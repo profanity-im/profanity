@@ -44,6 +44,10 @@
 
 #ifdef HAVE_LIBGPGME
 static void _ox_metadata_node__public_key(const char* const fingerprint);
+static int _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
+
+static void _ox_request_public_key(const char* const jid, const char* const fingerprint);
+static int _ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
 
 /*!
  * \brief Current Date and Time.
@@ -62,7 +66,7 @@ static char* _gettimestamp();
 <pre>
 <iq type='set' from='juliet@example.org/balcony' id='publish1'>
   <pubsub xmlns='http://jabber.org/protocol/pubsub'>
-    <publish node='urn:xmpp:openpgp:0:public-keys:1357B01865B2503C18453D208CAC2A9678548E35'>
+    <publish node='urn:xmpp:openpgp:0:public-keys:123456789ABCDEF1234567891238484848484848'>
       <item id='2020-01-21T10:46:21Z'>
         <pubkey xmlns='urn:xmpp:openpgp:0'>
            <data>
@@ -139,6 +143,56 @@ ox_announce_public_key(const char* const filename)
 }
 
 /*!
+ * <pre>
+
+<iq from='romeo@example.org/orchard'
+    to='juliet@example.org'
+    type='get'
+    id='getmeta'>
+  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    <items node='urn:xmpp:openpgp:0:public-keys'/>
+  </pubsub>
+</iq>
+
+ * </pre>
+ *
+*/
+
+void
+ox_discover_public_key(const char* const jid)
+{
+    assert(jid);
+    log_info("Discovering Public Key for %s", jid);
+    cons_show("Discovering Public Key for %s", jid);
+    // iq
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    char* id = xmpp_uuid_gen(ctx);
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
+    xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
+    xmpp_stanza_set_to(iq, jid);
+    // pubsub
+    xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, XMPP_FEATURE_PUBSUB);
+    // items
+    xmpp_stanza_t* items = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(items, STANZA_NAME_ITEMS);
+    xmpp_stanza_set_attribute(items, STANZA_ATTR_NODE, STANZA_NS_OPENPGP_0_PUBLIC_KEYS);
+
+    xmpp_stanza_add_child(pubsub, items);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_id_handler_add(connection_get_conn(), _ox_metadata_result, id, strdup(jid));
+    xmpp_send(connection_get_conn(), iq);
+}
+
+void
+ox_request_public_key(const char* const jid, const char* const fingerprint)
+{
+    _ox_request_public_key(jid, fingerprint);
+}
+
+/*!
  *
  *
  *
@@ -149,11 +203,11 @@ ox_announce_public_key(const char* const filename)
       <item>
         <public-keys-list xmlns='urn:xmpp:openpgp:0'>
           <pubkey-metadata
-            v4-fingerprint='1357B01865B2503C18453D208CAC2A9678548E35'
+            v4-fingerprint='1234512345678122ABCDE2222222222222222222'
             date='2018-03-01T15:26:12Z'
             />
           <pubkey-metadata
-            v4-fingerprint='67819B343B2AB70DED9320872C6464AF2A8E4C02'
+            v4-fingerprint='1234ABCD1234409865ABCD234482728939483472'
             date='1953-05-16T12:00:00Z'
             />
         </public-keys-list>
@@ -203,6 +257,178 @@ _ox_metadata_node__public_key(const char* const fingerprint)
     xmpp_stanza_add_child(pubsub, publish);
     xmpp_stanza_add_child(iq, pubsub);
     xmpp_send(connection_get_conn(), iq);
+}
+
+static int
+_ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
+{
+    log_debug("OX: Processing result %s's meatadata.", (char*)userdata);
+
+    if (g_strcmp0(xmpp_stanza_get_type(stanza), "result") != 0) {
+        cons_show("OX: Fehler");
+        return FALSE;
+    }
+    // pubsub
+    xmpp_stanza_t* pubsub = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_PUBSUB, XMPP_FEATURE_PUBSUB);
+    if (!pubsub) {
+        cons_show("OX: Fehler - Kein pubsub");
+        return FALSE;
+    }
+
+    xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(pubsub, STANZA_NAME_ITEMS);
+    if (!items) {
+        cons_show("OX: Fehler - Kein items");
+        return FALSE;
+    }
+
+    xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, STANZA_NAME_ITEM);
+    if (!item) {
+        cons_show("OX: Fehler - Kein item");
+        return FALSE;
+    }
+
+    xmpp_stanza_t* publickeyslist = stanza_get_child_by_name_and_ns(item, STANZA_NAME_PUBLIC_KEYS_LIST, STANZA_NS_OPENPGP_0);
+    if (!publickeyslist) {
+        cons_show("OX: Fehler - Kein publickeyslist");
+        return FALSE;
+    }
+
+    xmpp_stanza_t* pubkeymetadata = xmpp_stanza_get_children(publickeyslist);
+
+    while (pubkeymetadata) {
+        const char* fingerprint = xmpp_stanza_get_attribute(pubkeymetadata, STANZA_ATTR_V4_FINGERPRINT);
+        cons_show(fingerprint);
+        pubkeymetadata = xmpp_stanza_get_next(pubkeymetadata);
+    }
+
+    return FALSE;
+}
+
+/*!
+ *
+ * <pre>
+
+<iq from='romeo@example.org/orchard'
+    to='juliet@example.org'
+    type='get'
+    id='getpub'>
+  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    <items node='urn:xmpp:openpgp:0:public-keys:1234567890ABCDF12349ABCD1293848292983833'
+           max_items='1'/>
+  </pubsub>
+</iq>
+
+ * </pre>
+ */
+
+void
+_ox_request_public_key(const char* const jid, const char* const fingerprint)
+{
+    assert(jid);
+    assert(fingerprint);
+    assert(strlen(fingerprint) == 40);
+    cons_show("Requesting Public Key %s for %s", fingerprint, jid);
+    log_info("OX: Request %s's public key %s.", jid, fingerprint);
+    // iq
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    char* id = xmpp_uuid_gen(ctx);
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
+    xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
+    xmpp_stanza_set_to(iq, jid);
+    // pubsub
+    xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, XMPP_FEATURE_PUBSUB);
+    // items
+    GString* node_name = g_string_new(STANZA_NS_OPENPGP_0_PUBLIC_KEYS);
+    g_string_append(node_name, ":");
+    g_string_append(node_name, fingerprint);
+
+    xmpp_stanza_t* items = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(items, STANZA_NAME_ITEMS);
+    xmpp_stanza_set_attribute(items, STANZA_ATTR_NODE, node_name->str);
+    xmpp_stanza_set_attribute(items, "max_items", "1");
+
+    xmpp_stanza_add_child(pubsub, items);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_id_handler_add(connection_get_conn(), _ox_public_key_result, id, NULL);
+
+    xmpp_send(connection_get_conn(), iq);
+}
+
+/*!
+ *
+ * <pre>
+
+<iq from='juliet@example.org'
+    to='romeo@example.org/orchard'
+    type='result'
+    id='getpub'>
+  <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+    <items node='urn:xmpp:openpgp:0:public-keys:123454678819283823ABCDEF1234566789001234'>
+      <item id='2020-01-21T10:46:21Z'>
+        <pubkey xmlns='urn:xmpp:openpgp:0'>
+          <data>
+            BASE64_OPENPGP_PUBLIC_KEY
+          </data>
+        </pubkey>
+      </item>
+    </items>
+  </pubsub>
+</iq>
+
+ * </pre>
+ */
+
+int
+_ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
+{
+    log_debug("OX: Processing result public key");
+
+    if (g_strcmp0(xmpp_stanza_get_type(stanza), "result") != 0) {
+        cons_show("Public Key import failed. Check log for details.");
+        log_error("OX: Public Key response type is wrong");
+        return FALSE;
+    }
+    // pubsub
+    xmpp_stanza_t* pubsub = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_PUBSUB, XMPP_FEATURE_PUBSUB);
+    if (!pubsub) {
+        cons_show("Public Key import failed. Check log for details.");
+        log_error("OX: Public key request response failed: No <pubsub/>");
+        return FALSE;
+    }
+
+    xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(pubsub, STANZA_NAME_ITEMS);
+    if (!items) {
+        cons_show("Public Key import failed. Check log for details.");
+        log_error("OX: Public key request response failed: No <items/>");
+        return FALSE;
+    }
+
+    xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, STANZA_NAME_ITEM);
+    if (!item) {
+        cons_show("Public Key import failed. Check log for details.");
+        log_error("OX: Public key request response failed: No <item/>");
+        return FALSE;
+    }
+
+    xmpp_stanza_t* pubkey = stanza_get_child_by_name_and_ns(item, STANZA_NAME_PUPKEY, STANZA_NS_OPENPGP_0);
+    if (!pubkey) {
+        cons_show("Public Key import failed. Check log for details.");
+        log_error("OX: Public key request response failed: No <pubkey/>");
+        return FALSE;
+    }
+    xmpp_stanza_t* data = xmpp_stanza_get_child_by_name(pubkey, STANZA_NAME_DATA);
+    char* base64_data = xmpp_stanza_get_text(data);
+    log_debug("Key data: %s", base64_data);
+    if (p_ox_gpg_import(base64_data)) {
+        cons_show("Public Key imported");
+    } else {
+        cons_show("Public Key import failed. Check log for details.");
+    }
+
+    return FALSE;
 }
 
 // Date and Time (XEP-0082)

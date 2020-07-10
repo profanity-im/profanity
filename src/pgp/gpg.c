@@ -1304,3 +1304,47 @@ p_ox_gpg_readkey(const char* const filename, char** key, char** fp)
         log_error("Read OpenPGP key from file: Unable to read file: %s", error->message);
     }
 }
+
+gboolean
+p_ox_gpg_import(char* base64_public_key)
+{
+    gsize size = -1;
+    guchar* key = g_base64_decode(base64_public_key, &size);
+
+    setlocale(LC_ALL, "");
+    gpgme_check_version(NULL);
+    gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
+    gpgme_ctx_t ctx;
+    gpgme_error_t error = gpgme_new(&ctx);
+
+    if (GPG_ERR_NO_ERROR != error) {
+        log_error("Read OpenPGP key from file: gpgme_new failed: %s", gpgme_strerror(error));
+        return FALSE;
+    }
+
+    error = gpgme_set_protocol(ctx, GPGME_PROTOCOL_OPENPGP);
+    if (error != GPG_ERR_NO_ERROR) {
+        log_error("Read OpenPGP key from file: set GPGME_PROTOCOL_OPENPGP:  %s", gpgme_strerror(error));
+        return FALSE;
+    }
+
+    gpgme_set_armor(ctx, 0);
+    gpgme_set_textmode(ctx, 0);
+    gpgme_set_offline(ctx, 1);
+    gpgme_set_keylist_mode(ctx, GPGME_KEYLIST_MODE_LOCAL);
+
+    gpgme_data_t gpgme_data = NULL;
+    error = gpgme_data_new(&gpgme_data);
+    if (error != GPG_ERR_NO_ERROR) {
+        log_error("Read OpenPGP key from file: gpgme_data_new %s", gpgme_strerror(error));
+        return FALSE;
+    }
+
+    gpgme_data_new_from_mem(&gpgme_data, (gchar*)key, size, 0);
+    error = gpgme_op_import(ctx, gpgme_data);
+    if (error != GPG_ERR_NO_ERROR) {
+        log_error("Failed to import key");
+    }
+
+    return TRUE;
+}
