@@ -19,6 +19,8 @@ matrix:
     - os: linux
       env: BUILD_FLAVOR=debian
     - os: linux
+      env: BUILD_FLAVOR=ubuntu
+    - os: linux
       env: BUILD_FLAVOR=arch
     - os: linux
       env: BUILD_FLAVOR=fedora
