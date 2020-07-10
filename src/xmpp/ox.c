@@ -265,31 +265,31 @@ _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* 
     log_debug("OX: Processing result %s's meatadata.", (char*)userdata);
 
     if (g_strcmp0(xmpp_stanza_get_type(stanza), "result") != 0) {
-        cons_show("OX: Fehler");
+        cons_show("OX: Error:");
         return FALSE;
     }
     // pubsub
     xmpp_stanza_t* pubsub = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_PUBSUB, XMPP_FEATURE_PUBSUB);
     if (!pubsub) {
-        cons_show("OX: Fehler - Kein pubsub");
+        cons_show("OX: Error: No pubsub");
         return FALSE;
     }
 
     xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(pubsub, STANZA_NAME_ITEMS);
     if (!items) {
-        cons_show("OX: Fehler - Kein items");
+        cons_show("OX: Error: No items");
         return FALSE;
     }
 
     xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, STANZA_NAME_ITEM);
     if (!item) {
-        cons_show("OX: Fehler - Kein item");
+        cons_show("OX: Error: No item");
         return FALSE;
     }
 
     xmpp_stanza_t* publickeyslist = stanza_get_child_by_name_and_ns(item, STANZA_NAME_PUBLIC_KEYS_LIST, STANZA_NS_OPENPGP_0);
     if (!publickeyslist) {
-        cons_show("OX: Fehler - Kein publickeyslist");
+        cons_show("OX: Error: No publickeyslist");
         return FALSE;
     }
 
