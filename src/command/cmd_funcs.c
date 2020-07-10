@@ -69,7 +69,6 @@
 #include "tools/http_upload.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
-#include "tools/tinyurl.h"
 #include "tools/bookmark_ignore.h"
 #include "plugins/plugins.h"
 #include "ui/ui.h"
@@ -5030,58 +5029,6 @@ cmd_alias(ProfWin* window, const char* const command, gchar** args)
         cons_bad_cmd_usage(command);
         return TRUE;
     }
-}
-
-gboolean
-cmd_tiny(ProfWin* window, const char* const command, gchar** args)
-{
-    char* url = args[0];
-
-    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
-        cons_show("/tiny can only be used in chat windows");
-        return TRUE;
-    }
-
-    if (!tinyurl_valid(url)) {
-        win_println(window, THEME_ERROR, "-", "/tiny, badly formed URL: %s", url);
-        return TRUE;
-    }
-
-    char* tiny = tinyurl_get(url);
-    if (!tiny) {
-        win_println(window, THEME_ERROR, "-", "Couldn't create tinyurl.");
-        return TRUE;
-    }
-
-    switch (window->type) {
-    case WIN_CHAT:
-    {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        cl_ev_send_msg(chatwin, tiny, NULL);
-        break;
-    }
-    case WIN_PRIVATE:
-    {
-        ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
-        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        cl_ev_send_priv_msg(privatewin, tiny, NULL);
-        break;
-    }
-    case WIN_MUC:
-    {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        cl_ev_send_muc_msg(mucwin, tiny, NULL);
-        break;
-    }
-    default:
-        break;
-    }
-
-    free(tiny);
-
-    return TRUE;
 }
 
 gboolean

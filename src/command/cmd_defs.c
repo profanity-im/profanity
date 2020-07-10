@@ -64,7 +64,6 @@
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
-#include "tools/tinyurl.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/xmpp.h"
@@ -978,22 +977,6 @@ static struct cmd_t command_defs[] = {
                                   "/sub allow odin@valhalla.edda",
                                   "/sub request",
                                   "/sub sent") },
-
-    { "/tiny",
-      parse_args, 1, 1, NULL,
-      CMD_NOSUBFUNCS
-          CMD_MAINFUNC(cmd_tiny)
-              CMD_TAGS(
-                  CMD_TAG_CHAT,
-                  CMD_TAG_GROUPCHAT)
-                  CMD_SYN(
-                      "/tiny <url>")
-                      CMD_DESC(
-                          "Send url as tinyurl in current chat.")
-                          CMD_ARGS(
-                              { "<url>", "The url to make tiny." })
-                              CMD_EXAMPLES(
-                                  "Example: /tiny https://profanity-im.github.io/") },
 
     { "/who",
       parse_args, 0, 2, NULL,
