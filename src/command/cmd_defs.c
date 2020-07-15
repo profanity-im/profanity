@@ -2539,6 +2539,8 @@ static struct cmd_t command_defs[] = {
               "/url open https://profanity-im.github.io",
               "/url save https://profanity-im.github.io/guide/latest/userguide.html /home/user/Download/")
     },
+
+    // NEXT-COMMAND (search helper)
 };
 
 // clang-format on
