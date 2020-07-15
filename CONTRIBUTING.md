@@ -15,7 +15,9 @@ You can add the following snippet to `.git/hooks/pre-commit`:
 ```shell
 for f in $(git diff --cached --name-only)
 do
-    clang-format -i $f
+    if [[ "$f" =~ \.(c|h)$ ]]; then
+        clang-format -i $f
+    fi
 done
 ```
 
