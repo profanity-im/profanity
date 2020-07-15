@@ -204,7 +204,7 @@ parse_args_with_freetext(const char* const inp, int min, int max, gboolean* resu
         return NULL;
     }
 
-    // copy and strip input of leading/trailing whitepsace
+    // copy and strip input of leading/trailing whitespace
     char* copy = strdup(inp);
     g_strstrip(copy);
 
