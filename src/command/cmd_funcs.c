@@ -9212,6 +9212,8 @@ _make_unique_filename(const char* filename)
         if (asprintf(&unique, "%s.%u", filename, i) < 0) {
             return NULL;
         }
+
+        i++;
     }
 
     return unique;
@@ -9295,11 +9297,14 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_executable(ProfWin* window, const char* const command, gchar** args)
 {
+    guint num_args = g_strv_length(args);
+
     if (g_strcmp0(args[0], "avatar") == 0) {
         prefs_set_string(PREF_AVATAR_CMD, args[1]);
         cons_show("Avatar command set to: %s", args[1]);
+
     } else if (g_strcmp0(args[0], "urlopen") == 0) {
-        if (g_strv_length(args) < 4) {
+        if (num_args < 4) {
             cons_bad_cmd_usage(command);
             return TRUE;
         }
@@ -9309,16 +9314,29 @@ cmd_executable(ProfWin* window, const char* const command, gchar** args)
         prefs_set_string_list_with_option(PREF_URL_OPEN_CMD, args[1], list);
         cons_show("`url open` command set to: %s for %s files", str, args[1]);
         g_free(str);
+
     } else if (g_strcmp0(args[0], "urlsave") == 0) {
-        if (g_strv_length(args) < 3) {
+
+        if (num_args < 3) {
             cons_bad_cmd_usage(command);
             return TRUE;
         }
 
-        gchar* str = g_strjoinv(" ", &args[2]);
-        prefs_set_string_with_option(PREF_URL_SAVE_CMD, args[1], str);
-        cons_show("`url save` command set to: %s for scheme %s", str, args[1]);
-        g_free(str);
+        if (g_strcmp0(args[1], "set") == 0 && num_args >= 4) {
+            gchar* str = g_strjoinv(" ", &args[3]);
+            prefs_set_string_with_option(PREF_URL_SAVE_CMD, args[2], str);
+            cons_show("`url save` command set to: %s for scheme %s", str, args[2]);
+            g_free(str);
+
+        } else if (g_strcmp0(args[1], "clear") == 0) {
+            prefs_set_string_with_option(PREF_URL_SAVE_CMD, args[2], NULL);
+            cons_show("`url save` will use internal download method for scheme %s", args[2]);
+
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
     } else {
         cons_bad_cmd_usage(command);
     }

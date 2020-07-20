@@ -2318,8 +2318,6 @@ _get_default_string(preference_t pref)
         return "false";
     case PREF_AVATAR_CMD:
         return "xdg-open";
-    case PREF_URL_SAVE_CMD:
-        return "curl -o %p %u";
     default:
         return NULL;
     }
