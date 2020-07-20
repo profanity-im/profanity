@@ -157,13 +157,12 @@ http_file_get(void* userdata)
     curl_easy_cleanup(curl);
     curl_global_cleanup();
 
-    if (download->filehandle) {
+    if (download->filehandle && download->close) {
         fclose(download->filehandle);
     }
 
     pthread_mutex_lock(&lock);
     g_free(cert_path);
-
     if (err) {
         char* msg;
         if (download->cancel) {
@@ -236,4 +235,21 @@ http_basename_from_url(const char* url)
     }
 
     return filename;
+}
+
+void
+http_print_transfer_update(ProfWin* window, char* url,
+                           const char* fmt, ...)
+{
+    va_list args;
+
+    va_start(args, fmt);
+    char* msg;
+    if (vasprintf(&msg, fmt, args) == -1) {
+        msg = strdup(FALLBACK_MSG);
+    }
+    va_end(args);
+
+    win_print_http_transfer(window, msg, url);
+    free(msg);
 }

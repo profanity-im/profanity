@@ -45,6 +45,8 @@ core_sources = \
 	src/tools/http_upload.h \
 	src/tools/http_download.c \
 	src/tools/http_download.h \
+	src/tools/aesgcm_download.c \
+	src/tools/aesgcm_download.h \
 	src/tools/bookmark_ignore.c \
 	src/tools/bookmark_ignore.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \

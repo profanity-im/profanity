@@ -69,6 +69,7 @@
 #include "event/client_events.h"
 #include "tools/http_upload.h"
 #include "tools/http_download.h"
+#include "tools/aesgcm_download.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 #include "tools/bookmark_ignore.h"
@@ -9155,6 +9156,40 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
 }
 
 void
+_url_open_fallback_method(ProfWin* window, const char* url)
+{
+    /*
+    gboolean is_omemo_aesgcm = false;
+    gchar* scheme = g_uri_parse_scheme(url);
+    if (g_strcmp0(scheme, "aesgcm")) {
+        is_omemo_aesgcm = true;
+    }
+    free(scheme);
+
+    if (is_omemo_aesgcm) {
+        int tmpfd;
+        char* tmpname = NULL;
+        if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
+            *err = "Unable to create temporary file for decryption stream.";
+            return NULL;
+        }
+        FILE* tmpfh = fdopen(tmpfd, "wb");
+
+        unsigned char* nonce;
+        unsigned char* key;
+        char* https_url = omemo_parse_aesgcm_url(url, nonce, key);
+
+        _url_save_fallback_method(window, https_url, tmpname);
+
+        int crypt_res = omemo_decrypt_file(tmpfh, 
+
+        remove(tmpname);
+        free(tmpname);
+    }
+    */
+}
+
+void
 _url_save_fallback_method(ProfWin* window, const char* url, const char* filename)
 {
     FILE* fh = fopen(filename, "wb");
@@ -9163,13 +9198,27 @@ _url_save_fallback_method(ProfWin* window, const char* url, const char* filename
         return;
     }
 
-    HTTPDownload* download = malloc(sizeof(HTTPDownload));
-    download->window = window;
-    download->url = strdup(url);
-    download->filehandle = fh;
+    gchar* scheme = g_uri_parse_scheme(url);
 
-    pthread_create(&(download->worker), NULL, &http_file_get, download);
-    http_download_add_download(download);
+    if (g_strcmp0(scheme, "aesgcm") == 0) {
+        AESGCMDownload* download = malloc(sizeof(AESGCMDownload));
+        download->window = window;
+        download->url = strdup(url);
+        download->filehandle = fh;
+
+        pthread_create(&(download->worker), NULL, &aesgcm_file_get, download);
+        aesgcm_download_add_download(download);
+    } else {
+        HTTPDownload* download = malloc(sizeof(HTTPDownload));
+        download->window = window;
+        download->url = strdup(url);
+        download->filehandle = fh;
+
+        pthread_create(&(download->worker), NULL, &http_file_get, download);
+        http_download_add_download(download);
+    }
+
+    free(scheme);
 }
 
 void

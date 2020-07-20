@@ -40,9 +40,6 @@
 #define AES128_GCM_IV_LENGTH  12
 #define AES128_GCM_TAG_LENGTH 16
 
-#define AES256_GCM_KEY_LENGTH   32
-#define AES256_GCM_NONCE_LENGTH 12
-
 int omemo_crypto_init(void);
 /**
 * Callback for a secure random number generator.

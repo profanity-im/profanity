@@ -1,5 +1,5 @@
 /*
- * http_download.h
+ * aesgcm_download.h
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
@@ -34,8 +34,8 @@
  *
  */
 
-#ifndef TOOLS_HTTP_DOWNLOAD_H
-#define TOOLS_HTTP_DOWNLOAD_H
+#ifndef TOOLS_AESGCM_DOWNLOAD_H
+#define TOOLS_AESGCM_DOWNLOAD_H
 
 #ifdef PLATFORM_CYGWIN
 #define SOCKET int
@@ -43,27 +43,24 @@
 
 #include <sys/select.h>
 #include <curl/curl.h>
+#include "tools/http_download.h"
 
 #include "ui/win_types.h"
 
-typedef struct http_download_t
+typedef struct aesgcm_download_t
 {
     char* url;
     FILE* filehandle;
-    curl_off_t bytes_received;
     ProfWin* window;
     pthread_t worker;
-    int cancel;
-    int close;
-} HTTPDownload;
+    HTTPDownload* http_dl;
+} AESGCMDownload;
 
-void* http_file_get(void* userdata);
+void* aesgcm_file_get(void* userdata);
 
-void http_download_cancel_processes(ProfWin* window);
-void http_download_add_download(HTTPDownload* download);
+void aesgcm_download_cancel_processes(ProfWin* window);
+void aesgcm_download_add_download(AESGCMDownload* download);
 
 char* http_basename_from_url(const char* url);
-void http_print_transfer_update(ProfWin* window, char* url,
-                                const char* fmt, ...);
 
 #endif

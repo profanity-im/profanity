@@ -400,12 +400,12 @@ aes256gcm_crypt_file(FILE* in, FILE* out, off_t file_size,
         goto out;
     }
 
-    res = gcry_cipher_setkey(hd, key, AES256_GCM_KEY_LENGTH);
+    res = gcry_cipher_setkey(hd, key, OMEMO_AESGCM_KEY_LENGTH);
     if (res != GPG_ERR_NO_ERROR) {
         goto out;
     }
 
-    res = gcry_cipher_setiv(hd, nonce, AES256_GCM_NONCE_LENGTH);
+    res = gcry_cipher_setiv(hd, nonce, OMEMO_AESGCM_NONCE_LENGTH);
     if (res != GPG_ERR_NO_ERROR) {
         goto out;
     }
@@ -468,8 +468,8 @@ out:
 char*
 aes256gcm_create_secure_fragment(unsigned char* key, unsigned char* nonce)
 {
-    int key_size = AES256_GCM_KEY_LENGTH;
-    int nonce_size = AES256_GCM_NONCE_LENGTH;
+    int key_size = OMEMO_AESGCM_KEY_LENGTH;
+    int nonce_size = OMEMO_AESGCM_NONCE_LENGTH;
 
     char* fragment = gcry_malloc_secure((nonce_size + key_size) * 2 + 1);
 
