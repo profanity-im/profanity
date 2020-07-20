@@ -45,12 +45,12 @@
 #include "log.h"
 
 static GKeyFile* bookmark_ignore_keyfile = NULL;
-static char* account_jid = NULL;
+static gchar* account_jid = NULL;
 
 static void
 _bookmark_ignore_load()
 {
-    char* bi_loc;
+    gchar* bi_loc;
 
     bi_loc = files_get_data_path(FILE_BOOKMARK_AUTOJOIN_IGNORE);
 
@@ -61,7 +61,7 @@ _bookmark_ignore_load()
     bookmark_ignore_keyfile = g_key_file_new();
     g_key_file_load_from_file(bookmark_ignore_keyfile, bi_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
-    free(bi_loc);
+    g_free(bi_loc);
 }
 
 static void
@@ -70,13 +70,13 @@ _bookmark_save()
     gsize g_data_size;
     gchar* g_bookmark_ignore_data = g_key_file_to_data(bookmark_ignore_keyfile, &g_data_size, NULL);
 
-    char* bi_loc;
+    gchar* bi_loc;
     bi_loc = files_get_data_path(FILE_BOOKMARK_AUTOJOIN_IGNORE);
 
     g_file_set_contents(bi_loc, g_bookmark_ignore_data, g_data_size, NULL);
     g_chmod(bi_loc, S_IRUSR | S_IWUSR);
 
-    free(bi_loc);
+    g_free(bi_loc);
     g_free(g_bookmark_ignore_data);
 }
 
@@ -85,7 +85,7 @@ bookmark_ignore_on_connect(const char* const barejid)
 {
     if (bookmark_ignore_keyfile == NULL) {
         _bookmark_ignore_load();
-        account_jid = strdup(barejid);
+        account_jid = g_strdup(barejid);
     }
 }
 
@@ -94,7 +94,7 @@ bookmark_ignore_on_disconnect()
 {
     g_key_file_free(bookmark_ignore_keyfile);
     bookmark_ignore_keyfile = NULL;
-    free(account_jid);
+    g_free(account_jid);
 }
 
 gboolean
