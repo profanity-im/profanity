@@ -4807,16 +4807,18 @@ cmd_disco(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
-
-char *_add_omemo_stream(int *fd, FILE **fh, char **err) {
+#ifdef HAVE_OMEMO
+char*
+_add_omemo_stream(int* fd, FILE** fh, char** err)
+{
     // Create temporary file for writing ciphertext.
     int tmpfd;
-    char *tmpname = NULL;
+    char* tmpname = NULL;
     if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
         *err = "Unable to create temporary file for encrypted transfer.";
         return NULL;
     }
-    FILE *tmpfh = fdopen(tmpfd, "wb");
+    FILE* tmpfh = fdopen(tmpfd, "wb");
 
     // The temporary ciphertext file should be removed after it has
     // been closed.
@@ -4824,7 +4826,7 @@ char *_add_omemo_stream(int *fd, FILE **fh, char **err) {
     free(tmpname);
 
     int crypt_res;
-    char *fragment;
+    char* fragment;
     fragment = omemo_encrypt_file(*fh, tmpfh, file_size(*fd), &crypt_res);
     if (crypt_res != 0) {
         fclose(tmpfh);
@@ -4843,14 +4845,15 @@ char *_add_omemo_stream(int *fd, FILE **fh, char **err) {
 
     return fragment;
 }
+#endif
 
 gboolean
 cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 {
     jabber_conn_status_t conn_status = connection_get_status();
-    char *filename = args[0];
-    char *alt_scheme = NULL;
-    char *alt_fragment = NULL;
+    char* filename = args[0];
+    char* alt_scheme = NULL;
+    char* alt_fragment = NULL;
 
     // expand ~ to $HOME
     if (filename[0] == '~' && filename[1] == '/') {
@@ -4887,58 +4890,46 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         goto out;
     }
 
-    FILE *fh = fdopen(fd, "rb");
+    FILE* fh = fdopen(fd, "rb");
 
     switch (window->type) {
-        case WIN_MUC:
-        case WIN_CHAT:
-        {
-            ProfChatWin *chatwin = (ProfChatWin*)window;
+    case WIN_MUC:
+    case WIN_CHAT:
+    {
+        ProfChatWin* chatwin = (ProfChatWin*)window;
 
 #ifdef HAVE_OMEMO
-            if (chatwin->is_omemo) {
-                char *err = NULL;
-                alt_scheme = OMEMO_AESGCM_URL_SCHEME;
-                alt_fragment = _add_omemo_stream(&fd, &fh, &err);
-                if (err != NULL) {
-                    cons_show_error(err);
-                    win_println(window, THEME_ERROR, "-", err);
-                    goto out;
-                }
-                break;
-            }
-#endif
-
-            if (window->type == WIN_CHAT) {
-                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-                if ((chatwin->pgp_send && !prefs_get_boolean(PREF_PGP_SENDFILE))
-                        || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
-                    cons_show_error("Uploading unencrypted files disabled. See /otr sendfile or /pgp sendfile.");
-                    win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
-                    goto out;
-                }
+        if (chatwin->is_omemo) {
+            char* err = NULL;
+            alt_scheme = OMEMO_AESGCM_URL_SCHEME;
+            alt_fragment = _add_omemo_stream(&fd, &fh, &err);
+            if (err != NULL) {
+                cons_show_error(err);
+                win_println(window, THEME_ERROR, "-", err);
+                goto out;
             }
             break;
         }
-        case WIN_PRIVATE: // We don't support encryption in private MUC windows.
-        default:
-			cons_show_error("Unsupported window for file transmission.");
-            goto out;
+#endif
+
+        if (window->type == WIN_CHAT) {
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            if ((chatwin->pgp_send && !prefs_get_boolean(PREF_PGP_SENDFILE))
+                || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
+                cons_show_error("Uploading unencrypted files disabled. See /otr sendfile or /pgp sendfile.");
+                win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
+                goto out;
+            }
         }
         break;
     }
-    case WIN_PRIVATE:
-    {
-        //we don't support encryption in private muc windows
-        break;
-    }
+    case WIN_PRIVATE: // We don't support encryption in private MUC windows.
     default:
         cons_show_error("Unsupported window for file transmission.");
-        free(filename);
-        return TRUE;
+        goto out;
     }
 
-    HTTPUpload *upload = malloc(sizeof(HTTPUpload));
+    HTTPUpload* upload = malloc(sizeof(HTTPUpload));
     upload->window = window;
 
     upload->filename = strdup(filename);
@@ -8847,7 +8838,7 @@ cmd_omemo_policy(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
-cmd_save(ProfWin *window, const char *const command, gchar **args)
+cmd_save(ProfWin* window, const char* const command, gchar** args)
 {
     log_info("Saving preferences to configuration file");
     cons_show("Saving preferences.");
@@ -9123,8 +9114,8 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
     gchar* suffix_cmd = g_strdup(suffix_cmd_pref[1]);
     g_strfreev(suffix_cmd_pref);
 
-    gchar *scheme = g_uri_parse_scheme(args[1]);
-    if( 0 == g_strcmp0(scheme, OMEMO_AESGCM_URL_SCHEME)) {
+    gchar* scheme = g_uri_parse_scheme(args[1]);
+    if (0 == g_strcmp0(scheme, "aesgcm")) {
         require_save = true;
     }
     g_free(scheme);
@@ -9163,15 +9154,16 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
-
-void _url_save_fallback_method(ProfWin *window, const char *url, const char *filename) {
-    FILE *fh = fopen(filename, "wb");
+void
+_url_save_fallback_method(ProfWin* window, const char* url, const char* filename)
+{
+    FILE* fh = fopen(filename, "wb");
     if (!fh) {
         cons_show_error("Cannot open file '%s' for writing.", filename);
         return;
     }
 
-    HTTPDownload *download = malloc(sizeof(HTTPDownload));
+    HTTPDownload* download = malloc(sizeof(HTTPDownload));
     download->window = window;
     download->url = strdup(url);
     download->filehandle = fh;
@@ -9180,8 +9172,10 @@ void _url_save_fallback_method(ProfWin *window, const char *url, const char *fil
     http_download_add_download(download);
 }
 
-void _url_save_external_method(const char *scheme_cmd, const char *url, const char *filename) {
-    gchar **argv = g_strsplit(scheme_cmd, " ", 0);
+void
+_url_save_external_method(const char* scheme_cmd, const char* url, const char* filename)
+{
+    gchar** argv = g_strsplit(scheme_cmd, " ", 0);
 
     guint num_args = 0;
     while (argv[num_args]) {
@@ -9202,11 +9196,13 @@ void _url_save_external_method(const char *scheme_cmd, const char *url, const ch
     }
 }
 
-char *_make_unique_filename(const char *filename) {
-    char *unique = strdup(filename);
+char*
+_make_unique_filename(const char* filename)
+{
+    char* unique = strdup(filename);
 
     unsigned int i = 0;
-    while(g_file_test(unique, G_FILE_TEST_EXISTS)) {
+    while (g_file_test(unique, G_FILE_TEST_EXISTS)) {
         free(unique);
 
         if (i > 1000) { // Give up after 1000 attempts.
@@ -9222,11 +9218,9 @@ char *_make_unique_filename(const char *filename) {
 }
 
 gboolean
-cmd_url_save(ProfWin *window, const char *const command, gchar **args)
+cmd_url_save(ProfWin* window, const char* const command, gchar** args)
 {
-    if (window->type != WIN_CHAT &&
-        window->type != WIN_MUC &&
-        window->type != WIN_PRIVATE) {
+    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
         cons_show_error("`/url save` is not supported in this window.");
         return TRUE;
     }
@@ -9236,18 +9230,18 @@ cmd_url_save(ProfWin *window, const char *const command, gchar **args)
         return TRUE;
     }
 
-    gchar *url = args[1];
-    gchar *path = g_strdup(args[2]);
+    gchar* url = args[1];
+    gchar* path = g_strdup(args[2]);
 
-    gchar *scheme = g_uri_parse_scheme(url);
+    gchar* scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
         cons_show("URL '%s' is not valid.", url);
         g_free(url);
         return TRUE;
     }
 
-    gchar *directory = NULL;
-    gchar *basename = NULL;
+    gchar* directory = NULL;
+    gchar* basename = NULL;
     if (path != NULL) {
         directory = g_path_get_dirname(path);
         basename = g_path_get_basename(path);
@@ -9267,10 +9261,10 @@ cmd_url_save(ProfWin *window, const char *const command, gchar **args)
         basename = http_basename_from_url(url);
     }
 
-    char *filename = NULL;
+    char* filename = NULL;
     filename = g_build_filename(directory, basename, NULL);
 
-    char *unique_filename = _make_unique_filename(filename);
+    char* unique_filename = _make_unique_filename(filename);
     if (!unique_filename) {
         cons_show_error("Failed to generate an unique filename from '%s'.", filename);
         free(filename);
@@ -9280,11 +9274,11 @@ cmd_url_save(ProfWin *window, const char *const command, gchar **args)
     free(filename);
     filename = unique_filename;
 
-    gchar *scheme_cmd = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
+    gchar* scheme_cmd = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
     if (scheme_cmd == NULL) {
         if (g_strcmp0(scheme, "http") == 0
-                || g_strcmp0(scheme, "https") == 0
-                || g_strcmp0(scheme, OMEMO_AESGCM_URL_SCHEME) == 0) {
+            || g_strcmp0(scheme, "https") == 0
+            || g_strcmp0(scheme, "aesgcm") == 0) {
             _url_save_fallback_method(window, url, filename);
         } else {
             cons_show_error("No download method defined for the scheme '%s'.", scheme);

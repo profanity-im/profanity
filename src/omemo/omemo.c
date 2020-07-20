@@ -1654,13 +1654,16 @@ _generate_signed_pre_key(void)
     SIGNAL_UNREF(signed_pre_key);
 }
 
-
-void omemo_free(void *a) {
+void
+omemo_free(void* a)
+{
     gcry_free(a);
 }
 
-char *omemo_encrypt_file(FILE *in, FILE *out, off_t file_size, int *gcry_res) {
-    unsigned char *key = gcry_random_bytes_secure(
+char*
+omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res)
+{
+    unsigned char* key = gcry_random_bytes_secure(
         AES256_GCM_KEY_LENGTH,
         GCRY_VERY_STRONG_RANDOM);
 
@@ -1668,7 +1671,7 @@ char *omemo_encrypt_file(FILE *in, FILE *out, off_t file_size, int *gcry_res) {
     unsigned char nonce[AES256_GCM_NONCE_LENGTH];
     gcry_create_nonce(nonce, AES256_GCM_NONCE_LENGTH);
 
-    char *fragment = aes256gcm_create_secure_fragment(key, nonce);
+    char* fragment = aes256gcm_create_secure_fragment(key, nonce);
     *gcry_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, true);
 
     if (*gcry_res != GPG_ERR_NO_ERROR) {

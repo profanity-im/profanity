@@ -79,15 +79,38 @@ omemo_own_fingerprint(gboolean formatted)
     return NULL;
 }
 
-void omemo_start_muc_sessions(const char *const roomjid) {}
-void omemo_start_session(const char *const barejid) {}
-void omemo_trust(const char *const jid, const char *const fingerprint_formatted) {}
-void omemo_untrust(const char *const jid, const char *const fingerprint_formatted) {}
-void omemo_devicelist_publish(GList *device_list) {}
-void omemo_publish_crypto_materials(void) {}
-void omemo_start_sessions(void) {}
+void
+omemo_start_muc_sessions(const char* const roomjid)
+{
+}
+void
+omemo_start_session(const char* const barejid)
+{
+}
+void
+omemo_trust(const char* const jid, const char* const fingerprint_formatted)
+{
+}
+void
+omemo_untrust(const char* const jid, const char* const fingerprint_formatted)
+{
+}
+void
+omemo_devicelist_publish(GList* device_list)
+{
+}
+void
+omemo_publish_crypto_materials(void)
+{
+}
+void
+omemo_start_sessions(void)
+{
+}
 
-char *omemo_encrypt_file(FILE *in, FILE *out, off_t file_size, int *gcry_res) {
+char*
+omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res)
+{
     return NULL;
 };
-void omemo_free(void *a) {};
+void omemo_free(void* a){};

@@ -58,12 +58,12 @@
 
 #define FALLBACK_MSG ""
 
-GSList *download_processes = NULL;
+GSList* download_processes = NULL;
 
 static int
-_xferinfo(void *userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
+_xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
-    HTTPDownload *download = (HTTPDownload *)userdata;
+    HTTPDownload* download = (HTTPDownload*)userdata;
 
     pthread_mutex_lock(&lock);
 
@@ -84,7 +84,7 @@ _xferinfo(void *userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
         dlperc = (100 * dlnow) / dltotal;
     }
 
-    char *msg;
+    char* msg;
     if (asprintf(&msg, "Downloading '%s': %d%%", download->url, dlperc) == -1) {
         msg = strdup(FALLBACK_MSG);
     }
@@ -98,20 +98,20 @@ _xferinfo(void *userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
 
 #if LIBCURL_VERSION_NUM < 0x072000
 static int
-_older_progress(void *p, double dltotal, double dlnow, double ultotal, double ulnow)
+_older_progress(void* p, double dltotal, double dlnow, double ultotal, double ulnow)
 {
     return _xferinfo(p, (curl_off_t)dltotal, (curl_off_t)dlnow, (curl_off_t)ultotal, (curl_off_t)ulnow);
 }
 #endif
 
-void *
-http_file_get(void *userdata)
+void*
+http_file_get(void* userdata)
 {
-    HTTPDownload *download = (HTTPDownload *)userdata;
+    HTTPDownload* download = (HTTPDownload*)userdata;
 
-    char *err = NULL;
+    char* err = NULL;
 
-    CURL *curl;
+    CURL* curl;
     CURLcode res;
 
     download->cancel = 0;
@@ -125,7 +125,7 @@ http_file_get(void *userdata)
     win_print_http_transfer(download->window, msg, download->url);
     free(msg);
 
-    char *cert_path = prefs_get_string(PREF_TLS_CERTPATH);
+    char* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     pthread_mutex_unlock(&lock);
 
     curl_global_init(CURL_GLOBAL_ALL);
@@ -133,16 +133,16 @@ http_file_get(void *userdata)
 
     curl_easy_setopt(curl, CURLOPT_URL, download->url);
 
-    #if LIBCURL_VERSION_NUM >= 0x072000
+#if LIBCURL_VERSION_NUM >= 0x072000
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, _xferinfo);
     curl_easy_setopt(curl, CURLOPT_XFERINFODATA, download);
-    #else
+#else
     curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, _older_progress);
     curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, download);
-    #endif
+#endif
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void *)download->filehandle);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)download->filehandle);
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "profanity");
 
@@ -165,7 +165,7 @@ http_file_get(void *userdata)
     g_free(cert_path);
 
     if (err) {
-        char *msg;
+        char* msg;
         if (download->cancel) {
             if (asprintf(&msg, "Downloading '%s' failed: Download was canceled", download->url) == -1) {
                 msg = strdup(FALLBACK_MSG);
@@ -200,11 +200,11 @@ http_file_get(void *userdata)
 }
 
 void
-http_download_cancel_processes(ProfWin *window)
+http_download_cancel_processes(ProfWin* window)
 {
-    GSList *download_process = download_processes;
+    GSList* download_process = download_processes;
     while (download_process) {
-        HTTPDownload *download = download_process->data;
+        HTTPDownload* download = download_process->data;
         if (download->window == window) {
             download->cancel = 1;
             break;
@@ -214,21 +214,23 @@ http_download_cancel_processes(ProfWin *window)
 }
 
 void
-http_download_add_download(HTTPDownload *download)
+http_download_add_download(HTTPDownload* download)
 {
     download_processes = g_slist_append(download_processes, download);
 }
 
-char *http_basename_from_url(const char *url) {
-    const char *default_name = "index.html";
+char*
+http_basename_from_url(const char* url)
+{
+    const char* default_name = "index.html";
 
-    GFile *file = g_file_new_for_uri(url);
-    char *filename = g_file_get_basename(file);
+    GFile* file = g_file_new_for_uri(url);
+    char* filename = g_file_get_basename(file);
     g_object_unref(file);
 
     if (g_strcmp0(filename, ".") == 0
-            || g_strcmp0(filename, "..") == 0
-            || g_strcmp0(filename, G_DIR_SEPARATOR_S) == 0) {
+        || g_strcmp0(filename, "..") == 0
+        || g_strcmp0(filename, G_DIR_SEPARATOR_S) == 0) {
         g_free(filename);
         return strdup(default_name);
     }

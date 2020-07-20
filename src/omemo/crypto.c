@@ -41,7 +41,7 @@
 #include "omemo/omemo.h"
 #include "omemo/crypto.h"
 
-#define AES256_GCM_TAG_LENGTH 16
+#define AES256_GCM_TAG_LENGTH  16
 #define AES256_GCM_BUFFER_SIZE 1024
 
 int
@@ -377,8 +377,10 @@ out:
     return res;
 }
 
-int aes256gcm_crypt_file(FILE *in, FILE *out, off_t file_size,
-    unsigned char key[], unsigned char nonce[], bool encrypt) {
+int
+aes256gcm_crypt_file(FILE* in, FILE* out, off_t file_size,
+                     unsigned char key[], unsigned char nonce[], bool encrypt)
+{
 
     if (!gcry_control(GCRYCTL_INITIALIZATION_FINISHED_P)) {
         fputs("libgcrypt has not been initialized\n", stderr);
@@ -393,7 +395,7 @@ int aes256gcm_crypt_file(FILE *in, FILE *out, off_t file_size,
     gcry_cipher_hd_t hd;
 
     res = gcry_cipher_open(&hd, GCRY_CIPHER_AES256, GCRY_CIPHER_MODE_GCM,
-            GCRY_CIPHER_SECURE);
+                           GCRY_CIPHER_SECURE);
     if (res != GPG_ERR_NO_ERROR) {
         goto out;
     }
@@ -463,18 +465,20 @@ out:
     return res;
 }
 
-char *aes256gcm_create_secure_fragment(unsigned char *key, unsigned char *nonce) {
+char*
+aes256gcm_create_secure_fragment(unsigned char* key, unsigned char* nonce)
+{
     int key_size = AES256_GCM_KEY_LENGTH;
     int nonce_size = AES256_GCM_NONCE_LENGTH;
 
-    char *fragment = gcry_malloc_secure((nonce_size+key_size)*2+1);
+    char* fragment = gcry_malloc_secure((nonce_size + key_size) * 2 + 1);
 
     for (int i = 0; i < nonce_size; i++) {
-        sprintf(&(fragment[i*2]), "%02x", nonce[i]);
+        sprintf(&(fragment[i * 2]), "%02x", nonce[i]);
     }
 
     for (int i = 0; i < key_size; i++) {
-        sprintf(&(fragment[(i+nonce_size)*2]), "%02x", key[i]);
+        sprintf(&(fragment[(i + nonce_size) * 2]), "%02x", key[i]);
     }
 
     return fragment;

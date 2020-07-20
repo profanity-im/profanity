@@ -95,8 +95,8 @@ void omemo_start_muc_sessions(const char* const roomjid);
 void omemo_start_device_session(const char* const jid, uint32_t device_id, GList* prekeys, uint32_t signed_prekey_id, const unsigned char* const signed_prekey, size_t signed_prekey_len, const unsigned char* const signature, size_t signature_len, const unsigned char* const identity_key, size_t identity_key_len);
 
 gboolean omemo_loaded(void);
-char * omemo_on_message_send(ProfWin *win, const char *const message, gboolean request_receipt, gboolean muc, const char *const replace_id);
-char * omemo_on_message_recv(const char *const from, uint32_t sid, const unsigned char *const iv, size_t iv_len, GList *keys, const unsigned char *const payload, size_t payload_len, gboolean muc, gboolean *trusted);
+char* omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_receipt, gboolean muc, const char* const replace_id);
+char* omemo_on_message_recv(const char* const from, uint32_t sid, const unsigned char* const iv, size_t iv_len, GList* keys, const unsigned char* const payload, size_t payload_len, gboolean muc, gboolean* trusted);
 
-char *omemo_encrypt_file(FILE *in, FILE *out, off_t file_size, int *gcry_res);
-void omemo_free(void *a);
+char* omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res);
+void omemo_free(void* a);

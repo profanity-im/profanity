@@ -2192,7 +2192,7 @@ cons_show_omemo_prefs(void)
     cons_show("OMEMO char (/omemo char)     : %s", ch);
     free(ch);
 
-    cons_alert();
+    cons_alert(NULL);
 }
 
 void

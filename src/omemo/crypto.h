@@ -40,7 +40,7 @@
 #define AES128_GCM_IV_LENGTH  12
 #define AES128_GCM_TAG_LENGTH 16
 
-#define AES256_GCM_KEY_LENGTH 32
+#define AES256_GCM_KEY_LENGTH   32
 #define AES256_GCM_NONCE_LENGTH 12
 
 int omemo_crypto_init(void);
@@ -181,13 +181,13 @@ int aes128gcm_encrypt(unsigned char* ciphertext, size_t* ciphertext_len,
                       const unsigned char* const plaintext, size_t plaintext_len,
                       const unsigned char* const iv, const unsigned char* const key);
 
-int aes128gcm_decrypt(unsigned char *plaintext,
-    size_t *plaintext_len, const unsigned char *const ciphertext,
-    size_t ciphertext_len, const unsigned char *const iv, size_t iv_len,
-    const unsigned char *const key, const unsigned char *const tag);
+int aes128gcm_decrypt(unsigned char* plaintext,
+                      size_t* plaintext_len, const unsigned char* const ciphertext,
+                      size_t ciphertext_len, const unsigned char* const iv, size_t iv_len,
+                      const unsigned char* const key, const unsigned char* const tag);
 
-int aes256gcm_crypt_file(FILE *in, FILE *out, off_t file_size,
-    unsigned char key[], unsigned char nonce[], bool encrypt);
+int aes256gcm_crypt_file(FILE* in, FILE* out, off_t file_size,
+                         unsigned char key[], unsigned char nonce[], bool encrypt);
 
-char *aes256gcm_create_secure_fragment(unsigned char *key,
-    unsigned char *nonce);
+char* aes256gcm_create_secure_fragment(unsigned char* key,
+                                       unsigned char* nonce);

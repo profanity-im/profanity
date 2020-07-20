@@ -46,20 +46,21 @@
 
 #include "ui/win_types.h"
 
-typedef struct http_download_t {
-    char *url;
-    FILE *filehandle;
+typedef struct http_download_t
+{
+    char* url;
+    FILE* filehandle;
     curl_off_t bytes_received;
-    ProfWin *window;
+    ProfWin* window;
     pthread_t worker;
     int cancel;
 } HTTPDownload;
 
-void* http_file_get(void *userdata);
+void* http_file_get(void* userdata);
 
-void http_download_cancel_processes(ProfWin *window);
-void http_download_add_download(HTTPDownload *download);
+void http_download_cancel_processes(ProfWin* window);
+void http_download_add_download(HTTPDownload* download);
 
-char *http_basename_from_url(const char *url);
+char* http_basename_from_url(const char* url);
 
 #endif

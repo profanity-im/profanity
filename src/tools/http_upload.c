@@ -128,9 +128,11 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
     return realsize;
 }
 
-int format_alt_url(char *original_url, char *new_scheme, char *new_fragment, char **new_url) {
+int
+format_alt_url(char* original_url, char* new_scheme, char* new_fragment, char** new_url)
+{
     int ret = 0;
-    CURLU *h = curl_url();
+    CURLU* h = curl_url();
 
     if ((ret = curl_url_set(h, CURLUPART_URL, original_url, 0)) != 0) {
         goto out;
@@ -155,12 +157,12 @@ out:
     return ret;
 }
 
-void *
-http_file_put(void *userdata)
+void*
+http_file_put(void* userdata)
 {
     HTTPUpload* upload = (HTTPUpload*)userdata;
 
-    FILE *fh = NULL;
+    FILE* fh = NULL;
 
     char* err = NULL;
     char* content_type_header;
@@ -283,10 +285,10 @@ http_file_put(void *userdata)
             win_mark_received(upload->window, upload->put_url);
             free(msg);
 
-            char *url = NULL;
+            char* url = NULL;
             if (format_alt_url(upload->get_url, upload->alt_scheme, upload->alt_fragment, &url) != 0) {
-                char *msg;
-                if (asprintf(&msg, "Uploading '%s' failed: Bad URL ('%s')", upload->filename, upload->get_url)== -1) {
+                char* msg;
+                if (asprintf(&msg, "Uploading '%s' failed: Bad URL ('%s')", upload->filename, upload->get_url) == -1) {
                     msg = strdup(FALLBACK_MSG);
                 }
                 cons_show_error(msg);
@@ -295,21 +297,21 @@ http_file_put(void *userdata)
                 switch (upload->window->type) {
                 case WIN_CHAT:
                 {
-                    ProfChatWin *chatwin = (ProfChatWin*)(upload->window);
+                    ProfChatWin* chatwin = (ProfChatWin*)(upload->window);
                     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
                     cl_ev_send_msg(chatwin, url, url);
                     break;
                 }
                 case WIN_PRIVATE:
                 {
-                    ProfPrivateWin *privatewin = (ProfPrivateWin*)(upload->window);
+                    ProfPrivateWin* privatewin = (ProfPrivateWin*)(upload->window);
                     assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
                     cl_ev_send_priv_msg(privatewin, url, url);
                     break;
                 }
                 case WIN_MUC:
                 {
-                    ProfMucWin *mucwin = (ProfMucWin*)(upload->window);
+                    ProfMucWin* mucwin = (ProfMucWin*)(upload->window);
                     assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                     cl_ev_send_muc_msg(mucwin, url, url);
                     break;
@@ -342,14 +344,14 @@ file_mime_type(const char* const filename)
 {
     char* out_mime_type;
     char file_header[FILE_HEADER_BYTES];
-    FILE *fh;
+    FILE* fh;
     if (!(fh = fopen(filename, "rb"))) {
         return strdup(FALLBACK_MIMETYPE);
     }
     size_t file_header_size = fread(file_header, 1, FILE_HEADER_BYTES, fh);
     fclose(fh);
 
-    char *content_type = g_content_type_guess(filename, (unsigned char*)file_header, file_header_size, NULL);
+    char* content_type = g_content_type_guess(filename, (unsigned char*)file_header, file_header_size, NULL);
     if (content_type != NULL) {
         char* mime_type = g_content_type_get_mime_type(content_type);
         out_mime_type = strdup(mime_type);
@@ -361,7 +363,8 @@ file_mime_type(const char* const filename)
     return out_mime_type;
 }
 
-off_t file_size(int filedes)
+off_t
+file_size(int filedes)
 {
     struct stat st;
     fstat(filedes, &st);
