@@ -2443,7 +2443,7 @@ static struct cmd_t command_defs[] = {
     },
 
     { "/correct",
-      parse_args, 1, -1, NULL,
+      parse_args_with_freetext, 1, 1, NULL,
       CMD_NOSUBFUNCS
       CMD_MAINFUNC(cmd_correct)
       CMD_TAGS(
