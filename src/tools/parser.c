@@ -132,12 +132,13 @@ parse_args(const char* const inp, int min, int max, gboolean* result)
         tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
     }
 
+    free(copy);
+
     int num = g_slist_length(tokens) - 1;
 
     // if num args not valid return NULL
     if ((num < min) || (num > max)) {
         g_slist_free_full(tokens, free);
-        g_free(copy);
         *result = FALSE;
         return NULL;
 
@@ -146,7 +147,6 @@ parse_args(const char* const inp, int min, int max, gboolean* result)
         g_slist_free_full(tokens, free);
         gchar** args = malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
-        g_free(copy);
         *result = TRUE;
         return args;
 
@@ -164,7 +164,6 @@ parse_args(const char* const inp, int min, int max, gboolean* result)
 
         args[arg_count] = NULL;
         g_slist_free_full(tokens, free);
-        g_free(copy);
         *result = TRUE;
         return args;
     }
