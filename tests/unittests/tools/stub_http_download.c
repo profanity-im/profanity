@@ -23,6 +23,4 @@ void* http_file_get(void* userdata);
 void http_download_cancel_processes(ProfWin* window);
 void http_download_add_download(HTTPDownload* download);
 
-char* http_filename_from_url(const char* url);
-
 #endif

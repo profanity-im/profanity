@@ -69,7 +69,6 @@
 #include "event/client_events.h"
 #include "tools/http_upload.h"
 #include "tools/http_download.h"
-#include "tools/aesgcm_download.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 #include "tools/bookmark_ignore.h"
@@ -97,6 +96,7 @@
 #ifdef HAVE_OMEMO
 #include "omemo/omemo.h"
 #include "xmpp/omemo.h"
+#include "tools/aesgcm_download.h"
 #endif
 
 #ifdef HAVE_GTK
@@ -9168,6 +9168,7 @@ _url_save_fallback_method(ProfWin* window, const char* url, const char* filename
 {
     gchar* scheme = g_uri_parse_scheme(url);
 
+#ifdef HAVE_OMEMO
     if (g_strcmp0(scheme, "aesgcm") == 0) {
         AESGCMDownload* download = malloc(sizeof(AESGCMDownload));
         download->window = window;
@@ -9176,15 +9177,20 @@ _url_save_fallback_method(ProfWin* window, const char* url, const char* filename
 
         pthread_create(&(download->worker), NULL, &aesgcm_file_get, download);
         aesgcm_download_add_download(download);
-    } else {
-        HTTPDownload* download = malloc(sizeof(HTTPDownload));
-        download->window = window;
-        download->url = strdup(url);
-        download->filename = strdup(filename);
 
-        pthread_create(&(download->worker), NULL, &http_file_get, download);
-        http_download_add_download(download);
+        free(scheme);
+
+        return;
     }
+#endif
+
+    HTTPDownload* download = malloc(sizeof(HTTPDownload));
+    download->window = window;
+    download->url = strdup(url);
+    download->filename = strdup(filename);
+
+    pthread_create(&(download->worker), NULL, &http_file_get, download);
+    http_download_add_download(download);
 
     free(scheme);
 }

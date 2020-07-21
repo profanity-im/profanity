@@ -126,8 +126,10 @@ unittest_sources = \
 	tests/unittests/log/stub_log.c \
 	tests/unittests/database/stub_database.c \
 	tests/unittests/config/stub_accounts.c \
+	tests/unittests/tools/stub_http_common.c \
 	tests/unittests/tools/stub_http_upload.c \
 	tests/unittests/tools/stub_http_download.c \
+	tests/unittests/tools/stub_aesgcm_download.c \
 	tests/unittests/helpers.c tests/unittests/helpers.h \
 	tests/unittests/test_form.c tests/unittests/test_form.h \
 	tests/unittests/test_common.c tests/unittests/test_common.h \
