@@ -8,7 +8,7 @@
 
 #include "config.h"
 
-#include "tools/http_download.h"
+#include "tools/http_common.c"
 
 typedef struct
 {

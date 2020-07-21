@@ -18,9 +18,4 @@ typedef struct http_download_t
     int cancel;
 } HTTPDownload;
 
-void* http_file_get(void* userdata);
-
-void http_download_cancel_processes(ProfWin* window);
-void http_download_add_download(HTTPDownload* download);
-
 #endif

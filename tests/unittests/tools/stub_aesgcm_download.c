@@ -15,9 +15,13 @@ typedef struct aesgcm_download_t
     HTTPDownload* http_dl;
 } AESGCMDownload;
 
-void* aesgcm_file_get(void* userdata);
+void*
+aesgcm_file_get(void* userdata)
+{
+    return NULL;
+};
 
-void aesgcm_download_cancel_processes(ProfWin* window);
-void aesgcm_download_add_download(AESGCMDownload* download);
+void aesgcm_download_cancel_processes(ProfWin* window){};
+void aesgcm_download_add_download(AESGCMDownload* download){};
 
 #endif

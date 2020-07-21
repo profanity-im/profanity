@@ -36,8 +36,6 @@
 #ifndef TOOLS_HTTP_COMMON_H
 #define TOOLS_HTTP_COMMON_H
 
-#define _GNU_SOURCE 1
-
 #include "ui/window.h"
 
 char* http_basename_from_url(const char* url);

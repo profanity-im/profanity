@@ -20,8 +20,6 @@ typedef struct http_upload_t
     int cancel;
 } HTTPUpload;
 
-//GSList *upload_processes;
-
 void*
 http_file_put(void* userdata)
 {
@@ -33,6 +31,7 @@ file_mime_type(const char* const file_name)
 {
     return NULL;
 }
+
 off_t
 file_size(const char* const file_name)
 {

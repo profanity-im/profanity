@@ -38,7 +38,7 @@
 #include "test_form.h"
 #include "test_callbacks.h"
 #include "test_plugins_disco.h"
-#include "test_http_download.h"
+#include "test_http_common.h"
 
 int
 main(int argc, char* argv[])

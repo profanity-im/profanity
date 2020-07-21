@@ -64,35 +64,31 @@ http_basename_from_url(const char* url)
 }
 
 void
-http_print_transfer_update(ProfWin* window, char* url,
-                           const char* fmt, ...)
+http_print_transfer_update(ProfWin* window, char* url, const char* fmt, ...)
 {
     va_list args;
 
     va_start(args, fmt);
-    char* msg;
-    if (vasprintf(&msg, fmt, args) == -1) {
-        msg = strdup(FALLBACK_MSG);
-    }
+    GString* msg = g_string_new(FALLBACK_MSG);
+    g_string_vprintf(msg, fmt, args);
     va_end(args);
 
-    win_update_entry_message(window, url, msg);
-    free(msg);
+    win_update_entry_message(window, url, msg->str);
+
+    g_string_free(msg, TRUE);
 }
 
 void
-http_print_transfer(ProfWin* window, char* url,
-                    const char* fmt, ...)
+http_print_transfer(ProfWin* window, char* url, const char* fmt, ...)
 {
     va_list args;
 
     va_start(args, fmt);
-    char* msg;
-    if (vasprintf(&msg, fmt, args) == -1) {
-        msg = strdup(FALLBACK_MSG);
-    }
+    GString* msg = g_string_new(FALLBACK_MSG);
+    g_string_vprintf(msg, fmt, args);
     va_end(args);
 
-    win_print_http_transfer(window, msg, url);
-    free(msg);
+    win_print_http_transfer(window, msg->str, url);
+
+    g_string_free(msg, TRUE);
 }
