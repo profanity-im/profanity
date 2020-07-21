@@ -68,9 +68,6 @@ aesgcm_file_get(void* userdata)
     char* https_url = NULL;
     char* fragment = NULL;
 
-    const size_t err_len = 100;
-    char err_buf[err_len];
-
     if (omemo_parse_aesgcm_url(aesgcm_dl->url, &https_url, &fragment) != 0) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
                                    "Download failed: Cannot parse URL '%s'.",
@@ -78,24 +75,29 @@ aesgcm_file_get(void* userdata)
         return NULL;
     }
 
-    char* tmpname = NULL;
-    if (g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL) == -1) {
-        strerror_r(errno, err_buf, err_len);
+    gchar* tmpname = NULL;
+    gint tmpfd;
+    if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
                                    "Downloading '%s' failed: Unable to create "
                                    "temporary ciphertext file for writing "
                                    "(%s).",
-                                   https_url, err_buf);
+                                   https_url, g_strerror(errno));
         return NULL;
+    } else {
+        // TODO(wstrm): Maybe refactor this to use file handles so we do not
+        //              have to open a dummy file descriptor and then close it.
+        //              It's pretty ugly this way...
+        close(tmpfd);
     }
 
     FILE* outfh = fopen(aesgcm_dl->filename, "wb");
     if (outfh == NULL) {
-        strerror_r(errno, err_buf, err_len);
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
                                    "Downloading '%s' failed: Unable to open "
                                    "output file at '%s' for writing (%s).",
-                                   https_url, aesgcm_dl->filename, err_buf);
+                                   https_url, aesgcm_dl->filename,
+                                   g_strerror(errno));
         return NULL;
     }
 
@@ -111,11 +113,11 @@ aesgcm_file_get(void* userdata)
 
     FILE* tmpfh = fopen(tmpname, "rb");
     if (tmpfh == NULL) {
-        strerror_r(errno, err_buf, err_len);
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
                                    "Downloading '%s' failed: Unable to open "
                                    "temporary file at '%s' for reading (%s).",
-                                   aesgcm_dl->url, aesgcm_dl->filename, err_buf);
+                                   aesgcm_dl->url, aesgcm_dl->filename,
+                                   g_strerror(errno));
         return NULL;
     }
 
@@ -124,12 +126,11 @@ aesgcm_file_get(void* userdata)
                                    http_dl->bytes_received, fragment);
 
     if (fclose(tmpfh) == EOF) {
-        strerror_r(errno, err_buf, err_len);
-        cons_show_error(err_buf);
+        cons_show_error(g_strerror(errno));
     }
 
     remove(tmpname);
-    free(tmpname);
+    g_free(tmpname);
 
     if (crypt_res != GPG_ERR_NO_ERROR) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
@@ -139,8 +140,7 @@ aesgcm_file_get(void* userdata)
     }
 
     if (fclose(outfh) == EOF) {
-        strerror_r(errno, err_buf, err_len);
-        cons_show_error(err_buf);
+        cons_show_error(g_strerror(errno));
     }
 
     free(https_url);

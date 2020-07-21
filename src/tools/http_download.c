@@ -103,9 +103,6 @@ http_file_get(void* userdata)
 {
     HTTPDownload* download = (HTTPDownload*)userdata;
 
-    const size_t err_len = 100;
-    char err_buf[err_len];
-
     char* err = NULL;
 
     CURL* curl;
@@ -120,11 +117,11 @@ http_file_get(void* userdata)
 
     FILE* outfh = fopen(download->filename, "wb");
     if (outfh == NULL) {
-        strerror_r(errno, err_buf, err_len);
         http_print_transfer_update(download->window, download->url,
                                    "Downloading '%s' failed: Unable to open "
                                    "output file at '%s' for writing (%s).",
-                                   download->url, download->filename, err_buf);
+                                   download->url, download->filename,
+                                   g_strerror(errno));
         return NULL;
     }
 
@@ -161,8 +158,7 @@ http_file_get(void* userdata)
     curl_global_cleanup();
 
     if (fclose(outfh) == EOF) {
-        strerror_r(errno, err_buf, err_len);
-        err = strdup(err_buf);
+        err = strdup(g_strerror(errno));
     }
 
     pthread_mutex_lock(&lock);

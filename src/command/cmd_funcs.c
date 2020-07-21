@@ -9156,37 +9156,11 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
 }
 
 void
-_url_open_fallback_method(ProfWin* window, const char* url)
+_url_open_fallback_method(ProfWin* window, const char* url, const char* filename)
 {
-    /*
-    gboolean is_omemo_aesgcm = false;
-    gchar* scheme = g_uri_parse_scheme(url);
-    if (g_strcmp0(scheme, "aesgcm")) {
-        is_omemo_aesgcm = true;
-    }
-    free(scheme);
-
-    if (is_omemo_aesgcm) {
-        int tmpfd;
-        char* tmpname = NULL;
-        if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
-            *err = "Unable to create temporary file for decryption stream.";
-            return NULL;
-        }
-        FILE* tmpfh = fdopen(tmpfd, "wb");
-
-        unsigned char* nonce;
-        unsigned char* key;
-        char* https_url = omemo_parse_aesgcm_url(url, nonce, key);
-
-        _url_save_fallback_method(window, https_url, tmpname);
-
-        int crypt_res = omemo_decrypt_file(tmpfh, 
-
-        remove(tmpname);
-        free(tmpname);
-    }
-    */
+    // TODO(wstrm): Use _url_save_fallback_method?.
+    // We probably want to do the cmd_url_open in a separate thread and wait for
+    // the transfer to be finished before calling call_external.
 }
 
 void
