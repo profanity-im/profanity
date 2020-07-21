@@ -49,12 +49,11 @@
 typedef struct http_download_t
 {
     char* url;
-    FILE* filehandle;
+    char* filename;
     curl_off_t bytes_received;
     ProfWin* window;
     pthread_t worker;
     int cancel;
-    int close;
 } HTTPDownload;
 
 void* http_file_get(void* userdata);

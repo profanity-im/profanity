@@ -109,6 +109,9 @@ http_file_get(void* userdata)
 {
     HTTPDownload* download = (HTTPDownload*)userdata;
 
+    const size_t err_len = 100;
+    char err_buf[err_len];
+
     char* err = NULL;
 
     CURL* curl;
@@ -118,12 +121,18 @@ http_file_get(void* userdata)
     download->bytes_received = 0;
 
     pthread_mutex_lock(&lock);
-    char* msg;
-    if (asprintf(&msg, "Downloading '%s': 0%%", download->url) == -1) {
-        msg = strdup(FALLBACK_MSG);
+    http_print_transfer_update(download->window, download->url,
+                               "Downloading '%s': 0%%", download->url);
+
+    FILE* outfh = fopen(download->filename, "wb");
+    if (outfh == NULL) {
+        strerror_r(errno, err_buf, err_len);
+        http_print_transfer_update(download->window, download->url,
+                                   "Downloading '%s' failed: Unable to open "
+                                   "output file at '%s' for writing (%s).",
+                                   download->url, download->filename, err_buf);
+        return NULL;
     }
-    win_print_http_transfer(download->window, msg, download->url);
-    free(msg);
 
     char* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     pthread_mutex_unlock(&lock);
@@ -142,7 +151,7 @@ http_file_get(void* userdata)
 #endif
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)download->filehandle);
+    curl_easy_setopt(curl, CURLOPT_WRITEDATA, (void*)outfh);
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "profanity");
 
@@ -157,35 +166,31 @@ http_file_get(void* userdata)
     curl_easy_cleanup(curl);
     curl_global_cleanup();
 
-    if (download->filehandle && download->close) {
-        fclose(download->filehandle);
+    if (fclose(outfh) == EOF) {
+        strerror_r(errno, err_buf, err_len);
+        err = strdup(err_buf);
     }
 
     pthread_mutex_lock(&lock);
     g_free(cert_path);
     if (err) {
-        char* msg;
         if (download->cancel) {
-            if (asprintf(&msg, "Downloading '%s' failed: Download was canceled", download->url) == -1) {
-                msg = strdup(FALLBACK_MSG);
-            }
+            http_print_transfer_update(download->window, download->url,
+                                       "Downloading '%s' failed: "
+                                       "Download was canceled",
+                                       download->url);
         } else {
-            if (asprintf(&msg, "Downloading '%s' failed: %s", download->url, err) == -1) {
-                msg = strdup(FALLBACK_MSG);
-            }
-            win_update_entry_message(download->window, download->url, msg);
+            http_print_transfer_update(download->window, download->url,
+                                       "Downloading '%s' failed: %s",
+                                       download->url, err);
         }
-        cons_show_error(msg);
-        free(msg);
         free(err);
     } else {
         if (!download->cancel) {
-            if (asprintf(&msg, "Downloading '%s': 100%%", download->url) == -1) {
-                msg = strdup(FALLBACK_MSG);
-            }
-            win_update_entry_message(download->window, download->url, msg);
+            http_print_transfer_update(download->window, download->url,
+                                       "Downloading '%s': 100%%",
+                                       download->url);
             win_mark_received(download->window, download->url);
-            free(msg);
         }
     }
 
@@ -193,6 +198,7 @@ http_file_get(void* userdata)
     pthread_mutex_unlock(&lock);
 
     free(download->url);
+    free(download->filename);
     free(download);
 
     return NULL;

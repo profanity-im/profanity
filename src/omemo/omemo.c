@@ -1713,7 +1713,7 @@ _bytes_from_hex(const char* hex, size_t hex_size,
     }
 }
 
-int
+gcry_error_t
 omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char* fragment)
 {
     char nonce_hex[AESGCM_URL_NONCE_LEN];
@@ -1733,7 +1733,8 @@ omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char* fragment)
     _bytes_from_hex(key_hex, AESGCM_URL_KEY_LEN,
                     key, OMEMO_AESGCM_KEY_LENGTH);
 
-    int crypt_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, false);
+    gcry_error_t crypt_res;
+    crypt_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, false);
 
     gcry_free(key);
 

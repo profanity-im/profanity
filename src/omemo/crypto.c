@@ -35,7 +35,6 @@
 #include <assert.h>
 #include <signal/signal_protocol.h>
 #include <signal/signal_protocol_types.h>
-#include <gcrypt.h>
 
 #include "log.h"
 #include "omemo/omemo.h"
@@ -377,7 +376,7 @@ out:
     return res;
 }
 
-int
+gcry_error_t
 aes256gcm_crypt_file(FILE* in, FILE* out, off_t file_size,
                      unsigned char key[], unsigned char nonce[], bool encrypt)
 {
@@ -416,7 +415,7 @@ aes256gcm_crypt_file(FILE* in, FILE* out, off_t file_size,
     off_t bytes_read = 0, bytes_available = 0, read_size = 0;
     while (bytes_read < file_size) {
         bytes_available = file_size - bytes_read;
-        if (!bytes_available) {
+        if (!bytes_available || ferror(in) != 0) {
             break;
         }
 

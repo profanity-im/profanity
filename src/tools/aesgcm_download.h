@@ -50,7 +50,7 @@
 typedef struct aesgcm_download_t
 {
     char* url;
-    FILE* filehandle;
+    char* filename;
     ProfWin* window;
     pthread_t worker;
     HTTPDownload* http_dl;

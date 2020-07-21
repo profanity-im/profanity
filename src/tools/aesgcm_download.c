@@ -67,56 +67,87 @@ aesgcm_file_get(void* userdata)
     char* https_url = NULL;
     char* fragment = NULL;
 
+    const size_t err_len = 100;
+    char err_buf[err_len];
+
     if (omemo_parse_aesgcm_url(aesgcm_dl->url, &https_url, &fragment) != 0) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
-                                   "Download failed: Cannot parse URL.");
+                                   "Download failed: Cannot parse URL '%s'.",
+                                   aesgcm_dl->url);
         return NULL;
     }
 
-    int tmpfd;
     char* tmpname = NULL;
-    if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
+    if (g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL) == -1) {
+        strerror_r(errno, err_buf, err_len);
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
                                    "Downloading '%s' failed: Unable to create "
-                                   "temporary ciphertext file for writing.",
-                                   https_url);
+                                   "temporary ciphertext file for writing "
+                                   "(%s).",
+                                   https_url, err_buf);
         return NULL;
     }
-    FILE* tmpfh = fdopen(tmpfd, "wb");
 
-    // Remove the file once it is closed.
-    remove(tmpname);
-    free(tmpname);
+    FILE* outfh = fopen(aesgcm_dl->filename, "wb");
+    if (outfh == NULL) {
+        strerror_r(errno, err_buf, err_len);
+        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
+                                   "Downloading '%s' failed: Unable to open "
+                                   "output file at '%s' for writing (%s).",
+                                   https_url, aesgcm_dl->filename, err_buf);
+        return NULL;
+    }
 
     HTTPDownload* http_dl = malloc(sizeof(HTTPDownload));
     http_dl->window = aesgcm_dl->window;
     http_dl->worker = aesgcm_dl->worker;
-    http_dl->url = https_url;
-    http_dl->filehandle = tmpfh;
-    http_dl->close = 0;
+    http_dl->url = strdup(https_url);
+    http_dl->filename = strdup(tmpname);
 
     aesgcm_dl->http_dl = http_dl;
 
-    // TODO: Verify result.
-    http_file_get(http_dl);
+    http_file_get(http_dl); // TODO(wstrm): Verify result.
 
-    // Force flush as the decrypt function will read from the same stream.
-    fflush(tmpfh);
-    rewind(tmpfh);
-
-    int crypt_res = omemo_decrypt_file(tmpfh, aesgcm_dl->filehandle,
-                                       http_dl->bytes_received, fragment);
-
-    fclose(tmpfh);
-
-    if (crypt_res != 0) {
+    FILE* tmpfh = fopen(tmpname, "rb");
+    if (tmpfh == NULL) {
+        strerror_r(errno, err_buf, err_len);
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
-                                   "Downloading '%s' failed: Failed to decrypt"
-                                   "file.",
-                                   https_url);
+                                   "Downloading '%s' failed: Unable to open "
+                                   "temporary file at '%s' for reading (%s).",
+                                   aesgcm_dl->url, aesgcm_dl->filename, err_buf);
+        return NULL;
     }
 
-    fclose(aesgcm_dl->filehandle);
+    gcry_error_t crypt_res;
+    crypt_res = omemo_decrypt_file(tmpfh, outfh,
+                                   http_dl->bytes_received, fragment);
+
+    if (fclose(tmpfh) == EOF) {
+        strerror_r(errno, err_buf, err_len);
+        cons_show_error(err_buf);
+    }
+
+    remove(tmpname);
+    free(tmpname);
+
+    if (crypt_res != GPG_ERR_NO_ERROR) {
+        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
+                                   "Downloading '%s' failed: Failed to decrypt "
+                                   "file (%s).",
+                                   https_url, gcry_strerror(crypt_res));
+    }
+
+    if (fclose(outfh) == EOF) {
+        strerror_r(errno, err_buf, err_len);
+        cons_show_error(err_buf);
+    }
+
+    free(https_url);
+    free(fragment);
+
+    free(aesgcm_dl->filename);
+    free(aesgcm_dl->url);
+    free(aesgcm_dl);
 
     return NULL;
 }

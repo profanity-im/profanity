@@ -9192,19 +9192,13 @@ _url_open_fallback_method(ProfWin* window, const char* url)
 void
 _url_save_fallback_method(ProfWin* window, const char* url, const char* filename)
 {
-    FILE* fh = fopen(filename, "wb");
-    if (!fh) {
-        cons_show_error("Cannot open file '%s' for writing.", filename);
-        return;
-    }
-
     gchar* scheme = g_uri_parse_scheme(url);
 
     if (g_strcmp0(scheme, "aesgcm") == 0) {
         AESGCMDownload* download = malloc(sizeof(AESGCMDownload));
         download->window = window;
         download->url = strdup(url);
-        download->filehandle = fh;
+        download->filename = strdup(filename);
 
         pthread_create(&(download->worker), NULL, &aesgcm_file_get, download);
         aesgcm_download_add_download(download);
@@ -9212,7 +9206,7 @@ _url_save_fallback_method(ProfWin* window, const char* url, const char* filename
         HTTPDownload* download = malloc(sizeof(HTTPDownload));
         download->window = window;
         download->url = strdup(url);
-        download->filehandle = fh;
+        download->filename = strdup(filename);
 
         pthread_create(&(download->worker), NULL, &http_file_get, download);
         http_download_add_download(download);
