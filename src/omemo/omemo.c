@@ -1767,6 +1767,12 @@ omemo_parse_aesgcm_url(const char* aesgcm_url,
         goto out;
     }
 
+    // Clear fragment from HTTPS URL as it's not required for download.
+    ret = curl_url_set(url, CURLUPART_FRAGMENT, NULL, curl_flags);
+    if (ret) {
+        goto out;
+    }
+
     ret = curl_url_set(url, CURLUPART_SCHEME, "https", curl_flags);
     if (ret) {
         goto out;

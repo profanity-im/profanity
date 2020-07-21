@@ -101,5 +101,6 @@ char* omemo_on_message_send(ProfWin* win, const char* const message, gboolean re
 char* omemo_on_message_recv(const char* const from, uint32_t sid, const unsigned char* const iv, size_t iv_len, GList* keys, const unsigned char* const payload, size_t payload_len, gboolean muc, gboolean* trusted);
 
 char* omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res);
-gcry_error_t omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char* fragment); void omemo_free(void* a);
+gcry_error_t omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char* fragment);
+void omemo_free(void* a);
 int omemo_parse_aesgcm_url(const char* aesgcm_url, char** https_url, char** fragment);
