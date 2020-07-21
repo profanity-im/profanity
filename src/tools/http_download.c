@@ -56,8 +56,6 @@
 #include "ui/window.h"
 #include "common.h"
 
-#define FALLBACK_MSG ""
-
 GSList* download_processes = NULL;
 
 static int
@@ -84,12 +82,8 @@ _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
         dlperc = (100 * dlnow) / dltotal;
     }
 
-    char* msg;
-    if (asprintf(&msg, "Downloading '%s': %d%%", download->url, dlperc) == -1) {
-        msg = strdup(FALLBACK_MSG);
-    }
-    win_update_entry_message(download->window, download->url, msg);
-    free(msg);
+    http_print_transfer_update(download->window, download->url,
+                               "Downloading '%s': %d%%", download->url, dlperc);
 
     pthread_mutex_unlock(&lock);
 
@@ -121,8 +115,8 @@ http_file_get(void* userdata)
     download->bytes_received = 0;
 
     pthread_mutex_lock(&lock);
-    http_print_transfer_update(download->window, download->url,
-                               "Downloading '%s': 0%%", download->url);
+    http_print_transfer(download->window, download->url,
+                        "Downloading '%s': 0%%", download->url);
 
     FILE* outfh = fopen(download->filename, "wb");
     if (outfh == NULL) {
@@ -188,7 +182,7 @@ http_file_get(void* userdata)
     } else {
         if (!download->cancel) {
             http_print_transfer_update(download->window, download->url,
-                                       "Downloading '%s': 100%%",
+                                       "Downloading '%s': done",
                                        download->url);
             win_mark_received(download->window, download->url);
         }
@@ -222,40 +216,4 @@ void
 http_download_add_download(HTTPDownload* download)
 {
     download_processes = g_slist_append(download_processes, download);
-}
-
-char*
-http_basename_from_url(const char* url)
-{
-    const char* default_name = "index.html";
-
-    GFile* file = g_file_new_for_uri(url);
-    char* filename = g_file_get_basename(file);
-    g_object_unref(file);
-
-    if (g_strcmp0(filename, ".") == 0
-        || g_strcmp0(filename, "..") == 0
-        || g_strcmp0(filename, G_DIR_SEPARATOR_S) == 0) {
-        g_free(filename);
-        return strdup(default_name);
-    }
-
-    return filename;
-}
-
-void
-http_print_transfer_update(ProfWin* window, char* url,
-                           const char* fmt, ...)
-{
-    va_list args;
-
-    va_start(args, fmt);
-    char* msg;
-    if (vasprintf(&msg, fmt, args) == -1) {
-        msg = strdup(FALLBACK_MSG);
-    }
-    va_end(args);
-
-    win_print_http_transfer(window, msg, url);
-    free(msg);
 }

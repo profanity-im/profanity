@@ -50,6 +50,7 @@
 
 #include "profanity.h"
 #include "event/client_events.h"
+#include "tools/http_common.h"
 #include "tools/aesgcm_download.h"
 #include "omemo/omemo.h"
 #include "config/preferences.h"

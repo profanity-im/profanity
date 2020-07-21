@@ -1,8 +1,7 @@
 /*
- * http_download.h
+ * http_common.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
  * Copyright (C) 2020 William Wennerström <william@wstrm.dev>
  *
  * This file is part of Profanity.
@@ -34,32 +33,66 @@
  *
  */
 
-#ifndef TOOLS_HTTP_DOWNLOAD_H
-#define TOOLS_HTTP_DOWNLOAD_H
+#define _GNU_SOURCE 1
 
-#ifdef PLATFORM_CYGWIN
-#define SOCKET int
-#endif
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <gio/gio.h>
 
-#include <sys/select.h>
-#include <curl/curl.h>
-
-#include "ui/win_types.h"
 #include "tools/http_common.h"
 
-typedef struct http_download_t
+#define FALLBACK_MSG ""
+
+char*
+http_basename_from_url(const char* url)
 {
-    char* url;
-    char* filename;
-    curl_off_t bytes_received;
-    ProfWin* window;
-    pthread_t worker;
-    int cancel;
-} HTTPDownload;
+    const char* default_name = "index.html";
 
-void* http_file_get(void* userdata);
+    GFile* file = g_file_new_for_uri(url);
+    char* filename = g_file_get_basename(file);
+    g_object_unref(file);
 
-void http_download_cancel_processes(ProfWin* window);
-void http_download_add_download(HTTPDownload* download);
+    if (g_strcmp0(filename, ".") == 0
+        || g_strcmp0(filename, "..") == 0
+        || g_strcmp0(filename, G_DIR_SEPARATOR_S) == 0) {
+        g_free(filename);
+        return strdup(default_name);
+    }
 
-#endif
+    return filename;
+}
+
+void
+http_print_transfer_update(ProfWin* window, char* url,
+                           const char* fmt, ...)
+{
+    va_list args;
+
+    va_start(args, fmt);
+    char* msg;
+    if (vasprintf(&msg, fmt, args) == -1) {
+        msg = strdup(FALLBACK_MSG);
+    }
+    va_end(args);
+
+    win_update_entry_message(window, url, msg);
+    free(msg);
+}
+
+void
+http_print_transfer(ProfWin* window, char* url,
+                    const char* fmt, ...)
+{
+    va_list args;
+
+    va_start(args, fmt);
+    char* msg;
+    if (vasprintf(&msg, fmt, args) == -1) {
+        msg = strdup(FALLBACK_MSG);
+    }
+    va_end(args);
+
+    win_print_http_transfer(window, msg, url);
+    free(msg);
+}

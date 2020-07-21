@@ -41,6 +41,8 @@ core_sources = \
 	src/command/cmd_ac.h src/command/cmd_ac.c \
 	src/tools/parser.c \
 	src/tools/parser.h \
+	src/tools/http_common.c \
+	src/tools/http_common.h \
 	src/tools/http_upload.c \
 	src/tools/http_upload.h \
 	src/tools/http_download.c \

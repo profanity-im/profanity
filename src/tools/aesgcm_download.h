@@ -43,6 +43,7 @@
 
 #include <sys/select.h>
 #include <curl/curl.h>
+#include "tools/http_common.h"
 #include "tools/http_download.h"
 
 #include "ui/win_types.h"
@@ -60,7 +61,5 @@ void* aesgcm_file_get(void* userdata);
 
 void aesgcm_download_cancel_processes(ProfWin* window);
 void aesgcm_download_add_download(AESGCMDownload* download);
-
-char* http_basename_from_url(const char* url);
 
 #endif
