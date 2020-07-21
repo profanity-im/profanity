@@ -40,163 +40,8 @@
 
 #include "common.h"
 
-/*
- * Take a full line of input and return an array of strings representing
- * the arguments of a command.
- * If the number of arguments found is less than min, or more than max
- * NULL is returned.
- *
- * inp - The line of input
- * min - The minimum allowed number of arguments
- * max - The maximum allowed number of arguments
- *
- * Returns - An NULL terminated array of strings representing the arguments
- * of the command, or NULL if the validation fails.
- *
- * E.g. the following input line:
- *
- * /cmd arg1 arg2
- *
- * Will return a pointer to the following array:
- *
- * { "arg1", "arg2", NULL }
- *
- */
-gchar**
-parse_args(const char* const inp, int min, int max, gboolean* result)
-{
-    if (inp == NULL) {
-        *result = FALSE;
-        return NULL;
-    }
-
-    // copy and strip input of leading/trailing whitespace
-    char* copy = strdup(inp);
-    g_strstrip(copy);
-
-    int inp_size = g_utf8_strlen(copy, -1);
-    gboolean in_token = FALSE;
-    gboolean in_quotes = FALSE;
-    char* token_start = &copy[0];
-    int token_size = 0;
-    GSList* tokens = NULL;
-
-    // add tokens to GSList
-    int i;
-    for (i = 0; i < inp_size; i++) {
-        gchar* curr_ch = g_utf8_offset_to_pointer(copy, i);
-        gunichar curr_uni = g_utf8_get_char(curr_ch);
-
-        if (!in_token) {
-            if (curr_uni == ' ') {
-                continue;
-            } else {
-                in_token = TRUE;
-                if (curr_uni == '"') {
-                    in_quotes = TRUE;
-                    i++;
-                    gchar* next_ch = g_utf8_next_char(curr_ch);
-                    gunichar next_uni = g_utf8_get_char(next_ch);
-                    token_start = next_ch;
-                    token_size += g_unichar_to_utf8(next_uni, NULL);
-                } else {
-                    token_start = curr_ch;
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
-                }
-            }
-        } else {
-            if (in_quotes) {
-                if (curr_uni == '"') {
-                    tokens = g_slist_append(tokens, g_strndup(token_start,
-                                                              token_size));
-                    token_size = 0;
-                    in_token = FALSE;
-                    in_quotes = FALSE;
-                } else {
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
-                }
-            } else {
-                if (curr_uni == ' ') {
-                    tokens = g_slist_append(tokens, g_strndup(token_start,
-                                                              token_size));
-                    token_size = 0;
-                    in_token = FALSE;
-                } else {
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
-                }
-            }
-        }
-    }
-
-    if (in_token) {
-        tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
-    }
-
-    free(copy);
-
-    int num = g_slist_length(tokens) - 1;
-
-    // if num args not valid return NULL
-    if ((num < min) || (num > max)) {
-        g_slist_free_full(tokens, free);
-        *result = FALSE;
-        return NULL;
-
-        // if min allowed is 0 and 0 found, return empty char* array
-    } else if (min == 0 && num == 0) {
-        g_slist_free_full(tokens, free);
-        gchar** args = malloc((num + 1) * sizeof(*args));
-        args[0] = NULL;
-        *result = TRUE;
-        return args;
-
-        // otherwise return args array
-    } else {
-        gchar** args = malloc((num + 1) * sizeof(*args));
-        GSList* token = tokens;
-        token = g_slist_next(token);
-        int arg_count = 0;
-
-        while (token) {
-            args[arg_count++] = strdup(token->data);
-            token = g_slist_next(token);
-        }
-
-        args[arg_count] = NULL;
-        g_slist_free_full(tokens, free);
-        *result = TRUE;
-        return args;
-    }
-}
-
-/*
- * Take a full line of input and return an array of strings representing
- * the arguments of a command.  This function handles when the last parameter
- * to the command is free text e.g.
- *
- * /msg user@host here is a message
- *
- * If the number of arguments found is less than min, or more than max
- * NULL is returned.
- *
- * inp - The line of input
- * min - The minimum allowed number of arguments
- * max - The maximum allowed number of arguments
- *
- * Returns - An NULL terminated array of strings representing the arguments
- * of the command, or NULL if the validation fails.
- *
- * E.g. the following input line:
- *
- * /cmd arg1 arg2 some free text
- *
- * Will return a pointer to the following array:
- *
- * { "arg1", "arg2", "some free text", NULL }
- *
- */
-gchar**
-parse_args_with_freetext(const char* const inp, int min, int max, gboolean* result)
+static gchar**
+_parse_args_helper(const char* const inp, int min, int max, gboolean* result, gboolean with_freetext)
 {
     if (inp == NULL) {
         *result = FALSE;
@@ -227,8 +72,10 @@ parse_args_with_freetext(const char* const inp, int min, int max, gboolean* resu
                 continue;
             } else {
                 in_token = TRUE;
-                num_tokens++;
-                if ((num_tokens == max + 1) && (curr_uni != '"')) {
+                if (with_freetext) {
+                    num_tokens++;
+                }
+                if (with_freetext && (num_tokens == max + 1) && (curr_uni != '"')) {
                     in_freetext = TRUE;
                 } else if (curr_uni == '"') {
                     in_quotes = TRUE;
@@ -260,7 +107,7 @@ parse_args_with_freetext(const char* const inp, int min, int max, gboolean* resu
                     }
                 }
             } else {
-                if (in_freetext) {
+                if (with_freetext && in_freetext) {
                     token_size += g_unichar_to_utf8(curr_uni, NULL);
                 } else if (curr_uni == ' ') {
                     tokens = g_slist_append(tokens, g_strndup(token_start,
@@ -313,6 +160,66 @@ parse_args_with_freetext(const char* const inp, int min, int max, gboolean* resu
         *result = TRUE;
         return args;
     }
+}
+
+/*
+ * Take a full line of input and return an array of strings representing
+ * the arguments of a command.
+ * If the number of arguments found is less than min, or more than max
+ * NULL is returned.
+ *
+ * inp - The line of input
+ * min - The minimum allowed number of arguments
+ * max - The maximum allowed number of arguments
+ *
+ * Returns - An NULL terminated array of strings representing the arguments
+ * of the command, or NULL if the validation fails.
+ *
+ * E.g. the following input line:
+ *
+ * /cmd arg1 arg2
+ *
+ * Will return a pointer to the following array:
+ *
+ * { "arg1", "arg2", NULL }
+ *
+ */
+gchar**
+parse_args(const char* const inp, int min, int max, gboolean* result)
+{
+    return _parse_args_helper(inp, min, max, result, FALSE);
+}
+
+/*
+ * Take a full line of input and return an array of strings representing
+ * the arguments of a command.  This function handles when the last parameter
+ * to the command is free text e.g.
+ *
+ * /msg user@host here is a message
+ *
+ * If the number of arguments found is less than min, or more than max
+ * NULL is returned.
+ *
+ * inp - The line of input
+ * min - The minimum allowed number of arguments
+ * max - The maximum allowed number of arguments
+ *
+ * Returns - An NULL terminated array of strings representing the arguments
+ * of the command, or NULL if the validation fails.
+ *
+ * E.g. the following input line:
+ *
+ * /cmd arg1 arg2 some free text
+ *
+ * Will return a pointer to the following array:
+ *
+ * { "arg1", "arg2", "some free text", NULL }
+ *
+ */
+gchar**
+parse_args_with_freetext(const char* const inp, int min, int max, gboolean* result)
+{
+    return _parse_args_helper(inp, min, max, result, TRUE);
 }
 
 int
