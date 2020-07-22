@@ -1836,7 +1836,7 @@ static struct cmd_t command_defs[] = {
       CMD_SYN(
               "/history on|off")
       CMD_DESC(
-              "Switch chat history on or off, /chlog will automatically be enabled when this setting is on. "
+              "Switch chat history on or off, /logging chat will automatically be enabled when this setting is on. "
               "When history is enabled, previous messages are shown in chat windows.")
       CMD_ARGS(
               { "on|off", "Enable or disable showing chat history." })
