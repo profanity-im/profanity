@@ -897,7 +897,7 @@ static struct cmd_t command_defs[] = {
               "Enable/disable sending last activity, and send last activity requests.")
       CMD_ARGS(
               { "on|off", "Enable or disable sending of last activity." },
-              { "<jid>", "The JID of the entity to query, omitting the JID will query your server." })
+              { "<jid>", "The JID of the entity to query. Omitting the JID will query your server for its uptime." })
       CMD_EXAMPLES(
               "/lastactivity",
               "/lastactivity off",
