@@ -126,6 +126,7 @@ static char* _correct_autocomplete(ProfWin* window, const char* const input, gbo
 static char* _software_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _url_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _executable_autocomplete(ProfWin* window, const char* const input, gboolean previous);
+static char* _lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char* const prefix, gboolean previous, void* context);
 
@@ -1654,7 +1655,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
 
     // autocomplete boolean settings
     gchar* boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash",
-                                 "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/lastactivity", "/os", "/slashguard" };
+                                 "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/os", "/slashguard" };
 
     for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice, previous, NULL);
@@ -1786,6 +1787,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/software", _software_autocomplete);
     g_hash_table_insert(ac_funcs, "/url", _url_autocomplete);
     g_hash_table_insert(ac_funcs, "/executable", _executable_autocomplete);
+    g_hash_table_insert(ac_funcs, "/lastactivity", _lastactivity_autocomplete);
 
     int len = strlen(input);
     char parsed[len + 1];
@@ -4159,6 +4161,35 @@ _executable_autocomplete(ProfWin* window, const char* const input, gboolean prev
     result = autocomplete_param_with_ac(input, "/executable", executable_ac, TRUE, previous);
     if (result) {
         return result;
+    }
+
+    return NULL;
+}
+
+static char*
+_lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+{
+    char* result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/lastactivity", status_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status == JABBER_CONNECTED) {
+
+        result = autocomplete_param_with_func(input, "/lastactivity set", prefs_autocomplete_boolean_choice, previous, NULL);
+        if (result) {
+            return result;
+        }
+
+        result = autocomplete_param_with_func(input, "/lastactivity get", roster_barejid_autocomplete, previous, NULL);
+        if (result) {
+            return result;
+        }
+
     }
 
     return NULL;

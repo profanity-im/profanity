@@ -885,25 +885,25 @@ static struct cmd_t command_defs[] = {
     },
 
     { "/lastactivity",
-      parse_args, 0, 1, NULL,
+      parse_args, 1, 2, NULL,
       CMD_NOSUBFUNCS
       CMD_MAINFUNC(cmd_lastactivity)
       CMD_TAGS(
               CMD_TAG_PRESENCE)
       CMD_SYN(
-              "/lastactivity on|off",
-              "/lastactivity [<jid>]")
+              "/lastactivity set on|off",
+              "/lastactivity get [<jid>]")
       CMD_DESC(
               "Enable/disable sending last activity, and send last activity requests.")
       CMD_ARGS(
               { "on|off", "Enable or disable sending of last activity." },
               { "<jid>", "The JID of the entity to query. Omitting the JID will query your server for its uptime." })
       CMD_EXAMPLES(
-              "/lastactivity",
-              "/lastactivity off",
-              "/lastactivity freyja@asgaard.edda",
-              "/lastactivity freyja@asgaard.edda/laptop",
-              "/lastactivity someserver.com")
+              "/lastactivity get",
+              "/lastactivity set off",
+              "/lastactivity get freyja@asgaard.edda",
+              "/lastactivity get freyja@asgaard.edda/laptop",
+              "/lastactivity get someserver.com")
     },
 
     { "/nick",

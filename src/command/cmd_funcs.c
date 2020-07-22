@@ -4903,15 +4903,20 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_lastactivity(ProfWin* window, const char* const command, gchar** args)
 {
-    if ((g_strcmp0(args[0], "on") == 0) || (g_strcmp0(args[0], "off") == 0)) {
-        _cmd_set_boolean_preference(args[0], command, "Last activity", PREF_LASTACTIVITY);
-        if (g_strcmp0(args[0], "on") == 0) {
-            caps_add_feature(XMPP_FEATURE_LASTACTIVITY);
+    if ((g_strcmp0(args[0], "set") == 0)) {
+        if ((g_strcmp0(args[1], "on") == 0) || (g_strcmp0(args[1], "off") == 0)) {
+            _cmd_set_boolean_preference(args[1], command, "Last activity", PREF_LASTACTIVITY);
+            if (g_strcmp0(args[1], "on") == 0) {
+                caps_add_feature(XMPP_FEATURE_LASTACTIVITY);
+            }
+            if (g_strcmp0(args[1], "off") == 0) {
+                caps_remove_feature(XMPP_FEATURE_LASTACTIVITY);
+            }
+            return TRUE;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
         }
-        if (g_strcmp0(args[0], "off") == 0) {
-            caps_remove_feature(XMPP_FEATURE_LASTACTIVITY);
-        }
-        return TRUE;
     }
 
     jabber_conn_status_t conn_status = connection_get_status();
@@ -4921,20 +4926,25 @@ cmd_lastactivity(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    if (args[0] == NULL) {
-        Jid* jidp = jid_create(connection_get_fulljid());
-        GString* jid = g_string_new(jidp->domainpart);
+    if ((g_strcmp0(args[0], "get") == 0)) {
+        if (args[1] == NULL) {
+            Jid* jidp = jid_create(connection_get_fulljid());
+            GString* jid = g_string_new(jidp->domainpart);
 
-        iq_last_activity_request(jid->str);
+            iq_last_activity_request(jid->str);
 
-        g_string_free(jid, TRUE);
-        jid_destroy(jidp);
+            g_string_free(jid, TRUE);
+            jid_destroy(jidp);
 
-        return TRUE;
-    } else {
-        iq_last_activity_request(args[0]);
-        return TRUE;
+            return TRUE;
+        } else {
+            iq_last_activity_request(args[1]);
+            return TRUE;
+        }
     }
+
+    cons_bad_cmd_usage(command);
+    return TRUE;
 }
 
 gboolean
