@@ -138,14 +138,14 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
         // if min allowed is 0 and 0 found, return empty char* array
     } else if (min == 0 && num == 0) {
         g_slist_free_full(tokens, free);
-        gchar** args = malloc((num + 1) * sizeof(*args));
+        gchar** args = g_malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
         *result = TRUE;
         return args;
 
         // otherwise return args array
     } else {
-        gchar** args = malloc((num + 1) * sizeof(*args));
+        gchar** args = g_malloc((num + 1) * sizeof(*args));
         GSList* token = tokens;
         token = g_slist_next(token);
         int arg_count = 0;
@@ -298,11 +298,11 @@ get_start(const char* const string, int tokens)
         gunichar curr_uni = g_utf8_get_char(curr_ch);
 
         if (num_tokens < tokens) {
-            gchar* uni_char = malloc(7);
+            gchar* uni_char = g_malloc(7);
             int len = g_unichar_to_utf8(curr_uni, uni_char);
             uni_char[len] = '\0';
             g_string_append(result, uni_char);
-            free(uni_char);
+            g_free(uni_char);
         }
         if (curr_uni == ' ') {
             if (!in_quotes) {
