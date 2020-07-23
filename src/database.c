@@ -110,8 +110,8 @@ log_database_init(ProfAccount* account)
     // message is the message text
     // timestamp the timestamp like "2020/03/24 11:12:14"
     // type is there to distinguish: message (chat), MUC message (muc), muc pm (mucpm)
-    // stanza_id is the ID from XEP-0359: Unique and Stable Stanza IDs
-    // archive_id is the ID from XEP-0313: Message Archive Management
+    // stanza_id is the ID in <message>
+    // archive_id is the stanza-id from from XEP-0359: Unique and Stable Stanza IDs used for XEP-0313: Message Archive Management
     // replace_id is the ID from XEP-0308: Last Message Correction
     // encryption is to distinguish: none, omemo, otr, pgp
     // marked_read is 0/1 whether a message has been marked as read via XEP-0333: Chat Markers
@@ -335,7 +335,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
 
     char* escaped_message = str_replace(message->plain, "'", "''");
 
-    if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `replace_id`, `type`, `encryption`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+    if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) SELECT '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' WHERE NOT EXISTS (SELECT 1 FROM `ChatLogs` WHERE `archive_id` = '%s')",
                  from_jid->barejid,
                  from_jid->resourcepart ? from_jid->resourcepart : "",
                  to_jid->barejid,
@@ -343,9 +343,11 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                  escaped_message,
                  date_fmt,
                  message->id ? message->id : "",
+                 message->stanzaid ? message->stanzaid : "",
                  message->replace_id ? message->replace_id : "",
                  type,
-                 enc)
+                 enc,
+                 message->stanzaid)
         == -1) {
         log_error("log_database_add(): SQL query. could not allocate memory");
         return;
