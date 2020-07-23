@@ -4189,7 +4189,6 @@ _lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean pr
         if (result) {
             return result;
         }
-
     }
 
     return NULL;

@@ -222,6 +222,33 @@ parse_args_with_freetext(const char* const inp, int min, int max, gboolean* resu
     return _parse_args_helper(inp, min, max, result, TRUE);
 }
 
+/*
+ * Will just take everything after the first space as the argument.
+ * Used for `/correct` so that we also include quotation marks.
+ */
+gchar**
+parse_args_as_one(const char* const inp, int min, int max, gboolean* result)
+{
+    gchar** args = g_malloc0(2 * sizeof(*args));
+    int length = g_utf8_strlen(inp, -1);
+    gchar* space = g_utf8_strchr(inp, length, ' ');
+    if (space) {
+        int sub_length = g_utf8_strlen(space, -1);
+        if (sub_length > 1) {
+            args[0] = g_strdup(space + 1);
+            *result = TRUE;
+            return args;
+        } else {
+            g_free(args);
+        }
+    } else {
+        g_free(args);
+    }
+
+    *result = FALSE;
+    return NULL;
+}
+
 int
 count_tokens(const char* const string)
 {
