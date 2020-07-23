@@ -1404,6 +1404,7 @@ win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const ch
     const char* myjid = connection_get_fulljid();
     if (replace_id) {
         _win_correct(window, message, id, replace_id, myjid);
+        free(receipt); //TODO: probably we should use this in _win_correct()
     } else {
         buffer_append(window->layout->buffer, show_char, 0, time, 0, THEME_TEXT_ME, from, myjid, message, receipt, id);
         _win_print_internal(window, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
