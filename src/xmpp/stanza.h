@@ -110,6 +110,8 @@
 #define STANZA_NAME_COMMAND          "command"
 #define STANZA_NAME_CONFIGURE        "configure"
 #define STANZA_NAME_ORIGIN_ID        "origin-id"
+#define STANZA_NAME_STANZA_ID        "stanza-id"
+#define STANZA_NAME_RESULT           "result"
 #define STANZA_NAME_MINIMIZE         "minimize"
 
 // error conditions
