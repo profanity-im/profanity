@@ -85,7 +85,7 @@ static void _handle_muc_private_message(xmpp_stanza_t* const stanza);
 static void _handle_conference(xmpp_stanza_t* const stanza);
 static void _handle_captcha(xmpp_stanza_t* const stanza);
 static void _handle_receipt_received(xmpp_stanza_t* const stanza);
-static void _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon);
+static void _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, const char *result_id);
 static void _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_mam);
 static xmpp_stanza_t* _handle_carbons(xmpp_stanza_t* const stanza);
 static void _send_message_stanza(xmpp_stanza_t* const stanza);
@@ -232,7 +232,7 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
         }
 
         if (msg_stanza) {
-            _handle_chat(msg_stanza, FALSE, is_carbon);
+            _handle_chat(msg_stanza, FALSE, is_carbon, NULL);
         }
     } else {
         // none of the allowed types
@@ -281,6 +281,7 @@ message_init(void)
     message->to_jid = NULL;
     message->id = NULL;
     message->originid = NULL;
+    message->stanzaid = NULL;
     message->replace_id = NULL;
     message->body = NULL;
     message->encrypted = NULL;
@@ -311,6 +312,10 @@ message_free(ProfMessage* message)
 
     if (message->originid) {
         xmpp_free(ctx, message->originid);
+    }
+
+    if (message->stanzaid) {
+        xmpp_free(ctx, message->stanzaid);
     }
 
     if (message->replace_id) {
@@ -1217,7 +1222,7 @@ _handle_carbons(xmpp_stanza_t* const stanza)
 }
 
 static void
-_handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon)
+_handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, const char *result_id)
 {
     // some clients send the mucuser namespace with private messages
     // if the namespace exists, and the stanza contains a body element, assume its a private message
@@ -1278,6 +1283,26 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon)
     const char* id = xmpp_stanza_get_id(stanza);
     if (id) {
         message->id = strdup(id);
+    }
+
+    if (is_mam) {
+        // MAM has XEP-0359 stanza-id as <result id="">
+        if (result_id) {
+            message->stanzaid = strdup(result_id);
+        } else {
+            log_warning("MAM received with no result id");
+        }
+    } else {
+        // live messages use XEP-0359 <stanza-id>
+        // TODO: add to muc too
+        char* stanzaid = NULL;
+        xmpp_stanza_t* stanzaidst = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_STANZA_ID, STANZA_NS_STABLE_ID);
+        if (stanzaidst) {
+            stanzaid = (char*)xmpp_stanza_get_attribute(stanzaidst, STANZA_ATTR_ID);
+            if (stanzaid) {
+                message->stanzaid = strdup(stanzaid);
+            }
+        }
     }
 
     // replace id for XEP-0308: Last Message Correction
@@ -1379,7 +1404,7 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
 static gboolean
 _handle_mam(xmpp_stanza_t* const stanza)
 {
-    xmpp_stanza_t* result = stanza_get_child_by_name_and_ns(stanza, "result", STANZA_NS_MAM2);
+    xmpp_stanza_t* result = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_RESULT, STANZA_NS_MAM2);
     if (!result) {
         return FALSE;
     }
@@ -1390,8 +1415,12 @@ _handle_mam(xmpp_stanza_t* const stanza)
         return FALSE;
     }
 
+    // <result xmlns='urn:xmpp:mam:2' queryid='f27' id='5d398-28273-f7382'>
+    // same as <stanza-id> from XEP-0359 for live messages
+    const char* result_id = xmpp_stanza_get_id(result);
+
     xmpp_stanza_t* message_stanza = xmpp_stanza_get_child_by_ns(forwarded, "jabber:client");
-    _handle_chat(message_stanza, TRUE, FALSE);
+    _handle_chat(message_stanza, TRUE, FALSE, result_id);
 
     return TRUE;
 }
