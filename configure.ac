@@ -208,11 +208,13 @@ PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.22.0], [],
     [AC_MSG_ERROR([sqlite3 3.22.0 or higher is required for profanity])])
 
 AS_IF([test "x$enable_icons_and_clipboard" != xno],
-    [PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10],
+    [PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.24.0],
         [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
         [AS_IF([test "x$enable_icons_and_clipboard" = xyes],
-            [AC_MSG_ERROR([gtk+-2.0 or higher is required for icons])],
-            [AC_MSG_NOTICE([gtk+-2.0 not found, icons and clipboard not enabled])])])])
+               [PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10],
+                                  [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
+                                  [AC_MSG_ERROR([gtk+-2.0 >= 2.24.10 or gtk+-3.0 >= 3.24.0 is required for icons and clipboard])],
+                                  [AC_MSG_NOTICE([gtk+-3.0/gtk+2.0 not found, icons and clipboard not enabled])])])])])
 
 AS_IF([test "x$PLATFORM" = xosx],
     [AC_CHECK_FILE([/usr/local/opt/readline/lib],
