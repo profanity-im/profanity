@@ -1239,17 +1239,10 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
     }
     Jid* jid = jid_create(from);
 
-    Jid* to_jid = NULL;
-    const gchar* to = xmpp_stanza_get_to(stanza);
-    if (to) {
-        to_jid = jid_create(to);
-    }
-
     // private message from chat room use full jid (room/nick)
     if (muc_active(jid->barejid)) {
         _handle_muc_private_message(stanza);
         jid_destroy(jid);
-        jid_destroy(to_jid);
         return;
     }
 
@@ -1257,26 +1250,19 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
     ProfMessage* message = message_init();
     message->is_mam = is_mam;
     message->from_jid = jid;
-    if (to_jid) {
-        message->to_jid = to_jid;
-    } else {
-        if (is_carbon) {
-            // happens when receive a carbon of a self sent message
-            // really? maybe some servers do this, but it's not required.
-            Jid* from_jid = jid_create(from);
-            message->to_jid = from_jid;
-        }
+    const gchar* to = xmpp_stanza_get_to(stanza);
+    if (to) {
+        message->to_jid = jid_create(to);
+    } else if (is_carbon) {
+        // happens when receive a carbon of a self sent message
+        // really? maybe some servers do this, but it's not required.
+        message->to_jid = jid_create(from);
     }
 
     if (mucuser) {
         message->type = PROF_MSG_TYPE_MUCPM;
     } else {
         message->type = PROF_MSG_TYPE_CHAT;
-    }
-
-    const gchar* to_text = xmpp_stanza_get_to(stanza);
-    if (to_text) {
-        message->to_jid = jid_create(to_text);
     }
 
     // message stanza id
