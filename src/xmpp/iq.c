@@ -142,6 +142,7 @@ static int _auto_pong_id_handler(xmpp_stanza_t* const stanza, void* const userda
 static int _room_list_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _command_list_result_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _command_exec_response_handler(xmpp_stanza_t* const stanza, void* const userdata);
+static int _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 
 static void _iq_free_room_data(ProfRoomInfoData* roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet* affiliation_set);
@@ -2559,11 +2560,33 @@ iq_mam_request(ProfChatWin* win)
     g_free(datestr);
     g_date_time_unref(timestamp);
 
-    //    iq_id_handler_add(id, _http_upload_response_id_handler, NULL, upload);
+    iq_id_handler_add(id, _mam_rsm_id_handler, NULL, NULL);
     free(id);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 
     return;
+}
+
+static int
+_mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    const char* type = xmpp_stanza_get_type(stanza);
+    if (g_strcmp0(type, "error") == 0) {
+        //TODO
+        //char* error_message = stanza_get_error_message(stanza);
+    } else if (g_strcmp0(type, "result") == 0) {
+        xmpp_stanza_t* fin = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
+        if (fin) {
+            xmpp_stanza_t* set = stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
+            if (set) {
+                xmpp_stanza_t* last =  xmpp_stanza_get_child_by_name(set, STANZA_NAME_LAST);
+                char* lastid = xmpp_stanza_get_text(last);
+                lastid = lastid;
+            }
+        }
+    }
+
+    return 0;
 }

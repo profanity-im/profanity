@@ -113,6 +113,8 @@
 #define STANZA_NAME_STANZA_ID        "stanza-id"
 #define STANZA_NAME_RESULT           "result"
 #define STANZA_NAME_MINIMIZE         "minimize"
+#define STANZA_NAME_FIN              "fin"
+#define STANZA_NAME_LAST             "last"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST             "bad-request"
@@ -220,6 +222,7 @@
 #define STANZA_NS_LAST_MESSAGE_CORRECTION "urn:xmpp:message-correct:0"
 #define STANZA_NS_MAM2                    "urn:xmpp:mam:2"
 #define STANZA_NS_EXT_GAJIM_BOOKMARKS     "xmpp:gajim.org/bookmarks"
+#define STANZA_NS_RSM                     "http://jabber.org/protocol/rsm"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
