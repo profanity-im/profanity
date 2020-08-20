@@ -93,6 +93,8 @@ chatwin_new(const char* const barejid)
     // XEP-0373: OpenPGP for XMPP
     chatwin->is_ox = FALSE;
 
+    chatwin->last_msg_timestamp = NULL;
+
     return chatwin;
 }
 
@@ -250,6 +252,27 @@ chatwin_recipient_gone(ProfChatWin* chatwin)
     win_println((ProfWin*)chatwin, THEME_GONE, "!", "<- %s has left the conversation.", display_usr);
 }
 
+static void _chatwin_changed_date(ProfChatWin *chatwin, ProfWin *window) {
+    gint before = 0;
+    gint after;
+
+    if (chatwin->last_msg_timestamp) {
+        before = g_date_time_get_day_of_year(chatwin->last_msg_timestamp);
+        g_date_time_unref(chatwin->last_msg_timestamp);
+    }
+
+    chatwin->last_msg_timestamp = g_date_time_new_now_local();
+
+    if (before != 0) {
+        after = g_date_time_get_day_of_year(chatwin->last_msg_timestamp);
+        if (before < after) {
+            gchar *date_str = g_date_time_format(chatwin->last_msg_timestamp, "%x");
+            win_println(window, THEME_TEXT, "!", "Day changed to %s", date_str);
+            g_free(date_str);
+        }
+    }
+}
+
 void
 chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_created)
 {
@@ -259,7 +282,8 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     message->plain = plugins_pre_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
 
     ProfWin* window = (ProfWin*)chatwin;
-    int num = wins_get_num(window);
+
+    _chatwin_changed_date(chatwin, window);
 
     char* display_name;
     char* mybarejid = connection_get_barejid();
@@ -272,6 +296,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
 
     gboolean is_current = wins_is_current(window);
     gboolean notify = prefs_do_chat_notify(is_current);
+    int num = wins_get_num(window);
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {

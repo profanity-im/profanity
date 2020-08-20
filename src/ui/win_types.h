@@ -173,6 +173,7 @@ typedef struct prof_chat_win_t
     char* enctext;
     char* incoming_char;
     char* outgoing_char;
+    GDateTime* last_msg_timestamp;
     // For LMC
     char* last_message;
     char* last_msg_id;
