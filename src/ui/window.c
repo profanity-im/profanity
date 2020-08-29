@@ -1953,3 +1953,34 @@ win_insert_last_read_position_marker(ProfWin* window, char* id)
 
     g_date_time_unref(time);
 }
+
+void
+win_changed_date_since_last_msg(ProfWin *window) {
+    GDateTime* lmt = NULL;
+    gint before = 0;
+    gint after;
+
+    if (window->type == WIN_CHAT) {
+        lmt = ((ProfChatWin*)window)->last_msg_timestamp;
+    } else if (window->type == WIN_MUC) {
+        lmt = ((ProfMucWin*)window)->last_msg_timestamp;
+    } else {
+        return;
+    }
+
+    if (lmt) {
+        before = g_date_time_get_day_of_year(lmt);
+        g_date_time_unref(lmt);
+    }
+
+    lmt = g_date_time_new_now_local();
+
+    if (before != 0) {
+        after = g_date_time_get_day_of_year(lmt);
+        if (before < after) {
+            gchar *date_str = g_date_time_format(lmt, "%x");
+            win_println(window, THEME_TEXT, "!", "Day changed to %s", date_str);
+            g_free(date_str);
+        }
+    }
+}

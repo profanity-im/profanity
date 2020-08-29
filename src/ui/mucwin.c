@@ -544,7 +544,8 @@ mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList
     }
 
     ProfWin* window = (ProfWin*)mucwin;
-    char* mynick = muc_nick(mucwin->roomjid);
+
+    win_changed_date_since_last_msg(window);
 
     char* ch;
     if (mucwin->message_char) {
@@ -562,6 +563,7 @@ mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList
     win_insert_last_read_position_marker((ProfWin*)mucwin, mucwin->roomjid);
     wins_add_urls_ac(window, message);
 
+    char* mynick = muc_nick(mucwin->roomjid);
     if (g_slist_length(mentions) > 0) {
         _mucwin_print_mention(window, message->plain, message->from_jid->resourcepart, mynick, mentions, ch, flags);
     } else if (triggers) {

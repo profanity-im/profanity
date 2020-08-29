@@ -252,27 +252,6 @@ chatwin_recipient_gone(ProfChatWin* chatwin)
     win_println((ProfWin*)chatwin, THEME_GONE, "!", "<- %s has left the conversation.", display_usr);
 }
 
-static void _chatwin_changed_date(ProfChatWin *chatwin, ProfWin *window) {
-    gint before = 0;
-    gint after;
-
-    if (chatwin->last_msg_timestamp) {
-        before = g_date_time_get_day_of_year(chatwin->last_msg_timestamp);
-        g_date_time_unref(chatwin->last_msg_timestamp);
-    }
-
-    chatwin->last_msg_timestamp = g_date_time_new_now_local();
-
-    if (before != 0) {
-        after = g_date_time_get_day_of_year(chatwin->last_msg_timestamp);
-        if (before < after) {
-            gchar *date_str = g_date_time_format(chatwin->last_msg_timestamp, "%x");
-            win_println(window, THEME_TEXT, "!", "Day changed to %s", date_str);
-            g_free(date_str);
-        }
-    }
-}
-
 void
 chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_created)
 {
@@ -283,7 +262,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
 
     ProfWin* window = (ProfWin*)chatwin;
 
-    _chatwin_changed_date(chatwin, window);
+    win_changed_date_since_last_msg(window);
 
     char* display_name;
     char* mybarejid = connection_get_barejid();
