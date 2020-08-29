@@ -369,12 +369,6 @@ sv_ev_room_message(ProfMessage* message)
         }
     }
 
-    // save timestamp of last received muc message
-    if (mucwin->last_msg_timestamp) {
-        g_date_time_unref(mucwin->last_msg_timestamp);
-    }
-    mucwin->last_msg_timestamp = g_date_time_new_now_local();
-
     if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL)) {
         Jid* jidp = jid_create(mucwin->roomjid);
         notify_room_message(message->from_jid->resourcepart, jidp->localpart, num, message->plain);
