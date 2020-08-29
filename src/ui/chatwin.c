@@ -357,10 +357,13 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
         enc_char = strdup("-");
     }
 
+    ProfWin* window = (ProfWin*)chatwin;
+    win_changed_date_since_last_msg(window);
+
     if (request_receipt && id) {
-        win_print_outgoing_with_receipt((ProfWin*)chatwin, enc_char, "me", message, id, replace_id);
+        win_print_outgoing_with_receipt(window, enc_char, "me", message, id, replace_id);
     } else {
-        win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, message);
+        win_print_outgoing(window, enc_char, id, replace_id, message);
     }
 
     free(enc_char);
@@ -386,6 +389,8 @@ chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message)
     }
 
     ProfWin* window = (ProfWin*)chatwin;
+
+    win_changed_date_since_last_msg(window);
 
     win_print_outgoing(window, enc_char, message->id, message->replace_id, message->plain);
     int num = wins_get_num(window);

@@ -501,7 +501,8 @@ mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* c
     assert(mucwin != NULL);
 
     ProfWin* window = (ProfWin*)mucwin;
-    char* mynick = muc_nick(mucwin->roomjid);
+
+    win_changed_date_since_last_msg(window);
 
     // displayed message char
     char* ch;
@@ -519,6 +520,7 @@ mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* c
         ch = strdup("-");
     }
 
+    char* mynick = muc_nick(mucwin->roomjid);
     win_print_outgoing_muc_msg(window, ch, mynick, id, replace_id, message);
     free(ch);
 
