@@ -22,6 +22,7 @@ AC_CANONICAL_HOST
 PLATFORM="unknown"
 AS_CASE([$host_os],
     [freebsd*], [PLATFORM="freebsd"],
+    [netbsd*], [PLATFORM="netbsd"],
     [openbsd*], [PLATFORM="openbsd"],
     [darwin*], [PLATFORM="osx"],
     [cygwin], [PLATFORM="cygwin"],
@@ -81,7 +82,7 @@ elif test "x$enable_python_plugins" != xno; then
         rm -f Python.framework
         ln -s $PYTHON_FRAMEWORK Python.framework ])
     AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
-    if test "$PYTHON_CONFIG_EXISTS" == "yes"; then
+    if test "$PYTHON_CONFIG_EXISTS" = "yes"; then
         AX_PYTHON_DEVEL
         AM_CONDITIONAL([BUILD_PYTHON_API], [true])
         AC_DEFINE([HAVE_PYTHON], [1], [Python support])
@@ -106,9 +107,9 @@ else
     if test "x$enable_plugins" = xno; then
         AM_CONDITIONAL([BUILD_C_API], [false])
     elif test "x$enable_c_plugins" != xno; then
-        # libdl doesn't exist as a separate library in OpenBSD/FreeBSD and is
+        # libdl doesn't exist as a separate library in the BSDs and is
         # provided in the standard libraries.
-        AS_IF([test "x$PLATFORM" = xopenbsd -o "x$PLATFORM" = xfreebsd],
+        AS_IF([test "x$PLATFORM" = xopenbsd -o "x$PLATFORM" = xfreebsd -o "x$PLATFORM" = xnetbsd],
             [AM_CONDITIONAL([BUILD_C_API], [true]) AC_DEFINE([HAVE_C], [1], [C support])],
             [AC_CHECK_LIB([dl], [main],
                 [AM_CONDITIONAL([BUILD_C_API], [true]) LIBS="$LIBS -ldl" AC_DEFINE([HAVE_C], [1], [C support])],
@@ -160,21 +161,23 @@ AC_LINK_IFELSE([AC_LANG_SOURCE([[
     [AC_MSG_RESULT([yes])],
     [AC_MSG_ERROR([${XMPP_LIB} is broken, check config.log for details])])
 
-### Check for ncurses library
+### Check for curses library
 PKG_CHECK_MODULES([ncursesw], [ncursesw],
-    [NCURSES_CFLAGS="$ncursesw_CFLAGS"; NCURSES_LIBS="$ncursesw_LIBS"; NCURSES="ncursesw"],
+    [NCURSES_CFLAGS="$ncursesw_CFLAGS"; NCURSES_LIBS="$ncursesw_LIBS"; CURSES="ncursesw"],
     [PKG_CHECK_MODULES([ncurses], [ncurses],
-        [NCURSES_CFLAGS="$ncurses_CFLAGS"; NCURSES_LIBS="$ncurses_LIBS"; NCURSES="ncurses"],
+        [NCURSES_CFLAGS="$ncurses_CFLAGS"; NCURSES_LIBS="$ncurses_LIBS"; CURSES="ncurses"],
         [AC_CHECK_LIB([ncursesw], [main], [],
             [AC_CHECK_LIB([ncurses], [main], [],
-            	[AC_MSG_ERROR([ncurses is required for profanity])])])])])
+                [AC_CHECK_LIB([curses], [main],
+                    [LIBS="$LIBS -lcurses"; CURSES="curses"],
+                    [AC_MSG_ERROR([ncurses or curses is required for profanity])])])])])])
 AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
 LIBS="$NCURSES_LIBS $LIBS"
 
-### Check wide characters support in ncurses library
+### Check wide characters support in curses library
 CFLAGS_RESTORE="$CFLAGS"
 CFLAGS="$CFLAGS $NCURSES_CFLAGS"
-AC_CACHE_CHECK([for wget_wch support in $NCURSES], ncurses_cv_wget_wch,
+AC_CACHE_CHECK([for wget_wch support in $CURSES], ncurses_cv_wget_wch,
    [AC_LINK_IFELSE([AC_LANG_SOURCE([
        void wget_wch(void);
        int main() {
@@ -354,6 +357,7 @@ AC_CHECK_LIB([expect], [exp_expectl], [AM_CONDITIONAL([HAVE_EXPECT], [true])],
 ### Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
 AC_CHECK_HEADERS([ncursesw/ncurses.h], [], [])
 AC_CHECK_HEADERS([ncurses.h], [], [])
+AC_CHECK_HEADERS([curses.h], [], [])
 
 ### Default parameters
 AM_CFLAGS="-Wall -Wno-deprecated-declarations -std=gnu99"
