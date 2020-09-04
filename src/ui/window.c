@@ -1863,7 +1863,12 @@ win_sub_print(WINDOW* win, char* msg, gboolean newline, gboolean wrap, int inden
 void
 win_sub_newline_lazy(WINDOW* win)
 {
-    int curx = getcurx(win);
+    int curx;
+
+    if (win == NULL) {
+        return;
+    }
+    curx = getcurx(win);
     if (curx > 0) {
         int cury = getcury(win);
         wmove(win, cury + 1, 0);
