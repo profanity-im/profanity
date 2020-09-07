@@ -52,6 +52,8 @@
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
 #include <ncurses.h>
+#elif HAVE_CURSES_H
+#include <curses.h>
 #endif
 
 #include "profanity.h"
@@ -306,7 +308,9 @@ _inp_win_update_virtual(void)
 {
     int wcols = getmaxx(stdscr);
     int row = screen_inputwin_row();
-    pnoutrefresh(inp_win, 0, pad_start, row, 0, row, wcols - 2);
+    if (inp_win != NULL) {
+        pnoutrefresh(inp_win, 0, pad_start, row, 0, row, wcols - 2);
+    }
 }
 
 static void
