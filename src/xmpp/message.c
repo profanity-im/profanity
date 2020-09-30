@@ -1368,8 +1368,6 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
     xmpp_stanza_t* ox = xmpp_stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
     message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
 
-    // Implementation for libstrophe 0.10.
-    /*
     xmpp_stanza_t *x =  xmpp_stanza_new_from_string(connection_get_ctx(), message->plain);
     xmpp_stanza_t *p =  xmpp_stanza_get_child_by_name(x, "payload");
     xmpp_stanza_t *b =  xmpp_stanza_get_child_by_name(p, "body");
@@ -1378,7 +1376,6 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
         message->plain = xmpp_stanza_get_text(stanza);
     }
 	message->encrypted = xmpp_stanza_get_text(ox);
-    */
 
     if (message->plain == NULL) {
         message->plain = xmpp_stanza_get_text(stanza);
