@@ -947,7 +947,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
     const char* id = xmpp_stanza_get_id(stanza);
     char* originid = NULL;
 
-    xmpp_stanza_t* origin = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_ORIGIN_ID, STANZA_NS_STABLE_ID);
+    xmpp_stanza_t* origin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_ORIGIN_ID, STANZA_NS_STABLE_ID);
     if (origin) {
         originid = (char*)xmpp_stanza_get_attribute(origin, STANZA_ATTR_ID);
     }
@@ -1282,7 +1282,7 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
         // live messages use XEP-0359 <stanza-id>
         // TODO: add to muc too
         char* stanzaid = NULL;
-        xmpp_stanza_t* stanzaidst = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_STANZA_ID, STANZA_NS_STABLE_ID);
+        xmpp_stanza_t* stanzaidst = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_STANZA_ID, STANZA_NS_STABLE_ID);
         if (stanzaidst) {
             stanzaid = (char*)xmpp_stanza_get_attribute(stanzaidst, STANZA_ATTR_ID);
             if (stanzaid) {
@@ -1365,7 +1365,7 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
     message->enc = PROF_MSG_ENC_OX;
 
 #ifdef HAVE_LIBGPGME
-    xmpp_stanza_t* ox = stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
+    xmpp_stanza_t* ox = xmpp_stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
     message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
 
     // Implementation for libstrophe 0.10.
@@ -1390,7 +1390,7 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
 static gboolean
 _handle_mam(xmpp_stanza_t* const stanza)
 {
-    xmpp_stanza_t* result = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_RESULT, STANZA_NS_MAM2);
+    xmpp_stanza_t* result = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_RESULT, STANZA_NS_MAM2);
     if (!result) {
         return FALSE;
     }

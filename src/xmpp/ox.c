@@ -269,7 +269,7 @@ _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* 
         return FALSE;
     }
     // pubsub
-    xmpp_stanza_t* pubsub = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_PUBSUB, XMPP_FEATURE_PUBSUB);
+    xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_PUBSUB, XMPP_FEATURE_PUBSUB);
     if (!pubsub) {
         cons_show("OX: Error: No pubsub");
         return FALSE;
@@ -287,7 +287,7 @@ _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* 
         return FALSE;
     }
 
-    xmpp_stanza_t* publickeyslist = stanza_get_child_by_name_and_ns(item, STANZA_NAME_PUBLIC_KEYS_LIST, STANZA_NS_OPENPGP_0);
+    xmpp_stanza_t* publickeyslist = xmpp_stanza_get_child_by_name_and_ns(item, STANZA_NAME_PUBLIC_KEYS_LIST, STANZA_NS_OPENPGP_0);
     if (!publickeyslist) {
         cons_show("OX: Error: No publickeyslist");
         return FALSE;
@@ -392,7 +392,7 @@ _ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void
         return FALSE;
     }
     // pubsub
-    xmpp_stanza_t* pubsub = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_PUBSUB, XMPP_FEATURE_PUBSUB);
+    xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_PUBSUB, XMPP_FEATURE_PUBSUB);
     if (!pubsub) {
         cons_show("Public Key import failed. Check log for details.");
         log_error("OX: Public key request response failed: No <pubsub/>");
@@ -413,7 +413,7 @@ _ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void
         return FALSE;
     }
 
-    xmpp_stanza_t* pubkey = stanza_get_child_by_name_and_ns(item, STANZA_NAME_PUPKEY, STANZA_NS_OPENPGP_0);
+    xmpp_stanza_t* pubkey = xmpp_stanza_get_child_by_name_and_ns(item, STANZA_NAME_PUPKEY, STANZA_NS_OPENPGP_0);
     if (!pubkey) {
         cons_show("Public Key import failed. Check log for details.");
         log_error("OX: Public key request response failed: No <pubkey/>");
