@@ -193,13 +193,7 @@ connection_connect(const char* const jid, const char* const passwd, const char* 
     }
 
     if (auth_policy && (g_strcmp0(auth_policy, "legacy") == 0)) {
-#ifdef HAVE_LIBSTROPHE_LT_0_9_3
-        log_warning("Legacy authentication is requested, but it hasn't been "
-                    "built. Update libstrophe and rebuild Profanity.");
-        cons_show("Legacy authentication is requested, but it hasn't been built.");
-#else
         flags |= XMPP_CONN_FLAG_LEGACY_AUTH;
-#endif /* HAVE_LIBSTROPHE_LT_0_9_3 */
     }
 
     xmpp_conn_set_flags(conn.xmpp_conn, flags);
@@ -215,9 +209,7 @@ connection_connect(const char* const jid, const char* const passwd, const char* 
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_TRUST_TLS);
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_DISABLE_TLS);
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_SSL);
-#ifndef HAVE_LIBSTROPHE_LT_0_9_3
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_AUTH);
-#endif /* HAVE_LIBSTROPHE_LT_0_9_3 */
 #undef LOG_FLAG_IF_SET
     }
 
