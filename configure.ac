@@ -82,7 +82,8 @@ elif test "x$enable_python_plugins" != xno; then
         rm -f Python.framework
         ln -s $PYTHON_FRAMEWORK Python.framework ])
     AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
-    if test "$PYTHON_CONFIG_EXISTS" = "yes"; then
+    AC_CHECK_PROG(PYTHON3_CONFIG_EXISTS, python3-config, yes, no)
+    if test "$PYTHON_CONFIG_EXISTS" = "yes" || test "$PYTHON3_CONFIG_EXISTS" = "yes"; then
         AX_PYTHON_DEVEL
         AM_CONDITIONAL([BUILD_PYTHON_API], [true])
         AC_DEFINE([HAVE_PYTHON], [1], [Python support])
