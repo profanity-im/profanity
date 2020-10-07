@@ -2410,6 +2410,8 @@ cons_alert(ProfWin* alert_origin_window)
         if (!item) {
             alert_list = g_list_append(alert_list, win_name);
         }
+
+        free(win_name);
     }
 }
 
