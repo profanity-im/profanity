@@ -2575,26 +2575,6 @@ _stanza_create_sha1_hash(char* str)
 }
 
 xmpp_stanza_t*
-stanza_get_child_by_name_and_ns(xmpp_stanza_t* const stanza, const char* const name, const char* const ns)
-{
-    xmpp_stanza_t* child;
-    const char* child_ns;
-    const char* child_name;
-
-    for (child = xmpp_stanza_get_children(stanza); child; child = xmpp_stanza_get_next(child)) {
-        child_name = xmpp_stanza_get_name(child);
-        if (child_name && strcmp(name, child_name) == 0) {
-            child_ns = xmpp_stanza_get_ns(child);
-            if (child_ns && strcmp(ns, child_ns) == 0) {
-                break;
-            }
-        }
-    }
-
-    return child;
-}
-
-xmpp_stanza_t*
 stanza_create_avatar_retrieve_data_request(xmpp_ctx_t* ctx, const char* stanza_id, const char* const item_id, const char* const jid)
 {
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, stanza_id);

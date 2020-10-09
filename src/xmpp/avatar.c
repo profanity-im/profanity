@@ -210,7 +210,7 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
         return 1;
     }
 
-    xmpp_stanza_t* st_data = stanza_get_child_by_name_and_ns(item, "data", STANZA_NS_USER_AVATAR_DATA);
+    xmpp_stanza_t* st_data = xmpp_stanza_get_child_by_name_and_ns(item, "data", STANZA_NS_USER_AVATAR_DATA);
     if (!st_data) {
         return 1;
     }

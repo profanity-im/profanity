@@ -82,7 +82,8 @@ elif test "x$enable_python_plugins" != xno; then
         rm -f Python.framework
         ln -s $PYTHON_FRAMEWORK Python.framework ])
     AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
-    if test "$PYTHON_CONFIG_EXISTS" = "yes"; then
+    AC_CHECK_PROG(PYTHON3_CONFIG_EXISTS, python3-config, yes, no)
+    if test "$PYTHON_CONFIG_EXISTS" = "yes" || test "$PYTHON3_CONFIG_EXISTS" = "yes"; then
         AX_PYTHON_DEVEL
         AM_CONDITIONAL([BUILD_PYTHON_API], [true])
         AC_DEFINE([HAVE_PYTHON], [1], [Python support])
@@ -131,19 +132,11 @@ AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
 
 ### Check for libmesode, fall back to libstrophe
 ### TODO libmesode support will be removed in the future, rewrite this section
-PKG_CHECK_MODULES([libmesode], [libmesode >= 0.9.3],
+PKG_CHECK_MODULES([libmesode], [libmesode >= 0.10.0],
     [LIBS="$libmesode_LIBS $LIBS" CFLAGS="$CFLAGS $libmesode_CFLAGS" XMPP_LIB="libmesode" AC_DEFINE([HAVE_LIBMESODE], [1], [libmesode])],
-    [PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.9.3],
+    [PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.10.0],
         [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" XMPP_LIB="libstrophe" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
         [XMPP_LIB=""])])
-if test "x$XMPP_LIB" = x; then
-    PKG_CHECK_MODULES([libmesode], [libmesode >= 0.9.2],
-        [LIBS="$libmesode_LIBS $LIBS" CFLAGS="$CFLAGS $libmesode_CFLAGS" XMPP_LIB="libmesode" AC_DEFINE([HAVE_LIBMESODE], [1], [libmesode])],
-        [PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.9.2],
-            [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" XMPP_LIB="libstrophe" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
-            [AC_MSG_ERROR([libstrophe-0.9.2 or later is required for profanity])])])
-    AC_DEFINE([HAVE_LIBSTROPHE_LT_0_9_3], [1], [Old libstrophe is present])
-fi
 
 AC_MSG_CHECKING([whether ${XMPP_LIB} works])
 AC_LINK_IFELSE([AC_LANG_SOURCE([[
@@ -194,8 +187,8 @@ AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
     [AC_MSG_ERROR([ncurses does not support wide characters])])
 
 ### Check for glib libraries
-PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.56.0], [],
-    [AC_MSG_ERROR([glib 2.56.0 or higher is required for profanity])])
+PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.62.0], [],
+    [AC_MSG_ERROR([glib 2.62.0 or higher is required for profanity])])
 PKG_CHECK_MODULES([gio], [gio-2.0], [],
     [AC_MSG_ERROR([libgio-2.0 from glib-2.0 is required for profanity])])
 

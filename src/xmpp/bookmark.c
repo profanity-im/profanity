@@ -308,7 +308,7 @@ _bookmark_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
         // we save minimize, which is not standard, so that we don't remove it if it was set by gajim
         int minimize = 0;
-        xmpp_stanza_t* minimize_st = stanza_get_child_by_name_and_ns(child, STANZA_NAME_MINIMIZE, STANZA_NS_EXT_GAJIM_BOOKMARKS);
+        xmpp_stanza_t* minimize_st = xmpp_stanza_get_child_by_name_and_ns(child, STANZA_NAME_MINIMIZE, STANZA_NS_EXT_GAJIM_BOOKMARKS);
         if (minimize_st) {
             char* min_str = xmpp_stanza_get_text(minimize_st);
             if (strcmp(min_str, "true") == 0) {

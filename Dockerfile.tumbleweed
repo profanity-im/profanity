@@ -21,6 +21,7 @@ RUN zypper --non-interactive in --no-recommends \
   libgcrypt-devel \
   libgpgme-devel \
   libmesode-devel \
+  libstrophe-devel \
   libmicrohttpd-devel \
   libnotify-devel \
   libotr-devel \
