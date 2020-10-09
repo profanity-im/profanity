@@ -2408,7 +2408,7 @@ cons_alert(ProfWin* alert_origin_window)
 
         GList* item = g_list_find_custom(alert_list, win_name, (GCompareFunc)g_strcmp0);
         if (!item) {
-            alert_list = g_list_append(alert_list, win_name);
+            alert_list = g_list_append(alert_list, g_strdup(win_name));
         }
 
         free(win_name);
