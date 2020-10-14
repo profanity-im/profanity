@@ -240,7 +240,7 @@ omemo_on_connect(ProfAccount* account)
     errno = 0;
     int res = g_mkdir_with_parents(omemo_dir, S_IRWXU);
     if (res == -1) {
-        char* errmsg = strerror(errno);
+        const char* errmsg = strerror(errno);
         if (errmsg) {
             log_error("OMEMO: error creating directory: %s, %s", omemo_dir, errmsg);
         } else {

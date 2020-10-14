@@ -60,7 +60,7 @@ _get_db_filename(ProfAccount* account)
 
     int res = g_mkdir_with_parents(database_dir, S_IRWXU);
     if (res == -1) {
-        char* errmsg = strerror(errno);
+        const char* errmsg = strerror(errno);
         if (errmsg) {
             log_error("DATABASE: error creating directory: %s, %s", database_dir, errmsg);
         } else {

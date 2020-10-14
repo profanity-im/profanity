@@ -229,7 +229,7 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
     errno = 0;
     int res = g_mkdir_with_parents(filename->str, S_IRWXU);
     if (res == -1) {
-        char* errmsg = strerror(errno);
+        const char* errmsg = strerror(errno);
         if (errmsg) {
             log_error("Avatar: error creating directory: %s, %s", filename->str, errmsg);
         } else {
