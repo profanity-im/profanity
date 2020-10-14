@@ -172,7 +172,7 @@ inp_readline(void)
     pthread_mutex_lock(&lock);
     if (r < 0) {
         if (errno != EINTR) {
-            char* err_msg = strerror(errno);
+            const char* err_msg = strerror(errno);
             log_error("Readline failed: %s", err_msg);
         }
         return NULL;

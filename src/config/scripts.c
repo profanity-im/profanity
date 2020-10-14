@@ -58,7 +58,7 @@ scripts_init(void)
     errno = 0;
     int res = g_mkdir_with_parents(scriptsdir, S_IRWXU);
     if (res == -1) {
-        char* errmsg = strerror(errno);
+        const char* errmsg = strerror(errno);
         if (errmsg) {
             log_error("Error creating directory: %s, %s", scriptsdir, errmsg);
         } else {
