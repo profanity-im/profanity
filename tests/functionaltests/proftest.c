@@ -23,7 +23,7 @@ char *data_orig;
 int fd = 0;
 
 gboolean
-_create_dir(char *name)
+_create_dir(const char *name)
 {
     struct stat sb;
 
@@ -206,7 +206,7 @@ close_prof_test(void **state)
 }
 
 void
-prof_input(char *input)
+prof_input(const char *input)
 {
     GString *inp_str = g_string_new(input);
     g_string_append(inp_str, "\r");
@@ -215,19 +215,19 @@ prof_input(char *input)
 }
 
 int
-prof_output_exact(char *text)
+prof_output_exact(const char *text)
 {
     return (1 == exp_expectl(fd, exp_exact, text, 1, exp_end));
 }
 
 int
-prof_output_regex(char *text)
+prof_output_regex(const char *text)
 {
     return (1 == exp_expectl(fd, exp_regexp, text, 1, exp_end));
 }
 
 void
-prof_connect_with_roster(char *roster)
+prof_connect_with_roster(const char *roster)
 {
     GString *roster_str = g_string_new(
         "<iq type='result' to='stabber@localhost/profanity'>"

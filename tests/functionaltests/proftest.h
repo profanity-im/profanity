@@ -9,11 +9,11 @@ void close_prof_test(void **state);
 
 void prof_start(void);
 void prof_connect(void);
-void prof_connect_with_roster(char *roster);
-void prof_input(char *input);
+void prof_connect_with_roster(const char *roster);
+void prof_input(const char *input);
 
-int prof_output_exact(char *text);
-int prof_output_regex(char *text);
+int prof_output_exact(const char *text);
+int prof_output_regex(const char *text);
 
 void prof_timeout(int timeout);
 void prof_timeout_reset(void);
