@@ -126,6 +126,7 @@ bookmark_add(const char* jid, const char* nick, const char* password, const char
     } else {
         bookmark->name = NULL;
     }
+    bookmark->ext_gajim_minimize = 0;
 
     if (g_strcmp0(autojoin_str, "on") == 0) {
         bookmark->autojoin = TRUE;
