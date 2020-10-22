@@ -282,7 +282,7 @@ tests_unittests_unittests_LDADD = -lcmocka
 #check_PROGRAMS += tests/functionaltests/functionaltests
 #tests_functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
 #tests_functionaltests_functionaltests_CFLAGS = $(AM_CFLAGS) -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
-#tests_functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect -ltcl
+#tests_functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect
 #endif
 #endif
 
