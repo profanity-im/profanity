@@ -2551,10 +2551,10 @@ iq_mam_request(ProfChatWin* win)
     xmpp_ctx_t* const ctx = connection_get_ctx();
     char* id = connection_create_stanza_id();
 
-    GDateTime* now = g_date_time_new_now_local();
+    GDateTime* now = g_date_time_new_now_utc();
     GDateTime* timestamp = g_date_time_add_days(now, -1);
     g_date_time_unref(now);
-    gchar* datestr = g_date_time_format(timestamp, "%FT%T%:::z");
+    gchar* datestr = g_date_time_format(timestamp, "%FT%TZ");
     xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, datestr);
     g_free(datestr);
     g_date_time_unref(timestamp);
