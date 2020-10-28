@@ -2550,7 +2550,6 @@ iq_mam_request(ProfChatWin* win)
     }
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = connection_create_stanza_id();
 
     GDateTime* now = g_date_time_new_now_utc();
     GDateTime* timestamp = g_date_time_add_days(now, -1);
@@ -2560,8 +2559,7 @@ iq_mam_request(ProfChatWin* win)
     g_free(datestr);
     g_date_time_unref(timestamp);
 
-    iq_id_handler_add(id, _mam_rsm_id_handler, NULL, NULL);
-    free(id);
+    iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, NULL);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
