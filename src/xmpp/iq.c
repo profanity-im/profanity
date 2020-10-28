@@ -2544,7 +2544,7 @@ void
 iq_mam_request(ProfChatWin* win)
 {
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
-        log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_PING);
+        log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
         cons_show_error("Server doesn't support MAM.");
         return;
     }
