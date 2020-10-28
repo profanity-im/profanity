@@ -2615,7 +2615,7 @@ stanza_attach_correction(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza, const char* con
 }
 
 xmpp_stanza_t*
-stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate)
+stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char *const lastid)
 {
     char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
@@ -2674,12 +2674,37 @@ stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const s
 
     xmpp_stanza_add_child(field_start, value_start);
 
+    // 4.3.2 set/rsm
+    xmpp_stanza_t *after, *after_text, *set;
+    if (lastid) {
+        set = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(set, STANZA_TYPE_SET);
+        xmpp_stanza_set_ns(set, STANZA_NS_RSM);
+
+        after = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(after, STANZA_NAME_AFTER);
+
+        after_text = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(after_text, lastid);
+
+        xmpp_stanza_add_child(after, after_text);
+        xmpp_stanza_add_child(set, after);
+    }
+
     // add and release
     xmpp_stanza_add_child(iq, query);
     xmpp_stanza_add_child(query, x);
     xmpp_stanza_add_child(x, field_form_type);
     xmpp_stanza_add_child(x, field_with);
     xmpp_stanza_add_child(x, field_start);
+
+    if (lastid) {
+        xmpp_stanza_add_child(query, after);
+
+        xmpp_stanza_release(after_text);
+        xmpp_stanza_release(after);
+        xmpp_stanza_release(set);
+    }
 
     xmpp_stanza_release(mam_text);
     xmpp_stanza_release(with_text);

@@ -115,6 +115,7 @@
 #define STANZA_NAME_MINIMIZE         "minimize"
 #define STANZA_NAME_FIN              "fin"
 #define STANZA_NAME_LAST             "last"
+#define STANZA_NAME_AFTER            "after"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST             "bad-request"
@@ -380,6 +381,6 @@ void stanza_free_caps(XMPPCaps* caps);
 
 xmpp_stanza_t* stanza_create_avatar_retrieve_data_request(xmpp_ctx_t* ctx, const char* stanza_id, const char* const item_id, const char* const jid);
 
-xmpp_stanza_t* stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate);
+xmpp_stanza_t* stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char *const lastid);
 
 #endif

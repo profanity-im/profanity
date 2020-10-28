@@ -2556,10 +2556,11 @@ iq_mam_request(ProfChatWin* win)
     g_date_time_unref(now);
     gchar* datestr = g_date_time_format(timestamp, "%FT%TZ");
     xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, datestr);
+
+    iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, g_strdup(datestr));
+
     g_free(datestr);
     g_date_time_unref(timestamp);
-
-    iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, NULL);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -2573,7 +2574,12 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
     const char* type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, "error") == 0) {
         //TODO
-        //char* error_message = stanza_get_error_message(stanza);
+        /*
+        char* error_message = stanza_get_error_message(stanza);
+        cons_show_error("Server error: %s", error_message);
+        log_debug("Error: %s", error_message);
+        free(error_message);
+        */
     } else if (g_strcmp0(type, "result") == 0) {
         xmpp_stanza_t* fin = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
         if (fin) {
@@ -2582,6 +2588,15 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                 xmpp_stanza_t* last =  xmpp_stanza_get_child_by_name(set, STANZA_NAME_LAST);
                 char* lastid = xmpp_stanza_get_text(last);
                 lastid = lastid;
+
+                // 4.3.2. send same stanza with set,max stanza
+                xmpp_ctx_t* const ctx = connection_get_ctx();
+                gchar *datestr = (gchar*)userdata;
+                //TODO give barejid or get from stanza
+                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, NULL, datestr, lastid);
+
+                iq_send_stanza(iq);
+                xmpp_stanza_release(iq);
             }
         }
     }
