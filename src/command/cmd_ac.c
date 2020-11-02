@@ -1172,14 +1172,14 @@ char*
 cmd_ac_complete(ProfWin* window, const char* const input, gboolean previous)
 {
     // autocomplete command
-    if ((strncmp(input, "/", 1) == 0) && (!str_contains(input, strlen(input), ' '))) {
+    if ((strncmp(input, "/", 1) == 0) && (!strchr(input, ' '))) {
         char* found = NULL;
         found = autocomplete_complete(commands_ac, input, TRUE, previous);
         if (found) {
             return found;
         }
 
-        // autocomplete parameters
+    // autocomplete parameters
     } else {
         char* found = _cmd_ac_complete_params(window, input, previous);
         if (found) {

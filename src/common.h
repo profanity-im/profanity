@@ -84,7 +84,6 @@ gboolean create_dir(char* name);
 gboolean mkdir_recursive(const char* dir);
 gboolean copy_file(const char* const src, const char* const target, const gboolean overwrite_existing);
 char* str_replace(const char* string, const char* substr, const char* replacement);
-int str_contains(const char str[], int size, char ch);
 gboolean strtoi_range(char* str, int* saveptr, int min, int max, char** err_msg);
 int utf8_display_len(const char* const str);
 
