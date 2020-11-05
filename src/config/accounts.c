@@ -252,7 +252,7 @@ accounts_get_account(const char* const name)
         GList* otr_manual = NULL;
         gchar** manual = g_key_file_get_string_list(accounts, name, "otr.manual", &length, NULL);
         if (manual) {
-            int i = 0;
+            int i;
             for (i = 0; i < length; i++) {
                 otr_manual = g_list_append(otr_manual, strdup(manual[i]));
             }
@@ -262,7 +262,7 @@ accounts_get_account(const char* const name)
         GList* otr_opportunistic = NULL;
         gchar** opportunistic = g_key_file_get_string_list(accounts, name, "otr.opportunistic", &length, NULL);
         if (opportunistic) {
-            int i = 0;
+            int i;
             for (i = 0; i < length; i++) {
                 otr_opportunistic = g_list_append(otr_opportunistic, strdup(opportunistic[i]));
             }
@@ -272,7 +272,7 @@ accounts_get_account(const char* const name)
         GList* otr_always = NULL;
         gchar** always = g_key_file_get_string_list(accounts, name, "otr.always", &length, NULL);
         if (always) {
-            int i = 0;
+            int i;
             for (i = 0; i < length; i++) {
                 otr_always = g_list_append(otr_always, strdup(always[i]));
             }
@@ -287,7 +287,7 @@ accounts_get_account(const char* const name)
         GList* omemo_enabled = NULL;
         gchar** enabled_list = g_key_file_get_string_list(accounts, name, "omemo.enabled", &length, NULL);
         if (enabled_list) {
-            int i = 0;
+            int i;
             for (i = 0; i < length; i++) {
                 omemo_enabled = g_list_append(omemo_enabled, strdup(enabled_list[i]));
             }
@@ -297,7 +297,7 @@ accounts_get_account(const char* const name)
         GList* omemo_disabled = NULL;
         gchar** disabled_list = g_key_file_get_string_list(accounts, name, "omemo.disabled", &length, NULL);
         if (disabled_list) {
-            int i = 0;
+            int i;
             for (i = 0; i < length; i++) {
                 omemo_disabled = g_list_append(omemo_disabled, strdup(disabled_list[i]));
             }
