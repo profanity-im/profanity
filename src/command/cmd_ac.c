@@ -1870,9 +1870,6 @@ _who_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         }
 
         result = autocomplete_param_with_ac(input, "/who", who_roster_ac, TRUE, previous);
-        if (result) {
-            return result;
-        }
     }
 
     return result;
