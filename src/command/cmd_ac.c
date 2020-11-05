@@ -4148,7 +4148,7 @@ _lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean pr
     char* result = NULL;
 
     result = autocomplete_param_with_ac(input, "/lastactivity", status_ac, TRUE, previous);
-    if (result) {
+    if (!result) {
         return result;
     }
 
@@ -4157,15 +4157,10 @@ _lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean pr
     if (conn_status == JABBER_CONNECTED) {
 
         result = autocomplete_param_with_func(input, "/lastactivity set", prefs_autocomplete_boolean_choice, previous, NULL);
-        if (result) {
-            return result;
-        }
-
-        result = autocomplete_param_with_func(input, "/lastactivity get", roster_barejid_autocomplete, previous, NULL);
-        if (result) {
-            return result;
+        if (!result) {
+            result = autocomplete_param_with_func(input, "/lastactivity get", roster_barejid_autocomplete, previous, NULL);
         }
     }
 
-    return NULL;
+    return result;
 }
