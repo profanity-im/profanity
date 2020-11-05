@@ -1827,11 +1827,7 @@ _sub_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         return result;
     }
     result = autocomplete_param_with_ac(input, "/sub", sub_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
+    return result;
 }
 
 static char*
