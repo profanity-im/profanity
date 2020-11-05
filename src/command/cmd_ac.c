@@ -1531,8 +1531,6 @@ char*
 cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean previous)
 {
     unsigned int output_off = 0;
-
-    char* result = NULL;
     char* tmp;
 
     // strip command
@@ -1631,12 +1629,7 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
     autocomplete_update(filepath_ac, (char**)files->data);
     g_array_free(files, TRUE);
 
-    result = autocomplete_param_with_ac(input, startstr, filepath_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
+    return autocomplete_param_with_ac(input, startstr, filepath_ac, TRUE, previous);
 }
 
 static char*
