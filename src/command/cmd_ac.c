@@ -1171,23 +1171,17 @@ cmd_ac_remove_form_fields(DataForm* form)
 char*
 cmd_ac_complete(ProfWin* window, const char* const input, gboolean previous)
 {
+    char *found = NULL;
     // autocomplete command
     if ((strncmp(input, "/", 1) == 0) && (!strchr(input, ' '))) {
-        char* found = NULL;
         found = autocomplete_complete(commands_ac, input, TRUE, previous);
-        if (found) {
-            return found;
-        }
 
     // autocomplete parameters
     } else {
-        char* found = _cmd_ac_complete_params(window, input, previous);
-        if (found) {
-            return found;
-        }
+        found = _cmd_ac_complete_params(window, input, previous);
     }
 
-    return NULL;
+    return found;
 }
 
 void
