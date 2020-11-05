@@ -4135,11 +4135,8 @@ _executable_autocomplete(ProfWin* window, const char* const input, gboolean prev
     char* result = NULL;
 
     result = autocomplete_param_with_ac(input, "/executable", executable_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
 
-    return NULL;
+    return result;
 }
 
 static char*
