@@ -1840,11 +1840,7 @@ _tray_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     result = autocomplete_param_with_ac(input, "/tray", tray_ac, FALSE, previous);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
+    return result;
 }
 
 static char*
