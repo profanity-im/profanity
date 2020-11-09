@@ -237,8 +237,7 @@ stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id,
     xmpp_stanza_t* filename_txt = xmpp_stanza_new(ctx);
     char* filename_cpy = strdup(upload->filename);
     // strip spaces from filename (servers don't spaces)
-    int i;
-    for (i = 0; i < strlen(filename_cpy); i++) {
+    for (int i = 0; i < strlen(filename_cpy); i++) {
         if (filename_cpy[i] == ' ') {
             filename_cpy[i] = '_';
         }
@@ -1826,8 +1825,7 @@ stanza_create_caps_from_query_element(xmpp_stanza_t* query)
         xmpp_stanza_t* id_stanza = curr_identity->data;
         const char* stanza_lang = xmpp_stanza_get_attribute(id_stanza, "xml:lang");
         if (stanza_lang) {
-            int i = 0;
-            for (i = 0; i < num_langs; i++) {
+            for (int i = 0; i < num_langs; i++) {
                 if (g_strcmp0(langs[i], stanza_lang) == 0) {
                     found = id_stanza;
                     break;
@@ -1929,8 +1927,7 @@ stanza_get_error_message(xmpp_stanza_t* stanza)
             STANZA_NAME_UNEXPECTED_REQUEST
         };
 
-        int i;
-        for (i = 0; i < ARRAY_SIZE(defined_conditions); i++) {
+        for (int i = 0; i < ARRAY_SIZE(defined_conditions); i++) {
             xmpp_stanza_t* cond_stanza = xmpp_stanza_get_child_by_name(error_stanza, defined_conditions[i]);
             if (cond_stanza) {
                 char* result = strdup(xmpp_stanza_get_name(cond_stanza));
@@ -2334,8 +2331,7 @@ stanza_create_omemo_devicelist_publish(xmpp_ctx_t* ctx, GList* const ids)
     xmpp_stanza_set_name(list, "list");
     xmpp_stanza_set_ns(list, "eu.siacs.conversations.axolotl");
 
-    GList* i;
-    for (i = ids; i != NULL; i = i->next) {
+    for (GList *i = ids; i != NULL; i = i->next) {
         xmpp_stanza_t* device = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(device, "device");
         char* id = g_strdup_printf("%d", GPOINTER_TO_INT(i->data));

@@ -84,8 +84,7 @@ plugins_init(void)
     // load plugins
     gchar** plugins_pref = prefs_get_plugins();
     if (plugins_pref) {
-        int i;
-        for (i = 0; i < g_strv_length(plugins_pref); i++) {
+        for (int i = 0; i < g_strv_length(plugins_pref); i++) {
             gboolean loaded = FALSE;
             gchar* filename = plugins_pref[i];
 #ifdef HAVE_PYTHON

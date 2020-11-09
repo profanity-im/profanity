@@ -1086,8 +1086,7 @@ _writecsv(int fd, const char* const str)
     size_t len = strlen(str);
     char* s = malloc(2 * len * sizeof(char));
     char* c = s;
-    int i = 0;
-    for (; i < strlen(str); i++) {
+    for (int i =0; i < strlen(str); i++) {
         if (str[i] != '"')
             *c++ = str[i];
         else {
@@ -1415,8 +1414,7 @@ cmd_close(ProfWin* window, const char* const command, gchar** args)
     gboolean is_num = TRUE;
     int index = 0;
     if (args[0] != NULL) {
-        int i = 0;
-        for (i = 0; i < strlen(args[0]); i++) {
+        for (int i = 0; i < strlen(args[0]); i++) {
             if (!isdigit((int)args[0][i])) {
                 is_num = FALSE;
                 break;
@@ -1503,8 +1501,7 @@ gboolean
 cmd_win(ProfWin* window, const char* const command, gchar** args)
 {
     gboolean is_num = TRUE;
-    int i = 0;
-    for (i = 0; i < strlen(args[0]); i++) {
+    for (int i = 0; i < strlen(args[0]); i++) {
         if (!isdigit((int)args[0][i])) {
             is_num = FALSE;
             break;
@@ -8567,14 +8564,13 @@ cmd_omemo_fingerprint(ProfWin* window, const char* const command, gchar** args)
     }
 
     GList* fingerprints = omemo_known_device_identities(jid->barejid);
-    GList* fingerprint;
 
     if (!fingerprints) {
         win_println(window, THEME_DEFAULT, "-", "There is no known fingerprints for %s", jid->barejid);
         return TRUE;
     }
 
-    for (fingerprint = fingerprints; fingerprint != NULL; fingerprint = fingerprint->next) {
+    for (GList* fingerprint = fingerprints; fingerprint != NULL; fingerprint = fingerprint->next) {
         char* formatted_fingerprint = omemo_format_fingerprint(fingerprint->data);
         gboolean trusted = omemo_is_trusted_identity(jid->barejid, fingerprint->data);
 
@@ -8710,8 +8706,7 @@ cmd_omemo_untrust(ProfWin* window, const char* const command, gchar** args)
     omemo_untrust(barejid, fingerprint);
 
     char* unformatted_fingerprint = malloc(strlen(fingerprint));
-    int i;
-    int j;
+    int i, j;
     for (i = 0, j = 0; fingerprint[i] != '\0'; i++) {
         if (!g_ascii_isxdigit(fingerprint[i])) {
             continue;

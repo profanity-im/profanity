@@ -62,8 +62,7 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
     GSList* tokens = NULL;
 
     // add tokens to GSList
-    int i;
-    for (i = 0; i < inp_size; i++) {
+    for (int i = 0; i < inp_size; i++) {
         gchar* curr_ch = g_utf8_offset_to_pointer(copy, i);
         gunichar curr_uni = g_utf8_get_char(curr_ch);
 
@@ -255,12 +254,11 @@ count_tokens(const char* const string)
     int length = g_utf8_strlen(string, -1);
     gboolean in_quotes = FALSE;
     int num_tokens = 0;
-    int i = 0;
 
     // include first token
     num_tokens++;
 
-    for (i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++) {
         gchar* curr_ch = g_utf8_offset_to_pointer(string, i);
         gunichar curr_uni = g_utf8_get_char(curr_ch);
 
@@ -288,12 +286,11 @@ get_start(const char* const string, int tokens)
     gboolean in_quotes = FALSE;
     char* result_str = NULL;
     int num_tokens = 0;
-    int i = 0;
 
     // include first token
     num_tokens++;
 
-    for (i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++) {
         gchar* curr_ch = g_utf8_offset_to_pointer(string, i);
         gunichar curr_uni = g_utf8_get_char(curr_ch);
 
@@ -327,8 +324,7 @@ GHashTable*
 parse_options(gchar** args, gchar** opt_keys, gboolean* res)
 {
     GList* keys = NULL;
-    int i;
-    for (i = 0; i < g_strv_length(opt_keys); i++) {
+    for (int i = 0; i < g_strv_length(opt_keys); i++) {
         keys = g_list_append(keys, opt_keys[i]);
     }
 
@@ -343,9 +339,8 @@ parse_options(gchar** args, gchar** opt_keys, gboolean* res)
     }
 
     // validate options
-    int curr;
     GList* found_keys = NULL;
-    for (curr = 0; curr < g_strv_length(args); curr += 2) {
+    for (int curr = 0; curr < g_strv_length(args); curr += 2) {
         // check if option valid
         if (g_list_find_custom(keys, args[curr], (GCompareFunc)g_strcmp0) == NULL) {
             *res = FALSE;
@@ -378,7 +373,7 @@ parse_options(gchar** args, gchar** opt_keys, gboolean* res)
     // create map
     options = g_hash_table_new(g_str_hash, g_str_equal);
     *res = TRUE;
-    for (curr = 0; curr < g_strv_length(args); curr += 2) {
+    for (int curr = 0; curr < g_strv_length(args); curr += 2) {
         g_hash_table_insert(options, args[curr], args[curr + 1]);
     }
 

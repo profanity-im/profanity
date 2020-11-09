@@ -171,8 +171,7 @@ autocomplete_add(Autocomplete ac, const char* item)
 void
 autocomplete_add_all(Autocomplete ac, char** items)
 {
-    int i = 0;
-    for (i = 0; i < g_strv_length(items); i++) {
+    for (int i = 0; i < g_strv_length(items); i++) {
         autocomplete_add(ac, items[i]);
     }
 }
@@ -202,8 +201,7 @@ autocomplete_remove(Autocomplete ac, const char* const item)
 void
 autocomplete_remove_all(Autocomplete ac, char** items)
 {
-    int i = 0;
-    for (i = 0; i < g_strv_length(items); i++) {
+    for (int i = 0; i < g_strv_length(items); i++) {
         autocomplete_remove(ac, items[i]);
     }
 }
@@ -310,10 +308,9 @@ autocomplete_param_with_func(const char* const input, char* command, autocomplet
     int len = strlen(command_cpy);
 
     if (strncmp(input, command_cpy, len) == 0) {
-        int i;
         int inp_len = strlen(input);
         char prefix[inp_len];
-        for (i = len; i < inp_len; i++) {
+        for (int i = len; i < inp_len; i++) {
             prefix[i - len] = input[i];
         }
         prefix[inp_len - len] = '\0';
@@ -341,9 +338,8 @@ autocomplete_param_with_ac(const char* const input, char* command, Autocomplete 
     int len = strlen(command_cpy);
     int inp_len = strlen(input);
     if (strncmp(input, command_cpy, len) == 0) {
-        int i;
         char prefix[inp_len];
-        for (i = len; i < inp_len; i++) {
+        for (int i = len; i < inp_len; i++) {
             prefix[i - len] = input[i];
         }
         prefix[inp_len - len] = '\0';

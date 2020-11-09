@@ -859,8 +859,7 @@ cons_show_account_list(gchar** accounts)
     int size = g_strv_length(accounts);
     if (size > 0) {
         cons_show("Accounts:");
-        int i = 0;
-        for (i = 0; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             if ((connection_get_status() == JABBER_CONNECTED) && (g_strcmp0(session_get_account_name(), accounts[i]) == 0)) {
                 resource_presence_t presence = accounts_get_last_presence(accounts[i]);
                 theme_item_t presence_colour = theme_main_presence_attrs(string_from_resource_presence(presence));
@@ -2718,13 +2717,12 @@ cons_show_bookmarks_ignore(gchar** list, gsize len)
         return;
     }
 
-    int i;
     ProfWin* console = wins_get_console();
 
     cons_show("");
     cons_show("Ignored bookmarks:");
 
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++) {
         win_print(console, THEME_DEFAULT, "-", "  %s", list[i]);
         win_newline(console);
     }

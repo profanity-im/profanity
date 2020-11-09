@@ -244,10 +244,9 @@ _rotate_log_file(void)
     gchar* log_file = g_strdup(mainlogfile);
     size_t len = strlen(log_file);
     gchar* log_file_new = malloc(len + 4);
-    int i = 1;
 
     // find an empty name. from .log -> log.01 -> log.99
-    for (; i < 100; i++) {
+    for (int i=1; i < 100; i++) {
         g_sprintf(log_file_new, "%s.%02d", log_file, i);
         if (!g_file_test(log_file_new, G_FILE_TEST_EXISTS))
             break;
@@ -780,7 +779,6 @@ log_stderr_handler(void)
     char* const buf = stderr_buf;
     ssize_t size;
     int retry = 0;
-    int i;
 
     if (!stderr_inited)
         return;
@@ -792,7 +790,7 @@ log_stderr_handler(void)
         if (size <= 0 || retry++ >= STDERR_RETRY_NR)
             break;
 
-        for (i = 0; i < size; ++i) {
+        for (int i = 0; i < size; ++i) {
             if (buf[i] == '\n') {
                 log_msg(stderr_level, "stderr", s->str);
                 g_string_assign(s, "");

@@ -296,8 +296,7 @@ status_bar_draw(void)
         pos = 0;
     }
     gint max_tabs = prefs_get_statusbartabs();
-    int i = 1;
-    for (i = 1; i <= max_tabs; i++) {
+    for (int i = 1; i <= max_tabs; i++) {
         StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
         if (tab) {
             pos = _status_bar_draw_tab(tab, pos, i);
@@ -319,8 +318,7 @@ _extended_new(void)
         return FALSE;
     }
 
-    int i = 0;
-    for (i = max_tabs + 1; i <= tabs_count; i++) {
+    for (int i = max_tabs + 1; i <= tabs_count; i++) {
         StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
         if (tab && tab->highlight) {
             return TRUE;
@@ -527,8 +525,7 @@ _tabs_width(void)
 
     if (show_name && show_number) {
         int width = g_hash_table_size(statusbar->tabs) > max_tabs ? 4 : 1;
-        int i = 0;
-        for (i = 1; i <= max_tabs; i++) {
+        for (int i = 1; i <= max_tabs; i++) {
             StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
                 gboolean is_current = i == statusbar->current_tab;
@@ -547,8 +544,7 @@ _tabs_width(void)
 
     if (show_name && !show_number) {
         int width = g_hash_table_size(statusbar->tabs) > max_tabs ? 4 : 1;
-        int i = 0;
-        for (i = 1; i <= max_tabs; i++) {
+        for (int i = 1; i <= max_tabs; i++) {
             StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
                 gboolean is_current = i == statusbar->current_tab;

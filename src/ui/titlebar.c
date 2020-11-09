@@ -190,8 +190,7 @@ _title_bar_draw(void)
 
     werase(win);
     wmove(win, 0, 0);
-    int i;
-    for (i = 0; i < 45; i++) {
+    for (int i = 0; i < 45; i++) {
         waddch(win, ' ');
     }
 

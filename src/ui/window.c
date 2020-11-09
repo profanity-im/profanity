@@ -1613,8 +1613,7 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
 static void
 _win_indent(WINDOW* win, int size)
 {
-    int i = 0;
-    for (i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         waddch(win, ' ');
     }
 }
@@ -1743,8 +1742,7 @@ win_print_trackbar(ProfWin* window)
     wbkgdset(window->layout->win, theme_attrs(THEME_TRACKBAR));
     wattron(window->layout->win, theme_attrs(THEME_TRACKBAR));
 
-    int i;
-    for (i = 1; i < cols; i++) {
+    for (int i = 1; i < cols; i++) {
         wprintw(window->layout->win, "-");
     }
 
@@ -1756,11 +1754,11 @@ win_print_trackbar(ProfWin* window)
 void
 win_redraw(ProfWin* window)
 {
-    int i, size;
+    int size;
     werase(window->layout->win);
     size = buffer_size(window->layout->buffer);
 
-    for (i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         ProfBuffEntry* e = buffer_get_entry(window->layout->buffer, i);
 
         if (e->display_from == NULL && e->message && e->message[0] == '-') {
@@ -1935,12 +1933,12 @@ win_handle_command_exec_result_note(ProfWin* window, const char* const type, con
 void
 win_insert_last_read_position_marker(ProfWin* window, char* id)
 {
-    int i, size;
+    int size;
     size = buffer_size(window->layout->buffer);
 
     // TODO: this is somewhat costly. We should improve this later.
     // check if we already have a separator present
-    for (i = 0; i < size; i++) {
+    for (int i = 0; i < size; i++) {
         ProfBuffEntry* e = buffer_get_entry(window->layout->buffer, i);
 
         // if yes, don't print a new one

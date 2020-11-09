@@ -77,8 +77,7 @@ accounts_load(void)
     gsize naccounts;
     gchar** account_names = g_key_file_get_groups(accounts, &naccounts);
 
-    gsize i;
-    for (i = 0; i < naccounts; i++) {
+    for (gsize i = 0; i < naccounts; i++) {
         autocomplete_add(all_ac, account_names[i]);
         if (g_key_file_get_boolean(accounts, account_names[i], "enabled", NULL)) {
             autocomplete_add(enabled_ac, account_names[i]);
@@ -252,8 +251,7 @@ accounts_get_account(const char* const name)
         GList* otr_manual = NULL;
         gchar** manual = g_key_file_get_string_list(accounts, name, "otr.manual", &length, NULL);
         if (manual) {
-            int i;
-            for (i = 0; i < length; i++) {
+            for (int i = 0; i < length; i++) {
                 otr_manual = g_list_append(otr_manual, strdup(manual[i]));
             }
             g_strfreev(manual);
@@ -262,8 +260,7 @@ accounts_get_account(const char* const name)
         GList* otr_opportunistic = NULL;
         gchar** opportunistic = g_key_file_get_string_list(accounts, name, "otr.opportunistic", &length, NULL);
         if (opportunistic) {
-            int i;
-            for (i = 0; i < length; i++) {
+            for (int i = 0; i < length; i++) {
                 otr_opportunistic = g_list_append(otr_opportunistic, strdup(opportunistic[i]));
             }
             g_strfreev(opportunistic);
@@ -272,8 +269,7 @@ accounts_get_account(const char* const name)
         GList* otr_always = NULL;
         gchar** always = g_key_file_get_string_list(accounts, name, "otr.always", &length, NULL);
         if (always) {
-            int i;
-            for (i = 0; i < length; i++) {
+            for (int i = 0; i < length; i++) {
                 otr_always = g_list_append(otr_always, strdup(always[i]));
             }
             g_strfreev(always);
@@ -287,8 +283,7 @@ accounts_get_account(const char* const name)
         GList* omemo_enabled = NULL;
         gchar** enabled_list = g_key_file_get_string_list(accounts, name, "omemo.enabled", &length, NULL);
         if (enabled_list) {
-            int i;
-            for (i = 0; i < length; i++) {
+            for (int i = 0; i < length; i++) {
                 omemo_enabled = g_list_append(omemo_enabled, strdup(enabled_list[i]));
             }
             g_strfreev(enabled_list);
@@ -297,8 +292,7 @@ accounts_get_account(const char* const name)
         GList* omemo_disabled = NULL;
         gchar** disabled_list = g_key_file_get_string_list(accounts, name, "omemo.disabled", &length, NULL);
         if (disabled_list) {
-            int i;
-            for (i = 0; i < length; i++) {
+            for (int i = 0; i < length; i++) {
                 omemo_disabled = g_list_append(omemo_disabled, strdup(disabled_list[i]));
             }
             g_strfreev(disabled_list);
@@ -425,8 +419,7 @@ accounts_rename(const char* const account_name, const char* const new_name)
         "tls.policy"
     };
 
-    int i;
-    for (i = 0; i < ARRAY_SIZE(string_keys); i++) {
+    for (int i = 0; i < ARRAY_SIZE(string_keys); i++) {
         char* value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
         if (value) {
             g_key_file_set_string(accounts, new_name, string_keys[i], value);

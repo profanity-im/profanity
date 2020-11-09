@@ -91,10 +91,9 @@ create_dir(char* name)
 gboolean
 mkdir_recursive(const char* dir)
 {
-    int i;
     gboolean result = TRUE;
 
-    for (i = 1; i <= strlen(dir); i++) {
+    for (int i = 1; i <= strlen(dir); i++) {
         if (dir[i] == '/' || dir[i] == '\0') {
             gchar* next_dir = g_strndup(dir, i);
             result = create_dir(next_dir);
@@ -446,8 +445,7 @@ get_random_string(int length)
 
     prng = g_rand_new();
 
-    int i;
-    for (i = 0; i < length; i++) {
+    for (int i = 0; i < length; i++) {
         rand[i] = alphabet[g_rand_int_range(prng, 0, sizeof(alphabet))];
     }
     g_rand_free(prng);

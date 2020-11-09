@@ -123,7 +123,7 @@ api_register_command(const char* const plugin_name, const char* command_name, in
 
     help->tags[0] = NULL;
 
-    int i = 0;
+    int i;
     for (i = 0; synopsis[i] != NULL; i++) {
         help->synopsis[i] = strdup(synopsis[i]);
     }

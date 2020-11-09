@@ -202,8 +202,7 @@ p_gpg_on_connect(const char* const barejid)
         return;
     }
 
-    int i = 0;
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++) {
         GError* gerr = NULL;
         gchar* jid = jids[i];
         gchar* keyid = g_key_file_get_string(pubkeyfile, jid, "keyid", &gerr);
@@ -777,9 +776,8 @@ p_gpg_format_fp_str(char* fp)
     }
 
     GString* format = g_string_new("");
-    int i;
     int len = strlen(fp);
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++) {
         g_string_append_c(format, fp[i]);
         if (((i + 1) % 4 == 0) && (i + 1 < len)) {
             g_string_append_c(format, ' ');

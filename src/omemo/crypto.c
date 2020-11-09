@@ -287,8 +287,7 @@ omemo_decrypt_func(signal_buffer** output, int cipher, const uint8_t* key, size_
         assert(FALSE);
     }
 
-    int i;
-    for (i = 0; i < padding; i++) {
+    for (int i = 0; i < padding; i++) {
         if (plaintext[plaintext_len - 1 - i] != padding) {
             ret = SG_ERR_UNKNOWN;
             goto out;

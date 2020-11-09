@@ -2557,17 +2557,16 @@ _cmd_index(Command* cmd)
     index_source = g_string_append(index_source, " ");
 
     int len = g_strv_length(cmd->help.tags);
-    int i = 0;
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++) {
         index_source = g_string_append(index_source, cmd->help.tags[i]);
         index_source = g_string_append(index_source, " ");
     }
     len = g_strv_length(cmd->help.synopsis);
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++) {
         index_source = g_string_append(index_source, cmd->help.synopsis[i]);
         index_source = g_string_append(index_source, " ");
     }
-    for (i = 0; cmd->help.args[i][0] != NULL; i++) {
+    for (int i = 0; cmd->help.args[i][0] != NULL; i++) {
         index_source = g_string_append(index_source, cmd->help.args[i][0]);
         index_source = g_string_append(index_source, " ");
         index_source = g_string_append(index_source, cmd->help.args[i][1]);
@@ -2578,7 +2577,7 @@ _cmd_index(Command* cmd)
     g_string_free(index_source, TRUE);
 
     GString* index = g_string_new("");
-    for (i = 0; i < g_strv_length(tokens); i++) {
+    for (int i = 0; i < g_strv_length(tokens); i++) {
         index = g_string_append(index, tokens[i]);
         index = g_string_append(index, " ");
     }
@@ -2598,8 +2597,7 @@ cmd_search_index_any(char* term)
     gchar** processed_terms = g_str_tokenize_and_fold(term, NULL, NULL);
     int terms_len = g_strv_length(processed_terms);
 
-    int i = 0;
-    for (i = 0; i < terms_len; i++) {
+    for (int i = 0; i < terms_len; i++) {
         GList* index_keys = g_hash_table_get_keys(search_index);
         GList* curr = index_keys;
         while (curr) {
@@ -2630,8 +2628,7 @@ cmd_search_index_all(char* term)
     while (curr) {
         char* command = curr->data;
         int matches = 0;
-        int i = 0;
-        for (i = 0; i < terms_len; i++) {
+        for (int i = 0; i < terms_len; i++) {
             char* command_index = g_hash_table_lookup(search_index, command);
             if (g_str_match_string(terms[i], command_index, FALSE)) {
                 matches++;
@@ -2663,8 +2660,7 @@ cmd_init(void)
 
     // load command defs into hash table
     commands = g_hash_table_new(g_str_hash, g_str_equal);
-    unsigned int i;
-    for (i = 0; i < ARRAY_SIZE(command_defs); i++) {
+    for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
         Command* pcmd = command_defs + i;
 
         // add to hash
@@ -2738,8 +2734,7 @@ cmd_get_ordered(const char* const tag)
 static gboolean
 _cmd_has_tag(Command* pcmd, const char* const tag)
 {
-    int i = 0;
-    for (i = 0; pcmd->help.tags[i] != NULL; i++) {
+    for (int i = 0; pcmd->help.tags[i] != NULL; i++) {
         if (g_strcmp0(tag, pcmd->help.tags[i]) == 0) {
             return TRUE;
         }
@@ -2758,8 +2753,8 @@ void
 command_docgen(void)
 {
     GList* cmds = NULL;
-    unsigned int i;
-    for (i = 0; i < ARRAY_SIZE(command_defs); i++) {
+
+    for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
         Command* pcmd = command_defs + i;
         cmds = g_list_insert_sorted(cmds, pcmd, (GCompareFunc)_cmp_command);
     }

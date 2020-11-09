@@ -343,12 +343,11 @@ color_distance(const struct color_def* a, const struct color_def* b)
 static int
 find_closest_col(int h, int s, int l)
 {
-    int i;
     struct color_def a = { h, s, l };
     int min = 0;
     int dmin = color_distance(&a, &color_names[0]);
 
-    for (i = 1; i < COLOR_NAME_SIZE; i++) {
+    for (int i = 1; i < COLOR_NAME_SIZE; i++) {
         int d = color_distance(&a, &color_names[i]);
         if (d < dmin) {
             dmin = d;
@@ -361,7 +360,6 @@ find_closest_col(int h, int s, int l)
 static int
 find_col(const char* col_name, int n)
 {
-    int i;
     char name[32] = { 0 };
 
     /*
@@ -381,7 +379,7 @@ find_col(const char* col_name, int n)
         return -1;
     }
 
-    for (i = 0; i < COLOR_NAME_SIZE; i++) {
+    for (int i = 0; i < COLOR_NAME_SIZE; i++) {
         if (g_ascii_strcasecmp(name, color_names[i].name) == 0) {
             return i;
         }
@@ -462,8 +460,6 @@ color_pair_cache_reset(void)
 static int
 _color_pair_cache_get(int fg, int bg)
 {
-    int i;
-
     if (COLORS < 256) {
         if (fg > 7 || bg > 7) {
             log_error("Color: trying to load 256 colour theme without capable terminal");
@@ -472,7 +468,7 @@ _color_pair_cache_get(int fg, int bg)
     }
 
     /* try to find pair in cache */
-    for (i = 0; i < cache.size; i++) {
+    for (int i = 0; i < cache.size; i++) {
         if (fg == cache.pairs[i].fg && bg == cache.pairs[i].bg) {
             return i;
         }
@@ -486,7 +482,7 @@ _color_pair_cache_get(int fg, int bg)
         return -1;
     }
 
-    i = cache.size;
+    int i = cache.size;
     cache.pairs[i].fg = fg;
     cache.pairs[i].bg = bg;
     /* (re-)define the new pair in curses */

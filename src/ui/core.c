@@ -1222,8 +1222,7 @@ void
 ui_show_lines(ProfWin* window, gchar** lines)
 {
     if (lines) {
-        int i;
-        for (i = 0; lines[i] != NULL; i++) {
+        for (int i = 0; lines[i] != NULL; i++) {
             win_println(window, THEME_DEFAULT, "-", "%s", lines[i]);
         }
     }

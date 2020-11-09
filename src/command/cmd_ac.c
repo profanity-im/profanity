@@ -1635,7 +1635,6 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
 static char*
 _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previous)
 {
-    int i;
     char* result = NULL;
 
     jabber_conn_status_t conn_status = connection_get_status();
@@ -1644,7 +1643,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     gchar* boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash",
                                  "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/os", "/slashguard" };
 
-    for (i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
+    for (int i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice, previous, NULL);
         if (result) {
             return result;
@@ -1661,7 +1660,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
 
             // Remove quote character before and after names when doing autocomplete
             char* unquoted = strip_arg_quotes(input);
-            for (i = 0; i < ARRAY_SIZE(nick_choices); i++) {
+            for (int i = 0; i < ARRAY_SIZE(nick_choices); i++) {
                 result = autocomplete_param_with_ac(unquoted, nick_choices[i], nick_ac, TRUE, previous);
                 if (result) {
                     free(unquoted);
@@ -1676,7 +1675,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
         gchar* contact_choices[] = { "/msg", "/info" };
         // Remove quote character before and after names when doing autocomplete
         char* unquoted = strip_arg_quotes(input);
-        for (i = 0; i < ARRAY_SIZE(contact_choices); i++) {
+        for (int i = 0; i < ARRAY_SIZE(contact_choices); i++) {
             result = autocomplete_param_with_func(unquoted, contact_choices[i], roster_contact_autocomplete, previous, NULL);
             if (result) {
                 free(unquoted);
@@ -1686,7 +1685,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
         free(unquoted);
 
         gchar* resource_choices[] = { "/caps", "/ping" };
-        for (i = 0; i < ARRAY_SIZE(resource_choices); i++) {
+        for (int i = 0; i < ARRAY_SIZE(resource_choices); i++) {
             result = autocomplete_param_with_func(input, resource_choices[i], roster_fulljid_autocomplete, previous, NULL);
             if (result) {
                 return result;
@@ -1695,7 +1694,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     }
 
     gchar* invite_choices[] = { "/join" };
-    for (i = 0; i < ARRAY_SIZE(invite_choices); i++) {
+    for (int i = 0; i < ARRAY_SIZE(invite_choices); i++) {
         result = autocomplete_param_with_func(input, invite_choices[i], muc_invites_find, previous, NULL);
         if (result) {
             return result;
@@ -1705,7 +1704,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     gchar* cmds[] = { "/prefs", "/disco", "/room", "/autoping", "/mainwin", "/inputwin" };
     Autocomplete completers[] = { prefs_ac, disco_ac, room_ac, autoping_ac, winpos_ac, winpos_ac };
 
-    for (i = 0; i < ARRAY_SIZE(cmds); i++) {
+    for (int i = 0; i < ARRAY_SIZE(cmds); i++) {
         result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE, previous);
         if (result) {
             return result;
@@ -1778,7 +1777,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
 
     int len = strlen(input);
     char parsed[len + 1];
-    i = 0;
+    int i = 0;
     while (i < len) {
         if (input[i] == ' ') {
             break;
@@ -1856,12 +1855,11 @@ _who_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     } else {
         jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status == JABBER_CONNECTED) {
-            int i = 0;
             gchar* group_commands[] = { "/who any", "/who online", "/who offline",
                                         "/who chat", "/who away", "/who xa", "/who dnd", "/who available",
                                         "/who unavailable" };
 
-            for (i = 0; i < ARRAY_SIZE(group_commands); i++) {
+            for (int i = 0; i < ARRAY_SIZE(group_commands); i++) {
                 result = autocomplete_param_with_func(input, group_commands[i], roster_group_autocomplete, previous, NULL);
                 if (result) {
                     return result;
@@ -2186,7 +2184,6 @@ _bookmark_autocomplete(ProfWin* window, const char* const input, gboolean previo
 static char*
 _notify_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
-    int i = 0;
     char* result = NULL;
 
     result = autocomplete_param_with_func(input, "/notify room trigger remove", prefs_autocomplete_room_trigger, previous, NULL);
@@ -2196,7 +2193,7 @@ _notify_autocomplete(ProfWin* window, const char* const input, gboolean previous
 
     gchar* boolean_choices1[] = { "/notify room current", "/notify chat current", "/notify typing current",
                                   "/notify room text", "/notify chat text" };
-    for (i = 0; i < ARRAY_SIZE(boolean_choices1); i++) {
+    for (int i = 0; i < ARRAY_SIZE(boolean_choices1); i++) {
         result = autocomplete_param_with_func(input, boolean_choices1[i], prefs_autocomplete_boolean_choice, previous, NULL);
         if (result) {
             return result;
@@ -2229,7 +2226,7 @@ _notify_autocomplete(ProfWin* window, const char* const input, gboolean previous
     }
 
     gchar* boolean_choices2[] = { "/notify invite", "/notify sub", "/notify mention", "/notify trigger" };
-    for (i = 0; i < ARRAY_SIZE(boolean_choices2); i++) {
+    for (int i = 0; i < ARRAY_SIZE(boolean_choices2); i++) {
         result = autocomplete_param_with_func(input, boolean_choices2[i], prefs_autocomplete_boolean_choice, previous, NULL);
         if (result) {
             return result;
@@ -3713,12 +3710,11 @@ _account_autocomplete(ProfWin* window, const char* const input, gboolean previou
         return found;
     }
 
-    int i = 0;
     gchar* account_choice[] = { "/account set", "/account show", "/account enable",
                                 "/account disable", "/account rename", "/account clear", "/account remove",
                                 "/account default set" };
 
-    for (i = 0; i < ARRAY_SIZE(account_choice); i++) {
+    for (int i = 0; i < ARRAY_SIZE(account_choice); i++) {
         found = autocomplete_param_with_func(input, account_choice[i], accounts_find_all, previous, NULL);
         if (found) {
             return found;

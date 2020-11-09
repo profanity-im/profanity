@@ -194,8 +194,7 @@ _prefs_load(void)
     gsize len = 0;
     gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
-    int i = 0;
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++) {
         autocomplete_add(room_trigger_ac, triggers[i]);
     }
     g_strfreev(triggers);
@@ -312,14 +311,15 @@ prefs_message_get_triggers(const char* const message)
     char* message_lower = g_utf8_strdown(message, -1);
     gsize len = 0;
     gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
-    int i;
-    for (i = 0; i < len; i++) {
+
+    for (int i = 0; i < len; i++) {
         char* trigger_lower = g_utf8_strdown(triggers[i], -1);
         if (g_strrstr(message_lower, trigger_lower)) {
             result = g_list_append(result, strdup(triggers[i]));
         }
         g_free(trigger_lower);
     }
+
     g_strfreev(triggers);
     g_free(message_lower);
 
@@ -1384,8 +1384,7 @@ prefs_get_room_notify_triggers(void)
     gsize len = 0;
     gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
-    int i;
-    for (i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++) {
         result = g_list_append(result, strdup(triggers[i]));
     }
 
@@ -1476,8 +1475,7 @@ prefs_titlebar_pos_up(void)
 {
     ProfWinPlacement* placement = prefs_get_win_placement();
 
-    int pos = 2;
-    for (pos = 2; pos < 5; pos++) {
+    for (int pos = 2; pos < 5; pos++) {
         if (placement->titlebar_pos == pos) {
             placement->titlebar_pos = pos - 1;
 
@@ -1504,8 +1502,7 @@ prefs_mainwin_pos_up(void)
 {
     ProfWinPlacement* placement = prefs_get_win_placement();
 
-    int pos = 2;
-    for (pos = 2; pos < 5; pos++) {
+    for (int pos = 2; pos < 5; pos++) {
         if (placement->mainwin_pos == pos) {
             placement->mainwin_pos = pos - 1;
 
@@ -1532,8 +1529,7 @@ prefs_statusbar_pos_up(void)
 {
     ProfWinPlacement* placement = prefs_get_win_placement();
 
-    int pos = 2;
-    for (pos = 2; pos < 5; pos++) {
+    for (int pos = 2; pos < 5; pos++) {
         if (placement->statusbar_pos == pos) {
             placement->statusbar_pos = pos - 1;
 
@@ -1560,8 +1556,7 @@ prefs_inputwin_pos_up(void)
 {
     ProfWinPlacement* placement = prefs_get_win_placement();
 
-    int pos = 2;
-    for (pos = 2; pos < 5; pos++) {
+    for (int pos = 2; pos < 5; pos++) {
         if (placement->inputwin_pos == pos) {
             placement->inputwin_pos = pos - 1;
 
@@ -1588,8 +1583,7 @@ prefs_titlebar_pos_down(void)
 {
     ProfWinPlacement* placement = prefs_get_win_placement();
 
-    int pos = 1;
-    for (pos = 1; pos < 4; pos++) {
+    for (int pos = 1; pos < 4; pos++) {
         if (placement->titlebar_pos == pos) {
             placement->titlebar_pos = pos + 1;
 
@@ -1616,8 +1610,7 @@ prefs_mainwin_pos_down(void)
 {
     ProfWinPlacement* placement = prefs_get_win_placement();
 
-    int pos = 1;
-    for (pos = 1; pos < 4; pos++) {
+    for (int pos = 1; pos < 4; pos++) {
         if (placement->mainwin_pos == pos) {
             placement->mainwin_pos = pos + 1;
 
@@ -1644,8 +1637,7 @@ prefs_statusbar_pos_down(void)
 {
     ProfWinPlacement* placement = prefs_get_win_placement();
 
-    int pos = 1;
-    for (pos = 1; pos < 4; pos++) {
+    for (int pos = 1; pos < 4; pos++) {
         if (placement->statusbar_pos == pos) {
             placement->statusbar_pos = pos + 1;
 
@@ -1672,8 +1664,7 @@ prefs_inputwin_pos_down(void)
 {
     ProfWinPlacement* placement = prefs_get_win_placement();
 
-    int pos = 1;
-    for (pos = 1; pos < 4; pos++) {
+    for (int pos = 1; pos < 4; pos++) {
         if (placement->inputwin_pos == pos) {
             placement->inputwin_pos = pos + 1;
 
@@ -1741,8 +1732,8 @@ prefs_get_aliases(void)
         GList* result = NULL;
         gsize len;
         gchar** keys = g_key_file_get_keys(prefs, PREF_GROUP_ALIAS, &len, NULL);
-        int i;
-        for (i = 0; i < len; i++) {
+
+        for (int i = 0; i < len; i++) {
             char* name = keys[i];
             char* value = g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
 
