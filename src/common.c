@@ -555,3 +555,23 @@ call_external(gchar** argv, gchar*** const output_ptr, gchar*** const error_ptr)
 
     return TRUE;
 }
+
+gchar**
+format_call_external_argv(const char* template, const char* url, const char* filename)
+{
+    gchar** argv = g_strsplit(template, " ", 0);
+
+    guint num_args = 0;
+    while (argv[num_args]) {
+        if (0 == g_strcmp0(argv[num_args], "%u") && url != NULL) {
+            g_free(argv[num_args]);
+            argv[num_args] = g_strdup(url);
+        } else if (0 == g_strcmp0(argv[num_args], "%p") && filename != NULL) {
+            g_free(argv[num_args]);
+            argv[num_args] = strdup(filename);
+        }
+        num_args++;
+    }
+
+    return argv;
+}

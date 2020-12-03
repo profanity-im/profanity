@@ -40,7 +40,7 @@
 
 char* http_basename_from_url(const char* url);
 void http_print_transfer(ProfWin* window, char* url, const char* fmt, ...);
-void http_print_transfer_update(ProfWin* window, char* url,
-                                const char* fmt, ...);
+void http_print_transfer_update(ProfWin* window, char* url, const char* fmt, ...);
+gchar** http_format_external_argv(const char* cmd, const char* url, const char* filename);
 
 #endif

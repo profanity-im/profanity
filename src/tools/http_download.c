@@ -47,6 +47,7 @@
 #include <gio/gio.h>
 #include <pthread.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "profanity.h"
 #include "event/client_events.h"
@@ -186,6 +187,25 @@ http_file_get(void* userdata)
 
     download_processes = g_slist_remove(download_processes, download);
     pthread_mutex_unlock(&lock);
+
+    if (download->cmd_template != NULL) {
+        gchar** argv = format_call_external_argv(download->cmd_template,
+                                                 download->url,
+                                                 download->filename);
+
+        // TODO(wstrm): Log the error.
+        if (!call_external(argv, NULL, NULL)) {
+            http_print_transfer_update(download->window, download->url,
+                                       "Downloading '%s' failed: Unable to call "
+                                       "command '%s' with file at '%s' (%s).",
+                                       download->url,
+                                       download->cmd_template,
+                                       download->filename,
+                                       "TODO(wstrm): Log the error");
+        }
+
+        g_strfreev(argv);
+    }
 
     free(download->url);
     free(download->filename);

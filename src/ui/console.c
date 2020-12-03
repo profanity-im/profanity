@@ -2074,9 +2074,9 @@ cons_executable_setting(void)
 
     //TODO: there needs to be a way to get all the "locales"/schemes so we can
     //display the defualt openers for all filetypes
-    gchar** urlopen = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, "");
+    char* urlopen = prefs_get_string_with_option(PREF_URL_OPEN_CMD, "");
     cons_show("Default '/url open' command (/executable urlopen)                        : %s", urlopen[1]);
-    g_strfreev(urlopen);
+    g_free(urlopen);
 
     char* urlsave = prefs_get_string(PREF_URL_SAVE_CMD);
     cons_show("Default '/url save' command (/executable urlsave)                        : %s", urlsave);

@@ -47,8 +47,6 @@ core_sources = \
 	src/tools/http_upload.h \
 	src/tools/http_download.c \
 	src/tools/http_download.h \
-	src/tools/aesgcm_download.c \
-	src/tools/aesgcm_download.h \
 	src/tools/bookmark_ignore.c \
 	src/tools/bookmark_ignore.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
@@ -200,7 +198,8 @@ otr4_sources = \
 
 omemo_sources = \
 	src/omemo/omemo.h src/omemo/omemo.c src/omemo/crypto.h src/omemo/crypto.c \
-	src/omemo/store.h src/omemo/store.c src/xmpp/omemo.h src/xmpp/omemo.c
+	src/omemo/store.h src/omemo/store.c src/xmpp/omemo.h src/xmpp/omemo.c \
+	src/tools/aesgcm_download.h src/tools/aesgcm_download.c
 
 omemo_unittest_sources = \
 	tests/unittests/omemo/stub_omemo.c

@@ -81,7 +81,6 @@ static const char* _get_group(preference_t pref);
 static const char* _get_key(preference_t pref);
 static gboolean _get_default_boolean(preference_t pref);
 static char* _get_default_string(preference_t pref);
-static char** _get_default_string_list(preference_t pref);
 
 static void
 _prefs_load(void)
@@ -542,33 +541,6 @@ prefs_get_string_with_option(preference_t pref, gchar* option)
     }
 
     return result;
-}
-
-gchar**
-prefs_get_string_list_with_option(preference_t pref, gchar* option)
-{
-    const char* group = _get_group(pref);
-    const char* key = _get_key(pref);
-    char** def = _get_default_string_list(pref);
-
-    gchar** result = g_key_file_get_locale_string_list(prefs, group, key, option, NULL, NULL);
-    if (result) {
-        g_strfreev(def);
-        return result;
-    }
-
-    result = g_key_file_get_string_list(prefs, group, key, NULL, NULL);
-    if (result) {
-        g_strfreev(def);
-        return result;
-    }
-
-    if (def) {
-        return def;
-    } else {
-        g_strfreev(def);
-        return NULL;
-    }
 }
 
 void
@@ -1893,6 +1865,7 @@ _get_group(preference_t pref)
         return PREF_GROUP_LOGGING;
     case PREF_AVATAR_CMD:
     case PREF_URL_OPEN_CMD:
+        return PREF_GROUP_EXECUTABLES;
     case PREF_URL_SAVE_CMD:
         return PREF_GROUP_EXECUTABLES;
     case PREF_AUTOAWAY_CHECK:
@@ -2318,24 +2291,10 @@ _get_default_string(preference_t pref)
         return "false";
     case PREF_AVATAR_CMD:
         return "xdg-open";
-    default:
-        return NULL;
-    }
-}
-
-// the default setting for a string list type preference
-// if it is not specified in .profrc
-static char**
-_get_default_string_list(preference_t pref)
-{
-    char** str_array = NULL;
-
-    switch (pref) {
     case PREF_URL_OPEN_CMD:
-        str_array = g_malloc0(3);
-        str_array[0] = g_strdup("false");
-        str_array[1] = g_strdup("xdg-open %u");
-        return str_array;
+        return "xdg-open %u";
+    case PREF_URL_SAVE_CMD:
+        return NULL; // Default to built-in method.
     default:
         return NULL;
     }

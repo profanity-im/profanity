@@ -47,6 +47,7 @@
 #include <gio/gio.h>
 #include <pthread.h>
 #include <assert.h>
+#include <errno.h>
 
 #include "profanity.h"
 #include "event/client_events.h"
@@ -146,8 +147,28 @@ aesgcm_file_get(void* userdata)
     free(https_url);
     free(fragment);
 
+    if (aesgcm_dl->cmd_template != NULL) {
+        gchar** argv = format_call_external_argv(aesgcm_dl->cmd_template,
+                                                 aesgcm_dl->url,
+                                                 aesgcm_dl->filename);
+
+        // TODO(wstrm): Log the error.
+        if (!call_external(argv, NULL, NULL)) {
+            http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
+                                       "Downloading '%s' failed: Unable to call "
+                                       "command '%s' with file at '%s' (%s).",
+                                       aesgcm_dl->url,
+                                       aesgcm_dl->cmd_template,
+                                       aesgcm_dl->filename,
+                                       "TODO(wstrm): Log the error");
+        }
+
+        g_strfreev(argv);
+    }
+
     free(aesgcm_dl->filename);
     free(aesgcm_dl->url);
+    free(aesgcm_dl->cmd_template);
     free(aesgcm_dl);
 
     return NULL;

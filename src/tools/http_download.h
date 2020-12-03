@@ -51,6 +51,7 @@ typedef struct http_download_t
 {
     char* url;
     char* filename;
+    char* cmd_template;
     curl_off_t bytes_received;
     ProfWin* window;
     pthread_t worker;

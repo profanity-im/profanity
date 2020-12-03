@@ -33,6 +33,7 @@
  *
  */
 #include <glib.h>
+#include <gcrypt.h>
 
 #include "ui/ui.h"
 #include "config/account.h"

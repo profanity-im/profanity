@@ -45,7 +45,6 @@
 #include <signal/signal_protocol.h>
 #include <signal/session_builder.h>
 #include <signal/session_cipher.h>
-#include <gcrypt.h>
 
 #include "config/account.h"
 #include "config/files.h"

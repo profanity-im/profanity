@@ -60,6 +60,7 @@
 #include "command/cmd_funcs.h"
 #include "command/cmd_defs.h"
 #include "command/cmd_ac.h"
+#include "config/files.h"
 #include "config/accounts.h"
 #include "config/account.h"
 #include "config/preferences.h"
@@ -1089,7 +1090,7 @@ _writecsv(int fd, const char* const str)
     size_t len = strlen(str);
     char* s = malloc(2 * len * sizeof(char));
     char* c = s;
-    for (int i =0; i < strlen(str); i++) {
+    for (int i = 0; i < strlen(str); i++) {
         if (str[i] != '"')
             *c++ = str[i];
         else {
@@ -9058,169 +9059,59 @@ cmd_slashguard(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
-gboolean
-cmd_url_open(ProfWin* window, const char* const command, gchar** args)
-{
-    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
-        cons_show("url open not supported in this window");
-        return TRUE;
-    }
-
-    if (args[1] == NULL) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
-    gboolean require_save = false;
-
-    gchar* fileStart = g_strrstr(args[1], "/");
-    if (fileStart == NULL) {
-        cons_show("URL '%s' is not valid.", args[1]);
-        return TRUE;
-    }
-
-    fileStart++;
-    if (((char*)(fileStart - 2))[0] == '/' && ((char*)(fileStart - 3))[0] == ':') {
-        // If the '/' is last character of the '://' string, there will be no suffix
-        // Therefore, it is considered that there is no file name in the URL and
-        // fileStart is set to the end of the URL.
-        fileStart = args[1] + strlen(args[1]);
-    }
-
-    gchar* suffix = NULL;
-    gchar* suffixStart = g_strrstr(fileStart, ".");
-    if (suffixStart != NULL) {
-        suffixStart++;
-        gchar* suffixEnd = g_strrstr(suffixStart, "#");
-        if (suffixEnd == NULL) {
-            suffix = g_strdup(suffixStart);
-        } else {
-            suffix = g_strndup(suffixStart, suffixEnd - suffixStart);
-        }
-    }
-
-    gchar** suffix_cmd_pref = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, NULL);
-    if (suffix != NULL) {
-        gchar* lowercase_suffix = g_ascii_strdown(suffix, -1);
-        g_strfreev(suffix_cmd_pref);
-        suffix_cmd_pref = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, lowercase_suffix);
-        g_free(lowercase_suffix);
-        g_free(suffix);
-    }
-
-    if (0 == g_strcmp0(suffix_cmd_pref[0], "true")) {
-        require_save = true;
-    }
-
-    gchar* suffix_cmd = g_strdup(suffix_cmd_pref[1]);
-    g_strfreev(suffix_cmd_pref);
-
-    gchar* scheme = g_uri_parse_scheme(args[1]);
-    if (0 == g_strcmp0(scheme, "aesgcm")) {
-        require_save = true;
-    }
-    g_free(scheme);
-
-    if (require_save) {
-        gchar* save_args[] = { "open", args[1], "/tmp/profanity.tmp", NULL };
-        cmd_url_save(window, command, save_args);
-    }
-
-    gchar** argv = g_strsplit(suffix_cmd, " ", 0);
-    guint num_args = 0;
-    while (argv[num_args]) {
-        if (0 == g_strcmp0(argv[num_args], "%u")) {
-            g_free(argv[num_args]);
-            if (require_save) {
-                argv[num_args] = g_strdup("/tmp/profanity.tmp");
-            } else {
-                argv[num_args] = g_strdup(args[1]);
-            }
-            break;
-        }
-        num_args++;
-    }
-
-    if (!call_external(argv, NULL, NULL)) {
-        cons_show_error("Unable to open url: check the logs for more information.");
-    }
-
-    if (require_save) {
-        g_unlink("/tmp/profanity.tmp");
-    }
-
-    g_strfreev(argv);
-    g_free(suffix_cmd);
-
-    return TRUE;
-}
-
-void
-_url_open_fallback_method(ProfWin* window, const char* url, const char* filename)
-{
-    // TODO(wstrm): Use _url_save_fallback_method?.
-    // We probably want to do the cmd_url_open in a separate thread and wait for
-    // the transfer to be finished before calling call_external.
-}
-
-void
-_url_save_fallback_method(ProfWin* window, const char* url, const char* filename)
-{
-    gchar* scheme = g_uri_parse_scheme(url);
-
 #ifdef HAVE_OMEMO
-    if (g_strcmp0(scheme, "aesgcm") == 0) {
-        AESGCMDownload* download = malloc(sizeof(AESGCMDownload));
-        download->window = window;
-        download->url = strdup(url);
-        download->filename = strdup(filename);
-
-        pthread_create(&(download->worker), NULL, &aesgcm_file_get, download);
-        aesgcm_download_add_download(download);
-
-        free(scheme);
-
-        return;
+void
+_url_aesgcm_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename)
+{
+    AESGCMDownload* download = malloc(sizeof(AESGCMDownload));
+    download->window = window;
+    download->url = strdup(url);
+    download->filename = strdup(filename);
+    if (cmd_template != NULL) {
+        download->cmd_template = strdup(cmd_template);
+    } else {
+        download->cmd_template = NULL;
     }
+
+    pthread_create(&(download->worker), NULL, &aesgcm_file_get, download);
+    aesgcm_download_add_download(download);
+}
 #endif
+
+void
+_url_http_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename)
+{
 
     HTTPDownload* download = malloc(sizeof(HTTPDownload));
     download->window = window;
     download->url = strdup(url);
     download->filename = strdup(filename);
+    if (cmd_template != NULL) {
+        download->cmd_template = strdup(cmd_template);
+    } else {
+        download->cmd_template = NULL;
+    }
 
     pthread_create(&(download->worker), NULL, &http_file_get, download);
     http_download_add_download(download);
-
-    free(scheme);
 }
 
 void
-_url_save_external_method(const char* scheme_cmd, const char* url, const char* filename)
+_url_external_method(const char* cmd_template, const char* url, const char* filename)
 {
-    gchar** argv = g_strsplit(scheme_cmd, " ", 0);
-
-    guint num_args = 0;
-    while (argv[num_args]) {
-        if (0 == g_strcmp0(argv[num_args], "%u")) {
-            g_free(argv[num_args]);
-            argv[num_args] = g_strdup(url);
-        } else if (0 == g_strcmp0(argv[num_args], "%p")) {
-            g_free(argv[num_args]);
-            argv[num_args] = strdup(filename);
-        }
-        num_args++;
-    }
+    gchar** argv = format_call_external_argv(cmd_template, url, filename);
 
     if (!call_external(argv, NULL, NULL)) {
-        cons_show_error("Unable to save url: check the logs for more information.");
+        cons_show_error("Unable to call external executable for url: check the logs for more information.");
     } else {
-        cons_show("URL '%s' has been saved to '%s'.", url, filename);
+        cons_show("URL '%s' has been called with '%s'.", cmd_template);
     }
+
+    g_strfreev(argv);
 }
 
 char*
-_make_unique_filename(const char* filename)
+_unique_filename(const char* filename)
 {
     char* unique = strdup(filename);
 
@@ -9242,6 +9133,92 @@ _make_unique_filename(const char* filename)
     return unique;
 }
 
+char*
+_unique_filename_from_url(char* url, char* path)
+{
+    gchar* directory = NULL;
+    gchar* basename = NULL;
+    if (path != NULL) {
+        directory = g_path_get_dirname(path);
+        basename = g_path_get_basename(path);
+    }
+
+    if (directory == NULL) {
+        // Explicitly use "./" as directory if no directory has been passed.
+        directory = "./";
+    }
+
+    if (!g_file_test(directory, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+        cons_show_error("Directory '%s' does not exist or is not a directory.", directory);
+        return NULL;
+    }
+
+    if (!basename) {
+        basename = http_basename_from_url(url);
+    }
+
+    char* filename = NULL;
+    filename = g_build_filename(directory, basename, NULL);
+
+    char* unique_filename = _unique_filename(filename);
+    if (!unique_filename) {
+        cons_show_error("Failed to generate an unique filename from '%s'.", filename);
+        free(filename);
+        return NULL;
+    }
+
+    free(filename);
+    return unique_filename;
+}
+
+gboolean
+cmd_url_open(ProfWin* window, const char* const command, gchar** args)
+{
+    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
+        cons_show("url open not supported in this window");
+        return TRUE;
+    }
+
+    gchar* url = args[1];
+    if (url == NULL) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    gchar* scheme = g_uri_parse_scheme(url);
+    if (scheme == NULL) {
+        cons_show("URL '%s' is not valid.", args[1]);
+        return TRUE;
+    }
+
+    char* cmd_template = prefs_get_string_with_option(PREF_URL_OPEN_CMD, scheme);
+    if (cmd_template == NULL) {
+        cons_show("No default open command found in url open preferences");
+        return TRUE;
+    }
+
+#ifdef HAVE_OMEMO
+    // OMEMO URLs (aesgcm://) must be saved and decrypted before being opened.
+    if (0 == g_strcmp0(scheme, "aesgcm")) {
+        char* filename = _unique_filename_from_url(url, files_get_data_path(DIR_DOWNLOADS));
+        _url_aesgcm_method(window, cmd_template, url, filename);
+
+        free(filename);
+        goto out;
+    }
+#endif
+
+    _url_external_method(cmd_template, url, NULL);
+
+#ifdef HAVE_OMEMO
+out:
+#endif
+    free(cmd_template);
+    free(scheme);
+
+    return TRUE;
+}
+
 gboolean
 cmd_url_save(ProfWin* window, const char* const command, gchar** args)
 {
@@ -9260,59 +9237,29 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
 
     gchar* scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
-        cons_show("URL '%s' is not valid.", url);
-        g_free(url);
+        cons_show("URL '%s' is not valid.", args[1]);
         return TRUE;
     }
 
-    gchar* directory = NULL;
-    gchar* basename = NULL;
-    if (path != NULL) {
-        directory = g_path_get_dirname(path);
-        basename = g_path_get_basename(path);
-    }
+    char* filename = _unique_filename_from_url(url, path);
 
-    if (directory == NULL) {
-        // Explicitly use "./" as directory if no directory has been passed.
-        directory = "./";
-    }
-
-    if (!g_file_test(directory, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
-        cons_show_error("Directory '%s' does not exist or is not a directory.", directory);
-        return TRUE;
-    }
-
-    if (!basename) {
-        basename = http_basename_from_url(url);
-    }
-
-    char* filename = NULL;
-    filename = g_build_filename(directory, basename, NULL);
-
-    char* unique_filename = _make_unique_filename(filename);
-    if (!unique_filename) {
-        cons_show_error("Failed to generate an unique filename from '%s'.", filename);
-        free(filename);
-        return TRUE;
-    }
-
-    free(filename);
-    filename = unique_filename;
-
-    gchar* scheme_cmd = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
-    if (scheme_cmd == NULL) {
+    char* cmd_template = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
+    if (cmd_template == NULL) {
         if (g_strcmp0(scheme, "http") == 0
-            || g_strcmp0(scheme, "https") == 0
-            || g_strcmp0(scheme, "aesgcm") == 0) {
-            _url_save_fallback_method(window, url, filename);
+            || g_strcmp0(scheme, "https") == 0) {
+            _url_http_method(window, url, filename, cmd_template);
+#ifdef HAVE_OMEMO
+        } else if (g_strcmp0(scheme, "aesgcm") == 0) {
+            _url_aesgcm_method(window, url, filename, cmd_template);
+#endif
         } else {
             cons_show_error("No download method defined for the scheme '%s'.", scheme);
         }
     } else {
-        _url_save_external_method(scheme_cmd, url, filename);
+        _url_external_method(cmd_template, url, filename);
     }
 
-    g_free(scheme_cmd);
+    free(cmd_template);
 
     return TRUE;
 }
