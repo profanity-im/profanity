@@ -1865,7 +1865,6 @@ _get_group(preference_t pref)
         return PREF_GROUP_LOGGING;
     case PREF_AVATAR_CMD:
     case PREF_URL_OPEN_CMD:
-        return PREF_GROUP_EXECUTABLES;
     case PREF_URL_SAVE_CMD:
         return PREF_GROUP_EXECUTABLES;
     case PREF_AUTOAWAY_CHECK:

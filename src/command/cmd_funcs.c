@@ -9110,67 +9110,6 @@ _url_external_method(const char* cmd_template, const char* url, const char* file
     g_strfreev(argv);
 }
 
-char*
-_unique_filename(const char* filename)
-{
-    char* unique = strdup(filename);
-
-    unsigned int i = 0;
-    while (g_file_test(unique, G_FILE_TEST_EXISTS)) {
-        free(unique);
-
-        if (i > 1000) { // Give up after 1000 attempts.
-            return NULL;
-        }
-
-        if (asprintf(&unique, "%s.%u", filename, i) < 0) {
-            return NULL;
-        }
-
-        i++;
-    }
-
-    return unique;
-}
-
-char*
-_unique_filename_from_url(char* url, char* path)
-{
-    gchar* directory = NULL;
-    gchar* basename = NULL;
-    if (path != NULL) {
-        directory = g_path_get_dirname(path);
-        basename = g_path_get_basename(path);
-    }
-
-    if (directory == NULL) {
-        // Explicitly use "./" as directory if no directory has been passed.
-        directory = "./";
-    }
-
-    if (!g_file_test(directory, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
-        cons_show_error("Directory '%s' does not exist or is not a directory.", directory);
-        return NULL;
-    }
-
-    if (!basename) {
-        basename = http_basename_from_url(url);
-    }
-
-    char* filename = NULL;
-    filename = g_build_filename(directory, basename, NULL);
-
-    char* unique_filename = _unique_filename(filename);
-    if (!unique_filename) {
-        cons_show_error("Failed to generate an unique filename from '%s'.", filename);
-        free(filename);
-        return NULL;
-    }
-
-    free(filename);
-    return unique_filename;
-}
-
 gboolean
 cmd_url_open(ProfWin* window, const char* const command, gchar** args)
 {
@@ -9200,7 +9139,7 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
 #ifdef HAVE_OMEMO
     // OMEMO URLs (aesgcm://) must be saved and decrypted before being opened.
     if (0 == g_strcmp0(scheme, "aesgcm")) {
-        char* filename = _unique_filename_from_url(url, files_get_data_path(DIR_DOWNLOADS));
+        char* filename = unique_filename_from_url(url, files_get_data_path(DIR_DOWNLOADS));
         _url_aesgcm_method(window, cmd_template, url, filename);
 
         free(filename);
@@ -9241,7 +9180,7 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    char* filename = _unique_filename_from_url(url, path);
+    char* filename = unique_filename_from_url(url, path);
 
     char* cmd_template = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
     if (cmd_template == NULL) {

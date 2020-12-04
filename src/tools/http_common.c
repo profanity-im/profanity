@@ -44,25 +44,6 @@
 
 #define FALLBACK_MSG ""
 
-char*
-http_basename_from_url(const char* url)
-{
-    const char* default_name = "index.html";
-
-    GFile* file = g_file_new_for_uri(url);
-    char* filename = g_file_get_basename(file);
-    g_object_unref(file);
-
-    if (g_strcmp0(filename, ".") == 0
-        || g_strcmp0(filename, "..") == 0
-        || g_strcmp0(filename, G_DIR_SEPARATOR_S) == 0) {
-        g_free(filename);
-        return strdup(default_name);
-    }
-
-    return filename;
-}
-
 void
 http_print_transfer_update(ProfWin* window, char* url, const char* fmt, ...)
 {

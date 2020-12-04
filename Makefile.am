@@ -93,8 +93,6 @@ unittest_sources = \
 	src/tools/clipboard.c src/tools/clipboard.h \
 	src/tools/bookmark_ignore.c \
 	src/tools/bookmark_ignore.h \
-	src/tools/http_download.c \
-	src/tools/http_download.h \
 	src/config/accounts.h \
 	src/config/account.c src/config/account.h \
 	src/config/files.c src/config/files.h \
@@ -153,7 +151,6 @@ unittest_sources = \
 	tests/unittests/test_cmd_disconnect.c tests/unittests/test_cmd_disconnect.h \
 	tests/unittests/test_callbacks.c tests/unittests/test_callbacks.h \
 	tests/unittests/test_plugins_disco.c tests/unittests/test_plugins_disco.h \
-	tests/unittests/test_http_common.c tests/unittests/test_http_common.h \
 	tests/unittests/unittests.c
 
 functionaltest_sources = \

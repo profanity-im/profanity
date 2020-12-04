@@ -330,6 +330,83 @@ strip_quotes_strips_both(void** state)
     free(result);
 }
 
+typedef struct
+{
+    char* url;
+    char* path;
+    char* filename;
+} unique_filename_from_url_t;
+
+void
+unique_filename_from_url_td(void** state)
+{
+    enum table { num_tests = 11 };
+
+    unique_filename_from_url_t tests[num_tests] = {
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg",
+            .path = "./",
+            .filename = "./image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg#somefragment",
+            .path = "./",
+            .filename = "./image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg?query=param",
+            .path = "./",
+            .filename = "./image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg?query=param&another=one",
+            .path = "./",
+            .filename = "./image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/images/",
+            .path = "./",
+            .filename = "./images",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/images/../../file",
+            .path = "./",
+            .filename = "./file",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/images/../../file/..",
+            .path = "./",
+            .filename = "./index.html",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/images/..//",
+            .path = "./",
+            .filename = "./index.html",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/",
+            .path = "./",
+            .filename = "./index.html",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test",
+            .path = "./",
+            .filename = "./index.html",
+        },
+        (unique_filename_from_url_t){
+            .url = "aesgcm://host.test",
+            .path = "./",
+            .filename = "./index.html",
+        },
+    };
+
+    char* filename;
+    for (int i = 0; i < num_tests; i++) {
+        filename = unique_filename_from_url(tests[i].url, tests[i].path);
+        assert_string_equal(filename, tests[i].filename);
+    }
+}
+
 gboolean
 _lists_equal(GSList* a, GSList* b)
 {

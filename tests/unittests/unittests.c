@@ -38,7 +38,6 @@
 #include "test_form.h"
 #include "test_callbacks.h"
 #include "test_plugins_disco.h"
-#include "test_http_common.h"
 
 int
 main(int argc, char* argv[])
@@ -91,6 +90,7 @@ main(int argc, char* argv[])
         unit_test(strip_quotes_strips_first),
         unit_test(strip_quotes_strips_last),
         unit_test(strip_quotes_strips_both),
+        unit_test(unique_filename_from_url_td),
 
         unit_test(clear_empty),
         unit_test(reset_after_create),
@@ -627,8 +627,6 @@ main(int argc, char* argv[])
         unit_test(does_not_add_duplicate_feature),
         unit_test(removes_plugin_features),
         unit_test(does_not_remove_feature_when_more_than_one_reference),
-
-        unit_test(http_basename_from_url_td),
     };
 
     return run_tests(all_tests);

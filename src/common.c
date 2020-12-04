@@ -33,6 +33,9 @@
  * source files in the program, then also delete it here.
  *
  */
+
+#define _GNU_SOURCE 1
+
 #include "config.h"
 
 #include <errno.h>
@@ -574,4 +577,81 @@ format_call_external_argv(const char* template, const char* url, const char* fil
     }
 
     return argv;
+}
+
+gchar*
+_unique_filename(const char* filename)
+{
+    gchar* unique = g_strdup(filename);
+
+    unsigned int i = 0;
+    while (g_file_test(unique, G_FILE_TEST_EXISTS)) {
+        free(unique);
+
+        if (i > 1000) { // Give up after 1000 attempts.
+            return NULL;
+        }
+
+        if (asprintf(&unique, "%s.%u", filename, i) < 0) {
+            return NULL;
+        }
+
+        i++;
+    }
+
+    return unique;
+}
+
+gchar*
+_basename_from_url(const char* url)
+{
+    const char* default_name = "index.html";
+
+    GFile* file = g_file_new_for_uri(url);
+    gchar* filename = g_file_get_basename(file);
+    g_object_unref(file);
+
+    if (g_strcmp0(filename, ".") == 0
+        || g_strcmp0(filename, "..") == 0
+        || g_strcmp0(filename, G_DIR_SEPARATOR_S) == 0) {
+        g_free(filename);
+        return strdup(default_name);
+    }
+
+    return filename;
+}
+
+gchar*
+unique_filename_from_url(const char* url, const char* path)
+{
+    gchar* directory = NULL;
+    gchar* basename = NULL;
+    if (path != NULL) {
+        directory = g_path_get_dirname(path);
+        basename = g_path_get_basename(path);
+    }
+
+    if (!directory) {
+        // Explicitly use "./" as directory if no directory has been passed.
+        directory = "./";
+    }
+
+    if (!g_file_test(directory, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+        return NULL;
+    }
+
+    if (g_file_test(path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
+        basename = _basename_from_url(url);
+    }
+
+    gchar* filename = g_build_filename(directory, basename, NULL);
+
+    gchar* unique_filename = _unique_filename(filename);
+    if (!unique_filename) {
+        g_free(filename);
+        return NULL;
+    }
+
+    g_free(filename);
+    return unique_filename;
 }

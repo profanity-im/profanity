@@ -107,4 +107,6 @@ char* get_random_string(int length);
 gboolean call_external(gchar** argv, gchar*** const output_ptr, gchar*** const error_ptr);
 gchar** format_call_external_argv(const char* template, const char* url, const char* filename);
 
+gchar* unique_filename_from_url(const char* url, const char* path);
+
 #endif

@@ -18,4 +18,13 @@ typedef struct http_download_t
     int cancel;
 } HTTPDownload;
 
+void*
+http_file_get(void* userdata)
+{
+    return NULL;
+}
+
+void http_download_cancel_processes(){};
+void http_download_add_download(){};
+
 #endif
