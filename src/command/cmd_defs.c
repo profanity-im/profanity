@@ -2833,3 +2833,70 @@ command_docgen(void)
     printf("\nProcessed %d commands.\n\n", g_list_length(cmds));
     g_list_free(cmds);
 }
+
+void
+command_mangen(void)
+{
+    GList* cmds = NULL;
+
+    for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
+        Command* pcmd = command_defs + i;
+        cmds = g_list_insert_sorted(cmds, pcmd, (GCompareFunc)_cmp_command);
+    }
+
+    mkdir_recursive("docs");
+
+    GList* curr = cmds;
+    while (curr) {
+        Command* pcmd = curr->data;
+
+        char* filename = NULL;
+        if (asprintf(&filename, "docs/profanity-%s.1", &pcmd->cmd[1]) == -1) {
+            // TODO: error
+            return;
+        }
+        FILE* manpage = fopen(filename, "w");
+        free(filename);
+
+        fputs(".TH man 1 \"2020-07-01\" \""PACKAGE_VERSION"\" \"Profanity XMPP client\"\n", manpage);
+        fputs(".SH NAME\n", manpage);
+        fprintf(manpage, "%s\n", pcmd->cmd);
+
+        fputs("\n.SH DESCRIPTION\n", manpage);
+        fprintf(manpage, "%s\n", pcmd->help.desc);
+
+        fputs("\n.SH SYNOPSIS\n", manpage);
+        int i = 0;
+        while (pcmd->help.synopsis[i]) {
+            fprintf(manpage, "%s\n", pcmd->help.synopsis[i]);
+            fputs("\n.BR\n", manpage);
+            i++;
+        }
+
+        if (pcmd->help.args[0][0] != NULL) {
+            fputs("\n.SH ARGUMENTS\n", manpage);
+            for (i = 0; pcmd->help.args[i][0] != NULL; i++) {
+                fprintf(manpage, "%s\n", pcmd->help.args[i][0]);
+                fprintf(manpage, "%s\n", pcmd->help.args[i][1]);
+                fputs("\n.BR\n", manpage);
+            }
+        }
+
+        if (pcmd->help.examples[0] != NULL) {
+            fputs("\n.SH EXAMPLES\n", manpage);
+            int i = 0;
+            while (pcmd->help.examples[i]) {
+                fprintf(manpage, "%s\n", pcmd->help.examples[i]);
+                fputs("\n.BR\n", manpage);
+                i++;
+            }
+        }
+
+        curr = g_list_next(curr);
+
+        fclose(manpage);
+    }
+
+    printf("\nProcessed %d commands.\n\n", g_list_length(cmds));
+    g_list_free(cmds);
+}

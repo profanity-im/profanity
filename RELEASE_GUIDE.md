@@ -15,6 +15,10 @@ Usually release candidates are tagged 0.6.0.rc1, 0.6.0.rc2 and tested for a week
 * Generate HTML docs (the docgen argument only works when package status is development)
     `./profanity docgen`
 
+* Generate manpages for profanity commands (the mangen argument only works when package status is development)
+    `./profanity mangen`
+  These files should be added to the docs subfolder and added to git whenever a command changes.
+
 * Determine if libprofanitys version needs to be [increased](https://github.com/profanity-im/profanity/issues/973)
 * Update plugin API docs (./apidocs/c and ./apidocs/python) need to run the `gen.sh` and commit the results to the website git repo
 * Update CHANGELOG
