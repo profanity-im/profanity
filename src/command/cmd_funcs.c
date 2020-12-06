@@ -9141,7 +9141,6 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
     if (0 == g_strcmp0(scheme, "aesgcm")) {
         char* filename = unique_filename_from_url(url, files_get_data_path(DIR_DOWNLOADS));
         _url_aesgcm_method(window, cmd_template, url, filename);
-
         free(filename);
         goto out;
     }

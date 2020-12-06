@@ -205,6 +205,7 @@ http_file_get(void* userdata)
         }
 
         g_strfreev(argv);
+        free(download->cmd_template);
     }
 
     free(download->url);

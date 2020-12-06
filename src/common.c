@@ -602,56 +602,63 @@ _unique_filename(const char* filename)
     return unique;
 }
 
-gchar*
+bool
+_has_directory_suffix(const char* path)
+{
+    return (g_str_has_suffix(path, ".")
+            || g_str_has_suffix(path, "..")
+            || g_str_has_suffix(path, G_DIR_SEPARATOR_S));
+}
+
+char*
 _basename_from_url(const char* url)
 {
-    const char* default_name = "index.html";
+    const char* default_name = "index";
 
-    GFile* file = g_file_new_for_uri(url);
-    gchar* filename = g_file_get_basename(file);
-    g_object_unref(file);
+    GFile* file = g_file_new_for_commandline_arg(url);
+    char* basename = g_file_get_basename(file);
 
-    if (g_strcmp0(filename, ".") == 0
-        || g_strcmp0(filename, "..") == 0
-        || g_strcmp0(filename, G_DIR_SEPARATOR_S) == 0) {
-        g_free(filename);
-        return strdup(default_name);
+    if (_has_directory_suffix(basename)) {
+        g_free(basename);
+        basename = strdup(default_name);
     }
 
-    return filename;
+    g_object_unref(file);
+
+    return basename;
 }
 
 gchar*
 unique_filename_from_url(const char* url, const char* path)
 {
-    gchar* directory = NULL;
-    gchar* basename = NULL;
-    if (path != NULL) {
-        directory = g_path_get_dirname(path);
-        basename = g_path_get_basename(path);
+    // Default to './' as path when none has been provided.
+    if (path == NULL) {
+        path = "./";
     }
 
-    if (!directory) {
-        // Explicitly use "./" as directory if no directory has been passed.
-        directory = "./";
-    }
+    // Resolves paths such as './../.' for path.
+    GFile* target = g_file_new_for_commandline_arg(path);
+    gchar* filename = NULL;
 
-    if (!g_file_test(directory, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
-        return NULL;
+    if (_has_directory_suffix(path) || g_file_test(path, G_FILE_TEST_IS_DIR)) {
+        // The target should be used as a directory. Assume that the basename
+        // should be derived from the URL.
+        char* basename = _basename_from_url(url);
+        filename = g_build_filename(g_file_peek_path(target), basename, NULL);
+        g_free(basename);
+    } else {
+        // Just use the target as filename.
+        filename = g_build_filename(g_file_peek_path(target), NULL);
     }
-
-    if (g_file_test(path, G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR)) {
-        basename = _basename_from_url(url);
-    }
-
-    gchar* filename = g_build_filename(directory, basename, NULL);
 
     gchar* unique_filename = _unique_filename(filename);
-    if (!unique_filename) {
+    if (unique_filename == NULL) {
         g_free(filename);
         return NULL;
     }
 
+    g_object_unref(target);
     g_free(filename);
+
     return unique_filename;
 }

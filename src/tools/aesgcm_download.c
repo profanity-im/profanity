@@ -85,11 +85,6 @@ aesgcm_file_get(void* userdata)
                                    "(%s).",
                                    https_url, g_strerror(errno));
         return NULL;
-    } else {
-        // TODO(wstrm): Maybe refactor this to use file handles so we do not
-        //              have to open a dummy file descriptor and then close it.
-        //              It's pretty ugly this way...
-        close(tmpfd);
     }
 
     FILE* outfh = fopen(aesgcm_dl->filename, "wb");
@@ -107,6 +102,7 @@ aesgcm_file_get(void* userdata)
     http_dl->worker = aesgcm_dl->worker;
     http_dl->url = strdup(https_url);
     http_dl->filename = strdup(tmpname);
+    http_dl->cmd_template = NULL;
 
     aesgcm_dl->http_dl = http_dl;
 
@@ -117,7 +113,7 @@ aesgcm_file_get(void* userdata)
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
                                    "Downloading '%s' failed: Unable to open "
                                    "temporary file at '%s' for reading (%s).",
-                                   aesgcm_dl->url, aesgcm_dl->filename,
+                                   aesgcm_dl->url, tmpname,
                                    g_strerror(errno));
         return NULL;
     }
@@ -130,6 +126,7 @@ aesgcm_file_get(void* userdata)
         cons_show_error(g_strerror(errno));
     }
 
+    close(tmpfd);
     remove(tmpname);
     g_free(tmpname);
 
@@ -149,7 +146,7 @@ aesgcm_file_get(void* userdata)
 
     if (aesgcm_dl->cmd_template != NULL) {
         gchar** argv = format_call_external_argv(aesgcm_dl->cmd_template,
-                                                 aesgcm_dl->url,
+                                                 aesgcm_dl->filename,
                                                  aesgcm_dl->filename);
 
         // TODO(wstrm): Log the error.
@@ -164,11 +161,11 @@ aesgcm_file_get(void* userdata)
         }
 
         g_strfreev(argv);
+        free(aesgcm_dl->cmd_template);
     }
 
     free(aesgcm_dl->filename);
     free(aesgcm_dl->url);
-    free(aesgcm_dl->cmd_template);
     free(aesgcm_dl);
 
     return NULL;

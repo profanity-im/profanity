@@ -334,77 +334,123 @@ typedef struct
 {
     char* url;
     char* path;
-    char* filename;
+    char* target;
+    char* basename;
 } unique_filename_from_url_t;
 
 void
 unique_filename_from_url_td(void** state)
 {
-    enum table { num_tests = 11 };
+
+    enum table { num_tests = 15 };
+    char* pwd = g_get_current_dir();
 
     unique_filename_from_url_t tests[num_tests] = {
         (unique_filename_from_url_t){
             .url = "https://host.test/image.jpeg",
-            .path = "./",
-            .filename = "./image.jpeg",
+            .path = "./.",
+            .target = pwd,
+            .basename = "image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg",
+            .path = NULL,
+            .target = pwd,
+            .basename = "image.jpeg",
         },
         (unique_filename_from_url_t){
             .url = "https://host.test/image.jpeg#somefragment",
             .path = "./",
-            .filename = "./image.jpeg",
+            .target = pwd,
+            .basename = "image.jpeg",
         },
         (unique_filename_from_url_t){
             .url = "https://host.test/image.jpeg?query=param",
             .path = "./",
-            .filename = "./image.jpeg",
+            .target = pwd,
+            .basename = "image.jpeg",
         },
         (unique_filename_from_url_t){
             .url = "https://host.test/image.jpeg?query=param&another=one",
             .path = "./",
-            .filename = "./image.jpeg",
+            .target = pwd,
+            .basename = "image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg?query=param&another=one",
+            .path = "/tmp/",
+            .target = "/tmp/",
+            .basename = "image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg?query=param&another=one",
+            .path = "/tmp/hopefully/this/file/does/not/exist",
+            .target = "/tmp/hopefully/this/file/does/not/",
+            .basename = "exist",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg?query=param&another=one",
+            .path = "/tmp/hopefully/this/file/does/not/exist/",
+            .target = "/tmp/hopefully/this/file/does/not/exist/",
+            .basename = "image.jpeg",
         },
         (unique_filename_from_url_t){
             .url = "https://host.test/images/",
             .path = "./",
-            .filename = "./images",
+            .target = pwd,
+            .basename = "images",
         },
         (unique_filename_from_url_t){
             .url = "https://host.test/images/../../file",
             .path = "./",
-            .filename = "./file",
+            .target = pwd,
+            .basename = "file",
         },
         (unique_filename_from_url_t){
             .url = "https://host.test/images/../../file/..",
             .path = "./",
-            .filename = "./index.html",
+            .target = pwd,
+            .basename = "index",
         },
         (unique_filename_from_url_t){
             .url = "https://host.test/images/..//",
             .path = "./",
-            .filename = "./index.html",
+            .target = pwd,
+            .basename = "index",
         },
         (unique_filename_from_url_t){
             .url = "https://host.test/",
             .path = "./",
-            .filename = "./index.html",
+            .target = pwd,
+            .basename = "index",
         },
         (unique_filename_from_url_t){
             .url = "https://host.test",
             .path = "./",
-            .filename = "./index.html",
+            .target = pwd,
+            .basename = "index",
         },
         (unique_filename_from_url_t){
             .url = "aesgcm://host.test",
             .path = "./",
-            .filename = "./index.html",
+            .target = pwd,
+            .basename = "index",
         },
     };
 
-    char* filename;
+    char* got_filename;
+    char* exp_filename;
     for (int i = 0; i < num_tests; i++) {
-        filename = unique_filename_from_url(tests[i].url, tests[i].path);
-        assert_string_equal(filename, tests[i].filename);
+        got_filename = unique_filename_from_url(tests[i].url, tests[i].path);
+        exp_filename = g_build_filename(tests[i].target, tests[i].basename, NULL);
+
+        assert_string_equal(got_filename, exp_filename);
+
+        free(got_filename);
+        free(exp_filename);
     }
+
+    g_free(pwd);
 }
 
 gboolean
