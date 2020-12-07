@@ -2869,7 +2869,7 @@ command_mangen(void)
         int i = 0;
         while (pcmd->help.synopsis[i]) {
             fprintf(manpage, "%s\n", pcmd->help.synopsis[i]);
-            fputs("\n.BR\n", manpage);
+            fputs("\n.LP\n", manpage);
             i++;
         }
 
@@ -2886,7 +2886,7 @@ command_mangen(void)
             int i = 0;
             while (pcmd->help.examples[i]) {
                 fprintf(manpage, "%s\n", pcmd->help.examples[i]);
-                fputs("\n.BR\n", manpage);
+                fputs("\n.LP\n", manpage);
                 i++;
             }
         }
