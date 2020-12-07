@@ -193,7 +193,7 @@ http_file_get(void* userdata)
                                                  download->url,
                                                  download->filename);
 
-        // TODO(wstrm): Log the error.
+        // TODO: Log the error.
         if (!call_external(argv, NULL, NULL)) {
             http_print_transfer_update(download->window, download->url,
                                        "Downloading '%s' failed: Unable to call "
@@ -201,7 +201,7 @@ http_file_get(void* userdata)
                                        download->url,
                                        download->cmd_template,
                                        download->filename,
-                                       "TODO(wstrm): Log the error");
+                                       "TODO: Log the error");
         }
 
         g_strfreev(argv);
