@@ -69,6 +69,8 @@ aesgcm_file_get(void* userdata)
     char* https_url = NULL;
     char* fragment = NULL;
 
+    // Convert the aesgcm:// URL to a https:// URL and extract the encoded key
+    // and tag stored in the URL fragment.
     if (omemo_parse_aesgcm_url(aesgcm_dl->url, &https_url, &fragment) != 0) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
                                    "Download failed: Cannot parse URL '%s'.",
@@ -76,6 +78,8 @@ aesgcm_file_get(void* userdata)
         return NULL;
     }
 
+    // Create a temporary file used for storing the ciphertext that is to be
+    // retrieved from the https:// URL.
     gchar* tmpname = NULL;
     gint tmpfd;
     if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
@@ -87,6 +91,7 @@ aesgcm_file_get(void* userdata)
         return NULL;
     }
 
+    // Open the target file for storing the cleartext.
     FILE* outfh = fopen(aesgcm_dl->filename, "wb");
     if (outfh == NULL) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
@@ -97,13 +102,14 @@ aesgcm_file_get(void* userdata)
         return NULL;
     }
 
+    // We wrap the HTTPDownload tool and use it for retrieving the ciphertext
+    // and storing it in the temporary file previously opened.
     HTTPDownload* http_dl = malloc(sizeof(HTTPDownload));
     http_dl->window = aesgcm_dl->window;
     http_dl->worker = aesgcm_dl->worker;
     http_dl->url = strdup(https_url);
     http_dl->filename = strdup(tmpname);
     http_dl->cmd_template = NULL;
-
     aesgcm_dl->http_dl = http_dl;
 
     http_file_get(http_dl); // TODO(wstrm): Verify result.

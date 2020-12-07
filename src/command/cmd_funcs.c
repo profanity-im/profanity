@@ -4809,6 +4809,8 @@ cmd_disco(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
+// TODO(wstrm): Move this into its own tools such as HTTPUpload or
+// AESGCMDownload.
 #ifdef HAVE_OMEMO
 char*
 _add_omemo_stream(int* fd, FILE** fh, char** err)
@@ -9180,6 +9182,11 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* filename = unique_filename_from_url(url, path);
+    if (filename == NULL) {
+        cons_show("Failed to generate unique filename"
+                  "from URL '%s' for path '%s'",
+                  url, path);
+    }
 
     char* cmd_template = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
     if (cmd_template == NULL) {
@@ -9188,7 +9195,7 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
             _url_http_method(window, url, filename, cmd_template);
 #ifdef HAVE_OMEMO
         } else if (g_strcmp0(scheme, "aesgcm") == 0) {
-            _url_aesgcm_method(window, url, filename, cmd_template);
+            _url_aesgcm_method(window, cmd_template, url, filename);
 #endif
         } else {
             cons_show_error("No download method defined for the scheme '%s'.", scheme);

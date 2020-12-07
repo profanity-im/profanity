@@ -2073,7 +2073,7 @@ cons_executable_setting(void)
     g_free(avatar);
 
     //TODO: there needs to be a way to get all the "locales"/schemes so we can
-    //display the defualt openers for all filetypes
+    //display the default openers for all filetypes
     char* urlopen = prefs_get_string_with_option(PREF_URL_OPEN_CMD, "");
     cons_show("Default '/url open' command (/executable urlopen)                        : %s", urlopen[1]);
     g_free(urlopen);
