@@ -2833,3 +2833,80 @@ command_docgen(void)
     printf("\nProcessed %d commands.\n\n", g_list_length(cmds));
     g_list_free(cmds);
 }
+
+void
+command_mangen(void)
+{
+    GList* cmds = NULL;
+
+    for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
+        Command* pcmd = command_defs + i;
+        cmds = g_list_insert_sorted(cmds, pcmd, (GCompareFunc)_cmp_command);
+    }
+
+    mkdir_recursive("docs");
+
+    char* header = NULL;
+    GDateTime *now = g_date_time_new_now_local();
+    gchar *date = g_date_time_format(now, "%F");
+    if (asprintf(&header, ".TH man 1 \"%s\" \""PACKAGE_VERSION"\" \"Profanity XMPP client\"\n", date) == -1) {
+        // TODO: error
+        return;
+    }
+    g_date_time_unref(now);
+    g_free(date);
+
+    GList* curr = cmds;
+    while (curr) {
+        Command* pcmd = curr->data;
+
+        char* filename = NULL;
+        if (asprintf(&filename, "docs/profanity-%s.1", &pcmd->cmd[1]) == -1) {
+            // TODO: error
+            return;
+        }
+        FILE* manpage = fopen(filename, "w");
+        free(filename);
+
+        fprintf(manpage, "%s\n", header);
+        fputs(".SH NAME\n", manpage);
+        fprintf(manpage, "%s\n", pcmd->cmd);
+
+        fputs("\n.SH DESCRIPTION\n", manpage);
+        fprintf(manpage, "%s\n", pcmd->help.desc);
+
+        fputs("\n.SH SYNOPSIS\n", manpage);
+        int i = 0;
+        while (pcmd->help.synopsis[i]) {
+            fprintf(manpage, "%s\n", pcmd->help.synopsis[i]);
+            fputs("\n.LP\n", manpage);
+            i++;
+        }
+
+        if (pcmd->help.args[0][0] != NULL) {
+            fputs("\n.SH ARGUMENTS\n", manpage);
+            for (i = 0; pcmd->help.args[i][0] != NULL; i++) {
+                fprintf(manpage, ".PP\n\\fB%s\\fR\n", pcmd->help.args[i][0]);
+                fprintf(manpage, ".RS 4\n%s\n.RE\n", pcmd->help.args[i][1]);
+            }
+        }
+
+        if (pcmd->help.examples[0] != NULL) {
+            fputs("\n.SH EXAMPLES\n", manpage);
+            int i = 0;
+            while (pcmd->help.examples[i]) {
+                fprintf(manpage, "%s\n", pcmd->help.examples[i]);
+                fputs("\n.LP\n", manpage);
+                i++;
+            }
+        }
+
+        fclose(manpage);
+        curr = g_list_next(curr);
+    }
+
+    printf("\nProcessed %d commands.\n\n", g_list_length(cmds));
+
+    free(header);
+    g_list_free(cmds);
+}

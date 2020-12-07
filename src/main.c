@@ -69,9 +69,14 @@ static char* theme_name = NULL;
 int
 main(int argc, char** argv)
 {
-    if (argc == 2 && g_strcmp0(argv[1], "docgen") == 0 && g_strcmp0(PACKAGE_STATUS, "development") == 0) {
-        command_docgen();
-        return 0;
+    if (argc == 2  && g_strcmp0(PACKAGE_STATUS, "development") == 0) {
+        if (g_strcmp0(argv[1], "docgen") == 0) {
+            command_docgen();
+            return 0;
+        } else if (g_strcmp0(argv[1], "mangen") == 0) {
+            command_mangen();
+            return 0;
+        }
     }
 
     static GOptionEntry entries[] = {

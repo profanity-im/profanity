@@ -213,7 +213,7 @@ icons_sources = $(top_srcdir)/icons/*
 
 script_sources = bootstrap.sh
 
-man_sources = docs/profanity.1
+man_sources = docs/profanity*.1
 
 if BUILD_PGP
 core_sources += $(pgp_sources)

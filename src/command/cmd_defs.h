@@ -50,6 +50,7 @@ GList* cmd_get_ordered(const char* const tag);
 gboolean cmd_valid_tag(const char* const str);
 
 void command_docgen(void);
+void command_mangen(void);
 
 GList* cmd_search_index_all(char* term);
 GList* cmd_search_index_any(char* term);
