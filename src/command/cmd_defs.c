@@ -2846,6 +2846,16 @@ command_mangen(void)
 
     mkdir_recursive("docs");
 
+    char* header = NULL;
+    GDateTime *now = g_date_time_new_now_local();
+    gchar *date = g_date_time_format(now, "%F");
+    if (asprintf(&header, ".TH man 1 \"%s\" \""PACKAGE_VERSION"\" \"Profanity XMPP client\"\n", date) == -1) {
+        // TODO: error
+        return;
+    }
+    g_date_time_unref(now);
+    g_free(date);
+
     GList* curr = cmds;
     while (curr) {
         Command* pcmd = curr->data;
@@ -2858,7 +2868,7 @@ command_mangen(void)
         FILE* manpage = fopen(filename, "w");
         free(filename);
 
-        fputs(".TH man 1 \"2020-07-01\" \""PACKAGE_VERSION"\" \"Profanity XMPP client\"\n", manpage);
+        fprintf(manpage, "%s\n", header);
         fputs(".SH NAME\n", manpage);
         fprintf(manpage, "%s\n", pcmd->cmd);
 
@@ -2891,11 +2901,12 @@ command_mangen(void)
             }
         }
 
-        curr = g_list_next(curr);
-
         fclose(manpage);
+        curr = g_list_next(curr);
     }
 
     printf("\nProcessed %d commands.\n\n", g_list_length(cmds));
+
+    free(header);
     g_list_free(cmds);
 }
