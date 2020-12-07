@@ -4809,8 +4809,7 @@ cmd_disco(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
-// TODO(wstrm): Move this into its own tools such as HTTPUpload or
-// AESGCMDownload.
+// TODO: Move this into its own tools such as HTTPUpload or AESGCMDownload.
 #ifdef HAVE_OMEMO
 char*
 _add_omemo_stream(int* fd, FILE** fh, char** err)
@@ -9126,35 +9125,39 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    gchar* scheme = g_uri_parse_scheme(url);
+    gchar* scheme = NULL;
+    char* cmd_template = NULL;
+    char* filename = NULL;
+
+    scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
         cons_show("URL '%s' is not valid.", args[1]);
-        return TRUE;
+        goto out;
     }
 
-    char* cmd_template = prefs_get_string_with_option(PREF_URL_OPEN_CMD, scheme);
+    cmd_template = prefs_get_string_with_option(PREF_URL_OPEN_CMD, scheme);
     if (cmd_template == NULL) {
         cons_show("No default open command found in url open preferences");
-        return TRUE;
+        goto out;
     }
 
 #ifdef HAVE_OMEMO
     // OMEMO URLs (aesgcm://) must be saved and decrypted before being opened.
     if (0 == g_strcmp0(scheme, "aesgcm")) {
-        char* filename = unique_filename_from_url(url, files_get_data_path(DIR_DOWNLOADS));
+        filename = unique_filename_from_url(url, files_get_data_path(DIR_DOWNLOADS));
         _url_aesgcm_method(window, cmd_template, url, filename);
-        free(filename);
         goto out;
     }
 #endif
 
     _url_external_method(cmd_template, url, NULL);
 
-#ifdef HAVE_OMEMO
 out:
-#endif
+
     free(cmd_template);
-    free(scheme);
+    free(filename);
+
+    g_free(scheme);
 
     return TRUE;
 }
@@ -9174,21 +9177,25 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
 
     gchar* url = args[1];
     gchar* path = g_strdup(args[2]);
+    gchar* scheme = NULL;
+    char* filename = NULL;
+    char* cmd_template = NULL;
 
-    gchar* scheme = g_uri_parse_scheme(url);
+    scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
         cons_show("URL '%s' is not valid.", args[1]);
-        return TRUE;
+        goto out;
     }
 
-    char* filename = unique_filename_from_url(url, path);
+    filename = unique_filename_from_url(url, path);
     if (filename == NULL) {
         cons_show("Failed to generate unique filename"
                   "from URL '%s' for path '%s'",
                   url, path);
+        goto out;
     }
 
-    char* cmd_template = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
+    cmd_template = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
     if (cmd_template == NULL) {
         if (g_strcmp0(scheme, "http") == 0
             || g_strcmp0(scheme, "https") == 0) {
@@ -9204,7 +9211,13 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
         _url_external_method(cmd_template, url, filename);
     }
 
+out:
+
+    free(filename);
     free(cmd_template);
+
+    g_free(scheme);
+    g_free(path);
 
     return TRUE;
 }

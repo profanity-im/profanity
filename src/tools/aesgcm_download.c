@@ -155,7 +155,7 @@ aesgcm_file_get(void* userdata)
                                                  aesgcm_dl->filename,
                                                  aesgcm_dl->filename);
 
-        // TODO(wstrm): Log the error.
+        // TODO: Log the error.
         if (!call_external(argv, NULL, NULL)) {
             http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
                                        "Downloading '%s' failed: Unable to call "
@@ -163,7 +163,7 @@ aesgcm_file_get(void* userdata)
                                        aesgcm_dl->url,
                                        aesgcm_dl->cmd_template,
                                        aesgcm_dl->filename,
-                                       "TODO(wstrm): Log the error");
+                                       "TODO: Log the error");
         }
 
         g_strfreev(argv);
