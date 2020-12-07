@@ -2886,7 +2886,7 @@ command_mangen(void)
         if (pcmd->help.args[0][0] != NULL) {
             fputs("\n.SH ARGUMENTS\n", manpage);
             for (i = 0; pcmd->help.args[i][0] != NULL; i++) {
-                fprintf(manpage, ".PP\n%s\n", pcmd->help.args[i][0]);
+                fprintf(manpage, ".PP\n\\fB%s\\fR\n", pcmd->help.args[i][0]);
                 fprintf(manpage, ".RS 4\n%s\n.RE\n", pcmd->help.args[i][1]);
             }
         }
