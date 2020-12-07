@@ -9105,7 +9105,7 @@ _url_external_method(const char* cmd_template, const char* url, const char* file
     if (!call_external(argv, NULL, NULL)) {
         cons_show_error("Unable to call external executable for url: check the logs for more information.");
     } else {
-        cons_show("URL '%s' has been called with '%s'.", cmd_template);
+        cons_show("URL '%s' has been called with '%s'.", url, cmd_template);
     }
 
     g_strfreev(argv);
@@ -9199,7 +9199,7 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
     if (cmd_template == NULL) {
         if (g_strcmp0(scheme, "http") == 0
             || g_strcmp0(scheme, "https") == 0) {
-            _url_http_method(window, url, filename, cmd_template);
+            _url_http_method(window, cmd_template, url, filename);
 #ifdef HAVE_OMEMO
         } else if (g_strcmp0(scheme, "aesgcm") == 0) {
             _url_aesgcm_method(window, cmd_template, url, filename);
