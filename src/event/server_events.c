@@ -448,16 +448,6 @@ sv_ev_outgoing_carbon(ProfMessage* message)
 
     chat_state_active(chatwin->state);
 
-    if (message->plain) {
-        if (message->type == PROF_MSG_TYPE_MUCPM) {
-            // MUC PM, should have resource (nick) in filename
-            chat_log_msg_out(message->to_jid->barejid, message->plain, message->from_jid->resourcepart);
-        } else {
-            chat_log_msg_out(message->to_jid->barejid, message->plain, NULL);
-        }
-        log_database_add_incoming(message);
-    }
-
     if (message->enc == PROF_MSG_ENC_OMEMO) {
         chatwin_outgoing_carbon(chatwin, message);
     } else if (message->encrypted) {
@@ -480,6 +470,16 @@ sv_ev_outgoing_carbon(ProfMessage* message)
         message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
         chatwin_outgoing_carbon(chatwin, message);
+    }
+
+    if (message->plain) {
+        if (message->type == PROF_MSG_TYPE_MUCPM) {
+            // MUC PM, should have resource (nick) in filename
+            chat_log_msg_out(message->to_jid->barejid, message->plain, message->from_jid->resourcepart);
+        } else {
+            chat_log_msg_out(message->to_jid->barejid, message->plain, NULL);
+        }
+        log_database_add_incoming(message);
     }
     return;
 }
