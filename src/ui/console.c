@@ -2068,17 +2068,20 @@ cons_correction_setting(void)
 void
 cons_executable_setting(void)
 {
-    char* avatar = prefs_get_string(PREF_AVATAR_CMD);
+    gchar* avatar = prefs_get_string(PREF_AVATAR_CMD);
     cons_show("Default '/avatar open' command (/executable avatar)                      : %s", avatar);
     g_free(avatar);
 
     //TODO: there needs to be a way to get all the "locales"/schemes so we can
     //display the default openers for all filetypes
-    char* urlopen = prefs_get_string_with_option(PREF_URL_OPEN_CMD, "");
+    gchar* urlopen = prefs_get_string(PREF_URL_OPEN_CMD);
     cons_show("Default '/url open' command (/executable urlopen)                        : %s", urlopen);
     g_free(urlopen);
 
-    char* urlsave = prefs_get_string(PREF_URL_SAVE_CMD);
+    gchar* urlsave = prefs_get_string(PREF_URL_SAVE_CMD);
+    if (urlsave == NULL) {
+        urlsave = g_strdup("(built-in)");
+    }
     cons_show("Default '/url save' command (/executable urlsave)                        : %s", urlsave);
     g_free(urlsave);
 }

@@ -170,7 +170,7 @@ _prefs_load(void)
         value = g_string_append(value, val);
         value = g_string_append(value, " %u;");
 
-        g_key_file_set_locale_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", "DEF", value->str);
+        g_key_file_set_locale_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", "*", value->str);
         g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
 
         g_string_free(value, TRUE);
@@ -529,7 +529,7 @@ prefs_get_string_with_option(preference_t pref, gchar* option)
 
     if (result == NULL) {
         // check for user set default
-        result = g_key_file_get_locale_string(prefs, group, key, "DEF", NULL);
+        result = g_key_file_get_locale_string(prefs, group, key, "*", NULL);
         if (result == NULL) {
             if (def) {
                 // use hardcoded profanity default

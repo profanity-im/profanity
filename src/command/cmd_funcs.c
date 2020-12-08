@@ -9135,9 +9135,9 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
         goto out;
     }
 
-    cmd_template = prefs_get_string_with_option(PREF_URL_OPEN_CMD, scheme);
+    cmd_template = prefs_get_string(PREF_URL_OPEN_CMD);
     if (cmd_template == NULL) {
-        cons_show("No default open command found in url open preferences");
+        cons_show("No default `url open` command found in executables preferences.");
         goto out;
     }
 
@@ -9195,20 +9195,17 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
         goto out;
     }
 
-    cmd_template = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
-    if (cmd_template == NULL) {
-        if (g_strcmp0(scheme, "http") == 0
-            || g_strcmp0(scheme, "https") == 0) {
-            _url_http_method(window, cmd_template, url, filename);
+    cmd_template = prefs_get_string(PREF_URL_SAVE_CMD);
+    if (cmd_template == NULL && (g_strcmp0(scheme, "http") == 0 || g_strcmp0(scheme, "https") == 0)) {
+        _url_http_method(window, cmd_template, url, filename);
 #ifdef HAVE_OMEMO
-        } else if (g_strcmp0(scheme, "aesgcm") == 0) {
-            _url_aesgcm_method(window, cmd_template, url, filename);
+    } else if (g_strcmp0(scheme, "aesgcm") == 0) {
+        _url_aesgcm_method(window, cmd_template, url, filename);
 #endif
-        } else {
-            cons_show_error("No download method defined for the scheme '%s'.", scheme);
-        }
-    } else {
+    } else if (cmd_template != NULL) {
         _url_external_method(cmd_template, url, filename);
+    } else {
+        cons_show_error("No download method defined for the scheme '%s'.", scheme);
     }
 
 out:
@@ -9223,48 +9220,59 @@ out:
 }
 
 gboolean
-cmd_executable(ProfWin* window, const char* const command, gchar** args)
+cmd_executable_avatar(ProfWin* window, const char* const command, gchar** args)
+{
+    prefs_set_string(PREF_AVATAR_CMD, args[1]);
+    cons_show("`avatar` command set to invoke '%s'", args[1]);
+    return TRUE;
+}
+
+gboolean
+cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args)
 {
     guint num_args = g_strv_length(args);
+    if (num_args < 2) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
 
-    if (g_strcmp0(args[0], "avatar") == 0) {
-        prefs_set_string(PREF_AVATAR_CMD, args[1]);
-        cons_show("Avatar command set to: %s", args[1]);
-
-    } else if (g_strcmp0(args[0], "urlopen") == 0) {
-        if (num_args < 4) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-
-        gchar* str = g_strjoinv(" ", &args[3]);
-        const gchar* const list[] = { args[2], str, NULL };
-        prefs_set_string_list_with_option(PREF_URL_OPEN_CMD, args[1], list);
-        cons_show("`url open` command set to: %s for %s files", str, args[1]);
+    if (g_strcmp0(args[1], "set") == 0 && num_args >= 3) {
+        gchar* str = g_strjoinv(" ", &args[2]);
+        prefs_set_string(PREF_URL_OPEN_CMD, str);
+        cons_show("`url open` command set to invoke '%s'", str);
         g_free(str);
 
-    } else if (g_strcmp0(args[0], "urlsave") == 0) {
+    } else if (g_strcmp0(args[1], "default") == 0) {
+        prefs_set_string(PREF_URL_SAVE_CMD, NULL);
+        gchar* def = prefs_get_string(PREF_URL_SAVE_CMD);
+        cons_show("`url open` command set to invoke %s (default)", def);
+        g_free(def);
+    } else {
+        cons_bad_cmd_usage(command);
+    }
 
-        if (num_args < 3) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
+    return TRUE;
+}
 
-        if (g_strcmp0(args[1], "set") == 0 && num_args >= 4) {
-            gchar* str = g_strjoinv(" ", &args[3]);
-            prefs_set_string_with_option(PREF_URL_SAVE_CMD, args[2], str);
-            cons_show("`url save` command set to: %s for scheme %s", str, args[2]);
-            g_free(str);
+gboolean
+cmd_executable_urlsave(ProfWin* window, const char* const command, gchar** args)
+{
 
-        } else if (g_strcmp0(args[1], "clear") == 0) {
-            prefs_set_string_with_option(PREF_URL_SAVE_CMD, args[2], NULL);
-            cons_show("`url save` will use internal download method for scheme %s", args[2]);
+    guint num_args = g_strv_length(args);
+    if (num_args < 2) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
 
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
+    if (g_strcmp0(args[1], "set") == 0 && num_args >= 3) {
+        gchar* str = g_strjoinv(" ", &args[2]);
+        prefs_set_string(PREF_URL_SAVE_CMD, str);
+        cons_show("`url save` command set to invoke '%s'", str);
+        g_free(str);
 
+    } else if (g_strcmp0(args[1], "default") == 0) {
+        prefs_set_string(PREF_URL_SAVE_CMD, NULL);
+        cons_show("`url save` will use built-in download method (default)");
     } else {
         cons_bad_cmd_usage(command);
     }
