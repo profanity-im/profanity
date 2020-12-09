@@ -653,7 +653,7 @@ unique_filename_from_url(const char* url, const char* path)
 
     // Default to './' as path when none has been provided.
     if (path == NULL) {
-        realpath = "./";
+        realpath = strdup("./");
     } else {
         realpath = get_expanded_path(path);
     }
