@@ -4854,18 +4854,12 @@ gboolean
 cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 {
     jabber_conn_status_t conn_status = connection_get_status();
-    char* filename = args[0];
+    gchar* filename;
     char* alt_scheme = NULL;
     char* alt_fragment = NULL;
 
     // expand ~ to $HOME
-    if (filename[0] == '~' && filename[1] == '/') {
-        if (asprintf(&filename, "%s/%s", getenv("HOME"), filename + 2) == -1) {
-            return TRUE;
-        }
-    } else {
-        filename = strdup(filename);
-    }
+    filename = get_expanded_path(args[0]);
 
     if (access(filename, R_OK) != 0) {
         cons_show_error("Uploading '%s' failed: File not found!", filename);
