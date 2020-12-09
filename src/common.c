@@ -629,18 +629,40 @@ _basename_from_url(const char* url)
 }
 
 gchar*
+get_expanded_path(const char *path)
+{
+    GString* exp_path = g_string_new("");
+    gchar *result;
+
+    if (strlen(path) >= 2 && path[0] == '~' && path[1] == '/') {
+        g_string_printf(exp_path, "%s/%s", getenv("HOME"), path+2);
+    } else {
+        g_string_printf(exp_path, "%s", path+2);
+    }
+
+    result = exp_path->str;
+    g_string_free(exp_path, FALSE);
+
+    return result;
+}
+
+gchar*
 unique_filename_from_url(const char* url, const char* path)
 {
+    gchar *realpath;
+
     // Default to './' as path when none has been provided.
     if (path == NULL) {
-        path = "./";
+        realpath = "./";
+    } else {
+        realpath = get_expanded_path(path);
     }
 
     // Resolves paths such as './../.' for path.
-    GFile* target = g_file_new_for_commandline_arg(path);
+    GFile* target = g_file_new_for_commandline_arg(realpath);
     gchar* filename = NULL;
 
-    if (_has_directory_suffix(path) || g_file_test(path, G_FILE_TEST_IS_DIR)) {
+    if (_has_directory_suffix(realpath) || g_file_test(realpath, G_FILE_TEST_IS_DIR)) {
         // The target should be used as a directory. Assume that the basename
         // should be derived from the URL.
         char* basename = _basename_from_url(url);
@@ -654,11 +676,13 @@ unique_filename_from_url(const char* url, const char* path)
     gchar* unique_filename = _unique_filename(filename);
     if (unique_filename == NULL) {
         g_free(filename);
+        g_free(realpath);
         return NULL;
     }
 
     g_object_unref(target);
     g_free(filename);
+    g_free(realpath);
 
     return unique_filename;
 }
