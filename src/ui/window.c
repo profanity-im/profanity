@@ -1742,7 +1742,7 @@ win_print_trackbar(ProfWin* window)
     wbkgdset(window->layout->win, theme_attrs(THEME_TRACKBAR));
     wattron(window->layout->win, theme_attrs(THEME_TRACKBAR));
 
-    for (int i = 1; i < cols; i++) {
+    for (int i = 1; i <= cols; i++) {
         wprintw(window->layout->win, "-");
     }
 
