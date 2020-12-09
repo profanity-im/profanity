@@ -659,14 +659,19 @@ sv_ev_incoming_carbon(ProfMessage* message)
 #endif
     }
 
+    gboolean logit = TRUE;
+    if (message->type == PROF_MSG_TYPE_MUCPM) {
+        logit = FALSE;
+    }
+
     if (message->enc == PROF_MSG_ENC_OX) {
-        _sv_ev_incoming_ox(chatwin, new_win, message, FALSE);
+        _sv_ev_incoming_ox(chatwin, new_win, message, logit);
     } else if (message->encrypted) {
-        _sv_ev_incoming_pgp(chatwin, new_win, message, FALSE);
+        _sv_ev_incoming_pgp(chatwin, new_win, message, logit);
     } else if (message->enc == PROF_MSG_ENC_OMEMO) {
-        _sv_ev_incoming_omemo(chatwin, new_win, message, FALSE);
+        _sv_ev_incoming_omemo(chatwin, new_win, message, logit);
     } else {
-        _sv_ev_incoming_plain(chatwin, new_win, message, FALSE);
+        _sv_ev_incoming_plain(chatwin, new_win, message, logit);
     }
     rosterwin_roster();
     return;
