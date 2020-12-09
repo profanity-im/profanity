@@ -204,11 +204,11 @@ notify(const char* const message, int timeout, const char* const category)
     if (notify_is_initted()) {
         log_debug("Reinitialising libnotify");
         notify_uninit();
-        notify_init("Profanity");
     } else {
         log_debug("Initialising libnotify");
-        notify_init("Profanity");
     }
+    notify_init("Profanity");
+
     if (notify_is_initted()) {
         NotifyNotification* notification;
         notification = notify_notification_new("Profanity", message, NULL);
