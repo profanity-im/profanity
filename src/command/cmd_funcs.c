@@ -4889,42 +4889,51 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 
     FILE* fh = fdopen(fd, "rb");
 
+    gboolean omemo_enabled = FALSE;
+    gboolean sendfile_enabled = TRUE;
+
     switch (window->type) {
     case WIN_MUC:
+    {
+        ProfMucWin* mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        omemo_enabled = mucwin->is_omemo == TRUE;
+        break;
+    }
     case WIN_CHAT:
     {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-
-#ifdef HAVE_OMEMO
-        if (chatwin->is_omemo) {
-            char* err = NULL;
-            alt_scheme = OMEMO_AESGCM_URL_SCHEME;
-            alt_fragment = _add_omemo_stream(&fd, &fh, &err);
-            if (err != NULL) {
-                cons_show_error(err);
-                win_println(window, THEME_ERROR, "-", err);
-                goto out;
-            }
-            break;
-        }
-#endif
-
-        if (window->type == WIN_CHAT) {
-            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-            if ((chatwin->pgp_send && !prefs_get_boolean(PREF_PGP_SENDFILE))
-                || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
-                cons_show_error("Uploading unencrypted files disabled. See /otr sendfile or /pgp sendfile.");
-                win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
-                goto out;
-            }
-        }
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        omemo_enabled = chatwin->is_omemo == TRUE;
+        sendfile_enabled = !((chatwin->pgp_send == TRUE && !prefs_get_boolean(PREF_PGP_SENDFILE))
+                             || (chatwin->is_otr == TRUE && !prefs_get_boolean(PREF_OTR_SENDFILE)));
         break;
     }
+
     case WIN_PRIVATE: // We don't support encryption in private MUC windows.
     default:
         cons_show_error("Unsupported window for file transmission.");
         goto out;
     }
+
+    if (!sendfile_enabled) {
+        cons_show_error("Uploading unencrypted files disabled. See /otr sendfile or /pgp sendfile.");
+        win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
+        goto out;
+    }
+
+#ifdef HAVE_OMEMO
+    if (omemo_enabled) {
+        char* err = NULL;
+        alt_scheme = OMEMO_AESGCM_URL_SCHEME;
+        alt_fragment = _add_omemo_stream(&fd, &fh, &err);
+        if (err != NULL) {
+            cons_show_error(err);
+            win_println(window, THEME_ERROR, "-", err);
+            goto out;
+        }
+    }
+#endif
 
     HTTPUpload* upload = malloc(sizeof(HTTPUpload));
     upload->window = window;

@@ -80,6 +80,7 @@ chatwin_new(const char* const barejid)
         }
     }
 
+    chatwin->is_omemo = FALSE;
 #ifdef HAVE_OMEMO
     if (omemo_automatic_start(barejid)) {
         omemo_start_session(barejid);
@@ -90,6 +91,7 @@ chatwin_new(const char* const barejid)
     if (prefs_get_boolean(PREF_MAM)) {
         iq_mam_request(chatwin);
     }
+
     // XEP-0373: OpenPGP for XMPP
     chatwin->is_ox = FALSE;
 
