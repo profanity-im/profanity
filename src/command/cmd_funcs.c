@@ -4922,8 +4922,8 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         goto out;
     }
 
-#ifdef HAVE_OMEMO
     if (omemo_enabled) {
+#ifdef HAVE_OMEMO
         char* err = NULL;
         alt_scheme = OMEMO_AESGCM_URL_SCHEME;
         alt_fragment = _add_omemo_stream(&fd, &fh, &err);
@@ -4932,8 +4932,8 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
             win_println(window, THEME_ERROR, "-", err);
             goto out;
         }
-    }
 #endif
+    }
 
     HTTPUpload* upload = malloc(sizeof(HTTPUpload));
     upload->window = window;
