@@ -1,9 +1,9 @@
 /*
- * files.h
+ * http_download.h
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
- * Copyright (C) 2018 - 2019 Michael Vetter <jubalh@idoru.org>
+ * Copyright (C) 2020 William Wennerström <william@wstrm.dev>
  *
  * This file is part of Profanity.
  *
@@ -34,38 +34,33 @@
  *
  */
 
-#ifndef CONFIG_FILES_H
-#define CONFIG_FILES_H
+#ifndef TOOLS_HTTP_DOWNLOAD_H
+#define TOOLS_HTTP_DOWNLOAD_H
 
-#include <glib.h>
+#ifdef PLATFORM_CYGWIN
+#define SOCKET int
+#endif
 
-#define FILE_PROFRC                   "profrc"
-#define FILE_ACCOUNTS                 "accounts"
-#define FILE_TLSCERTS                 "tlscerts"
-#define FILE_PLUGIN_SETTINGS          "plugin_settings"
-#define FILE_PLUGIN_THEMES            "plugin_themes"
-#define FILE_CAPSCACHE                "capscache"
-#define FILE_PROFANITY_IDENTIFIER     "profident"
-#define FILE_BOOKMARK_AUTOJOIN_IGNORE "bookmark_ignore"
+#include <sys/select.h>
+#include <curl/curl.h>
 
-#define DIR_THEMES    "themes"
-#define DIR_ICONS     "icons"
-#define DIR_SCRIPTS   "scripts"
-#define DIR_CHATLOGS  "chatlogs"
-#define DIR_OTR       "otr"
-#define DIR_PGP       "pgp"
-#define DIR_OMEMO     "omemo"
-#define DIR_PLUGINS   "plugins"
-#define DIR_DATABASE  "database"
-#define DIR_DOWNLOADS "downloads"
+#include "ui/win_types.h"
+#include "tools/http_common.h"
 
-void files_create_directories(void);
+typedef struct http_download_t
+{
+    char* url;
+    char* filename;
+    char* cmd_template;
+    curl_off_t bytes_received;
+    ProfWin* window;
+    pthread_t worker;
+    int cancel;
+} HTTPDownload;
 
-gchar* files_get_config_path(const char* const config_base);
-gchar* files_get_data_path(const char* const data_base);
-gchar* files_get_account_data_path(const char* const specific_dir, const char* const jid);
+void* http_file_get(void* userdata);
 
-gchar* files_get_log_file(const char* const log_file);
-gchar* files_get_inputrc_file(void);
+void http_download_cancel_processes(ProfWin* window);
+void http_download_add_download(HTTPDownload* download);
 
 #endif

@@ -32,7 +32,10 @@
  * source files in the program, then also delete it here.
  *
  */
+#include <stdio.h>
+#include <stdbool.h>
 #include <signal/signal_protocol_types.h>
+#include <gcrypt.h>
 
 #define AES128_GCM_KEY_LENGTH 16
 #define AES128_GCM_IV_LENGTH  12
@@ -180,3 +183,9 @@ int aes128gcm_decrypt(unsigned char* plaintext,
                       size_t* plaintext_len, const unsigned char* const ciphertext,
                       size_t ciphertext_len, const unsigned char* const iv, size_t iv_len,
                       const unsigned char* const key, const unsigned char* const tag);
+
+gcry_error_t aes256gcm_crypt_file(FILE* in, FILE* out, off_t file_size,
+                                  unsigned char key[], unsigned char nonce[], bool encrypt);
+
+char* aes256gcm_create_secure_fragment(unsigned char* key,
+                                       unsigned char* nonce);

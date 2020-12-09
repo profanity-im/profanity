@@ -90,6 +90,8 @@ main(int argc, char* argv[])
         unit_test(strip_quotes_strips_first),
         unit_test(strip_quotes_strips_last),
         unit_test(strip_quotes_strips_both),
+        unit_test(format_call_external_argv_td),
+        unit_test(unique_filename_from_url_td),
 
         unit_test(clear_empty),
         unit_test(reset_after_create),

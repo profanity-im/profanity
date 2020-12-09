@@ -86,3 +86,4 @@ breaks
 
 *.tar.*
 *.zip
+*.log*

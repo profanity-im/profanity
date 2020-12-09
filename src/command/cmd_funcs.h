@@ -223,7 +223,6 @@ gboolean cmd_omemo_trust(ProfWin* window, const char* const command, gchar** arg
 gboolean cmd_omemo_untrust(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_omemo_policy(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_omemo_clear_device_list(ProfWin* window, const char* const command, gchar** args);
-gboolean cmd_omemo_sendfile(ProfWin* window, const char* const command, gchar** args);
 
 gboolean cmd_save(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_reload(ProfWin* window, const char* const command, gchar** args);
@@ -238,6 +237,8 @@ gboolean cmd_slashguard(ProfWin* window, const char* const command, gchar** args
 gboolean cmd_serversoftware(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_url_open(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_url_save(ProfWin* window, const char* const command, gchar** args);
-gboolean cmd_executable(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_executable_avatar(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_executable_urlsave(ProfWin* window, const char* const command, gchar** args);
 
 #endif

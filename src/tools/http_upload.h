@@ -48,11 +48,14 @@
 typedef struct http_upload_t
 {
     char* filename;
+    FILE* filehandle;
     off_t filesize;
     curl_off_t bytes_sent;
     char* mime_type;
     char* get_url;
     char* put_url;
+    char* alt_scheme;
+    char* alt_fragment;
     ProfWin* window;
     pthread_t worker;
     int cancel;
@@ -60,8 +63,8 @@ typedef struct http_upload_t
 
 void* http_file_put(void* userdata);
 
-char* file_mime_type(const char* const file_name);
-off_t file_size(const char* const file_name);
+char* file_mime_type(const char* const filename);
+off_t file_size(int filedes);
 
 void http_upload_cancel_processes(ProfWin* window);
 void http_upload_add_upload(HTTPUpload* upload);

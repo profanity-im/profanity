@@ -4,6 +4,7 @@
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
  * Copyright (C) 2019 Michael Vetter <jubalh@iodoru.org>
+ * Copyright (C) 2020 William Wennerström <william@wstrm.dev>
  *
  * This file is part of Profanity.
  *
@@ -59,6 +60,7 @@
 #include "command/cmd_funcs.h"
 #include "command/cmd_defs.h"
 #include "command/cmd_ac.h"
+#include "config/files.h"
 #include "config/accounts.h"
 #include "config/account.h"
 #include "config/preferences.h"
@@ -67,6 +69,7 @@
 #include "config/scripts.h"
 #include "event/client_events.h"
 #include "tools/http_upload.h"
+#include "tools/http_download.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
 #include "tools/bookmark_ignore.h"
@@ -94,6 +97,7 @@
 #ifdef HAVE_OMEMO
 #include "omemo/omemo.h"
 #include "xmpp/omemo.h"
+#include "tools/aesgcm_download.h"
 #endif
 
 #ifdef HAVE_GTK
@@ -1086,7 +1090,7 @@ _writecsv(int fd, const char* const str)
     size_t len = strlen(str);
     char* s = malloc(2 * len * sizeof(char));
     char* c = s;
-    for (int i =0; i < strlen(str); i++) {
+    for (int i = 0; i < strlen(str); i++) {
         if (str[i] != '"')
             *c++ = str[i];
         else {
@@ -4805,11 +4809,54 @@ cmd_disco(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
+// TODO: Move this into its own tools such as HTTPUpload or AESGCMDownload.
+#ifdef HAVE_OMEMO
+char*
+_add_omemo_stream(int* fd, FILE** fh, char** err)
+{
+    // Create temporary file for writing ciphertext.
+    int tmpfd;
+    char* tmpname = NULL;
+    if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
+        *err = "Unable to create temporary file for encrypted transfer.";
+        return NULL;
+    }
+    FILE* tmpfh = fdopen(tmpfd, "wb");
+
+    // The temporary ciphertext file should be removed after it has
+    // been closed.
+    remove(tmpname);
+    free(tmpname);
+
+    int crypt_res;
+    char* fragment;
+    fragment = omemo_encrypt_file(*fh, tmpfh, file_size(*fd), &crypt_res);
+    if (crypt_res != 0) {
+        fclose(tmpfh);
+        return NULL;
+    }
+
+    // Force flush as the upload will read from the same stream.
+    fflush(tmpfh);
+    rewind(tmpfh);
+
+    fclose(*fh); // Also closes descriptor.
+
+    // Switch original stream with temporary ciphertext stream.
+    *fd = tmpfd;
+    *fh = tmpfh;
+
+    return fragment;
+}
+#endif
+
 gboolean
 cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 {
     jabber_conn_status_t conn_status = connection_get_status();
     char* filename = args[0];
+    char* alt_scheme = NULL;
+    char* alt_fragment = NULL;
 
     // expand ~ to $HOME
     if (filename[0] == '~' && filename[1] == '/') {
@@ -4820,79 +4867,100 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         filename = strdup(filename);
     }
 
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-        free(filename);
-        return TRUE;
-    }
-
-    if (window->type != WIN_CHAT && window->type != WIN_PRIVATE && window->type != WIN_MUC) {
-        cons_show_error("Unsupported window for file transmission.");
-        free(filename);
-        return TRUE;
-    }
-
-    switch (window->type) {
-    case WIN_MUC:
-    {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-
-        // only omemo, no pgp/otr available in MUCs
-        if (mucwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
-            cons_show_error("Uploading unencrypted files disabled. See /omemo sendfile, /otr sendfile, /pgp sendfile.");
-            win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
-            free(filename);
-            return TRUE;
-        }
-        break;
-    }
-    case WIN_CHAT:
-    {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-
-        if ((chatwin->is_omemo && !prefs_get_boolean(PREF_OMEMO_SENDFILE))
-            || (chatwin->pgp_send && !prefs_get_boolean(PREF_PGP_SENDFILE))
-            || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
-            cons_show_error("Uploading unencrypted files disabled. See /omemo sendfile, /otr sendfile, /pgp sendfile.");
-            win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
-            free(filename);
-            return TRUE;
-        }
-        break;
-    }
-    case WIN_PRIVATE:
-    {
-        //we don't support encryption in private muc windows
-        break;
-    }
-    default:
-        cons_show_error("Unsupported window for file transmission.");
-        free(filename);
-        return TRUE;
-    }
-
     if (access(filename, R_OK) != 0) {
         cons_show_error("Uploading '%s' failed: File not found!", filename);
-        free(filename);
-        return TRUE;
+        goto out;
     }
 
     if (!is_regular_file(filename)) {
         cons_show_error("Uploading '%s' failed: Not a file!", filename);
-        free(filename);
-        return TRUE;
+        goto out;
+    }
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        goto out;
+    }
+
+    if (window->type != WIN_CHAT && window->type != WIN_PRIVATE && window->type != WIN_MUC) {
+        cons_show_error("Unsupported window for file transmission.");
+        goto out;
+    }
+
+    int fd;
+    if ((fd = open(filename, O_RDONLY)) == -1) {
+        cons_show_error("Unable to open file descriptor for '%s'.", filename);
+        goto out;
+    }
+
+    FILE* fh = fdopen(fd, "rb");
+
+    switch (window->type) {
+    case WIN_MUC:
+    case WIN_CHAT:
+    {
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+
+#ifdef HAVE_OMEMO
+        if (chatwin->is_omemo) {
+            char* err = NULL;
+            alt_scheme = OMEMO_AESGCM_URL_SCHEME;
+            alt_fragment = _add_omemo_stream(&fd, &fh, &err);
+            if (err != NULL) {
+                cons_show_error(err);
+                win_println(window, THEME_ERROR, "-", err);
+                goto out;
+            }
+            break;
+        }
+#endif
+
+        if (window->type == WIN_CHAT) {
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            if ((chatwin->pgp_send && !prefs_get_boolean(PREF_PGP_SENDFILE))
+                || (chatwin->is_otr && !prefs_get_boolean(PREF_OTR_SENDFILE))) {
+                cons_show_error("Uploading unencrypted files disabled. See /otr sendfile or /pgp sendfile.");
+                win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
+                goto out;
+            }
+        }
+        break;
+    }
+    case WIN_PRIVATE: // We don't support encryption in private MUC windows.
+    default:
+        cons_show_error("Unsupported window for file transmission.");
+        goto out;
     }
 
     HTTPUpload* upload = malloc(sizeof(HTTPUpload));
     upload->window = window;
 
-    upload->filename = filename;
-    upload->filesize = file_size(filename);
+    upload->filename = strdup(filename);
+    upload->filehandle = fh;
+    upload->filesize = file_size(fd);
     upload->mime_type = file_mime_type(filename);
 
+    if (alt_scheme != NULL) {
+        upload->alt_scheme = strdup(alt_scheme);
+    } else {
+        upload->alt_scheme = NULL;
+    }
+
+    if (alt_fragment != NULL) {
+        upload->alt_fragment = strdup(alt_fragment);
+    } else {
+        upload->alt_fragment = NULL;
+    }
+
     iq_http_upload_request(upload);
+
+out:
+#ifdef HAVE_OMEMO
+    if (alt_fragment != NULL)
+        omemo_free(alt_fragment);
+#endif
+    if (filename != NULL)
+        free(filename);
 
     return TRUE;
 }
@@ -8773,19 +8841,6 @@ cmd_omemo_policy(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
-cmd_omemo_sendfile(ProfWin* window, const char* const command, gchar** args)
-{
-#ifdef HAVE_OMEMO
-    _cmd_set_boolean_preference(args[1], command, "Sending unencrypted files in an OMEMO session via /sendfile", PREF_OMEMO_SENDFILE);
-
-    return TRUE;
-#else
-    cons_show("This version of Profanity has not been built with OMEMO support enabled");
-    return TRUE;
-#endif
-}
-
-gboolean
 cmd_save(ProfWin* window, const char* const command, gchar** args)
 {
     log_info("Saving preferences to configuration file");
@@ -9005,6 +9060,57 @@ cmd_slashguard(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
+#ifdef HAVE_OMEMO
+void
+_url_aesgcm_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename)
+{
+    AESGCMDownload* download = malloc(sizeof(AESGCMDownload));
+    download->window = window;
+    download->url = strdup(url);
+    download->filename = strdup(filename);
+    if (cmd_template != NULL) {
+        download->cmd_template = strdup(cmd_template);
+    } else {
+        download->cmd_template = NULL;
+    }
+
+    pthread_create(&(download->worker), NULL, &aesgcm_file_get, download);
+    aesgcm_download_add_download(download);
+}
+#endif
+
+void
+_url_http_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename)
+{
+
+    HTTPDownload* download = malloc(sizeof(HTTPDownload));
+    download->window = window;
+    download->url = strdup(url);
+    download->filename = strdup(filename);
+    if (cmd_template != NULL) {
+        download->cmd_template = strdup(cmd_template);
+    } else {
+        download->cmd_template = NULL;
+    }
+
+    pthread_create(&(download->worker), NULL, &http_file_get, download);
+    http_download_add_download(download);
+}
+
+void
+_url_external_method(const char* cmd_template, const char* url, const char* filename)
+{
+    gchar** argv = format_call_external_argv(cmd_template, url, filename);
+
+    if (!call_external(argv, NULL, NULL)) {
+        cons_show_error("Unable to call external executable for url: check the logs for more information.");
+    } else {
+        cons_show("URL '%s' has been called with '%s'.", url, cmd_template);
+    }
+
+    g_strfreev(argv);
+}
+
 gboolean
 cmd_url_open(ProfWin* window, const char* const command, gchar** args)
 {
@@ -9013,91 +9119,45 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    if (args[1] == NULL) {
+    gchar* url = args[1];
+    if (url == NULL) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
 
-    gboolean require_save = false;
+    gchar* scheme = NULL;
+    char* cmd_template = NULL;
+    char* filename = NULL;
 
-    gchar* fileStart = g_strrstr(args[1], "/");
-    if (fileStart == NULL) {
+    scheme = g_uri_parse_scheme(url);
+    if (scheme == NULL) {
         cons_show("URL '%s' is not valid.", args[1]);
-        return TRUE;
+        goto out;
     }
 
-    fileStart++;
-    if (((char*)(fileStart - 2))[0] == '/' && ((char*)(fileStart - 3))[0] == ':') {
-        // If the '/' is last character of the '://' string, there will be no suffix
-        // Therefore, it is considered that there is no file name in the URL and
-        // fileStart is set to the end of the URL.
-        fileStart = args[1] + strlen(args[1]);
+    cmd_template = prefs_get_string(PREF_URL_OPEN_CMD);
+    if (cmd_template == NULL) {
+        cons_show("No default `url open` command found in executables preferences.");
+        goto out;
     }
 
-    gchar* suffix = NULL;
-    gchar* suffixStart = g_strrstr(fileStart, ".");
-    if (suffixStart != NULL) {
-        suffixStart++;
-        gchar* suffixEnd = g_strrstr(suffixStart, "#");
-        if (suffixEnd == NULL) {
-            suffix = g_strdup(suffixStart);
-        } else {
-            suffix = g_strndup(suffixStart, suffixEnd - suffixStart);
-        }
-    }
-
-    gchar** suffix_cmd_pref = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, NULL);
-    if (suffix != NULL) {
-        gchar* lowercase_suffix = g_ascii_strdown(suffix, -1);
-        g_strfreev(suffix_cmd_pref);
-        suffix_cmd_pref = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, lowercase_suffix);
-        g_free(lowercase_suffix);
-        g_free(suffix);
-    }
-
-    if (0 == g_strcmp0(suffix_cmd_pref[0], "true")) {
-        require_save = true;
-    }
-
-    gchar* suffix_cmd = g_strdup(suffix_cmd_pref[1]);
-    g_strfreev(suffix_cmd_pref);
-
-    gchar* scheme = g_uri_parse_scheme(args[1]);
+#ifdef HAVE_OMEMO
+    // OMEMO URLs (aesgcm://) must be saved and decrypted before being opened.
     if (0 == g_strcmp0(scheme, "aesgcm")) {
-        require_save = true;
+        filename = unique_filename_from_url(url, files_get_data_path(DIR_DOWNLOADS));
+        _url_aesgcm_method(window, cmd_template, url, filename);
+        goto out;
     }
+#endif
+
+    _url_external_method(cmd_template, url, NULL);
+
+out:
+
+    free(cmd_template);
+    free(filename);
+
     g_free(scheme);
-
-    if (require_save) {
-        gchar* save_args[] = { "open", args[1], "/tmp/profanity.tmp", NULL };
-        cmd_url_save(window, command, save_args);
-    }
-
-    gchar** argv = g_strsplit(suffix_cmd, " ", 0);
-    guint num_args = 0;
-    while (argv[num_args]) {
-        if (0 == g_strcmp0(argv[num_args], "%u")) {
-            g_free(argv[num_args]);
-            if (require_save) {
-                argv[num_args] = g_strdup("/tmp/profanity.tmp");
-            } else {
-                argv[num_args] = g_strdup(args[1]);
-            }
-            break;
-        }
-        num_args++;
-    }
-
-    if (!call_external(argv, NULL, NULL)) {
-        cons_show_error("Unable to open url: check the logs for more information.");
-    }
-
-    if (require_save) {
-        g_unlink("/tmp/profanity.tmp");
-    }
-
-    g_strfreev(argv);
-    g_free(suffix_cmd);
 
     return TRUE;
 }
@@ -9106,7 +9166,7 @@ gboolean
 cmd_url_save(ProfWin* window, const char* const command, gchar** args)
 {
     if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
-        cons_show("url save not supported in this window");
+        cons_show_error("`/url save` is not supported in this window.");
         return TRUE;
     }
 
@@ -9115,121 +9175,104 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    gchar* uri = args[1];
-    gchar* target_path = g_strdup(args[2]);
+    gchar* url = args[1];
+    gchar* path = g_strdup(args[2]);
+    gchar* scheme = NULL;
+    char* filename = NULL;
+    char* cmd_template = NULL;
 
-    GFile* file = g_file_new_for_uri(uri);
-
-    gchar* target_dir = NULL;
-    gchar* base_name = NULL;
-
-    if (target_path == NULL) {
-        target_dir = g_strdup("./");
-        base_name = g_file_get_basename(file);
-        if (0 == g_strcmp0(base_name, ".")) {
-            g_free(base_name);
-            base_name = g_strdup("saved_url_content.html");
-        }
-        target_path = g_strconcat(target_dir, base_name, NULL);
-    }
-
-    if (g_file_test(target_path, G_FILE_TEST_EXISTS) && g_file_test(target_path, G_FILE_TEST_IS_DIR)) {
-        target_dir = g_strdup(target_path);
-        base_name = g_file_get_basename(file);
-        g_free(target_path);
-        target_path = g_strconcat(target_dir, "/", base_name, NULL);
-    }
-
-    g_object_unref(file);
-    file = NULL;
-
-    if (base_name == NULL) {
-        base_name = g_path_get_basename(target_path);
-        target_dir = g_path_get_dirname(target_path);
-    }
-
-    if (!g_file_test(target_dir, G_FILE_TEST_EXISTS) || !g_file_test(target_dir, G_FILE_TEST_IS_DIR)) {
-        cons_show("%s does not exist or is not a directory.", target_dir);
-        g_free(target_path);
-        g_free(target_dir);
-        g_free(base_name);
-        return TRUE;
-    }
-
-    gchar* scheme = g_uri_parse_scheme(uri);
+    scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
-        cons_show("URL '%s' is not valid.", uri);
-        g_free(target_path);
-        g_free(target_dir);
-        g_free(base_name);
-        return TRUE;
+        cons_show("URL '%s' is not valid.", args[1]);
+        goto out;
     }
 
-    gchar* scheme_cmd = NULL;
-
-    if (0 == g_strcmp0(scheme, "http")
-        || 0 == g_strcmp0(scheme, "https")
-        || 0 == g_strcmp0(scheme, "aesgcm")) {
-        scheme_cmd = prefs_get_string_with_option(PREF_URL_SAVE_CMD, scheme);
+    filename = unique_filename_from_url(url, path);
+    if (filename == NULL) {
+        cons_show("Failed to generate unique filename"
+                  "from URL '%s' for path '%s'",
+                  url, path);
+        goto out;
     }
+
+    cmd_template = prefs_get_string(PREF_URL_SAVE_CMD);
+    if (cmd_template == NULL && (g_strcmp0(scheme, "http") == 0 || g_strcmp0(scheme, "https") == 0)) {
+        _url_http_method(window, cmd_template, url, filename);
+#ifdef HAVE_OMEMO
+    } else if (g_strcmp0(scheme, "aesgcm") == 0) {
+        _url_aesgcm_method(window, cmd_template, url, filename);
+#endif
+    } else if (cmd_template != NULL) {
+        _url_external_method(cmd_template, url, filename);
+    } else {
+        cons_show_error("No download method defined for the scheme '%s'.", scheme);
+    }
+
+out:
+
+    free(filename);
+    free(cmd_template);
 
     g_free(scheme);
-
-    gchar** argv = g_strsplit(scheme_cmd, " ", 0);
-    g_free(scheme_cmd);
-
-    guint num_args = 0;
-    while (argv[num_args]) {
-        if (0 == g_strcmp0(argv[num_args], "%u")) {
-            g_free(argv[num_args]);
-            argv[num_args] = g_strdup(uri);
-        } else if (0 == g_strcmp0(argv[num_args], "%p")) {
-            g_free(argv[num_args]);
-            argv[num_args] = target_path;
-        }
-        num_args++;
-    }
-
-    if (!call_external(argv, NULL, NULL)) {
-        cons_show_error("Unable to save url: check the logs for more information.");
-    } else {
-        cons_show("URL '%s' has been saved into '%s'.", uri, target_path);
-    }
-
-    g_free(target_dir);
-    g_free(base_name);
-    g_strfreev(argv);
+    g_free(path);
 
     return TRUE;
 }
 
 gboolean
-cmd_executable(ProfWin* window, const char* const command, gchar** args)
+cmd_executable_avatar(ProfWin* window, const char* const command, gchar** args)
 {
-    if (g_strcmp0(args[0], "avatar") == 0) {
-        prefs_set_string(PREF_AVATAR_CMD, args[1]);
-        cons_show("Avatar command set to: %s", args[1]);
-    } else if (g_strcmp0(args[0], "urlopen") == 0) {
-        if (g_strv_length(args) < 4) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
+    prefs_set_string(PREF_AVATAR_CMD, args[1]);
+    cons_show("`avatar` command set to invoke '%s'", args[1]);
+    return TRUE;
+}
 
-        gchar* str = g_strjoinv(" ", &args[3]);
-        const gchar* const list[] = { args[2], str, NULL };
-        prefs_set_string_list_with_option(PREF_URL_OPEN_CMD, args[1], list);
-        cons_show("`url open` command set to: %s for %s files", str, args[1]);
-        g_free(str);
-    } else if (g_strcmp0(args[0], "urlsave") == 0) {
-        if (g_strv_length(args) < 3) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
+gboolean
+cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args)
+{
+    guint num_args = g_strv_length(args);
+    if (num_args < 2) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
 
+    if (g_strcmp0(args[1], "set") == 0 && num_args >= 3) {
         gchar* str = g_strjoinv(" ", &args[2]);
-        prefs_set_string_with_option(PREF_URL_SAVE_CMD, args[1], str);
-        cons_show("`url save` command set to: %s for scheme %s", str, args[1]);
+        prefs_set_string(PREF_URL_OPEN_CMD, str);
+        cons_show("`url open` command set to invoke '%s'", str);
         g_free(str);
+
+    } else if (g_strcmp0(args[1], "default") == 0) {
+        prefs_set_string(PREF_URL_SAVE_CMD, NULL);
+        gchar* def = prefs_get_string(PREF_URL_SAVE_CMD);
+        cons_show("`url open` command set to invoke %s (default)", def);
+        g_free(def);
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+
+    return TRUE;
+}
+
+gboolean
+cmd_executable_urlsave(ProfWin* window, const char* const command, gchar** args)
+{
+
+    guint num_args = g_strv_length(args);
+    if (num_args < 2) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[1], "set") == 0 && num_args >= 3) {
+        gchar* str = g_strjoinv(" ", &args[2]);
+        prefs_set_string(PREF_URL_SAVE_CMD, str);
+        cons_show("`url save` command set to invoke '%s'", str);
+        g_free(str);
+
+    } else if (g_strcmp0(args[1], "default") == 0) {
+        prefs_set_string(PREF_URL_SAVE_CMD, NULL);
+        cons_show("`url save` will use built-in download method (default)");
     } else {
         cons_bad_cmd_usage(command);
     }

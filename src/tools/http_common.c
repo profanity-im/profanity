@@ -1,9 +1,8 @@
 /*
- * files.h
+ * http_common.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
- * Copyright (C) 2018 - 2019 Michael Vetter <jubalh@idoru.org>
+ * Copyright (C) 2020 William Wennerström <william@wstrm.dev>
  *
  * This file is part of Profanity.
  *
@@ -34,38 +33,43 @@
  *
  */
 
-#ifndef CONFIG_FILES_H
-#define CONFIG_FILES_H
+#define _GNU_SOURCE 1
 
-#include <glib.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <gio/gio.h>
 
-#define FILE_PROFRC                   "profrc"
-#define FILE_ACCOUNTS                 "accounts"
-#define FILE_TLSCERTS                 "tlscerts"
-#define FILE_PLUGIN_SETTINGS          "plugin_settings"
-#define FILE_PLUGIN_THEMES            "plugin_themes"
-#define FILE_CAPSCACHE                "capscache"
-#define FILE_PROFANITY_IDENTIFIER     "profident"
-#define FILE_BOOKMARK_AUTOJOIN_IGNORE "bookmark_ignore"
+#include "tools/http_common.h"
 
-#define DIR_THEMES    "themes"
-#define DIR_ICONS     "icons"
-#define DIR_SCRIPTS   "scripts"
-#define DIR_CHATLOGS  "chatlogs"
-#define DIR_OTR       "otr"
-#define DIR_PGP       "pgp"
-#define DIR_OMEMO     "omemo"
-#define DIR_PLUGINS   "plugins"
-#define DIR_DATABASE  "database"
-#define DIR_DOWNLOADS "downloads"
+#define FALLBACK_MSG ""
 
-void files_create_directories(void);
+void
+http_print_transfer_update(ProfWin* window, char* url, const char* fmt, ...)
+{
+    va_list args;
 
-gchar* files_get_config_path(const char* const config_base);
-gchar* files_get_data_path(const char* const data_base);
-gchar* files_get_account_data_path(const char* const specific_dir, const char* const jid);
+    va_start(args, fmt);
+    GString* msg = g_string_new(FALLBACK_MSG);
+    g_string_vprintf(msg, fmt, args);
+    va_end(args);
 
-gchar* files_get_log_file(const char* const log_file);
-gchar* files_get_inputrc_file(void);
+    win_update_entry_message(window, url, msg->str);
 
-#endif
+    g_string_free(msg, TRUE);
+}
+
+void
+http_print_transfer(ProfWin* window, char* url, const char* fmt, ...)
+{
+    va_list args;
+
+    va_start(args, fmt);
+    GString* msg = g_string_new(FALLBACK_MSG);
+    g_string_vprintf(msg, fmt, args);
+    va_end(args);
+
+    win_print_http_transfer(window, msg->str, url);
+
+    g_string_free(msg, TRUE);
+}

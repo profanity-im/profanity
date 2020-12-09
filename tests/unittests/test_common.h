@@ -31,3 +31,5 @@ void strip_quotes_strips_last(void** state);
 void strip_quotes_strips_both(void** state);
 void prof_partial_occurrences_tests(void** state);
 void prof_whole_occurrences_tests(void** state);
+void unique_filename_from_url_td(void** state);
+void format_call_external_argv_td(void** state);

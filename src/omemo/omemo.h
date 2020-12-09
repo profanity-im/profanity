@@ -33,12 +33,17 @@
  *
  */
 #include <glib.h>
+#include <gcrypt.h>
 
 #include "ui/ui.h"
 #include "config/account.h"
 
 #define OMEMO_ERR_UNSUPPORTED_CRYPTO -10000
 #define OMEMO_ERR_GCRYPT             -20000
+
+#define OMEMO_AESGCM_NONCE_LENGTH AES128_GCM_IV_LENGTH
+#define OMEMO_AESGCM_KEY_LENGTH   32
+#define OMEMO_AESGCM_URL_SCHEME   "aesgcm"
 
 typedef enum {
     PROF_OMEMOPOLICY_MANUAL,
@@ -95,3 +100,8 @@ void omemo_start_device_session(const char* const jid, uint32_t device_id, GList
 gboolean omemo_loaded(void);
 char* omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_receipt, gboolean muc, const char* const replace_id);
 char* omemo_on_message_recv(const char* const from, uint32_t sid, const unsigned char* const iv, size_t iv_len, GList* keys, const unsigned char* const payload, size_t payload_len, gboolean muc, gboolean* trusted);
+
+char* omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res);
+gcry_error_t omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char* fragment);
+void omemo_free(void* a);
+int omemo_parse_aesgcm_url(const char* aesgcm_url, char** https_url, char** fragment);

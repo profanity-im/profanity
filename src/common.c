@@ -33,6 +33,9 @@
  * source files in the program, then also delete it here.
  *
  */
+
+#define _GNU_SOURCE 1
+
 #include "config.h"
 
 #include <errno.h>
@@ -554,4 +557,108 @@ call_external(gchar** argv, gchar*** const output_ptr, gchar*** const error_ptr)
     }
 
     return TRUE;
+}
+
+gchar**
+format_call_external_argv(const char* template, const char* url, const char* filename)
+{
+    gchar** argv = g_strsplit(template, " ", 0);
+
+    guint num_args = 0;
+    while (argv[num_args]) {
+        if (0 == g_strcmp0(argv[num_args], "%u") && url != NULL) {
+            g_free(argv[num_args]);
+            argv[num_args] = g_strdup(url);
+        } else if (0 == g_strcmp0(argv[num_args], "%p") && filename != NULL) {
+            g_free(argv[num_args]);
+            argv[num_args] = strdup(filename);
+        }
+        num_args++;
+    }
+
+    return argv;
+}
+
+gchar*
+_unique_filename(const char* filename)
+{
+    gchar* unique = g_strdup(filename);
+
+    unsigned int i = 0;
+    while (g_file_test(unique, G_FILE_TEST_EXISTS)) {
+        free(unique);
+
+        if (i > 1000) { // Give up after 1000 attempts.
+            return NULL;
+        }
+
+        if (asprintf(&unique, "%s.%u", filename, i) < 0) {
+            return NULL;
+        }
+
+        i++;
+    }
+
+    return unique;
+}
+
+bool
+_has_directory_suffix(const char* path)
+{
+    return (g_str_has_suffix(path, ".")
+            || g_str_has_suffix(path, "..")
+            || g_str_has_suffix(path, G_DIR_SEPARATOR_S));
+}
+
+char*
+_basename_from_url(const char* url)
+{
+    const char* default_name = "index";
+
+    GFile* file = g_file_new_for_commandline_arg(url);
+    char* basename = g_file_get_basename(file);
+
+    if (_has_directory_suffix(basename)) {
+        g_free(basename);
+        basename = strdup(default_name);
+    }
+
+    g_object_unref(file);
+
+    return basename;
+}
+
+gchar*
+unique_filename_from_url(const char* url, const char* path)
+{
+    // Default to './' as path when none has been provided.
+    if (path == NULL) {
+        path = "./";
+    }
+
+    // Resolves paths such as './../.' for path.
+    GFile* target = g_file_new_for_commandline_arg(path);
+    gchar* filename = NULL;
+
+    if (_has_directory_suffix(path) || g_file_test(path, G_FILE_TEST_IS_DIR)) {
+        // The target should be used as a directory. Assume that the basename
+        // should be derived from the URL.
+        char* basename = _basename_from_url(url);
+        filename = g_build_filename(g_file_peek_path(target), basename, NULL);
+        g_free(basename);
+    } else {
+        // Just use the target as filename.
+        filename = g_build_filename(g_file_peek_path(target), NULL);
+    }
+
+    gchar* unique_filename = _unique_filename(filename);
+    if (unique_filename == NULL) {
+        g_free(filename);
+        return NULL;
+    }
+
+    g_object_unref(target);
+    g_free(filename);
+
+    return unique_filename;
 }

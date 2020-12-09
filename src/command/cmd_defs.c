@@ -2274,55 +2274,52 @@ static struct cmd_t command_defs[] = {
     },
 
     { "/omemo",
-      parse_args, 1, 3, NULL,
-      CMD_SUBFUNCS(
-              { "gen", cmd_omemo_gen },
-              { "log", cmd_omemo_log },
-              { "start", cmd_omemo_start },
-              { "end", cmd_omemo_end },
-              { "trust", cmd_omemo_trust },
-              { "untrust", cmd_omemo_untrust },
-              { "fingerprint", cmd_omemo_fingerprint },
-              { "char", cmd_omemo_char },
-              { "policy", cmd_omemo_policy },
-              { "clear_device_list", cmd_omemo_clear_device_list },
-              { "sendfile", cmd_omemo_sendfile })
-      CMD_NOMAINFUNC
-      CMD_TAGS(
-              CMD_TAG_CHAT,
-              CMD_TAG_UI)
-      CMD_SYN(
-              "/omemo gen",
-              "/omemo log on|off|redact",
-              "/omemo start [<contact>]",
-              "/omemo trust [<contact>] <fingerprint>",
-              "/omemo end",
-              "/omemo fingerprint [<contact>]",
-              "/omemo char <char>",
-              "/omemo policy manual|automatic|always",
-              "/omemo sendfile on|off",
-              "/omemo clear_device_list")
-      CMD_DESC(
-              "OMEMO commands to manage keys, and perform encryption during chat sessions.")
-      CMD_ARGS(
-              { "gen", "Generate OMEMO crytographic materials for current account." },
-              { "start [<contact>]", "Start an OMEMO session with contact, or current recipient if omitted." },
-              { "end", "End the current OMEMO session." },
-              { "log on|off", "Enable or disable plaintext logging of OMEMO encrypted messages." },
-              { "log redact", "Log OMEMO encrypted messages, but replace the contents with [redacted]. This is the default." },
-              { "fingerprint [<contact>]", "Show contact fingerprints, or current recipient if omitted." },
-              { "char <char>", "Set the character to be displayed next to OMEMO encrypted messages." },
-              { "policy manual", "Set the global OMEMO policy to manual, OMEMO sessions must be started manually." },
-              { "policy automatic", "Set the global OMEMO policy to opportunistic, an OMEMO session will be attempted upon starting a conversation." },
-              { "policy always", "Set the global OMEMO policy to always, an error will be displayed if an OMEMO session cannot be initiated upon starting a conversation." },
-              { "sendfile on|off", "Allow /sendfile to send unencrypted files while in an OMEMO session." },
-              { "clear_device_list", "Clear your own device list on server side. Each client will reannounce itself when connected back." })
-      CMD_EXAMPLES(
-              "/omemo gen",
-              "/omemo start odin@valhalla.edda",
-              "/omemo trust c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
-              "/omemo untrust loki@valhalla.edda c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
-              "/omemo char *")
+        parse_args, 1, 3, NULL,
+        CMD_SUBFUNCS(
+            { "gen", cmd_omemo_gen },
+            { "log", cmd_omemo_log },
+            { "start", cmd_omemo_start },
+            { "end", cmd_omemo_end },
+            { "trust", cmd_omemo_trust },
+            { "untrust", cmd_omemo_untrust },
+            { "fingerprint", cmd_omemo_fingerprint },
+            { "char", cmd_omemo_char },
+            { "policy", cmd_omemo_policy },
+            { "clear_device_list", cmd_omemo_clear_device_list })
+        CMD_NOMAINFUNC
+        CMD_TAGS(
+            CMD_TAG_CHAT,
+            CMD_TAG_UI)
+        CMD_SYN(
+            "/omemo gen",
+            "/omemo log on|off|redact",
+            "/omemo start [<contact>]",
+            "/omemo trust [<contact>] <fingerprint>",
+            "/omemo end",
+            "/omemo fingerprint [<contact>]",
+            "/omemo char <char>",
+            "/omemo policy manual|automatic|always",
+            "/omemo clear_device_list")
+        CMD_DESC(
+            "OMEMO commands to manage keys, and perform encryption during chat sessions.")
+        CMD_ARGS(
+            { "gen",                     "Generate OMEMO crytographic materials for current account." },
+            { "start [<contact>]",       "Start an OMEMO session with contact, or current recipient if omitted." },
+            { "end",                     "End the current OMEMO session." },
+            { "log on|off",              "Enable or disable plaintext logging of OMEMO encrypted messages." },
+            { "log redact",              "Log OMEMO encrypted messages, but replace the contents with [redacted]. This is the default." },
+            { "fingerprint [<contact>]", "Show contact fingerprints, or current recipient if omitted." },
+            { "char <char>",             "Set the character to be displayed next to OMEMO encrypted messages." },
+            { "policy manual",           "Set the global OMEMO policy to manual, OMEMO sessions must be started manually." },
+            { "policy automatic",        "Set the global OMEMO policy to opportunistic, an OMEMO session will be attempted upon starting a conversation." },
+            { "policy always",           "Set the global OMEMO policy to always, an error will be displayed if an OMEMO session cannot be initiated upon starting a conversation." },
+            { "clear_device_list",       "Clear your own device list on server side. Each client will reannounce itself when connected back."})
+        CMD_EXAMPLES(
+            "/omemo gen",
+            "/omemo start odin@valhalla.edda",
+            "/omemo trust c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
+            "/omemo untrust loki@valhalla.edda c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
+            "/omemo char *")
     },
 
     { "/save",
@@ -2377,7 +2374,7 @@ static struct cmd_t command_defs[] = {
               "Settings for consistent color generation for nicks (XEP-0392). Including corrections for Color Vision Deficiencies. "
               "Your terminal needs to support 256 colors.")
       CMD_ARGS(
-              { "on|off|redgreen|blue", "Enable or disable nick colorization for MUC nicks. 'redgreen' is for people with red/green blindess and 'blue' for people with blue blindness." },
+              { "on|off|redgreen|blue", "Enable or disable nick colorization for MUC nicks. 'redgreen' is for people with red/green blindness and 'blue' for people with blue blindness." },
               { "own on|off", "Enable color generation for own nick. If disabled the color from the color from the theme ('me') will get used." })
       CMD_EXAMPLES(
               "/color off",
@@ -2496,26 +2493,35 @@ static struct cmd_t command_defs[] = {
 
     { "/executable",
       parse_args, 2, 4, &cons_executable_setting,
-      CMD_NOSUBFUNCS
-      CMD_MAINFUNC(cmd_executable)
+      CMD_SUBFUNCS(
+              { "avatar",  cmd_executable_avatar },
+              { "urlopen", cmd_executable_urlopen },
+              { "urlsave", cmd_executable_urlsave })
+      CMD_NOMAINFUNC
       CMD_TAGS(
               CMD_TAG_DISCOVERY)
       CMD_SYN(
               "/executable avatar <cmd>",
-              "/executable urlopen (<fileType>|DEF <require_save> <cmd>",
-              "/executable urlsave (<protocol>|DEF) <cmd>")
+              "/executable urlopen set <cmdtemplate>",
+              "/executable urlopen default",
+              "/executable urlsave set <cmdtemplate>",
+              "/executable urlsave default")
       CMD_DESC(
-              "Configure executable that should be called upon a certain command."
-              "Default is xdg-open.")
+              "Configure executable that should be called upon a certain command.")
       CMD_ARGS(
-              { "avatar", "Set executable that is run in /avatar open. Use your favourite image viewer." },
-              { "urlopen", "Set executable that is run in /url open for a given file type. It may be your favorite browser or a specific viewer. Use DEF to set default command for undefined file type." },
-              { "urlsave", "Set executable that is run in /url save for a given protocol. Use your favourite downloader. Use DEF to set default command for undefined protocol." })
+              { "avatar", "Set executable that is run by /avatar open. Use your favorite image viewer." },
+              { "urlopen set", "Set executable that is run by /url open. It may be your favorite browser or a specific viewer." },
+              { "urlopen default", "Restore to default settings." },
+              { "urlsave set", "Set executable that is run by /url save. It may be your favorite downloader.'" },
+              { "urlsave default", "Use the built-in download method for saving." })
       CMD_EXAMPLES(
               "/executable avatar xdg-open",
-              "/executable urlopen DEF false \"xdg-open %u\"",
-              "/executable urlopen html false \"firefox %u\"",
-              "/executable urlsave aesgcm \"omut -d -o %p %u\"")
+              "/executable urlopen set \"xdg-open %u\"",
+              "/executable urlopen set \"firefox %u\"",
+              "/executable urlopen default",
+              "/executable urlsave set \"wget %u -O %p\"",
+              "/executable urlsave set \"curl %u -o %p\"",
+              "/executable urlsave default")
     },
 
     { "/url",

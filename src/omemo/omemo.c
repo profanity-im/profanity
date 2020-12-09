@@ -45,7 +45,6 @@
 #include <signal/signal_protocol.h>
 #include <signal/session_builder.h>
 #include <signal/session_cipher.h>
-#include <gcrypt.h>
 
 #include "config/account.h"
 #include "config/files.h"
@@ -61,6 +60,9 @@
 #include "xmpp/omemo.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/xmpp.h"
+
+#define AESGCM_URL_NONCE_LEN (2 * OMEMO_AESGCM_NONCE_LENGTH)
+#define AESGCM_URL_KEY_LEN   (2 * OMEMO_AESGCM_KEY_LENGTH)
 
 static gboolean loaded;
 
@@ -1652,4 +1654,135 @@ _generate_signed_pre_key(void)
     signal_protocol_key_helper_generate_signed_pre_key(&signed_pre_key, omemo_ctx.identity_key_pair, omemo_ctx.signed_pre_key_id, timestamp, omemo_ctx.signal);
     signal_protocol_signed_pre_key_store_key(omemo_ctx.store, signed_pre_key);
     SIGNAL_UNREF(signed_pre_key);
+}
+
+void
+omemo_free(void* a)
+{
+    gcry_free(a);
+}
+
+char*
+omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res)
+{
+    unsigned char* key = gcry_random_bytes_secure(
+        OMEMO_AESGCM_KEY_LENGTH,
+        GCRY_VERY_STRONG_RANDOM);
+
+    // Create nonce/IV with random bytes.
+    unsigned char nonce[OMEMO_AESGCM_NONCE_LENGTH];
+    gcry_create_nonce(nonce, OMEMO_AESGCM_NONCE_LENGTH);
+
+    char* fragment = aes256gcm_create_secure_fragment(key, nonce);
+    *gcry_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, true);
+
+    if (*gcry_res != GPG_ERR_NO_ERROR) {
+        gcry_free(fragment);
+        fragment = NULL;
+    }
+
+    gcry_free(key);
+
+    return fragment;
+}
+
+void
+_bytes_from_hex(const char* hex, size_t hex_size,
+                unsigned char* bytes, size_t bytes_size)
+{
+    const unsigned char ht[] = {
+        0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, // 01234567
+        0x08, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // 89:;<=>?
+        0x00, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x00, // @ABCDEFG
+    };
+    const size_t ht_size = sizeof(ht);
+
+    unsigned char b0;
+    unsigned char b1;
+
+    memset(bytes, 0, bytes_size);
+
+    for (int i = 0; (i < hex_size) && (i / 2 < bytes_size); i += 2) {
+        b0 = ((unsigned char)hex[i + 0] & 0x1f) ^ 0x10;
+        b1 = ((unsigned char)hex[i + 1] & 0x1f) ^ 0x10;
+
+        if (b0 <= ht_size && b1 <= ht_size) {
+            bytes[i / 2] = (unsigned char)(ht[b0] << 4) | ht[b1];
+        }
+    }
+}
+
+gcry_error_t
+omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char* fragment)
+{
+    char nonce_hex[AESGCM_URL_NONCE_LEN];
+    char key_hex[AESGCM_URL_KEY_LEN];
+
+    const int nonce_pos = 0;
+    const int key_pos = AESGCM_URL_NONCE_LEN;
+
+    memcpy(nonce_hex, &(fragment[nonce_pos]), AESGCM_URL_NONCE_LEN);
+    memcpy(key_hex, &(fragment[key_pos]), AESGCM_URL_KEY_LEN);
+
+    unsigned char nonce[OMEMO_AESGCM_NONCE_LENGTH];
+    unsigned char* key = gcry_malloc_secure(OMEMO_AESGCM_KEY_LENGTH);
+
+    _bytes_from_hex(nonce_hex, AESGCM_URL_NONCE_LEN,
+                    nonce, OMEMO_AESGCM_NONCE_LENGTH);
+    _bytes_from_hex(key_hex, AESGCM_URL_KEY_LEN,
+                    key, OMEMO_AESGCM_KEY_LENGTH);
+
+    gcry_error_t crypt_res;
+    crypt_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, false);
+
+    gcry_free(key);
+
+    return crypt_res;
+}
+
+int
+omemo_parse_aesgcm_url(const char* aesgcm_url,
+                       char** https_url,
+                       char** fragment)
+{
+    CURLUcode ret;
+    CURLU* url = curl_url();
+
+    // Required to allow for the "aesgcm://" scheme that OMEMO Media Sharing
+    // uses.
+    unsigned int curl_flags = CURLU_NON_SUPPORT_SCHEME;
+
+    ret = curl_url_set(url, CURLUPART_URL, aesgcm_url, curl_flags);
+    if (ret) {
+        goto out;
+    }
+
+    ret = curl_url_get(url, CURLUPART_FRAGMENT, fragment, curl_flags);
+    if (ret) {
+        goto out;
+    }
+
+    if (strlen(*fragment) != AESGCM_URL_NONCE_LEN + AESGCM_URL_KEY_LEN) {
+        goto out;
+    }
+
+    // Clear fragment from HTTPS URL as it's not required for download.
+    ret = curl_url_set(url, CURLUPART_FRAGMENT, NULL, curl_flags);
+    if (ret) {
+        goto out;
+    }
+
+    ret = curl_url_set(url, CURLUPART_SCHEME, "https", curl_flags);
+    if (ret) {
+        goto out;
+    }
+
+    ret = curl_url_get(url, CURLUPART_URL, https_url, curl_flags);
+    if (ret) {
+        goto out;
+    }
+
+out:
+    curl_url_cleanup(url);
+    return ret;
 }

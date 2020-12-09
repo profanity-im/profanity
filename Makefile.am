@@ -41,8 +41,12 @@ core_sources = \
 	src/command/cmd_ac.h src/command/cmd_ac.c \
 	src/tools/parser.c \
 	src/tools/parser.h \
+	src/tools/http_common.c \
+	src/tools/http_common.h \
 	src/tools/http_upload.c \
 	src/tools/http_upload.h \
+	src/tools/http_download.c \
+	src/tools/http_download.h \
 	src/tools/bookmark_ignore.c \
 	src/tools/bookmark_ignore.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
@@ -119,6 +123,8 @@ unittest_sources = \
 	tests/unittests/database/stub_database.c \
 	tests/unittests/config/stub_accounts.c \
 	tests/unittests/tools/stub_http_upload.c \
+	tests/unittests/tools/stub_http_download.c \
+	tests/unittests/tools/stub_aesgcm_download.c \
 	tests/unittests/helpers.c tests/unittests/helpers.h \
 	tests/unittests/test_form.c tests/unittests/test_form.h \
 	tests/unittests/test_common.c tests/unittests/test_common.h \
@@ -189,7 +195,8 @@ otr4_sources = \
 
 omemo_sources = \
 	src/omemo/omemo.h src/omemo/omemo.c src/omemo/crypto.h src/omemo/crypto.c \
-	src/omemo/store.h src/omemo/store.c src/xmpp/omemo.h src/xmpp/omemo.c
+	src/omemo/store.h src/omemo/store.c src/xmpp/omemo.h src/xmpp/omemo.c \
+	src/tools/aesgcm_download.h src/tools/aesgcm_download.c
 
 omemo_unittest_sources = \
 	tests/unittests/omemo/stub_omemo.c

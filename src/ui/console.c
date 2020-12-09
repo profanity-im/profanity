@@ -2068,17 +2068,20 @@ cons_correction_setting(void)
 void
 cons_executable_setting(void)
 {
-    char* avatar = prefs_get_string(PREF_AVATAR_CMD);
+    gchar* avatar = prefs_get_string(PREF_AVATAR_CMD);
     cons_show("Default '/avatar open' command (/executable avatar)                      : %s", avatar);
     g_free(avatar);
 
     //TODO: there needs to be a way to get all the "locales"/schemes so we can
-    //display the defualt openers for all filetypes
-    gchar** urlopen = prefs_get_string_list_with_option(PREF_URL_OPEN_CMD, "");
-    cons_show("Default '/url open' command (/executable urlopen)                        : %s", urlopen[1]);
-    g_strfreev(urlopen);
+    //display the default openers for all filetypes
+    gchar* urlopen = prefs_get_string(PREF_URL_OPEN_CMD);
+    cons_show("Default '/url open' command (/executable urlopen)                        : %s", urlopen);
+    g_free(urlopen);
 
-    char* urlsave = prefs_get_string(PREF_URL_SAVE_CMD);
+    gchar* urlsave = prefs_get_string(PREF_URL_SAVE_CMD);
+    if (urlsave == NULL) {
+        urlsave = g_strdup("(built-in)");
+    }
     cons_show("Default '/url save' command (/executable urlsave)                        : %s", urlsave);
     g_free(urlsave);
 }
@@ -2191,12 +2194,6 @@ cons_show_omemo_prefs(void)
     char* ch = prefs_get_omemo_char();
     cons_show("OMEMO char (/omemo char)     : %s", ch);
     free(ch);
-
-    if (prefs_get_boolean(PREF_OMEMO_SENDFILE)) {
-        cons_show("Allow sending unencrypted files in an OMEMO session via /sendfile (/omemo sendfile): ON");
-    } else {
-        cons_show("Allow sending unencrypted files in an OMEMO session via /sendfile (/omemo sendfile): OFF");
-    }
 
     cons_alert(NULL);
 }

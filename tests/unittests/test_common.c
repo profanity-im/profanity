@@ -330,6 +330,186 @@ strip_quotes_strips_both(void** state)
     free(result);
 }
 
+typedef struct
+{
+    char* template;
+    char* url;
+    char* filename;
+    char* argv;
+} format_call_external_argv_t;
+
+void
+format_call_external_argv_td(void** state)
+{
+
+    enum table { num_tests = 4 };
+
+    format_call_external_argv_t tests[num_tests] = {
+        (format_call_external_argv_t){
+            .template = "/bin/echo %u %p",
+            .url = "https://example.org",
+            .filename = "image.jpeg",
+            .argv = "/bin/echo https://example.org image.jpeg",
+        },
+        (format_call_external_argv_t){
+            .template = "/bin/echo %p %u",
+            .url = "https://example.org",
+            .filename = "image.jpeg",
+            .argv = "/bin/echo image.jpeg https://example.org",
+        },
+        (format_call_external_argv_t){
+            .template = "/bin/echo %p",
+            .url = "https://example.org",
+            .filename = "image.jpeg",
+            .argv = "/bin/echo image.jpeg",
+        },
+        (format_call_external_argv_t){
+            .template = "/bin/echo %u",
+            .url = "https://example.org",
+            .filename = "image.jpeg",
+            .argv = "/bin/echo https://example.org",
+        },
+    };
+
+    gchar** got_argv = NULL;
+    gchar* got_argv_str = NULL;
+    for (int i = 0; i < num_tests; i++) {
+        got_argv = format_call_external_argv(
+            tests[i].template,
+            tests[i].url,
+            tests[i].filename);
+        got_argv_str = g_strjoinv(" ", got_argv);
+
+        assert_string_equal(got_argv_str, tests[i].argv);
+
+        g_strfreev(got_argv);
+        g_free(got_argv_str);
+    }
+}
+
+typedef struct
+{
+    char* url;
+    char* path;
+    char* target;
+    char* basename;
+} unique_filename_from_url_t;
+
+void
+unique_filename_from_url_td(void** state)
+{
+
+    enum table { num_tests = 15 };
+    char* pwd = g_get_current_dir();
+
+    unique_filename_from_url_t tests[num_tests] = {
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg",
+            .path = "./.",
+            .target = pwd,
+            .basename = "image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg",
+            .path = NULL,
+            .target = pwd,
+            .basename = "image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg#somefragment",
+            .path = "./",
+            .target = pwd,
+            .basename = "image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg?query=param",
+            .path = "./",
+            .target = pwd,
+            .basename = "image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg?query=param&another=one",
+            .path = "./",
+            .target = pwd,
+            .basename = "image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg?query=param&another=one",
+            .path = "/tmp/",
+            .target = "/tmp/",
+            .basename = "image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg?query=param&another=one",
+            .path = "/tmp/hopefully/this/file/does/not/exist",
+            .target = "/tmp/hopefully/this/file/does/not/",
+            .basename = "exist",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/image.jpeg?query=param&another=one",
+            .path = "/tmp/hopefully/this/file/does/not/exist/",
+            .target = "/tmp/hopefully/this/file/does/not/exist/",
+            .basename = "image.jpeg",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/images/",
+            .path = "./",
+            .target = pwd,
+            .basename = "images",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/images/../../file",
+            .path = "./",
+            .target = pwd,
+            .basename = "file",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/images/../../file/..",
+            .path = "./",
+            .target = pwd,
+            .basename = "index",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/images/..//",
+            .path = "./",
+            .target = pwd,
+            .basename = "index",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test/",
+            .path = "./",
+            .target = pwd,
+            .basename = "index",
+        },
+        (unique_filename_from_url_t){
+            .url = "https://host.test",
+            .path = "./",
+            .target = pwd,
+            .basename = "index",
+        },
+        (unique_filename_from_url_t){
+            .url = "aesgcm://host.test",
+            .path = "./",
+            .target = pwd,
+            .basename = "index",
+        },
+    };
+
+    char* got_filename = NULL;
+    char* exp_filename = NULL;
+    for (int i = 0; i < num_tests; i++) {
+        got_filename = unique_filename_from_url(tests[i].url, tests[i].path);
+        exp_filename = g_build_filename(tests[i].target, tests[i].basename, NULL);
+
+        assert_string_equal(got_filename, exp_filename);
+
+        free(got_filename);
+        free(exp_filename);
+    }
+
+    g_free(pwd);
+}
+
 gboolean
 _lists_equal(GSList* a, GSList* b)
 {
