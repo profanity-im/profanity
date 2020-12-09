@@ -108,5 +108,6 @@ gboolean call_external(gchar** argv, gchar*** const output_ptr, gchar*** const e
 gchar** format_call_external_argv(const char* template, const char* url, const char* filename);
 
 gchar* unique_filename_from_url(const char* url, const char* path);
+gchar* get_expanded_path(const char *path);
 
 #endif
