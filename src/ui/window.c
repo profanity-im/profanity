@@ -179,7 +179,6 @@ win_create_muc(const char* const roomjid)
         layout->base.win = newpad(PAD_SIZE, cols - subwin_cols);
         wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
         layout->subwin = newpad(PAD_SIZE, subwin_cols);
-        ;
         wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
     } else {
         layout->base.win = newpad(PAD_SIZE, (cols));
