@@ -1169,8 +1169,8 @@ p_ox_gpg_decrypt(char* base64)
     gpgme_data_t cipher = NULL;
 
     gsize s;
-    guchar* encypted = g_base64_decode(base64, &s);
-    error = gpgme_data_new_from_mem(&cipher, (char*)encypted, s, 0);
+    guchar* encrypted = g_base64_decode(base64, &s);
+    error = gpgme_data_new_from_mem(&cipher, (char*)encrypted, s, 0);
     if (error != 0) {
         log_error("GpgME Error gpgme_data_new_from_mem: %s", gpgme_strerror(error));
         return NULL;
@@ -1215,7 +1215,7 @@ p_ox_gpg_decrypt(char* base64)
  * 
  * Only one key in the file.
  *
- * \param filename filname to read the file.
+ * \param filename filename to read the file.
  * \param key result with base64 encode key or NULL
  * \param fp result with the fingerprint or NULL
  *

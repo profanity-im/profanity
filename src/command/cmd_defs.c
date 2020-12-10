@@ -1430,7 +1430,7 @@ static struct cmd_t command_defs[] = {
               "To configure presence update messages in the console, chat and chat room windows, see '/help presence'.")
       CMD_ARGS(
               { "chat on|off", "Notifications for regular chat messages." },
-              { "chat current on|off", "Whether to show regular chat message notifications when the window is focussed." },
+              { "chat current on|off", "Whether to show regular chat message notifications when the window is focused." },
               { "chat text on|off", "Show message text in regular message notifications." },
               { "room on|off", "Notifications for all chat room messages." },
               { "room mention on|off", "Notifications for chat room messages when your nick is mentioned." },
@@ -1438,7 +1438,7 @@ static struct cmd_t command_defs[] = {
               { "room mention case_insensitive", "Set room mention notifications as case insensitive." },
               { "room mention word_whole", "Set room mention notifications only on whole word match, i.e. when nickname is not part of a larger word." },
               { "room mention word_part", "Set room mention notifications on partial word match, i.e. nickname may be part of a larger word." },
-              { "room current on|off", "Whether to show all chat room messages notifications when the window is focussed." },
+              { "room current on|off", "Whether to show all chat room messages notifications when the window is focused." },
               { "room text on|off", "Show message text in chat room message notifications." },
               { "room trigger add <text>", "Notify when specified text included in all chat room messages." },
               { "room trigger remove <text>", "Remove chat room notification trigger." },

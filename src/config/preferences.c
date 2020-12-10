@@ -183,7 +183,7 @@ _prefs_load(void)
         g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL);
     }
     
-    // 0.10 will have omemo media sharing. so disabling of senfile introduced in 0.9 is not needed (#1270)
+    // 0.10 will have omemo media sharing. so disabling of sendfile introduced in 0.9 is not needed (#1270)
     if (g_key_file_has_key(prefs, PREF_GROUP_OMEMO, "sendfile", NULL)) {
         g_key_file_remove_key(prefs, PREF_GROUP_OMEMO, "sendfile", NULL);
     }

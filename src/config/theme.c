@@ -721,7 +721,7 @@ theme_attrs(theme_item_t attrs)
     GString* lookup_str = g_string_new("");
     gboolean bold = FALSE;
 
-    // get forground colour
+    // get foreground colour
     switch (attrs) {
     case THEME_TEXT:
         _theme_prep_fgnd("main.text", lookup_str, &bold);

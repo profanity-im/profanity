@@ -688,7 +688,7 @@ api_room_set_titlebar_enctext(const char* const roomjid, const char* const encte
 
     ProfMucWin* mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
-        log_warning("%s", "api_room_set_titlebar_enctext failed, coudl not find room window for %s", roomjid);
+        log_warning("%s", "api_room_set_titlebar_enctext failed, could not find room window for %s", roomjid);
         return 0;
     }
 
@@ -707,7 +707,7 @@ api_room_unset_titlebar_enctext(const char* const roomjid)
 
     ProfMucWin* mucwin = wins_get_muc(roomjid);
     if (mucwin == NULL) {
-        log_warning("%s", "api_room_unset_titlebar_enctext failed, coudl not find room window for %s", roomjid);
+        log_warning("%s", "api_room_unset_titlebar_enctext failed, could not find room window for %s", roomjid);
         return 0;
     }
 

@@ -1850,10 +1850,10 @@ void
 cons_winpos_setting(void)
 {
     ProfWinPlacement* placement = prefs_get_win_placement();
-    cons_show("Title bar postion (/titlebar)       : %d", placement->titlebar_pos);
-    cons_show("Main window postion (/mainwin)      : %d", placement->mainwin_pos);
-    cons_show("Status bar postion (/statusbar)     : %d", placement->statusbar_pos);
-    cons_show("Input window postion (/inputwin)    : %d", placement->inputwin_pos);
+    cons_show("Title bar position (/titlebar)       : %d", placement->titlebar_pos);
+    cons_show("Main window position (/mainwin)      : %d", placement->mainwin_pos);
+    cons_show("Status bar position (/statusbar)     : %d", placement->statusbar_pos);
+    cons_show("Input window position (/inputwin)    : %d", placement->inputwin_pos);
     prefs_free_win_placement(placement);
 }
 

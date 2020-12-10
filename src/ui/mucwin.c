@@ -450,7 +450,7 @@ _mucwin_print_triggers(ProfWin* window, const char* const message, GList* trigge
             continue;
         }
 
-        // found, repace vars if earlier than previous
+        // found, replace vars if earlier than previous
         int trigger_pos = trigger_ptr - message_lower;
         if (first_trigger_pos == -1 || trigger_pos < first_trigger_pos) {
             first_trigger_pos = trigger_pos;

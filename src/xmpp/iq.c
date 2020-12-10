@@ -875,7 +875,7 @@ _caps_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         log_debug("Valid SHA-1 hash found: %s", given_sha1);
 
         if (caps_cache_contains(given_sha1)) {
-            log_debug("Capabilties already cached: %s", given_sha1);
+            log_debug("Capabilities already cached: %s", given_sha1);
         } else {
             log_debug("Capabilities not cached: %s, storing", given_sha1);
             EntityCapabilities* capabilities = stanza_create_caps_from_query_element(query);
@@ -1003,7 +1003,7 @@ _caps_response_legacy_id_handler(xmpp_stanza_t* const stanza, void* const userda
     if (g_strcmp0(expected_node, node) == 0) {
         log_debug("Legacy capabilities, nodes match %s", node);
         if (caps_cache_contains(node)) {
-            log_debug("Capabilties already cached: %s", node);
+            log_debug("Capabilities already cached: %s", node);
         } else {
             log_debug("Capabilities not cached: %s, storing", node);
             EntityCapabilities* capabilities = stanza_create_caps_from_query_element(query);
@@ -1015,7 +1015,7 @@ _caps_response_legacy_id_handler(xmpp_stanza_t* const stanza, void* const userda
 
         // node match fail
     } else {
-        log_info("Legacy Capabilities nodes do not match, expeceted %s, given %s.", expected_node, node);
+        log_info("Legacy Capabilities nodes do not match, expected %s, given %s.", expected_node, node);
     }
 
     return 0;
