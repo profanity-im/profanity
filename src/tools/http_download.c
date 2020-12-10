@@ -123,7 +123,7 @@ http_file_get(void* userdata)
                                    "output file at '%s' for writing (%s).",
                                    download->url, download->filename,
                                    g_strerror(errno));
-        return NULL;
+        goto out;
     }
 
     char* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
@@ -185,9 +185,6 @@ http_file_get(void* userdata)
         }
     }
 
-    download_processes = g_slist_remove(download_processes, download);
-    pthread_mutex_unlock(&lock);
-
     if (download->cmd_template != NULL) {
         gchar** argv = format_call_external_argv(download->cmd_template,
                                                  download->url,
@@ -207,6 +204,11 @@ http_file_get(void* userdata)
         g_strfreev(argv);
         free(download->cmd_template);
     }
+
+out:
+
+    download_processes = g_slist_remove(download_processes, download);
+    pthread_mutex_unlock(&lock);
 
     free(download->url);
     free(download->filename);
