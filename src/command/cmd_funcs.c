@@ -9118,7 +9118,7 @@ gboolean
 cmd_url_open(ProfWin* window, const char* const command, gchar** args)
 {
     if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
-        cons_show("url open not supported in this window");
+        cons_show_error("url open not supported in this window");
         return TRUE;
     }
 
@@ -9134,20 +9134,37 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
 
     scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
-        cons_show("URL '%s' is not valid.", args[1]);
+        cons_show_error("URL '%s' is not valid.", args[1]);
         goto out;
     }
 
     cmd_template = prefs_get_string(PREF_URL_OPEN_CMD);
     if (cmd_template == NULL) {
-        cons_show("No default `url open` command found in executables preferences.");
+        cons_show_error("No default `url open` command found in executables preferences.");
         goto out;
     }
 
 #ifdef HAVE_OMEMO
     // OMEMO URLs (aesgcm://) must be saved and decrypted before being opened.
-    if (0 == g_strcmp0(scheme, "aesgcm")) {
-        filename = unique_filename_from_url(url, files_get_data_path(DIR_DOWNLOADS));
+    if (g_strcmp0(scheme, "aesgcm") == 0) {
+
+        // Ensure that the downloads directory exists for saving cleartexts.
+        gchar* downloads_dir = files_get_data_path(DIR_DOWNLOADS);
+        if (g_mkdir_with_parents(downloads_dir, S_IRWXU) != 0) {
+            cons_show_error("Failed to create download directory "
+                            "at '%s' with error '%s'",
+                            downloads_dir, strerror(errno));
+            g_free(downloads_dir);
+            goto out;
+        }
+
+        // Generate an unique filename from the URL that should be stored in the
+        // downloads directory.
+        filename = unique_filename_from_url(url, downloads_dir);
+        g_free(downloads_dir);
+
+        // Download, decrypt and open the cleartext version of the AESGCM
+        // encrypted file.
         _url_aesgcm_method(window, cmd_template, url, filename);
         goto out;
     }
@@ -9186,15 +9203,15 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
 
     scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
-        cons_show("URL '%s' is not valid.", args[1]);
+        cons_show_error("URL '%s' is not valid.", args[1]);
         goto out;
     }
 
     filename = unique_filename_from_url(url, path);
     if (filename == NULL) {
-        cons_show("Failed to generate unique filename"
-                  "from URL '%s' for path '%s'",
-                  url, path);
+        cons_show_error("Failed to generate unique filename"
+                        "from URL '%s' for path '%s'",
+                        url, path);
         goto out;
     }
 
