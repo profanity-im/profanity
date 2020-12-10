@@ -86,6 +86,7 @@ theme_init(const char* const theme_name)
     g_hash_table_insert(defaults, strdup("main.text.them"), strdup("default"));
     g_hash_table_insert(defaults, strdup("main.splash"), strdup("cyan"));
     g_hash_table_insert(defaults, strdup("main.help.header"), strdup("default"));
+    g_hash_table_insert(defaults, strdup("main.trackbar"), strdup("default"));
     g_hash_table_insert(defaults, strdup("error"), strdup("red"));
     g_hash_table_insert(defaults, strdup("incoming"), strdup("yellow"));
     g_hash_table_insert(defaults, strdup("mention"), strdup("yellow"));
