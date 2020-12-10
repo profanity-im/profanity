@@ -629,15 +629,15 @@ _basename_from_url(const char* url)
 }
 
 gchar*
-get_expanded_path(const char *path)
+get_expanded_path(const char* path)
 {
     GString* exp_path = g_string_new("");
-    gchar *result;
+    gchar* result;
 
     if (strlen(path) >= 2 && path[0] == '~' && path[1] == '/') {
-        g_string_printf(exp_path, "%s/%s", getenv("HOME"), path+2);
+        g_string_printf(exp_path, "%s/%s", getenv("HOME"), path + 2);
     } else {
-        g_string_printf(exp_path, "%s", path+2);
+        g_string_printf(exp_path, "%s", path);
     }
 
     result = exp_path->str;
@@ -649,11 +649,11 @@ get_expanded_path(const char *path)
 gchar*
 unique_filename_from_url(const char* url, const char* path)
 {
-    gchar *realpath;
+    gchar* realpath;
 
     // Default to './' as path when none has been provided.
     if (path == NULL) {
-        realpath = strdup("./");
+        realpath = g_strdup("./");
     } else {
         realpath = get_expanded_path(path);
     }
