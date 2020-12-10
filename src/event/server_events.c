@@ -448,16 +448,6 @@ sv_ev_outgoing_carbon(ProfMessage* message)
 
     chat_state_active(chatwin->state);
 
-    if (message->plain) {
-        if (message->type == PROF_MSG_TYPE_MUCPM) {
-            // MUC PM, should have resource (nick) in filename
-            chat_log_msg_out(message->to_jid->barejid, message->plain, message->from_jid->resourcepart);
-        } else {
-            chat_log_msg_out(message->to_jid->barejid, message->plain, NULL);
-        }
-        log_database_add_incoming(message);
-    }
-
     if (message->enc == PROF_MSG_ENC_OMEMO) {
         chatwin_outgoing_carbon(chatwin, message);
     } else if (message->encrypted) {
@@ -480,6 +470,16 @@ sv_ev_outgoing_carbon(ProfMessage* message)
         message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
         chatwin_outgoing_carbon(chatwin, message);
+    }
+
+    if (message->plain) {
+        if (message->type == PROF_MSG_TYPE_MUCPM) {
+            // MUC PM, should have resource (nick) in filename
+            chat_log_msg_out(message->to_jid->barejid, message->plain, message->from_jid->resourcepart);
+        } else {
+            chat_log_msg_out(message->to_jid->barejid, message->plain, NULL);
+        }
+        log_database_add_incoming(message);
     }
     return;
 }
@@ -659,14 +659,19 @@ sv_ev_incoming_carbon(ProfMessage* message)
 #endif
     }
 
+    gboolean logit = TRUE;
+    if (message->type == PROF_MSG_TYPE_MUCPM) {
+        logit = FALSE;
+    }
+
     if (message->enc == PROF_MSG_ENC_OX) {
-        _sv_ev_incoming_ox(chatwin, new_win, message, FALSE);
+        _sv_ev_incoming_ox(chatwin, new_win, message, logit);
     } else if (message->encrypted) {
-        _sv_ev_incoming_pgp(chatwin, new_win, message, FALSE);
+        _sv_ev_incoming_pgp(chatwin, new_win, message, logit);
     } else if (message->enc == PROF_MSG_ENC_OMEMO) {
-        _sv_ev_incoming_omemo(chatwin, new_win, message, FALSE);
+        _sv_ev_incoming_omemo(chatwin, new_win, message, logit);
     } else {
-        _sv_ev_incoming_plain(chatwin, new_win, message, FALSE);
+        _sv_ev_incoming_plain(chatwin, new_win, message, logit);
     }
     rosterwin_roster();
     return;
