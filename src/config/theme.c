@@ -712,7 +712,7 @@ theme_hash_attrs(const char* str)
     return COLOR_PAIR(color_pair_cache_hash_str(str, profile));
 }
 
-/* returns the colours (fgnd and bknd) for a certian attribute ie main.text */
+/* returns the colours (fgnd and bknd) for a certain attribute ie main.text */
 int
 theme_attrs(theme_item_t attrs)
 {
