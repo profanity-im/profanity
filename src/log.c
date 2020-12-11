@@ -159,20 +159,6 @@ log_init(log_level_t filter, char* log_file)
     g_free(lf);
 }
 
-void
-log_reinit(void)
-{
-    char* lf = strdup(mainlogfile);
-    char* start = strrchr(lf, '/') + 1;
-    char* end = strstr(start, ".log");
-    *end = '\0';
-
-    log_close();
-    log_init(level_filter, start);
-
-    free(lf);
-}
-
 const char*
 get_log_file_location(void)
 {

@@ -56,7 +56,6 @@ typedef enum {
 void log_init(log_level_t filter, char* log_file);
 log_level_t log_get_filter(void);
 void log_close(void);
-void log_reinit(void);
 const char* get_log_file_location(void);
 void log_debug(const char* const msg, ...);
 void log_info(const char* const msg, ...);
