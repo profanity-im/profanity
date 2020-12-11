@@ -6375,7 +6375,7 @@ cmd_log(ProfWin* window, const char* const command, gchar** args)
             return TRUE;
         }
         _cmd_set_boolean_preference(value, command, "Shared log", PREF_LOG_SHARED);
-        log_reinit();
+        cons_show("Setting only takes effect after saving and restarting Profanity.");
         return TRUE;
     }
 

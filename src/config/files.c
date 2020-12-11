@@ -116,20 +116,26 @@ char*
 files_get_log_file(const char* const log_file)
 {
     gchar* xdg_data = _files_get_xdg_data_home();
-    GString* logfile = g_string_new(xdg_data);
+    GString* logfile;
 
     if (log_file) {
-        g_string_append(logfile, "/profanity/logs/");
-        g_string_append(logfile, log_file);
+        gchar *log_path = g_path_get_dirname(log_file);
+        if (!mkdir_recursive(log_path)) {
+            log_error("Error while creating directory %s", log_path);
+        }
+        g_free(log_path);
+
+        logfile = g_string_new(log_file);
     } else {
+        logfile = g_string_new(xdg_data);
         g_string_append(logfile, "/profanity/logs/profanity");
-    }
 
-    if (!prefs_get_boolean(PREF_LOG_SHARED)) {
-        g_string_append_printf(logfile, "%d", getpid());
-    }
+        if (!prefs_get_boolean(PREF_LOG_SHARED)) {
+            g_string_append_printf(logfile, "%d", getpid());
+        }
 
-    g_string_append(logfile, ".log");
+        g_string_append(logfile, ".log");
+    }
 
     char* result = g_strdup(logfile->str);
 

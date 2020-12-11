@@ -37,10 +37,6 @@ log_get_filter(void)
 }
 
 void
-log_reinit(void)
-{
-}
-void
 log_close(void)
 {
 }

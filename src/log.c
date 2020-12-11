@@ -56,6 +56,7 @@
 
 static FILE* logp;
 static gchar* mainlogfile = NULL;
+static gboolean user_provided_log = FALSE;
 
 static GTimeZone* tz;
 static GDateTime* dt;
@@ -150,6 +151,11 @@ log_init(log_level_t filter, char* log_file)
 {
     level_filter = filter;
     tz = g_time_zone_new_local();
+
+    if (log_file) {
+        user_provided_log = TRUE;
+    }
+
     gchar* lf = files_get_log_file(log_file);
 
     logp = fopen(lf, "a");
@@ -157,20 +163,6 @@ log_init(log_level_t filter, char* log_file)
     mainlogfile = g_strdup(lf);
 
     g_free(lf);
-}
-
-void
-log_reinit(void)
-{
-    char* lf = strdup(mainlogfile);
-    char* start = strrchr(lf, '/') + 1;
-    char* end = strstr(start, ".log");
-    *end = '\0';
-
-    log_close();
-    log_init(level_filter, start);
-
-    free(lf);
 }
 
 const char*
@@ -212,7 +204,7 @@ log_msg(log_level_t level, const char* const area, const char* const msg)
         fflush(logp);
         g_free(date_fmt);
 
-        if (prefs_get_boolean(PREF_LOG_ROTATE)) {
+        if (prefs_get_boolean(PREF_LOG_ROTATE) && !user_provided_log) {
             long result = ftell(logp);
             if (result != -1 && result >= prefs_get_max_log_size()) {
                 _rotate_log_file();
