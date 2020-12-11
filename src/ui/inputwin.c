@@ -309,7 +309,7 @@ _inp_win_update_virtual(void)
     int wcols = getmaxx(stdscr);
     int row = screen_inputwin_row();
     if (inp_win != NULL) {
-        pnoutrefresh(inp_win, 0, pad_start, row, 0, row, wcols - 2);
+        pnoutrefresh(inp_win, 0, pad_start, row, 0, row, wcols - 1);
     }
 }
 
@@ -387,7 +387,7 @@ _inp_win_handle_scroll(void)
 
     if (col == 0) {
         pad_start = 0;
-    } else if (col >= pad_start + (wcols - 2)) {
+    } else if (col >= pad_start + (wcols - 1)) {
         pad_start = col - (wcols / 2);
         if (pad_start < 0) {
             pad_start = 0;
