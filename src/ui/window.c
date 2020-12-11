@@ -1745,8 +1745,6 @@ win_print_trackbar(ProfWin* window)
     }
 
     wattroff(window->layout->win, theme_attrs(THEME_TRACKBAR));
-
-    wprintw(window->layout->win, "\n");
 }
 
 void
