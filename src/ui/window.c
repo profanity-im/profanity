@@ -1213,7 +1213,6 @@ win_print_outgoing(ProfWin* window, const char* show_char, const char* const id,
     if (replace_id) {
         _win_correct(window, message, id, replace_id, myjid);
     } else {
-        //TODO my jid
         _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, "me", myjid, id, "%s", message);
     }
 
