@@ -471,92 +471,35 @@ get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const mes
     return mentions;
 }
 
-/*
- * Take an NULL-terminated array used as the tokens of a command, and optionally
- * pointers to the string arrays that will store each lines of the call standard
- * output and standard error.
- *
- * argv - NULL-terminated string array containing the tokens of the command
- *        line to spawn
- * output_ptr - a pointer to the string array where to store spawned command
- *              standard output
- *              set to NULL to ignore the command standard output
- * error_ptr - a pointer to the string array where to store spawned command
- *             standard error
- *             set to NULL to ignore the command standard error
- *
- * Returns:
- * - TRUE if the command has been successfully spawned and exited normally
- * - FALSE otherwise
- */
 gboolean
-call_external(gchar** argv, gchar*** const output_ptr, gchar*** const error_ptr)
+call_external(gchar** argv, gchar** std_out, gchar** std_err)
 {
-    gchar* stdout_str = NULL;
-    gchar** stdout_str_ptr = &stdout_str;
-    gchar* stderr_str = NULL;
-    gchar** stderr_str_ptr = &stderr_str;
-    GSpawnFlags flags = G_SPAWN_SEARCH_PATH;
-    gint status;
-    GError* error = NULL;
-    gchar* cmd = NULL;
-
-    cmd = g_strjoinv(" ", argv);
-    log_debug("Calling external: %s", cmd);
-
-    if (!output_ptr) {
-        stdout_str_ptr = NULL;
+    GSpawnFlags flags = G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN;
+    if (std_out == NULL)
         flags |= G_SPAWN_STDOUT_TO_DEV_NULL;
-    }
-
-    if (!error_ptr) {
-        stderr_str_ptr = NULL;
+    if (std_err == NULL)
         flags |= G_SPAWN_STDERR_TO_DEV_NULL;
-    }
 
-    if (!g_spawn_sync(NULL, argv, NULL, flags, NULL, NULL, stdout_str_ptr, stderr_str_ptr, &status, &error)) {
-        log_error("Spawning '%s' failed: %s.", cmd, error->message);
-        g_error_free(error);
-        error = NULL;
-        return FALSE;
-    }
+    gint exit_status;
+    gboolean spawn_result;
+    GError* spawn_error;
+    spawn_result = g_spawn_sync(NULL, // Inherit the parent PWD.
+                                argv,
+                                NULL, // Inherit the parent environment.
+                                flags,
+                                NULL, NULL, // No func. before exec() in child.
+                                std_out, std_err,
+                                &exit_status, &spawn_error);
 
-    if (!g_spawn_check_exit_status(status, &error)) {
-        log_error("Calling '%s' failed: %s.", cmd, error->message);
-        g_error_free(error);
-        error = NULL;
+    if (!spawn_result
+        || !g_spawn_check_exit_status(exit_status, &spawn_error)) {
+        gchar* cmd = g_strjoinv(" ", argv);
+        log_error("Spawning '%s' failed with '%s'.", cmd, spawn_error->message);
         g_free(cmd);
-        cmd = NULL;
-        g_free(stdout_str);
-        stdout_str = NULL;
-        stdout_str_ptr = NULL;
-        if (stderr_str && strlen(stderr_str)) {
-            log_error("Called command returned the following on stderr: %s.", stderr_str);
-        }
-        g_free(stderr_str);
-        stderr_str = NULL;
-        stderr_str_ptr = NULL;
-        return FALSE;
+        g_error_free(spawn_error);
     }
 
-    g_free(cmd);
-    cmd = NULL;
-
-    if (output_ptr) {
-        *output_ptr = g_strsplit(stdout_str, "\n", 0);
-        g_free(stdout_str);
-        stdout_str = NULL;
-        stdout_str_ptr = NULL;
-    }
-
-    if (error_ptr) {
-        *error_ptr = g_strsplit(stderr_str, "\n", 0);
-        g_free(stderr_str);
-        stderr_str = NULL;
-        stderr_str_ptr = NULL;
-    }
-
-    return TRUE;
+    return spawn_result;
 }
 
 gchar**

@@ -200,27 +200,35 @@ account_eval_password(ProfAccount* account)
     assert(account != NULL);
     assert(account->eval_password != NULL);
 
-    gchar** output = NULL;
-    gchar** error = NULL;
+    gchar* std_out = NULL;
+    gchar* std_err = NULL;
 
     gchar* argv[] = { "sh", "-c", account->eval_password, NULL };
-    if (!call_external(argv, &output, &error)) {
+    if (!call_external(argv, &std_out, &std_err)) {
+        log_error("Password command failed with: %s", std_err);
+        g_free(std_out);
+        g_free(std_err);
         return FALSE;
     }
 
-    if (!output || !output[0]) {
-        log_error("Failed to read eval_password output");
-        g_strfreev(output);
-        output = NULL;
+    if (!std_out || !std_out[0]) {
+        log_error("Password command returned empty output.");
+        g_free(std_out);
+        g_free(std_err);
         return FALSE;
     }
 
-    account->password = strdup(output[0]);
-    g_strfreev(output);
-    output = NULL;
+    // Remove leading and trailing whitespace from command output.
+    gchar* password = g_strdup(std_out);
+    g_strstrip(password);
+
+    account->password = password;
+    g_free(std_out);
+    g_free(std_err);
 
     if (!account->password) {
-        log_error("Failed to allocate enough memory to read eval_password output");
+        log_error("Failed to allocate enough memory to read password command "
+                  "output");
         return FALSE;
     }
 
