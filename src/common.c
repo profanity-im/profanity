@@ -474,7 +474,7 @@ get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const mes
 gboolean
 call_external(gchar** argv, gchar** std_out, gchar** std_err)
 {
-    GSpawnFlags flags = G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN;
+    GSpawnFlags flags = G_SPAWN_SEARCH_PATH;
     if (std_out == NULL)
         flags |= G_SPAWN_STDOUT_TO_DEV_NULL;
     if (std_err == NULL)
