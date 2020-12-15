@@ -36,6 +36,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
 #include <glib.h>
 
@@ -200,27 +201,49 @@ account_eval_password(ProfAccount* account)
     assert(account != NULL);
     assert(account->eval_password != NULL);
 
-    gchar** output = NULL;
-    gchar** error = NULL;
+    errno = 0;
 
-    gchar* argv[] = { "sh", "-c", account->eval_password, NULL };
-    if (!call_external(argv, &output, &error)) {
+    FILE* stream = popen(account->eval_password, "r");
+    if (stream == NULL) {
+        const char* errmsg = strerror(errno);
+        if (errmsg) {
+            log_error("Could not execute `eval_password` command (%s).",
+                      errmsg);
+        } else {
+            log_error("Failed to allocate memory for `eval_password` command.");
+        }
         return FALSE;
     }
 
-    if (!output || !output[0]) {
-        log_error("Failed to read eval_password output");
-        g_strfreev(output);
-        output = NULL;
-        return FALSE;
-    }
-
-    account->password = strdup(output[0]);
-    g_strfreev(output);
-    output = NULL;
-
+    account->password = g_malloc(READ_BUF_SIZE);
     if (!account->password) {
-        log_error("Failed to allocate enough memory to read eval_password output");
+        log_error("Failed to allocate enough memory to read `eval_password` "
+                  "output.");
+        return FALSE;
+    }
+
+    account->password = fgets(account->password, READ_BUF_SIZE, stream);
+    if (!account->password) {
+        log_error("Failed to read password from stream.");
+        return FALSE;
+    }
+
+    int exit_status = pclose(stream);
+    if (exit_status > 0) {
+        log_error("Command for `eval_password` returned error status (%s).",
+                  exit_status);
+        return FALSE;
+    } else if (exit_status < 0) {
+        log_error("Failed to close stream for `eval_password` command output "
+                  "(%s).",
+                  strerror(errno));
+        return FALSE;
+    };
+
+    // Remove leading and trailing whitespace from output.
+    g_strstrip(account->password);
+    if (!account->password) {
+        log_error("Empty password returned by `eval_password` command.");
         return FALSE;
     }
 
