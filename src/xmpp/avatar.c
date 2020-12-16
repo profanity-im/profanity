@@ -42,7 +42,6 @@
 
 #include "log.h"
 #include "xmpp/connection.h"
-#include "xmpp/form.h"
 #include "xmpp/iq.h"
 #include "xmpp/message.h"
 #include "xmpp/stanza.h"
