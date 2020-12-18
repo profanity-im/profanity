@@ -191,6 +191,9 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.62.0], [],
     [AC_MSG_ERROR([glib 2.62.0 or higher is required for profanity])])
 PKG_CHECK_MODULES([gio], [gio-2.0], [],
     [AC_MSG_ERROR([libgio-2.0 from glib-2.0 is required for profanity])])
+#TODO: only under cond
+PKG_CHECK_MODULES([pixbuf], [gdk-pixbuf-2.0], [],
+    [AC_MSG_ERROR([gdk-pixbuf-2.0 from glib-2.0 is required for profanity])])
 
 ### Check for other profanity dependencies
 AC_SEARCH_LIBS([fmod], [m], [],
@@ -202,6 +205,10 @@ PKG_CHECK_MODULES([curl], [libcurl], [],
 
 PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.22.0], [],
     [AC_MSG_ERROR([sqlite3 3.22.0 or higher is required for profanity])])
+
+#TODO: only under cond
+PKG_CHECK_MODULES([chafa], [chafa >= 1.4.1], [],
+    [AC_MSG_ERROR([chafa needed])])
 
 AS_IF([test "x$enable_icons_and_clipboard" != xno],
     [PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.24.0],
@@ -359,9 +366,9 @@ AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
 AS_IF([test "x$PLATFORM" = xosx],
     [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
 AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
-AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS} ${SQLITE_CFLAGS}"
+AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS} ${SQLITE_CFLAGS} ${chafa_CFLAGS}"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\""
-LIBS="$glib_LIBS $gio_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_EXTRA_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} ${SQLITE_LIBS} $LIBS"
+LIBS="$glib_LIBS $gio_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_EXTRA_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} ${SQLITE_LIBS} ${chafa_LIBS} $LIBS"
 
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
