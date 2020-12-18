@@ -2510,9 +2510,9 @@ static struct cmd_t command_defs[] = {
               "Configure executable that should be called upon a certain command.")
       CMD_ARGS(
               { "avatar", "Set executable that is run by /avatar open. Use your favorite image viewer." },
-              { "urlopen set", "Set executable that is run by /url open. It may be your favorite browser or a specific viewer." },
+              { "urlopen set", "Set executable that is run by /url open. Takes a command template that replaces %u and %p with the URL and path respectively." },
               { "urlopen default", "Restore to default settings." },
-              { "urlsave set", "Set executable that is run by /url save. It may be your favorite downloader.'" },
+              { "urlsave set", "Set executable that is run by /url save. Takes a command template that replaces %u and %p with the URL and path respectively." },
               { "urlsave default", "Use the built-in download method for saving." })
       CMD_EXAMPLES(
               "/executable avatar xdg-open",
@@ -2853,9 +2853,9 @@ command_mangen(void)
     mkdir_recursive("docs");
 
     char* header = NULL;
-    GDateTime *now = g_date_time_new_now_local();
-    gchar *date = g_date_time_format(now, "%F");
-    if (asprintf(&header, ".TH man 1 \"%s\" \""PACKAGE_VERSION"\" \"Profanity XMPP client\"\n", date) == -1) {
+    GDateTime* now = g_date_time_new_now_local();
+    gchar* date = g_date_time_format(now, "%F");
+    if (asprintf(&header, ".TH man 1 \"%s\" \"" PACKAGE_VERSION "\" \"Profanity XMPP client\"\n", date) == -1) {
         // TODO: error
         return;
     }

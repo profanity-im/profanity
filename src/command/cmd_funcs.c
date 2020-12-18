@@ -9263,8 +9263,8 @@ cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args)
         g_free(str);
 
     } else if (g_strcmp0(args[1], "default") == 0) {
-        prefs_set_string(PREF_URL_SAVE_CMD, NULL);
-        gchar* def = prefs_get_string(PREF_URL_SAVE_CMD);
+        prefs_set_string(PREF_URL_OPEN_CMD, NULL);
+        gchar* def = prefs_get_string(PREF_URL_OPEN_CMD);
         cons_show("`url open` command set to invoke %s (default)", def);
         g_free(def);
     } else {
