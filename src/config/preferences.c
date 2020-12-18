@@ -170,7 +170,7 @@ _prefs_load(void)
         value = g_string_append(value, val);
         value = g_string_append(value, " %u;");
 
-        g_key_file_set_locale_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", "*", value->str);
+        g_key_file_set_locale_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", "DEF", value->str);
         g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
 
         g_string_free(value, TRUE);
@@ -182,10 +182,36 @@ _prefs_load(void)
         g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "avatar.cmd", value);
         g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL);
     }
-    
-    // 0.10 will have omemo media sharing. so disabling of sendfile introduced in 0.9 is not needed (#1270)
+
+    // 0.10 will have omemo media sharing. So disabling of sendfile introduced in 0.9 is not needed (#1270)
     if (g_key_file_has_key(prefs, PREF_GROUP_OMEMO, "sendfile", NULL)) {
         g_key_file_remove_key(prefs, PREF_GROUP_OMEMO, "sendfile", NULL);
+    }
+
+    // 0.10 have changed the behavior of /url open and /url save to not use any
+    // file type or scheme matching. Move value saved under 'DEF' locale to a
+    // simple key-value string not under any locale.
+    {
+        char** values = g_key_file_get_locale_string_list(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", "DEF", NULL, NULL);
+        if (values && !g_key_file_has_key(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", NULL)) {
+            // First value in array is `require_save` option -- we ignore that
+            // one as there is no such option anymore.
+            char* executable = values[1];
+
+            g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", executable);
+            g_key_file_set_comment(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", " Migrated from url.open.cmd[DEF]. `require_save` option has been removed in v0.10 and was discarded.", NULL);
+            g_key_file_remove_key(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd[DEF]", NULL);
+
+            g_strfreev(values);
+        }
+
+        char* value = g_key_file_get_locale_string(prefs, PREF_GROUP_EXECUTABLES, "url.save.cmd", "DEF", NULL);
+        if (value && !g_key_file_has_key(prefs, PREF_GROUP_EXECUTABLES, "url.save.cmd", NULL)) {
+            g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "url.save.cmd", value);
+            g_key_file_set_comment(prefs, PREF_GROUP_EXECUTABLES, "url.save.cmd", " Migrated from url.save.cmd[DEF].", NULL);
+            g_key_file_remove_key(prefs, PREF_GROUP_EXECUTABLES, "url.save.cmd[DEF]", NULL);
+            g_free(value);
+        }
     }
 
     _save_prefs();
