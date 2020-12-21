@@ -1,8 +1,19 @@
 #!/usr/bin/env bash
 
+log_content()
+{
+    echo
+    echo "Content of $1:"
+    cat "$1"
+}
+
 error_handler()
 {
     ERR_CODE=$?
+
+    log_content ./config.log
+    log_content ./test-suite.log
+
     echo
     echo "Error ${ERR_CODE} with command '${BASH_COMMAND}' on line ${BASH_LINENO[0]}. Exiting."
     echo
@@ -113,10 +124,6 @@ do
 
     $MAKE CC="${CC}"
     $MAKE check
-
-    if [ $? -eq 1 ]; then
-        cat ./test-suite.log
-    fi
 
     ./profanity -v
     $MAKE clean
