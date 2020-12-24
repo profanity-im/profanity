@@ -44,16 +44,17 @@
 
 #include <glib.h>
 
-//TODO: ifdef
-#include <gdk-pixbuf/gdk-pixbuf.h>
-#include <chafa.h>
-
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
 #include <ncurses.h>
 #elif HAVE_CURSES_H
 #include <curses.h>
+#endif
+
+#ifdef HAVE_INLINE_IMAGE
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <chafa.h>
 #endif
 
 #include "log.h"
@@ -1958,6 +1959,7 @@ win_insert_last_read_position_marker(ProfWin* window, char* id)
     g_date_time_unref(time);
 }
 
+#ifdef HAVE_INLINE_IMAGE
 void
 win_pictest(ProfWin* window)
 {
@@ -2010,3 +2012,4 @@ win_pictest(ProfWin* window)
     GString *gs = chafa_canvas_build_ansi (canvas);
     win_println(window, THEME_DEFAULT, "!", gs->str);
 }
+#endif

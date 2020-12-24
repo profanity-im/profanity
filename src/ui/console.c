@@ -407,7 +407,9 @@ cons_about(void)
     getmaxyx(stdscr, rows, cols);
 
     if (prefs_get_boolean(PREF_SPLASH)) {
+#ifdef HAVE_INLINE_IMAGE
         win_pictest(console);
+#endif
         _cons_splash_logo();
     } else {
 

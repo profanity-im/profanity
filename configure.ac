@@ -69,6 +69,8 @@ AC_ARG_WITH([themes],
     [AS_HELP_STRING([--with-themes[[=PATH]]], [install themes (default yes)])])
 AC_ARG_ENABLE([icons-and-clipboard],
     [AS_HELP_STRING([--enable-icons-and-clipboard], [enable GTK tray icons and clipboard paste support])])
+AC_ARG_ENABLE([inline-images],
+    [AS_HELP_STRING([--enable-inline-images], [enable inline display of images])])
 
 ### plugins
 
@@ -191,9 +193,6 @@ PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.62.0], [],
     [AC_MSG_ERROR([glib 2.62.0 or higher is required for profanity])])
 PKG_CHECK_MODULES([gio], [gio-2.0], [],
     [AC_MSG_ERROR([libgio-2.0 from glib-2.0 is required for profanity])])
-#TODO: only under cond
-PKG_CHECK_MODULES([pixbuf], [gdk-pixbuf-2.0], [],
-    [AC_MSG_ERROR([gdk-pixbuf-2.0 from glib-2.0 is required for profanity])])
 
 ### Check for other profanity dependencies
 AC_SEARCH_LIBS([fmod], [m], [],
@@ -205,10 +204,6 @@ PKG_CHECK_MODULES([curl], [libcurl], [],
 
 PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.22.0], [],
     [AC_MSG_ERROR([sqlite3 3.22.0 or higher is required for profanity])])
-
-#TODO: only under cond
-PKG_CHECK_MODULES([chafa], [chafa >= 1.4.1], [],
-    [AC_MSG_ERROR([chafa needed])])
 
 AS_IF([test "x$enable_icons_and_clipboard" != xno],
     [PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.24.0],
@@ -328,6 +323,16 @@ if test "x$enable_omemo" != xno; then
                [AC_MSG_NOTICE([gcrypt >= 1.7.0 not found, OMEMO support not enabled])])])
 
    AM_COND_IF([BUILD_OMEMO], [AC_DEFINE([HAVE_OMEMO], [1], [Have OMEMO])])
+fi
+
+if test "x$enable_inline_images" = xyes; then
+    PKG_CHECK_MODULES([pixbuf], [gdk-pixbuf-2.0], [],
+        [AC_MSG_ERROR([gdk-pixbuf-2.0 from glib-2.0 is required for inline image support])])
+
+    PKG_CHECK_MODULES([chafa], [chafa >= 1.4.1], [],
+        [AC_MSG_ERROR([chafa >= 1.4.1 needed for inline image support])])
+
+   AC_DEFINE([HAVE_INLINE_IMAGE], [1], [Have inline image])
 fi
 
 AS_IF([test "x$with_themes" = xno],
