@@ -1,3 +1,62 @@
+0.10.0 (2021-01-07)
+=====
+
+Six months and 269 commits after 0.9.5 we are happy to release 0.10.0.
+
+10 people contributed code to it: @wstrm, @DebXWoody, @pasis, @niacat, @kaffeekanne,
+@timgates42, @spth, @licaon-kter, @misaflo and @jubalh.
+
+Thanks a lot to our sponsors: @mdosch, @wstrm, @huhndev and one person who wantsto stay anonymous.
+If you want to support us too: https://profanity-im.github.io/donate.html
+
+This release depends on:
+- libstrophe/libmesode >= 0.10.0.
+- glib >= 2.62.0
+- sqlite >= 3.22.0
+- gtk3 >= 3.24 or gtk2 >= 2.24.10
+
+The goal for this release was mostly internal cleanup, like announced in
+the 0.10.0 roadmap: https://lists.notraces.net/pipermail/profanity/2020/000018.html
+There was also some undercover work done for MAM (XEP-0313).
+
+Changes:
+- Code cleanup
+- Several memory leaks fixed (b45384, #805, #1416, #1427)
+- Handle headline stanza (#1366)
+- By default log only WARN not INFO (#1353)
+- Fix OMEMO: check for current item (#1384)
+- Fix request OMEMO device id (#1332)
+- Add experimental OX (XEP-0373, XEP-0374) support (#1331)
+- Add clang format file for uniform coding style (#1396)
+- Add contributing guidelines (#1397)
+- Dont hilight console once all messages have been read (#1399)
+- New setting: Only highlight in console upon MUC mention (#1371)
+  `/console muc mention`
+- Remove `/tiny` command (#1370)
+- Fix `/lastactivity` behaviour (#1411)
+- Fix `/correct` quotation marks usage (#1404)
+- Parse Stable Stanza IDs (XEP-0359) (#1207) (#660)
+- Only insert new messages in database (c9b154) (#660)
+- Support both gtk2 and gtk3 (05d19c)
+- Update gruvbox theme (#1421)
+- Add NetBSD support (#1424)
+- Fix uninitialized field in bookmarks (#1432)
+- Don't link functional tests against tcl (da513a)
+- Fix date format for MAM requests (15f45f)
+- Print error stanzas (#1435)
+- Add man pages for each profanity command (#1444)
+- Fix chatlogs for outgoing carbons (#1439)
+- Add OMEMO media sharing support (#1375)
+  See `/help sendfile` `/help executable`
+- Expand trackbar to whole line (#1448)
+- Set default color for trackbar (#1453)
+- Log incoming carbons (#1446)
+- Use whole path as logfile when defined via -f (#1442)
+  `profanity -f ~/mylog`
+- Fix color for outgoing messages when no receipts are enabled (#1441)
+- Set input window size to max window size (#1458)
+- For details see: https://github.com/profanity-im/profanity/milestone/20
+
 0.9.5 (2020-07-01)
 =====
 
