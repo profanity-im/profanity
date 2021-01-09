@@ -1,0 +1,104 @@
+.TH man 1 "2021-01-09" "0.10.0" "Profanity XMPP client"
+
+.SH NAME
+/tls
+
+.SH DESCRIPTION
+Handle TLS certificates. 
+
+.SH SYNOPSIS
+/tls allow
+
+.LP
+/tls always
+
+.LP
+/tls deny
+
+.LP
+/tls cert [<fingerprint>]
+
+.LP
+/tls trust
+
+.LP
+/tls trusted
+
+.LP
+/tls revoke <fingerprint>
+
+.LP
+/tls certpath
+
+.LP
+/tls certpath set <path>
+
+.LP
+/tls certpath clear
+
+.LP
+/tls certpath default
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBallow\fR
+.RS 4
+Allow connection to continue with TLS certificate.
+.RE
+.PP
+\fBalways\fR
+.RS 4
+Always allow connections with TLS certificate.
+.RE
+.PP
+\fBdeny\fR
+.RS 4
+Abort connection.
+.RE
+.PP
+\fBcert\fR
+.RS 4
+Show the current TLS certificate.
+.RE
+.PP
+\fBcert <fingerprint>\fR
+.RS 4
+Show details of trusted certificate.
+.RE
+.PP
+\fBtrust\fR
+.RS 4
+Add the current TLS certificate to manually trusted certificates.
+.RE
+.PP
+\fBtrusted\fR
+.RS 4
+List summary of manually trusted certificates (with '/tls always' or '/tls trust').
+.RE
+.PP
+\fBrevoke <fingerprint>\fR
+.RS 4
+Remove a manually trusted certificate.
+.RE
+.PP
+\fBcertpath\fR
+.RS 4
+Show the trusted certificate path.
+.RE
+.PP
+\fBcertpath set <path>\fR
+.RS 4
+Specify filesystem path containing trusted certificates.
+.RE
+.PP
+\fBcertpath clear\fR
+.RS 4
+Clear the trusted certificate path.
+.RE
+.PP
+\fBcertpath default\fR
+.RS 4
+Use default system certificate path, if it can be found.
+.RE

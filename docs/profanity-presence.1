@@ -1,0 +1,87 @@
+.TH man 1 "2021-01-09" "0.10.0" "Profanity XMPP client"
+
+.SH NAME
+/presence
+
+.SH DESCRIPTION
+Show the contacts presence in the titlebar and configure presence messages in different window types.
+
+.SH SYNOPSIS
+/presence titlebar on|off
+
+.LP
+/presence console all|online|none
+
+.LP
+/presence chat all|online|none
+
+.LP
+/presence room all|online|none
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBtitlebar on|off\fR
+.RS 4
+Switch display of the contacts presence in the titlebar on or off.
+.RE
+.PP
+\fBconsole all\fR
+.RS 4
+Show all presence changes in the console window.
+.RE
+.PP
+\fBconsole online\fR
+.RS 4
+Show only online/offline presence changes in the console window.
+.RE
+.PP
+\fBconsole none\fR
+.RS 4
+Don't show any presence changes in the console window.
+.RE
+.PP
+\fBchat all\fR
+.RS 4
+Show all presence changes in the chat windows.
+.RE
+.PP
+\fBchat online\fR
+.RS 4
+Show only online/offline presence changes in chat windows.
+.RE
+.PP
+\fBchat none\fR
+.RS 4
+Don't show any presence changes in chat windows.
+.RE
+.PP
+\fBroom all\fR
+.RS 4
+Show all presence changes in chat room windows.
+.RE
+.PP
+\fBroom online\fR
+.RS 4
+Show only online/offline presence changes in chat room windows.
+.RE
+.PP
+\fBroom none\fR
+.RS 4
+Don't show any presence changes in chat room windows.
+.RE
+
+.SH EXAMPLES
+/presence titlebar off
+
+.LP
+/presence console none
+
+.LP
+/presence chat online
+
+.LP
+/presence room all
+
+.LP

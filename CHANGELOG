@@ -1,12 +1,12 @@
-0.10.0 (2021-01-07)
+0.10.0 (2021-01-09)
 =====
 
-Six months and 269 commits after 0.9.5 we are happy to release 0.10.0.
+Six months and 270 commits after 0.9.5 we are happy to release 0.10.0.
 
 10 people contributed code to it: @wstrm, @DebXWoody, @pasis, @niacat, @kaffeekanne,
 @timgates42, @spth, @licaon-kter, @misaflo and @jubalh.
 
-Thanks a lot to our sponsors: @mdosch, @wstrm, @huhndev and one person who wantsto stay anonymous.
+Thanks a lot to our sponsors: @mdosch, @wstrm, @huhndev and one person who wants to stay anonymous.
 If you want to support us too: https://profanity-im.github.io/donate.html
 
 This release depends on:
@@ -29,7 +29,7 @@ Changes:
 - Add experimental OX (XEP-0373, XEP-0374) support (#1331)
 - Add clang format file for uniform coding style (#1396)
 - Add contributing guidelines (#1397)
-- Dont hilight console once all messages have been read (#1399)
+- Dont highlight console once all messages have been read (#1399)
 - New setting: Only highlight in console upon MUC mention (#1371)
   `/console muc mention`
 - Remove `/tiny` command (#1370)

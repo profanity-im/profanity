@@ -1,0 +1,52 @@
+.TH man 1 "2021-01-09" "0.10.0" "Profanity XMPP client"
+
+.SH NAME
+/alias
+
+.SH DESCRIPTION
+Add, remove or list command aliases.
+
+.SH SYNOPSIS
+/alias list
+
+.LP
+/alias add <name> <value>
+
+.LP
+/alias remove <name>
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBlist\fR
+.RS 4
+List all aliases.
+.RE
+.PP
+\fBadd <name> <value>\fR
+.RS 4
+Add a new command alias.
+.RE
+.PP
+\fBremove <name>\fR
+.RS 4
+Remove a command alias.
+.RE
+
+.SH EXAMPLES
+/alias add friends /who online friends
+
+.LP
+/alias add /q /quit
+
+.LP
+/alias add a /away "I'm in a meeting."
+
+.LP
+/alias remove q
+
+.LP
+/alias list
+
+.LP
