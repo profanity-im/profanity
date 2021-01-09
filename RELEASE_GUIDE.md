@@ -37,6 +37,8 @@ AC_INIT([profanity], [0.6.0], [boothj5web@gmail.com])
 PACKAGE_STATUS="release"
 ```
 
+* Add generated command manpages: `git add docs/profanity-*.1`
+
 * Commit
 * Tag (0.6.0)
 * Push
@@ -67,6 +69,8 @@ AC_INIT([profanity], [0.7.0], [boothj5web@gmail.com])
 ```
 PACKAGE_STATUS="development"
 ```
+
+* Remove generated command manpages: `git rm docs/profanity-*.1`
 
 * Create a branch for patch releases (0.6.patch)
 * Push
