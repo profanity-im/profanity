@@ -1963,11 +1963,15 @@ win_insert_last_read_position_marker(ProfWin* window, char* id)
 void
 win_pictest(ProfWin* window)
 {
-    GdkPixbuf *file = gdk_pixbuf_new_from_file ("/home/michael/Pictures/test.png", NULL);
+    gchar *path = get_expanded_path("~/test.png");
+    GdkPixbuf *file = gdk_pixbuf_new_from_file (path, NULL);
     if (file == NULL) {
         win_println(window, THEME_ERROR, "!", "pictest");
+        g_free(path);
         return;
     }
+    g_free(path);
+
     ChafaCanvasConfig *config;
     ChafaCanvas *canvas;
     ChafaSymbolMap *symbol_map;
