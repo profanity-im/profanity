@@ -73,7 +73,7 @@ cmd_otr_log_on_shows_warning_when_chlog_disabled(void** state)
     prefs_set_boolean(PREF_CHLOG, FALSE);
 
     expect_cons_show("OTR messages will be logged as plaintext.");
-    expect_cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+    expect_cons_show("Chat logging is currently disabled, use '/logging chat on' to enable.");
 
     gboolean result = cmd_otr_log(NULL, CMD_OTR, args);
     assert_true(result);
@@ -121,7 +121,7 @@ cmd_otr_log_redact_shows_warning_when_chlog_disabled(void** state)
     prefs_set_boolean(PREF_CHLOG, FALSE);
 
     expect_cons_show("OTR messages will be logged as '[redacted]'.");
-    expect_cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+    expect_cons_show("Chat logging is currently disabled, use '/logging chat on' to enable.");
 
     gboolean result = cmd_otr_log(NULL, CMD_OTR, args);
     assert_true(result);

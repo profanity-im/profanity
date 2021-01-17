@@ -6800,7 +6800,7 @@ cmd_history(ProfWin* window, const char* const command, gchar** args)
 
     _cmd_set_boolean_preference(args[0], command, "Chat history", PREF_HISTORY);
 
-    // if set to on, set chlog
+    // if set to on, set chlog (/logging chat on)
     if (strcmp(args[0], "on") == 0) {
         prefs_set_boolean(PREF_CHLOG, TRUE);
     }
@@ -7197,7 +7197,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
             prefs_set_string(PREF_PGP_LOG, "on");
             cons_show("PGP messages will be logged as plaintext.");
             if (!prefs_get_boolean(PREF_CHLOG)) {
-                cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+                cons_show("Chat logging is currently disabled, use '/logging chat on' to enable.");
             }
         } else if (g_strcmp0(choice, "off") == 0) {
             prefs_set_string(PREF_PGP_LOG, "off");
@@ -7206,7 +7206,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
             prefs_set_string(PREF_PGP_LOG, "redact");
             cons_show("PGP messages will be logged as '[redacted]'.");
             if (!prefs_get_boolean(PREF_CHLOG)) {
-                cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+                cons_show("Chat logging is currently disabled, use '/logging chat on' to enable.");
             }
         } else {
             cons_bad_cmd_usage(command);
@@ -7624,7 +7624,7 @@ cmd_otr_log(ProfWin* window, const char* const command, gchar** args)
         prefs_set_string(PREF_OTR_LOG, "on");
         cons_show("OTR messages will be logged as plaintext.");
         if (!prefs_get_boolean(PREF_CHLOG)) {
-            cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            cons_show("Chat logging is currently disabled, use '/logging chat on' to enable.");
         }
     } else if (g_strcmp0(choice, "off") == 0) {
         prefs_set_string(PREF_OTR_LOG, "off");
@@ -7633,7 +7633,7 @@ cmd_otr_log(ProfWin* window, const char* const command, gchar** args)
         prefs_set_string(PREF_OTR_LOG, "redact");
         cons_show("OTR messages will be logged as '[redacted]'.");
         if (!prefs_get_boolean(PREF_CHLOG)) {
-            cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            cons_show("Chat logging is currently disabled, use '/logging chat on' to enable.");
         }
     } else {
         cons_bad_cmd_usage(command);
@@ -8529,7 +8529,7 @@ cmd_omemo_log(ProfWin* window, const char* const command, gchar** args)
         prefs_set_string(PREF_OMEMO_LOG, "on");
         cons_show("OMEMO messages will be logged as plaintext.");
         if (!prefs_get_boolean(PREF_CHLOG)) {
-            cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            cons_show("Chat logging is currently disabled, use '/logging chat on' to enable.");
         }
     } else if (g_strcmp0(choice, "off") == 0) {
         prefs_set_string(PREF_OMEMO_LOG, "off");
@@ -8538,7 +8538,7 @@ cmd_omemo_log(ProfWin* window, const char* const command, gchar** args)
         prefs_set_string(PREF_OMEMO_LOG, "redact");
         cons_show("OMEMO messages will be logged as '[redacted]'.");
         if (!prefs_get_boolean(PREF_CHLOG)) {
-            cons_show("Chat logging is currently disabled, use '/chlog on' to enable.");
+            cons_show("Chat logging is currently disabled, use '/logging chat on' to enable.");
         }
     } else {
         cons_bad_cmd_usage(command);
