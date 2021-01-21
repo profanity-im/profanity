@@ -321,7 +321,14 @@ cons_show_incoming_room_message(const char* const nick, const char* const room, 
 
     char* muc_show = prefs_get_string(PREF_CONSOLE_MUC);
 
-    if (g_strcmp0(muc_show, "all") == 0) {
+    // 'mention'
+    if (g_strcmp0(muc_show, "mention") == 0) {
+        if (mention) {
+            win_println(console, THEME_MENTION, "-", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            cons_alert(window);
+        }
+        // 'all' or 'first'
+    } else {
         if (mention) {
             win_println(console, THEME_MENTION, "-", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
         } else if (triggers) {
@@ -329,30 +336,15 @@ cons_show_incoming_room_message(const char* const nick, const char* const room, 
             win_println(console, THEME_TRIGGER, "-", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
             free(triggers_str);
         } else {
-            win_println(console, THEME_INCOMING, "-", "<< room message: %s in %s (win %d)", nick, room, ui_index);
-        }
-        cons_alert(window);
-
-    } else if (g_strcmp0(muc_show, "first") == 0) {
-        if (mention) {
-            win_println(console, THEME_MENTION, "-", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
-            cons_alert(window);
-        } else if (triggers) {
-            char* triggers_str = _room_triggers_to_string(triggers);
-            win_println(console, THEME_TRIGGER, "-", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
-            free(triggers_str);
-            cons_alert(window);
-        } else if (unread == 0) {
-            win_println(console, THEME_INCOMING, "-", "<< room message: %s (win %d)", room, ui_index);
-            cons_alert(window);
-        }
-    } else if (g_strcmp0(muc_show, "mention") == 0) {
-        if (mention) {
-            win_println(console, THEME_MENTION, "-", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
+            // 'all' or 'first' if its the first message
+            if ((g_strcmp0(muc_show, "all") == 0) || ((g_strcmp0(muc_show, "first") == 0) && (unread == 0))) {
+                win_println(console, THEME_INCOMING, "-", "<< room message: %s in %s (win %d)", nick, room, ui_index);
+            }
             cons_alert(window);
         }
     }
-    g_free(muc_show);
+
+    free(muc_show);
 }
 
 void
@@ -366,10 +358,7 @@ cons_show_incoming_message(const char* const short_from, const int win_index, in
     }
 
     char* chat_show = prefs_get_string(PREF_CONSOLE_CHAT);
-    if (g_strcmp0(chat_show, "all") == 0) {
-        win_println(console, THEME_INCOMING, "-", "<< chat message: %s (win %d)", short_from, ui_index);
-        cons_alert(window);
-    } else if ((g_strcmp0(chat_show, "first") == 0) && unread == 0) {
+    if (g_strcmp0(chat_show, "all") == 0 || ((g_strcmp0(chat_show, "first") == 0) && unread == 0)) {
         win_println(console, THEME_INCOMING, "-", "<< chat message: %s (win %d)", short_from, ui_index);
         cons_alert(window);
     }
@@ -388,15 +377,12 @@ cons_show_incoming_private_message(const char* const nick, const char* const roo
     }
 
     char* priv_show = prefs_get_string(PREF_CONSOLE_PRIVATE);
-    if (g_strcmp0(priv_show, "all") == 0) {
-        win_println(console, THEME_INCOMING, "-", "<< private message: %s in %s (win %d)", nick, room, ui_index);
-        cons_alert(window);
-    } else if ((g_strcmp0(priv_show, "first") == 0) && unread == 0) {
+    if (g_strcmp0(priv_show, "all") == 0 || ((g_strcmp0(priv_show, "first") == 0) && (unread == 0))) {
         win_println(console, THEME_INCOMING, "-", "<< private message: %s in %s (win %d)", nick, room, ui_index);
         cons_alert(window);
     }
 
-    g_free(priv_show);
+    free(priv_show);
 }
 
 void
