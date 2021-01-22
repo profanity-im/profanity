@@ -1283,27 +1283,6 @@ cmd_disconnect(ProfWin* window, const char* const command, gchar** args)
 
     cl_ev_disconnect();
 
-    char* theme = prefs_get_string(PREF_THEME);
-    if (theme) {
-        gboolean res = theme_load(theme, false);
-        g_free(theme);
-        if (!res) {
-            theme_load("default", false);
-        }
-    } else {
-        theme_load("default", false);
-    }
-    ui_load_colours();
-    if (prefs_get_boolean(PREF_ROSTER)) {
-        ui_show_roster();
-    } else {
-        ui_hide_roster();
-    }
-    if (prefs_get_boolean(PREF_OCCUPANTS)) {
-        ui_show_all_room_rosters();
-    } else {
-        ui_hide_all_room_rosters();
-    }
     ui_redraw();
 
     return TRUE;
