@@ -2583,13 +2583,10 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
     const char* type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, "error") == 0) {
-        //TODO
-        /*
         char* error_message = stanza_get_error_message(stanza);
         cons_show_error("Server error: %s", error_message);
-        log_debug("Error: %s", error_message);
+        log_debug("MAM Error: %s", error_message);
         free(error_message);
-        */
     } else if (g_strcmp0(type, "result") == 0) {
         xmpp_stanza_t* fin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
         if (fin) {
