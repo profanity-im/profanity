@@ -108,6 +108,12 @@ typedef struct command_config_data_t
     char* command;
 } CommandConfigData;
 
+typedef struct mam_rsm_userdata
+{
+    char* barejid;
+    char* datestr;
+} MamRsmUserdata;
+
 static int _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
 
 static void _error_handler(xmpp_stanza_t* const stanza);
@@ -142,6 +148,7 @@ static int _auto_pong_id_handler(xmpp_stanza_t* const stanza, void* const userda
 static int _room_list_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _command_list_result_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _command_exec_response_handler(xmpp_stanza_t* const stanza, void* const userdata);
+static int _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 
 static void _iq_free_room_data(ProfRoomInfoData* roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet* affiliation_set);
@@ -2543,27 +2550,69 @@ void
 iq_mam_request(ProfChatWin* win)
 {
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
-        log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_PING);
+        log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
         cons_show_error("Server doesn't support MAM.");
         return;
     }
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = connection_create_stanza_id();
 
     GDateTime* now = g_date_time_new_now_utc();
-    GDateTime* timestamp = g_date_time_add_days(now, -1);
+    GDateTime* timestamp = g_date_time_add_days(now, -7);
     g_date_time_unref(now);
     gchar* datestr = g_date_time_format(timestamp, "%FT%TZ");
-    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, datestr);
+    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, datestr, NULL);
+
+    MamRsmUserdata* data = malloc(sizeof(MamRsmUserdata));
+    data->datestr = strdup(datestr);
+    data->barejid = strdup(win->barejid);
+
+    iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, data);
+
     g_free(datestr);
     g_date_time_unref(timestamp);
-
-    //    iq_id_handler_add(id, _http_upload_response_id_handler, NULL, upload);
-    free(id);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 
     return;
+}
+
+static int
+_mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    const char* type = xmpp_stanza_get_type(stanza);
+    if (g_strcmp0(type, "error") == 0) {
+        char* error_message = stanza_get_error_message(stanza);
+        cons_show_error("Server error: %s", error_message);
+        log_debug("MAM Error: %s", error_message);
+        free(error_message);
+    } else if (g_strcmp0(type, "result") == 0) {
+        xmpp_stanza_t* fin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
+        if (fin) {
+            xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
+            if (set) {
+                char *lastid = NULL;
+                xmpp_stanza_t* last =  xmpp_stanza_get_child_by_name(set, STANZA_NAME_LAST);
+                if (last) {
+                    lastid = xmpp_stanza_get_text(last);
+                }
+
+                // 4.3.2. send same stanza with set,max stanza
+                xmpp_ctx_t* const ctx = connection_get_ctx();
+
+                MamRsmUserdata* data = (MamRsmUserdata*)userdata;
+                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->datestr, lastid);
+                free(data->barejid);
+                free(data->datestr);
+                free(data);
+                free(lastid);
+
+                iq_send_stanza(iq);
+                xmpp_stanza_release(iq);
+            }
+        }
+    }
+
+    return 0;
 }
