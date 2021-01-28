@@ -1165,12 +1165,12 @@ cmd_ac_remove_form_fields(DataForm* form)
 char*
 cmd_ac_complete(ProfWin* window, const char* const input, gboolean previous)
 {
-    char *found = NULL;
+    char* found = NULL;
     // autocomplete command
     if ((strncmp(input, "/", 1) == 0) && (!strchr(input, ' '))) {
         found = autocomplete_complete(commands_ac, input, TRUE, previous);
 
-    // autocomplete parameters
+        // autocomplete parameters
     } else {
         found = _cmd_ac_complete_params(window, input, previous);
     }
@@ -1633,7 +1633,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
 
     // autocomplete boolean settings
     gchar* boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash",
-                                 "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/os", "/slashguard" };
+                                 "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/os", "/slashguard", "/mam" };
 
     for (int i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice, previous, NULL);

@@ -2546,6 +2546,21 @@ static struct cmd_t command_defs[] = {
               "/url save https://profanity-im.github.io/guide/latest/userguide.html /home/user/Download/")
     },
 
+    { "/mam",
+      parse_args, 1, 1, &cons_mam_setting,
+      CMD_NOSUBFUNCS
+      CMD_MAINFUNC(cmd_mam)
+      CMD_TAGS(
+              CMD_TAG_CHAT)
+      CMD_SYN(
+              "/os <on>|<off>")
+      CMD_DESC(
+              "Enable/Disable Message Archive Management (XEP-0313)")
+      CMD_ARGS(
+              { "on|off", "Enable or disable MAM" })
+      CMD_NOEXAMPLES
+    },
+
     // NEXT-COMMAND (search helper)
 };
 

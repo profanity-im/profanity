@@ -240,5 +240,6 @@ gboolean cmd_url_save(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_executable_avatar(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_executable_urlsave(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_mam(ProfWin* window, const char* const command, gchar** args);
 
 #endif

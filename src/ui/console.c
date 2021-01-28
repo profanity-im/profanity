@@ -2083,6 +2083,16 @@ cons_slashguard_setting(void)
 }
 
 void
+cons_mam_setting(void)
+{
+    if (prefs_get_boolean(PREF_MAM)) {
+        cons_show("Message Archive Management (XEP-0313) (/mam)    : ON");
+    } else {
+        cons_show("Message Archive Management (XEP-0313) (/mam)    : OFF");
+    }
+}
+
+void
 cons_show_connection_prefs(void)
 {
     cons_show("Connection preferences:");

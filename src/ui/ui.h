@@ -321,6 +321,7 @@ void cons_os_setting(void);
 void cons_correction_setting(void);
 void cons_executable_setting(void);
 void cons_slashguard_setting(void);
+void cons_mam_setting(void);
 void cons_show_contact_online(PContact contact, Resource* resource, GDateTime* last_activity);
 void cons_show_contact_offline(PContact contact, char* resource, char* status);
 void cons_theme_properties(void);

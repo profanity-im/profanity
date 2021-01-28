@@ -9278,3 +9278,11 @@ cmd_executable_urlsave(ProfWin* window, const char* const command, gchar** args)
 
     return TRUE;
 }
+
+gboolean
+cmd_mam(ProfWin* window, const char* const command, gchar** args)
+{
+    _cmd_set_boolean_preference(args[0], command, "Message Archive Management", PREF_MAM);
+
+    return TRUE;
+}
