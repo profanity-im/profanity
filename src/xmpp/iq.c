@@ -2555,7 +2555,7 @@ iq_mam_request(ProfChatWin* win)
     GDateTime* timestamp = g_date_time_add_days(now, -1);
     g_date_time_unref(now);
     gchar* datestr = g_date_time_format(timestamp, "%FT%TZ");
-    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, datestr);
+    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, datestr, NULL);
 
     iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, g_strdup(datestr));
 
@@ -2581,9 +2581,9 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         free(error_message);
         */
     } else if (g_strcmp0(type, "result") == 0) {
-        xmpp_stanza_t* fin = stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
+        xmpp_stanza_t* fin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
         if (fin) {
-            xmpp_stanza_t* set = stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
+            xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {
                 xmpp_stanza_t* last =  xmpp_stanza_get_child_by_name(set, STANZA_NAME_LAST);
                 char* lastid = xmpp_stanza_get_text(last);
