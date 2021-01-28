@@ -108,6 +108,12 @@ typedef struct command_config_data_t
     char* command;
 } CommandConfigData;
 
+typedef struct mam_rsm_userdata
+{
+    char* barejid;
+    char* datestr;
+} MamRsmUserdata;
+
 static int _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
 
 static void _error_handler(xmpp_stanza_t* const stanza);
@@ -2557,7 +2563,11 @@ iq_mam_request(ProfChatWin* win)
     gchar* datestr = g_date_time_format(timestamp, "%FT%TZ");
     xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, datestr, NULL);
 
-    iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, g_strdup(datestr));
+    MamRsmUserdata* data = malloc(sizeof(MamRsmUserdata));
+    data->datestr = strdup(datestr);
+    data->barejid = strdup(win->barejid);
+
+    iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, data);
 
     g_free(datestr);
     g_date_time_unref(timestamp);
@@ -2585,15 +2595,21 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         if (fin) {
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {
+                char *lastid = NULL;
                 xmpp_stanza_t* last =  xmpp_stanza_get_child_by_name(set, STANZA_NAME_LAST);
-                char* lastid = xmpp_stanza_get_text(last);
-                lastid = lastid;
+                if (last) {
+                    lastid = xmpp_stanza_get_text(last);
+                }
 
                 // 4.3.2. send same stanza with set,max stanza
                 xmpp_ctx_t* const ctx = connection_get_ctx();
-                gchar *datestr = (gchar*)userdata;
-                //TODO give barejid or get from stanza
-                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, NULL, datestr, lastid);
+
+                MamRsmUserdata* data = (MamRsmUserdata*)userdata;
+                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->datestr, lastid);
+                free(data->barejid);
+                free(data->datestr);
+                free(data);
+                free(lastid);
 
                 iq_send_stanza(iq);
                 xmpp_stanza_release(iq);
