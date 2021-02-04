@@ -85,7 +85,7 @@ static void _handle_muc_private_message(xmpp_stanza_t* const stanza);
 static void _handle_conference(xmpp_stanza_t* const stanza);
 static void _handle_captcha(xmpp_stanza_t* const stanza);
 static void _handle_receipt_received(xmpp_stanza_t* const stanza);
-static void _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, const char *result_id);
+static void _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, const char *result_id, GDateTime* timestamp);
 static void _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_mam);
 static xmpp_stanza_t* _handle_carbons(xmpp_stanza_t* const stanza);
 static void _send_message_stanza(xmpp_stanza_t* const stanza);
@@ -232,7 +232,7 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
         }
 
         if (msg_stanza) {
-            _handle_chat(msg_stanza, FALSE, is_carbon, NULL);
+            _handle_chat(msg_stanza, FALSE, is_carbon, NULL, NULL);
         }
     } else {
         // none of the allowed types
@@ -1222,7 +1222,7 @@ _handle_carbons(xmpp_stanza_t* const stanza)
 }
 
 static void
-_handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, const char *result_id)
+_handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, const char *result_id, GDateTime* timestamp)
 {
     // some clients send the mucuser namespace with private messages
     // if the namespace exists, and the stanza contains a body element, assume its a private message
@@ -1300,10 +1300,15 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
         }
     }
 
-    // timestamp or now
-    message->timestamp = stanza_get_delay(stanza);
-    if (!message->timestamp) {
-        message->timestamp = g_date_time_new_now_local();
+    if (timestamp) {
+        // timestamp provided outside like in a <forwarded> by MAM
+        message->timestamp = timestamp;
+    } else {
+        // timestamp in the message stanza or use time of receival (now)
+        message->timestamp = stanza_get_delay(stanza);
+        if (!message->timestamp) {
+            message->timestamp = g_date_time_new_now_local();
+        }
     }
 
     if (body) {
@@ -1402,8 +1407,12 @@ _handle_mam(xmpp_stanza_t* const stanza)
     // same as <stanza-id> from XEP-0359 for live messages
     const char* result_id = xmpp_stanza_get_id(result);
 
+    GDateTime *timestamp = stanza_get_delay_from(forwarded, NULL);
+    timestamp = timestamp;
+
     xmpp_stanza_t* message_stanza = xmpp_stanza_get_child_by_ns(forwarded, "jabber:client");
-    _handle_chat(message_stanza, TRUE, FALSE, result_id);
+
+    _handle_chat(message_stanza, TRUE, FALSE, result_id, timestamp);
 
     return TRUE;
 }
