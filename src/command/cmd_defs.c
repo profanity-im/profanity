@@ -2553,7 +2553,7 @@ static struct cmd_t command_defs[] = {
       CMD_TAGS(
               CMD_TAG_CHAT)
       CMD_SYN(
-              "/os <on>|<off>")
+              "/mam <on>|<off>")
       CMD_DESC(
               "Enable/Disable Message Archive Management (XEP-0313)")
       CMD_ARGS(
