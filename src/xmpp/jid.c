@@ -205,3 +205,18 @@ jid_random_resource(void)
 
     return result;
 }
+
+
+gboolean jid_compare_bare(const Jid* const jid1, const Jid* const jid2) {
+    gboolean res = FALSE;
+    res = !g_strcmp0(jid1->barejid, jid2->barejid);
+    return res;
+}
+
+gboolean jid_compare_full(const Jid* const jid1, const Jid* const jid2) {
+    gboolean res = FALSE;
+    res = !g_strcmp0(jid1->fulljid,  jid2->fulljid);
+    return res;
+}
+
+

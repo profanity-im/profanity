@@ -61,4 +61,8 @@ char* get_nick_from_full_jid(const char* const full_room_jid);
 char* jid_fulljid_or_barejid(Jid* jid);
 char* jid_random_resource(void);
 
+gboolean jid_compare_bare(const Jid* const jid1, const Jid* const jid2);
+gboolean jid_compare_full(const Jid* const jid1, const Jid* const jid2);
+
+
 #endif
