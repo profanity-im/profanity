@@ -307,7 +307,7 @@ win_get_title(ProfWin* window)
         gboolean show_titlebar_name = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_NAME);
         GString* title = g_string_new("");
 
-        if (show_titlebar_name) {
+        if (show_titlebar_name && mucwin->room_name) {
             g_string_append(title, mucwin->room_name);
             g_string_append(title, " ");
         }
