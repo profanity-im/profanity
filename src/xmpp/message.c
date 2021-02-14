@@ -64,6 +64,7 @@
 #include "xmpp/stanza.h"
 #include "xmpp/connection.h"
 #include "xmpp/xmpp.h"
+#include "tools/date_time.h"
 
 #ifdef HAVE_OMEMO
 #include "xmpp/omemo.h"
@@ -1503,10 +1504,6 @@ message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
 static xmpp_stanza_t*
 _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text)
 {
-    time_t now = time(NULL);
-    struct tm* tm = localtime(&now);
-    char buf[255];
-    strftime(buf, sizeof(buf), "%FT%T%z", tm);
     int randnr = rand() % 5;
     char rpad_data[randnr];
 
@@ -1524,10 +1521,11 @@ _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text
     xmpp_stanza_set_name(s_to, "to");
     xmpp_stanza_set_attribute(s_to, "jid", to);
     // time
+    char* date_fmt_now =  prof_date_now();
     xmpp_stanza_t* time = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(time, "time");
-    xmpp_stanza_set_attribute(time, "stamp", buf);
-    xmpp_stanza_set_name(time, "time");
+    xmpp_stanza_set_attribute(time, "stamp", date_fmt_now);
+    free(date_fmt_now);
     // rpad
     xmpp_stanza_t* rpad = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(rpad, "rpad");

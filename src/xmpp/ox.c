@@ -41,6 +41,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "pgp/gpg.h"
+#include "tools/date_time.h"
 
 #ifdef HAVE_LIBGPGME
 static void _ox_metadata_node__public_key(const char* const fingerprint);
@@ -435,13 +436,7 @@ _ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void
 char*
 _gettimestamp()
 {
-    time_t now = time(NULL);
-    struct tm* tm = localtime(&now);
-    char buf[255];
-    strftime(buf, sizeof(buf), "%FT%T", tm);
-    GString* d = g_string_new(buf);
-    g_string_append(d, "Z");
-    return strdup(d->str);
+    return prof_date_now();
 }
 
 #endif // HAVE_LIBGPGME

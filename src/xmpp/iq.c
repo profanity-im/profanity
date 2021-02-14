@@ -57,6 +57,7 @@
 #include "config/preferences.h"
 #include "event/server_events.h"
 #include "plugins/plugins.h"
+#include "tools/date_time.h"
 #include "tools/http_upload.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
@@ -2560,7 +2561,7 @@ iq_mam_request(ProfChatWin* win)
     GDateTime* now = g_date_time_new_now_utc();
     GDateTime* timestamp = g_date_time_add_days(now, -7);
     g_date_time_unref(now);
-    gchar* datestr = g_date_time_format(timestamp, "%FT%TZ");
+    gchar* datestr = prof_date_time_fmt(timestamp);
     xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, datestr, NULL);
 
     MamRsmUserdata* data = malloc(sizeof(MamRsmUserdata));

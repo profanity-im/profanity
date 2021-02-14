@@ -187,8 +187,8 @@ AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
     [AC_MSG_ERROR([ncurses does not support wide characters])])
 
 ### Check for glib libraries
-PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.62.0], [],
-    [AC_MSG_ERROR([glib 2.62.0 or higher is required for profanity])])
+PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.58.3], [],
+    [AC_MSG_ERROR([glib 2.58.3 or higher is required for profanity])])
 PKG_CHECK_MODULES([gio], [gio-2.0], [],
     [AC_MSG_ERROR([libgio-2.0 from glib-2.0 is required for profanity])])
 

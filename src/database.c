@@ -46,6 +46,7 @@
 #include "log.h"
 #include "common.h"
 #include "config/files.h"
+#include "tools/date_time.h"
 
 static sqlite3* g_chatlog_database;
 
@@ -316,9 +317,9 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     gchar* date_fmt;
 
     if (message->timestamp) {
-        date_fmt = g_date_time_format_iso8601(message->timestamp);
+        date_fmt = prof_date_time_fmt(message->timestamp);
     } else {
-        date_fmt = g_date_time_format_iso8601(g_date_time_new_now_local());
+        date_fmt =  prof_date_now();
     }
 
     const char* enc = _get_message_enc_str(message->enc);
