@@ -52,6 +52,12 @@
 #include <langinfo.h>
 #include <ctype.h>
 
+// fork / execl
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <readline/readline.h>
+
 #include "profanity.h"
 #include "log.h"
 #include "common.h"
@@ -9301,6 +9307,40 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
     free(user);
     free(passwd);
     free(confirm_passwd);
+
+    return TRUE;
+}
+
+gboolean
+cmd_editor(ProfWin* window, const char* const command, gchar** args)
+{
+    const char* filename = "/tmp/profanity.txt";
+    pid_t pid = fork();
+    if( pid == 0 ) {
+        int x = execl("/usr/bin/vim", "/usr/bin/vim", filename, (char *) NULL);
+        if ( x == -1 ) {
+            cons_show_error("Failed to exec vim");
+        }
+    } else {
+        int status = 0;
+        waitpid(pid, &status, 0);
+        ui_redraw();
+
+        int fd_input_file = open(filename, O_RDONLY);
+        const size_t COUNT = 8192;
+        char buf[COUNT];
+        ssize_t size_read = read(fd_input_file, buf, COUNT);
+        if(size_read > 0 && size_read <= COUNT ) {
+          buf[size_read-1] = '\0';
+          GString* text = g_string_new(buf);
+          //ProfWin* window = wins_get_current();
+          //cmd_process_input(window, text->str);
+          rl_insert_text(text->str);
+          g_string_free(text, TRUE);
+        }
+        close(fd_input_file);
+        ui_redraw();
+    }
 
     return TRUE;
 }
