@@ -1371,21 +1371,39 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
 
 #ifdef HAVE_LIBGPGME
     xmpp_stanza_t* ox = xmpp_stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
-    message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
+    if ( ox ) {
+        message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
+        if ( message->plain ) {
+            xmpp_stanza_t *x =  xmpp_stanza_new_from_string(connection_get_ctx(), message->plain);
+            if ( x ) {
+                xmpp_stanza_t *p =  xmpp_stanza_get_child_by_name(x, "payload");
+                if ( !p ) {
+                    log_warning("OX Stanza - no Payload");
+                    return;
+                }
+                xmpp_stanza_t *b =  xmpp_stanza_get_child_by_name(p, "body");
+                if ( !b ) {
+                    log_warning("OX Stanza - no body");
+                    return;
+                }
+                message->plain = xmpp_stanza_get_text(b);
+                if(message->plain == NULL ) {
+                    message->plain = xmpp_stanza_get_text(stanza);
+                }
+    	        message->encrypted = xmpp_stanza_get_text(ox);
 
-    xmpp_stanza_t *x =  xmpp_stanza_new_from_string(connection_get_ctx(), message->plain);
-    xmpp_stanza_t *p =  xmpp_stanza_get_child_by_name(x, "payload");
-    xmpp_stanza_t *b =  xmpp_stanza_get_child_by_name(p, "body");
-    message->plain = xmpp_stanza_get_text(b);
-    if(message->plain == NULL ) {
-        message->plain = xmpp_stanza_get_text(stanza);
+                if (message->plain == NULL) {
+                    message->plain = xmpp_stanza_get_text(stanza);
+                }
+                message->encrypted = xmpp_stanza_get_text(ox);
+            } else {
+                log_warning("OX Stanza text to stanza failed");
+            }
+        }
+    } else {
+        log_warning("OX Stanza without openpgp stanza");
     }
-	message->encrypted = xmpp_stanza_get_text(ox);
 
-    if (message->plain == NULL) {
-        message->plain = xmpp_stanza_get_text(stanza);
-    }
-    message->encrypted = xmpp_stanza_get_text(ox);
 #endif // HAVE_LIBGPGME
 }
 
