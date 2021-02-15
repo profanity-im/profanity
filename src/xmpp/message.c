@@ -1408,7 +1408,6 @@ _handle_mam(xmpp_stanza_t* const stanza)
     const char* result_id = xmpp_stanza_get_id(result);
 
     GDateTime *timestamp = stanza_get_delay_from(forwarded, NULL);
-    timestamp = timestamp;
 
     xmpp_stanza_t* message_stanza = xmpp_stanza_get_child_by_ns(forwarded, "jabber:client");
 
