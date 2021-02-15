@@ -334,14 +334,14 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                  from_jid->resourcepart ? from_jid->resourcepart : "",
                  to_jid->barejid,
                  to_jid->resourcepart ? to_jid->resourcepart : "",
-                 escaped_message,
-                 date_fmt,
+                 escaped_message ? escaped_message : "",
+                 date_fmt ? date_fmt : "",
                  message->id ? message->id : "",
                  message->stanzaid ? message->stanzaid : "",
                  message->replace_id ? message->replace_id : "",
-                 type,
-                 enc,
-                 message->stanzaid)
+                 type ? type : "",
+                 enc ? enc : "",
+                 message->stanzaid ? message->stanzaid : "")
         == -1) {
         log_error("log_database_add(): SQL query. could not allocate memory");
         return;
