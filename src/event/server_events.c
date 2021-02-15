@@ -195,10 +195,6 @@ sv_ev_roster_received(void)
 
     const char* fulljid = connection_get_fulljid();
     plugins_on_connect(account_name, fulljid);
-
-#ifdef HAVE_OMEMO
-    omemo_start_sessions();
-#endif
 }
 
 void
