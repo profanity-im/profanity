@@ -34,6 +34,32 @@
  *
  */
 
+/**
+ * \mainpage
+ * Profanity is A console based XMPP client.
+ *
+ * As contributor you can find information \ref contributing. 
+ * More information about the XEP implementations see \ref xep.
+ *
+ * \section xep XEP
+ * <table>
+ * <caption id="multi_row"></caption>
+ * <tr><th>XEP<th>Name <th>Short name <th>Developer notes
+ * <tr><td>XEP-0373 <td> OpenPGP for XMPP <td>OX  <td> \ref OX 
+ * </table>
+ *
+ * 
+ * \section contributing Contributing to Profanity
+ * 
+ * - https://github.com/profanity-im/profanity/blob/master/CONTRIBUTING.md
+ *
+ * \section helpful-links Helpful link
+ *
+ * - https://profanity-im.github.io/
+ * - https://xmpp.org/extensions/
+ * 
+ */
+
 #include "config.h"
 
 #include <string.h>
