@@ -7413,6 +7413,22 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
+    if (strcmp(args[0], "char") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        } else if (g_utf8_strlen(args[1], 4) == 1) {
+            if (prefs_set_ox_char(args[1])) {
+                cons_show("OX char set to %s.", args[1]);
+            } else {
+                cons_show_error("Could not set OX char: %s.", args[1]);
+            }
+            return TRUE;
+        }
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
     // The '/ox keys' command - same like in pgp
     // Should we move this to a common command
     // e.g. '/openpgp keys'?.
@@ -7557,13 +7573,13 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
         if (args[1]) {
             ox_discover_public_key(args[1]);
         } else {
-            cons_show("JID is required");
+            cons_show("To discover the OpenPGP keys of an user, the JID is required");
         }
     } else if (g_strcmp0(args[0], "request") == 0) {
         if (args[1] && args[2]) {
             ox_request_public_key(args[1], args[2]);
         } else {
-            cons_show("JID and Fingerprint is required");
+            cons_show("JID and KeyID is required");
         }
     } else {
         cons_show("OX not implemented");

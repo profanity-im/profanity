@@ -43,6 +43,9 @@
 #include "pgp/gpg.h"
 
 #ifdef HAVE_LIBGPGME
+
+#define KEYID_LENGTH 40
+
 static void _ox_metadata_node__public_key(const char* const fingerprint);
 static int _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
 
@@ -161,13 +164,14 @@ ox_announce_public_key(const char* const filename)
 void
 ox_discover_public_key(const char* const jid)
 {
-    assert(jid);
-    log_info("Discovering Public Key for %s", jid);
+    assert(jid && strlen(jid) > 0);
+    log_info("[OX] Discovering Public Key for %s", jid);
     cons_show("Discovering Public Key for %s", jid);
     // iq
     xmpp_ctx_t* const ctx = connection_get_ctx();
     char* id = xmpp_uuid_gen(ctx);
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
+ 
     xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
     xmpp_stanza_set_to(iq, jid);
     // pubsub
@@ -184,6 +188,7 @@ ox_discover_public_key(const char* const jid)
 
     xmpp_id_handler_add(connection_get_conn(), _ox_metadata_result, id, strdup(jid));
     xmpp_send(connection_get_conn(), iq);
+    xmpp_stanza_release(iq);
 }
 
 void
@@ -224,7 +229,7 @@ _ox_metadata_node__public_key(const char* const fingerprint)
 {
     log_info("Annonuce OpenPGP metadata: %s", fingerprint);
     assert(fingerprint);
-    assert(strlen(fingerprint) == 40);
+    assert(strlen(fingerprint) == KEYID_LENGTH );
     // iq
     xmpp_ctx_t* const ctx = connection_get_ctx();
     char* id = xmpp_uuid_gen(ctx);
@@ -262,10 +267,10 @@ _ox_metadata_node__public_key(const char* const fingerprint)
 static int
 _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
 {
-    log_debug("OX: Processing result %s's metadata.", (char*)userdata);
+    log_debug("[OX] Processing result %s's metadata.", (char*)userdata);
 
     if (g_strcmp0(xmpp_stanza_get_type(stanza), "result") != 0) {
-        cons_show("OX: Error:");
+        cons_show("OX Error: Unable to load metadata of user %s - Not a stanza result type", (char*)userdata );
         return FALSE;
     }
     // pubsub
@@ -297,7 +302,12 @@ _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* 
 
     while (pubkeymetadata) {
         const char* fingerprint = xmpp_stanza_get_attribute(pubkeymetadata, STANZA_ATTR_V4_FINGERPRINT);
-        cons_show(fingerprint);
+        if ( strlen( fingerprint ) == KEYID_LENGTH ) {
+            cons_show(fingerprint);
+        } else {
+            cons_show("OX: Wrong char size of public key");
+            log_error("[OX] Wrong chat size of public key %s", fingerprint);
+        }
         pubkeymetadata = xmpp_stanza_get_next(pubkeymetadata);
     }
 
@@ -326,7 +336,7 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
 {
     assert(jid);
     assert(fingerprint);
-    assert(strlen(fingerprint) == 40);
+    assert(strlen(fingerprint) == KEYID_LENGTH );
     cons_show("Requesting Public Key %s for %s", fingerprint, jid);
     log_info("OX: Request %s's public key %s.", jid, fingerprint);
     // iq
