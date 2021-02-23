@@ -35,12 +35,27 @@
 
 /*!
  * \page OX OX Implementation
- * 
- * \section OX XEP-0373: OpenPGP for XMPP
+ *
+ * profanity provides OpenPGP for XMPP. 
+ *
+ * \section xep-ox XEPs
+ *
+ * \subsection OX XEP-0373: OpenPGP for XMPP
  * XEP-0373: OpenPGP for XMPP (OX) is the implementation of OpenPGP for XMPP
  * replace the XEP-0027.  
  *
  * https://xmpp.org/extensions/xep-0373.html
+ *
+ * \subsection oxim XEP-0374: OpenPGP for XMPP Instant Messaging
+ * 
+ * XEP-0374: OpenPGP for XMPP Instant Messaging
+ *
+ * https://xmpp.org/extensions/xep-0374.html
+ * 
+ * \subsection SCE XEP-0420: Stanza Content Encryption
+ *
+ * https://xmpp.org/extensions/xep-0420.html
+ *
  */
 
 /*!

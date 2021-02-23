@@ -33,14 +33,30 @@
  *
  */
 
+
+/*!
+ * \file config/account.h
+ * \brief Profanity Account
+ *
+ * Profanity account stores all information about the XMPP account. 
+ *
+ */
+
 #ifndef CONFIG_ACCOUNT_H
 #define CONFIG_ACCOUNT_H
 
 #include "common.h"
 
+/*!
+ * \brief Entity XMPP profanity Account
+ * 
+ */
+
 typedef struct prof_account_t
 {
+    /*! \brief Name of the Profanity Account */
     gchar* name;
+    /*! \brief JID of the XMPP Account */
     gchar* jid;
     gchar* password;
     gchar* eval_password;

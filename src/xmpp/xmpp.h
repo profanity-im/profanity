@@ -89,14 +89,24 @@ typedef enum {
     INVITE_MEDIATED
 } jabber_invite_t;
 
+/*!
+ * \brief Entity for XEP-0048: Bookmarks.
+ * 
+ * Bookmarks are used to store conference rooms.
+ * 
+ */
+
 typedef struct bookmark_t
 {
+	/*! \brief Barejid of the conference room */
     char* barejid;
+	/*! \brief Nickname used for joining the room */
     char* nick;
     char* password;
     char* name;
     gboolean autojoin;
-    int ext_gajim_minimize; //0 - non existent, 1 - true, 2 - false
+	/*! 0 - non existent, 1 - true, 2 - false */
+    int ext_gajim_minimize; 
 } Bookmark;
 
 typedef struct disco_identity_t

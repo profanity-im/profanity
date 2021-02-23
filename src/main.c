@@ -45,6 +45,7 @@
  * <table>
  * <caption id="multi_row"></caption>
  * <tr><th>XEP<th>Name <th>Short name <th>Developer notes
+ * <tr><td>XEP-0048: Bookmarks<td> bookmarks <td> \ref bookmarks
  * <tr><td>XEP-0373 <td> OpenPGP for XMPP <td>OX  <td> \ref OX 
  * </table>
  *
