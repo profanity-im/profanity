@@ -90,7 +90,10 @@ gboolean p_ox_gpg_import(char* base64_public_key);
  */
 GHashTable* ox_gpg_public_keys(void);
 
+gboolean ox_is_my_private_key_available();
+
 gboolean ox_is_private_key_available(const char* const barejid);
+
 gboolean ox_is_public_key_available(const char* const barejid);
 
 #endif

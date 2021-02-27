@@ -986,6 +986,16 @@ p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient
 }
 
 gboolean
+ox_is_my_private_key_available()
+{
+    gboolean result = FALSE;
+    char* mybarejid = connection_get_barejid();
+    ox_is_private_key_available(mybarejid);
+    free(mybarejid);
+    return result;
+}
+
+gboolean
 ox_is_private_key_available(const char* const barejid)
 {
     g_assert(barejid);
