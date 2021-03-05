@@ -600,7 +600,9 @@ sv_ev_incoming_message(ProfMessage* message)
     if (message->is_mam) {
         char* mybarejid = connection_get_barejid();
         if (g_strcmp0(mybarejid, message->from_jid->barejid) == 0) {
-            looking_for_jid = message->to_jid->barejid;
+            if (message->to_jid) {
+                looking_for_jid = message->to_jid->barejid;
+            }
         }
         free(mybarejid);
     }
