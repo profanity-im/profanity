@@ -82,7 +82,6 @@
 #include "otr/otr.h"
 #endif
 
-static char* win_title;
 static int inp_size;
 static gboolean perform_resize = FALSE;
 static GTimer* ui_idle_time;
@@ -1079,21 +1078,20 @@ ui_contact_offline(char* barejid, char* resource, char* status)
 void
 ui_clear_win_title(void)
 {
-    printf("%c]0;%c", '\033', '\007');
+    fputs("\e]0;\a", stdout);
+    fflush(stdout);
 }
 
 void
 ui_goodbye_title(void)
 {
-    int result = system("/bin/echo -ne \"\033]0;Thanks for using Profanity\007\"");
-    if (result == -1)
-        log_error("Error printing title on shutdown");
+    fputs("\e]0;Thanks for using Profanity\a", stdout);
+    fflush(stdout);
 }
 
 static void
 _ui_draw_term_title(void)
 {
-    char new_win_title[100];
     jabber_conn_status_t status = connection_get_status();
 
     if (status == JABBER_CONNECTED) {
@@ -1101,29 +1099,14 @@ _ui_draw_term_title(void)
         gint unread = wins_get_total_unread();
 
         if (unread != 0) {
-            snprintf(new_win_title, sizeof(new_win_title),
-                     "/bin/echo -n \"%c]0;%s (%d) - %s%c\"", '\033', "Profanity",
-                     unread, jid, '\007');
+            fprintf(stdout, "\e]0;Profanity (%d) - %s\a", unread, jid);
         } else {
-            snprintf(new_win_title, sizeof(new_win_title),
-                     "/bin/echo -n \"%c]0;%s - %s%c\"", '\033', "Profanity", jid,
-                     '\007');
+            fprintf(stdout, "\e]0;Profanity - %s\a", jid);
         }
     } else {
-        snprintf(new_win_title, sizeof(new_win_title), "/bin/echo -n \"%c]0;%s%c\"", '\033',
-                 "Profanity", '\007');
+        fputs("\e]0;Profanity\a", stdout);
     }
-    if (g_strcmp0(win_title, new_win_title) != 0) {
-        // print to x-window title bar
-        int res = system(new_win_title);
-        if (res == -1) {
-            log_error("Error writing terminal window title.");
-        }
-        if (win_title) {
-            free(win_title);
-        }
-        win_title = strdup(new_win_title);
-    }
+    fflush(stdout);
 }
 
 void
