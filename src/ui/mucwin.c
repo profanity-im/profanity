@@ -34,6 +34,7 @@
  *
  */
 
+#include "ui.h"
 #define _GNU_SOURCE 1
 
 #include <string.h>
@@ -67,6 +68,8 @@ mucwin_new(const char* const barejid)
     }
 #endif
 
+    // Force redraw here to show correct offline users; before this point muc_members returns a wrong list
+    ui_redraw_all_room_rosters();
     return mucwin;
 }
 

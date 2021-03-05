@@ -42,12 +42,15 @@
 #include "ui/window_list.h"
 
 static void
-_occuptantswin_occupant(ProfLayoutSplit* layout, Occupant* occupant, gboolean showjid)
+_occuptantswin_occupant(ProfLayoutSplit* layout, GList* item, gboolean showjid, gboolean isoffline)
 {
     int colour = 0;                                     //init to workaround compiler warning
     theme_item_t presence_colour = THEME_ROSTER_ONLINE; //init to workaround compiler warning
+    Occupant* occupant = item->data;
 
-    if (prefs_get_boolean(PREF_OCCUPANTS_COLOR_NICK)) {
+    if (isoffline) {
+        wattron(layout->subwin, theme_attrs(THEME_ROSTER_OFFLINE));
+    } else if (prefs_get_boolean(PREF_OCCUPANTS_COLOR_NICK)) {
         colour = theme_hash_attrs(occupant->nick);
 
         wattron(layout->subwin, colour);
@@ -79,12 +82,18 @@ _occuptantswin_occupant(ProfLayoutSplit* layout, Occupant* occupant, gboolean sh
 
     gboolean wrap = prefs_get_boolean(PREF_OCCUPANTS_WRAP);
 
-    g_string_append(msg, occupant->nick);
+    if (isoffline) {
+        Jid* jid = jid_create(item->data);
+        g_string_append(msg, jid->barejid);
+        jid_destroy(jid);
+    } else {
+        g_string_append(msg, occupant->nick);
+    }
     win_sub_newline_lazy(layout->subwin);
     win_sub_print(layout->subwin, msg->str, FALSE, wrap, current_indent);
     g_string_free(msg, TRUE);
 
-    if (showjid && occupant->jid) {
+    if (showjid && !isoffline && occupant->jid) {
         GString* msg = g_string_new(spaces->str);
         g_string_append(msg, " ");
 
@@ -96,7 +105,9 @@ _occuptantswin_occupant(ProfLayoutSplit* layout, Occupant* occupant, gboolean sh
 
     g_string_free(spaces, TRUE);
 
-    if (prefs_get_boolean(PREF_OCCUPANTS_COLOR_NICK)) {
+    if (isoffline) {
+        wattroff(layout->subwin, theme_attrs(THEME_ROSTER_OFFLINE));
+    } else if (prefs_get_boolean(PREF_OCCUPANTS_COLOR_NICK)) {
         wattroff(layout->subwin, colour);
     } else {
         wattroff(layout->subwin, theme_attrs(presence_colour));
@@ -124,6 +135,8 @@ occupantswin_occupants(const char* const roomjid)
 
             if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
 
+                GList* online_occupants = { NULL };
+
                 GString* role = g_string_new(prefix->str);
                 g_string_append(role, "Moderators");
 
@@ -136,9 +149,10 @@ occupantswin_occupants(const char* const roomjid)
                 while (roster_curr) {
                     Occupant* occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_MODERATOR) {
-                        _occuptantswin_occupant(layout, occupant, mucwin->showjid);
+                        _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, false);
                     }
                     roster_curr = g_list_next(roster_curr);
+                    online_occupants = g_list_append(online_occupants, occupant->jid);
                 }
 
                 role = g_string_new(prefix->str);
@@ -153,9 +167,10 @@ occupantswin_occupants(const char* const roomjid)
                 while (roster_curr) {
                     Occupant* occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_PARTICIPANT) {
-                        _occuptantswin_occupant(layout, occupant, mucwin->showjid);
+                        _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, false);
                     }
                     roster_curr = g_list_next(roster_curr);
+                    online_occupants = g_list_append(online_occupants, occupant->jid);
                 }
 
                 role = g_string_new(prefix->str);
@@ -170,10 +185,50 @@ occupantswin_occupants(const char* const roomjid)
                 while (roster_curr) {
                     Occupant* occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_VISITOR) {
-                        _occuptantswin_occupant(layout, occupant, mucwin->showjid);
+                        _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, false);
                     }
                     roster_curr = g_list_next(roster_curr);
+                    online_occupants = g_list_append(online_occupants, occupant->jid);
                 }
+
+                if (mucwin->showoffline) {
+                    GList* members = muc_members(roomjid);
+                    // offline_occupants is used to display the same account on multiple devices once
+                    GList* offline_occupants = { NULL };
+
+                    role = g_string_new(prefix->str);
+                    g_string_append(role, "Offline");
+
+                    wattron(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                    win_sub_newline_lazy(layout->subwin);
+                    win_sub_print(layout->subwin, role->str, TRUE, FALSE, 0);
+                    wattroff(layout->subwin, theme_attrs(THEME_OCCUPANTS_HEADER));
+                    g_string_free(role, TRUE);
+                    roster_curr = members;
+                    while (roster_curr) {
+                        Jid* jid = jid_create(roster_curr->data);
+                        gboolean found = false;
+                        GList* iter = online_occupants;
+                        for (; iter != NULL; iter = iter->next) {
+                            if (strstr(iter->data, jid->barejid)) {
+                                found = true;
+                                break;
+                            }
+                        }
+
+                        if (!found && g_list_index(offline_occupants, jid->barejid) == -1) {
+                            _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, true);
+                            offline_occupants = g_list_append(offline_occupants, jid->barejid);
+                        }
+
+                        jid_destroy(jid);
+                        roster_curr = g_list_next(roster_curr);
+                    }
+                    g_list_free(members);
+                    g_list_free(offline_occupants);
+                }
+                g_list_free(online_occupants);
+
             } else {
                 GString* role = g_string_new(prefix->str);
                 g_string_append(role, "Occupants\n");
@@ -186,8 +241,7 @@ occupantswin_occupants(const char* const roomjid)
 
                 GList* roster_curr = occupants;
                 while (roster_curr) {
-                    Occupant* occupant = roster_curr->data;
-                    _occuptantswin_occupant(layout, occupant, mucwin->showjid);
+                    _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, false);
                     roster_curr = g_list_next(roster_curr);
                 }
             }

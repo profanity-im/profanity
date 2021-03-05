@@ -4370,6 +4370,9 @@ cmd_occupants(ProfWin* window, const char* const command, gchar** args)
             if (g_strcmp0(args[2], "jid") == 0) {
                 cons_show("Occupant jids enabled.");
                 prefs_set_boolean(PREF_OCCUPANTS_JID, TRUE);
+            } else if (g_strcmp0(args[2], "offline") == 0) {
+                cons_show("Occupants offline enabled.");
+                prefs_set_boolean(PREF_OCCUPANTS_OFFLINE, TRUE);
             } else {
                 cons_show("Occupant list enabled.");
                 prefs_set_boolean(PREF_OCCUPANTS, TRUE);
@@ -4379,6 +4382,9 @@ cmd_occupants(ProfWin* window, const char* const command, gchar** args)
             if (g_strcmp0(args[2], "jid") == 0) {
                 cons_show("Occupant jids disabled.");
                 prefs_set_boolean(PREF_OCCUPANTS_JID, FALSE);
+            } else if (g_strcmp0(args[2], "offline") == 0) {
+                cons_show("Occupants offline disabled.");
+                prefs_set_boolean(PREF_OCCUPANTS_OFFLINE, FALSE);
             } else {
                 cons_show("Occupant list disabled.");
                 prefs_set_boolean(PREF_OCCUPANTS, FALSE);
@@ -4430,12 +4436,18 @@ cmd_occupants(ProfWin* window, const char* const command, gchar** args)
         if (g_strcmp0(args[1], "jid") == 0) {
             mucwin->showjid = TRUE;
             mucwin_update_occupants(mucwin);
+        } else if (g_strcmp0(args[1], "offline") == 0) {
+            mucwin->showoffline = TRUE;
+            mucwin_update_occupants(mucwin);
         } else {
             mucwin_show_occupants(mucwin);
         }
     } else if (g_strcmp0(args[0], "hide") == 0) {
         if (g_strcmp0(args[1], "jid") == 0) {
             mucwin->showjid = FALSE;
+            mucwin_update_occupants(mucwin);
+        } else if (g_strcmp0(args[1], "offline") == 0) {
+            mucwin->showoffline = FALSE;
             mucwin_update_occupants(mucwin);
         } else {
             mucwin_hide_occupants(mucwin);
