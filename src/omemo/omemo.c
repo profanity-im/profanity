@@ -118,7 +118,7 @@ static omemo_context omemo_ctx;
 void
 omemo_init(void)
 {
-    log_info("OMEMO: initialising");
+    log_info("[OMEMO] initialising");
     if (omemo_crypto_init() != 0) {
         cons_show("Error initializing OMEMO crypto: gcry_check_version() failed");
     }
@@ -244,9 +244,9 @@ omemo_on_connect(ProfAccount* account)
     if (res == -1) {
         const char* errmsg = strerror(errno);
         if (errmsg) {
-            log_error("OMEMO: error creating directory: %s, %s", omemo_dir, errmsg);
+            log_error("[OMEMO] error creating directory: %s, %s", omemo_dir, errmsg);
         } else {
-            log_error("OMEMO: creating directory: %s", omemo_dir);
+            log_error("[OMEMO] creating directory: %s", omemo_dir);
         }
     }
 
@@ -264,7 +264,7 @@ omemo_on_connect(ProfAccount* account)
             return;
         }
     } else if (error->code != G_FILE_ERROR_NOENT) {
-        log_warning("OMEMO: error loading identity from: %s, %s", omemo_ctx.identity_filename->str, error->message);
+        log_warning("[OMEMO] error loading identity from: %s, %s", omemo_ctx.identity_filename->str, error->message);
         g_error_free(error);
         return;
     }
@@ -273,7 +273,7 @@ omemo_on_connect(ProfAccount* account)
     if (g_key_file_load_from_file(omemo_ctx.trust_keyfile, omemo_ctx.trust_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
         _load_trust();
     } else if (error->code != G_FILE_ERROR_NOENT) {
-        log_warning("OMEMO: error loading trust from: %s, %s", omemo_ctx.trust_filename->str, error->message);
+        log_warning("[OMEMO] error loading trust from: %s, %s", omemo_ctx.trust_filename->str, error->message);
         g_error_free(error);
     }
 
@@ -281,7 +281,7 @@ omemo_on_connect(ProfAccount* account)
     if (g_key_file_load_from_file(omemo_ctx.sessions_keyfile, omemo_ctx.sessions_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
         _load_sessions();
     } else if (error->code != G_FILE_ERROR_NOENT) {
-        log_warning("OMEMO: error loading sessions from: %s, %s", omemo_ctx.sessions_filename->str, error->message);
+        log_warning("[OMEMO] error loading sessions from: %s, %s", omemo_ctx.sessions_filename->str, error->message);
         g_error_free(error);
     }
 
@@ -289,7 +289,7 @@ omemo_on_connect(ProfAccount* account)
     if (g_key_file_load_from_file(omemo_ctx.known_devices_keyfile, omemo_ctx.known_devices_filename->str, G_KEY_FILE_KEEP_COMMENTS, &error)) {
         _load_known_devices();
     } else if (error->code != G_FILE_ERROR_NOENT) {
-        log_warning("OMEMO: error loading known devices from: %s, %s", omemo_ctx.known_devices_filename->str, error->message);
+        log_warning("[OMEMO] error loading known devices from: %s, %s", omemo_ctx.known_devices_filename->str, error->message);
         g_error_free(error);
     }
 }
@@ -329,7 +329,7 @@ omemo_generate_crypto_materials(ProfAccount* account)
     gcry_randomize(&omemo_ctx.device_id, 4, GCRY_VERY_STRONG_RANDOM);
     omemo_ctx.device_id &= 0x7fffffff;
     g_key_file_set_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, omemo_ctx.device_id);
-    log_info("OMEMO: device id: %d", omemo_ctx.device_id);
+    log_info("[OMEMO] device id: %d", omemo_ctx.device_id);
 
     /* Identity key */
     signal_protocol_key_helper_generate_identity_key_pair(&omemo_ctx.identity_key_pair, omemo_ctx.signal);
@@ -366,7 +366,8 @@ void
 omemo_publish_crypto_materials(void)
 {
     if (loaded != TRUE) {
-        log_error("OMEMO: cannot publish crypto materials before they are generated");
+        cons_show("OMEMO: cannot publish crypto materials before they are generated");
+        log_error("[OMEMO] cannot publish crypto materials before they are generated");
         return;
     }
 
@@ -401,10 +402,10 @@ void
 omemo_start_session(const char* const barejid)
 {
     if (omemo_loaded()) {
-        log_info("OMEMO: start session with %s", barejid);
+        log_info("[OMEMO] start session with %s", barejid);
         GList* device_list = g_hash_table_lookup(omemo_ctx.device_list, barejid);
         if (!device_list) {
-            log_info("OMEMO: missing device list for %s", barejid);
+            log_info("[OMEMO] missing device list for %s", barejid);
             omemo_devicelist_request(barejid);
             g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
             return;
@@ -554,7 +555,7 @@ omemo_identity_keyfile_save(void)
     GError* error = NULL;
 
     if (!g_key_file_save_to_file(omemo_ctx.identity_keyfile, omemo_ctx.identity_filename->str, &error)) {
-        log_error("OMEMO: error saving identity to: %s, %s", omemo_ctx.identity_filename->str, error->message);
+        log_error("[OMEMO] error saving identity to: %s, %s", omemo_ctx.identity_filename->str, error->message);
     }
 }
 
@@ -570,7 +571,7 @@ omemo_trust_keyfile_save(void)
     GError* error = NULL;
 
     if (!g_key_file_save_to_file(omemo_ctx.trust_keyfile, omemo_ctx.trust_filename->str, &error)) {
-        log_error("OMEMO: error saving trust to: %s, %s", omemo_ctx.trust_filename->str, error->message);
+        log_error("[OMEMO] error saving trust to: %s, %s", omemo_ctx.trust_filename->str, error->message);
     }
 }
 
@@ -586,7 +587,7 @@ omemo_sessions_keyfile_save(void)
     GError* error = NULL;
 
     if (!g_key_file_save_to_file(omemo_ctx.sessions_keyfile, omemo_ctx.sessions_filename->str, &error)) {
-        log_error("OMEMO: error saving sessions to: %s, %s", omemo_ctx.sessions_filename->str, error->message);
+        log_error("[OMEMO] error saving sessions to: %s, %s", omemo_ctx.sessions_filename->str, error->message);
     }
 }
 
@@ -596,7 +597,7 @@ omemo_known_devices_keyfile_save(void)
     GError* error = NULL;
 
     if (!g_key_file_save_to_file(omemo_ctx.known_devices_keyfile, omemo_ctx.known_devices_filename->str, &error)) {
-        log_error("OMEMO: error saving known devices to: %s, %s", omemo_ctx.known_devices_filename->str, error->message);
+        log_error("[OMEMO] error saving known devices to: %s, %s", omemo_ctx.known_devices_filename->str, error->message);
     }
 }
 
@@ -636,7 +637,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
         session_builder* builder;
         res = session_builder_create(&builder, omemo_ctx.store, address, omemo_ctx.signal);
         if (res != 0) {
-            log_error("OMEMO: cannot create session builder for %s device %d", jid, device_id);
+            log_error("[OMEMO] cannot create session builder for %s device %d", jid, device_id);
             goto out;
         }
 
@@ -652,17 +653,17 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
 
         res = session_pre_key_bundle_create(&bundle, 0, device_id, prekey->id, prekey_public, signed_prekey_id, signed_prekey, signature, signature_len, identity_key);
         if (res != 0) {
-            log_error("OMEMO: cannot create pre key bundle for %s device %d", jid, device_id);
+            log_error("[OMEMO] cannot create pre key bundle for %s device %d", jid, device_id);
             goto out;
         }
 
         res = session_builder_process_pre_key_bundle(builder, bundle);
         if (res != 0) {
-            log_error("OMEMO: cannot process pre key bundle for %s device %d", jid, device_id);
+            log_error("[OMEMO] cannot process pre key bundle for %s device %d", jid, device_id);
             goto out;
         }
 
-        log_info("OMEMO: create session with %s device %d", jid, device_id);
+        log_info("[OMEMO] create session with %s device %d", jid, device_id);
     }
 
 out:
@@ -695,7 +696,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 
     res = aes128gcm_encrypt(ciphertext, &ciphertext_len, tag, &tag_len, (const unsigned char* const)message, strlen(message), iv, key);
     if (res != 0) {
-        log_error("OMEMO: cannot encrypt message");
+        log_error("[OMEMO] cannot encrypt message");
         goto out;
     }
 
@@ -729,7 +730,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
         GList* recipient_device_id = NULL;
         recipient_device_id = g_hash_table_lookup(omemo_ctx.device_list, recipients_iter->data);
         if (!recipient_device_id) {
-            log_warning("OMEMO: cannot find device ids for %s", recipients_iter->data);
+            log_warning("[OMEMO] cannot find device ids for %s", recipients_iter->data);
             continue;
         }
 
@@ -745,14 +746,14 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
             if (res != 0) {
-                log_error("OMEMO: cannot create cipher for %s device id %d", address.name, address.device_id);
+                log_error("[OMEMO] cannot create cipher for %s device id %d", address.name, address.device_id);
                 continue;
             }
 
             res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
             session_cipher_free(cipher);
             if (res != 0) {
-                log_error("OMEMO: cannot encrypt key for %s device id %d", address.name, address.device_id);
+                log_error("[OMEMO] cannot encrypt key for %s device id %d", address.name, address.device_id);
                 continue;
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);
@@ -783,14 +784,14 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
             if (res != 0) {
-                log_error("OMEMO: cannot create cipher for %s device id %d", address.name, address.device_id);
+                log_error("[OMEMO] cannot create cipher for %s device id %d", address.name, address.device_id);
                 continue;
             }
 
             res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
             session_cipher_free(cipher);
             if (res != 0) {
-                log_error("OMEMO: cannot encrypt key for %s device id %d", address.name, address.device_id);
+                log_error("[OMEMO] cannot encrypt key for %s device id %d", address.name, address.device_id);
                 continue;
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);
@@ -851,7 +852,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
     }
 
     if (!key) {
-        log_warning("OMEMO: received a message with no corresponding key");
+        log_warning("[OMEMO] received a message with no corresponding key");
         goto out;
     }
 
@@ -867,7 +868,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         }
         g_list_free(roster);
         if (!sender) {
-            log_warning("OMEMO: cannot find MUC message sender fulljid");
+            log_warning("[OMEMO] cannot find MUC message sender fulljid");
             goto out;
         }
     } else {
@@ -884,12 +885,12 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
 
     res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
     if (res != 0) {
-        log_error("OMEMO: cannot create session cipher");
+        log_error("[OMEMO] cannot create session cipher");
         goto out;
     }
 
     if (key->prekey) {
-        log_debug("OMEMO: decrypting message with prekey");
+        log_debug("[OMEMO] decrypting message with prekey");
         pre_key_signal_message* message;
         ec_public_key* their_identity_key;
         signal_buffer* identity_buffer = NULL;
@@ -925,13 +926,13 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
             omemo_bundle_request(sender->barejid, sid, omemo_start_device_session_handle_bundle, free, strdup(sender->barejid));
         }
     } else {
-        log_debug("OMEMO: decrypting message with existing session");
+        log_debug("[OMEMO] decrypting message with existing session");
         signal_message* message = NULL;
 
         res = signal_message_deserialize(&message, key->data, key->length, omemo_ctx.signal);
 
         if (res < 0) {
-            log_error("OMEMO: cannot deserialize message");
+            log_error("[OMEMO] cannot deserialize message");
         } else {
             res = session_cipher_decrypt_signal_message(cipher, message, NULL, &plaintext_key);
             *trusted = true;
@@ -941,12 +942,12 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
 
     session_cipher_free(cipher);
     if (res != 0) {
-        log_error("OMEMO: cannot decrypt message key");
+        log_error("[OMEMO] cannot decrypt message key");
         goto out;
     }
 
     if (signal_buffer_len(plaintext_key) != AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH) {
-        log_error("OMEMO: invalid key length");
+        log_error("[OMEMO] invalid key length");
         signal_buffer_free(plaintext_key);
         goto out;
     }
@@ -958,7 +959,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
                             signal_buffer_data(plaintext_key) + AES128_GCM_KEY_LENGTH);
     signal_buffer_free(plaintext_key);
     if (res != 0) {
-        log_error("OMEMO: cannot decrypt message: %s", gcry_strerror(res));
+        log_error("[OMEMO] cannot decrypt message: %s", gcry_strerror(res));
         free(plaintext);
         plaintext = NULL;
         goto out;
@@ -1132,7 +1133,7 @@ omemo_trust(const char* const jid, const char* const fingerprint_formatted)
 
     GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
     if (!known_identities) {
-        log_warning("OMEMO: cannot trust unknown device: %s", fingerprint_formatted);
+        log_warning("[OMEMO] cannot trust unknown device: %s", fingerprint_formatted);
         cons_show("Cannot trust unknown device: %s", fingerprint_formatted);
         return;
     }
@@ -1143,7 +1144,7 @@ omemo_trust(const char* const jid, const char* const fingerprint_formatted)
     free(fingerprint);
 
     if (!device_id) {
-        log_warning("OMEMO: cannot trust unknown device: %s", fingerprint_formatted);
+        log_warning("[OMEMO] cannot trust unknown device: %s", fingerprint_formatted);
         cons_show("Cannot trust unknown device: %s", fingerprint_formatted);
         return;
     }
@@ -1200,13 +1201,13 @@ omemo_untrust(const char* const jid, const char* const fingerprint_formatted)
     /* Remove existing session */
     GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
     if (!known_identities) {
-        log_error("OMEMO: cannot find known device while untrusting a fingerprint");
+        log_error("[OMEMO] cannot find known device while untrusting a fingerprint");
         goto out;
     }
 
     uint32_t device_id = GPOINTER_TO_INT(g_hash_table_lookup(known_identities, fingerprint));
     if (!device_id) {
-        log_error("OMEMO: cannot find device id while untrusting a fingerprint");
+        log_error("[OMEMO] cannot find device id while untrusting a fingerprint");
         goto out;
     }
     signal_protocol_address address = {
@@ -1246,17 +1247,17 @@ _omemo_log(int level, const char* message, size_t len, void* user_data)
 {
     switch (level) {
     case SG_LOG_ERROR:
-        log_error("OMEMO: %s", message);
+        log_error("[OMEMO] %s", message);
         break;
     case SG_LOG_WARNING:
-        log_warning("OMEMO: %s", message);
+        log_warning("[OMEMO] %s", message);
         break;
     case SG_LOG_NOTICE:
     case SG_LOG_INFO:
-        log_info("OMEMO: %s", message);
+        log_info("[OMEMO] %s", message);
         break;
     case SG_LOG_DEBUG:
-        log_debug("OMEMO: %s", message);
+        log_debug("[OMEMO] %s", message);
         break;
     }
 }
@@ -1393,16 +1394,16 @@ _load_identity(void)
     error = NULL;
     omemo_ctx.device_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, &error);
     if (error != NULL) {
-        log_error("OMEMO: cannot load device id: %s", error->message);
+        log_error("[OMEMO] cannot load device id: %s", error->message);
         return FALSE;
     }
-    log_info("OMEMO: device id: %d", omemo_ctx.device_id);
+    log_info("[OMEMO] device id: %d", omemo_ctx.device_id);
 
     /* Registration ID */
     error = NULL;
     omemo_ctx.registration_id = g_key_file_get_uint64(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, &error);
     if (error != NULL) {
-        log_error("OMEMO: cannot load registration id: %s", error->message);
+        log_error("[OMEMO] cannot load registration id: %s", error->message);
         return FALSE;
     }
 
@@ -1410,7 +1411,7 @@ _load_identity(void)
     error = NULL;
     char* identity_key_public_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC, &error);
     if (!identity_key_public_b64) {
-        log_error("OMEMO: cannot load identity public key: %s", error->message);
+        log_error("[OMEMO] cannot load identity public key: %s", error->message);
         return FALSE;
     }
 
@@ -1422,7 +1423,7 @@ _load_identity(void)
     error = NULL;
     char* identity_key_private_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PRIVATE, &error);
     if (!identity_key_private_b64) {
-        log_error("OMEMO: cannot load identity private key: %s", error->message);
+        log_error("[OMEMO] cannot load identity private key: %s", error->message);
         return FALSE;
     }
 
@@ -1599,7 +1600,7 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
     }
 
     char* fingerprint = _omemo_fingerprint(identity, FALSE);
-    log_info("OMEMO: cache identity for %s:%d: %s", jid, device_id, fingerprint);
+    log_info("[OMEMO] cache identity for %s:%d: %s", jid, device_id, fingerprint);
     g_hash_table_insert(known_identities, strdup(fingerprint), GINT_TO_POINTER(device_id));
 
     char* device_id_str = g_strdup_printf("%d", device_id);
