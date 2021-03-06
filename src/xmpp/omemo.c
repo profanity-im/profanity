@@ -89,6 +89,7 @@ omemo_devicelist_request(const char* const jid)
 void
 omemo_bundle_publish(gboolean first)
 {
+    log_info("[OMEMO] publish omemo bundle");
     xmpp_ctx_t* const ctx = connection_get_ctx();
     unsigned char* identity_key = NULL;
     size_t identity_key_length;
@@ -459,7 +460,7 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
     if (current) {
         item = current;
     } else if (first) {
-        log_warning("OMEMO: User %s has a non 'current' device item list: %s.", from, xmpp_stanza_get_id(first));
+        log_warning("[OMEMO] User %s has a non 'current' device item list: %s.", from, xmpp_stanza_get_id(first));
         item = first;
     } else {
         return 1;
@@ -480,7 +481,7 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
         if (id != NULL) {
             device_list = g_list_append(device_list, GINT_TO_POINTER(strtoul(id, NULL, 10)));
         } else {
-            log_error("OMEMO: received device without ID");
+            log_error("[OMEMO] received device without ID");
         }
     }
 
@@ -495,19 +496,22 @@ _omemo_bundle_publish_result(xmpp_stanza_t* const stanza, void* const userdata)
     const char* type = xmpp_stanza_get_type(stanza);
 
     if (g_strcmp0(type, STANZA_TYPE_ERROR) != 0) {
+        log_error("[OMEMO] Error for bundle publish");
         return 0;
     }
 
     if (!GPOINTER_TO_INT(userdata)) {
-        log_error("OMEMO: definitely cannot publish bundle with an open access model");
+        log_error("[OMEMO] definitely cannot publish bundle with an open access model");
         return 0;
     }
 
-    log_info("OMEMO: cannot publish bundle with open access model, trying to configure node");
+    log_info("[OMEMO] cannot publish bundle with open access model, trying to configure node");
     xmpp_ctx_t* const ctx = connection_get_ctx();
     Jid* jid = jid_create(connection_get_fulljid());
     char* id = connection_create_stanza_id();
     char* node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
+    log_info("[OMEMO] node: %s", node); 
+
     xmpp_stanza_t* iq = stanza_create_pubsub_configure_request(ctx, id, jid->barejid, node);
     g_free(node);
 
@@ -532,7 +536,7 @@ _omemo_bundle_publish_configure(xmpp_stanza_t* const stanza, void* const userdat
     DataForm* form = form_create(x);
     char* tag = g_hash_table_lookup(form->var_to_tag, "pubsub#access_model");
     if (!tag) {
-        log_info("OMEMO: cannot configure bundle to an open access model");
+        log_error("[OMEMO] cannot configure bundle to an open access model");
         return 0;
     }
     form_set_value(form, tag, "open");
@@ -560,7 +564,7 @@ _omemo_bundle_publish_configure_result(xmpp_stanza_t* const stanza, void* const 
     const char* type = xmpp_stanza_get_type(stanza);
 
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
-        log_error("OMEMO: cannot configure bundle to an open access model");
+        log_error("[OMEMO] cannot configure bundle to an open access model: Result error");
         return 0;
     }
 
