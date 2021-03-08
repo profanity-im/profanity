@@ -305,6 +305,7 @@ _load_preferences(void)
     _set_boolean_preference("resource.message", PREF_RESOURCE_MESSAGE);
     _set_boolean_preference("occupants", PREF_OCCUPANTS);
     _set_boolean_preference("occupants.jid", PREF_OCCUPANTS_JID);
+    _set_boolean_preference("occupants.offline", PREF_OCCUPANTS_OFFLINE);
     _set_boolean_preference("occupants.wrap", PREF_OCCUPANTS_WRAP);
     _set_boolean_preference("roster", PREF_ROSTER);
     _set_boolean_preference("roster.offline", PREF_ROSTER_OFFLINE);

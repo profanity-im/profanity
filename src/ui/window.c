@@ -203,6 +203,11 @@ win_create_muc(const char* const roomjid)
     } else {
         new_win->showjid = FALSE;
     }
+    if (prefs_get_boolean(PREF_OCCUPANTS_OFFLINE)) {
+        new_win->showoffline = TRUE;
+    } else {
+        new_win->showoffline = FALSE;
+    }
     new_win->enctext = NULL;
     new_win->message_char = NULL;
     new_win->is_omemo = FALSE;

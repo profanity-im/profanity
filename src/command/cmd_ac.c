@@ -790,6 +790,7 @@ cmd_ac_init(void)
 
     occupants_show_ac = autocomplete_new();
     autocomplete_add(occupants_show_ac, "jid");
+    autocomplete_add(occupants_show_ac, "offline");
 
     occupants_char_ac = autocomplete_new();
     autocomplete_add(occupants_char_ac, "none");

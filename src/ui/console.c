@@ -1255,6 +1255,11 @@ cons_occupants_setting(void)
     else
         cons_show("Occupant jids (/occupants)          : hide");
 
+    if (prefs_get_boolean(PREF_OCCUPANTS_OFFLINE))
+        cons_show("Occupants offline (/occupants)      : show");
+    else
+        cons_show("Occupants offline (/occupants)      : hide");
+
     if (prefs_get_boolean(PREF_OCCUPANTS_WRAP))
         cons_show("Occupants wrap (/occupants)         : ON");
     else
