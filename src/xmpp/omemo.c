@@ -63,8 +63,11 @@ omemo_devicelist_publish(GList* device_list)
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_stanza_t* iq = stanza_create_omemo_devicelist_publish(ctx, device_list);
 
+    log_debug("[OMEMO] omemo_devicelist_publish()");
+
     if (connection_supports(XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS)) {
         stanza_attach_publish_options(ctx, iq, "pubsub#access_model", "open");
+        // stanza_attach_publish_options(ctx, iq, "pubsub#max_items", "max");
     }
 
     iq_send_stanza(iq);
@@ -98,6 +101,8 @@ omemo_bundle_publish(gboolean first)
     unsigned char* signed_prekey_signature = NULL;
     size_t signed_prekey_signature_length;
     GList *prekeys = NULL, *ids = NULL, *lengths = NULL;
+
+    log_debug("OMEMO: omemo_bundle_publish()");
 
     omemo_identity_key(&identity_key, &identity_key_length);
     omemo_signed_prekey(&signed_prekey, &signed_prekey_length);
@@ -493,6 +498,8 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
 static int
 _omemo_bundle_publish_result(xmpp_stanza_t* const stanza, void* const userdata)
 {
+    log_debug("[OMEMO] _omemo_bundle_publish_result()");
+
     const char* type = xmpp_stanza_get_type(stanza);
 
     if (g_strcmp0(type, STANZA_TYPE_ERROR) != 0) {
@@ -510,14 +517,16 @@ _omemo_bundle_publish_result(xmpp_stanza_t* const stanza, void* const userdata)
     Jid* jid = jid_create(connection_get_fulljid());
     char* id = connection_create_stanza_id();
     char* node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
-    log_info("[OMEMO] node: %s", node); 
+    log_info("[OMEMO] node: %s", node);
 
     xmpp_stanza_t* iq = stanza_create_pubsub_configure_request(ctx, id, jid->barejid, node);
     g_free(node);
 
     iq_id_handler_add(id, _omemo_bundle_publish_configure, NULL, userdata);
 
+    log_debug("[OMEMO] _omemo_bundle_publish_result(): sending pubsub conf request");
     iq_send_stanza(iq);
+    log_debug("[OMEMO] _omemo_bundle_publish_result(): sent    pubsub conf request");
 
     xmpp_stanza_release(iq);
     free(id);
@@ -528,10 +537,24 @@ _omemo_bundle_publish_result(xmpp_stanza_t* const stanza, void* const userdata)
 static int
 _omemo_bundle_publish_configure(xmpp_stanza_t* const stanza, void* const userdata)
 {
+    log_debug("[OMEMO] _omemo_bundle_publish_configure()");
+
     /* TODO handle error */
     xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_name(stanza, "pubsub");
+    if (!pubsub) {
+        log_error("[OMEMO] The stanza doesn't contain a 'pubsub' child");
+        return 0;
+    }
     xmpp_stanza_t* configure = xmpp_stanza_get_child_by_name(pubsub, STANZA_NAME_CONFIGURE);
+    if (!configure) {
+        log_error("[OMEMO] The stanza doesn't contain a 'configure' child");
+        return 0;
+    }
     xmpp_stanza_t* x = xmpp_stanza_get_child_by_name(configure, "x");
+    if (!x) {
+        log_error("[OMEMO] The stanza doesn't contain an 'x' child");
+        return 0;
+    }
 
     DataForm* form = form_create(x);
     char* tag = g_hash_table_lookup(form->var_to_tag, "pubsub#access_model");
@@ -551,6 +574,8 @@ _omemo_bundle_publish_configure(xmpp_stanza_t* const stanza, void* const userdat
     iq_id_handler_add(id, _omemo_bundle_publish_configure_result, NULL, userdata);
 
     iq_send_stanza(iq);
+
+    log_debug("[OMEMO] _omemo_bundle_publish_configure() done");
 
     xmpp_stanza_release(iq);
     free(id);
