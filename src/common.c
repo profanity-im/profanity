@@ -577,6 +577,9 @@ get_expanded_path(const char* path)
     GString* exp_path = g_string_new("");
     gchar* result;
 
+    if (g_str_has_prefix(path, "file://")) {
+        path += strlen("file://");
+    }
     if (strlen(path) >= 2 && path[0] == '~' && path[1] == '/') {
         g_string_printf(exp_path, "%s/%s", getenv("HOME"), path + 2);
     } else {
