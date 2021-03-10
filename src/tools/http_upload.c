@@ -166,6 +166,10 @@ http_file_put(void* userdata)
 
     char* err = NULL;
     char* content_type_header;
+    // Optional headers
+    char* auth_header = NULL;
+    char* cookie_header = NULL;
+    char* expires_header = NULL;
 
     CURL* curl;
     CURLcode res;
@@ -196,6 +200,21 @@ http_file_put(void* userdata)
     }
     headers = curl_slist_append(headers, content_type_header);
     headers = curl_slist_append(headers, "Expect:");
+
+    // Optional headers
+    if (upload->authorization) {
+        asprintf(&auth_header, "Authorization: %s", upload->authorization);
+        headers = curl_slist_append(headers, auth_header);
+    }
+    if (upload->cookie) {
+        asprintf(&cookie_header, "Cookie: %s", upload->cookie);
+        headers = curl_slist_append(headers, cookie_header);
+    }
+    if (upload->expires) {
+        asprintf(&expires_header, "Expires: %s", upload->expires);
+        headers = curl_slist_append(headers, expires_header);
+    }
+
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 
 #if LIBCURL_VERSION_NUM >= 0x072000
@@ -225,6 +244,7 @@ http_file_put(void* userdata)
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)(upload->filesize));
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
+
     if ((res = curl_easy_perform(curl)) != CURLE_OK) {
         err = strdup(curl_easy_strerror(res));
     } else {
@@ -252,11 +272,15 @@ http_file_put(void* userdata)
     curl_easy_cleanup(curl);
     curl_global_cleanup();
     curl_slist_free_all(headers);
+
     if (fh) {
         fclose(fh);
     }
     free(content_type_header);
     free(output.buffer);
+    free(auth_header);
+    free(cookie_header);
+    free(expires_header);
 
     pthread_mutex_lock(&lock);
     g_free(cert_path);
@@ -334,6 +358,9 @@ http_file_put(void* userdata)
     free(upload->put_url);
     free(upload->alt_scheme);
     free(upload->alt_fragment);
+    free(upload->authorization);
+    free(upload->cookie);
+    free(upload->expires);
     free(upload);
 
     return NULL;

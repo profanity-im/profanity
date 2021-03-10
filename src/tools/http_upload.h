@@ -59,6 +59,11 @@ typedef struct http_upload_t
     ProfWin* window;
     pthread_t worker;
     int cancel;
+    // Additional headers
+    // (NULL if they shouldn't be send in the PUT)
+    char* authorization;
+    char* cookie;
+    char* expires;
 } HTTPUpload;
 
 void* http_file_put(void* userdata);

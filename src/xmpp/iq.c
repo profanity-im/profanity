@@ -2423,18 +2423,31 @@ _http_upload_response_id_handler(xmpp_stanza_t* const stanza, void* const userda
         xmpp_stanza_t* get = xmpp_stanza_get_child_by_name(slot, STANZA_NAME_GET);
 
         if (put && get) {
-            char* put_url = xmpp_stanza_get_text(put);
-            char* get_url = xmpp_stanza_get_text(get);
-
+            const char* put_url = xmpp_stanza_get_attribute(put, "url");
             upload->put_url = strdup(put_url);
+            const char* get_url = xmpp_stanza_get_attribute(get, "url");
             upload->get_url = strdup(get_url);
 
-            xmpp_conn_t* conn = connection_get_conn();
-            xmpp_ctx_t* ctx = xmpp_conn_get_context(conn);
-            if (put_url)
-                xmpp_free(ctx, put_url);
-            if (get_url)
-                xmpp_free(ctx, get_url);
+            // Optional "authorization", "cookie", "expires" headers
+            upload->authorization = upload->cookie = upload->expires = NULL;
+            xmpp_stanza_t* header = xmpp_stanza_get_children(put);
+            for (; header; header = xmpp_stanza_get_next(header)) {
+                if (g_strcmp0(xmpp_stanza_get_name(header), STANZA_NAME_HEADER) == 0) {
+                    const char* header_name = xmpp_stanza_get_attribute(header, STANZA_ATTR_NAME);
+                    if (g_strcmp0(header_name, STANZA_HEADER_AUTHORIZATION) == 0) {
+                        upload->authorization = xmpp_stanza_get_text(header);
+                    }
+                    else if (g_strcmp0(header_name, STANZA_HEADER_COOKIE) == 0) {
+                        upload->cookie = xmpp_stanza_get_text(header);
+                    }
+                    else if (g_strcmp0(header_name, STANZA_HEADER_EXPIRES) == 0) {
+                        upload->expires = xmpp_stanza_get_text(header);
+                    }
+                    else {
+                        log_warning("[HTTP upload] unknown header: %s", header_name);
+                    }
+                }
+            }
 
             pthread_create(&(upload->worker), NULL, &http_file_put, upload);
             http_upload_add_upload(upload);
