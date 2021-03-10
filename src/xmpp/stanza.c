@@ -1940,8 +1940,9 @@ stanza_get_error_message(xmpp_stanza_t* stanza)
     return strdup("unknown");
 }
 
+// Note that the `count' must be 2 * number of key/value pairs
 void
-stanza_attach_publish_options(xmpp_ctx_t* const ctx, xmpp_stanza_t* const iq, const char* const option, const char* const value)
+stanza_attach_publish_options_va(xmpp_ctx_t* const ctx, xmpp_stanza_t* const iq, int count, ...)
 {
     xmpp_stanza_t* publish_options = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(publish_options, STANZA_NAME_PUBLISH_OPTIONS);
@@ -1964,29 +1965,47 @@ stanza_attach_publish_options(xmpp_ctx_t* const ctx, xmpp_stanza_t* const iq, co
     xmpp_stanza_add_child(form_type, form_type_value);
     xmpp_stanza_add_child(x, form_type);
 
-    xmpp_stanza_t* access_model = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(access_model, STANZA_NAME_FIELD);
-    xmpp_stanza_set_attribute(access_model, STANZA_ATTR_VAR, option);
-    xmpp_stanza_t* access_model_value = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(access_model_value, STANZA_NAME_VALUE);
-    xmpp_stanza_t* access_model_value_text = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(access_model_value_text, value);
-    xmpp_stanza_add_child(access_model_value, access_model_value_text);
-    xmpp_stanza_add_child(access_model, access_model_value);
-    xmpp_stanza_add_child(x, access_model);
-
     xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_ns(iq, STANZA_NS_PUBSUB);
     xmpp_stanza_add_child(pubsub, publish_options);
 
-    xmpp_stanza_release(access_model_value_text);
-    xmpp_stanza_release(access_model_value);
-    xmpp_stanza_release(access_model);
+    va_list ap;
+    va_start(ap, count);
+    int j;
+    for (j = 0; j < count; j += 2) {
+        const char* const option = va_arg(ap, char* const);
+        const char* const value  = va_arg(ap, char* const);
+
+        xmpp_stanza_t* field = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(field, STANZA_NAME_FIELD);
+        xmpp_stanza_set_attribute(field, STANZA_ATTR_VAR, option);
+        xmpp_stanza_t* field_value = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(field_value, STANZA_NAME_VALUE);
+        xmpp_stanza_t* field_value_text = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_text(field_value_text, value);
+        xmpp_stanza_add_child(field_value, field_value_text);
+        xmpp_stanza_add_child(field, field_value);
+        xmpp_stanza_add_child(x, field);
+
+        xmpp_stanza_release(field_value_text);
+        xmpp_stanza_release(field_value);
+        xmpp_stanza_release(field);
+    }
+    va_end(ap);
+
+
     xmpp_stanza_release(form_type_value_text);
     xmpp_stanza_release(form_type_value);
     xmpp_stanza_release(form_type);
     xmpp_stanza_release(x);
     xmpp_stanza_release(publish_options);
 }
+
+void
+stanza_attach_publish_options(xmpp_ctx_t* const ctx, xmpp_stanza_t* const iq, const char* const option, const char* const value)
+{
+    stanza_attach_publish_options_va(ctx, iq, 2, option, value);
+}
+
 
 void
 stanza_attach_priority(xmpp_ctx_t* const ctx, xmpp_stanza_t* const presence, const int pri)

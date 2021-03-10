@@ -454,6 +454,7 @@ connection_get_barejid(void)
 void
 connection_features_received(const char* const jid)
 {
+    log_info("[CONNECTION] connection_features_received %s", jid);
     if (g_hash_table_remove(conn.requested_features, jid) && g_hash_table_size(conn.requested_features) == 0) {
         sv_ev_connection_features_received();
     }
