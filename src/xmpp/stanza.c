@@ -232,9 +232,6 @@ stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id,
     xmpp_stanza_set_name(request, STANZA_NAME_REQUEST);
     xmpp_stanza_set_ns(request, STANZA_NS_HTTP_UPLOAD);
 
-    xmpp_stanza_t* filename = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(filename, STANZA_NAME_FILENAME);
-    xmpp_stanza_t* filename_txt = xmpp_stanza_new(ctx);
     char* filename_cpy = strdup(upload->filename);
     // strip spaces from filename (servers don't spaces)
     for (int i = 0; i < strlen(filename_cpy); i++) {
@@ -242,34 +239,16 @@ stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id,
             filename_cpy[i] = '_';
         }
     }
-    xmpp_stanza_set_text(filename_txt, basename(filename_cpy));
+    xmpp_stanza_set_attribute(request, STANZA_ATTR_FILENAME, basename(filename_cpy));
     free(filename_cpy);
-    xmpp_stanza_add_child(filename, filename_txt);
-    xmpp_stanza_add_child(request, filename);
-    xmpp_stanza_release(filename_txt);
-    xmpp_stanza_release(filename);
 
-    xmpp_stanza_t* size = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(size, STANZA_NAME_SIZE);
-    xmpp_stanza_t* size_txt = xmpp_stanza_new(ctx);
     char* filesize = NULL;
     if (asprintf(&filesize, "%jd", (intmax_t)(upload->filesize)) != -1) {
-        xmpp_stanza_set_text(size_txt, filesize);
+        xmpp_stanza_set_attribute(request, STANZA_ATTR_SIZE, filesize);
         free(filesize);
     }
-    xmpp_stanza_add_child(size, size_txt);
-    xmpp_stanza_add_child(request, size);
-    xmpp_stanza_release(size_txt);
-    xmpp_stanza_release(size);
 
-    xmpp_stanza_t* content_type = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(content_type, STANZA_NAME_CONTENT_TYPE);
-    xmpp_stanza_t* content_type_txt = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(content_type_txt, upload->mime_type);
-    xmpp_stanza_add_child(content_type, content_type_txt);
-    xmpp_stanza_add_child(request, content_type);
-    xmpp_stanza_release(content_type_txt);
-    xmpp_stanza_release(content_type);
+    xmpp_stanza_set_attribute(request, STANZA_ATTR_CONTENTTYPE, upload->mime_type);
 
     xmpp_stanza_add_child(iq, request);
     xmpp_stanza_release(request);
