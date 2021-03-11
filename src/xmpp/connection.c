@@ -451,6 +451,19 @@ connection_get_barejid(void)
     return result;
 }
 
+char*
+connection_get_user(void)
+{
+    const char* jid = connection_get_fulljid();
+    char* result;
+    result = strdup(jid);
+
+    char* split = strchr(result, '@');
+    *split = '\0';
+
+    return result;
+}
+
 void
 connection_features_received(const char* const jid)
 {

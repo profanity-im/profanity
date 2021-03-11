@@ -2564,6 +2564,19 @@ static struct cmd_t command_defs[] = {
       CMD_NOEXAMPLES
     },
 
+    { "/changepassword",
+      parse_args, 0, 0, NULL,
+      CMD_NOSUBFUNCS
+      CMD_MAINFUNC(cmd_change_password)
+      CMD_NOTAGS
+      CMD_SYN(
+              "/changepassword")
+      CMD_DESC(
+              "Change password of logged in account")
+      CMD_NOARGS
+      CMD_NOEXAMPLES
+    },
+
     // NEXT-COMMAND (search helper)
 };
 
