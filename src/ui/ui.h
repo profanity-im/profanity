@@ -75,7 +75,7 @@ int ui_close_all_wins(void);
 int ui_close_read_wins(void);
 void ui_close_win(int index);
 int ui_win_unread(int index);
-char* ui_ask_password(void);
+char* ui_ask_password(gboolean confirm);
 char* ui_get_line(void);
 char* ui_ask_pgp_passphrase(const char* hint, int prev_fail);
 void ui_contact_online(char* barejid, Resource* resource, GDateTime* last_activity);

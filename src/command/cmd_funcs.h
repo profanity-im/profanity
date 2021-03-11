@@ -159,6 +159,7 @@ gboolean cmd_charset(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_console(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_command_list(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_command_exec(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_change_password(ProfWin* window, const char* const command, gchar** args);
 
 gboolean cmd_plugins(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_plugins_sourcepath(ProfWin* window, const char* const command, gchar** args);

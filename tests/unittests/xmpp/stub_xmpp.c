@@ -62,6 +62,12 @@ connection_get_barejid(void)
     return mock_ptr_type(char*);
 }
 
+char*
+connection_get_user(void)
+{
+    return mock_ptr_type(char*);
+}
+
 const char*
 connection_get_domain(void)
 {
@@ -391,6 +397,10 @@ iq_command_list(const char* const target)
 }
 void
 iq_command_exec(const char* const target, const char* const command)
+{
+}
+void
+iq_register_change_password(const char* const user, const char* const password)
 {
 }
 

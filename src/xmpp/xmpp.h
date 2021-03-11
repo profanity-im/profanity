@@ -186,6 +186,7 @@ char* connection_get_presence_msg(void);
 void connection_set_presence_msg(const char* const message);
 const char* connection_get_fulljid(void);
 char* connection_get_barejid(void);
+char* connection_get_user(void);
 char* connection_create_uuid(void);
 void connection_free_uuid(char* uuid);
 #ifdef HAVE_LIBMESODE
@@ -256,6 +257,7 @@ void iq_http_upload_request(HTTPUpload* upload);
 void iq_command_list(const char* const target);
 void iq_command_exec(const char* const target, const char* const command);
 void iq_mam_request(ProfChatWin* win);
+void iq_register_change_password(const char* const user, const char* const password);
 
 EntityCapabilities* caps_lookup(const char* const jid);
 void caps_close(void);
