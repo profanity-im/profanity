@@ -438,7 +438,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
 
             // no account password setting, prompt
         } else {
-            account->password = ui_ask_password();
+            account->password = ui_ask_password(false);
             conn_status = cl_ev_connect_account(account);
             free(account->password);
             account->password = NULL;
@@ -450,7 +450,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
         // connect with JID
     } else {
         jid = g_utf8_strdown(user, -1);
-        char* passwd = ui_ask_password();
+        char* passwd = ui_ask_password(false);
         conn_status = cl_ev_connect_jid(jid, passwd, altdomain, port, tls_policy, auth_policy);
         free(passwd);
     }

@@ -993,9 +993,13 @@ ui_win_unread(int index)
 }
 
 char*
-ui_ask_password(void)
+ui_ask_password(gboolean confirm)
 {
-    status_bar_set_prompt("Enter password:");
+    if (!confirm) {
+        status_bar_set_prompt("Enter password:");
+    } else {
+        status_bar_set_prompt("Confirm password:");
+    }
     return inp_get_password();
 }
 

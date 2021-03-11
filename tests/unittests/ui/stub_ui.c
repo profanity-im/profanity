@@ -211,7 +211,7 @@ ui_win_unread(int index)
 }
 
 char*
-ui_ask_password(void)
+ui_ask_password(gboolean confirm)
 {
     return mock_ptr_type(char*);
 }
