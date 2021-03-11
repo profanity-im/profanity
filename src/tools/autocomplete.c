@@ -33,6 +33,7 @@
  *
  */
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -303,11 +304,15 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
 static char*
 _autocomplete_param_common(const char* const input, char* command, autocomplete_func func, Autocomplete ac, gboolean quote, gboolean previous, void* context)
 {
-    GString* auto_msg = NULL;
+    GString* auto_msg;
+    char* command_cpy;
     char* result = NULL;
-    char* command_cpy = malloc(strlen(command) + 2);
-    sprintf(command_cpy, "%s ", command);
-    int len = strlen(command_cpy);
+    int len;
+
+    len = asprintf(&command_cpy, "%s ", command);
+    if (len == -1) {
+        return NULL;
+    }
 
     if (strncmp(input, command_cpy, len) == 0) {
         int inp_len = strlen(input);
