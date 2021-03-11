@@ -298,53 +298,34 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
     }
 }
 
-char*
-autocomplete_param_with_func(const char* const input, char* command, autocomplete_func func, gboolean previous, void* context)
-{
-    GString* auto_msg = NULL;
-    char* result = NULL;
-    char command_cpy[strlen(command) + 2];
-    sprintf(command_cpy, "%s ", command);
-    int len = strlen(command_cpy);
-
-    if (strncmp(input, command_cpy, len) == 0) {
-        int inp_len = strlen(input);
-        char prefix[inp_len];
-        for (int i = len; i < inp_len; i++) {
-            prefix[i - len] = input[i];
-        }
-        prefix[inp_len - len] = '\0';
-
-        char* found = func(prefix, previous, context);
-        if (found) {
-            auto_msg = g_string_new(command_cpy);
-            g_string_append(auto_msg, found);
-            free(found);
-            result = auto_msg->str;
-            g_string_free(auto_msg, FALSE);
-        }
-    }
-
-    return result;
-}
-
-char*
-autocomplete_param_with_ac(const char* const input, char* command, Autocomplete ac, gboolean quote, gboolean previous)
+// autocomplete_func func is used -> autocomplete_param_with_func
+// Autocomplete ac, gboolean quote are used -> autocomplete_param_with_ac
+static char*
+_autocomplete_param_common(const char* const input, char* command, autocomplete_func func, Autocomplete ac, gboolean quote, gboolean previous, void* context)
 {
     GString* auto_msg = NULL;
     char* result = NULL;
     char* command_cpy = malloc(strlen(command) + 2);
     sprintf(command_cpy, "%s ", command);
     int len = strlen(command_cpy);
-    int inp_len = strlen(input);
+
     if (strncmp(input, command_cpy, len) == 0) {
+        int inp_len = strlen(input);
         char prefix[inp_len];
+        char *found;
+
         for (int i = len; i < inp_len; i++) {
             prefix[i - len] = input[i];
         }
+
         prefix[inp_len - len] = '\0';
 
-        char* found = autocomplete_complete(ac, prefix, quote, previous);
+        if (func) {
+            found = func(prefix, previous, context);
+        } else {
+            found = autocomplete_complete(ac, prefix, quote, previous);
+        }
+
         if (found) {
             auto_msg = g_string_new(command_cpy);
             g_string_append(auto_msg, found);
@@ -356,6 +337,18 @@ autocomplete_param_with_ac(const char* const input, char* command, Autocomplete 
     free(command_cpy);
 
     return result;
+}
+
+char*
+autocomplete_param_with_func(const char* const input, char* command, autocomplete_func func, gboolean previous, void* context)
+{
+    return _autocomplete_param_common(input, command, func, NULL, FALSE, previous, context);
+}
+
+char*
+autocomplete_param_with_ac(const char* const input, char* command, Autocomplete ac, gboolean quote, gboolean previous)
+{
+    return _autocomplete_param_common(input, command, NULL, ac, quote, previous, NULL);
 }
 
 char*
