@@ -203,15 +203,21 @@ http_file_put(void* userdata)
 
     // Optional headers
     if (upload->authorization) {
-        asprintf(&auth_header, "Authorization: %s", upload->authorization);
+        if (asprintf(&auth_header, "Authorization: %s", upload->authorization) == -1) {
+            auth_header = strdup(FALLBACK_MSG);
+        }
         headers = curl_slist_append(headers, auth_header);
     }
     if (upload->cookie) {
-        asprintf(&cookie_header, "Cookie: %s", upload->cookie);
+        if (asprintf(&cookie_header, "Cookie: %s", upload->cookie) == -1) {
+            cookie_header = strdup(FALLBACK_MSG);
+        }
         headers = curl_slist_append(headers, cookie_header);
     }
     if (upload->expires) {
-        asprintf(&expires_header, "Expires: %s", upload->expires);
+        if (asprintf(&expires_header, "Expires: %s", upload->expires) == -1) {
+            expires_header = strdup(FALLBACK_MSG);
+        }
         headers = curl_slist_append(headers, expires_header);
     }
 
@@ -243,7 +249,6 @@ http_file_put(void* userdata)
     curl_easy_setopt(curl, CURLOPT_READDATA, fh);
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)(upload->filesize));
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-
 
     if ((res = curl_easy_perform(curl)) != CURLE_OK) {
         err = strdup(curl_easy_strerror(res));
