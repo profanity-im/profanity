@@ -44,6 +44,11 @@
 #include "tools/parser.h"
 #include "ui/ui.h"
 
+typedef enum {
+    PREVIOUS,
+    NEXT
+} search_direction;
+
 struct autocomplete_t
 {
     GList* items;
@@ -51,8 +56,7 @@ struct autocomplete_t
     gchar* search_str;
 };
 
-static gchar* _search_next(Autocomplete ac, GList* curr, gboolean quote);
-static gchar* _search_prev(Autocomplete ac, GList* curr, gboolean quote);
+static gchar* _search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction);
 
 Autocomplete
 autocomplete_new(void)
@@ -258,7 +262,7 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
         }
 
         ac->search_str = strdup(search_str);
-        found = _search_next(ac, ac->items, quote);
+        found = _search(ac, ac->items, quote, NEXT);
 
         return found;
 
@@ -266,13 +270,13 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
     } else {
         if (previous) {
             // search from here-1 to beginning
-            found = _search_prev(ac, g_list_previous(ac->last_found), quote);
+            found = _search(ac, g_list_previous(ac->last_found), quote, PREVIOUS);
             if (found) {
                 return found;
             }
         } else {
             // search from here+1 to end
-            found = _search_next(ac, g_list_next(ac->last_found), quote);
+            found = _search(ac, g_list_next(ac->last_found), quote, NEXT);
             if (found) {
                 return found;
             }
@@ -280,13 +284,13 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
 
         if (previous) {
             // search from end
-            found = _search_prev(ac, g_list_last(ac->items), quote);
+            found = _search(ac, g_list_last(ac->items), quote, PREVIOUS);
             if (found) {
                 return found;
             }
         } else {
             // search from beginning
-            found = _search_next(ac, ac->items, quote);
+            found = _search(ac, ac->items, quote, NEXT);
             if (found) {
                 return found;
             }
@@ -409,7 +413,7 @@ autocomplete_remove_older_than_max_reverse(Autocomplete ac, int maxsize)
 }
 
 static gchar*
-_search_next(Autocomplete ac, GList* curr, gboolean quote)
+_search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction)
 {
     gchar* search_str_ascii = g_str_to_ascii(ac->search_str, NULL);
     gchar* search_str_lower = g_ascii_strdown(search_str_ascii, -1);
@@ -448,54 +452,12 @@ _search_next(Autocomplete ac, GList* curr, gboolean quote)
         }
 
         g_free(curr_lower);
-        curr = g_list_next(curr);
-    }
 
-    g_free(search_str_lower);
-    return NULL;
-}
-
-static gchar*
-_search_prev(Autocomplete ac, GList* curr, gboolean quote)
-{
-    gchar* search_str_ascii = g_str_to_ascii(ac->search_str, NULL);
-    gchar* search_str_lower = g_ascii_strdown(search_str_ascii, -1);
-    g_free(search_str_ascii);
-
-    while (curr) {
-        gchar* curr_ascii = g_str_to_ascii(curr->data, NULL);
-        gchar* curr_lower = g_ascii_strdown(curr_ascii, -1);
-        g_free(curr_ascii);
-
-        // match found
-        if (strncmp(curr_lower, search_str_lower, strlen(search_str_lower)) == 0) {
-
-            // set pointer to last found
-            ac->last_found = curr;
-
-            // if contains space, quote before returning
-            if (quote && g_strrstr(curr->data, " ")) {
-                GString* quoted = g_string_new("\"");
-                g_string_append(quoted, curr->data);
-                g_string_append(quoted, "\"");
-
-                gchar* result = quoted->str;
-                g_string_free(quoted, FALSE);
-
-                g_free(search_str_lower);
-                g_free(curr_lower);
-                return result;
-
-                // otherwise just return the string
-            } else {
-                g_free(search_str_lower);
-                g_free(curr_lower);
-                return strdup(curr->data);
-            }
+        if (direction == PREVIOUS) {
+            curr = g_list_previous(curr);
+        } else {
+            curr = g_list_next(curr);
         }
-
-        g_free(curr_lower);
-        curr = g_list_previous(curr);
     }
 
     g_free(search_str_lower);
