@@ -844,8 +844,6 @@ accounts_set_last_status(const char* const account_name, const char* const value
     if (accounts_account_exists(account_name)) {
         if (value) {
             g_key_file_set_string(accounts, account_name, "presence.laststatus", value);
-        } else {
-            g_key_file_remove_key(accounts, account_name, "presence.laststatus", NULL);
         }
         _save_accounts();
     }
@@ -950,6 +948,17 @@ accounts_get_login_presence(const char* const account_name)
         g_free(setting);
     }
     return result;
+}
+
+char*
+accounts_get_login_status(const char* const account_name)
+{
+    gchar* setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
+    gchar* status = NULL;
+    if (g_strcmp0(setting, "last") == 0) {
+        status = accounts_get_last_status(account_name);
+    }
+    return status;
 }
 
 static void

@@ -40,6 +40,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "config/accounts.h"
 #include "profanity.h"
 #include "log.h"
 #include "database.h"
@@ -166,6 +167,7 @@ sv_ev_roster_received(void)
     // send initial presence
     resource_presence_t conn_presence = accounts_get_login_presence(account_name);
     char* last_activity_str = accounts_get_last_activity(account_name);
+    char* status_message = accounts_get_login_status(account_name);
     if (prefs_get_boolean(PREF_LASTACTIVITY) && last_activity_str) {
 
         GTimeVal lasttv;
@@ -177,17 +179,17 @@ sv_ev_roster_received(void)
             GTimeSpan diff_micros = g_date_time_difference(nowdt, lastdt);
             int diff_secs = (diff_micros / 1000) / 1000;
 
-            connection_set_presence_msg(NULL);
+            connection_set_presence_msg(status_message);
             cl_ev_presence_send(conn_presence, diff_secs);
 
             g_date_time_unref(lastdt);
         } else {
-            connection_set_presence_msg(NULL);
+            connection_set_presence_msg(status_message);
             cl_ev_presence_send(conn_presence, 0);
         }
         g_date_time_unref(nowdt);
     } else {
-        connection_set_presence_msg(NULL);
+        connection_set_presence_msg(status_message);
         cl_ev_presence_send(conn_presence, 0);
     }
 
