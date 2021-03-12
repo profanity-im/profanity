@@ -1117,20 +1117,11 @@ cmd_export(ProfWin* window, const char* const command, gchar** args)
         cons_show("");
         return TRUE;
     } else {
-        GString* fname = g_string_new("");
-        GSList* list = NULL;
         int fd;
+        GSList* list = NULL;
+        char* path = get_expanded_path(args[0]);
 
-        /* deal with the ~ convention for $HOME */
-        if (args[0][0] == '~') {
-            fname = g_string_append(fname, getenv("HOME"));
-            fname = g_string_append(fname, args[0] + 1);
-        } else {
-            fname = g_string_append(fname, args[0]);
-        }
-
-        fd = open(fname->str, O_WRONLY | O_CREAT, 00600);
-        g_string_free(fname, TRUE);
+        fd = open(path, O_WRONLY | O_CREAT, 00600);
 
         if (-1 == fd) {
             cons_show("error: cannot open %s: %s", args[0], strerror(errno));
@@ -6863,20 +6854,12 @@ cmd_plugins_sourcepath(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (g_strcmp0(args[1], "set") == 0) {
-        char* path = args[2];
-        if (path == NULL) {
+        if (args[2] == NULL) {
             cons_bad_cmd_usage(command);
             return TRUE;
         }
 
-        // expand ~ to $HOME
-        if (path[0] == '~' && path[1] == '/') {
-            if (asprintf(&path, "%s/%s", getenv("HOME"), path + 2) == -1) {
-                return TRUE;
-            }
-        } else {
-            path = strdup(path);
-        }
+        char *path = get_expanded_path(args[2]);
 
         if (!is_dir(path)) {
             cons_show("Plugins sourcepath must be a directory.");
@@ -6897,8 +6880,9 @@ cmd_plugins_sourcepath(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
 {
-    char* path = args[1];
-    if (path == NULL) {
+    char *path;
+
+    if (args[1] == NULL) {
         char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
         if (sourcepath) {
             path = strdup(sourcepath);
@@ -6907,12 +6891,8 @@ cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
             cons_show("Either a path must be provided or the sourcepath property must be set, see /help plugins");
             return TRUE;
         }
-    } else if (path[0] == '~' && path[1] == '/') {
-        if (asprintf(&path, "%s/%s", getenv("HOME"), path + 2) == -1) {
-            return TRUE;
-        }
     } else {
-        path = strdup(path);
+        path = get_expanded_path(args[1]);
     }
 
     if (is_regular_file(path)) {
@@ -6972,8 +6952,9 @@ cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
 {
-    char* path = args[1];
-    if (path == NULL) {
+    char* path;
+
+    if (args[1] == NULL) {
         char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
         if (sourcepath) {
             path = strdup(sourcepath);
@@ -6982,12 +6963,8 @@ cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
             cons_show("Either a path must be provided or the sourcepath property must be set, see /help plugins");
             return TRUE;
         }
-    } else if (path[0] == '~' && path[1] == '/') {
-        if (asprintf(&path, "%s/%s", getenv("HOME"), path + 2) == -1) {
-            return TRUE;
-        }
     } else {
-        path = strdup(path);
+        path = get_expanded_path(args[1]);
     }
 
     if (access(path, R_OK) != 0) {
