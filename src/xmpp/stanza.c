@@ -2755,3 +2755,61 @@ stanza_change_password(xmpp_ctx_t* ctx, const char* const user, const char* cons
 
     return iq;
 }
+
+xmpp_stanza_t*
+stanza_request_voice(xmpp_ctx_t* ctx, const char* const room)
+{
+    char* id = connection_create_stanza_id();
+    xmpp_stanza_t* message = xmpp_message_new(ctx, NULL, room, id);
+    free(id);
+
+    xmpp_stanza_t* request_voice_st = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(request_voice_st, STANZA_NAME_X);
+    xmpp_stanza_set_type(request_voice_st, STANZA_TYPE_SUBMIT);
+    xmpp_stanza_set_ns(request_voice_st, STANZA_NS_DATA);
+
+    xmpp_stanza_t* form_type = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(form_type, STANZA_NAME_FIELD);
+    xmpp_stanza_set_attribute(form_type, STANZA_ATTR_VAR, "FORM_TYPE");
+
+    xmpp_stanza_t* value_request = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(value_request, STANZA_NAME_VALUE);
+
+    xmpp_stanza_t* request_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(request_text, STANZA_NS_VOICEREQUEST);
+
+    xmpp_stanza_add_child(value_request, request_text);
+    xmpp_stanza_release(request_text);
+
+    xmpp_stanza_add_child(form_type, value_request);
+    xmpp_stanza_release(value_request);
+
+    xmpp_stanza_add_child(request_voice_st, form_type);
+    xmpp_stanza_release(form_type);
+
+    xmpp_stanza_t* request_role = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(request_role, STANZA_NAME_FIELD);
+    xmpp_stanza_set_attribute(request_role, STANZA_ATTR_VAR, "muc#role");
+    xmpp_stanza_set_attribute(request_role, STANZA_ATTR_TYPE, "list-single");
+    xmpp_stanza_set_attribute(request_role, STANZA_ATTR_LABEL, "Requested role");
+
+    xmpp_stanza_t* value_role = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(value_role, STANZA_NAME_VALUE);
+
+    xmpp_stanza_t* role_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(role_text, "participant");
+
+    xmpp_stanza_add_child(value_role, role_text);
+    xmpp_stanza_release(role_text);
+
+    xmpp_stanza_add_child(request_role, value_role);
+    xmpp_stanza_release(value_role);
+
+    xmpp_stanza_add_child(request_voice_st, request_role);
+    xmpp_stanza_release(request_role);
+
+    xmpp_stanza_add_child(message, request_voice_st);
+    xmpp_stanza_release(request_voice_st);
+
+    return message;
+}

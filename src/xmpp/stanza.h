@@ -158,6 +158,7 @@
 #define STANZA_TYPE_SET          "set"
 #define STANZA_TYPE_ERROR        "error"
 #define STANZA_TYPE_RESULT       "result"
+#define STANZA_TYPE_SUBMIT       "submit"
 
 #define STANZA_ATTR_TO             "to"
 #define STANZA_ATTR_FROM           "from"
@@ -186,6 +187,7 @@
 #define STANZA_ATTR_FILENAME       "filename"
 #define STANZA_ATTR_SIZE           "size"
 #define STANZA_ATTR_CONTENTTYPE    "content-type"
+#define STANZA_ATTR_LABEL          "label"
 
 #define STANZA_TEXT_AWAY   "away"
 #define STANZA_TEXT_DND    "dnd"
@@ -233,6 +235,7 @@
 #define STANZA_NS_EXT_GAJIM_BOOKMARKS     "xmpp:gajim.org/bookmarks"
 #define STANZA_NS_RSM                     "http://jabber.org/protocol/rsm"
 #define STANZA_NS_REGISTER                "jabber:iq:register"
+#define STANZA_NS_VOICEREQUEST            "http://jabber.org/protocol/muc#request"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -338,7 +341,6 @@ xmpp_stanza_t* stanza_create_command_config_submit_iq(xmpp_ctx_t* ctx, const cha
 void stanza_attach_publish_options_va(xmpp_ctx_t* const ctx, xmpp_stanza_t* const iq, int count, ...);
 void stanza_attach_publish_options(xmpp_ctx_t* const ctx, xmpp_stanza_t* const iq, const char* const option, const char* const value);
 
-
 xmpp_stanza_t* stanza_create_omemo_devicelist_request(xmpp_ctx_t* ctx, const char* const id, const char* const jid);
 xmpp_stanza_t* stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t* ctx, const char* const jid);
 xmpp_stanza_t* stanza_create_omemo_devicelist_publish(xmpp_ctx_t* ctx, GList* const ids);
@@ -395,5 +397,8 @@ xmpp_stanza_t* stanza_create_avatar_retrieve_data_request(xmpp_ctx_t* ctx, const
 xmpp_stanza_t* stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const lastid);
 
 xmpp_stanza_t* stanza_change_password(xmpp_ctx_t* ctx, const char* const user, const char* const password);
+
+xmpp_stanza_t*
+stanza_request_voice(xmpp_ctx_t* ctx, const char* const room);
 
 #endif

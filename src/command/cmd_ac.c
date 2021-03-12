@@ -755,6 +755,7 @@ cmd_ac_init(void)
 
     affiliation_cmd_ac = autocomplete_new();
     autocomplete_add(affiliation_cmd_ac, "list");
+    autocomplete_add(affiliation_cmd_ac, "request");
     autocomplete_add(affiliation_cmd_ac, "set");
 
     role_cmd_ac = autocomplete_new();
