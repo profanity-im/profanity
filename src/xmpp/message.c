@@ -1004,6 +1004,15 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
         message->id = strdup(id);
     }
 
+    char* stanzaid = NULL;
+    xmpp_stanza_t* stanzaidst = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_STANZA_ID, STANZA_NS_STABLE_ID);
+    if (stanzaidst) {
+        stanzaid = (char*)xmpp_stanza_get_attribute(stanzaidst, STANZA_ATTR_ID);
+        if (stanzaid) {
+            message->stanzaid = strdup(stanzaid);
+        }
+    }
+
     if (originid) {
         message->originid = strdup(originid);
     }
