@@ -620,6 +620,16 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     gboolean trusted = is_trusted_identity(&address, (uint8_t*)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
 
     if (!trusted) {
+        if (g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "manual") == 0) {
+            goto out;
+        } else if (g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "tofu") == 0) {
+            cons_show("Not implemented yet");
+        } else if (g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "blind") == 0) {
+            char* fp = _omemo_fingerprint(identity_key, TRUE);
+            cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
+            omemo_trust(jid, fp);
+        }
+
         goto out;
     }
 

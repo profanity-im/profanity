@@ -2283,6 +2283,7 @@ static struct cmd_t command_defs[] = {
             { "log", cmd_omemo_log },
             { "start", cmd_omemo_start },
             { "end", cmd_omemo_end },
+            { "trustmode", cmd_omemo_trust_mode },
             { "trust", cmd_omemo_trust },
             { "untrust", cmd_omemo_untrust },
             { "fingerprint", cmd_omemo_fingerprint },
@@ -2301,6 +2302,7 @@ static struct cmd_t command_defs[] = {
             "/omemo end",
             "/omemo fingerprint [<contact>]",
             "/omemo char <char>",
+            "/omemo trustmode manual|tofu|blind",
             "/omemo policy manual|automatic|always",
             "/omemo clear_device_list")
         CMD_DESC(
@@ -2313,6 +2315,9 @@ static struct cmd_t command_defs[] = {
             { "log redact",              "Log OMEMO encrypted messages, but replace the contents with [redacted]. This is the default." },
             { "fingerprint [<contact>]", "Show contact fingerprints, or current recipient if omitted." },
             { "char <char>",             "Set the character to be displayed next to OMEMO encrypted messages." },
+            { "trustmode manual",        "Set the global OMEMO trust mode to manual, OMEMO keys has to be trusted manually." },
+            { "trustmode tofu",          "Set the global OMEMO trust mode to ToFu, first OMEMO keys trusted automatic." },
+            { "trustmode blind",         "Set the global OMEMO trust mode to Blind, ALL OMEMO keys trusted automatic." },
             { "policy manual",           "Set the global OMEMO policy to manual, OMEMO sessions must be started manually." },
             { "policy automatic",        "Set the global OMEMO policy to opportunistic, an OMEMO session will be attempted upon starting a conversation." },
             { "policy always",           "Set the global OMEMO policy to always, an error will be displayed if an OMEMO session cannot be initiated upon starting a conversation." },
