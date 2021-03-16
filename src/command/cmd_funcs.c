@@ -4161,6 +4161,11 @@ cmd_affiliation(ProfWin* window, const char* const command, gchar** args)
         }
     }
 
+    if (g_strcmp0(cmd, "request") == 0) {
+        message_request_voice(mucwin->roomjid);
+        return TRUE;
+    }
+
     cons_bad_cmd_usage(command);
     return TRUE;
 }

@@ -214,6 +214,7 @@ void message_send_composing(const char* const jid);
 void message_send_paused(const char* const jid);
 void message_send_gone(const char* const jid);
 void message_send_invite(const char* const room, const char* const contact, const char* const reason);
+void message_request_voice(const char* const roomjid);
 
 bool message_is_sent_by_us(const ProfMessage* const message, bool checkOID);
 

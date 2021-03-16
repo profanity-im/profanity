@@ -692,13 +692,15 @@ static struct cmd_t command_defs[] = {
               CMD_TAG_GROUPCHAT)
       CMD_SYN(
               "/affiliation set <affiliation> <jid> [<reason>]",
-              "/affiliation list [<affiliation>]")
+              "/affiliation list [<affiliation>]",
+              "/affiliation request")
       CMD_DESC(
               "Manage room affiliations. "
               "Affiliation may be one of owner, admin, member, outcast or none.")
       CMD_ARGS(
               { "set <affiliation> <jid> [<reason>]", "Set the affiliation of user with jid, with an optional reason." },
-              { "list [<affiliation>]", "List all users with the specified affiliation, or all if none specified." })
+              { "list [<affiliation>]", "List all users with the specified affiliation, or all if none specified." },
+              { "request", "Request voice."})
       CMD_NOEXAMPLES
     },
 

@@ -213,6 +213,11 @@ message_send_invite(const char* const room, const char* const contact,
 {
 }
 
+void
+message_request_voice(const char* const roomjid)
+{
+}
+
 bool
 message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
 {

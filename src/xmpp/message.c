@@ -1560,3 +1560,15 @@ _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text
     return signcrypt;
 }
 #endif // HAVE_LIBGPGME
+
+void
+message_request_voice(const char* const roomjid)
+{
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    xmpp_stanza_t* stanza = stanza_request_voice(ctx, roomjid);
+
+    log_debug("Requesting voice in %s", roomjid);
+
+    _send_message_stanza(stanza);
+    xmpp_stanza_release(stanza);
+}

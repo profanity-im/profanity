@@ -206,7 +206,8 @@ static Autocomplete rooms_list_ac;
 static Autocomplete rooms_cache_ac;
 static Autocomplete affiliation_ac;
 static Autocomplete role_ac;
-static Autocomplete privilege_cmd_ac;
+static Autocomplete affiliation_cmd_ac;
+static Autocomplete role_cmd_ac;
 static Autocomplete subject_ac;
 static Autocomplete form_ac;
 static Autocomplete form_field_multi_ac;
@@ -752,9 +753,14 @@ cmd_ac_init(void)
     autocomplete_add(role_ac, "visitor");
     autocomplete_add(role_ac, "none");
 
-    privilege_cmd_ac = autocomplete_new();
-    autocomplete_add(privilege_cmd_ac, "list");
-    autocomplete_add(privilege_cmd_ac, "set");
+    affiliation_cmd_ac = autocomplete_new();
+    autocomplete_add(affiliation_cmd_ac, "list");
+    autocomplete_add(affiliation_cmd_ac, "request");
+    autocomplete_add(affiliation_cmd_ac, "set");
+
+    role_cmd_ac = autocomplete_new();
+    autocomplete_add(role_cmd_ac, "list");
+    autocomplete_add(role_cmd_ac, "set");
 
     subject_ac = autocomplete_new();
     autocomplete_add(subject_ac, "set");
@@ -1300,7 +1306,8 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(rooms_cache_ac);
     autocomplete_reset(affiliation_ac);
     autocomplete_reset(role_ac);
-    autocomplete_reset(privilege_cmd_ac);
+    autocomplete_reset(affiliation_cmd_ac);
+    autocomplete_reset(role_cmd_ac);
     autocomplete_reset(subject_ac);
     autocomplete_reset(form_ac);
     autocomplete_reset(form_field_multi_ac);
@@ -1457,7 +1464,8 @@ cmd_ac_uninit(void)
     autocomplete_free(rooms_cache_ac);
     autocomplete_free(affiliation_ac);
     autocomplete_free(role_ac);
-    autocomplete_free(privilege_cmd_ac);
+    autocomplete_free(affiliation_cmd_ac);
+    autocomplete_free(role_cmd_ac);
     autocomplete_free(subject_ac);
     autocomplete_free(form_ac);
     autocomplete_free(form_field_multi_ac);
@@ -3106,7 +3114,7 @@ _affiliation_autocomplete(ProfWin* window, const char* const input, gboolean pre
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/affiliation", privilege_cmd_ac, TRUE, previous);
+    result = autocomplete_param_with_ac(input, "/affiliation", affiliation_cmd_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -3156,7 +3164,7 @@ _role_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         return result;
     }
 
-    result = autocomplete_param_with_ac(input, "/role", privilege_cmd_ac, TRUE, previous);
+    result = autocomplete_param_with_ac(input, "/role", role_cmd_ac, TRUE, previous);
     if (result) {
         return result;
     }
