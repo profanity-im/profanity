@@ -91,12 +91,13 @@ static void _shutdown(void);
 static void _connect_default(const char* const account);
 
 pthread_mutex_t lock;
-static gboolean cont = TRUE;
 static gboolean force_quit = FALSE;
 
 void
 prof_run(char* log_level, char* account_name, char* config_file, char* log_file, char* theme_name)
 {
+    gboolean cont = TRUE;
+
     _init(log_level, config_file, log_file, theme_name);
     plugins_on_start();
     _connect_default(account_name);
