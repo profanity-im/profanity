@@ -447,6 +447,7 @@ form_tag_exists(DataForm* form, const char* const tag)
     GList* curr = tags;
     while (curr) {
         if (g_strcmp0(curr->data, tag) == 0) {
+            g_list_free(tags);
             return TRUE;
         }
         curr = g_list_next(curr);

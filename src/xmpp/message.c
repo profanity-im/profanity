@@ -64,6 +64,7 @@
 #include "xmpp/stanza.h"
 #include "xmpp/connection.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/form.h"
 
 #ifdef HAVE_OMEMO
 #include "xmpp/omemo.h"
@@ -91,6 +92,7 @@ static xmpp_stanza_t* _handle_carbons(xmpp_stanza_t* const stanza);
 static void _send_message_stanza(xmpp_stanza_t* const stanza);
 static gboolean _handle_mam(xmpp_stanza_t* const stanza);
 static void _handle_pubsub(xmpp_stanza_t* const stanza, xmpp_stanza_t* const event);
+static gboolean _handle_form(xmpp_stanza_t* const stanza);
 
 #ifdef HAVE_LIBGPGME
 static xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text);
@@ -170,6 +172,11 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
     } else if (type == NULL || g_strcmp0(type, STANZA_TYPE_CHAT) != 0 || g_strcmp0(type, STANZA_TYPE_NORMAL) != 0) {
         // type: chat, normal (==NULL)
 
+        // XEP-0045: Multi-User Chat 8.6 Voice Requests
+        if (_handle_form(stanza)) {
+            return 1;
+        }
+
         // XEP-0313: Message Archive Management
         if (_handle_mam(stanza)) {
             return 1;
@@ -246,6 +253,33 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
     }
 
     return 1;
+}
+
+void
+message_muc_submit_voice_approve(ProfConfWin* confwin)
+{
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    xmpp_stanza_t* message = stanza_create_approve_voice(ctx, NULL, confwin->roomjid, NULL, confwin->form);
+
+    _send_message_stanza(message);
+    xmpp_stanza_release(message);
+}
+
+static gboolean
+_handle_form(xmpp_stanza_t* const stanza)
+{
+    xmpp_stanza_t* result = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_X, STANZA_NS_DATA);
+    if (!result) {
+        return FALSE;
+    }
+
+    const char* const stanza_from = xmpp_stanza_get_from(stanza);
+
+    DataForm* form = form_create(result);
+    ProfConfWin* confwin = (ProfConfWin*)wins_new_config(stanza_from, form, message_muc_submit_voice_approve, NULL, NULL);
+    confwin_handle_configuration(confwin, form);
+
+    return TRUE;
 }
 
 void

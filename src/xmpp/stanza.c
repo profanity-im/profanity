@@ -2813,3 +2813,18 @@ stanza_request_voice(xmpp_ctx_t* ctx, const char* const room)
 
     return message;
 }
+
+xmpp_stanza_t*
+stanza_create_approve_voice(xmpp_ctx_t* ctx, const char* const id, const char* const jid, const char* const node, DataForm* form)
+{
+    char* stid = connection_create_stanza_id();
+    xmpp_stanza_t* message = xmpp_message_new(ctx, NULL, jid, stid);
+    free(stid);
+
+    xmpp_stanza_t* x = form_create_submission(form);
+
+    xmpp_stanza_add_child(message, x);
+    xmpp_stanza_release(x);
+
+    return message;
+}

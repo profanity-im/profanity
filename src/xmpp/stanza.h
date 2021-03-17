@@ -398,7 +398,8 @@ xmpp_stanza_t* stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, cons
 
 xmpp_stanza_t* stanza_change_password(xmpp_ctx_t* ctx, const char* const user, const char* const password);
 
-xmpp_stanza_t*
-stanza_request_voice(xmpp_ctx_t* ctx, const char* const room);
+xmpp_stanza_t* stanza_request_voice(xmpp_ctx_t* ctx, const char* const room);
+
+xmpp_stanza_t* stanza_create_approve_voice(xmpp_ctx_t* ctx, const char* const id, const char* const jid, const char* const node, DataForm* form);
 
 #endif
