@@ -159,6 +159,8 @@
 #define STANZA_TYPE_ERROR        "error"
 #define STANZA_TYPE_RESULT       "result"
 #define STANZA_TYPE_SUBMIT       "submit"
+#define STANZA_TYPE_CANCEL       "cancel"
+#define STANZA_TYPE_MODIFY       "modify"
 
 #define STANZA_ATTR_TO             "to"
 #define STANZA_ATTR_FROM           "from"
@@ -393,13 +395,10 @@ XMPPCaps* stanza_parse_caps(xmpp_stanza_t* const stanza);
 void stanza_free_caps(XMPPCaps* caps);
 
 xmpp_stanza_t* stanza_create_avatar_retrieve_data_request(xmpp_ctx_t* ctx, const char* stanza_id, const char* const item_id, const char* const jid);
-
 xmpp_stanza_t* stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const lastid);
-
 xmpp_stanza_t* stanza_change_password(xmpp_ctx_t* ctx, const char* const user, const char* const password);
-
 xmpp_stanza_t* stanza_request_voice(xmpp_ctx_t* ctx, const char* const room);
-
 xmpp_stanza_t* stanza_create_approve_voice(xmpp_ctx_t* ctx, const char* const id, const char* const jid, const char* const node, DataForm* form);
+xmpp_stanza_t* stanza_create_muc_register_nick(xmpp_ctx_t* ctx, const char* const id, const char* const jid, const char* const node, DataForm* form);
 
 #endif

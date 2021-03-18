@@ -409,15 +409,22 @@ iq_register_change_password(const char* const user, const char* const password)
 {
 }
 
+void
+iq_muc_register_nick(const char* const roomjid)
+{
+}
+
 // caps functions
 void
 caps_add_feature(char* feature)
 {
 }
+
 void
 caps_remove_feature(char* feature)
 {
 }
+
 EntityCapabilities*
 caps_lookup(const char* const jid)
 {
@@ -428,14 +435,17 @@ void
 caps_close(void)
 {
 }
+
 void
 caps_destroy(EntityCapabilities* caps)
 {
 }
+
 void
 caps_reset_ver(void)
 {
 }
+
 gboolean
 caps_jid_has_feature(const char* const jid, const char* const feature)
 {

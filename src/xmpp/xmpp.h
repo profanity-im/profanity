@@ -259,6 +259,7 @@ void iq_command_list(const char* const target);
 void iq_command_exec(const char* const target, const char* const command);
 void iq_mam_request(ProfChatWin* win);
 void iq_register_change_password(const char* const user, const char* const password);
+void iq_muc_register_nick(const char* const roomjid);
 
 EntityCapabilities* caps_lookup(const char* const jid);
 void caps_close(void);
