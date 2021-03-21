@@ -647,13 +647,14 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     curve_decode_point(&identity_key, identity_key_raw, identity_key_len, omemo_ctx.signal);
     _cache_device_identity(jid, device_id, identity_key);
 
-    if (g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "blind") == 0) {
+    gboolean trusted = is_trusted_identity(&address, (uint8_t*)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
+
+    if ( ( g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "blind") == 0 ) && !trusted ) {
         char* fp = _omemo_fingerprint(identity_key, TRUE);
         cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
         omemo_trust(jid, fp);
+        trusted = TRUE;
     }
-
-    gboolean trusted = is_trusted_identity(&address, (uint8_t*)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
 
     if (!trusted) {
         goto out;
