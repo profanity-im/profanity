@@ -575,7 +575,9 @@ static struct cmd_t command_defs[] = {
               "If no room is supplied, a generated name will be used with the format private-chat-[UUID]. "
               "If the domain part is not included in the room name, the account preference 'muc.service' will be used. "
               "If no nickname is specified the account preference 'muc.nick' will be used which by default is the localpart of your JID. "
-              "If the room doesn't exist, and the server allows it, a new one will be created.")
+              "If the room doesn't exist, and the server allows it, a new one will be created. "
+              "If you join to a room often, you might also want to add a bookmark (see `/help bookmark`), which also allows to set a default nickname. "
+              "In this case, you should use `/bookmark join`.")
       CMD_ARGS(
               { "<room>", "The chat room to join." },
               { "nick <nick>", "Nickname to use in the room." },
@@ -822,7 +824,7 @@ static struct cmd_t command_defs[] = {
               "/bookmark",
               "/bookmark list",
               "/bookmark add [<room>] [nick <nick>] [password <password>] [name <roomname>] [autojoin on|off]",
-              "/bookmark update <room> [nick <nick>] [password <password>] [name <roomname>] autojoin on|off]",
+              "/bookmark update <room> [nick <nick>] [password <password>] [name <roomname>] [autojoin on|off]",
               "/bookmark remove [<room>]",
               "/bookmark join <room>",
               "/bookmark invites on|off",
@@ -831,14 +833,14 @@ static struct cmd_t command_defs[] = {
               "/bookmark ignore remove <jid>")
       CMD_DESC(
               "Manage bookmarks and join bookmarked rooms. "
-              "In a chat room, no arguments will bookmark the current room, setting autojoin to \"on\"."
-              "There is also an autojoin ignore list in case you want to autojoind in many clients but not on Profanity.")
+              "If you are in a chat room and no arguments are supplied to `/bookmark add`, autojoin is set to \"on\". "
+              "There is also an autojoin ignore list in case you want to autojoin in many clients but not on Profanity. ")
       CMD_ARGS(
               { "list", "List all bookmarks." },
               { "add [<room>]", "Add a bookmark, passing no room will bookmark the current room, setting autojoin to \"on\"." },
               { "remove [<room>]", "Remove a bookmark, passing no room will remove the bookmark for the current room, if one exists." },
               { "update <room>", "Update the properties associated with a bookmark." },
-              { "nick <nick>", "Nickname used in the chat room." },
+              { "nick <nick>", "Nickname used when joining the chat room." },
               { "password <password>", "Password if required, may be stored in plaintext on your server." },
               { "name <roomname>", "Optional name for the bookmark. By default localpart of the JID will be used." },
               { "autojoin on|off", "Whether to join the room automatically on login." },
@@ -846,7 +848,12 @@ static struct cmd_t command_defs[] = {
               { "invites on|off", "Whether or not to bookmark accepted room invites, defaults to 'on'." },
               { "ignore add <barejid>", "Add a bookmark to the autojoin ignore list." },
               { "ignore remove <barejid>", "Remove a bookmark from the autojoin ignore list." })
-      CMD_NOEXAMPLES
+      CMD_EXAMPLES(
+              "/bookmark add room@example.com nick YOURNICK",
+              "/bookmark join room@example.com",
+              "/bookmark update room@example.com nick NEWNICK autojoin on",
+              "/bookmark ignore room@example.com",
+              "/bookmark remove room@example.com")
     },
 
     { "/disco",
