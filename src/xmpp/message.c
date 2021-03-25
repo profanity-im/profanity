@@ -1425,22 +1425,38 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
     message->enc = PROF_MSG_ENC_OX;
 
 #ifdef HAVE_LIBGPGME
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+
     xmpp_stanza_t* ox = xmpp_stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
-    message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
+    if (!ox) {
+        return;
+    }
 
-    xmpp_stanza_t *x =  xmpp_stanza_new_from_string(connection_get_ctx(), message->plain);
+    char* ox_text = xmpp_stanza_get_text(ox);
+    if (!ox_text) {
+        return;
+    }
+
+    message->plain = p_ox_gpg_decrypt(ox_text);
+    xmpp_free(ctx, ox_text);
+
+    xmpp_stanza_t *x =  xmpp_stanza_new_from_string(ctx, message->plain);
     xmpp_stanza_t *p =  xmpp_stanza_get_child_by_name(x, "payload");
-    xmpp_stanza_t *b =  xmpp_stanza_get_child_by_name(p, "body");
-    message->plain = xmpp_stanza_get_text(b);
-    if(message->plain == NULL ) {
-        message->plain = xmpp_stanza_get_text(stanza);
-    }
-	message->encrypted = xmpp_stanza_get_text(ox);
+    if (p) {
+        xmpp_stanza_t *b =  xmpp_stanza_get_child_by_name(p, "body");
+        if (b) {
+            message->plain = xmpp_stanza_get_text(b);
+            if(message->plain == NULL ) {
+                message->plain = xmpp_stanza_get_text(stanza);
+            }
+            message->encrypted = xmpp_stanza_get_text(ox);
 
-    if (message->plain == NULL) {
-        message->plain = xmpp_stanza_get_text(stanza);
+            if (message->plain == NULL) {
+                message->plain = xmpp_stanza_get_text(stanza);
+            }
+            message->encrypted = xmpp_stanza_get_text(ox);
+        }
     }
-    message->encrypted = xmpp_stanza_get_text(ox);
 #endif // HAVE_LIBGPGME
 }
 
