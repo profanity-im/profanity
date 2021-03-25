@@ -265,7 +265,7 @@ _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* 
     log_debug("[OX] Processing result %s's metadata.", (char*)userdata);
 
     if (g_strcmp0(xmpp_stanza_get_type(stanza), "result") != 0) {
-        cons_show("[OX] Error:");
+        log_debug("[OX] Error: No result");
         return FALSE;
     }
     // pubsub
