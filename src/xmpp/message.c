@@ -276,6 +276,9 @@ _handle_form(xmpp_stanza_t* const stanza)
     }
 
     const char* const stanza_from = xmpp_stanza_get_from(stanza);
+    if (!stanza_from) {
+        return FALSE;
+    }
 
     DataForm* form = form_create(result);
     ProfConfWin* confwin = (ProfConfWin*)wins_new_config(stanza_from, form, message_muc_submit_voice_approve, NULL, NULL);
