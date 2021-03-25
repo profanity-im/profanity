@@ -864,8 +864,10 @@ _handle_error(xmpp_stanza_t* const stanza)
     } else {
         if (type && (strcmp(type, "cancel") == 0)) {
             Jid* jidp = jid_create(jid);
-            chat_session_remove(jidp->barejid);
-            jid_destroy(jidp);
+            if (jidp) {
+                chat_session_remove(jidp->barejid);
+                jid_destroy(jidp);
+            }
         }
         ui_handle_recipient_error(jid, err_msg);
     }
