@@ -113,6 +113,9 @@ static int
 _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
     const char* from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    if (!from) {
+        return 1;
+    }
 
     if (!g_hash_table_contains(looking_for, from)) {
         return 1;
@@ -141,22 +144,28 @@ _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
     xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, "item");
     if (item) {
         xmpp_stanza_t* metadata = xmpp_stanza_get_child_by_name(item, "metadata");
-        if (!metadata)
-            return 1;
+        if (metadata) {
 
-        xmpp_stanza_t* info = xmpp_stanza_get_child_by_name(metadata, "info");
+            xmpp_stanza_t* info = xmpp_stanza_get_child_by_name(metadata, "info");
+            if (info) {
 
-        const char* id = xmpp_stanza_get_id(info);
-        const char* type = xmpp_stanza_get_attribute(info, "type");
+                const char* id = xmpp_stanza_get_id(info);
+                const char* type = xmpp_stanza_get_attribute(info, "type");
 
-        log_debug("Avatar ID for %s is: %s", from, id);
+                if(id && type) {
+                    log_debug("Avatar ID for %s is: %s", from, id);
 
-        avatar_metadata* data = malloc(sizeof(avatar_metadata));
-        data->type = strdup(type);
-        data->id = strdup(id);
+                    avatar_metadata* data = malloc(sizeof(avatar_metadata));
+                    if(data) {
+                        data->type = strdup(type);
+                        data->id = strdup(id);
 
-        // request the actual (image) data
-        _avatar_request_item_by_id(from, data);
+                        // request the actual (image) data
+                        _avatar_request_item_by_id(from, data);
+                    }
+                }
+            }
+        }
     }
 
     return 1;
