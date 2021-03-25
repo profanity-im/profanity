@@ -297,7 +297,9 @@ _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* 
 
     while (pubkeymetadata) {
         const char* fingerprint = xmpp_stanza_get_attribute(pubkeymetadata, STANZA_ATTR_V4_FINGERPRINT);
-        cons_show(fingerprint);
+        if (fingerprint) {
+            cons_show(fingerprint);
+        }
         pubkeymetadata = xmpp_stanza_get_next(pubkeymetadata);
     }
 
