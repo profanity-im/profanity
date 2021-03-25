@@ -87,7 +87,7 @@ ox_announce_public_key(const char* const filename)
     assert(filename);
 
     cons_show("Annonuce OpenPGP Key for OX %s ...", filename);
-    log_info("Annonuce OpenPGP Key of OX: %s", filename);
+    log_info("[OX] Annonuce OpenPGP Key of OX: %s", filename);
 
     // key the key and the fingerprint via GnuPG from file
     char* key = NULL;
@@ -98,7 +98,7 @@ ox_announce_public_key(const char* const filename)
         cons_show("Error during OpenPGP OX announce. See log file for more information");
         return FALSE;
     } else {
-        log_info("Annonuce OpenPGP Key for Fingerprint: %s", fp);
+        log_info("[OX] Annonuce OpenPGP Key for Fingerprint: %s", fp);
         xmpp_ctx_t* const ctx = connection_get_ctx();
         char* id = xmpp_uuid_gen(ctx);
         xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
@@ -262,34 +262,34 @@ _ox_metadata_node__public_key(const char* const fingerprint)
 static int
 _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
 {
-    log_debug("OX: Processing result %s's metadata.", (char*)userdata);
+    log_debug("[OX] Processing result %s's metadata.", (char*)userdata);
 
     if (g_strcmp0(xmpp_stanza_get_type(stanza), "result") != 0) {
-        cons_show("OX: Error:");
+        cons_show("[OX] Error:");
         return FALSE;
     }
     // pubsub
     xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_PUBSUB, XMPP_FEATURE_PUBSUB);
     if (!pubsub) {
-        cons_show("OX: Error: No pubsub");
+        cons_show("[OX] Error: No pubsub");
         return FALSE;
     }
 
     xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(pubsub, STANZA_NAME_ITEMS);
     if (!items) {
-        cons_show("OX: Error: No items");
+        cons_show("[OX] Error: No items");
         return FALSE;
     }
 
     xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, STANZA_NAME_ITEM);
     if (!item) {
-        cons_show("OX: Error: No item");
+        cons_show("[OX] Error: No item");
         return FALSE;
     }
 
     xmpp_stanza_t* publickeyslist = xmpp_stanza_get_child_by_name_and_ns(item, STANZA_NAME_PUBLIC_KEYS_LIST, STANZA_NS_OPENPGP_0);
     if (!publickeyslist) {
-        cons_show("OX: Error: No publickeyslist");
+        cons_show("[OX] Error: No publickeyslist");
         return FALSE;
     }
 
@@ -328,7 +328,7 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
     assert(fingerprint);
     assert(strlen(fingerprint) == 40);
     cons_show("Requesting Public Key %s for %s", fingerprint, jid);
-    log_info("OX: Request %s's public key %s.", jid, fingerprint);
+    log_info("[OX] Request %s's public key %s.", jid, fingerprint);
     // iq
     xmpp_ctx_t* const ctx = connection_get_ctx();
     char* id = xmpp_uuid_gen(ctx);
@@ -384,39 +384,39 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
 int
 _ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
 {
-    log_debug("OX: Processing result public key");
+    log_debug("[OX] Processing result public key");
 
     if (g_strcmp0(xmpp_stanza_get_type(stanza), "result") != 0) {
         cons_show("Public Key import failed. Check log for details.");
-        log_error("OX: Public Key response type is wrong");
+        log_error("[OX] Public Key response type is wrong");
         return FALSE;
     }
     // pubsub
     xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_PUBSUB, XMPP_FEATURE_PUBSUB);
     if (!pubsub) {
         cons_show("Public Key import failed. Check log for details.");
-        log_error("OX: Public key request response failed: No <pubsub/>");
+        log_error("[OX] Public key request response failed: No <pubsub/>");
         return FALSE;
     }
 
     xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(pubsub, STANZA_NAME_ITEMS);
     if (!items) {
         cons_show("Public Key import failed. Check log for details.");
-        log_error("OX: Public key request response failed: No <items/>");
+        log_error("[OX] Public key request response failed: No <items/>");
         return FALSE;
     }
 
     xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, STANZA_NAME_ITEM);
     if (!item) {
         cons_show("Public Key import failed. Check log for details.");
-        log_error("OX: Public key request response failed: No <item/>");
+        log_error("[OX] Public key request response failed: No <item/>");
         return FALSE;
     }
 
     xmpp_stanza_t* pubkey = xmpp_stanza_get_child_by_name_and_ns(item, STANZA_NAME_PUPKEY, STANZA_NS_OPENPGP_0);
     if (!pubkey) {
         cons_show("Public Key import failed. Check log for details.");
-        log_error("OX: Public key request response failed: No <pubkey/>");
+        log_error("[OX] Public key request response failed: No <pubkey/>");
         return FALSE;
     }
     xmpp_stanza_t* data = xmpp_stanza_get_child_by_name(pubkey, STANZA_NAME_DATA);
