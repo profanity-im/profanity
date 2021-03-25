@@ -1184,7 +1184,7 @@ _receipt_request_handler(xmpp_stanza_t* const stanza)
     }
 
     const char* receipts_name = xmpp_stanza_get_name(receipts);
-    if (g_strcmp0(receipts_name, "request") != 0) {
+    if ((receipts_name == NULL) || (g_strcmp0(receipts_name, "request") != 0)) {
         return;
     }
 
