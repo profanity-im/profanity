@@ -181,8 +181,7 @@ _log_database_add_outgoing(char* type, const char* const id, const char* const b
     msg->timestamp = g_date_time_new_now_local(); //TODO: get from outside. best to have whole ProfMessage from outside
     msg->enc = enc;
 
-    const char* jid = connection_get_fulljid();
-    Jid* myjid = jid_create(jid);
+    Jid* myjid = jid_create(connection_get_fulljid());
 
     _add_to_db(msg, type, myjid, msg->from_jid); // TODO: myjid now in profmessage
 
