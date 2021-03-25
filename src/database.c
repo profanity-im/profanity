@@ -161,8 +161,7 @@ log_database_add_incoming(ProfMessage* message)
     if (message->to_jid) {
         _add_to_db(message, NULL, message->from_jid, message->to_jid);
     } else {
-        const char* jid = connection_get_fulljid();
-        Jid* myjid = jid_create(jid);
+        Jid* myjid = jid_create(connection_get_fulljid());
 
         _add_to_db(message, NULL, message->from_jid, myjid);
 
