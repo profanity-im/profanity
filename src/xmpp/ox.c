@@ -421,13 +421,23 @@ _ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void
         log_error("[OX] Public key request response failed: No <pubkey/>");
         return FALSE;
     }
+
     xmpp_stanza_t* data = xmpp_stanza_get_child_by_name(pubkey, STANZA_NAME_DATA);
+    if (!data) {
+        log_error("[OX] No data");
+    }
+
     char* base64_data = xmpp_stanza_get_text(data);
-    log_debug("Key data: %s", base64_data);
-    if (p_ox_gpg_import(base64_data)) {
-        cons_show("Public Key imported");
-    } else {
-        cons_show("Public Key import failed. Check log for details.");
+    if (base64_data) {
+        log_debug("Key data: %s", base64_data);
+
+        if (p_ox_gpg_import(base64_data)) {
+            cons_show("Public Key imported");
+        } else {
+            cons_show("Public Key import failed. Check log for details.");
+        }
+
+        free(base64_data);
     }
 
     return FALSE;
