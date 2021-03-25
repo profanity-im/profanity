@@ -937,6 +937,11 @@ _handle_conference(xmpp_stanza_t* const stanza)
     xmpp_stanza_t* xns_conference = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
 
     if (xns_conference) {
+        // XEP-0249
+        const char* room = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_JID);
+        if (!room) {
+            return;
+        }
 
         const char* from = xmpp_stanza_get_from(stanza);
         if (!from) {
@@ -946,13 +951,6 @@ _handle_conference(xmpp_stanza_t* const stanza)
 
         Jid* jidp = jid_create(from);
         if (!jidp) {
-            return;
-        }
-
-        // XEP-0249
-        const char* room = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_JID);
-        if (!room) {
-            jid_destroy(jidp);
             return;
         }
 
