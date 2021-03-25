@@ -1176,9 +1176,13 @@ _receipt_request_handler(xmpp_stanza_t* const stanza)
     }
 
     const gchar* from = xmpp_stanza_get_from(stanza);
-    Jid* jid = jid_create(from);
-    _message_send_receipt(jid->fulljid, id);
-    jid_destroy(jid);
+    if (from) {
+        Jid* jid = jid_create(from);
+        if (jid) {
+            _message_send_receipt(jid->fulljid, id);
+            jid_destroy(jid);
+        }
+    }
 }
 
 static void
