@@ -1193,7 +1193,14 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
     message->type = PROF_MSG_TYPE_MUCPM;
 
     const gchar* from = xmpp_stanza_get_from(stanza);
+    if (!from) {
+        goto out;
+    }
+
     message->from_jid = jid_create(from);
+    if (!message->from_jid) {
+        goto out;
+    }
 
     // message stanza id
     const char* id = xmpp_stanza_get_id(stanza);
