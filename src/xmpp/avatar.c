@@ -224,6 +224,10 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
     }
 
     char* buf = xmpp_stanza_get_text(st_data);
+    if (!buf) {
+        return 1;
+    }
+
     gsize size;
     gchar* de = (gchar*)g_base64_decode(buf, &size);
     free(buf);
