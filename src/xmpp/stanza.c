@@ -1507,11 +1507,8 @@ stanza_get_muc_destroy_alternative_room(xmpp_stanza_t* stanza)
     }
 
     const char* jid = xmpp_stanza_get_attribute(destroy, STANZA_ATTR_JID);
-    if (jid) {
-        return jid;
-    }
 
-    return NULL;
+    return jid;
 }
 
 char*
