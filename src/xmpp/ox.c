@@ -118,7 +118,9 @@ ox_announce_public_key(const char* const filename)
 
         xmpp_stanza_t* item = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
-        xmpp_stanza_set_attribute(item, STANZA_ATTR_ID, _gettimestamp());
+        char *timestamp = _gettimestamp();
+        xmpp_stanza_set_attribute(item, STANZA_ATTR_ID, timestamp);
+        free(timestamp);
 
         xmpp_stanza_t* pubkey = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(pubkey, STANZA_NAME_PUPKEY);
