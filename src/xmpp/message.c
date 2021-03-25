@@ -1290,6 +1290,9 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
         return;
     }
     Jid* jid = jid_create(from);
+    if (!jid) {
+        return;
+    }
 
     // private message from chat room use full jid (room/nick)
     if (muc_active(jid->barejid)) {
