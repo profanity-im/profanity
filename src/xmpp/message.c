@@ -990,7 +990,13 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
     xmpp_ctx_t* ctx = connection_get_ctx();
 
     const char* room_jid = xmpp_stanza_get_from(stanza);
+    if(!room_jid) {
+        return;
+    }
     Jid* from_jid = jid_create(room_jid);
+    if(!from_jid) {
+        return;
+    }
 
     // handle room subject
     xmpp_stanza_t* subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
