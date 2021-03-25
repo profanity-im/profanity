@@ -877,6 +877,10 @@ _handle_muc_user(xmpp_stanza_t* const stanza)
     xmpp_stanza_t* xns_muc_user = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     const char* room = xmpp_stanza_get_from(stanza);
 
+    if (!xns_muc_user) {
+        return;
+    }
+
     if (!room) {
         log_warning("Message received with no from attribute, ignoring");
         return;
