@@ -2659,3 +2659,128 @@ _register_change_password_result_id_handler(xmpp_stanza_t* const stanza, void* c
     }
     return 0;
 }
+
+static int
+_muc_register_nick_response_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    const char* type = xmpp_stanza_get_type(stanza);
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        xmpp_stanza_t* error = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
+        const char* errtype = xmpp_stanza_get_type(error);
+        if (errtype) {
+            if (g_strcmp0(errtype, STANZA_TYPE_CANCEL) == 0) {
+                // find reason
+                xmpp_stanza_t* reason = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_CONFLICT, STANZA_NS_STANZAS);
+                if (reason) {
+                    cons_show_error("Error while registering nickname: nick already registered with MUC");
+                    log_debug("Error while registering nickname: nick already registered with MUC");
+                } else {
+                    xmpp_stanza_t* reason = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_SERVICE_UNAVAILABLE, STANZA_NS_STANZAS);
+                    if (reason) {
+                        cons_show_error("Error while registering nickname: registration not supported by MUC");
+                        log_debug("Error while registering nickname: registration not supported by MUC");
+                    }
+                }
+            } else if (g_strcmp0(errtype, STANZA_TYPE_MODIFY) == 0) {
+                xmpp_stanza_t* reason = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_BAD_REQUEST, STANZA_NS_STANZAS);
+                if (reason) {
+                    cons_show_error("Error while registering nickname: invalid form");
+                    log_debug("Error while registering nickname: invalid form");
+                }
+            }
+        }
+    } else if (g_strcmp0(type, STANZA_TYPE_RESULT) == 0) {
+        cons_show("Registration request succesfully received");
+        log_debug("Registration request succesfully received");
+    }
+
+    return 0;
+}
+
+void
+iq_submit_muc_register_nick_form(ProfConfWin* confwin)
+{
+    char* id = connection_create_stanza_id();
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+
+    xmpp_stanza_t* iq = stanza_create_muc_register_nick(ctx, id, confwin->roomjid, NULL, confwin->form);
+
+    iq_id_handler_add(id, _muc_register_nick_response_handler, NULL, NULL);
+    free(id);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+}
+
+static int
+_muc_register_nick_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    const char* type = xmpp_stanza_get_type(stanza);
+
+    // error case
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        xmpp_stanza_t* error = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
+        const char* errtype = xmpp_stanza_get_type(error);
+        if (errtype) {
+            if (g_strcmp0(errtype, STANZA_TYPE_CANCEL) == 0) {
+                // find reason
+                xmpp_stanza_t* reason = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_ITEM_NOT_FOUND, STANZA_NS_STANZAS);
+                if (reason) {
+                    cons_show_error("Error while registering nickname: room does not exist");
+                    log_debug("Error while registering nickname: room does not exist");
+                } else {
+                    xmpp_stanza_t* reason = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_NOT_ALLOWED, STANZA_NS_STANZAS);
+                    if (reason) {
+                        cons_show_error("Error while registering nickname: not allowed to register");
+                        log_debug("Error while registering nickname: not allowed to register");
+                    }
+                }
+            }
+        }
+    } else if (g_strcmp0(type, STANZA_TYPE_RESULT) == 0) {
+        xmpp_stanza_t* query = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_QUERY, STANZA_NS_REGISTER);
+        if (query) {
+            // user might already be registered
+            xmpp_stanza_t* username = xmpp_stanza_get_child_by_name(query, STANZA_NAME_USERNAME);
+            if (username) {
+                const char* value = xmpp_stanza_get_text(username);
+                cons_show("User already registered: %s", value);
+            } else {
+                xmpp_stanza_t* x_st = xmpp_stanza_get_child_by_name_and_ns(query, STANZA_NAME_X, STANZA_NS_DATA);
+
+                if (x_st) {
+                    const char* from = xmpp_stanza_get_from(stanza);
+
+                    DataForm* form = form_create(x_st);
+                    ProfConfWin* confwin = (ProfConfWin*)wins_new_config(from, form, iq_submit_muc_register_nick_form, NULL, NULL);
+                    confwin_handle_configuration(confwin, form);
+                }
+            }
+        }
+    }
+    return 0;
+}
+
+void
+iq_muc_register_nick(const char* const roomjid)
+{
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+
+    char* id = connection_create_stanza_id();
+
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
+    xmpp_stanza_set_to(iq, roomjid);
+
+    xmpp_stanza_t* query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, STANZA_NS_REGISTER);
+    xmpp_stanza_add_child(iq, query);
+
+    iq_id_handler_add(id, _muc_register_nick_handler, NULL, NULL);
+    free(id);
+
+    iq_send_stanza(iq);
+
+    xmpp_stanza_release(iq);
+    xmpp_stanza_release(query);
+}

@@ -2828,3 +2828,18 @@ stanza_create_approve_voice(xmpp_ctx_t* ctx, const char* const id, const char* c
 
     return message;
 }
+
+xmpp_stanza_t*
+stanza_create_muc_register_nick(xmpp_ctx_t* ctx, const char* const id, const char* const jid, const char* const node, DataForm* form)
+{
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+
+    xmpp_stanza_set_to(iq, jid);
+
+    xmpp_stanza_t* x = form_create_submission(form);
+
+    xmpp_stanza_add_child(iq, x);
+    xmpp_stanza_release(x);
+
+    return iq;
+}
