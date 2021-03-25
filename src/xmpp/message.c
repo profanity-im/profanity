@@ -226,13 +226,15 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
             char* mybarejid = connection_get_barejid();
             const char* const stanza_from = xmpp_stanza_get_from(stanza);
 
-            if (g_strcmp0(mybarejid, stanza_from) != 0) {
-                log_warning("Invalid carbon received, from: %s", stanza_from);
-                msg_stanza = NULL;
-            } else {
-                is_carbon = TRUE;
-                // returns NULL if it was a carbon that was invalid, so that we dont parse later
-                msg_stanza = _handle_carbons(carbons);
+            if (stanza_from) {
+                if (g_strcmp0(mybarejid, stanza_from) != 0) {
+                    log_warning("Invalid carbon received, from: %s", stanza_from);
+                    msg_stanza = NULL;
+                } else {
+                    is_carbon = TRUE;
+                    // returns NULL if it was a carbon that was invalid, so that we dont parse later
+                    msg_stanza = _handle_carbons(carbons);
+                }
             }
 
             free(mybarejid);
