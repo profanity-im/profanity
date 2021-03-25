@@ -161,8 +161,7 @@ log_database_add_incoming(ProfMessage* message)
     if (message->to_jid) {
         _add_to_db(message, NULL, message->from_jid, message->to_jid);
     } else {
-        const char* jid = connection_get_fulljid();
-        Jid* myjid = jid_create(jid);
+        Jid* myjid = jid_create(connection_get_fulljid());
 
         _add_to_db(message, NULL, message->from_jid, myjid);
 
@@ -182,8 +181,7 @@ _log_database_add_outgoing(char* type, const char* const id, const char* const b
     msg->timestamp = g_date_time_new_now_local(); //TODO: get from outside. best to have whole ProfMessage from outside
     msg->enc = enc;
 
-    const char* jid = connection_get_fulljid();
-    Jid* myjid = jid_create(jid);
+    Jid* myjid = jid_create(connection_get_fulljid());
 
     _add_to_db(msg, type, myjid, msg->from_jid); // TODO: myjid now in profmessage
 
@@ -216,6 +214,8 @@ log_database_get_previous_chat(const gchar* const contact_barejid)
     char* query;
     const char* jid = connection_get_fulljid();
     Jid* myjid = jid_create(jid);
+    if (!myjid)
+        return NULL;
 
     if (asprintf(&query, "SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE (`from_jid` = '%s' AND `to_jid` = '%s') OR (`from_jid` = '%s' AND `to_jid` = '%s') ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid) == -1) {
         log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");

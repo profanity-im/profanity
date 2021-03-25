@@ -116,14 +116,12 @@ _handled_by_plugin(xmpp_stanza_t* const stanza)
 static void
 _handle_headline(xmpp_stanza_t* const stanza)
 {
-    xmpp_ctx_t* ctx = connection_get_ctx();
-    char* text = NULL;
     xmpp_stanza_t* body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
     if (body) {
-        text = xmpp_stanza_get_text(body);
+        char *text = xmpp_stanza_get_text(body);
         if (text) {
             cons_show("Headline: %s", text);
-            xmpp_free(ctx, text);
+            xmpp_free(connection_get_ctx(), text);
         }
     }
 }
@@ -226,13 +224,15 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
             char* mybarejid = connection_get_barejid();
             const char* const stanza_from = xmpp_stanza_get_from(stanza);
 
-            if (g_strcmp0(mybarejid, stanza_from) != 0) {
-                log_warning("Invalid carbon received, from: %s", stanza_from);
-                msg_stanza = NULL;
-            } else {
-                is_carbon = TRUE;
-                // returns NULL if it was a carbon that was invalid, so that we dont parse later
-                msg_stanza = _handle_carbons(carbons);
+            if (stanza_from) {
+                if (g_strcmp0(mybarejid, stanza_from) != 0) {
+                    log_warning("Invalid carbon received, from: %s", stanza_from);
+                    msg_stanza = NULL;
+                } else {
+                    is_carbon = TRUE;
+                    // returns NULL if it was a carbon that was invalid, so that we dont parse later
+                    msg_stanza = _handle_carbons(carbons);
+                }
             }
 
             free(mybarejid);
@@ -274,6 +274,9 @@ _handle_form(xmpp_stanza_t* const stanza)
     }
 
     const char* const stanza_from = xmpp_stanza_get_from(stanza);
+    if (!stanza_from) {
+        return FALSE;
+    }
 
     DataForm* form = form_create(result);
     ProfConfWin* confwin = (ProfConfWin*)wins_new_config(stanza_from, form, message_muc_submit_voice_approve, NULL, NULL);
@@ -861,8 +864,10 @@ _handle_error(xmpp_stanza_t* const stanza)
     } else {
         if (type && (strcmp(type, "cancel") == 0)) {
             Jid* jidp = jid_create(jid);
-            chat_session_remove(jidp->barejid);
-            jid_destroy(jidp);
+            if (jidp) {
+                chat_session_remove(jidp->barejid);
+                jid_destroy(jidp);
+            }
         }
         ui_handle_recipient_error(jid, err_msg);
     }
@@ -876,6 +881,10 @@ _handle_muc_user(xmpp_stanza_t* const stanza)
     xmpp_ctx_t* ctx = connection_get_ctx();
     xmpp_stanza_t* xns_muc_user = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
     const char* room = xmpp_stanza_get_from(stanza);
+
+    if (!xns_muc_user) {
+        return;
+    }
 
     if (!room) {
         log_warning("Message received with no from attribute, ignoring");
@@ -927,29 +936,31 @@ _handle_conference(xmpp_stanza_t* const stanza)
 {
     xmpp_stanza_t* xns_conference = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CONFERENCE);
 
-    const char* from = xmpp_stanza_get_from(stanza);
-    if (!from) {
-        log_warning("Message received with no from attribute, ignoring");
-        return;
-    }
+    if (xns_conference) {
+        // XEP-0249
+        const char* room = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_JID);
+        if (!room) {
+            return;
+        }
 
-    Jid* jidp = jid_create(from);
-    if (!jidp) {
-        return;
-    }
+        const char* from = xmpp_stanza_get_from(stanza);
+        if (!from) {
+            log_warning("Message received with no from attribute, ignoring");
+            return;
+        }
 
-    // XEP-0249
-    const char* room = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_JID);
-    if (!room) {
+        Jid* jidp = jid_create(from);
+        if (!jidp) {
+            return;
+        }
+
+        // reason and password are both optional
+        const char* reason = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_REASON);
+        const char* password = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_PASSWORD);
+
+        sv_ev_room_invite(INVITE_DIRECT, jidp->barejid, room, reason, password);
         jid_destroy(jidp);
-        return;
     }
-
-    const char* reason = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_REASON);
-    const char* password = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_PASSWORD);
-
-    sv_ev_room_invite(INVITE_DIRECT, jidp->barejid, room, reason, password);
-    jid_destroy(jidp);
 }
 
 static void
@@ -978,22 +989,20 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
 {
     xmpp_ctx_t* ctx = connection_get_ctx();
 
-    const char* id = xmpp_stanza_get_id(stanza);
-    char* originid = NULL;
-
-    xmpp_stanza_t* origin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_ORIGIN_ID, STANZA_NS_STABLE_ID);
-    if (origin) {
-        originid = (char*)xmpp_stanza_get_attribute(origin, STANZA_ATTR_ID);
-    }
-
     const char* room_jid = xmpp_stanza_get_from(stanza);
+    if(!room_jid) {
+        return;
+    }
     Jid* from_jid = jid_create(room_jid);
+    if(!from_jid) {
+        return;
+    }
 
     // handle room subject
     xmpp_stanza_t* subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
     if (subject) {
-        char* subject_text;
-        subject_text = xmpp_stanza_get_text(subject);
+        // subject_text is optional, can be NULL
+        char* subject_text = xmpp_stanza_get_text(subject);
         sv_ev_room_subject(from_jid->barejid, from_jid->resourcepart, subject_text);
         xmpp_free(ctx, subject_text);
 
@@ -1034,12 +1043,17 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
     message->from_jid = from_jid;
     message->type = PROF_MSG_TYPE_MUC;
 
+    const char* id = xmpp_stanza_get_id(stanza);
     if (id) {
         message->id = strdup(id);
     }
 
-    if (originid) {
-        message->originid = strdup(originid);
+    xmpp_stanza_t* origin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_ORIGIN_ID, STANZA_NS_STABLE_ID);
+    if (origin) {
+        char* originid = (char*)xmpp_stanza_get_attribute(origin, STANZA_ATTR_ID);
+        if (originid) {
+            message->originid = strdup(originid);
+        }
     }
 
     xmpp_stanza_t* replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
@@ -1126,24 +1140,30 @@ static void
 _handle_receipt_received(xmpp_stanza_t* const stanza)
 {
     xmpp_stanza_t* receipt = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_RECEIPTS);
-    const char* name = xmpp_stanza_get_name(receipt);
-    if (g_strcmp0(name, "received") != 0) {
-        return;
-    }
+    if (receipt) {
+        const char* name = xmpp_stanza_get_name(receipt);
+        if ((name == NULL) || (g_strcmp0(name, "received") != 0)) {
+            return;
+        }
 
-    const char* id = xmpp_stanza_get_id(receipt);
-    if (!id) {
-        return;
-    }
+        const char* id = xmpp_stanza_get_id(receipt);
+        if (!id) {
+            return;
+        }
 
-    const char* fulljid = xmpp_stanza_get_from(stanza);
-    if (!fulljid) {
-        return;
-    }
+        const char* fulljid = xmpp_stanza_get_from(stanza);
+        if (!fulljid) {
+            return;
+        }
 
-    Jid* jidp = jid_create(fulljid);
-    sv_ev_message_receipt(jidp->barejid, id);
-    jid_destroy(jidp);
+        Jid* jidp = jid_create(fulljid);
+        if(!jidp) {
+            return;
+        }
+
+        sv_ev_message_receipt(jidp->barejid, id);
+        jid_destroy(jidp);
+    }
 }
 
 static void
@@ -1164,14 +1184,18 @@ _receipt_request_handler(xmpp_stanza_t* const stanza)
     }
 
     const char* receipts_name = xmpp_stanza_get_name(receipts);
-    if (g_strcmp0(receipts_name, "request") != 0) {
+    if ((receipts_name == NULL) || (g_strcmp0(receipts_name, "request") != 0)) {
         return;
     }
 
     const gchar* from = xmpp_stanza_get_from(stanza);
-    Jid* jid = jid_create(from);
-    _message_send_receipt(jid->fulljid, id);
-    jid_destroy(jid);
+    if (from) {
+        Jid* jid = jid_create(from);
+        if (jid) {
+            _message_send_receipt(jid->fulljid, id);
+            jid_destroy(jid);
+        }
+    }
 }
 
 static void
@@ -1182,7 +1206,14 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
     message->type = PROF_MSG_TYPE_MUCPM;
 
     const gchar* from = xmpp_stanza_get_from(stanza);
+    if (!from) {
+        goto out;
+    }
+
     message->from_jid = jid_create(from);
+    if (!message->from_jid) {
+        goto out;
+    }
 
     // message stanza id
     const char* id = xmpp_stanza_get_id(stanza);
@@ -1272,6 +1303,9 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
         return;
     }
     Jid* jid = jid_create(from);
+    if (!jid) {
+        return;
+    }
 
     // private message from chat room use full jid (room/nick)
     if (muc_active(jid->barejid)) {
@@ -1404,22 +1438,38 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
     message->enc = PROF_MSG_ENC_OX;
 
 #ifdef HAVE_LIBGPGME
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+
     xmpp_stanza_t* ox = xmpp_stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
-    message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
+    if (!ox) {
+        return;
+    }
 
-    xmpp_stanza_t *x =  xmpp_stanza_new_from_string(connection_get_ctx(), message->plain);
+    char* ox_text = xmpp_stanza_get_text(ox);
+    if (!ox_text) {
+        return;
+    }
+
+    message->plain = p_ox_gpg_decrypt(ox_text);
+    xmpp_free(ctx, ox_text);
+
+    xmpp_stanza_t *x =  xmpp_stanza_new_from_string(ctx, message->plain);
     xmpp_stanza_t *p =  xmpp_stanza_get_child_by_name(x, "payload");
-    xmpp_stanza_t *b =  xmpp_stanza_get_child_by_name(p, "body");
-    message->plain = xmpp_stanza_get_text(b);
-    if(message->plain == NULL ) {
-        message->plain = xmpp_stanza_get_text(stanza);
-    }
-	message->encrypted = xmpp_stanza_get_text(ox);
+    if (p) {
+        xmpp_stanza_t *b =  xmpp_stanza_get_child_by_name(p, "body");
+        if (b) {
+            message->plain = xmpp_stanza_get_text(b);
+            if(message->plain == NULL ) {
+                message->plain = xmpp_stanza_get_text(stanza);
+            }
+            message->encrypted = xmpp_stanza_get_text(ox);
 
-    if (message->plain == NULL) {
-        message->plain = xmpp_stanza_get_text(stanza);
+            if (message->plain == NULL) {
+                message->plain = xmpp_stanza_get_text(stanza);
+            }
+            message->encrypted = xmpp_stanza_get_text(ox);
+        }
     }
-    message->encrypted = xmpp_stanza_get_text(ox);
 #endif // HAVE_LIBGPGME
 }
 
