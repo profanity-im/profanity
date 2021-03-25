@@ -986,22 +986,14 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
 {
     xmpp_ctx_t* ctx = connection_get_ctx();
 
-    const char* id = xmpp_stanza_get_id(stanza);
-    char* originid = NULL;
-
-    xmpp_stanza_t* origin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_ORIGIN_ID, STANZA_NS_STABLE_ID);
-    if (origin) {
-        originid = (char*)xmpp_stanza_get_attribute(origin, STANZA_ATTR_ID);
-    }
-
     const char* room_jid = xmpp_stanza_get_from(stanza);
     Jid* from_jid = jid_create(room_jid);
 
     // handle room subject
     xmpp_stanza_t* subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
     if (subject) {
-        char* subject_text;
-        subject_text = xmpp_stanza_get_text(subject);
+        // subject_text is optional, can be NULL
+        char* subject_text = xmpp_stanza_get_text(subject);
         sv_ev_room_subject(from_jid->barejid, from_jid->resourcepart, subject_text);
         xmpp_free(ctx, subject_text);
 
@@ -1042,12 +1034,17 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
     message->from_jid = from_jid;
     message->type = PROF_MSG_TYPE_MUC;
 
+    const char* id = xmpp_stanza_get_id(stanza);
     if (id) {
         message->id = strdup(id);
     }
 
-    if (originid) {
-        message->originid = strdup(originid);
+    xmpp_stanza_t* origin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_ORIGIN_ID, STANZA_NS_STABLE_ID);
+    if (origin) {
+        char* originid = (char*)xmpp_stanza_get_attribute(origin, STANZA_ATTR_ID);
+        if (originid) {
+            message->originid = strdup(originid);
+        }
     }
 
     xmpp_stanza_t* replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
