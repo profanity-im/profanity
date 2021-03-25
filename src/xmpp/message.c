@@ -1048,6 +1048,15 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
         message->id = strdup(id);
     }
 
+    char* stanzaid = NULL;
+    xmpp_stanza_t* stanzaidst = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_STANZA_ID, STANZA_NS_STABLE_ID);
+    if (stanzaidst) {
+        stanzaid = (char*)xmpp_stanza_get_attribute(stanzaidst, STANZA_ATTR_ID);
+        if (stanzaid) {
+            message->stanzaid = strdup(stanzaid);
+        }
+    }
+
     xmpp_stanza_t* origin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_ORIGIN_ID, STANZA_NS_STABLE_ID);
     if (origin) {
         char* originid = (char*)xmpp_stanza_get_attribute(origin, STANZA_ATTR_ID);
@@ -1348,7 +1357,6 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
         }
     } else {
         // live messages use XEP-0359 <stanza-id>
-        // TODO: add to muc too
         char* stanzaid = NULL;
         xmpp_stanza_t* stanzaidst = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_STANZA_ID, STANZA_NS_STABLE_ID);
         if (stanzaidst) {
