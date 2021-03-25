@@ -986,7 +986,7 @@ stanza_create_caps_query_element(xmpp_ctx_t* ctx)
 
     GString* name_str = g_string_new("Profanity ");
     g_string_append(name_str, PACKAGE_VERSION);
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+    if (g_strcmp0(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
         g_string_append(name_str, "dev.");
         g_string_append(name_str, PROF_GIT_BRANCH);
@@ -1074,16 +1074,16 @@ stanza_create_caps_sha1_from_query(xmpp_stanza_t* const query)
                 g_string_append(identity_str, name);
             }
             g_string_append(identity_str, "<");
-            identities = g_slist_insert_sorted(identities, g_strdup(identity_str->str), (GCompareFunc)strcmp);
+            identities = g_slist_insert_sorted(identities, g_strdup(identity_str->str), (GCompareFunc)g_strcmp0);
             g_string_free(identity_str, TRUE);
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_FEATURE) == 0) {
             const char* feature_str = xmpp_stanza_get_attribute(child, "var");
-            features = g_slist_insert_sorted(features, g_strdup(feature_str), (GCompareFunc)strcmp);
+            features = g_slist_insert_sorted(features, g_strdup(feature_str), (GCompareFunc)g_strcmp0);
         } else if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_X) == 0) {
             if (g_strcmp0(xmpp_stanza_get_ns(child), STANZA_NS_DATA) == 0) {
                 DataForm* form = form_create(child);
                 char* form_type = form_get_form_type_field(form);
-                form_names = g_slist_insert_sorted(form_names, g_strdup(form_type), (GCompareFunc)strcmp);
+                form_names = g_slist_insert_sorted(form_names, g_strdup(form_type), (GCompareFunc)g_strcmp0);
                 g_hash_table_insert(forms, g_strdup(form_type), form);
             }
         }
@@ -1154,9 +1154,9 @@ stanza_get_child_by_name_and_from(xmpp_stanza_t* const stanza, const char* const
 
     for (child = xmpp_stanza_get_children(stanza); child; child = xmpp_stanza_get_next(child)) {
         child_name = xmpp_stanza_get_name(child);
-        if (child_name && strcmp(name, child_name) == 0) {
+        if (child_name && g_strcmp0(name, child_name) == 0) {
             child_from = xmpp_stanza_get_attribute(child, STANZA_ATTR_FROM);
-            if (child_from && strcmp(from, child_from) == 0) {
+            if (child_from && g_strcmp0(from, child_from) == 0) {
                 break;
             }
         }
@@ -1177,7 +1177,7 @@ _stanza_get_delay_timestamp_xep0203(xmpp_stanza_t* const delay_stanza)
     GTimeVal utc_stamp;
     const char* xmlns = xmpp_stanza_get_attribute(delay_stanza, STANZA_ATTR_XMLNS);
 
-    if (xmlns && (strcmp(xmlns, "urn:xmpp:delay") == 0)) {
+    if (xmlns && (g_strcmp0(xmlns, "urn:xmpp:delay") == 0)) {
         const char* stamp = xmpp_stanza_get_attribute(delay_stanza, STANZA_ATTR_STAMP);
 
         if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
@@ -1199,7 +1199,7 @@ _stanza_get_delay_timestamp_xep0091(xmpp_stanza_t* const x_stanza)
     GTimeVal utc_stamp;
     const char* xmlns = xmpp_stanza_get_attribute(x_stanza, STANZA_ATTR_XMLNS);
 
-    if (xmlns && (strcmp(xmlns, "jabber:x:delay") == 0)) {
+    if (xmlns && (g_strcmp0(xmlns, "jabber:x:delay") == 0)) {
         const char* stamp = xmpp_stanza_get_attribute(x_stanza, STANZA_ATTR_STAMP);
         if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
 
@@ -1256,7 +1256,7 @@ stanza_get_oldest_delay(xmpp_stanza_t* const stanza)
 
         child_name = xmpp_stanza_get_name(child);
 
-        if (child_name && strcmp(child_name, STANZA_NAME_DELAY) == 0) {
+        if (child_name && g_strcmp0(child_name, STANZA_NAME_DELAY) == 0) {
             GDateTime* tmp = _stanza_get_delay_timestamp_xep0203(child);
 
             if (oldest == NULL) {
@@ -1269,7 +1269,7 @@ stanza_get_oldest_delay(xmpp_stanza_t* const stanza)
             }
         }
 
-        if (child_name && strcmp(child_name, STANZA_NAME_X) == 0) {
+        if (child_name && g_strcmp0(child_name, STANZA_NAME_X) == 0) {
             GDateTime* tmp = _stanza_get_delay_timestamp_xep0091(child);
 
             if (oldest == NULL) {
@@ -1320,7 +1320,7 @@ stanza_is_muc_presence(xmpp_stanza_t* const stanza)
     if (stanza == NULL) {
         return FALSE;
     }
-    if (strcmp(xmpp_stanza_get_name(stanza), STANZA_NAME_PRESENCE) != 0) {
+    if (g_strcmp0(xmpp_stanza_get_name(stanza), STANZA_NAME_PRESENCE) != 0) {
         return FALSE;
     }
 
@@ -1668,7 +1668,7 @@ stanza_get_new_nick(xmpp_stanza_t* const stanza)
     xmpp_stanza_t* x_children = xmpp_stanza_get_children(x);
 
     while (x_children) {
-        if (strcmp(xmpp_stanza_get_name(x_children), STANZA_NAME_ITEM) == 0) {
+        if (g_strcmp0(xmpp_stanza_get_name(x_children), STANZA_NAME_ITEM) == 0) {
             const char* nick = xmpp_stanza_get_attribute(x_children, STANZA_ATTR_NICK);
             if (nick) {
                 return nick;
@@ -1694,7 +1694,7 @@ stanza_get_idle_time(xmpp_stanza_t* const stanza)
         return 0;
     }
 
-    if (strcmp(ns, STANZA_NS_LASTACTIVITY) != 0) {
+    if (g_strcmp0(ns, STANZA_NS_LASTACTIVITY) != 0) {
         return 0;
     }
 
@@ -1756,19 +1756,19 @@ stanza_create_caps_from_query_element(xmpp_stanza_t* query)
             while (field) {
                 formField = field->data;
                 if (formField->values) {
-                    if (strcmp(formField->var, "software") == 0) {
+                    if (g_strcmp0(formField->var, "software") == 0) {
                         if (software == NULL) {
                             software = strdup(formField->values->data);
                         }
-                    } else if (strcmp(formField->var, "software_version") == 0) {
+                    } else if (g_strcmp0(formField->var, "software_version") == 0) {
                         if (software_version == NULL) {
                             software_version = strdup(formField->values->data);
                         }
-                    } else if (strcmp(formField->var, "os") == 0) {
+                    } else if (g_strcmp0(formField->var, "os") == 0) {
                         if (os == NULL) {
                             os = strdup(formField->values->data);
                         }
-                    } else if (strcmp(formField->var, "os_version") == 0) {
+                    } else if (g_strcmp0(formField->var, "os_version") == 0) {
                         if (os_version == NULL) {
                             os_version = strdup(formField->values->data);
                         }
