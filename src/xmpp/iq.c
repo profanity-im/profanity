@@ -1450,7 +1450,7 @@ _auto_pong_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
     if (errtype == NULL) {
         return 0;
     }
-    if (g_strcmp0(errtype, "cancel") == 0) {
+    if (g_strcmp0(errtype, STANZA_TYPE_CANCEL) == 0) {
         log_warning("Server ping (id=%s) error type 'cancel', disabling autoping.", id);
         prefs_set_autoping(0);
         cons_show_error("Server ping not supported, autoping disabled.");
@@ -1766,7 +1766,7 @@ _last_activity_get_handler(xmpp_stanza_t* const stanza)
 
         xmpp_stanza_t* error = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(error, STANZA_NAME_ERROR);
-        xmpp_stanza_set_type(error, "cancel");
+        xmpp_stanza_set_type(error, STANZA_TYPE_CANCEL);
 
         xmpp_stanza_t* service_unavailable = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(service_unavailable, "service-unavailable");
