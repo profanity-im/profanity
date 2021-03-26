@@ -34,6 +34,8 @@
  *
  */
 
+#include "config.h"
+
 #include <assert.h>
 
 #include "config/preferences.h"

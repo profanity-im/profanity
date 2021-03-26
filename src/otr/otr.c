@@ -33,6 +33,8 @@
  *
  */
 
+#include "config.h"
+
 #include <libotr/proto.h>
 #include <libotr/privkey.h>
 #include <libotr/message.h>

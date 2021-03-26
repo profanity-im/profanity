@@ -33,6 +33,8 @@
  *
  */
 
+#include "config.h"
+
 #include "config/tlscerts.h"
 #include "ui/ui.h"
 #include "xmpp/chat_session.h"

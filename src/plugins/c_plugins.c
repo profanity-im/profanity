@@ -33,6 +33,8 @@
  *
  */
 
+#include "config.h"
+
 #include <dlfcn.h>
 #include <stdlib.h>
 #include <assert.h>
