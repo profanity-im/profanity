@@ -33,6 +33,8 @@
  * source files in the program, then also delete it here.
  *
  */
+#include "config.h"
+
 #include <sys/time.h>
 #include <sys/stat.h>
 

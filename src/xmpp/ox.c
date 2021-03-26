@@ -33,6 +33,8 @@
  *
  */
 
+#include "config.h"
+
 #include <glib.h>
 #include <assert.h>
 

@@ -32,6 +32,8 @@
  * source files in the program, then also delete it here.
  *
  */
+#include "config.h"
+
 #include <assert.h>
 #include <signal/signal_protocol.h>
 #include <signal/signal_protocol_types.h>
