@@ -414,36 +414,6 @@ omemo_start_session(const char* const barejid)
         for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
             omemo_bundle_request(barejid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(barejid));
         }
-
-        // OMEMO trustmode ToFu
-        if (g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "tofu") == 0) {
-            log_info("[OMEMO] Checking ToFu state for %s", barejid);
-            GHashTable* trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, barejid);
-            if (trusted) {
-                if ( g_hash_table_size(trusted) > 0 ) {
-                    log_info("[OMEMO] Found trusted device for %s - skip ToFu", barejid);
-                    return;
-                }
-            } else {
-                GList* device_list = g_hash_table_lookup(omemo_ctx.device_list, barejid);
-                if (device_list) {
-                    cons_show("OMEMO: No trusted devices found for %s", barejid);
-                    GList* device_id;
-                    for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
-                        GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, barejid);
-                        if (known_identities) {
-                            GList *fp = NULL;
-                            for ( fp = g_hash_table_get_keys (known_identities); fp != NULL; fp = fp->next ) {
-                                if ( device_id->data == g_hash_table_lookup(known_identities, fp->data) ) {
-                                    cons_show("OMEMO: Adding ToFu trust for %s device %d - Fingerprint %s", barejid, device_id->data, omemo_format_fingerprint( fp->data ));
-                                    omemo_trust(barejid, omemo_format_fingerprint( fp->data ));
-                                }
-                            }
-                        }
-                    }
-                }
-            }                
-        }
     }
 }
 
@@ -569,6 +539,34 @@ omemo_set_device_list(const char* const from, GList* device_list)
         }
     }
 
+    // OMEMO trustmode ToFu
+    if (g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "tofu") == 0) {
+        log_info("[OMEMO] Checking ToFu state for %s", jid->barejid);
+        GHashTable* trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid->barejid);
+        if (trusted) {
+            if (g_hash_table_size(trusted) > 0) {
+                log_info("[OMEMO] Found trusted device for %s - skip ToFu", jid->barejid);
+                return;
+            }
+        } else {
+            if (device_list) {
+                cons_show("OMEMO: No trusted devices found for %s", jid->barejid);
+                GList* device_id;
+                for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
+                    GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid->barejid);
+                    if (known_identities) {
+                        GList* fp = NULL;
+                        for (fp = g_hash_table_get_keys(known_identities); fp != NULL; fp = fp->next) {
+                            if (device_id->data == g_hash_table_lookup(known_identities, fp->data)) {
+                                cons_show("OMEMO: Adding ToFu trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, omemo_format_fingerprint(fp->data));
+                                omemo_trust(jid->barejid, omemo_format_fingerprint(fp->data));
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
     jid_destroy(jid);
 }
 
@@ -649,7 +647,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
 
     gboolean trusted = is_trusted_identity(&address, (uint8_t*)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
 
-    if ( ( g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "blind") == 0 ) && !trusted ) {
+    if ((g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "blind") == 0) && !trusted) {
         char* fp = _omemo_fingerprint(identity_key, TRUE);
         cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
         omemo_trust(jid, fp);
