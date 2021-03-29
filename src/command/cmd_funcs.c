@@ -6488,13 +6488,13 @@ cmd_ping(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_autoaway(ProfWin* window, const char* const command, gchar** args)
 {
-    if ((strcmp(args[0], "mode") != 0) && (strcmp(args[0], "time") != 0) && (strcmp(args[0], "message") != 0) && (strcmp(args[0], "check") != 0)) {
+    if ((g_strcmp0(args[0], "mode") != 0) && (g_strcmp0(args[0], "time") != 0) && (g_strcmp0(args[0], "message") != 0) && (g_strcmp0(args[0], "check") != 0)) {
         cons_show("Setting must be one of 'mode', 'time', 'message' or 'check'");
         return TRUE;
     }
 
-    if (strcmp(args[0], "mode") == 0) {
-        if ((strcmp(args[1], "idle") != 0) && (strcmp(args[1], "away") != 0) && (strcmp(args[1], "off") != 0)) {
+    if (g_strcmp0(args[0], "mode") == 0) {
+        if ((g_strcmp0(args[1], "idle") != 0) && (g_strcmp0(args[1], "away") != 0) && (g_strcmp0(args[1], "off") != 0)) {
             cons_show("Mode must be one of 'idle', 'away' or 'off'");
         } else {
             prefs_set_string(PREF_AUTOAWAY_MODE, args[1]);
@@ -6504,7 +6504,7 @@ cmd_autoaway(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    if (strcmp(args[0], "time") == 0) {
+    if ((g_strcmp0(args[0], "time") == 0) && (args[2] != NULL)) {
         if (g_strcmp0(args[1], "away") == 0) {
             int minutesval = 0;
             char* err_msg = NULL;
@@ -6550,11 +6550,14 @@ cmd_autoaway(ProfWin* window, const char* const command, gchar** args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+    } else {
+        cons_bad_cmd_usage(command);
+        return TRUE;
     }
 
-    if (strcmp(args[0], "message") == 0) {
-        if (g_strcmp0(args[1], "away") == 0) {
-            if (strcmp(args[2], "off") == 0) {
+    if (g_strcmp0(args[0], "message") == 0) {
+        if (g_strcmp0(args[1], "away") == 0 && args[2] != NULL) {
+            if (g_strcmp0(args[2], "off") == 0) {
                 prefs_set_string(PREF_AUTOAWAY_MESSAGE, NULL);
                 cons_show("Auto away message cleared.");
             } else {
@@ -6564,7 +6567,7 @@ cmd_autoaway(ProfWin* window, const char* const command, gchar** args)
 
             return TRUE;
         } else if (g_strcmp0(args[1], "xa") == 0) {
-            if (strcmp(args[2], "off") == 0) {
+            if (g_strcmp0(args[2], "off") == 0) {
                 prefs_set_string(PREF_AUTOXA_MESSAGE, NULL);
                 cons_show("Auto xa message cleared.");
             } else {
@@ -6579,7 +6582,7 @@ cmd_autoaway(ProfWin* window, const char* const command, gchar** args)
         }
     }
 
-    if (strcmp(args[0], "check") == 0) {
+    if (g_strcmp0(args[0], "check") == 0) {
         _cmd_set_boolean_preference(args[1], command, "Online check", PREF_AUTOAWAY_CHECK);
         return TRUE;
     }
