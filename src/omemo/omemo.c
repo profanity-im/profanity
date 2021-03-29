@@ -705,6 +705,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     memcpy(key_tag, key, AES128_GCM_KEY_LENGTH);
     memcpy(key_tag + AES128_GCM_KEY_LENGTH, tag, AES128_GCM_TAG_LENGTH);
 
+    // List of barejids of the recipients of this message
     GList* recipients = NULL;
     if (muc) {
         ProfMucWin* mucwin = (ProfMucWin*)win;
@@ -727,6 +728,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 
     omemo_ctx.identity_key_store.recv = false;
 
+    // Encrypt keys for the recipients
     GList* recipients_iter;
     for (recipients_iter = recipients; recipients_iter != NULL; recipients_iter = recipients_iter->next) {
         GList* recipient_device_id = NULL;
@@ -772,6 +774,17 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 
     g_list_free_full(recipients, free);
 
+    // Don't send the message if no key could be encrypted.
+    // (Since none of the recipients would be able to read the message.)
+    if (keys == NULL) {
+        win_println(win, THEME_ERROR, "!", "This message cannot be decrypted for any recipient.\n"
+                "You should trust your recipients' device fingerprint(s) using \"/omemo fingerprint trust FINGERPRINT\".\n"
+                "It could also be that the key bundle of the recipient(s) have not been received. "
+                "In this case, you could try \"omemo end\", \"omemo start\", and send the message again.");
+        goto out;
+    }
+
+    // Encrypt keys for the sender
     if (!muc) {
         GList* sender_device_id = g_hash_table_lookup(omemo_ctx.device_list, jid->barejid);
         for (device_ids_iter = sender_device_id; device_ids_iter != NULL; device_ids_iter = device_ids_iter->next) {
@@ -783,6 +796,12 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 .name_len = strlen(jid->barejid),
                 .device_id = GPOINTER_TO_INT(device_ids_iter->data)
             };
+
+            // Don't encrypt for this device (according to
+            // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
+            if (address.device_id == omemo_ctx.device_id) {
+                continue;
+            }
 
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
             if (res != 0) {
@@ -808,6 +827,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
         }
     }
 
+    // Send the message
     if (muc) {
         ProfMucWin* mucwin = (ProfMucWin*)win;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
