@@ -34,8 +34,6 @@
  *
  */
 
-#define _GNU_SOURCE 1
-
 #include "config.h"
 
 #include <errno.h>
@@ -529,13 +527,14 @@ _unique_filename(const char* filename)
 
     unsigned int i = 0;
     while (g_file_test(unique, G_FILE_TEST_EXISTS)) {
-        free(unique);
+        g_free(unique);
 
         if (i > 1000) { // Give up after 1000 attempts.
             return NULL;
         }
 
-        if (asprintf(&unique, "%s.%u", filename, i) < 0) {
+        unique = g_strdup_printf("%s.%u", filename, i);
+        if (!unique) {
             return NULL;
         }
 

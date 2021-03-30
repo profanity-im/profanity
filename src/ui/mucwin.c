@@ -37,7 +37,6 @@
 #include "config.h"
 
 #include "ui.h"
-#define _GNU_SOURCE 1
 
 #include <string.h>
 #include <assert.h>

@@ -35,8 +35,6 @@
 
 #include "config.h"
 
-#define _GNU_SOURCE 1
-
 #include <sys/stat.h>
 #include <sqlite3.h>
 #include <glib.h>
@@ -213,13 +211,14 @@ GSList*
 log_database_get_previous_chat(const gchar* const contact_barejid)
 {
     sqlite3_stmt* stmt = NULL;
-    char* query;
+    gchar* query;
     const char* jid = connection_get_fulljid();
     Jid* myjid = jid_create(jid);
     if (!myjid)
         return NULL;
 
-    if (asprintf(&query, "SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE (`from_jid` = '%s' AND `to_jid` = '%s') OR (`from_jid` = '%s' AND `to_jid` = '%s') ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid) == -1) {
+    query = g_strdup_printf("SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE (`from_jid` = '%s' AND `to_jid` = '%s') OR (`from_jid` = '%s' AND `to_jid` = '%s') ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
+    if (!query) {
         log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
         return NULL;
     }
@@ -251,7 +250,7 @@ log_database_get_previous_chat(const gchar* const contact_barejid)
         history = g_slist_append(history, msg);
     }
     sqlite3_finalize(stmt);
-    free(query);
+    g_free(query);
 
     return history;
 }
@@ -314,7 +313,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     }
 
     char* err_msg;
-    char* query;
+    gchar* query;
     gchar* date_fmt;
 
     if (message->timestamp) {
@@ -331,20 +330,20 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
 
     char* escaped_message = str_replace(message->plain, "'", "''");
 
-    if (asprintf(&query, "INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) SELECT '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' WHERE NOT EXISTS (SELECT 1 FROM `ChatLogs` WHERE `archive_id` = '%s')",
-                 from_jid->barejid,
-                 from_jid->resourcepart ? from_jid->resourcepart : "",
-                 to_jid->barejid,
-                 to_jid->resourcepart ? to_jid->resourcepart : "",
-                 escaped_message ? escaped_message : "",
-                 date_fmt ? date_fmt : "",
-                 message->id ? message->id : "",
-                 message->stanzaid ? message->stanzaid : "",
-                 message->replace_id ? message->replace_id : "",
-                 type ? type : "",
-                 enc ? enc : "",
-                 message->stanzaid ? message->stanzaid : "")
-        == -1) {
+    query = g_strdup_printf("INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) SELECT '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' WHERE NOT EXISTS (SELECT 1 FROM `ChatLogs` WHERE `archive_id` = '%s')",
+            from_jid->barejid,
+            from_jid->resourcepart ? from_jid->resourcepart : "",
+            to_jid->barejid,
+            to_jid->resourcepart ? to_jid->resourcepart : "",
+            escaped_message ? escaped_message : "",
+            date_fmt ? date_fmt : "",
+            message->id ? message->id : "",
+            message->stanzaid ? message->stanzaid : "",
+            message->replace_id ? message->replace_id : "",
+            type ? type : "",
+            enc ? enc : "",
+            message->stanzaid ? message->stanzaid : "");
+    if (!query) {
         log_error("log_database_add(): SQL query. could not allocate memory");
         return;
     }
@@ -359,5 +358,5 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
             log_error("Unknown SQLite error");
         }
     }
-    free(query);
+    g_free(query);
 }

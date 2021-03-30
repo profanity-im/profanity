@@ -35,7 +35,6 @@
 
 #include "config.h"
 
-#define _GNU_SOURCE
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -315,10 +314,12 @@ _autocomplete_param_common(const char* const input, char* command, autocomplete_
     char* result = NULL;
     int len;
 
-    len = asprintf(&command_cpy, "%s ", command);
-    if (len == -1) {
+    command_cpy = g_strdup_printf("%s ", command);
+    if (!command_cpy) {
         return NULL;
     }
+
+    len = strlen(command_cpy);
 
     if (strncmp(input, command_cpy, len) == 0) {
         int inp_len = strlen(input);

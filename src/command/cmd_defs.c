@@ -34,8 +34,6 @@
  *
  */
 
-#define _GNU_SOURCE 1
-
 #include "config.h"
 
 #include <assert.h>
@@ -2894,11 +2892,11 @@ command_mangen(void)
 
     mkdir_recursive("docs");
 
-    char* header = NULL;
     GDateTime* now = g_date_time_new_now_local();
     gchar* date = g_date_time_format(now, "%F");
-    if (asprintf(&header, ".TH man 1 \"%s\" \"" PACKAGE_VERSION "\" \"Profanity XMPP client\"\n", date) == -1) {
-        // TODO: error
+    gchar *header = g_strdup_printf(".TH man 1 \"%s\" \"" PACKAGE_VERSION "\" \"Profanity XMPP client\"\n", date);
+    if (!header) {
+        log_error("command_mangen(): could not allocate memory");
         return;
     }
     g_date_time_unref(now);
@@ -2908,9 +2906,9 @@ command_mangen(void)
     while (curr) {
         Command* pcmd = curr->data;
 
-        char* filename = NULL;
-        if (asprintf(&filename, "docs/profanity-%s.1", &pcmd->cmd[1]) == -1) {
-            // TODO: error
+        gchar* filename = g_strdup_printf("docs/profanity-%s.1", &pcmd->cmd[1]);
+        if (!filename) {
+            log_error("command_mangen(): could not allocate memory");
             return;
         }
         FILE* manpage = fopen(filename, "w");
@@ -2955,6 +2953,6 @@ command_mangen(void)
 
     printf("\nProcessed %d commands.\n\n", g_list_length(cmds));
 
-    free(header);
+    g_free(header);
     g_list_free(cmds);
 }

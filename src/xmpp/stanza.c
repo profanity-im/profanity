@@ -33,8 +33,6 @@
  *
  */
 
-#define _GNU_SOURCE 1
-
 #include "config.h"
 
 #ifdef HAVE_GIT_VERSION
@@ -242,10 +240,10 @@ stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id,
     xmpp_stanza_set_attribute(request, STANZA_ATTR_FILENAME, basename(filename_cpy));
     free(filename_cpy);
 
-    char* filesize = NULL;
-    if (asprintf(&filesize, "%jd", (intmax_t)(upload->filesize)) != -1) {
+    gchar* filesize = g_strdup_printf("%jd", (intmax_t)(upload->filesize));
+    if (filesize) {
         xmpp_stanza_set_attribute(request, STANZA_ATTR_SIZE, filesize);
-        free(filesize);
+        g_free(filesize);
     }
 
     xmpp_stanza_set_attribute(request, STANZA_ATTR_CONTENTTYPE, upload->mime_type);

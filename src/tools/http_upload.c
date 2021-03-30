@@ -33,8 +33,6 @@
  *
  */
 
-#define _GNU_SOURCE 1
-
 #include "config.h"
 
 #include <stdlib.h>
@@ -92,12 +90,12 @@ _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
         ulperc = (100 * ulnow) / ultotal;
     }
 
-    char* msg;
-    if (asprintf(&msg, "Uploading '%s': %d%%", upload->filename, ulperc) == -1) {
-        msg = strdup(FALLBACK_MSG);
+    gchar* msg = g_strdup_printf("Uploading '%s': %d%%", upload->filename, ulperc);
+    if (!msg) {
+        msg = g_strdup(FALLBACK_MSG);
     }
     win_update_entry_message(upload->window, upload->put_url, msg);
-    free(msg);
+    g_free(msg);
 
     pthread_mutex_unlock(&lock);
 
@@ -165,11 +163,11 @@ http_file_put(void* userdata)
     FILE* fh = NULL;
 
     char* err = NULL;
-    char* content_type_header;
+    gchar* content_type_header;
     // Optional headers
-    char* auth_header = NULL;
-    char* cookie_header = NULL;
-    char* expires_header = NULL;
+    gchar* auth_header = NULL;
+    gchar* cookie_header = NULL;
+    gchar* expires_header = NULL;
 
     CURL* curl;
     CURLcode res;
@@ -178,12 +176,12 @@ http_file_put(void* userdata)
     upload->bytes_sent = 0;
 
     pthread_mutex_lock(&lock);
-    char* msg;
-    if (asprintf(&msg, "Uploading '%s': 0%%", upload->filename) == -1) {
-        msg = strdup(FALLBACK_MSG);
+    gchar* msg = g_strdup_printf("Uploading '%s': 0%%", upload->filename);
+    if (!msg) {
+        msg = g_strdup(FALLBACK_MSG);
     }
     win_print_http_transfer(upload->window, msg, upload->put_url);
-    free(msg);
+    g_free(msg);
 
     char* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     pthread_mutex_unlock(&lock);
@@ -195,28 +193,32 @@ http_file_put(void* userdata)
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
 
     struct curl_slist* headers = NULL;
-    if (asprintf(&content_type_header, "Content-Type: %s", upload->mime_type) == -1) {
-        content_type_header = strdup(FALLBACK_CONTENTTYPE_HEADER);
+    content_type_header = g_strdup_printf("Content-Type: %s", upload->mime_type);
+    if (content_type_header) {
+        content_type_header = g_strdup(FALLBACK_CONTENTTYPE_HEADER);
     }
     headers = curl_slist_append(headers, content_type_header);
     headers = curl_slist_append(headers, "Expect:");
 
     // Optional headers
     if (upload->authorization) {
-        if (asprintf(&auth_header, "Authorization: %s", upload->authorization) == -1) {
-            auth_header = strdup(FALLBACK_MSG);
+        auth_header = g_strdup_printf("Authorization: %s", upload->authorization);
+        if (!auth_header) {
+            auth_header = g_strdup(FALLBACK_MSG);
         }
         headers = curl_slist_append(headers, auth_header);
     }
     if (upload->cookie) {
-        if (asprintf(&cookie_header, "Cookie: %s", upload->cookie) == -1) {
-            cookie_header = strdup(FALLBACK_MSG);
+        cookie_header = g_strdup_printf("Cookie: %s", upload->cookie);
+        if (!cookie_header) {
+            cookie_header = g_strdup(FALLBACK_MSG);
         }
         headers = curl_slist_append(headers, cookie_header);
     }
     if (upload->expires) {
-        if (asprintf(&expires_header, "Expires: %s", upload->expires) == -1) {
-            expires_header = strdup(FALLBACK_MSG);
+        expires_header = g_strdup_printf("Expires: %s", upload->expires);
+        if (!expires_header) {
+            expires_header = g_strdup(FALLBACK_MSG);
         }
         headers = curl_slist_append(headers, expires_header);
     }
@@ -262,9 +264,7 @@ http_file_put(void* userdata)
 
         // XEP-0363 specifies 201 but prosody returns 200
         if (http_code != 200 && http_code != 201) {
-            if (asprintf(&err, "Server returned %lu", http_code) == -1) {
-                err = NULL;
-            }
+            err = g_strdup_printf("Server returned %lu", http_code);
         }
 
 #if 0
@@ -281,47 +281,50 @@ http_file_put(void* userdata)
     if (fh) {
         fclose(fh);
     }
-    free(content_type_header);
     free(output.buffer);
-    free(auth_header);
-    free(cookie_header);
-    free(expires_header);
+    g_free(content_type_header);
+    g_free(auth_header);
+    g_free(cookie_header);
+    g_free(expires_header);
 
     pthread_mutex_lock(&lock);
     g_free(cert_path);
 
     if (err) {
-        char* msg;
+        gchar* msg;
         if (upload->cancel) {
-            if (asprintf(&msg, "Uploading '%s' failed: Upload was canceled", upload->filename) == -1) {
-                msg = strdup(FALLBACK_MSG);
+            msg = g_strdup_printf("Uploading '%s' failed: Upload was canceled", upload->filename);
+            if (!msg) {
+                msg = g_strdup(FALLBACK_MSG);
             }
         } else {
-            if (asprintf(&msg, "Uploading '%s' failed: %s", upload->filename, err) == -1) {
-                msg = strdup(FALLBACK_MSG);
+            msg = g_strdup_printf("Uploading '%s' failed: %s", upload->filename, err);
+            if (!msg) {
+                msg = g_strdup(FALLBACK_MSG);
             }
             win_update_entry_message(upload->window, upload->put_url, msg);
         }
         cons_show_error(msg);
-        free(msg);
+        g_free(msg);
         free(err);
     } else {
         if (!upload->cancel) {
-            if (asprintf(&msg, "Uploading '%s': 100%%", upload->filename) == -1) {
-                msg = strdup(FALLBACK_MSG);
+            msg = g_strdup_printf("Uploading '%s': 100%%", upload->filename);
+            if (!msg) {
+                msg = g_strdup(FALLBACK_MSG);
             }
             win_update_entry_message(upload->window, upload->put_url, msg);
             win_mark_received(upload->window, upload->put_url);
-            free(msg);
+            g_free(msg);
 
             char* url = NULL;
             if (format_alt_url(upload->get_url, upload->alt_scheme, upload->alt_fragment, &url) != 0) {
-                char* msg;
-                if (asprintf(&msg, "Uploading '%s' failed: Bad URL ('%s')", upload->filename, upload->get_url) == -1) {
-                    msg = strdup(FALLBACK_MSG);
+                gchar* msg = g_strdup_printf("Uploading '%s' failed: Bad URL ('%s')", upload->filename, upload->get_url);
+                if (!msg) {
+                    msg = g_strdup(FALLBACK_MSG);
                 }
                 cons_show_error(msg);
-                free(msg);
+                g_free(msg);
             } else {
                 switch (upload->window->type) {
                 case WIN_CHAT:

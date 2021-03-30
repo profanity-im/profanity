@@ -35,8 +35,6 @@
  *
  */
 
-#define _GNU_SOURCE 1
-
 #include "config.h"
 
 #include <string.h>
@@ -141,10 +139,10 @@ cmd_process_input(ProfWin* window, char* inp)
         char* question_mark = strchr(command, '?');
         if (question_mark) {
             *question_mark = '\0';
-            char* fakeinp;
-            if (asprintf(&fakeinp, "/help %s", command + 1)) {
+            gchar* fakeinp = g_strdup_printf("/help %s", command + 1);
+            if (fakeinp) {
                 result = _cmd_execute(window, "/help", fakeinp);
-                free(fakeinp);
+                g_free(fakeinp);
             }
         } else {
             result = _cmd_execute(window, command, inp);

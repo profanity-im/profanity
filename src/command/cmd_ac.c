@@ -36,8 +36,6 @@
 
 #include "config.h"
 
-#define _GNU_SOURCE 1
-
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -1558,13 +1556,15 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
 
     // expand ~ to $HOME
     if (inpcp[0] == '~' && inpcp[1] == '/') {
-        if (asprintf(&tmp, "%s/%sfoo", getenv("HOME"), inpcp + 2) == -1) {
+        tmp = g_strdup_printf("%s/%sfoo", getenv("HOME"), inpcp + 2);
+        if (!tmp) {
             free(inpcp);
             return NULL;
         }
         output_off = strlen(getenv("HOME")) + 1;
     } else {
-        if (asprintf(&tmp, "%sfoo", inpcp) == -1) {
+        tmp = g_strdup_printf("%sfoo", inpcp);
+        if (!tmp) {
             free(inpcp);
             return NULL;
         }
@@ -1596,25 +1596,29 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
 
             char* acstring;
             if (output_off) {
-                if (asprintf(&tmp, "%s/%s", directory, dir->d_name) == -1) {
+                tmp = g_strdup_printf("%s/%s", directory, dir->d_name);
+                if(!tmp) {
                     free(directory);
                     free(foofile);
                     return NULL;
                 }
-                if (asprintf(&acstring, "~/%s", tmp + output_off) == -1) {
+                acstring = g_strdup_printf("~/%s", tmp + output_off);
+                if (!acstring) {
                     free(directory);
                     free(foofile);
                     return NULL;
                 }
                 free(tmp);
             } else if (strcmp(directory, "/") == 0) {
-                if (asprintf(&acstring, "/%s", dir->d_name) == -1) {
+                acstring = g_strdup_printf("/%s", dir->d_name);
+                if (!acstring) {
                     free(directory);
                     free(foofile);
                     return NULL;
                 }
             } else {
-                if (asprintf(&acstring, "%s/%s", directory, dir->d_name) == -1) {
+                acstring = g_strdup_printf("%s/%s", directory, dir->d_name);
+                if (!acstring) {
                     free(directory);
                     free(foofile);
                     return NULL;
