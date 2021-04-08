@@ -2151,30 +2151,21 @@ cmd_msg(ProfWin* window, const char* const command, gchar** args)
 
         ProfChatWin* chatwin = wins_get_chat(barejid);
         if (!chatwin) {
+            // NOTE: This will also start the new OMEMO session and send a MAM request.
             chatwin = chatwin_new(barejid);
         }
         ui_focus_win((ProfWin*)chatwin);
 
-#ifdef HAVE_OMEMO
-        gboolean is_otr_secure = FALSE;
-
-#ifdef HAVE_LIBOTR
-        is_otr_secure = otr_is_secure(barejid);
-#endif // HAVE_LIBOTR
-
-        if (omemo_automatic_start(barejid) && is_otr_secure) {
-            win_println(window, THEME_DEFAULT, "!", "Chat could be either OMEMO or OTR encrypted. Use '/omemo start %s' or '/otr start %s' to start a session.", usr, usr);
-            return TRUE;
-        } else if (omemo_automatic_start(barejid)) {
-            omemo_start_session(barejid);
-            chatwin->is_omemo = TRUE;
-        }
-#endif // HAVE_OMEMO
-
         if (msg) {
+            // NOTE: In case the message is OMEMO encrypted, we can't be sure
+            // whether the key bundles of the recipient have already been
+            // received. In the case that *no* bundles have been received yet,
+            // the message won't be sent, and an error is shown to the user.
+            // Other cases are not handled here.
             cl_ev_send_msg(chatwin, msg, NULL);
         } else {
 #ifdef HAVE_LIBOTR
+            // Start the OTR session after this (i.e. the first) message was sent
             if (otr_is_secure(barejid)) {
                 chatwin_otr_secured(chatwin, otr_is_trusted(barejid));
             }

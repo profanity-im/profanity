@@ -80,12 +80,22 @@ chatwin_new(const char* const barejid)
         }
     }
 
+    // We start a new OMEMO session if this contact has been configured accordingly.
+    // However, if OTR is *also* configured, ask the user to choose between OMEMO and OTR.
 #ifdef HAVE_OMEMO
-    if (omemo_automatic_start(barejid)) {
+    gboolean is_otr_secure = FALSE;
+#ifdef HAVE_LIBOTR
+    is_otr_secure = otr_is_secure(barejid);
+#endif // HAVE_LIBOTR
+    if (omemo_automatic_start(barejid) && is_otr_secure) {
+        win_println(window, THEME_DEFAULT, "!", "This chat could be either OMEMO or OTR encrypted, but not both. "
+                "Use '/omemo start' or '/otr start' to select the encryption method.");
+    } else if (omemo_automatic_start(barejid)) {
+        // Start the OMEMO session
         omemo_start_session(barejid);
         chatwin->is_omemo = TRUE;
     }
-#endif
+#endif // HAVE_OMEMO
 
     if (prefs_get_boolean(PREF_MAM)) {
         iq_mam_request(chatwin);
