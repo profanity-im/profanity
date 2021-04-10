@@ -2302,7 +2302,7 @@ static struct cmd_t command_defs[] = {
             "/omemo end",
             "/omemo fingerprint [<contact>]",
             "/omemo char <char>",
-            "/omemo trustmode manual|tofu|blind",
+            "/omemo trustmode manual|firstusage|blind",
             "/omemo policy manual|automatic|always",
             "/omemo clear_device_list")
         CMD_DESC(
@@ -2316,7 +2316,7 @@ static struct cmd_t command_defs[] = {
             { "fingerprint [<contact>]", "Show contact fingerprints, or current recipient if omitted." },
             { "char <char>",             "Set the character to be displayed next to OMEMO encrypted messages." },
             { "trustmode manual",        "Set the global OMEMO trust mode to manual, OMEMO keys has to be trusted manually." },
-            { "trustmode tofu",          "Set the global OMEMO trust mode to ToFu, first OMEMO keys trusted automatic." },
+            { "trustmode firstusage",    "Set the global OMEMO trust mode to ToFu, first OMEMO keys trusted automatic." },
             { "trustmode blind",         "Set the global OMEMO trust mode to Blind, ALL OMEMO keys trusted automatic." },
             { "policy manual",           "Set the global OMEMO policy to manual, OMEMO sessions must be started manually." },
             { "policy automatic",        "Set the global OMEMO policy to opportunistic, an OMEMO session will be attempted upon starting a conversation." },

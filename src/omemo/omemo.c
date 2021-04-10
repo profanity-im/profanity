@@ -540,12 +540,12 @@ omemo_set_device_list(const char* const from, GList* device_list)
     }
 
     // OMEMO trustmode ToFu
-    if (g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "tofu") == 0) {
-        log_info("[OMEMO] Checking ToFu state for %s", jid->barejid);
+    if (g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "firstusage") == 0) {
+        log_info("[OMEMO] Checking firstusage state for %s", jid->barejid);
         GHashTable* trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid->barejid);
         if (trusted) {
             if (g_hash_table_size(trusted) > 0) {
-                log_info("[OMEMO] Found trusted device for %s - skip ToFu", jid->barejid);
+                log_info("[OMEMO] Found trusted device for %s - skip firstusage", jid->barejid);
                 return;
             }
         } else {
@@ -558,7 +558,7 @@ omemo_set_device_list(const char* const from, GList* device_list)
                         GList* fp = NULL;
                         for (fp = g_hash_table_get_keys(known_identities); fp != NULL; fp = fp->next) {
                             if (device_id->data == g_hash_table_lookup(known_identities, fp->data)) {
-                                cons_show("OMEMO: Adding ToFu trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, omemo_format_fingerprint(fp->data));
+                                cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, omemo_format_fingerprint(fp->data));
                                 omemo_trust(jid->barejid, omemo_format_fingerprint(fp->data));
                             }
                         }

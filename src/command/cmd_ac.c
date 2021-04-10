@@ -698,7 +698,7 @@ cmd_ac_init(void)
     // Autocomplete OMEMO trustmode
     omemo_trustmode_ac = autocomplete_new();
     autocomplete_add(omemo_trustmode_ac, "manual");
-    autocomplete_add(omemo_trustmode_ac, "tofu");
+    autocomplete_add(omemo_trustmode_ac, "firstusage");
     autocomplete_add(omemo_trustmode_ac, "blind");
 #endif
 

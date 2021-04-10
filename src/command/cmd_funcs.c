@@ -8502,7 +8502,7 @@ cmd_omemo_trust_mode(ProfWin* window, const char* const command, gchar** args)
     if (g_strcmp0(args[1], "manual") == 0) {
         cons_show("Current trust mode is %s - setting to %s", prefs_get_string(PREF_OMEMO_TRUST_MODE), args[1]);
         cons_show("You need to trust all OMEMO fingerprint manually");
-    } else if (g_strcmp0(args[1], "tofu") == 0) {
+    } else if (g_strcmp0(args[1], "firstusage") == 0) {
         cons_show("Current trust mode is %s - setting to %s", prefs_get_string(PREF_OMEMO_TRUST_MODE), args[1]);
         cons_show("The first seen OMEMO fingerprints will be trusted automatically - new keys must be trusted manually");
     } else if (g_strcmp0(args[1], "blind") == 0) {
