@@ -2324,7 +2324,7 @@ _get_default_string(preference_t pref)
     case PREF_OMEMO_POLICY:
         return "automatic";
     case PREF_OMEMO_TRUST_MODE:
-        return "manuel";
+        return "manual";
     case PREF_COLOR_NICK:
         return "false";
     case PREF_AVATAR_CMD:
