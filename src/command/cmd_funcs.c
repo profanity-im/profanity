@@ -9314,33 +9314,74 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_editor(ProfWin* window, const char* const command, gchar** args)
 {
-    const char* filename = "/tmp/profanity.txt";
+    /* Build temp file name */
+    GString * tempfile = g_string_new(g_get_tmp_dir());
+    g_string_append(tempfile, "/profanity-");
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    if(!ctx) {
+        cons_show("Editor: Not connection");
+        return TRUE;
+    }
+    char* uuid = xmpp_uuid_gen(ctx);
+    g_string_append(tempfile, uuid);
+    if (uuid) {
+        xmpp_free(ctx, uuid);
+    }
+    g_string_append(tempfile, ".txt");
+
+    // tempfile should be something like
+    // /tmp/profanity-f2f271dd-98c8-4118-8d47-3bd49c8e2e63.txt
+    const char* filename = tempfile->str;
+
+    // Check if file exists and create file
+    if (g_file_test(filename, G_FILE_TEST_EXISTS)) {
+        cons_show("Editor: The temp file exists");
+        g_string_free (tempfile, TRUE);
+        return TRUE;
+    }
+
+    GError* creation_error = NULL;
+    GFile* file = g_file_new_for_path(filename);
+    GFileOutputStream* fos = g_file_create (file,
+               G_FILE_CREATE_PRIVATE, NULL,
+               &creation_error);
+    if ( creation_error ) {
+        cons_show("Editor: Error during file creation");
+        return TRUE;
+    }
+    g_object_unref(fos);
+
+    // Fork / exec
     pid_t pid = fork();
     if( pid == 0 ) {
-        int x = execl("/usr/bin/vim", "/usr/bin/vim", filename, (char *) NULL);
+        int x = execl("/usr/bin/sensible-editor", "/usr/bin/sensible-editor", g_file_get_path(file), (char *) NULL);
         if ( x == -1 ) {
-            cons_show_error("Failed to exec vim");
+            cons_show_error("Failed to exec sensible-editor");
         }
     } else {
         int status = 0;
         waitpid(pid, &status, 0);
-        ui_redraw();
-
-        int fd_input_file = open(filename, O_RDONLY);
+        int fd_input_file = open(g_file_get_path(file), O_RDONLY);
         const size_t COUNT = 8192;
         char buf[COUNT];
         ssize_t size_read = read(fd_input_file, buf, COUNT);
         if(size_read > 0 && size_read <= COUNT ) {
           buf[size_read-1] = '\0';
           GString* text = g_string_new(buf);
-          //ProfWin* window = wins_get_current();
-          //cmd_process_input(window, text->str);
+          ProfWin* win = wins_get_current();
+          win_println(win, THEME_DEFAULT, "!", "EDITOR PREVIEW: %s", text->str);
           rl_insert_text(text->str);
           g_string_free(text, TRUE);
         }
         close(fd_input_file);
         ui_redraw();
+        GError* deletion_error = NULL;
+        g_file_delete (file, NULL, &deletion_error);
+        if ( deletion_error ) {
+            cons_show("Editor: Error during file deletion");
+            return TRUE;
+        }
+        g_object_unref(file);
     }
-
     return TRUE;
 }
