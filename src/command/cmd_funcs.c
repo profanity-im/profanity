@@ -9384,7 +9384,7 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
             g_string_free(text, TRUE);
         }
         close(fd_input_file);
-        ui_redraw();
+
         GError* deletion_error = NULL;
         g_file_delete (file, NULL, &deletion_error);
         if ( deletion_error ) {
@@ -9392,6 +9392,9 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
             return TRUE;
         }
         g_object_unref(file);
+        ui_resize();
+        rl_point = rl_end;
+        rl_forced_update_display();
     }
     return TRUE;
 }
