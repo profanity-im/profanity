@@ -9346,19 +9346,29 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
                G_FILE_CREATE_PRIVATE, NULL,
                &creation_error);
     if ( creation_error ) {
-        cons_show("Editor: Error during file creation");
+        cons_show_error("Editor: Error during file creation");
         return TRUE;
     }
     g_object_unref(fos);
 
+    char* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
+    if (!g_file_test(editor, G_FILE_TEST_EXISTS)) {
+        cons_show_error("Editor: editor %s not exists", editor);
+        return TRUE;
+    }
+
     // Fork / exec
     pid_t pid = fork();
     if( pid == 0 ) {
-        int x = execl("/usr/bin/sensible-editor", "/usr/bin/sensible-editor", g_file_get_path(file), (char *) NULL);
+        int x = execl(editor, editor, g_file_get_path(file), (char *) NULL);
         if ( x == -1 ) {
-            cons_show_error("Failed to exec sensible-editor");
+            cons_show_error("Failed to exec %s", editor);
         }
+        exit (EXIT_FAILURE);
     } else {
+        if ( pid == -1 ) {
+            return TRUE;
+        }
         int status = 0;
         waitpid(pid, &status, 0);
         int fd_input_file = open(g_file_get_path(file), O_RDONLY);
@@ -9366,12 +9376,12 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
         char buf[COUNT];
         ssize_t size_read = read(fd_input_file, buf, COUNT);
         if(size_read > 0 && size_read <= COUNT ) {
-          buf[size_read-1] = '\0';
-          GString* text = g_string_new(buf);
-          ProfWin* win = wins_get_current();
-          win_println(win, THEME_DEFAULT, "!", "EDITOR PREVIEW: %s", text->str);
-          rl_insert_text(text->str);
-          g_string_free(text, TRUE);
+            buf[size_read-1] = '\0';
+            GString* text = g_string_new(buf);
+            ProfWin* win = wins_get_current();
+            win_println(win, THEME_DEFAULT, "!", "EDITOR PREVIEW: %s", text->str);
+            rl_insert_text(text->str);
+            g_string_free(text, TRUE);
         }
         close(fd_input_file);
         ui_redraw();

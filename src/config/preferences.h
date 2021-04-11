@@ -173,6 +173,7 @@ typedef enum {
     PREF_MAM,
     PREF_URL_OPEN_CMD,
     PREF_URL_SAVE_CMD,
+    PREF_COMPOSE_EDITOR,
 } preference_t;
 
 typedef struct prof_alias_t
