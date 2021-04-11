@@ -9364,7 +9364,7 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
         if ( x == -1 ) {
             cons_show_error("Failed to exec %s", editor);
         }
-        exit (EXIT_FAILURE);
+        _exit(EXIT_FAILURE);
     } else {
         if ( pid == -1 ) {
             return TRUE;
