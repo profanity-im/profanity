@@ -38,6 +38,8 @@
 
 #include "xmpp/xmpp.h"
 
+#define CON_RAND_ID_LEN 15
+
 void connection_init(void);
 void connection_shutdown(void);
 void connection_check_events(void);

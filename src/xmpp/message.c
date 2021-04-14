@@ -1564,26 +1564,24 @@ message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
         }
 
         if (tmp_id != NULL) {
-            gsize tmp_len;
-            char* tmp = (char*)g_base64_decode(tmp_id, &tmp_len);
+            gsize tmp_len = strlen(tmp_id);
 
-            // our client sents at least 36 (uuid) + identifier
-            if (tmp_len > 36) {
-                char* uuid = g_strndup(tmp, 36);
+            // our client sents at CON_RAND_ID_LEN + identifier
+            if (tmp_len > CON_RAND_ID_LEN) {
+                char* uuid = g_strndup(tmp_id, CON_RAND_ID_LEN);
                 const char* prof_identifier = connection_get_profanity_identifier();
 
-                gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
+                gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA1,
                                                         (guchar*)prof_identifier, strlen(prof_identifier),
                                                         uuid, strlen(uuid));
 
-                if (g_strcmp0(&tmp[36], hmac) == 0) {
+                if (g_strcmp0(&tmp_id[CON_RAND_ID_LEN], hmac) == 0) {
                     ret = TRUE;
                 }
 
                 g_free(uuid);
                 g_free(hmac);
             }
-            free(tmp);
         }
     }
 

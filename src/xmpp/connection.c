@@ -514,26 +514,20 @@ connection_free_uuid(char* uuid)
 char*
 connection_create_stanza_id(void)
 {
-    char* uuid = connection_create_uuid();
+    char* rndid = get_random_string(CON_RAND_ID_LEN);
 
-    assert(uuid != NULL);
+    assert(rndid != NULL);
 
-    gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
+    gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA1,
                                             (guchar*)prof_identifier, strlen(prof_identifier),
-                                            uuid, strlen(uuid));
+                                            rndid, strlen(rndid));
 
-    GString* signature = g_string_new("");
-    g_string_printf(signature, "%s%s", uuid, hmac);
+    char *ret = g_strdup_printf("%s%s", rndid, hmac);
 
-    free(uuid);
+    free(rndid);
     g_free(hmac);
 
-    char* b64 = g_base64_encode((unsigned char*)signature->str, signature->len);
-    g_string_free(signature, TRUE);
-
-    assert(b64 != NULL);
-
-    return b64;
+    return ret;
 }
 
 char*
@@ -748,18 +742,12 @@ _random_bytes_close(void)
 static void
 _compute_identifier(const char* barejid)
 {
-    gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
-                                            (guchar*)profanity_instance_id, strlen(profanity_instance_id),
-                                            barejid, strlen(barejid));
-
-    char* b64 = g_base64_encode((guchar*)hmac, XMPP_SHA1_DIGEST_SIZE);
-    assert(b64 != NULL);
-    g_free(hmac);
-
     //in case of reconnect (lost connection)
     free(prof_identifier);
 
-    prof_identifier = b64;
+    prof_identifier = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
+                                            (guchar*)profanity_instance_id, strlen(profanity_instance_id),
+                                            barejid, strlen(barejid));
 }
 
 const char*
