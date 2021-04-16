@@ -1868,6 +1868,7 @@ _get_group(preference_t pref)
     case PREF_TITLEBAR_MUC_TITLE_JID:
     case PREF_TITLEBAR_MUC_TITLE_NAME:
     case PREF_SLASH_GUARD:
+    case PREF_COMPOSE_EDITOR:
         return PREF_GROUP_UI;
     case PREF_STATES:
     case PREF_OUTTYPE:
@@ -2189,6 +2190,8 @@ _get_key(preference_t pref)
         return "url.open.cmd";
     case PREF_URL_SAVE_CMD:
         return "url.save.cmd";
+    case PREF_COMPOSE_EDITOR:
+        return "compose.editor";
     default:
         return NULL;
     }
@@ -2326,6 +2329,8 @@ _get_default_string(preference_t pref)
         return "xdg-open";
     case PREF_URL_OPEN_CMD:
         return "xdg-open %u";
+    case PREF_COMPOSE_EDITOR:
+        return "/usr/bin/vim";
     case PREF_URL_SAVE_CMD:
         return NULL; // Default to built-in method.
     default:

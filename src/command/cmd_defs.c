@@ -2586,6 +2586,20 @@ static struct cmd_t command_defs[] = {
       CMD_NOEXAMPLES
     },
 
+    { "/editor",
+      parse_args, 0, 0, NULL,
+      CMD_NOSUBFUNCS
+      CMD_MAINFUNC(cmd_editor)
+      CMD_TAGS(
+              CMD_TAG_CHAT)
+      CMD_SYN(
+              "/editor")
+      CMD_DESC(
+              "Call editor")
+      CMD_NOARGS
+      CMD_NOEXAMPLES
+    },
+
     // NEXT-COMMAND (search helper)
 };
 
@@ -2894,7 +2908,7 @@ command_mangen(void)
 
     GDateTime* now = g_date_time_new_now_local();
     gchar* date = g_date_time_format(now, "%F");
-    gchar *header = g_strdup_printf(".TH man 1 \"%s\" \"" PACKAGE_VERSION "\" \"Profanity XMPP client\"\n", date);
+    gchar* header = g_strdup_printf(".TH man 1 \"%s\" \"" PACKAGE_VERSION "\" \"Profanity XMPP client\"\n", date);
     if (!header) {
         log_error("command_mangen(): could not allocate memory");
         return;

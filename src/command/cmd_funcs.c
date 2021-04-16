@@ -52,6 +52,12 @@
 #include <langinfo.h>
 #include <ctype.h>
 
+// fork / execl
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <readline/readline.h>
+
 #include "profanity.h"
 #include "log.h"
 #include "common.h"
@@ -6861,7 +6867,7 @@ cmd_plugins_sourcepath(ProfWin* window, const char* const command, gchar** args)
             return TRUE;
         }
 
-        char *path = get_expanded_path(args[2]);
+        char* path = get_expanded_path(args[2]);
 
         if (!is_dir(path)) {
             cons_show("Plugins sourcepath must be a directory.");
@@ -6882,7 +6888,7 @@ cmd_plugins_sourcepath(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
 {
-    char *path;
+    char* path;
 
     if (args[1] == NULL) {
         char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
@@ -9302,5 +9308,86 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
     free(passwd);
     free(confirm_passwd);
 
+    return TRUE;
+}
+
+gboolean
+cmd_editor(ProfWin* window, const char* const command, gchar** args)
+{
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    if (!ctx) {
+        log_debug("Editor: no connection");
+        return TRUE;
+    }
+
+    // build temp file name. Example: /tmp/profanity-f2f271dd-98c8-4118-8d47-3bd49c8e2e63.txt
+    char* uuid = xmpp_uuid_gen(ctx);
+    char* filename = g_strdup_printf("%s%s%s.txt", g_get_tmp_dir(), "/profanity-", uuid);
+    if (uuid) {
+        xmpp_free(ctx, uuid);
+    }
+
+    // Check if file exists and create file
+    if (g_file_test(filename, G_FILE_TEST_EXISTS)) {
+        cons_show("Editor: temp file exists already");
+        return TRUE;
+    }
+
+    GError* creation_error = NULL;
+    GFile* file = g_file_new_for_path(filename);
+    GFileOutputStream* fos = g_file_create(file,
+                                           G_FILE_CREATE_PRIVATE, NULL,
+                                           &creation_error);
+    if (creation_error) {
+        cons_show_error("Editor: could not create temp file");
+        return TRUE;
+    }
+    g_object_unref(fos);
+
+    char* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
+    if (!g_file_test(editor, G_FILE_TEST_EXISTS)) {
+        cons_show_error("Editor: binary %s not exist", editor);
+        return TRUE;
+    }
+
+    // Fork / exec
+    pid_t pid = fork();
+    if (pid == 0) {
+        int x = execl(editor, editor, g_file_get_path(file), (char*)NULL);
+        if (x == -1) {
+            cons_show_error("Editor:Failed to exec %s", editor);
+        }
+        _exit(EXIT_FAILURE);
+    } else {
+        if (pid == -1) {
+            return TRUE;
+        }
+        int status = 0;
+        waitpid(pid, &status, 0);
+        int fd_input_file = open(g_file_get_path(file), O_RDONLY);
+        const size_t COUNT = 8192;
+        char buf[COUNT];
+        ssize_t size_read = read(fd_input_file, buf, COUNT);
+        if (size_read > 0 && size_read <= COUNT) {
+            buf[size_read - 1] = '\0';
+            GString* text = g_string_new(buf);
+            ProfWin* win = wins_get_current();
+            win_println(win, THEME_DEFAULT, "!", "EDITOR PREVIEW: %s", text->str);
+            rl_insert_text(text->str);
+            g_string_free(text, TRUE);
+        }
+        close(fd_input_file);
+
+        GError* deletion_error = NULL;
+        g_file_delete(file, NULL, &deletion_error);
+        if (deletion_error) {
+            cons_show("Editor: error during file deletion");
+            return TRUE;
+        }
+        g_object_unref(file);
+        ui_resize();
+        rl_point = rl_end;
+        rl_forced_update_display();
+    }
     return TRUE;
 }
