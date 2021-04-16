@@ -9,6 +9,8 @@ Thank you very much to all of our sponsors and donors (including those that want
 
 [Alexander Dahl](https://github.com/LeSpocky) since January 2021
 
+[James Pond](https://github.com/jamesponddotco) since February 2021
+
 ## Donors
 [Martin Dosch](https://github.com/mdosch)
 
