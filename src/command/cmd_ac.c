@@ -2461,7 +2461,7 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 
     gboolean result;
     gchar** args = parse_args(input, 2, 3, &result);
-    if ((strncmp(input, "/ox", 4) == 0) && (result == TRUE)) {
+    if ((strncmp(input, "/ox ", 4) == 0) && (result == TRUE)) {
         GString* beginning = g_string_new("/ox ");
         g_string_append(beginning, args[0]);
         if (args[1]) {
@@ -2485,11 +2485,8 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     found = autocomplete_param_with_ac(input, "/ox", ox_ac, TRUE, previous);
-    if (found) {
-        return found;
-    }
 
-    return NULL;
+    return found;
 }
 #endif
 
