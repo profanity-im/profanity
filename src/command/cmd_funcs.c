@@ -9314,29 +9314,22 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_editor(ProfWin* window, const char* const command, gchar** args)
 {
-    /* Build temp file name */
-    GString* tempfile = g_string_new(g_get_tmp_dir());
-    g_string_append(tempfile, "/profanity-");
     xmpp_ctx_t* const ctx = connection_get_ctx();
     if (!ctx) {
-        cons_show("Editor: Not connection");
+        log_debug("Editor: No connection");
         return TRUE;
     }
+
+    // build temp file name. Example: /tmp/profanity-f2f271dd-98c8-4118-8d47-3bd49c8e2e63.txt
     char* uuid = xmpp_uuid_gen(ctx);
-    g_string_append(tempfile, uuid);
+    char* filename = g_strdup_printf("%s%s%s.txt", g_get_tmp_dir(), "/profanity-", uuid);
     if (uuid) {
         xmpp_free(ctx, uuid);
     }
-    g_string_append(tempfile, ".txt");
-
-    // tempfile should be something like
-    // /tmp/profanity-f2f271dd-98c8-4118-8d47-3bd49c8e2e63.txt
-    const char* filename = tempfile->str;
 
     // Check if file exists and create file
     if (g_file_test(filename, G_FILE_TEST_EXISTS)) {
         cons_show("Editor: The temp file exists");
-        g_string_free(tempfile, TRUE);
         return TRUE;
     }
 
