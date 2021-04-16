@@ -2908,7 +2908,7 @@ command_mangen(void)
 
     GDateTime* now = g_date_time_new_now_local();
     gchar* date = g_date_time_format(now, "%F");
-    gchar *header = g_strdup_printf(".TH man 1 \"%s\" \"" PACKAGE_VERSION "\" \"Profanity XMPP client\"\n", date);
+    gchar* header = g_strdup_printf(".TH man 1 \"%s\" \"" PACKAGE_VERSION "\" \"Profanity XMPP client\"\n", date);
     if (!header) {
         log_error("command_mangen(): could not allocate memory");
         return;

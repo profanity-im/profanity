@@ -6867,7 +6867,7 @@ cmd_plugins_sourcepath(ProfWin* window, const char* const command, gchar** args)
             return TRUE;
         }
 
-        char *path = get_expanded_path(args[2]);
+        char* path = get_expanded_path(args[2]);
 
         if (!is_dir(path)) {
             cons_show("Plugins sourcepath must be a directory.");
@@ -6888,7 +6888,7 @@ cmd_plugins_sourcepath(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
 {
-    char *path;
+    char* path;
 
     if (args[1] == NULL) {
         char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
@@ -9315,10 +9315,10 @@ gboolean
 cmd_editor(ProfWin* window, const char* const command, gchar** args)
 {
     /* Build temp file name */
-    GString * tempfile = g_string_new(g_get_tmp_dir());
+    GString* tempfile = g_string_new(g_get_tmp_dir());
     g_string_append(tempfile, "/profanity-");
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    if(!ctx) {
+    if (!ctx) {
         cons_show("Editor: Not connection");
         return TRUE;
     }
@@ -9336,16 +9336,16 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
     // Check if file exists and create file
     if (g_file_test(filename, G_FILE_TEST_EXISTS)) {
         cons_show("Editor: The temp file exists");
-        g_string_free (tempfile, TRUE);
+        g_string_free(tempfile, TRUE);
         return TRUE;
     }
 
     GError* creation_error = NULL;
     GFile* file = g_file_new_for_path(filename);
-    GFileOutputStream* fos = g_file_create (file,
-               G_FILE_CREATE_PRIVATE, NULL,
-               &creation_error);
-    if ( creation_error ) {
+    GFileOutputStream* fos = g_file_create(file,
+                                           G_FILE_CREATE_PRIVATE, NULL,
+                                           &creation_error);
+    if (creation_error) {
         cons_show_error("Editor: Error during file creation");
         return TRUE;
     }
@@ -9359,14 +9359,14 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
 
     // Fork / exec
     pid_t pid = fork();
-    if( pid == 0 ) {
-        int x = execl(editor, editor, g_file_get_path(file), (char *) NULL);
-        if ( x == -1 ) {
+    if (pid == 0) {
+        int x = execl(editor, editor, g_file_get_path(file), (char*)NULL);
+        if (x == -1) {
             cons_show_error("Failed to exec %s", editor);
         }
         _exit(EXIT_FAILURE);
     } else {
-        if ( pid == -1 ) {
+        if (pid == -1) {
             return TRUE;
         }
         int status = 0;
@@ -9375,8 +9375,8 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
         const size_t COUNT = 8192;
         char buf[COUNT];
         ssize_t size_read = read(fd_input_file, buf, COUNT);
-        if(size_read > 0 && size_read <= COUNT ) {
-            buf[size_read-1] = '\0';
+        if (size_read > 0 && size_read <= COUNT) {
+            buf[size_read - 1] = '\0';
             GString* text = g_string_new(buf);
             ProfWin* win = wins_get_current();
             win_println(win, THEME_DEFAULT, "!", "EDITOR PREVIEW: %s", text->str);
@@ -9386,8 +9386,8 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
         close(fd_input_file);
 
         GError* deletion_error = NULL;
-        g_file_delete (file, NULL, &deletion_error);
-        if ( deletion_error ) {
+        g_file_delete(file, NULL, &deletion_error);
+        if (deletion_error) {
             cons_show("Editor: Error during file deletion");
             return TRUE;
         }
