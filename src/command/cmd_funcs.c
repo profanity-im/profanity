@@ -9316,7 +9316,7 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
     if (!ctx) {
-        log_debug("Editor: No connection");
+        log_debug("Editor: no connection");
         return TRUE;
     }
 
@@ -9329,7 +9329,7 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
 
     // Check if file exists and create file
     if (g_file_test(filename, G_FILE_TEST_EXISTS)) {
-        cons_show("Editor: The temp file exists");
+        cons_show("Editor: temp file exists already");
         return TRUE;
     }
 
@@ -9339,14 +9339,14 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
                                            G_FILE_CREATE_PRIVATE, NULL,
                                            &creation_error);
     if (creation_error) {
-        cons_show_error("Editor: Error during file creation");
+        cons_show_error("Editor: could not create temp file");
         return TRUE;
     }
     g_object_unref(fos);
 
     char* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
     if (!g_file_test(editor, G_FILE_TEST_EXISTS)) {
-        cons_show_error("Editor: editor %s not exists", editor);
+        cons_show_error("Editor: binary %s not exist", editor);
         return TRUE;
     }
 
@@ -9355,7 +9355,7 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
     if (pid == 0) {
         int x = execl(editor, editor, g_file_get_path(file), (char*)NULL);
         if (x == -1) {
-            cons_show_error("Failed to exec %s", editor);
+            cons_show_error("Editor:Failed to exec %s", editor);
         }
         _exit(EXIT_FAILURE);
     } else {
@@ -9381,7 +9381,7 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
         GError* deletion_error = NULL;
         g_file_delete(file, NULL, &deletion_error);
         if (deletion_error) {
-            cons_show("Editor: Error during file deletion");
+            cons_show("Editor: error during file deletion");
             return TRUE;
         }
         g_object_unref(file);
