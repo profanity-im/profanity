@@ -2591,11 +2591,12 @@ static struct cmd_t command_defs[] = {
       CMD_NOSUBFUNCS
       CMD_MAINFUNC(cmd_editor)
       CMD_TAGS(
-              CMD_TAG_CHAT)
+              CMD_TAG_CHAT,
+              CMD_TAG_GROUPCHAT)
       CMD_SYN(
               "/editor")
       CMD_DESC(
-              "Call editor")
+              "Spawn external editor to edit message")
       CMD_NOARGS
       CMD_NOEXAMPLES
     },
