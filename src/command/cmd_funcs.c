@@ -9320,9 +9320,9 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    // build temp file name. Example: /tmp/profanity-f2f271dd-98c8-4118-8d47-3bd49c8e2e63.txt
+    // build temp file name. Example: /tmp/profanity-f2f271dd-98c8-4118-8d47-3bd49c8e2e63.md
     char* uuid = xmpp_uuid_gen(ctx);
-    char* filename = g_strdup_printf("%s%s%s.txt", g_get_tmp_dir(), "/profanity-", uuid);
+    char* filename = g_strdup_printf("%s%s%s.md", g_get_tmp_dir(), "/profanity-", uuid);
     if (uuid) {
         xmpp_free(ctx, uuid);
     }
