@@ -173,9 +173,9 @@ main(int argc, char** argv)
 #endif
 
 #ifdef HAVE_GTK
-        g_print("GTK icons: Enabled\n");
+        g_print("GTK icons/clipboard: Enabled\n");
 #else
-        g_print("GTK icons: Disabled\n");
+        g_print("GTK icons/clipboard: Disabled\n");
 #endif
 
         return 0;
