@@ -1044,6 +1044,7 @@ cmd_ac_init(void)
     autocomplete_add(executable_ac, "avatar");
     autocomplete_add(executable_ac, "urlopen");
     autocomplete_add(executable_ac, "urlsave");
+    autocomplete_add(executable_ac, "editor");
 }
 
 void

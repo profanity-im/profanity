@@ -2508,7 +2508,8 @@ static struct cmd_t command_defs[] = {
       CMD_SUBFUNCS(
               { "avatar",  cmd_executable_avatar },
               { "urlopen", cmd_executable_urlopen },
-              { "urlsave", cmd_executable_urlsave })
+              { "urlsave", cmd_executable_urlsave },
+              { "editor", cmd_executable_editor })
       CMD_NOMAINFUNC
       CMD_TAGS(
               CMD_TAG_DISCOVERY)
@@ -2525,7 +2526,8 @@ static struct cmd_t command_defs[] = {
               { "urlopen set", "Set executable that is run by /url open. Takes a command template that replaces %u and %p with the URL and path respectively." },
               { "urlopen default", "Restore to default settings." },
               { "urlsave set", "Set executable that is run by /url save. Takes a command template that replaces %u and %p with the URL and path respectively." },
-              { "urlsave default", "Use the built-in download method for saving." })
+              { "urlsave default", "Use the built-in download method for saving." },
+              { "editor set", "Set editor to be used with /editor. Needs full file path." })
       CMD_EXAMPLES(
               "/executable avatar xdg-open",
               "/executable urlopen set \"xdg-open %u\"",
@@ -2533,7 +2535,8 @@ static struct cmd_t command_defs[] = {
               "/executable urlopen default",
               "/executable urlsave set \"wget %u -O %p\"",
               "/executable urlsave set \"curl %u -o %p\"",
-              "/executable urlsave default")
+              "/executable urlsave default",
+              "/executable editor set /usr/bin/vim")
     },
 
     { "/url",

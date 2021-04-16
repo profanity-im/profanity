@@ -9277,6 +9277,21 @@ cmd_executable_urlsave(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_executable_editor(ProfWin* window, const char* const command, gchar** args)
+{
+    guint num_args = g_strv_length(args);
+
+    if (g_strcmp0(args[1], "set") == 0 && num_args >= 3) {
+        prefs_set_string(PREF_COMPOSE_EDITOR, args[2]);
+        cons_show("`editor` command set to invoke '%s'", args[2]);
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+
+    return TRUE;
+}
+
+gboolean
 cmd_mam(ProfWin* window, const char* const command, gchar** args)
 {
     _cmd_set_boolean_preference(args[0], command, "Message Archive Management", PREF_MAM);
