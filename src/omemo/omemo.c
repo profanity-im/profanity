@@ -651,6 +651,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
         char* fp = _omemo_fingerprint(identity_key, TRUE);
         cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
         omemo_trust(jid, fp);
+        free(fp);
         trusted = TRUE;
     }
 
