@@ -1930,6 +1930,7 @@ _get_group(preference_t pref)
         return PREF_GROUP_PLUGINS;
     case PREF_OMEMO_LOG:
     case PREF_OMEMO_POLICY:
+    case PREF_OMEMO_TRUST_MODE:
         return PREF_GROUP_OMEMO;
     default:
         return NULL;
@@ -2178,6 +2179,8 @@ _get_key(preference_t pref)
         return "log";
     case PREF_OMEMO_POLICY:
         return "policy";
+    case PREF_OMEMO_TRUST_MODE:
+        return "trustmode";
     case PREF_CORRECTION_ALLOW:
         return "correction.allow";
     case PREF_AVATAR_CMD:
@@ -2323,6 +2326,8 @@ _get_default_string(preference_t pref)
         return "redact";
     case PREF_OMEMO_POLICY:
         return "automatic";
+    case PREF_OMEMO_TRUST_MODE:
+        return "manual";
     case PREF_COLOR_NICK:
         return "false";
     case PREF_AVATAR_CMD:
