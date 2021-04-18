@@ -2504,8 +2504,25 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "<domain>", "The jid of your server or component." })
       CMD_EXAMPLES(
-              "/software valhalla.edda",
-              "/software xmpp.vanaheimr.edda")
+              "/serversoftware valhalla.edda",
+              "/serversoftware xmpp.vanaheimr.edda")
+    },
+
+    { "/servercontact",
+        parse_args, 1, 1, NULL,
+        CMD_NOSUBFUNCS
+            CMD_MAINFUNC(cmd_servercontact)
+            CMD_TAGS(
+                    CMD_TAG_DISCOVERY)
+            CMD_SYN(
+                    "/servercontact <domain>")
+            CMD_DESC(
+                    "Find XEP-0157 contact information.")
+            CMD_ARGS(
+                    { "<domain>", "The jid of the server." })
+        CMD_EXAMPLES(
+                "/servercontact valhalla.edda",
+                "/servercontact xmpp.vanaheimr.edda")
     },
 
     { "/executable",
