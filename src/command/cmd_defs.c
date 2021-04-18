@@ -2504,8 +2504,8 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "<domain>", "The jid of your server or component." })
       CMD_EXAMPLES(
-              "/software valhalla.edda",
-              "/software xmpp.vanaheimr.edda")
+              "/serversoftware valhalla.edda",
+              "/serversoftware xmpp.vanaheimr.edda")
     },
 
     { "/executable",
