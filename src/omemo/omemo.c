@@ -141,6 +141,14 @@ omemo_close(void)
     }
 }
 
+/*!
+ * \brief Initialize a global context for signal after connect
+ *
+ * Before using the library, a libsignal-protocol-c client needs to initialize
+ * a global context.
+ *
+ */
+
 void
 omemo_on_connect(ProfAccount* account)
 {
@@ -1305,17 +1313,17 @@ _omemo_log(int level, const char* message, size_t len, void* user_data)
 {
     switch (level) {
     case SG_LOG_ERROR:
-        log_error("[OMEMO] %s", message);
+        log_error("[OMEMO][SIGNAL] %s", message);
         break;
     case SG_LOG_WARNING:
-        log_warning("[OMEMO] %s", message);
+        log_warning("[OMEMO][SIGNAL] %s", message);
         break;
     case SG_LOG_NOTICE:
     case SG_LOG_INFO:
-        log_info("[OMEMO] %s", message);
+        log_info("[OMEMO][SIGNAL] %s", message);
         break;
     case SG_LOG_DEBUG:
-        log_debug("[OMEMO] %s", message);
+        log_debug("[OMEMO][SIGNAL] %s", message);
         break;
     }
 }
