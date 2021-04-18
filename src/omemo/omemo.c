@@ -66,7 +66,7 @@
 #define AESGCM_URL_NONCE_LEN (2 * OMEMO_AESGCM_NONCE_LENGTH)
 #define AESGCM_URL_KEY_LEN   (2 * OMEMO_AESGCM_KEY_LENGTH)
 
-static gboolean loaded;
+static gboolean loaded = FALSE;
 
 static void _generate_pre_keys(int count);
 static void _generate_signed_pre_key(void);
@@ -152,6 +152,7 @@ omemo_close(void)
 void
 omemo_on_connect(ProfAccount* account)
 {
+    loaded = FALSE;
     GError* error = NULL;
 
     if (signal_context_create(&omemo_ctx.signal, &omemo_ctx) != 0) {
@@ -233,7 +234,6 @@ omemo_on_connect(ProfAccount* account)
     };
     signal_protocol_store_context_set_identity_key_store(omemo_ctx.store, &identity_key_store);
 
-    loaded = FALSE;
     omemo_ctx.device_list = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_list_free);
     omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
     omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_g_hash_table_free);
