@@ -262,7 +262,7 @@ omemo_on_connect(ProfAccount* account)
 
     g_free(omemo_dir);
 
-    omemo_devicelist_subscribe();
+    // Loading OMEMO files
 
     omemo_ctx.identity_keyfile = g_key_file_new();
     omemo_ctx.trust_keyfile = g_key_file_new();
@@ -302,6 +302,8 @@ omemo_on_connect(ProfAccount* account)
         log_warning("[OMEMO] error loading known devices from: %s, %s", omemo_ctx.known_devices_filename->str, error->message);
         g_error_free(error);
     }
+
+    omemo_devicelist_subscribe();
 }
 
 void
