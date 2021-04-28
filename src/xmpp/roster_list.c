@@ -171,6 +171,30 @@ roster_get_contact(const char* const barejid)
 }
 
 char*
+roster_get_display_name(const char* const barejid)
+{
+    assert(roster != NULL);
+
+    GString* result = g_string_new("");
+
+    PContact contact = roster_get_contact(barejid);
+    if (contact) {
+        if (p_contact_name(contact)) {
+            g_string_append(result, p_contact_name(contact));
+        } else {
+            g_string_append(result, barejid);
+        }
+    } else {
+        g_string_append(result, barejid);
+    }
+
+    char* result_str = result->str;
+    g_string_free(result, FALSE);
+
+    return result_str;
+}
+
+char*
 roster_get_msg_display_name(const char* const barejid, const char* const resource)
 {
     assert(roster != NULL);

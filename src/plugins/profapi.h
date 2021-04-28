@@ -74,6 +74,7 @@ char* (*prof_get_current_recipient)(void);
 char* (*prof_get_current_muc)(void);
 int (*prof_current_win_is_console)(void);
 char* (*prof_get_current_nick)(void);
+char* (*prof_get_nick_from_roster)(const char *barejid);
 char** (*prof_get_current_occupants)(void);
 
 char* (*prof_get_room_nick)(const char *barejid);

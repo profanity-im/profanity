@@ -64,6 +64,7 @@ char* (*prof_get_current_recipient)(void) = NULL;
 char* (*prof_get_current_muc)(void) = NULL;
 int (*prof_current_win_is_console)(void) = NULL;
 char* (*prof_get_current_nick)(void) = NULL;
+char* (*prof_get_nick_from_roster)(const char *barejid) = NULL;
 char** (*prof_get_current_occupants)(void) = NULL;
 
 char* (*prof_get_room_nick)(const char *barejid) = NULL;
