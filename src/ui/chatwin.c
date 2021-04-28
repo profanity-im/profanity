@@ -519,6 +519,7 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 
         while (curr) {
             ProfMessage* msg = curr->data;
+            msg->plain = plugins_pre_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
             win_print_history((ProfWin*)chatwin, msg);
             curr = g_slist_next(curr);
         }
