@@ -442,7 +442,7 @@ python_api_get_current_nick(PyObject* self, PyObject* args)
 }
 
 static PyObject*
-python_api_get_nick_from_roster(PyObject* self, PyObject* args)
+python_api_get_name_from_roster(PyObject* self, PyObject* args)
 {
     PyObject* barejid = NULL;
     if (!PyArg_ParseTuple(args, "O", &barejid)) {
@@ -452,11 +452,11 @@ python_api_get_nick_from_roster(PyObject* self, PyObject* args)
     char* barejid_str = python_str_or_unicode_to_string(barejid);
 
     allow_python_threads();
-    char* nick = roster_get_display_name(barejid_str);
+    char* name = roster_get_display_name(barejid_str);
     free(barejid_str);
     disable_python_threads();
-    if (nick) {
-        return Py_BuildValue("s", nick);
+    if (name) {
+        return Py_BuildValue("s", name);
     } else {
         Py_RETURN_NONE;
     }
@@ -1509,7 +1509,7 @@ static PyMethodDef apiMethods[] = {
     { "get_current_recipient", python_api_get_current_recipient, METH_VARARGS, "Return the jid of the recipient of the current window." },
     { "get_current_muc", python_api_get_current_muc, METH_VARARGS, "Return the jid of the room of the current window." },
     { "get_current_nick", python_api_get_current_nick, METH_VARARGS, "Return nickname in current room." },
-    { "get_nick_from_roster", python_api_get_nick_from_roster, METH_VARARGS, "Return nickname in roster of barejid." },
+    { "get_name_from_roster", python_api_get_name_from_roster, METH_VARARGS, "Return nickname in roster of barejid." },
     { "get_current_occupants", python_api_get_current_occupants, METH_VARARGS, "Return list of occupants in current room." },
     { "current_win_is_console", python_api_current_win_is_console, METH_VARARGS, "Returns whether the current window is the console." },
     { "get_room_nick", python_api_get_room_nick, METH_VARARGS, "Return the nickname used in the specified room, or None if not in the room." },

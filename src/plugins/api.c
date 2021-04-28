@@ -241,7 +241,7 @@ api_get_current_nick(void)
 }
 
 char*
-api_get_nick_from_roster(const char* barejid)
+api_get_name_from_roster(const char* barejid)
 {
     return roster_get_display_name(barejid);
 }

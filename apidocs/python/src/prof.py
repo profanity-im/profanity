@@ -253,7 +253,7 @@ def get_current_nick():
     pass
 
 
-def get_nick_from_roster(barejid):
+def get_name_from_roster(barejid):
     """Retrieve a nickname from a barejid if it is in the roster.
 
     :return: the users nickname e.g. ``"eddie"``, or ``None`` if the barejid is not in the roster.
