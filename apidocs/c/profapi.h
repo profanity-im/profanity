@@ -145,6 +145,12 @@ Retrieve the nickname for a given barejid if it is in the roster.
 char* prof_get_name_from_roster(const char *barejid);
 
 /**
+Retrieve the barejid for a given nickname if it is in the roster.
+@return the users barejid e.g. "eddie@server.tld", or NULLL if the nickname is not in the roster.
+*/
+char* prof_get_barejid_from_roster(const char *name);
+
+/**
 Retrieve nicknames of all occupants in a chat room, when in a chat room window.
 @return nicknames of all occupants in the current room or an empty list if not in a chat room window.
 */

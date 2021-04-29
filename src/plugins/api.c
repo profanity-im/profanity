@@ -246,6 +246,12 @@ api_get_name_from_roster(const char* barejid)
     return roster_get_display_name(barejid);
 }
 
+char*
+api_get_barejid_from_roster(const char* name)
+{
+    return roster_barejid_from_name(name);
+}
+
 char**
 api_get_current_occupants(void)
 {

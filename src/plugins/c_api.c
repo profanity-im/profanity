@@ -201,6 +201,12 @@ c_api_get_name_from_roster(const char* barejid)
     return api_get_name_from_roster(barejid);
 }
 
+static char*
+c_api_get_barejid_from_roster(const char* name)
+{
+    return api_get_barejid_from_roster(name);
+}
+
 static char**
 c_api_get_current_occupants(void)
 {
@@ -490,6 +496,7 @@ c_api_init(void)
     prof_current_win_is_console = c_api_current_win_is_console;
     prof_get_current_nick = c_api_get_current_nick;
     prof_get_name_from_roster = c_api_get_name_from_roster;
+    prof_get_barejid_from_roster = c_api_get_barejid_from_roster;
     prof_get_current_occupants = c_api_get_current_occupants;
     prof_get_room_nick = c_api_get_room_nick;
     prof_log_debug = c_api_log_debug;

@@ -262,6 +262,15 @@ def get_name_from_roster(barejid):
     pass
 
 
+def get_barejid_from_roster(name):
+    """Retrieve the barejid for a given nickname if it is in the roster.
+
+    :return: the users barejid e.g. "eddie@server.tld", or ``None`` if the nickname is not in the roster.
+    :rtype: str
+    """
+    pass
+
+
 def get_current_occupants(): 
     """Retrieve nicknames of all occupants in a chat room, when in a chat room window.
 

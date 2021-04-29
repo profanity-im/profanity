@@ -50,6 +50,7 @@ char* api_get_current_muc(void);
 gboolean api_current_win_is_console(void);
 char* api_get_current_nick(void);
 char* api_get_name_from_roster(const char* barejid);
+char* api_get_barejid_from_roster(const char* name);
 char** api_get_current_occupants(void);
 
 char* api_get_room_nick(const char* barejid);
