@@ -1589,12 +1589,13 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
     free(inpcp);
     free(inpcp2);
 
-    struct dirent* dir;
     GArray* files = g_array_new(TRUE, FALSE, sizeof(char*));
     g_array_set_clear_func(files, (GDestroyNotify)_filepath_item_free);
 
     DIR* d = opendir(directory);
     if (d) {
+        struct dirent* dir;
+
         while ((dir = readdir(d)) != NULL) {
             if (strcmp(dir->d_name, ".") == 0) {
                 continue;
