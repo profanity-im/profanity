@@ -3138,9 +3138,6 @@ _affiliation_autocomplete(ProfWin* window, const char* const input, gboolean pre
     }
 
     result = autocomplete_param_with_ac(input, "/affiliation", affiliation_cmd_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
 
     return result;
 }
@@ -3188,9 +3185,6 @@ _role_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     result = autocomplete_param_with_ac(input, "/role", role_cmd_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
 
     return result;
 }
@@ -3201,11 +3195,8 @@ _wins_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     char* result = NULL;
 
     result = autocomplete_param_with_ac(input, "/wins", wins_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
 
-    return NULL;
+    return result;
 }
 
 static char*
@@ -3229,9 +3220,6 @@ _tls_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     result = autocomplete_param_with_ac(input, "/tls", tls_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
 
     return result;
 }
@@ -3252,9 +3240,6 @@ _titlebar_autocomplete(ProfWin* window, const char* const input, gboolean previo
     }
 
     result = autocomplete_param_with_ac(input, "/titlebar", titlebar_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
 
     return result;
 }
@@ -3275,11 +3260,8 @@ _receipts_autocomplete(ProfWin* window, const char* const input, gboolean previo
     }
 
     result = autocomplete_param_with_ac(input, "/receipts", receipts_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
 
-    return NULL;
+    return result;
 }
 
 static char*
@@ -3293,11 +3275,8 @@ _alias_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     result = autocomplete_param_with_ac(input, "/alias", alias_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
 
-    return NULL;
+    return result;
 }
 
 static char*
@@ -3465,11 +3444,7 @@ _help_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     result = autocomplete_param_with_ac(input, "/help", help_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
+    return result;
 }
 
 static char*
@@ -3508,11 +3483,8 @@ _join_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     g_strfreev(args);
 
     found = autocomplete_param_with_func(input, "/join", bookmark_find, previous, NULL);
-    if (found) {
-        return found;
-    }
 
-    return NULL;
+    return found;
 }
 
 static char*
@@ -3534,11 +3506,7 @@ _console_autocomplete(ProfWin* window, const char* const input, gboolean previou
     }
 
     result = autocomplete_param_with_ac(input, "/console", console_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
+    return result;
 }
 
 static char*
@@ -3590,11 +3558,8 @@ _subject_autocomplete(ProfWin* window, const char* const input, gboolean previou
     }
 
     result = autocomplete_param_with_ac(input, "/subject", subject_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
 
-    return NULL;
+    return result;
 }
 
 static char*
@@ -3770,11 +3735,8 @@ _presence_autocomplete(ProfWin* window, const char* const input, gboolean previo
     }
 
     found = autocomplete_param_with_ac(input, "/presence", presence_ac, TRUE, previous);
-    if (found) {
-        return found;
-    }
 
-    return NULL;
+    return found;
 }
 
 static char*
@@ -3871,11 +3833,8 @@ _statusbar_autocomplete(ProfWin* window, const char* const input, gboolean previ
     }
 
     found = autocomplete_param_with_ac(input, "/statusbar room", statusbar_room_ac, TRUE, previous);
-    if (found) {
-        return found;
-    }
 
-    return NULL;
+    return found;
 }
 
 static char*
@@ -3889,11 +3848,7 @@ _clear_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     result = autocomplete_param_with_func(input, "/clear persist_history", prefs_autocomplete_boolean_choice, previous, NULL);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
+    return result;
 }
 
 static char*
@@ -3989,11 +3944,7 @@ _logging_autocomplete(ProfWin* window, const char* const input, gboolean previou
     }
 
     result = autocomplete_param_with_ac(input, "/logging group", logging_group_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
+    return result;
 }
 
 static char*
@@ -4007,11 +3958,7 @@ _color_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     result = autocomplete_param_with_ac(input, "/color", color_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
+    return result;
 }
 
 static char*
