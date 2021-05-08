@@ -794,16 +794,17 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 .device_id = GPOINTER_TO_INT(device_ids_iter->data)
             };
 
+            log_info("[OMEMO] recipients with device id %d for %s", GPOINTER_TO_INT(device_ids_iter->data), recipients_iter->data);
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
-            if (res != 0) {
-                log_error("[OMEMO] cannot create cipher for %s device id %d", address.name, address.device_id);
+            if (res != SG_SUCCESS ) {
+                log_error("[OMEMO] cannot create cipher for %s device id %d - code: %d", address.name, address.device_id, res);
                 continue;
             }
 
             res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
             session_cipher_free(cipher);
-            if (res != 0) {
-                log_error("[OMEMO] cannot encrypt key for %s device id %d", address.name, address.device_id);
+            if (res != SG_SUCCESS ) {
+                log_error("[OMEMO] cannot encrypt key for %s device id %d - code: %d", address.name, address.device_id,res);
                 continue;
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);
@@ -842,10 +843,11 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 .name_len = strlen(jid->barejid),
                 .device_id = GPOINTER_TO_INT(device_ids_iter->data)
             };
-
+            log_info("[OMEMO] Sending to device %d for %s ", address.device_id, address.name);
             // Don't encrypt for this device (according to
             // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
             if (address.device_id == omemo_ctx.device_id) {
+                log_info("[OMEMO] Skipping %d (my device) ", address.device_id);
                 continue;
             }
 
