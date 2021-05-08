@@ -781,10 +781,21 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
         recipient_device_id = g_hash_table_lookup(omemo_ctx.device_list, recipients_iter->data);
         if (!recipient_device_id) {
             log_warning("[OMEMO] cannot find device ids for %s", recipients_iter->data);
+            win_println(win, THEME_ERROR, "!", "Can't find a OMEMO device id for %s.\n", recipients_iter->data);
             continue;
         }
 
         for (device_ids_iter = recipient_device_id; device_ids_iter != NULL; device_ids_iter = device_ids_iter->next) {
+
+            // Don't encrypt for this device (according to
+            // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
+            Jid* me = jid_create(connection_get_fulljid());
+            if ( !g_strcmp0(me->barejid, recipients_iter->data) ) {
+                if (GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
+                    log_info("[OMEMO] Skipping %d (my device) ", GPOINTER_TO_INT(device_ids_iter->data));
+                    continue;
+                }
+            }
             int res;
             ciphertext_message* ciphertext;
             session_cipher* cipher;
@@ -844,12 +855,6 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 .device_id = GPOINTER_TO_INT(device_ids_iter->data)
             };
             log_info("[OMEMO] Sending to device %d for %s ", address.device_id, address.name);
-            // Don't encrypt for this device (according to
-            // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
-            if (address.device_id == omemo_ctx.device_id) {
-                log_info("[OMEMO] Skipping %d (my device) ", address.device_id);
-                continue;
-            }
 
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
             if (res != 0) {
