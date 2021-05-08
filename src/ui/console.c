@@ -1716,9 +1716,14 @@ void
 cons_intype_setting(void)
 {
     if (prefs_get_boolean(PREF_INTYPE))
-        cons_show("Show typing (/intype)         : ON");
+        cons_show("Show typing in titlebar (/intype titlebar)       : ON");
     else
-        cons_show("Show typing (/intype)         : OFF");
+        cons_show("Show typing in titlebar (/intype titlebar)       : OFF");
+
+    if (prefs_get_boolean(PREF_INTYPE_CONSOLE))
+        cons_show("Show typing in console (/intype console)         : ON");
+    else
+        cons_show("Show typing in console (/intype console)         : OFF");
 }
 
 void

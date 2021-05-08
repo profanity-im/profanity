@@ -276,17 +276,21 @@ ui_contact_typing(const char* const barejid, const char* const resource)
     ProfWin* window = (ProfWin*)chatwin;
     ChatSession* session = chat_session_get(barejid);
 
-    if (prefs_get_boolean(PREF_INTYPE)) {
-        // no chat window for user
-        if (chatwin == NULL) {
+    // no chat window for user
+    if (chatwin == NULL) {
+        if (prefs_get_boolean(PREF_INTYPE_CONSOLE)) {
             cons_show_typing(barejid);
+        }
 
-            // have chat window but not currently in it
-        } else if (!wins_is_current(window)) {
+        // have chat window but not currently in it
+    } else if (!wins_is_current(window)) {
+        if (prefs_get_boolean(PREF_INTYPE_CONSOLE)) {
             cons_show_typing(barejid);
+        }
 
-            // in chat window with user, no session or session with resource
-        } else if (!session || (session && g_strcmp0(session->resource, resource) == 0)) {
+        // in chat window with user, no session or session with resource
+    } else if (!session || (session && g_strcmp0(session->resource, resource) == 0)) {
+        if (prefs_get_boolean(PREF_INTYPE)) {
             title_bar_set_typing(TRUE);
 
             int num = wins_get_num(window);
