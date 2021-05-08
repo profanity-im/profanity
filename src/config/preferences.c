@@ -2255,6 +2255,8 @@ _get_default_boolean(preference_t pref)
     case PREF_OUTTYPE:
     case PREF_TITLEBAR_MUC_TITLE_NAME:
     case PREF_COLOR_NICK_OWN:
+    case PREF_INTYPE:
+    case PREF_INTYPE_CONSOLE:
         return TRUE;
     default:
         return FALSE;
