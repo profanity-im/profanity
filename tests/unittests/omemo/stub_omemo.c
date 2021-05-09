@@ -119,6 +119,3 @@ uint32_t
 omemo_device_id() {
 	return 123;
 }
-
-
-
