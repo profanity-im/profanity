@@ -998,6 +998,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
 
         if (res == 0) {
             /* Start a new session */
+            log_info("[OMEMO][RECV] Res is 0 => omemo_bundle_request");
             omemo_bundle_request(sender->barejid, sid, omemo_start_device_session_handle_bundle, free, strdup(sender->barejid));
         }
     } else {

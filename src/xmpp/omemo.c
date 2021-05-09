@@ -144,7 +144,7 @@ omemo_bundle_request(const char* const jid, uint32_t device_id, ProfIqCallback f
     xmpp_ctx_t* const ctx = connection_get_ctx();
     char* id = connection_create_stanza_id();
 
-    log_info("[OMEMO] request omemo bundle (jid: %s, deivce: %d)", jid, device_id);
+    log_info("[OMEMO] request omemo bundle (jid: %s, device: %d)", jid, device_id);
 
     xmpp_stanza_t* iq = stanza_create_omemo_bundle_request(ctx, id, jid, device_id);
     iq_id_handler_add(id, func, free_func, userdata);
@@ -164,6 +164,13 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
     char* from = NULL;
 
     const char* from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    log_info("[OMEMO] omemo_start_device_session_handle_bundle: %s", from_attr);
+
+    const char* type = xmpp_stanza_get_type(stanza);
+    if ( g_strcmp0( type, "error") == 0 ) {
+        log_error("[OMEMO] Error to get key for a device from : %s", from_attr);
+        goto out;
+    }
 
     if (!from_attr) {
         Jid* jid = jid_create(connection_get_fulljid());
@@ -179,6 +186,7 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
 
     xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
     if (!pubsub) {
+        log_info("[OMEMO] omemo_start_device_session_handle_bundle - no pubsub: %s", from_attr);
         goto out;
     }
 
@@ -193,6 +201,7 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
     }
 
     uint32_t device_id = strtoul(++device_id_str, NULL, 10);
+    log_info("[OMEMO] omemo_start_device_session_handle_bundle: %d", device_id);
 
     xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, "item");
     if (!item) {
