@@ -6719,7 +6719,14 @@ cmd_tray(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_intype(ProfWin* window, const char* const command, gchar** args)
 {
-    _cmd_set_boolean_preference(args[0], command, "Show contact typing", PREF_INTYPE);
+    if (g_strcmp0(args[0], "console") == 0) {
+        _cmd_set_boolean_preference(args[1], command, "Show contact typing in console", PREF_INTYPE_CONSOLE);
+    } else if (g_strcmp0(args[0], "titlebar") == 0) {
+        _cmd_set_boolean_preference(args[1], command, "Show contact typing in titlebar", PREF_INTYPE);
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+
     return TRUE;
 }
 

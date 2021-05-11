@@ -1514,18 +1514,19 @@ static struct cmd_t command_defs[] = {
     },
 
     { "/intype",
-      parse_args, 1, 1, &cons_intype_setting,
+      parse_args, 2, 2, &cons_intype_setting,
       CMD_NOSUBFUNCS
       CMD_MAINFUNC(cmd_intype)
       CMD_TAGS(
               CMD_TAG_UI,
               CMD_TAG_CHAT)
       CMD_SYN(
-              "/intype on|off")
+              "/intype console|titlebar on|off")
       CMD_DESC(
               "Show when a contact is typing in the console, and in active message window.")
       CMD_ARGS(
-              { "on|off", "Enable or disable contact typing messages." })
+              { "titlebar on|off", "Enable or disable contact typing messages notification in titlebar." },
+              { "console on|off", "Enable or disable contact typing messages notification in console window." })
       CMD_NOEXAMPLES
     },
 

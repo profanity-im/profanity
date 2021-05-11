@@ -127,6 +127,7 @@ static char* _software_autocomplete(ProfWin* window, const char* const input, gb
 static char* _url_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _executable_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean previous);
+static char* _intype_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char* const prefix, gboolean previous, void* context);
 
@@ -267,6 +268,7 @@ static Autocomplete correction_ac;
 static Autocomplete avatar_ac;
 static Autocomplete url_ac;
 static Autocomplete executable_ac;
+static Autocomplete intype_ac;
 
 /*!
  * \brief Initialization of auto completion for commands.
@@ -1053,6 +1055,10 @@ cmd_ac_init(void)
     autocomplete_add(executable_ac, "urlopen");
     autocomplete_add(executable_ac, "urlsave");
     autocomplete_add(executable_ac, "editor");
+
+    intype_ac = autocomplete_new();
+    autocomplete_add(intype_ac, "console");
+    autocomplete_add(intype_ac, "titlebar");
 }
 
 void
@@ -1368,6 +1374,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(avatar_ac);
     autocomplete_reset(url_ac);
     autocomplete_reset(executable_ac);
+    autocomplete_reset(intype_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1531,6 +1538,7 @@ cmd_ac_uninit(void)
     autocomplete_free(avatar_ac);
     autocomplete_free(url_ac);
     autocomplete_free(executable_ac);
+    autocomplete_free(intype_ac);
 }
 
 static void
@@ -1660,7 +1668,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     jabber_conn_status_t conn_status = connection_get_status();
 
     // autocomplete boolean settings
-    gchar* boolean_choices[] = { "/beep", "/intype", "/states", "/outtype", "/flash", "/splash",
+    gchar* boolean_choices[] = { "/beep", "/states", "/outtype", "/flash", "/splash",
                                  "/history", "/vercheck", "/privileges", "/wrap", "/carbons", "/os", "/slashguard", "/mam" };
 
     for (int i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
@@ -1794,6 +1802,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/url", _url_autocomplete);
     g_hash_table_insert(ac_funcs, "/executable", _executable_autocomplete);
     g_hash_table_insert(ac_funcs, "/lastactivity", _lastactivity_autocomplete);
+    g_hash_table_insert(ac_funcs, "/intype", _intype_autocomplete);
 
     int len = strlen(input);
     char parsed[len + 1];
@@ -4119,5 +4128,23 @@ _lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean pr
         }
     }
 
+    return result;
+}
+
+static char*
+_intype_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+{
+    char* result = NULL;
+    result = autocomplete_param_with_func(input, "/intype console", prefs_autocomplete_boolean_choice, previous, NULL);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_func(input, "/intype titlebar", prefs_autocomplete_boolean_choice, previous, NULL);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/intype", intype_ac, FALSE, previous);
     return result;
 }

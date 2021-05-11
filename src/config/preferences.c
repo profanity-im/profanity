@@ -1803,6 +1803,7 @@ _get_group(preference_t pref)
     case PREF_WINTITLE_GOODBYE:
     case PREF_FLASH:
     case PREF_INTYPE:
+    case PREF_INTYPE_CONSOLE:
     case PREF_HISTORY:
     case PREF_OCCUPANTS:
     case PREF_OCCUPANTS_JID:
@@ -1967,6 +1968,8 @@ _get_key(preference_t pref)
         return "adv.notify.discoversion";
     case PREF_INTYPE:
         return "intype";
+    case PREF_INTYPE_CONSOLE:
+        return "intype.console";
     case PREF_HISTORY:
         return "history";
     case PREF_CARBONS:
@@ -2252,6 +2255,8 @@ _get_default_boolean(preference_t pref)
     case PREF_OUTTYPE:
     case PREF_TITLEBAR_MUC_TITLE_NAME:
     case PREF_COLOR_NICK_OWN:
+    case PREF_INTYPE:
+    case PREF_INTYPE_CONSOLE:
         return TRUE;
     default:
         return FALSE;
