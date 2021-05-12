@@ -16,6 +16,8 @@ Thank you very much to all of our sponsors and donors (including those that want
 
 [Julian Huhn](https://github.com/huhndev)
 
+[Matteo Bini](https://github.com/matteobin)
+
 ## Services
 [William Wennerström](https://github.com/wstrm/) for sponsoring our use of [sourcehut CI](https://builds.sr.ht/~wstrm/profanity?)
 
