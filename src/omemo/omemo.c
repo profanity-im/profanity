@@ -648,6 +648,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
                            const unsigned char* const signature, size_t signature_len,
                            const unsigned char* const identity_key_raw, size_t identity_key_len)
 {
+    log_info("[OMEMO] Starting device session for %s with device %d", jid, device_id);
     signal_protocol_address address = {
         .name = jid,
         .name_len = strlen(jid),
@@ -659,6 +660,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     _cache_device_identity(jid, device_id, identity_key);
 
     gboolean trusted = is_trusted_identity(&address, (uint8_t*)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
+    log_info("[OMEMO] Trust %s (%d): %d", jid, device_id, trusted);
 
     if ((g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "blind") == 0) && !trusted) {
         char* fp = _omemo_fingerprint(identity_key, TRUE);
@@ -669,10 +671,12 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     }
 
     if (!trusted) {
+        log_info("[OMEMO] We don't trust device %d for %s\n", device_id,jid);
         goto out;
     }
 
     if (!contains_session(&address, omemo_ctx.session_store)) {
+        log_info("[OMEMO] There is no Session for %s ( %d) ,... building session.", address.name, address.device_id );
         int res;
         session_pre_key_bundle* bundle;
         signal_protocol_address* address;
@@ -712,6 +716,8 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
         }
 
         log_info("[OMEMO] create session with %s device %d", jid, device_id);
+    } else {
+        log_info("[OMEMO] session with %s device %d exists", jid, device_id);
     }
 
 out:
@@ -744,7 +750,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 
     res = aes128gcm_encrypt(ciphertext, &ciphertext_len, tag, &tag_len, (const unsigned char* const)message, strlen(message), iv, key);
     if (res != 0) {
-        log_error("[OMEMO][SENT] cannot encrypt message");
+        log_error("[OMEMO][SEND] cannot encrypt message");
         goto out;
     }
 
@@ -780,7 +786,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
         GList* recipient_device_id = NULL;
         recipient_device_id = g_hash_table_lookup(omemo_ctx.device_list, recipients_iter->data);
         if (!recipient_device_id) {
-            log_warning("[OMEMO][SENT] cannot find device ids for %s", recipients_iter->data);
+            log_warning("[OMEMO][SEND] cannot find device ids for %s", recipients_iter->data);
             win_println(win, THEME_ERROR, "!", "Can't find a OMEMO device id for %s.\n", recipients_iter->data);
             continue;
         }
@@ -791,8 +797,9 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
             Jid* me = jid_create(connection_get_fulljid());
             if ( !g_strcmp0(me->barejid, recipients_iter->data) ) {
+                jid_destroy(me);
                 if (GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
-                    log_info("[OMEMO][SENT] Skipping %d (my device) ", GPOINTER_TO_INT(device_ids_iter->data));
+                    log_info("[OMEMO][SEND] Skipping %d (my device) ", GPOINTER_TO_INT(device_ids_iter->data));
                     continue;
                 }
             }
@@ -805,17 +812,17 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 .device_id = GPOINTER_TO_INT(device_ids_iter->data)
             };
 
-            log_info("[OMEMO][SENT] recipients with device id %d for %s", GPOINTER_TO_INT(device_ids_iter->data), recipients_iter->data);
+            log_info("[OMEMO][SEND] recipients with device id %d for %s", GPOINTER_TO_INT(device_ids_iter->data), recipients_iter->data);
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
             if (res != SG_SUCCESS ) {
-                log_error("[OMEMO][SENT] cannot create cipher for %s device id %d - code: %d", address.name, address.device_id, res);
+                log_error("[OMEMO][SEND] cannot create cipher for %s device id %d - code: %d", address.name, address.device_id, res);
                 continue;
             }
 
             res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
             session_cipher_free(cipher);
             if (res != SG_SUCCESS ) {
-                log_error("[OMEMO][SENT] cannot encrypt key for %s device id %d - code: %d", address.name, address.device_id,res);
+                log_error("[OMEMO][SEND] cannot encrypt key for %s device id %d - code: %d", address.name, address.device_id,res);
                 continue;
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);
@@ -846,6 +853,10 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     if (!muc) {
         GList* sender_device_id = g_hash_table_lookup(omemo_ctx.device_list, jid->barejid);
         for (device_ids_iter = sender_device_id; device_ids_iter != NULL; device_ids_iter = device_ids_iter->next) {
+            if (GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
+                log_info("[OMEMO][SEND] Skipping %d (my device) ", GPOINTER_TO_INT(device_ids_iter->data));
+                continue;
+            }
             int res;
             ciphertext_message* ciphertext;
             session_cipher* cipher;
@@ -854,18 +865,18 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 .name_len = strlen(jid->barejid),
                 .device_id = GPOINTER_TO_INT(device_ids_iter->data)
             };
-            log_info("[OMEMO][SENT] Sending to device %d for %s ", address.device_id, address.name);
+            log_info("[OMEMO][SEND] Sending to device %d for %s ", address.device_id, address.name);
 
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
             if (res != 0) {
-                log_error("[OMEMO][SENT] cannot create cipher for %s device id %d", address.name, address.device_id);
+                log_error("[OMEMO][SEND] cannot create cipher for %s device id %d", address.name, address.device_id);
                 continue;
             }
 
             res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
             session_cipher_free(cipher);
             if (res != 0) {
-                log_error("[OMEMO][SENT] cannot encrypt key for %s device id %d", address.name, address.device_id);
+                log_error("[OMEMO][SEND] cannot encrypt key for %s device id %d", address.name, address.device_id);
                 continue;
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);
@@ -1130,6 +1141,7 @@ omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
     buffer = signal_buffer_append(buffer, fingerprint_raw, fingerprint_len);
 
     gboolean trusted = is_trusted_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
+    log_info("[OMEMO] Device trusted %s (%d): %d", jid, GPOINTER_TO_INT(device_id), trusted);
 
     free(fingerprint_raw);
     signal_buffer_free(buffer);

@@ -186,7 +186,6 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
 
     xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
     if (!pubsub) {
-        log_info("[OMEMO] omemo_start_device_session_handle_bundle - no pubsub: %s", from_attr);
         goto out;
     }
 
