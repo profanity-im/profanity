@@ -2158,7 +2158,11 @@ cmd_msg(ProfWin* window, const char* const command, gchar** args)
             // in case of non-anon muc send regular chatmessage
             if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
                 Jid* jidp = jid_create(occupant->jid);
+
                 _cmd_msg_chatwin(jidp->barejid, msg);
+                win_println(window, THEME_DEFAULT, "-", "Starting direct message with occupant \"%s\" from room \"%s\" as \"%s\".", usr, mucwin->roomjid, jidp->barejid);
+                cons_show("Starting direct message with occupant \"%s\" from room \"%s\" as \"%s\".", usr, mucwin->roomjid, jidp->barejid);
+
                 jid_destroy(jidp);
             } else {
                 // otherwise send mucpm
