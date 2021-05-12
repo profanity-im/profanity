@@ -2108,6 +2108,33 @@ cmd_who(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
+static void
+_cmd_msg_chatwin(const char* const barejid, const char* const msg)
+{
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (!chatwin) {
+        // NOTE: This will also start the new OMEMO session and send a MAM request.
+        chatwin = chatwin_new(barejid);
+    }
+    ui_focus_win((ProfWin*)chatwin);
+
+    if (msg) {
+        // NOTE: In case the message is OMEMO encrypted, we can't be sure
+        // whether the key bundles of the recipient have already been
+        // received. In the case that *no* bundles have been received yet,
+        // the message won't be sent, and an error is shown to the user.
+        // Other cases are not handled here.
+        cl_ev_send_msg(chatwin, msg, NULL);
+    } else {
+#ifdef HAVE_LIBOTR
+        // Start the OTR session after this (i.e. the first) message was sent
+        if (otr_is_secure(barejid)) {
+            chatwin_otr_secured(chatwin, otr_is_trusted(barejid));
+        }
+#endif // HAVE_LIBOTR
+    }
+}
+
 gboolean
 cmd_msg(ProfWin* window, const char* const command, gchar** args)
 {
@@ -2125,22 +2152,36 @@ cmd_msg(ProfWin* window, const char* const command, gchar** args)
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        if (muc_roster_contains_nick(mucwin->roomjid, usr)) {
-            GString* full_jid = g_string_new(mucwin->roomjid);
-            g_string_append(full_jid, "/");
-            g_string_append(full_jid, usr);
 
-            ProfPrivateWin* privwin = wins_get_private(full_jid->str);
-            if (!privwin) {
-                privwin = (ProfPrivateWin*)wins_new_private(full_jid->str);
+        Occupant* occupant = muc_roster_item(mucwin->roomjid, usr);
+        if (occupant) {
+            // in case of non-anon muc send regular chatmessage
+            if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
+                Jid* jidp = jid_create(occupant->jid);
+
+                _cmd_msg_chatwin(jidp->barejid, msg);
+                win_println(window, THEME_DEFAULT, "-", "Starting direct message with occupant \"%s\" from room \"%s\" as \"%s\".", usr, mucwin->roomjid, jidp->barejid);
+                cons_show("Starting direct message with occupant \"%s\" from room \"%s\" as \"%s\".", usr, mucwin->roomjid, jidp->barejid);
+
+                jid_destroy(jidp);
+            } else {
+                // otherwise send mucpm
+                GString* full_jid = g_string_new(mucwin->roomjid);
+                g_string_append(full_jid, "/");
+                g_string_append(full_jid, usr);
+
+                ProfPrivateWin* privwin = wins_get_private(full_jid->str);
+                if (!privwin) {
+                    privwin = (ProfPrivateWin*)wins_new_private(full_jid->str);
+                }
+                ui_focus_win((ProfWin*)privwin);
+
+                if (msg) {
+                    cl_ev_send_priv_msg(privwin, msg, NULL);
+                }
+
+                g_string_free(full_jid, TRUE);
             }
-            ui_focus_win((ProfWin*)privwin);
-
-            if (msg) {
-                cl_ev_send_priv_msg(privwin, msg, NULL);
-            }
-
-            g_string_free(full_jid, TRUE);
 
         } else {
             win_println(window, THEME_DEFAULT, "-", "No such participant \"%s\" in room.", usr);
@@ -2155,28 +2196,7 @@ cmd_msg(ProfWin* window, const char* const command, gchar** args)
             barejid = usr;
         }
 
-        ProfChatWin* chatwin = wins_get_chat(barejid);
-        if (!chatwin) {
-            // NOTE: This will also start the new OMEMO session and send a MAM request.
-            chatwin = chatwin_new(barejid);
-        }
-        ui_focus_win((ProfWin*)chatwin);
-
-        if (msg) {
-            // NOTE: In case the message is OMEMO encrypted, we can't be sure
-            // whether the key bundles of the recipient have already been
-            // received. In the case that *no* bundles have been received yet,
-            // the message won't be sent, and an error is shown to the user.
-            // Other cases are not handled here.
-            cl_ev_send_msg(chatwin, msg, NULL);
-        } else {
-#ifdef HAVE_LIBOTR
-            // Start the OTR session after this (i.e. the first) message was sent
-            if (otr_is_secure(barejid)) {
-                chatwin_otr_secured(chatwin, otr_is_trusted(barejid));
-            }
-#endif // HAVE_LIBOTR
-        }
+        _cmd_msg_chatwin(barejid, msg);
 
         return TRUE;
     }
