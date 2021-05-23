@@ -5127,14 +5127,14 @@ cmd_clear(ProfWin* window, const char* const command, gchar** args)
 
             if (args[1] != NULL) {
                 if ((g_strcmp0(args[1], "on") == 0) || (g_strcmp0(args[1], "off") == 0)) {
-                    _cmd_set_boolean_preference(args[1], command, "Persistant history", PREF_CLEAR_PERSIST_HISTORY);
+                    _cmd_set_boolean_preference(args[1], command, "Persistent history", PREF_CLEAR_PERSIST_HISTORY);
                     return TRUE;
                 }
             } else {
                 if (prefs_get_boolean(PREF_CLEAR_PERSIST_HISTORY)) {
-                    win_println(window, THEME_DEFAULT, "!", "  Persistantly clear screen  : ON");
+                    win_println(window, THEME_DEFAULT, "!", "  Persistently clear screen  : ON");
                 } else {
-                    win_println(window, THEME_DEFAULT, "!", "  Persistantly clear screen  : OFF");
+                    win_println(window, THEME_DEFAULT, "!", "  Persistently clear screen  : OFF");
                 }
                 return TRUE;
             }
