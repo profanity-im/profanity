@@ -791,6 +791,19 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 .device_id = GPOINTER_TO_INT(device_ids_iter->data)
             };
 
+            // Don't encrypt for this device (according to
+            // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
+            // Yourself as recipients in case of MUC
+            Jid* me = jid_create(connection_get_fulljid());
+            if ( !g_strcmp0(me->barejid, recipients_iter->data) ) {
+                if (GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
+                    jid_destroy(me);
+                    log_debug("[OMEMO][SEND] Skipping %d (my device) ", GPOINTER_TO_INT(device_ids_iter->data));
+                    continue;
+                }
+            }
+            jid_destroy(me);
+
             log_debug("[OMEMO][SEND] recipients with device id %d for %s", GPOINTER_TO_INT(device_ids_iter->data), recipients_iter->data);
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
             if (res != SG_SUCCESS ) {
