@@ -8415,7 +8415,7 @@ cmd_omemo_gen(ProfWin* window, const char* const command, gchar** args)
     ui_update();
     ProfAccount* account = accounts_get_account(session_get_account_name());
     omemo_generate_crypto_materials(account);
-    cons_show("OMEMO crytographic materials generated.");
+    cons_show("OMEMO crytographic materials generated. Your Device ID is %d.", omemo_device_id());
     return TRUE;
 #else
     cons_show("This version of Profanity has not been built with OMEMO support enabled");
