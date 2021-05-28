@@ -36,6 +36,7 @@
 #include <signal/signal_protocol.h>
 
 #include "config.h"
+#include "log.h"
 #include "omemo/omemo.h"
 #include "omemo/store.h"
 
@@ -80,15 +81,19 @@ load_session(signal_buffer** record, signal_buffer** user_record,
     GHashTable* session_store = (GHashTable*)user_data;
     GHashTable* device_store = NULL;
 
+    log_debug("[OMEMO][STORE] Looking for %s in session_store", address->name);
     device_store = g_hash_table_lookup(session_store, address->name);
     if (!device_store) {
         *record = NULL;
+        log_warning("[OMEMO][STORE] No device store for %s found", address->name);
         return 0;
     }
 
+    log_debug("[OMEMO][STORE] Looking for device %d of %s ", address->device_id, address->name);
     signal_buffer* original = g_hash_table_lookup(device_store, GINT_TO_POINTER(address->device_id));
     if (!original) {
         *record = NULL;
+        log_warning("[OMEMO][STORE] No device (%d) store for %s found", address->device_id, address->name);
         return 0;
     }
     *record = signal_buffer_copy(original);
@@ -106,6 +111,7 @@ get_sub_device_sessions(signal_int_list** sessions, const char* name,
 
     device_store = g_hash_table_lookup(session_store, name);
     if (!device_store) {
+        log_debug("[OMEMO][STORE] What?");
         return SG_SUCCESS;
     }
 
@@ -133,6 +139,7 @@ store_session(const signal_protocol_address* address,
     GHashTable* session_store = (GHashTable*)user_data;
     GHashTable* device_store = NULL;
 
+    log_debug("[OMEMO][STORE] Store session for %s (%d)", address->name, address->device_id);
     device_store = g_hash_table_lookup(session_store, (void*)address->name);
     if (!device_store) {
         device_store = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
@@ -161,10 +168,12 @@ contains_session(const signal_protocol_address* address, void* user_data)
 
     device_store = g_hash_table_lookup(session_store, address->name);
     if (!device_store) {
+        log_debug("[OMEMO][STORE] No Device");
         return 0;
     }
 
     if (!g_hash_table_lookup(device_store, GINT_TO_POINTER(address->device_id))) {
+        log_debug("[OMEMO][STORE] No Session for %d ", address->device_id);
         return 0;
     }
 
@@ -200,6 +209,7 @@ delete_all_sessions(const char* name, size_t name_len, void* user_data)
 
     device_store = g_hash_table_lookup(session_store, name);
     if (!device_store) {
+        log_debug("[OMEMO][STORE] No device => no delete");
         return SG_SUCCESS;
     }
 
@@ -216,6 +226,7 @@ load_pre_key(signal_buffer** record, uint32_t pre_key_id, void* user_data)
 
     original = g_hash_table_lookup(pre_key_store, GINT_TO_POINTER(pre_key_id));
     if (original == NULL) {
+        log_error("[OMEMO][STORE] SG_ERR_INVALID_KEY_ID");
         return SG_ERR_INVALID_KEY_ID;
     }
 
@@ -269,6 +280,7 @@ remove_pre_key(uint32_t pre_key_id, void* user_data)
     if (ret > 0) {
         return SG_SUCCESS;
     } else {
+        log_error("[OMEMO][STORE] SG_ERR_INVALID_KEY_ID");
         return SG_ERR_INVALID_KEY_ID;
     }
 }
@@ -282,6 +294,7 @@ load_signed_pre_key(signal_buffer** record, uint32_t signed_pre_key_id,
 
     original = g_hash_table_lookup(signed_pre_key_store, GINT_TO_POINTER(signed_pre_key_id));
     if (!original) {
+        log_error("[OMEMO][STORE] SG_ERR_INVALID_KEY_ID");
         return SG_ERR_INVALID_KEY_ID;
     }
 
@@ -370,6 +383,7 @@ save_identity(const signal_protocol_address* address, uint8_t* key_data,
         int trusted = is_trusted_identity(address, key_data, key_len, user_data);
         identity_key_store->recv = true;
         if (trusted == 0) {
+            log_debug("[OMEMO][STORE] trusted 0");
             /* If not trusted we just don't save the identity */
             return SG_SUCCESS;
         }
@@ -402,12 +416,14 @@ is_trusted_identity(const signal_protocol_address* address, uint8_t* key_data,
 {
     int ret;
     identity_key_store_t* identity_key_store = (identity_key_store_t*)user_data;
-
+    log_debug("[OMEMO][STORE] Checking trust %s (%d)", address->name, address->device_id);
     GHashTable* trusted = g_hash_table_lookup(identity_key_store->trusted, address->name);
     if (!trusted) {
         if (identity_key_store->recv) {
+            log_debug("[OMEMO][STORE] identity_key_store->recv");
             return 1;
         } else {
+            log_debug("[OMEMO][STORE] !identity_key_store->recv");
             return 0;
         }
     }
@@ -415,13 +431,18 @@ is_trusted_identity(const signal_protocol_address* address, uint8_t* key_data,
     signal_buffer* buffer = signal_buffer_create(key_data, key_len);
     signal_buffer* original = g_hash_table_lookup(trusted, GINT_TO_POINTER(address->device_id));
 
+    if(!original) {
+        log_debug("[OMEMO][STORE] original not found %s (%d)", address->name, address->device_id);
+    }
     ret = original != NULL && signal_buffer_compare(buffer, original) == 0;
 
     signal_buffer_free(buffer);
 
     if (identity_key_store->recv) {
+        log_debug("[OMEMO][STORE] 1 identity_key_store->recv");
         return 1;
     } else {
+        log_debug("[OMEMO][STORE] Checking trust %s (%d): %d", address->name, address->device_id, ret);
         return ret;
     }
 }
