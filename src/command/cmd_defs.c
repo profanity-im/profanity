@@ -973,6 +973,7 @@ static struct cmd_t command_defs[] = {
       parse_args, 0, 3, NULL,
       CMD_SUBFUNCS(
               { "unread", cmd_wins_unread },
+              { "attention", cmd_wins_attention },
               { "prune", cmd_wins_prune },
               { "swap", cmd_wins_swap })
       CMD_MAINFUNC(cmd_wins)
@@ -981,6 +982,7 @@ static struct cmd_t command_defs[] = {
       CMD_SYN(
               "/wins",
               "/wins unread",
+              "/wins attention",
               "/wins prune",
               "/wins swap <source> <target>")
       CMD_DESC(
@@ -988,6 +990,7 @@ static struct cmd_t command_defs[] = {
               "Passing no argument will list all currently active windows and information about their usage.")
       CMD_ARGS(
               { "unread", "List windows with unread messages." },
+              { "attention", "Marked windows" },
               { "prune", "Close all windows with no unread messages." },
               { "swap <source> <target>", "Swap windows, target may be an empty position." })
       CMD_NOEXAMPLES

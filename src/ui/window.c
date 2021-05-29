@@ -158,7 +158,7 @@ win_create_chat(const char* const barejid)
     new_win->outgoing_char = NULL;
     new_win->last_message = NULL;
     new_win->last_msg_id = NULL;
-
+    new_win->has_attention = FALSE;
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
 
     return &new_win->window;

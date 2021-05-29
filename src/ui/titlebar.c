@@ -487,6 +487,18 @@ _show_privacy(ProfChatWin* chatwin)
 
         return;
     }
+    if (chatwin->has_attention) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wattron(win, encrypted_attrs);
+        wprintw(win, "ATTENTION");
+        wattroff(win, encrypted_attrs);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+        wattroff(win, bracket_attrs);
+    }
 
     if (chatwin->pgp_send || chatwin->pgp_recv) {
         GString* pgpmsg = g_string_new("PGP ");

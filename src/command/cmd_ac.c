@@ -471,6 +471,7 @@ cmd_ac_init(void)
 
     wins_ac = autocomplete_new();
     autocomplete_add(wins_ac, "unread");
+    autocomplete_add(wins_ac, "attention");
     autocomplete_add(wins_ac, "prune");
     autocomplete_add(wins_ac, "swap");
 
