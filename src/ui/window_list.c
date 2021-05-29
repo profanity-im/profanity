@@ -1213,18 +1213,35 @@ wins_get_next_attention(void)
     values = g_list_sort(values, _wins_cmp_num);
     GList* curr = values;
 
-    while (curr) {
-        // copy from wins_get_next_unread - what is it?
-        if (current == GPOINTER_TO_INT(curr->data)) {
-            curr = g_list_next(curr);
-            continue;
-        }
+    ProfWin* current_window = wins_get_by_num( current);
 
-        ProfWin* window_current = wins_get_by_num( current);
+    // search the current window
+    while(curr) {
         ProfWin* window = curr->data;
-        if( window_current == window  ) {
+        if( current_window == window  ) {
+            current_window = window;
             curr = g_list_next(curr);
-            continue;
+            break;
+        }
+        curr = g_list_next(curr);
+    }
+
+    // Start from current window
+    while ( current_window && curr) {
+        ProfWin* window = curr->data;
+        if (win_has_attention(window)) {
+            g_list_free(values);
+            return window;
+        }
+        curr = g_list_next(curr);
+    }
+    // Start from begin
+    curr = values;
+    while ( current_window && curr) {
+        ProfWin* window = curr->data;
+        if( current_window == window) {
+            // we are at current again
+            break;
         }
         if (win_has_attention(window)) {
             g_list_free(values);
