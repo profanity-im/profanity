@@ -1205,6 +1205,38 @@ wins_get_next_unread(void)
     return NULL;
 }
 
+ProfWin*
+wins_get_next_attention(void)
+{
+    // get and sort win nums
+    GList* values = g_hash_table_get_values(windows);
+    values = g_list_sort(values, _wins_cmp_num);
+    GList* curr = values;
+
+    while (curr) {
+        // copy from wins_get_next_unread - what is it?
+        if (current == GPOINTER_TO_INT(curr->data)) {
+            curr = g_list_next(curr);
+            continue;
+        }
+
+        ProfWin* window_current = wins_get_by_num( current);
+        ProfWin* window = curr->data;
+        if( window_current == window  ) {
+            curr = g_list_next(curr);
+            continue;
+        }
+        if (win_has_attention(window)) {
+            g_list_free(values);
+            return window;
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(values);
+    return NULL;
+}
+
 void
 wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message)
 {

@@ -1842,6 +1842,39 @@ win_unread(ProfWin* window)
     }
 }
 
+gboolean
+win_has_attention(ProfWin* window) 
+{
+    if (window->type == WIN_CHAT) {
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        return chatwin->has_attention;
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin* mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        return mucwin->has_attention;
+    }
+    return FALSE;
+}
+
+gboolean 
+win_toggle_attention(ProfWin* window) 
+{
+    if (window->type == WIN_CHAT) {
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        chatwin->has_attention = !chatwin->has_attention;
+        return chatwin->has_attention;
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin* mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        mucwin->has_attention = !mucwin->has_attention;
+        return mucwin->has_attention;
+    }
+    return FALSE;
+}
+
+
 void
 win_sub_print(WINDOW* win, char* msg, gboolean newline, gboolean wrap, int indent)
 {
