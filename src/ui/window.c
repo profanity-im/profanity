@@ -213,6 +213,7 @@ win_create_muc(const char* const roomjid)
     new_win->is_omemo = FALSE;
     new_win->last_message = NULL;
     new_win->last_msg_id = NULL;
+    new_win->has_attention = FALSE;
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 

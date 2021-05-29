@@ -36,6 +36,7 @@
 #define _XOPEN_SOURCE_EXTENDED
 #include "config.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <sys/select.h>
 #include <stdlib.h>
@@ -814,8 +815,15 @@ static int
 _inp_rl_win_attention_handler(int count, int key) {
     ProfWin* current = wins_get_current();
     if ( current ) {
-        ProfChatWin* chatwin = (ProfChatWin*)current;
-        chatwin->has_attention = !chatwin->has_attention;
+        if (current->type == WIN_CHAT) {
+            ProfChatWin* chatwin = (ProfChatWin*)current;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            chatwin->has_attention = !chatwin->has_attention;
+        } else if (current->type == WIN_MUC) {
+            ProfMucWin* mucwin = (ProfMucWin*)current;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            mucwin->has_attention = !mucwin->has_attention;
+        }
         win_redraw(current);
     }
     return 0;

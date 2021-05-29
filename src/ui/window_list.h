@@ -87,6 +87,7 @@ void wins_lost_connection(void);
 void wins_reestablished_connection(void);
 gboolean wins_tidy(void);
 GSList* wins_create_summary(gboolean unread);
+GSList* wins_create_summary_attention();
 void wins_destroy(void);
 GList* wins_get_nums(void);
 void wins_swap(int source_win, int target_win);

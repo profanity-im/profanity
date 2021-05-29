@@ -197,6 +197,7 @@ typedef struct prof_muc_win_t
     // For LMC
     char* last_message;
     char* last_msg_id;
+    gboolean has_attention;
 } ProfMucWin;
 
 typedef struct prof_conf_win_t ProfConfWin;

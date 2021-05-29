@@ -1301,7 +1301,7 @@ cmd_wins_unread(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_wins_attention(ProfWin* window, const char* const command, gchar** args)
 {
-    cons_show_wins(TRUE);
+    cons_show_wins_attention();
     return TRUE;
 }
 

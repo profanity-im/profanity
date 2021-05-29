@@ -507,6 +507,26 @@ cons_show_wins(gboolean unread)
 }
 
 void
+cons_show_wins_attention() {
+    ProfWin* console = wins_get_console();
+    cons_show("");
+    GSList* window_strings = wins_create_summary_attention();
+
+    GSList* curr = window_strings;
+    while (curr) {
+        if (g_strstr_len(curr->data, strlen(curr->data), " unread") > 0) {
+            win_println(console, THEME_CMD_WINS_UNREAD, "-", "%s", curr->data);
+        } else {
+            win_println(console, THEME_DEFAULT, "-", "%s", curr->data);
+        }
+        curr = g_slist_next(curr);
+    }
+    g_slist_free_full(window_strings, free);
+
+    cons_alert(NULL);
+}
+
+void
 cons_show_room_invites(GList* invites)
 {
     cons_show("");
