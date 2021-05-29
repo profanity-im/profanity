@@ -814,7 +814,12 @@ static int
 _inp_rl_win_attention_handler(int count, int key) {
     ProfWin* current = wins_get_current();
     if ( current ) {
-        win_toggle_attention(current); 
+        gboolean attention = win_toggle_attention(current);
+        if (attention) {
+            win_println(current, THEME_DEFAULT, "!", "Attention flag has been activated");
+        } else {
+            win_println(current, THEME_DEFAULT, "!", "Attention flag has been deactivated");
+        }
         win_redraw(current);
     }
     return 0;
