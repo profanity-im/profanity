@@ -2340,7 +2340,7 @@ _get_default_string(preference_t pref)
     case PREF_URL_OPEN_CMD:
         return "xdg-open %u";
     case PREF_COMPOSE_EDITOR:
-        return "/usr/bin/vim";
+        return "vim";
     case PREF_URL_SAVE_CMD:
         return NULL; // Default to built-in method.
     default:
