@@ -158,7 +158,7 @@ win_create_chat(const char* const barejid)
     new_win->outgoing_char = NULL;
     new_win->last_message = NULL;
     new_win->last_msg_id = NULL;
-
+    new_win->has_attention = FALSE;
     new_win->memcheck = PROFCHATWIN_MEMCHECK;
 
     return &new_win->window;
@@ -213,6 +213,7 @@ win_create_muc(const char* const roomjid)
     new_win->is_omemo = FALSE;
     new_win->last_message = NULL;
     new_win->last_msg_id = NULL;
+    new_win->has_attention = FALSE;
 
     new_win->memcheck = PROFMUCWIN_MEMCHECK;
 
@@ -1840,6 +1841,39 @@ win_unread(ProfWin* window)
         return 0;
     }
 }
+
+gboolean
+win_has_attention(ProfWin* window) 
+{
+    if (window->type == WIN_CHAT) {
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        return chatwin->has_attention;
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin* mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        return mucwin->has_attention;
+    }
+    return FALSE;
+}
+
+gboolean 
+win_toggle_attention(ProfWin* window) 
+{
+    if (window->type == WIN_CHAT) {
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        chatwin->has_attention = !chatwin->has_attention;
+        return chatwin->has_attention;
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin* mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        mucwin->has_attention = !mucwin->has_attention;
+        return mucwin->has_attention;
+    }
+    return FALSE;
+}
+
 
 void
 win_sub_print(WINDOW* win, char* msg, gboolean newline, gboolean wrap, int indent)

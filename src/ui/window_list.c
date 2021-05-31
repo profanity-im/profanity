@@ -1102,6 +1102,51 @@ wins_create_summary(gboolean unread)
     return result;
 }
 
+GSList*
+wins_create_summary_attention()
+{
+    GSList* result = NULL;
+
+    GList* keys = g_hash_table_get_keys(windows);
+    keys = g_list_sort(keys, _wins_cmp_num);
+    GList* curr = keys;
+
+    while (curr) {
+        ProfWin* window = g_hash_table_lookup(windows, curr->data);
+        gboolean has_attention = FALSE;
+        if (window->type == WIN_CHAT) {
+            ProfChatWin* chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            has_attention = chatwin->has_attention;
+        } else if (window->type == WIN_MUC) {
+            ProfMucWin* mucwin = (ProfMucWin*)window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            has_attention = mucwin->has_attention;
+        }
+        if ( has_attention) {
+            GString* line = g_string_new("");
+
+            int ui_index = GPOINTER_TO_INT(curr->data);
+            char* winstring = win_to_string(window);
+            if (!winstring) {
+                g_string_free(line, TRUE);
+                continue;
+            }
+
+            g_string_append_printf(line, "%d: %s", ui_index, winstring);
+            free(winstring);
+
+            result = g_slist_append(result, strdup(line->str));
+            g_string_free(line, TRUE);
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(keys);
+
+    return result;
+}
+
 char*
 win_autocomplete(const char* const search_str, gboolean previous, void* context)
 {
@@ -1153,6 +1198,55 @@ wins_get_next_unread(void)
             return window;
         }
 
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(values);
+    return NULL;
+}
+
+ProfWin*
+wins_get_next_attention(void)
+{
+    // get and sort win nums
+    GList* values = g_hash_table_get_values(windows);
+    values = g_list_sort(values, _wins_cmp_num);
+    GList* curr = values;
+
+    ProfWin* current_window = wins_get_by_num( current);
+
+    // search the current window
+    while(curr) {
+        ProfWin* window = curr->data;
+        if( current_window == window  ) {
+            current_window = window;
+            curr = g_list_next(curr);
+            break;
+        }
+        curr = g_list_next(curr);
+    }
+
+    // Start from current window
+    while ( current_window && curr) {
+        ProfWin* window = curr->data;
+        if (win_has_attention(window)) {
+            g_list_free(values);
+            return window;
+        }
+        curr = g_list_next(curr);
+    }
+    // Start from begin
+    curr = values;
+    while ( current_window && curr) {
+        ProfWin* window = curr->data;
+        if( current_window == window) {
+            // we are at current again
+            break;
+        }
+        if (win_has_attention(window)) {
+            g_list_free(values);
+            return window;
+        }
         curr = g_list_next(curr);
     }
 

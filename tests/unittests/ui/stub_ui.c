@@ -210,6 +210,20 @@ ui_win_unread(int index)
     return 0;
 }
 
+gboolean
+ui_win_has_attention(int index) {
+	return FALSE;
+}
+
+gboolean
+win_has_attention(ProfWin* window){
+	return FALSE;
+}
+
+gboolean
+win_toggle_attention(ProfWin* window){
+	return FALSE;
+}
 char*
 ui_ask_password(gboolean confirm)
 {
@@ -828,6 +842,12 @@ void
 cons_show_wins(gboolean unread)
 {
 }
+
+void 
+cons_show_wins_attention()
+{
+}
+
 void
 cons_show_status(const char* const barejid)
 {

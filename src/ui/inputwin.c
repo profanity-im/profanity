@@ -125,6 +125,8 @@ static int _inp_rl_win_20_handler(int count, int key);
 static int _inp_rl_win_prev_handler(int count, int key);
 static int _inp_rl_win_next_handler(int count, int key);
 static int _inp_rl_win_next_unread_handler(int count, int key);
+static int _inp_rl_win_attention_handler(int count, int key);
+static int _inp_rl_win_attention_next_handler(int count, int key);
 static int _inp_rl_win_pageup_handler(int count, int key);
 static int _inp_rl_win_pagedown_handler(int count, int key);
 static int _inp_rl_subwin_pageup_handler(int count, int key);
@@ -480,6 +482,8 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\e\\e[C", _inp_rl_win_next_handler);
 
     rl_bind_keyseq("\\ea", _inp_rl_win_next_unread_handler);
+    rl_bind_keyseq("\\ef", _inp_rl_win_attention_handler);
+    rl_bind_keyseq("\\em", _inp_rl_win_attention_next_handler);
 
     rl_bind_keyseq("\\e\\e[5~", _inp_rl_subwin_pageup_handler);
     rl_bind_keyseq("\\e[5;3~", _inp_rl_subwin_pageup_handler);
@@ -805,6 +809,31 @@ _inp_rl_win_next_unread_handler(int count, int key)
     }
     return 0;
 }
+
+static int
+_inp_rl_win_attention_handler(int count, int key) {
+    ProfWin* current = wins_get_current();
+    if ( current ) {
+        gboolean attention = win_toggle_attention(current);
+        if (attention) {
+            win_println(current, THEME_DEFAULT, "!", "Attention flag has been activated");
+        } else {
+            win_println(current, THEME_DEFAULT, "!", "Attention flag has been deactivated");
+        }
+        win_redraw(current);
+    }
+    return 0;
+}
+
+static int
+_inp_rl_win_attention_next_handler(int count, int key) {
+    ProfWin* window = wins_get_next_attention();
+    if (window) {
+        ui_focus_win(window);
+    }
+    return 0;
+}
+
 
 static int
 _inp_rl_win_pageup_handler(int count, int key)

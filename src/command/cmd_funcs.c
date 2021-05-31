@@ -1299,6 +1299,13 @@ cmd_wins_unread(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_wins_attention(ProfWin* window, const char* const command, gchar** args)
+{
+    cons_show_wins_attention();
+    return TRUE;
+}
+
+gboolean
 cmd_wins_prune(ProfWin* window, const char* const command, gchar** args)
 {
     ui_prune_wins();

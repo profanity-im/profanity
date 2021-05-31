@@ -209,6 +209,7 @@ gboolean cmd_otr_sendfile(ProfWin* window, const char* const command, gchar** ar
 
 gboolean cmd_wins(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_wins_unread(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_wins_attention(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_wins_prune(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_wins_swap(ProfWin* window, const char* const command, gchar** args);
 
