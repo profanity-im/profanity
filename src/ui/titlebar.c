@@ -67,6 +67,7 @@ static void _show_contact_presence(ProfChatWin* chatwin, int pos, int maxpos);
 static void _show_privacy(ProfChatWin* chatwin);
 static void _show_muc_privacy(ProfMucWin* mucwin);
 static void _show_scrolled(ProfWin* current);
+static void _show_attention(ProfWin* current, gboolean attention);
 
 void
 create_title_bar(void)
@@ -210,6 +211,7 @@ _title_bar_draw(void)
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         _show_contact_presence(chatwin, pos, maxrightpos);
         _show_privacy(chatwin);
+        _show_attention(current, chatwin->has_attention);
         _show_scrolled(current);
 
         if (typing) {
@@ -219,6 +221,7 @@ _title_bar_draw(void)
         ProfMucWin* mucwin = (ProfMucWin*)current;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         _show_muc_privacy(mucwin);
+        _show_attention(current, mucwin->has_attention);
         _show_scrolled(current);
     }
 
@@ -226,6 +229,26 @@ _title_bar_draw(void)
 
     wnoutrefresh(win);
     inp_put_back();
+}
+
+static void
+_show_attention(ProfWin* current, gboolean attention)
+{
+    int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
+    int text_attrs = theme_attrs(THEME_TITLE_TEXT);
+
+    if (attention) {
+        wprintw(win, " ");
+        wattron(win, bracket_attrs);
+        wprintw(win, "[");
+        wattroff(win, bracket_attrs);
+        wattron(win, text_attrs);
+        wprintw(win, "ATTENTION");
+        wattroff(win, text_attrs);
+        wattron(win, bracket_attrs);
+        wprintw(win, "]");
+        wattroff(win, bracket_attrs);
+    }
 }
 
 static void
@@ -486,18 +509,6 @@ _show_privacy(ProfChatWin* chatwin)
         }
 
         return;
-    }
-    if (chatwin->has_attention) {
-        wprintw(win, " ");
-        wattron(win, bracket_attrs);
-        wprintw(win, "[");
-        wattroff(win, bracket_attrs);
-        wattron(win, encrypted_attrs);
-        wprintw(win, "ATTENTION");
-        wattroff(win, encrypted_attrs);
-        wattron(win, bracket_attrs);
-        wprintw(win, "]");
-        wattroff(win, bracket_attrs);
     }
 
     if (chatwin->pgp_send || chatwin->pgp_recv) {
