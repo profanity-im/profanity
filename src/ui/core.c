@@ -999,12 +999,14 @@ ui_win_unread(int index)
 gboolean
 ui_win_has_attention(int index)
 {
+    gboolean ret = FALSE;
+
     ProfWin* window = wins_get_by_num(index);
     if (window) {
-        return win_has_attention(window);
-    } else {
-        return 0;
+        ret = win_has_attention(window);
     }
+
+    return ret;
 }
 
 
