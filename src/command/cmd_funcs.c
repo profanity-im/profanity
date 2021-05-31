@@ -9418,15 +9418,11 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
     g_object_unref(fos);
 
     char* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
-    if (!g_file_test(editor, G_FILE_TEST_EXISTS)) {
-        cons_show_error("Editor: binary %s not exist", editor);
-        return TRUE;
-    }
 
     // Fork / exec
     pid_t pid = fork();
     if (pid == 0) {
-        int x = execl(editor, editor, g_file_get_path(file), (char*)NULL);
+        int x = execlp(editor, editor, g_file_get_path(file), (char*)NULL);
         if (x == -1) {
             cons_show_error("Editor:Failed to exec %s", editor);
         }
