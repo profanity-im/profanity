@@ -990,7 +990,7 @@ static struct cmd_t command_defs[] = {
               "Passing no argument will list all currently active windows and information about their usage.")
       CMD_ARGS(
               { "unread", "List windows with unread messages." },
-              { "attention", "Marked windows" },
+              { "attention", "List windows that have been marked with the attention flag (alt+f). You can toggle between marked windows with alt+m." },
               { "prune", "Close all windows with no unread messages." },
               { "swap <source> <target>", "Swap windows, target may be an empty position." })
       CMD_NOEXAMPLES
