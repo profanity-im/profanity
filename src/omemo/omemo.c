@@ -1335,14 +1335,15 @@ _handle_own_device_list(const char* const jid, GList* device_list)
 {
     // We didn't find the own device id -> publish
     if (!g_list_find(device_list, GINT_TO_POINTER(omemo_ctx.device_id))) {
-        log_debug("[OMEMO] No device id for our device? publish device list...");
+        cons_show("Could not find own OMEMO device ID. Going to publish own device ID: %d", GINT_TO_POINTER(omemo_ctx.device_id));
+        log_debug("[OMEMO] No device ID for our device. Publishing device list");
         device_list = g_list_copy(device_list);
         device_list = g_list_append(device_list, GINT_TO_POINTER(omemo_ctx.device_id));
         g_hash_table_insert(omemo_ctx.device_list, strdup(jid), device_list);
         omemo_devicelist_publish(device_list);
     }
 
-    log_debug("[OMEMO] Request OMEMO Bundles for my devices...");
+    log_debug("[OMEMO] Request OMEMO Bundles for our devices");
     GList* device_id;
     for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
         omemo_bundle_request(jid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(jid));
