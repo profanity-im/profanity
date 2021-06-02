@@ -52,6 +52,10 @@
 #include "xmpp/roster_list.h"
 #include "tools/http_upload.h"
 
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
+
 static GHashTable* windows;
 static int current;
 static Autocomplete wins_ac;
@@ -864,6 +868,24 @@ wins_reestablished_connection(void)
         if (window->type != WIN_CONSOLE) {
             win_println(window, THEME_TEXT, "-", "Connection re-established.");
 
+#ifdef HAVE_OMEMO
+            if (window->type == WIN_CHAT) {
+                ProfChatWin* chatwin = (ProfChatWin*)window;
+                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+                if (chatwin->is_omemo) {
+                    win_println(window, THEME_TEXT, "-", "Restarted OMEMO session.");
+                    omemo_start_session(chatwin->barejid);
+                }
+            } else if (window->type == WIN_MUC) {
+                ProfMucWin* mucwin = (ProfMucWin*)window;
+                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+                if (mucwin->is_omemo) {
+                    win_println(window, THEME_TEXT, "-", "Restarted OMEMO session.");
+                    omemo_start_muc_sessions(mucwin->roomjid);
+                }
+            }
+#endif
+
             // if current win, set current_win_dirty
             if (wins_is_current(window)) {
                 win_update_virtual(window);
@@ -1123,7 +1145,7 @@ wins_create_summary_attention()
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             has_attention = mucwin->has_attention;
         }
-        if ( has_attention) {
+        if (has_attention) {
             GString* line = g_string_new("");
 
             int ui_index = GPOINTER_TO_INT(curr->data);
@@ -1213,12 +1235,12 @@ wins_get_next_attention(void)
     values = g_list_sort(values, _wins_cmp_num);
     GList* curr = values;
 
-    ProfWin* current_window = wins_get_by_num( current);
+    ProfWin* current_window = wins_get_by_num(current);
 
     // search the current window
-    while(curr) {
+    while (curr) {
         ProfWin* window = curr->data;
-        if( current_window == window  ) {
+        if (current_window == window) {
             current_window = window;
             curr = g_list_next(curr);
             break;
@@ -1227,7 +1249,7 @@ wins_get_next_attention(void)
     }
 
     // Start from current window
-    while ( current_window && curr) {
+    while (current_window && curr) {
         ProfWin* window = curr->data;
         if (win_has_attention(window)) {
             g_list_free(values);
@@ -1237,9 +1259,9 @@ wins_get_next_attention(void)
     }
     // Start from begin
     curr = values;
-    while ( current_window && curr) {
+    while (current_window && curr) {
         ProfWin* window = curr->data;
-        if( current_window == window) {
+        if (current_window == window) {
             // we are at current again
             break;
         }
