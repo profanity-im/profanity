@@ -194,7 +194,7 @@ http_file_put(void* userdata)
 
     struct curl_slist* headers = NULL;
     content_type_header = g_strdup_printf("Content-Type: %s", upload->mime_type);
-    if (content_type_header) {
+    if (!content_type_header) {
         content_type_header = g_strdup(FALLBACK_CONTENTTYPE_HEADER);
     }
     headers = curl_slist_append(headers, content_type_header);
