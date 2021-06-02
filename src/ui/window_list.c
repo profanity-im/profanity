@@ -873,14 +873,14 @@ wins_reestablished_connection(void)
                 ProfChatWin* chatwin = (ProfChatWin*)window;
                 assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
                 if (chatwin->is_omemo) {
-                    win_println(window, THEME_TEXT, "-", "Re-establish OMEMO session");
+                    win_println(window, THEME_TEXT, "-", "Restarted OMEMO session.");
                     omemo_start_session(chatwin->barejid);
                 }
             } else if (window->type == WIN_MUC) {
                 ProfMucWin* mucwin = (ProfMucWin*)window;
                 assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 if (mucwin->is_omemo) {
-                    win_println(window, THEME_TEXT, "-", "Re-establish OMEMO session");
+                    win_println(window, THEME_TEXT, "-", "Restarted OMEMO session.");
                     omemo_start_muc_sessions(mucwin->roomjid);
                 }
             }
