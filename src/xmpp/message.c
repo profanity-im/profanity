@@ -1086,7 +1086,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
 #endif
 
     if (!message->plain && !message->body) {
-        log_error("Message received without body for room: %s", from_jid->str);
+        log_info("Message received without body for room: %s", from_jid->str);
         goto out;
     } else if (!message->plain) {
         message->plain = strdup(message->body);
@@ -1244,7 +1244,7 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
     message->body = xmpp_message_get_body(stanza);
 
     if (!message->plain && !message->body) {
-        log_error("Message received without body from: %s", message->from_jid->str);
+        log_info("Message received without body from: %s", message->from_jid->str);
         goto out;
     } else if (!message->plain) {
         message->plain = strdup(message->body);
