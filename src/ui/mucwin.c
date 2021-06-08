@@ -396,7 +396,10 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
             win_append_highlight(window, THEME_ROOMMENTION, "*%s ", from);
             win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str + 4);
         } else {
-            win_print_them(window, THEME_ROOMMENTION, ch, flags, from);
+            // print time and nick only once at beginning of the line
+            if (last_pos == 0) {
+                win_print_them(window, THEME_ROOMMENTION, ch, flags, from);
+            }
             win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str);
         }
         g_free(before_str);
