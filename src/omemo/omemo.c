@@ -367,6 +367,8 @@ omemo_generate_crypto_materials(ProfAccount* account)
 void
 omemo_publish_crypto_materials(void)
 {
+    log_debug("[OMEMO] publish crypto materials");
+
     if (loaded != TRUE) {
         cons_show("OMEMO: cannot publish crypto materials before they are generated");
         log_error("[OMEMO] cannot publish crypto materials before they are generated");
@@ -408,8 +410,14 @@ omemo_start_session(const char* const barejid)
         GList* device_list = g_hash_table_lookup(omemo_ctx.device_list, barejid);
         if (!device_list) {
             log_debug("[OMEMO] missing device list for %s", barejid);
+            // Own devices are handled by _handle_own_device_list
+            // We won't add _handle_device_list_start_session for ourself
+            char* mybarejid = connection_get_barejid();
+            if( g_strcmp0(mybarejid, barejid ) != 0 ) {
+                g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
+            }
+            free(mybarejid);
             omemo_devicelist_request(barejid);
-            g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
             return;
         }
 
@@ -525,6 +533,7 @@ omemo_prekeys(GList** prekeys, GList** ids, GList** lengths)
 void
 omemo_set_device_list(const char* const from, GList* device_list)
 {
+    log_debug("[OMEMO] Setting device list for %s", from);
     Jid* jid;
     if (from) {
         jid = jid_create(from);
@@ -540,6 +549,8 @@ omemo_set_device_list(const char* const from, GList* device_list)
         if (!keep) {
             g_hash_table_remove(omemo_ctx.device_list_handler, jid->barejid);
         }
+    } else {
+        log_debug("[OMEMO] No Device List Handler for %s", from);
     }
 
     // OMEMO trustmode ToFu
