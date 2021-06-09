@@ -908,6 +908,11 @@ cons_show_bookmarks(const GList* list)
 }
 
 void
+cons_show_bookmark(Bookmark* item)
+{
+}
+
+void
 cons_show_disco_items(GSList* items, const char* const jid)
 {
 }

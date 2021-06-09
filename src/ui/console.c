@@ -745,6 +745,34 @@ cons_show_bookmarks(const GList* list)
 }
 
 void
+cons_show_bookmark(Bookmark* item)
+{
+    cons_show("");
+    if (!item) {
+        cons_show("No such bookmark");
+    } else {
+        cons_show("Bookmark details:");
+        cons_show("Room jid           : %s", item->barejid);
+        if (item->name) {
+            cons_show("name               : %s", item->name);
+        }
+        if (item->nick) {
+            cons_show("nick               : %s", item->nick);
+        }
+        if (item->password) {
+            cons_show("password           : %s", item->password);
+        }
+        if (item->autojoin) {
+            cons_show("autojoin           : ON");
+        } else {
+            cons_show("autojoin           : OFF");
+        }
+    }
+
+    cons_alert(NULL);
+}
+
+void
 cons_show_disco_info(const char* jid, GSList* identities, GSList* features)
 {
     if ((identities && (g_slist_length(identities) > 0)) || (features && (g_slist_length(features) > 0))) {

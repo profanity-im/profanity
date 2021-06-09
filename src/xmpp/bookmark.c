@@ -225,6 +225,13 @@ bookmark_remove(const char* jid)
     return TRUE;
 }
 
+Bookmark*
+bookmark_get_by_jid(const char* jid)
+{
+    Bookmark* bookmark = g_hash_table_lookup(bookmarks, jid);
+    return bookmark;
+}
+
 GList*
 bookmark_get_list(void)
 {
