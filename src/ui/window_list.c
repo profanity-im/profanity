@@ -1205,16 +1205,15 @@ ProfWin*
 wins_get_next_unread(void)
 {
     // get and sort win nums
-    GList* values = g_hash_table_get_values(windows);
+    GList* values = g_hash_table_get_keys(windows);
     values = g_list_sort(values, _wins_cmp_num);
     GList* curr = values;
 
     while (curr) {
-        if (current == GPOINTER_TO_INT(curr->data)) {
-            break;
-        }
+        int curr_win_num = GPOINTER_TO_INT(curr->data); 
+        ProfWin* window = wins_get_by_num(curr_win_num);
 
-        ProfWin* window = curr->data;
+        // test if window has unread messages
         if (win_unread(window) > 0) {
             g_list_free(values);
             return window;
