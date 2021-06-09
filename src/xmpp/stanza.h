@@ -121,6 +121,7 @@
 #define STANZA_NAME_LAST             "last"
 #define STANZA_NAME_AFTER            "after"
 #define STANZA_NAME_USERNAME         "username"
+#define STANZA_NAME_PROPOSE          "propose"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST             "bad-request"
@@ -238,6 +239,8 @@
 #define STANZA_NS_RSM                     "http://jabber.org/protocol/rsm"
 #define STANZA_NS_REGISTER                "jabber:iq:register"
 #define STANZA_NS_VOICEREQUEST            "http://jabber.org/protocol/muc#request"
+#define STANZA_NS_JINGLE_MESSAGE          "urn:xmpp:jingle-message:0"
+#define STANZA_NS_JINGLE_RTP              "urn:xmpp:jingle:apps:rtp:1"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
