@@ -2206,6 +2206,10 @@ _bookmark_autocomplete(ProfWin* window, const char* const input, gboolean previo
     if (found) {
         return found;
     }
+    found = autocomplete_param_with_func(input, "/bookmark list", bookmark_find, previous, NULL);
+    if (found) {
+        return found;
+    }
 
     found = autocomplete_param_with_ac(input, "/bookmark", bookmark_ac, TRUE, previous);
     return found;

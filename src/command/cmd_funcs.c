@@ -4661,9 +4661,18 @@ cmd_bookmark(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (strcmp(cmd, "list") == 0) {
-        GList* bookmarks = bookmark_get_list();
-        cons_show_bookmarks(bookmarks);
-        g_list_free(bookmarks);
+        char* bookmark_jid = args[1];
+        if (bookmark_jid == NULL) {
+            // list all bookmarks
+            GList* bookmarks = bookmark_get_list();
+            cons_show_bookmarks(bookmarks);
+            g_list_free(bookmarks);
+        } else {
+             // list one bookmark
+            Bookmark *bookmark = bookmark_get_by_jid(bookmark_jid);
+            cons_show_bookmark(bookmark);
+        }
+
         return TRUE;
     }
 

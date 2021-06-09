@@ -274,6 +274,7 @@ gboolean bookmark_update(const char* jid, const char* nick, const char* password
 gboolean bookmark_remove(const char* jid);
 gboolean bookmark_join(const char* jid);
 GList* bookmark_get_list(void);
+Bookmark* bookmark_get_by_jid(const char* jid);
 char* bookmark_find(const char* const search_str, gboolean previous, void* context);
 void bookmark_autocomplete_reset(void);
 gboolean bookmark_exists(const char* const room);

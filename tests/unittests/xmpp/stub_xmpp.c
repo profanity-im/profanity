@@ -487,6 +487,12 @@ bookmark_get_list(void)
     return mock_ptr_type(GList*);
 }
 
+Bookmark*
+bookmark_get_by_jid(const char* jid)
+{
+    return NULL;
+}
+
 char*
 bookmark_find(const char* const search_str, gboolean previous, void* context)
 {

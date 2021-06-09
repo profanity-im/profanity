@@ -822,7 +822,7 @@ static struct cmd_t command_defs[] = {
               CMD_TAG_GROUPCHAT)
       CMD_SYN(
               "/bookmark",
-              "/bookmark list",
+              "/bookmark list [<jid>]",
               "/bookmark add [<room>] [nick <nick>] [password <password>] [name <roomname>] [autojoin on|off]",
               "/bookmark update <room> [nick <nick>] [password <password>] [name <roomname>] [autojoin on|off]",
               "/bookmark remove [<room>]",
@@ -836,7 +836,7 @@ static struct cmd_t command_defs[] = {
               "If you are in a chat room and no arguments are supplied to `/bookmark add`, autojoin is set to \"on\". "
               "There is also an autojoin ignore list in case you want to autojoin in many clients but not on Profanity. ")
       CMD_ARGS(
-              { "list", "List all bookmarks." },
+              { "list [<jid>]", "List all bookmarks. Or the details of one." },
               { "add [<room>]", "Add a bookmark, passing no room will bookmark the current room, setting autojoin to \"on\"." },
               { "remove [<room>]", "Remove a bookmark, passing no room will remove the bookmark for the current room, if one exists." },
               { "update <room>", "Update the properties associated with a bookmark." },
@@ -853,6 +853,8 @@ static struct cmd_t command_defs[] = {
               "/bookmark join room@example.com",
               "/bookmark update room@example.com nick NEWNICK autojoin on",
               "/bookmark ignore room@example.com",
+              "/bookmark list",
+              "/bookmark list room@example.com",
               "/bookmark remove room@example.com")
     },
 
