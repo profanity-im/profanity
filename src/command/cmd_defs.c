@@ -2547,7 +2547,7 @@ static struct cmd_t command_defs[] = {
               "/executable urlsave set \"wget %u -O %p\"",
               "/executable urlsave set \"curl %u -o %p\"",
               "/executable urlsave default",
-              "/executable editor set /usr/bin/vim")
+              "/executable editor set vim")
     },
 
     { "/url",
