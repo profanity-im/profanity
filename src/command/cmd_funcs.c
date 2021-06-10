@@ -9424,12 +9424,6 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
     free(jid);
     g_free(path);
 
-    // Check if file exists and create file
-    if (g_file_test(filename, G_FILE_TEST_EXISTS)) {
-        cons_show("Editor: temp file exists already");
-        return TRUE;
-    }
-
     GError* creation_error = NULL;
     GFile* file = g_file_new_for_path(filename);
     GFileOutputStream* fos = g_file_create(file, G_FILE_CREATE_PRIVATE, NULL, &creation_error);
