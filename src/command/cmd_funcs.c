@@ -9459,8 +9459,6 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
         if (size_read > 0 && size_read <= COUNT) {
             buf[size_read - 1] = '\0';
             GString* text = g_string_new(buf);
-            ProfWin* win = wins_get_current();
-            win_println(win, THEME_DEFAULT, "!", "EDITOR PREVIEW: %s", text->str);
             rl_insert_text(text->str);
             g_string_free(text, TRUE);
         }
