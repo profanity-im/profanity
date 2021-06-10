@@ -58,6 +58,7 @@
 #define DIR_PLUGINS   "plugins"
 #define DIR_DATABASE  "database"
 #define DIR_DOWNLOADS "downloads"
+#define DIR_EDITOR    "editor"
 
 void files_create_directories(void);
 

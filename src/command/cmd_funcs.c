@@ -9409,12 +9409,19 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    // build temp file name. Example: /tmp/profanity-f2f271dd-98c8-4118-8d47-3bd49c8e2e63.md
-    char* uuid = xmpp_uuid_gen(ctx);
-    char* filename = g_strdup_printf("%s%s%s.md", g_get_tmp_dir(), "/profanity-", uuid);
-    if (uuid) {
-        xmpp_free(ctx, uuid);
+    // create editor dir if not present
+    char *jid = connection_get_barejid();
+    gchar *path = files_get_account_data_path(DIR_EDITOR, jid);
+    if (g_mkdir_with_parents(path, S_IRWXU) != 0) {
+        cons_show_error("Failed to create directory at '%s' with error '%s'", path, strerror(errno));
+        free(jid);
+        g_free(path);
+        return TRUE;
     }
+    // build temp file name. Example: /home/user/.local/share/profanity/editor/jid/compose.md
+    char* filename = g_strdup_printf("%s/compose.md", path);
+    free(jid);
+    g_free(path);
 
     // Check if file exists and create file
     if (g_file_test(filename, G_FILE_TEST_EXISTS)) {
@@ -9424,9 +9431,10 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
 
     GError* creation_error = NULL;
     GFile* file = g_file_new_for_path(filename);
-    GFileOutputStream* fos = g_file_create(file,
-                                           G_FILE_CREATE_PRIVATE, NULL,
-                                           &creation_error);
+    GFileOutputStream* fos = g_file_create(file, G_FILE_CREATE_PRIVATE, NULL, &creation_error);
+
+    free(filename);
+
     if (creation_error) {
         cons_show_error("Editor: could not create temp file");
         return TRUE;
