@@ -2538,7 +2538,7 @@ static struct cmd_t command_defs[] = {
               { "urlopen default", "Restore to default settings." },
               { "urlsave set", "Set executable that is run by /url save. Takes a command template that replaces %u and %p with the URL and path respectively." },
               { "urlsave default", "Use the built-in download method for saving." },
-              { "editor set", "Set editor to be used with /editor. Needs full file path." })
+              { "editor set", "Set editor to be used with /editor. Needs a terminal editor or a script to run a graphical editor." })
       CMD_EXAMPLES(
               "/executable avatar xdg-open",
               "/executable urlopen set \"xdg-open %u\"",
