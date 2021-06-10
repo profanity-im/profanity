@@ -2130,6 +2130,10 @@ cons_executable_setting(void)
     }
     cons_show("Default '/url save' command (/executable urlsave)                        : %s", urlsave);
     g_free(urlsave);
+
+    gchar* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
+    cons_show("Default '/editor' command (/executable editor)                           : %s", editor);
+    g_free(editor);
 }
 
 void
