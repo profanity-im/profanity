@@ -9403,9 +9403,10 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_editor(ProfWin* window, const char* const command, gchar** args)
 {
-    xmpp_ctx_t* const ctx = connection_get_ctx();
-    if (!ctx) {
-        log_debug("Editor: no connection");
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
