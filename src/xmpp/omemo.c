@@ -458,7 +458,7 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
         return 1;
     }
 
-    xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(root, "items");
+    xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(root, STANZA_NAME_ITEMS);
     if (!items) {
         return 1;
     }
