@@ -541,6 +541,27 @@ omemo_set_device_list(const char* const from, GList* device_list)
         jid = jid_create(connection_get_fulljid());
     }
 
+    // Check the incoming list of device, if there is a new unknown device.
+    // The user will be informed about JID and Device ID of new devices.
+    GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid->barejid);
+    if (known_identities) {
+        GList* device_id;
+        for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
+            gboolean found = FALSE;
+            GList* fp = NULL;
+            for (fp = g_hash_table_get_keys(known_identities); fp != NULL; fp = fp->next) {
+                if (device_id->data == g_hash_table_lookup(known_identities, fp->data)) {
+                    found = TRUE;
+                    break;
+                }
+            }
+            if(!found) {
+                cons_show("Found new OMEMO device for %s (Device id %d)",
+                    jid->barejid, device_id->data);
+            }
+        }
+    }
+
     g_hash_table_insert(omemo_ctx.device_list, strdup(jid->barejid), device_list);
 
     OmemoDeviceListHandler handler = g_hash_table_lookup(omemo_ctx.device_list_handler, jid->barejid);
