@@ -246,18 +246,12 @@ _rotate_log_file(void)
             break;
     }
 
-    char* lf = strdup(mainlogfile);
-    char* start = strrchr(lf, '/') + 1;
-    char* end = strstr(start, ".log");
-    *end = '\0';
-
     log_close();
 
     rename(log_file, log_file_new);
 
-    log_init(log_get_filter(), start);
+    log_init(log_get_filter(), log_file);
 
-    free(lf);
     free(log_file_new);
     free(log_file);
     log_info("Log has been rotated");
