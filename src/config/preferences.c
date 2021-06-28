@@ -2213,14 +2213,6 @@ _get_default_boolean(preference_t pref)
     case PREF_AUTOAWAY_CHECK:
     case PREF_LOG_ROTATE:
     case PREF_LOG_SHARED:
-    case PREF_NOTIFY_CHAT:
-    case PREF_NOTIFY_CHAT_CURRENT:
-    case PREF_NOTIFY_ROOM:
-    case PREF_NOTIFY_ROOM_CURRENT:
-    case PREF_NOTIFY_TYPING:
-    case PREF_NOTIFY_TYPING_CURRENT:
-    case PREF_NOTIFY_SUB:
-    case PREF_NOTIFY_INVITE:
     case PREF_SPLASH:
     case PREF_OCCUPANTS:
     case PREF_MUC_PRIVILEGES:
@@ -2241,7 +2233,6 @@ _get_default_boolean(preference_t pref)
     case PREF_ROSTER_ROOMS_SERVER:
     case PREF_TLS_SHOW:
     case PREF_LASTACTIVITY:
-    case PREF_NOTIFY_MENTION_WHOLE_WORD:
     case PREF_TRAY_READ:
     case PREF_BOOKMARK_INVITE:
     case PREF_ROOM_LIST_CACHE:
