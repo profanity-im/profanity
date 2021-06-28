@@ -825,7 +825,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
             session_cipher_free(cipher);
             if (res != SG_SUCCESS ) {
-                log_error("[OMEMO][SEND] cannot encrypt key for %s device id %d - code: %d", address.name, address.device_id,res);
+                log_info("[OMEMO][SEND] cannot encrypt key for %s device id %d - code: %d", address.name, address.device_id,res);
                 continue;
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);
@@ -855,6 +855,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     // Encrypt keys for the sender
     if (!muc) {
         GList* sender_device_id = g_hash_table_lookup(omemo_ctx.device_list, jid->barejid);
+
         for (device_ids_iter = sender_device_id; device_ids_iter != NULL; device_ids_iter = device_ids_iter->next) {
             int res;
             ciphertext_message* ciphertext;
@@ -864,7 +865,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 .name_len = strlen(jid->barejid),
                 .device_id = GPOINTER_TO_INT(device_ids_iter->data)
             };
-            log_debug("[OMEMO][SEND] Sending to device %d for %s ", address.device_id, address.name);
+            log_debug("[OMEMO][SEND][Sender] Sending to device %d for %s ", address.device_id, address.name);
             // Don't encrypt for this device (according to
             // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
             if (address.device_id == omemo_ctx.device_id) {
@@ -873,14 +874,14 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
             if (res != 0) {
-                log_error("[OMEMO][SEND] cannot create cipher for %s device id %d", address.name, address.device_id);
+                log_info("[OMEMO][SEND][Sender] cannot create cipher for %s device id %d", address.name, address.device_id);
                 continue;
             }
 
             res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
             session_cipher_free(cipher);
             if (res != 0) {
-                log_error("[OMEMO][SEND] cannot encrypt key for %s device id %d", address.name, address.device_id);
+                log_info("[OMEMO][SEND][Sender] cannot encrypt key for %s device id %d", address.name, address.device_id);
                 continue;
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);

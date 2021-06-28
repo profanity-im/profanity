@@ -85,7 +85,7 @@ load_session(signal_buffer** record, signal_buffer** user_record,
     device_store = g_hash_table_lookup(session_store, address->name);
     if (!device_store) {
         *record = NULL;
-        log_warning("[OMEMO][STORE] No device store for %s found", address->name);
+        log_info("[OMEMO][STORE] No device store for %s found", address->name);
         return 0;
     }
 
