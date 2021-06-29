@@ -2838,3 +2838,34 @@ stanza_create_muc_register_nick(xmpp_ctx_t* ctx, const char* const id, const cha
 
     return iq;
 }
+
+void
+stanza_get_service_contact_addresses(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza)
+{
+    xmpp_stanza_t* fields = xmpp_stanza_get_children(stanza);
+    while (fields) {
+        const char* child_name = xmpp_stanza_get_name(fields);
+        const char* child_type = xmpp_stanza_get_type(fields);
+
+        if (g_strcmp0(child_name, STANZA_NAME_FIELD) == 0 && g_strcmp0(child_type, STANZA_TYPE_LIST_MULTI) == 0) {
+            // key
+            const char* var = xmpp_stanza_get_attribute(fields, STANZA_ATTR_VAR );
+            var = var;
+
+            // values
+            xmpp_stanza_t* values = xmpp_stanza_get_children(fields);
+            if (values) {
+                const char* value_name = xmpp_stanza_get_name(values);
+                if (value_name && (g_strcmp0(value_name, STANZA_NAME_VALUE) == 0)) {
+                    char* value_text = xmpp_stanza_get_text(values);
+                    if (value_text) {
+                        //add to list
+                        xmpp_free(ctx, value_text);
+                    }
+                }
+            }
+        }
+
+        fields = xmpp_stanza_get_next(fields);
+    }
+}

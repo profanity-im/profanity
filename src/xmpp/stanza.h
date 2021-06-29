@@ -162,6 +162,7 @@
 #define STANZA_TYPE_SUBMIT       "submit"
 #define STANZA_TYPE_CANCEL       "cancel"
 #define STANZA_TYPE_MODIFY       "modify"
+#define STANZA_TYPE_LIST_MULTI   "list-multi"
 
 #define STANZA_ATTR_TO             "to"
 #define STANZA_ATTR_FROM           "from"
@@ -387,6 +388,8 @@ char* stanza_get_muc_destroy_alternative_password(xmpp_stanza_t* stanza);
 char* stanza_get_muc_destroy_reason(xmpp_stanza_t* stanza);
 const char* stanza_get_actor(xmpp_stanza_t* stanza);
 char* stanza_get_reason(xmpp_stanza_t* stanza);
+
+void stanza_get_service_contact_addresses(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza);
 
 Resource* stanza_resource_from_presence(XMPPPresence* presence);
 XMPPPresence* stanza_parse_presence(xmpp_stanza_t* stanza, int* err);

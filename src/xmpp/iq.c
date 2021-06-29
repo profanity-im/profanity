@@ -2308,6 +2308,8 @@ _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdat
         GSList* features = NULL;
         while (child) {
             const char* stanza_name = xmpp_stanza_get_name(child);
+            const char* child_type = xmpp_stanza_get_type(child);
+
             if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
                 const char* var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
                 if (var) {
@@ -2315,10 +2317,9 @@ _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdat
                 }
             } else if (g_strcmp0(stanza_name, STANZA_NAME_IDENTITY) == 0) {
                 const char* name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
-                const char* type = xmpp_stanza_get_type(child);
                 const char* category = xmpp_stanza_get_attribute(child, STANZA_ATTR_CATEGORY);
 
-                if (name || category || type) {
+                if (name || category || child_type) {
                     DiscoIdentity* identity = malloc(sizeof(struct disco_identity_t));
 
                     if (identity) {
@@ -2332,8 +2333,8 @@ _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdat
                         } else {
                             identity->category = NULL;
                         }
-                        if (type) {
-                            identity->type = strdup(type);
+                        if (child_type) {
+                            identity->type = strdup(child_type);
                         } else {
                             identity->type = NULL;
                         }
@@ -2341,6 +2342,23 @@ _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdat
                         identities = g_slist_append(identities, identity);
                     }
                 }
+            } else if (g_strcmp0(child_type, STANZA_TYPE_RESULT) == 0) {
+                /*
+                DataForm* form = form_create(child);
+                ProfConfWin* confwin = (ProfConfWin*)wins_new_config(from, form, NULL, NULL, NULL);
+                confwin_handle_configuration(confwin, form);
+                */
+                /*g_hash_table_new () with field var='security-addresses' as key
+                 * a list of  <value>xmpp:security@shakespeare.lit</value> as value
+                 */
+                stanza_get_service_contact_addresses(connection_get_ctx(), child);
+                    /*
+                char* text;
+                size_t text_size;
+                xmpp_stanza_to_text(child, &text, &text_size);
+                cons_show(text);
+                free(text);
+                */
             }
 
             child = xmpp_stanza_get_next(child);
