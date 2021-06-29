@@ -1141,6 +1141,11 @@ _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret)
 char*
 p_ox_gpg_decrypt(char* base64)
 {
+    // if there is no private key avaibale,
+    // we don't try do decrypt
+    if(!ox_is_private_key_available(connection_get_barejid())) {
+        return NULL;
+    }
     setlocale(LC_ALL, "");
     gpgme_check_version(NULL);
     gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));

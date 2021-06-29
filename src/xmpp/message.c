@@ -1463,28 +1463,29 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
                 xmpp_stanza_t *p =  xmpp_stanza_get_child_by_name(x, "payload");
                 if ( !p ) {
                     log_warning("OX Stanza - no Payload");
+                    message->plain = "OX error: No payload found";
                     return;
                 }
                 xmpp_stanza_t *b =  xmpp_stanza_get_child_by_name(p, "body");
                 if ( !b ) {
                     log_warning("OX Stanza - no body");
+                    message->plain = "OX error: No paylod body found";
                     return;
                 }
                 message->plain = xmpp_stanza_get_text(b);
+                message->encrypted = xmpp_stanza_get_text(ox);
                 if(message->plain == NULL ) {
                     message->plain = xmpp_stanza_get_text(stanza);
                 }
-                message->encrypted = xmpp_stanza_get_text(ox);
-
-                if (message->plain == NULL) {
-                    message->plain = xmpp_stanza_get_text(stanza);
-                }
-                message->encrypted = xmpp_stanza_get_text(ox);
             } else {
+                message->plain = "Unable to decrypt OX message (XEP-0373: OpenPGP for XMPP)";
                 log_warning("OX Stanza text to stanza failed");
             }
+        } else {
+            message->plain = "Unable to decrypt OX message (XEP-0373: OpenPGP for XMPP)";
         }
     } else {
+        message->plain = "OX stanza without openpgp name";
         log_warning("OX Stanza without openpgp stanza");
     }
 #endif // HAVE_LIBGPGME
