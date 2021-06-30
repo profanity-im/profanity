@@ -837,6 +837,20 @@ cons_show_disco_items(GSList* items, const char* const jid)
     cons_alert(NULL);
 }
 
+static void _cons_print_contact_information_item(gpointer key, gpointer value, gpointer userdata)
+{
+    cons_show("%s: %s", (char*)key, (char*)value);
+}
+
+void
+cons_show_disco_contact_information(GHashTable* addresses)
+{
+    cons_show("");
+    cons_show("Server contact information:");
+
+    g_hash_table_foreach(addresses, _cons_print_contact_information_item, NULL);
+}
+
 void
 cons_show_status(const char* const barejid)
 {

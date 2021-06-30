@@ -2343,22 +2343,9 @@ _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdat
                     }
                 }
             } else if (g_strcmp0(child_type, STANZA_TYPE_RESULT) == 0) {
-                /*
-                DataForm* form = form_create(child);
-                ProfConfWin* confwin = (ProfConfWin*)wins_new_config(from, form, NULL, NULL, NULL);
-                confwin_handle_configuration(confwin, form);
-                */
-                /*g_hash_table_new () with field var='security-addresses' as key
-                 * a list of  <value>xmpp:security@shakespeare.lit</value> as value
-                 */
-                stanza_get_service_contact_addresses(connection_get_ctx(), child);
-                    /*
-                char* text;
-                size_t text_size;
-                xmpp_stanza_to_text(child, &text, &text_size);
-                cons_show(text);
-                free(text);
-                */
+                GHashTable *adr = stanza_get_service_contact_addresses(connection_get_ctx(), child);
+                cons_show_disco_contact_information(adr);
+                g_hash_table_destroy(adr);
             }
 
             child = xmpp_stanza_get_next(child);

@@ -389,7 +389,7 @@ char* stanza_get_muc_destroy_reason(xmpp_stanza_t* stanza);
 const char* stanza_get_actor(xmpp_stanza_t* stanza);
 char* stanza_get_reason(xmpp_stanza_t* stanza);
 
-void stanza_get_service_contact_addresses(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza);
+GHashTable* stanza_get_service_contact_addresses(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza);
 
 Resource* stanza_resource_from_presence(XMPPPresence* presence);
 XMPPPresence* stanza_parse_presence(xmpp_stanza_t* stanza, int* err);

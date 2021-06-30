@@ -2839,9 +2839,11 @@ stanza_create_muc_register_nick(xmpp_ctx_t* ctx, const char* const id, const cha
     return iq;
 }
 
-void
+GHashTable*
 stanza_get_service_contact_addresses(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza)
 {
+    GHashTable* addresses = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+
     xmpp_stanza_t* fields = xmpp_stanza_get_children(stanza);
     while (fields) {
         const char* child_name = xmpp_stanza_get_name(fields);
@@ -2850,22 +2852,27 @@ stanza_get_service_contact_addresses(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza)
         if (g_strcmp0(child_name, STANZA_NAME_FIELD) == 0 && g_strcmp0(child_type, STANZA_TYPE_LIST_MULTI) == 0) {
             // key
             const char* var = xmpp_stanza_get_attribute(fields, STANZA_ATTR_VAR );
-            var = var;
 
             // values
             xmpp_stanza_t* values = xmpp_stanza_get_children(fields);
-            if (values) {
+            while (values) {
                 const char* value_name = xmpp_stanza_get_name(values);
                 if (value_name && (g_strcmp0(value_name, STANZA_NAME_VALUE) == 0)) {
                     char* value_text = xmpp_stanza_get_text(values);
                     if (value_text) {
                         //add to list
+                        g_hash_table_insert(addresses, g_strdup(var), g_strdup(value_text));
+
                         xmpp_free(ctx, value_text);
                     }
                 }
+
+                values = xmpp_stanza_get_next(values);
             }
         }
 
         fields = xmpp_stanza_get_next(fields);
     }
+
+    return addresses;
 }
