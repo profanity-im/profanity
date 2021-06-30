@@ -869,7 +869,8 @@ static struct cmd_t command_defs[] = {
               "/disco items [<jid>]")
       CMD_DESC(
               "Find out information about an entities supported services. "
-              "Calling with no arguments will query the server you are currently connected to.")
+              "Calling with no arguments will query the server you are currently connected to. "
+              "This includes discovering contact addresses for XMPP services (XEP-0157).")
       CMD_ARGS(
               { "info [<jid>]", "List protocols and features supported by an entity." },
               { "items [<jid>]", "List items associated with an entity." })

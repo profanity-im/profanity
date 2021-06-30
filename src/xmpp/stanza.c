@@ -2838,3 +2838,54 @@ stanza_create_muc_register_nick(xmpp_ctx_t* ctx, const char* const id, const cha
 
     return iq;
 }
+
+static void
+_contact_addresses_list_free(GSList* list)
+{
+    if (list) {
+        g_slist_free_full(list, g_free);
+    }
+}
+
+GHashTable*
+stanza_get_service_contact_addresses(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza)
+{
+    GHashTable* addresses = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_contact_addresses_list_free);
+
+    xmpp_stanza_t* fields = xmpp_stanza_get_children(stanza);
+    while (fields) {
+        const char* child_name = xmpp_stanza_get_name(fields);
+        const char* child_type = xmpp_stanza_get_type(fields);
+
+        if (g_strcmp0(child_name, STANZA_NAME_FIELD) == 0 && g_strcmp0(child_type, STANZA_TYPE_LIST_MULTI) == 0) {
+            // extract key (eg 'admin-addresses')
+            const char* var = xmpp_stanza_get_attribute(fields, STANZA_ATTR_VAR );
+
+            // extract values (a list of contact addresses eg mailto:xmpp@shakespeare.lit, xmpp:admins@shakespeare.lit)
+            xmpp_stanza_t* values = xmpp_stanza_get_children(fields);
+            GSList* val_list = NULL;
+            while (values) {
+                const char* value_name = xmpp_stanza_get_name(values);
+                if (value_name && (g_strcmp0(value_name, STANZA_NAME_VALUE) == 0)) {
+                    char* value_text = xmpp_stanza_get_text(values);
+                    if (value_text) {
+                        val_list = g_slist_append(val_list, g_strdup(value_text));
+
+                        xmpp_free(ctx, value_text);
+                    }
+                }
+
+                values = xmpp_stanza_get_next(values);
+            }
+
+            // add to list
+            if (g_slist_length(val_list) > 0) {
+                g_hash_table_insert(addresses, g_strdup(var), val_list);
+            }
+        }
+
+        fields = xmpp_stanza_get_next(fields);
+    }
+
+    return addresses;
+}
