@@ -689,3 +689,35 @@ remove_contact_with_remaining_in_group(void** state)
     g_list_free_full(groups_res, free);
     roster_destroy();
 }
+
+void
+get_contact_display_name(void** state)
+{
+    roster_create();
+    roster_add("person@server.org", "nickname", NULL, NULL, FALSE);
+
+    assert_string_equal("nickname", roster_get_display_name("person@server.org"));
+
+    roster_destroy();
+}
+
+void
+get_contact_display_name_is_barejid_if_name_is_empty(void** state)
+{
+    roster_create();
+    roster_add("person@server.org", NULL, NULL, NULL, FALSE);
+
+    assert_string_equal("person@server.org", roster_get_display_name("person@server.org"));
+
+    roster_destroy();
+}
+
+void
+get_contact_display_name_is_passed_barejid_if_contact_does_not_exist(void** state)
+{
+    roster_create();
+
+    assert_string_equal("person@server.org", roster_get_display_name("person@server.org"));
+
+    roster_destroy();
+}

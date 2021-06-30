@@ -30,3 +30,6 @@ void add_contacts_with_different_groups(void** state);
 void add_contacts_with_same_groups(void** state);
 void add_contacts_with_overlapping_groups(void** state);
 void remove_contact_with_remaining_in_group(void** state);
+void get_contact_display_name(void** state);
+void get_contact_display_name_is_barejid_if_name_is_empty(void** state);
+void get_contact_display_name_is_passed_barejid_if_contact_does_not_exist(void** state);
