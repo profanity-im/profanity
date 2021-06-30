@@ -839,12 +839,13 @@ cons_show_disco_items(GSList* items, const char* const jid)
 
 static void _cons_print_contact_information_item(gpointer data, gpointer user_data)
 {
-    cons_show("%s: %s", (char*)user_data, (char*)data);
+    cons_show("    %s", (char*)data);
 }
 
 static void _cons_print_contact_information_hashlist_item(gpointer key, gpointer value, gpointer userdata)
 {
-    g_slist_foreach((GSList*)value, _cons_print_contact_information_item, key);
+    cons_show("  %s:", (char*)key);
+    g_slist_foreach((GSList*)value, _cons_print_contact_information_item, NULL);
 }
 
 void
