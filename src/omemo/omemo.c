@@ -1862,6 +1862,7 @@ omemo_parse_aesgcm_url(const char* aesgcm_url,
     }
 
     if (strlen(*fragment) != AESGCM_URL_NONCE_LEN + AESGCM_URL_KEY_LEN) {
+        ret = 1;
         goto out;
     }
 

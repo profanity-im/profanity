@@ -70,6 +70,7 @@ aesgcm_file_get(void* userdata)
     // Convert the aesgcm:// URL to a https:// URL and extract the encoded key
     // and tag stored in the URL fragment.
     if (omemo_parse_aesgcm_url(aesgcm_dl->url, &https_url, &fragment) != 0) {
+        cons_show_error("Download failed: Cannot parse URL '%s'.", aesgcm_dl->url);
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
                                    "Download failed: Cannot parse URL '%s'.",
                                    aesgcm_dl->url);
