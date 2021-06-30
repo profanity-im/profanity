@@ -851,10 +851,12 @@ static void _cons_print_contact_information_hashlist_item(gpointer key, gpointer
 void
 cons_show_disco_contact_information(GHashTable* addresses)
 {
-    cons_show("");
-    cons_show("Server contact information:");
+    if (addresses && g_hash_table_size(addresses) > 0) {
+        cons_show("");
+        cons_show("Server contact information:");
 
-    g_hash_table_foreach(addresses, _cons_print_contact_information_hashlist_item, NULL);
+        g_hash_table_foreach(addresses, _cons_print_contact_information_hashlist_item, NULL);
+    }
 }
 
 void
