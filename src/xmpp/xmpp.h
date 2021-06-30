@@ -70,6 +70,7 @@
 #define XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY "urn:xmpp:avatar:metadata+notify"
 #define XMPP_FEATURE_LAST_MESSAGE_CORRECTION     "urn:xmpp:message-correct:0"
 #define XMPP_FEATURE_MAM2                        "urn:xmpp:mam:2"
+#define XMPP_FEATURE_SPAM_REPORTING              "urn:xmpp:reporting:1"
 
 typedef enum {
     JABBER_CONNECTING,
@@ -88,6 +89,12 @@ typedef enum {
     INVITE_DIRECT,
     INVITE_MEDIATED
 } jabber_invite_t;
+
+typedef enum {
+    BLOCKED_NO_REPORT,
+    BLOCKED_REPORT_ABUSE,
+    BLOCKED_REPORT_SPAM
+} blocked_report;
 
 typedef struct bookmark_t
 {
@@ -286,7 +293,7 @@ void roster_send_add_new(const char* const barejid, const char* const name);
 void roster_send_remove(const char* const barejid);
 
 GList* blocked_list(void);
-gboolean blocked_add(char* jid);
+gboolean blocked_add(char* jid, blocked_report reportkind, const char* const message);
 gboolean blocked_remove(char* jid);
 char* blocked_ac_find(const char* const search_str, gboolean previous, void* context);
 void blocked_ac_reset(void);

@@ -420,7 +420,7 @@ static struct cmd_t command_defs[] = {
     },
 
     { "/blocked",
-      parse_args, 0, 2, NULL,
+      parse_args_with_freetext, 0, 4, NULL,
       CMD_NOSUBFUNCS
       CMD_MAINFUNC(cmd_blocked)
       CMD_TAGS(
@@ -428,7 +428,7 @@ static struct cmd_t command_defs[] = {
               CMD_TAG_CHAT)
       CMD_SYN(
               "/blocked",
-              "/blocked add [<jid>]",
+              "/blocked add [<jid>] [report-abuse|report-spam [<message>]",
               "/blocked remove <jid>")
       CMD_DESC(
               "Manage blocked users (XEP-0191), calling with no arguments shows the current list of blocked users. "
@@ -438,6 +438,7 @@ static struct cmd_t command_defs[] = {
               { "remove <jid>", "Remove the specified Jabber ID from the blocked list." })
       CMD_EXAMPLES(
               "/blocked add hel@helheim.edda",
+              "/blocked add hel@helheim.edda report-spam",
               "/blocked add profanity@rooms.dismail.de/spammy-user")
     },
 

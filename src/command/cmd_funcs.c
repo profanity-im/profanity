@@ -3014,17 +3014,41 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
 
     if (g_strcmp0(args[0], "add") == 0) {
         char* jid = args[1];
-        if (jid == NULL && (window->type == WIN_CHAT)) {
-            ProfChatWin* chatwin = (ProfChatWin*)window;
-            jid = chatwin->barejid;
+        char* msg = NULL;
+        blocked_report br = BLOCKED_NO_REPORT;
+
+        // /blocked add jid or /blocked add (in window)
+        if (g_strv_length(args) < 3) {
+            if (jid == NULL && (window->type == WIN_CHAT)) {
+                ProfChatWin* chatwin = (ProfChatWin*)window;
+                jid = chatwin->barejid;
+            }
+
+            if (jid == NULL) {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+
+        } else {
+            if (args[2] && g_strcmp0(args[2], "report-abuse") == 0) {
+                br = BLOCKED_REPORT_ABUSE;
+            } else if (args[2] && g_strcmp0(args[2], "report-abuse") == 0) {
+                br = BLOCKED_REPORT_SPAM;
+            } else {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+
+            if (!connection_supports(XMPP_FEATURE_SPAM_REPORTING)) {
+                cons_show("Spam reporting not supported by server.");
+                return TRUE;
+            }
+
+            msg = args[3];
         }
 
-        if (jid == NULL) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-
-        gboolean res = blocked_add(jid);
+        // args[3] is optional message
+        gboolean res = blocked_add(jid, br, msg);
         if (!res) {
             cons_show("User %s already blocked.", jid);
         }
