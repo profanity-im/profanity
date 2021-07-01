@@ -86,7 +86,7 @@ static void _handle_muc_private_message(xmpp_stanza_t* const stanza);
 static void _handle_conference(xmpp_stanza_t* const stanza);
 static void _handle_captcha(xmpp_stanza_t* const stanza);
 static void _handle_receipt_received(xmpp_stanza_t* const stanza);
-static void _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, const char *result_id, GDateTime* timestamp);
+static void _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, const char* result_id, GDateTime* timestamp);
 static void _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_mam);
 static xmpp_stanza_t* _handle_carbons(xmpp_stanza_t* const stanza);
 static void _send_message_stanza(xmpp_stanza_t* const stanza);
@@ -119,7 +119,7 @@ _handle_headline(xmpp_stanza_t* const stanza)
 {
     xmpp_stanza_t* body = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_BODY);
     if (body) {
-        char *text = xmpp_stanza_get_text(body);
+        char* text = xmpp_stanza_get_text(body);
         if (text) {
             cons_show("Headline: %s", text);
             xmpp_free(connection_get_ctx(), text);
@@ -641,7 +641,7 @@ message_send_chat_omemo(const char* const jid, uint32_t sid, GList* keys,
         xmpp_stanza_t* key_stanza = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(key_stanza, "key");
         char* rid = g_strdup_printf("%d", key->device_id);
-        log_debug("[OMEMO] Sending to device rid %s", rid == NULL ? "NULL" : rid );
+        log_debug("[OMEMO] Sending to device rid %s", rid == NULL ? "NULL" : rid);
         xmpp_stanza_set_attribute(key_stanza, "rid", rid);
         g_free(rid);
         if (key->prekey) {
@@ -998,11 +998,11 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
     xmpp_ctx_t* ctx = connection_get_ctx();
 
     const char* room_jid = xmpp_stanza_get_from(stanza);
-    if(!room_jid) {
+    if (!room_jid) {
         return;
     }
     Jid* from_jid = jid_create(room_jid);
-    if(!from_jid) {
+    if (!from_jid) {
         return;
     }
 
@@ -1174,7 +1174,7 @@ _handle_receipt_received(xmpp_stanza_t* const stanza)
         }
 
         Jid* jidp = jid_create(fulljid);
-        if(!jidp) {
+        if (!jidp) {
             return;
         }
 
@@ -1304,7 +1304,7 @@ _handle_carbons(xmpp_stanza_t* const stanza)
 }
 
 static void
-_handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, const char *result_id, GDateTime* timestamp)
+_handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, const char* result_id, GDateTime* timestamp)
 {
     // some clients send the mucuser namespace with private messages
     // if the namespace exists, and the stanza contains a body element, assume its a private message
@@ -1455,26 +1455,26 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
 
 #ifdef HAVE_LIBGPGME
     xmpp_stanza_t* ox = xmpp_stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
-    if ( ox ) {
+    if (ox) {
         message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
-        if ( message->plain ) {
-            xmpp_stanza_t *x =  xmpp_stanza_new_from_string(connection_get_ctx(), message->plain);
-            if ( x ) {
-                xmpp_stanza_t *p =  xmpp_stanza_get_child_by_name(x, "payload");
-                if ( !p ) {
+        if (message->plain) {
+            xmpp_stanza_t* x = xmpp_stanza_new_from_string(connection_get_ctx(), message->plain);
+            if (x) {
+                xmpp_stanza_t* p = xmpp_stanza_get_child_by_name(x, "payload");
+                if (!p) {
                     log_warning("OX Stanza - no Payload");
                     message->plain = "OX error: No payload found";
                     return;
                 }
-                xmpp_stanza_t *b =  xmpp_stanza_get_child_by_name(p, "body");
-                if ( !b ) {
+                xmpp_stanza_t* b = xmpp_stanza_get_child_by_name(p, "body");
+                if (!b) {
                     log_warning("OX Stanza - no body");
                     message->plain = "OX error: No paylod body found";
                     return;
                 }
                 message->plain = xmpp_stanza_get_text(b);
                 message->encrypted = xmpp_stanza_get_text(ox);
-                if(message->plain == NULL ) {
+                if (message->plain == NULL) {
                     message->plain = xmpp_stanza_get_text(stanza);
                 }
             } else {
@@ -1489,7 +1489,6 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
         log_warning("OX Stanza without openpgp stanza");
     }
 #endif // HAVE_LIBGPGME
-
 }
 
 static gboolean
@@ -1510,7 +1509,7 @@ _handle_mam(xmpp_stanza_t* const stanza)
     // same as <stanza-id> from XEP-0359 for live messages
     const char* result_id = xmpp_stanza_get_id(result);
 
-    GDateTime *timestamp = stanza_get_delay_from(forwarded, NULL);
+    GDateTime* timestamp = stanza_get_delay_from(forwarded, NULL);
 
     xmpp_stanza_t* message_stanza = xmpp_stanza_get_child_by_ns(forwarded, "jabber:client");
 

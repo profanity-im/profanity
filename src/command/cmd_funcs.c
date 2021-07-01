@@ -7619,7 +7619,7 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
         if (args[1] && args[2]) {
             ox_request_public_key(args[1], args[2]);
         } else {
-            cons_show("JID and KeyID is required");
+            cons_show("JID and OpenPGP Key ID are required");
         }
     } else {
         cons_show("OX not implemented");
