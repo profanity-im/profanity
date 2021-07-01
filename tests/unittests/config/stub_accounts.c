@@ -213,6 +213,12 @@ accounts_get_last_presence(const char* const account_name)
     return mock_type(resource_presence_t);
 }
 
+char*
+accounts_get_login_status(const char* const account_name)
+{
+    return NULL;
+}
+
 void
 accounts_set_priority_online(const char* const account_name, const gint value)
 {
