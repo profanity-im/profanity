@@ -1916,6 +1916,7 @@ _get_group(preference_t pref)
     case PREF_TLS_CERTPATH:
     case PREF_CORRECTION_ALLOW:
     case PREF_MAM:
+    case PREF_SILENCE_NON_ROSTER:
         return PREF_GROUP_CONNECTION;
     case PREF_OTR_LOG:
     case PREF_OTR_POLICY:
@@ -2198,6 +2199,8 @@ _get_key(preference_t pref)
         return "url.save.cmd";
     case PREF_COMPOSE_EDITOR:
         return "compose.editor";
+    case PREF_SILENCE_NON_ROSTER:
+        return "silence.incoming.nonroster";
     default:
         return NULL;
     }

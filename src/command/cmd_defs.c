@@ -2622,6 +2622,20 @@ static struct cmd_t command_defs[] = {
       CMD_NOEXAMPLES
     },
 
+    { "/silence",
+      parse_args, 1, 1, &cons_silence_setting,
+      CMD_NOSUBFUNCS
+      CMD_MAINFUNC(cmd_silence)
+      CMD_TAGS(
+              CMD_TAG_CHAT)
+      CMD_SYN(
+              "/silence on|off")
+      CMD_DESC(
+              "Let's you silence all message attempts from people who are not in your roster.")
+      CMD_NOARGS
+      CMD_NOEXAMPLES
+    },
+
     // NEXT-COMMAND (search helper)
 };
 

@@ -1125,6 +1125,12 @@ void
 cons_mam_setting(void)
 {
 }
+
+void
+cons_silence_setting(void)
+{
+}
+
 void
 cons_show_bookmarks_ignore(gchar** list, gsize len)
 {

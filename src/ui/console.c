@@ -2179,6 +2179,16 @@ cons_mam_setting(void)
 }
 
 void
+cons_silence_setting(void)
+{
+    if (prefs_get_boolean(PREF_SILENCE_NON_ROSTER)) {
+        cons_show("Block all messages from JIDs that are not in the roster (/silence)    : ON");
+    } else {
+        cons_show("Block all messages from JIDs that are not in the roster (/silence)    : OFF");
+    }
+}
+
+void
 cons_show_connection_prefs(void)
 {
     cons_show("Connection preferences:");
