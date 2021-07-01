@@ -94,6 +94,7 @@ static gboolean _handle_mam(xmpp_stanza_t* const stanza);
 static void _handle_pubsub(xmpp_stanza_t* const stanza, xmpp_stanza_t* const event);
 static gboolean _handle_form(xmpp_stanza_t* const stanza);
 static gboolean _handle_jingle_message(xmpp_stanza_t* const stanza);
+static gboolean _should_ignore_based_on_silence(xmpp_stanza_t* const stanza);
 
 #ifdef HAVE_LIBGPGME
 static xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text);
@@ -170,6 +171,11 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
         _handle_headline(stanza);
     } else if (type == NULL || g_strcmp0(type, STANZA_TYPE_CHAT) == 0 || g_strcmp0(type, STANZA_TYPE_NORMAL) == 0) {
         // type: chat, normal (==NULL)
+
+        // ignore all messages from JIDs that are not in roster, if 'silence' is set
+        if (_should_ignore_based_on_silence(stanza)) {
+            return 1;
+        }
 
         // XEP-0353: Jingle Message Initiation
         if (_handle_jingle_message(stanza)) {
@@ -1682,6 +1688,22 @@ _handle_jingle_message(xmpp_stanza_t* const stanza)
             const char* const from = xmpp_stanza_get_from(stanza);
             cons_show("Ring ring: %s is trying to call you", from);
             cons_alert(NULL);
+            return TRUE;
+        }
+    }
+    return FALSE;
+}
+
+static gboolean
+_should_ignore_based_on_silence(xmpp_stanza_t* const stanza)
+{
+    if (prefs_get_boolean(PREF_SILENCE_NON_ROSTER)) {
+        const char* const from = xmpp_stanza_get_from(stanza);
+        Jid* from_jid = jid_create(from);
+        PContact contact = roster_get_contact(from_jid->barejid);
+        jid_destroy(from_jid);
+        if (!contact) {
+            log_debug("[Silence] Ignoring message from: %s", from);
             return TRUE;
         }
     }
