@@ -1724,10 +1724,12 @@ static struct cmd_t command_defs[] = {
               "/ox char <char>",
               "/ox sendfile on|off",
               "/ox announce <file>",
-              "/ox discover",
-              "/ox request <jid>")
+              "/ox discover <jid>",
+              "/ox request <jid> <keyid>")
       CMD_DESC(
-              "OpenPGP (OX) commands to manage keys, and perform PGP encryption during chat sessions. ")
+             "OpenPGP (OX) commands to manage keys, and perform OpenPGP encryption during chat sessions. "
+             "Your OpenPGP key needs a user-id with your JID URI (xmpp:local@domain.tld). "
+             "A key can be generated with \"gpg --quick-gen-key xmpp:local@domain.tld future-default default 3y\".")
       CMD_ARGS(
               { "keys", "List all keys known to the system." },
               { "contacts", "Show contacts with assigned public keys." },
@@ -1737,7 +1739,7 @@ static struct cmd_t command_defs[] = {
               { "log redact", "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." },
               { "char <char>", "Set the character to be displayed next to PGP encrypted messages." },
               { "announce <file>", "Announce a public key by pushing it on the XMPP Server" },
-              { "discover <jid>", "Discover public keys of a jid " },
+              { "discover <jid>", "Discover public keys of a jid. The OpenPGP Key IDs will be displayed" },
               { "request <jid>", "Request public keys" },
               { "sendfile on|off", "Allow /sendfile to send unencrypted files while otherwise using PGP." })
       CMD_EXAMPLES(
