@@ -150,6 +150,7 @@ static int _command_list_result_handler(xmpp_stanza_t* const stanza, void* const
 static int _command_exec_response_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _register_change_password_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
+static int _register_new_account_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 
 static void _iq_free_room_data(ProfRoomInfoData* roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet* affiliation_set);
@@ -2655,6 +2656,36 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 }
 
 void
+iq_register_new_account(const char* const user, const char* const password)
+{
+    //char* id = connection_create_stanza_id();
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    xmpp_stanza_t* iq = stanza_register_new_account(ctx, user, password);
+
+    const char* id = xmpp_stanza_get_id(iq);
+    iq_id_handler_add(id, _register_new_account_result_id_handler, NULL, NULL);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+}
+
+static int
+_register_new_account_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    const char* type = xmpp_stanza_get_type(stanza);
+    if (g_strcmp0(type, "error") == 0) {
+        char* error_message = stanza_get_error_message(stanza);
+        cons_show_error("Server error: %s", error_message);
+        log_debug("Registration error: %s", error_message);
+        free(error_message);
+    } else {
+        cons_show("Registration successful.");
+        log_debug("Registration successful.");
+    }
+    return 0;
+}
+
+void
 iq_register_change_password(const char* const user, const char* const password)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
@@ -2807,3 +2838,4 @@ iq_muc_register_nick(const char* const roomjid)
     xmpp_stanza_release(iq);
     xmpp_stanza_release(query);
 }
+
