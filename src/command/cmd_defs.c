@@ -420,7 +420,7 @@ static struct cmd_t command_defs[] = {
     },
 
     { "/blocked",
-      parse_args_with_freetext, 0, 4, NULL,
+      parse_args_with_freetext, 0, 3, NULL,
       CMD_NOSUBFUNCS
       CMD_MAINFUNC(cmd_blocked)
       CMD_TAGS(
@@ -428,17 +428,22 @@ static struct cmd_t command_defs[] = {
               CMD_TAG_CHAT)
       CMD_SYN(
               "/blocked",
-              "/blocked add [<jid>] [report-abuse|report-spam [<message>]",
+              "/blocked add [<jid>]",
+              "/blocked report-abuse [<jid>] [<message>]",
+              "/blocked report-spam [<jid>] [<message>]",
               "/blocked remove <jid>")
       CMD_DESC(
               "Manage blocked users (XEP-0191), calling with no arguments shows the current list of blocked users. "
-              "To blog a certain user in a MUC use the following as jid: room@conference.example.org/spammy-user")
+              "To blog a certain user in a MUC use the following as jid: room@conference.example.org/spammy-user"
+              "It is also possible to block and report (XEP-0377) a user with the report-abuse and report-spam commands.")
       CMD_ARGS(
               { "add [<jid>]", "Block the specified Jabber ID. If in a chat window and no jid is specified, the current recipient will be blocked." },
-              { "remove <jid>", "Remove the specified Jabber ID from the blocked list." })
+              { "remove <jid>", "Remove the specified Jabber ID from the blocked list." },
+              { "report-abuse <jid> [<message>]", "Report the jid as abuse with an optional message to the service operator." },
+              { "report-spam <jid> [<message>]", "Report the jid as spam with an optional message to the service operator." })
       CMD_EXAMPLES(
               "/blocked add hel@helheim.edda",
-              "/blocked add hel@helheim.edda report-spam",
+              "/blocked report-spam hel@helheim.edda Very annoying guy",
               "/blocked add profanity@rooms.dismail.de/spammy-user")
     },
 

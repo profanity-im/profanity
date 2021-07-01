@@ -3012,10 +3012,10 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
+    blocked_report br = BLOCKED_NO_REPORT;
+
     if (g_strcmp0(args[0], "add") == 0) {
         char* jid = args[1];
-        char* msg = NULL;
-        blocked_report br = BLOCKED_NO_REPORT;
 
         // /blocked add jid or /blocked add (in window)
         if (g_strv_length(args) < 3) {
@@ -3028,27 +3028,9 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
                 cons_bad_cmd_usage(command);
                 return TRUE;
             }
-
-        } else {
-            if (args[2] && g_strcmp0(args[2], "report-abuse") == 0) {
-                br = BLOCKED_REPORT_ABUSE;
-            } else if (args[2] && g_strcmp0(args[2], "report-abuse") == 0) {
-                br = BLOCKED_REPORT_SPAM;
-            } else {
-                cons_bad_cmd_usage(command);
-                return TRUE;
-            }
-
-            if (!connection_supports(XMPP_FEATURE_SPAM_REPORTING)) {
-                cons_show("Spam reporting (%s) not supported by server.", XMPP_FEATURE_SPAM_REPORTING);
-                return TRUE;
-            }
-
-            msg = args[3];
         }
 
-        // args[3] is optional message
-        gboolean res = blocked_add(jid, br, msg);
+        gboolean res = blocked_add(jid, br, NULL);
         if (!res) {
             cons_show("User %s already blocked.", jid);
         }
@@ -3068,6 +3050,28 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
         }
 
         return TRUE;
+    }
+
+    if (strncmp(args[0], "report-", 7) == 0) {
+        if (args[1] && g_strcmp0(args[0], "report-abuse") == 0) {
+            br = BLOCKED_REPORT_ABUSE;
+        } else if (args[1] && g_strcmp0(args[0], "report-spam") == 0) {
+            br = BLOCKED_REPORT_SPAM;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        if (!connection_supports(XMPP_FEATURE_SPAM_REPORTING)) {
+            cons_show("Spam reporting (%s) not supported by server.", XMPP_FEATURE_SPAM_REPORTING);
+            return TRUE;
+        }
+
+        // args[3] is an optional message
+        gboolean res = blocked_add(args[1], br, args[3]);
+        if (!res) {
+            cons_show("User %s already blocked.", args[1]);
+        }
     }
 
     GList* blocked = blocked_list();
