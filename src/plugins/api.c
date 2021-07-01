@@ -55,6 +55,7 @@
 #include "plugins/disco.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
+#include "xmpp/roster_list.h"
 
 void
 api_cons_alert(void)
@@ -237,6 +238,18 @@ api_get_current_nick(void)
     } else {
         return NULL;
     }
+}
+
+char*
+api_get_name_from_roster(const char* barejid)
+{
+    return roster_get_display_name(barejid);
+}
+
+char*
+api_get_barejid_from_roster(const char* name)
+{
+    return roster_barejid_from_name(name);
 }
 
 char**

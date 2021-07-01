@@ -219,6 +219,9 @@ main(int argc, char* argv[])
         unit_test(add_contacts_with_same_groups),
         unit_test(add_contacts_with_overlapping_groups),
         unit_test(remove_contact_with_remaining_in_group),
+        unit_test(get_contact_display_name),
+        unit_test(get_contact_display_name_is_barejid_if_name_is_empty),
+        unit_test(get_contact_display_name_is_passed_barejid_if_contact_does_not_exist),
 
         unit_test_setup_teardown(returns_false_when_chat_session_does_not_exist,
                                  init_chat_sessions,
