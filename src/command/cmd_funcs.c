@@ -3008,23 +3008,29 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (!connection_supports(XMPP_FEATURE_BLOCKING)) {
-        cons_show("Blocking not supported by server.");
+        cons_show("Blocking (%s) not supported by server.", XMPP_FEATURE_BLOCKING);
         return TRUE;
     }
 
+    blocked_report br = BLOCKED_NO_REPORT;
+
     if (g_strcmp0(args[0], "add") == 0) {
         char* jid = args[1];
-        if (jid == NULL && (window->type == WIN_CHAT)) {
-            ProfChatWin* chatwin = (ProfChatWin*)window;
-            jid = chatwin->barejid;
+
+        // /blocked add jid or /blocked add (in window)
+        if (g_strv_length(args) < 3) {
+            if (jid == NULL && (window->type == WIN_CHAT)) {
+                ProfChatWin* chatwin = (ProfChatWin*)window;
+                jid = chatwin->barejid;
+            }
+
+            if (jid == NULL) {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
         }
 
-        if (jid == NULL) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-
-        gboolean res = blocked_add(jid);
+        gboolean res = blocked_add(jid, br, NULL);
         if (!res) {
             cons_show("User %s already blocked.", jid);
         }
@@ -3044,6 +3050,28 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
         }
 
         return TRUE;
+    }
+
+    if (strncmp(args[0], "report-", 7) == 0) {
+        if (args[1] && g_strcmp0(args[0], "report-abuse") == 0) {
+            br = BLOCKED_REPORT_ABUSE;
+        } else if (args[1] && g_strcmp0(args[0], "report-spam") == 0) {
+            br = BLOCKED_REPORT_SPAM;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        if (!connection_supports(XMPP_FEATURE_SPAM_REPORTING)) {
+            cons_show("Spam reporting (%s) not supported by server.", XMPP_FEATURE_SPAM_REPORTING);
+            return TRUE;
+        }
+
+        // args[3] is an optional message
+        gboolean res = blocked_add(args[1], br, args[3]);
+        if (!res) {
+            cons_show("User %s already blocked.", args[1]);
+        }
     }
 
     GList* blocked = blocked_list();
@@ -6497,7 +6525,7 @@ cmd_ping(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (args[0] == NULL && connection_supports(XMPP_FEATURE_PING) == FALSE) {
-        cons_show("Server does not support ping requests.");
+        cons_show("Server does not support ping requests (%s).", XMPP_FEATURE_PING);
         return TRUE;
     }
 
@@ -8102,7 +8130,7 @@ cmd_command_list(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (connection_supports(XMPP_FEATURE_COMMANDS) == FALSE) {
-        cons_show("Server does not support ad hoc commands.");
+        cons_show("Server does not support ad hoc commands (%s).", XMPP_FEATURE_COMMANDS);
         return TRUE;
     }
 
@@ -8158,7 +8186,7 @@ cmd_command_exec(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (connection_supports(XMPP_FEATURE_COMMANDS) == FALSE) {
-        cons_show("Server does not support ad hoc commands.");
+        cons_show("Server does not support ad hoc commands (%s).", XMPP_FEATURE_COMMANDS);
         return TRUE;
     }
 

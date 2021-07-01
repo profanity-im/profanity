@@ -122,6 +122,7 @@
 #define STANZA_NAME_AFTER            "after"
 #define STANZA_NAME_USERNAME         "username"
 #define STANZA_NAME_PROPOSE          "propose"
+#define STANZA_NAME_REPORT           "report"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST             "bad-request"
@@ -244,6 +245,9 @@
 #define STANZA_NS_JINGLE_RTP              "urn:xmpp:jingle:apps:rtp:1"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
+
+#define STANZA_REPORTING_ABUSE "urn:xmpp:reporting:abuse"
+#define STANZA_REPORTING_SPAM  "urn:xmpp:reporting:spam"
 
 typedef struct caps_stanza_t
 {

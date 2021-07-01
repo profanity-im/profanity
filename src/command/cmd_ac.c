@@ -951,6 +951,8 @@ cmd_ac_init(void)
     blocked_ac = autocomplete_new();
     autocomplete_add(blocked_ac, "add");
     autocomplete_add(blocked_ac, "remove");
+    autocomplete_add(blocked_ac, "report-abuse");
+    autocomplete_add(blocked_ac, "report-spam");
 
     clear_ac = autocomplete_new();
     autocomplete_add(clear_ac, "persist_history");

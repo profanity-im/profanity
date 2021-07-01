@@ -1385,7 +1385,7 @@ _autoping_timed_send(xmpp_conn_t* const conn, void* const userdata)
     if (connection_supports(XMPP_FEATURE_PING) == FALSE) {
         log_warning("Server doesn't advertise %s feature, disabling autoping.", XMPP_FEATURE_PING);
         prefs_set_autoping(0);
-        cons_show_error("Server ping not supported, autoping disabled.");
+        cons_show_error("Server ping not supported (%s), autoping disabled.", XMPP_FEATURE_PING);
         xmpp_conn_t* conn = connection_get_conn();
         xmpp_timed_handler_delete(conn, _autoping_timed_send);
         return 1;
@@ -2586,7 +2586,7 @@ iq_mam_request(ProfChatWin* win)
 {
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
-        cons_show_error("Server doesn't support MAM.");
+        cons_show_error("Server doesn't support MAM (%s).", XMPP_FEATURE_MAM2);
         return;
     }
 

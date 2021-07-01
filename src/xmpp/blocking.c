@@ -109,7 +109,7 @@ blocked_ac_reset(void)
 }
 
 gboolean
-blocked_add(char* jid)
+blocked_add(char* jid, blocked_report reportkind, const char* const message)
 {
     GList* found = g_list_find_custom(blocked, jid, (GCompareFunc)g_strcmp0);
     if (found) {
@@ -128,6 +128,31 @@ blocked_add(char* jid)
     xmpp_stanza_t* item = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
     xmpp_stanza_set_attribute(item, STANZA_ATTR_JID, jid);
+
+    if (reportkind != BLOCKED_NO_REPORT) {
+        xmpp_stanza_t* report = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(report, STANZA_NAME_REPORT);
+        if (reportkind == BLOCKED_REPORT_ABUSE) {
+            xmpp_stanza_set_attribute(report, STANZA_ATTR_REASON, STANZA_REPORTING_ABUSE);
+        } else {
+            xmpp_stanza_set_attribute(report, STANZA_ATTR_REASON, STANZA_REPORTING_SPAM);
+        }
+
+        if (message) {
+            xmpp_stanza_t* text = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_name(text, STANZA_NAME_TEXT);
+
+            xmpp_stanza_t* txt = xmpp_stanza_new(ctx);
+            xmpp_stanza_set_text(txt, message);
+
+            xmpp_stanza_add_child(text, txt);
+            xmpp_stanza_add_child(report, text);
+            xmpp_stanza_release(txt);
+        }
+
+        xmpp_stanza_add_child(item, report);
+        xmpp_stanza_release(report);
+    }
 
     xmpp_stanza_add_child(block, item);
     xmpp_stanza_release(item);
