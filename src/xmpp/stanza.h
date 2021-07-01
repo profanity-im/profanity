@@ -243,6 +243,7 @@
 #define STANZA_NS_VOICEREQUEST            "http://jabber.org/protocol/muc#request"
 #define STANZA_NS_JINGLE_MESSAGE          "urn:xmpp:jingle-message:0"
 #define STANZA_NS_JINGLE_RTP              "urn:xmpp:jingle:apps:rtp:1"
+#define STANZA_NS_REPORTING               "urn:xmpp:reporting:1"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 

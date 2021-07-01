@@ -132,6 +132,7 @@ blocked_add(char* jid, blocked_report reportkind, const char* const message)
     if (reportkind != BLOCKED_NO_REPORT) {
         xmpp_stanza_t* report = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(report, STANZA_NAME_REPORT);
+        xmpp_stanza_set_ns(report, STANZA_NS_REPORTING);
         if (reportkind == BLOCKED_REPORT_ABUSE) {
             xmpp_stanza_set_attribute(report, STANZA_ATTR_REASON, STANZA_REPORTING_ABUSE);
         } else {
