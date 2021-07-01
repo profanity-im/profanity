@@ -3017,17 +3017,14 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
     if (g_strcmp0(args[0], "add") == 0) {
         char* jid = args[1];
 
-        // /blocked add jid or /blocked add (in window)
-        if (g_strv_length(args) < 3) {
-            if (jid == NULL && (window->type == WIN_CHAT)) {
-                ProfChatWin* chatwin = (ProfChatWin*)window;
-                jid = chatwin->barejid;
-            }
+        if (jid == NULL && (window->type == WIN_CHAT)) {
+            ProfChatWin* chatwin = (ProfChatWin*)window;
+            jid = chatwin->barejid;
+        }
 
-            if (jid == NULL) {
-                cons_bad_cmd_usage(command);
-                return TRUE;
-            }
+        if (jid == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
         }
 
         gboolean res = blocked_add(jid, br, NULL);
@@ -3053,6 +3050,20 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (strncmp(args[0], "report-", 7) == 0) {
+        char *jid;
+        char *msg = NULL;
+        guint argn = g_strv_length(args);
+
+        if (argn >= 2) {
+            jid = args[1];
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+
+        if (argn >= 3) {
+            msg = args[2];
+        }
+
         if (args[1] && g_strcmp0(args[0], "report-abuse") == 0) {
             br = BLOCKED_REPORT_ABUSE;
         } else if (args[1] && g_strcmp0(args[0], "report-spam") == 0) {
@@ -3067,11 +3078,11 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
             return TRUE;
         }
 
-        // args[3] is an optional message
-        gboolean res = blocked_add(args[1], br, args[3]);
+        gboolean res = blocked_add(jid, br, msg);
         if (!res) {
             cons_show("User %s already blocked.", args[1]);
         }
+        return TRUE;
     }
 
     GList* blocked = blocked_list();
