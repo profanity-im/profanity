@@ -547,7 +547,7 @@ blocked_list(void)
 }
 
 gboolean
-blocked_add(char* jid)
+blocked_add(char* jid, blocked_report reportkind, const char* const message)
 {
     return TRUE;
 }
