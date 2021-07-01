@@ -3008,7 +3008,7 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (!connection_supports(XMPP_FEATURE_BLOCKING)) {
-        cons_show("Blocking not supported by server.");
+        cons_show("Blocking (%s) not supported by server.", XMPP_FEATURE_BLOCKING);
         return TRUE;
     }
 
@@ -3040,7 +3040,7 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
             }
 
             if (!connection_supports(XMPP_FEATURE_SPAM_REPORTING)) {
-                cons_show("Spam reporting not supported by server.");
+                cons_show("Spam reporting (%s) not supported by server.", XMPP_FEATURE_SPAM_REPORTING);
                 return TRUE;
             }
 
@@ -6521,7 +6521,7 @@ cmd_ping(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (args[0] == NULL && connection_supports(XMPP_FEATURE_PING) == FALSE) {
-        cons_show("Server does not support ping requests.");
+        cons_show("Server does not support ping requests (%s).", XMPP_FEATURE_PING);
         return TRUE;
     }
 
@@ -8126,7 +8126,7 @@ cmd_command_list(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (connection_supports(XMPP_FEATURE_COMMANDS) == FALSE) {
-        cons_show("Server does not support ad hoc commands.");
+        cons_show("Server does not support ad hoc commands (%s).", XMPP_FEATURE_COMMANDS);
         return TRUE;
     }
 
@@ -8182,7 +8182,7 @@ cmd_command_exec(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (connection_supports(XMPP_FEATURE_COMMANDS) == FALSE) {
-        cons_show("Server does not support ad hoc commands.");
+        cons_show("Server does not support ad hoc commands (%s).", XMPP_FEATURE_COMMANDS);
         return TRUE;
     }
 
