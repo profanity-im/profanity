@@ -9545,7 +9545,7 @@ cmd_silence(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_register(ProfWin* window, const char* const command, gchar** args)
 {
-    gchar* opt_keys[] = { "port", "tls", NULL };
+    gchar* opt_keys[] = { "port", "tls", "auth", NULL };
     gboolean parsed;
 
     GHashTable* options = parse_options(&args[2], opt_keys, &parsed);
@@ -9579,17 +9579,25 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
         }
     }
 
-    char* host = args[0];
-
-    jabber_conn_status_t conn_status = connection_connect_raw(host, port, tls_policy, "default");
-
-    if (conn_status == JABBER_DISCONNECTED) {
-        cons_show_error("Connection attempt to server %s port %d failed.", host, port);
-        log_info("Connection attempt to server %s port %d failed.", host, port);
+    char* auth_policy = g_hash_table_lookup(options, "auth");
+    if (auth_policy && (g_strcmp0(auth_policy, "default") != 0) && (g_strcmp0(auth_policy, "legacy") != 0)) {
+        cons_bad_cmd_usage(command);
+        cons_show("");
+        options_destroy(options);
         return TRUE;
     }
 
-    char* username = args[1];
+    char* server = args[1];
+
+    jabber_conn_status_t conn_status = connection_connect_raw(server, port, tls_policy, auth_policy);
+
+    if (conn_status == JABBER_DISCONNECTED) {
+        cons_show_error("Connection attempt to server %s port %d failed.", server, port);
+        log_info("Connection attempt to server %s port %d failed.", server, port);
+        return TRUE;
+    }
+
+    char* username = args[0];
     char* passwd = ui_ask_password(false);
     char* confirm_passwd = ui_ask_password(true);
 
