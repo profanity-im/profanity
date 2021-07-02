@@ -3058,6 +3058,7 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
             jid = args[1];
         } else {
             cons_bad_cmd_usage(command);
+            return TRUE;
         }
 
         if (argn >= 3) {
