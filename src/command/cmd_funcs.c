@@ -3050,14 +3050,15 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (strncmp(args[0], "report-", 7) == 0) {
-        char *jid;
-        char *msg = NULL;
+        char* jid = NULL;
+        char* msg = NULL;
         guint argn = g_strv_length(args);
 
         if (argn >= 2) {
             jid = args[1];
         } else {
             cons_bad_cmd_usage(command);
+            return TRUE;
         }
 
         if (argn >= 3) {
