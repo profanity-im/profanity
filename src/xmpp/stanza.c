@@ -2782,6 +2782,9 @@ stanza_register_new_account(xmpp_ctx_t* ctx, const char* const user, const char*
     xmpp_stanza_add_child(register_new_account, password_st);
     xmpp_stanza_release(password_st);
 
+    xmpp_stanza_add_child(iq, register_new_account);
+    xmpp_stanza_release(register_new_account);
+
     return iq;
 }
 
