@@ -342,7 +342,7 @@ connection_connect_raw(const char* const altdomain, int port,
 #endif
 
     if (connect_status == 0) {
-        conn.conn_status = JABBER_CONNECTING;
+        conn.conn_status = JABBER_RAW_CONNECTING;
     } else {
         conn.conn_status = JABBER_DISCONNECTED;
     }
@@ -683,6 +683,21 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         g_hash_table_insert(conn.features_by_jid, strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
 
         session_login_success(connection_is_secured());
+
+        break;
+
+    // raw connection success
+    case XMPP_CONN_RAW_CONNECT:
+        log_debug("Connection handler: XMPP_CONN_RAW_CONNECT");
+        conn.conn_status = JABBER_RAW_CONNECTED;
+
+        Jid* my_raw_jid = jid_create(xmpp_conn_get_jid(conn.xmpp_conn));
+        log_debug("jid: %s", xmpp_conn_get_jid(conn.xmpp_conn));
+        conn.domain = strdup(my_raw_jid->domainpart);
+        jid_destroy(my_raw_jid);
+
+        conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
+        g_hash_table_insert(conn.features_by_jid, strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
 
         break;
 

@@ -9589,7 +9589,7 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
 
     char* server = args[1];
 
-    jabber_conn_status_t conn_status = connection_connect_raw(server, port, tls_policy, auth_policy);
+    jabber_conn_status_t conn_status = cl_ev_connect_raw(server, port, tls_policy, auth_policy);
 
     if (conn_status == JABBER_DISCONNECTED) {
         cons_show_error("Connection attempt to server %s port %d failed.", server, port);
@@ -9598,19 +9598,26 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* username = args[0];
-    char* passwd = ui_ask_password(false);
-    char* confirm_passwd = ui_ask_password(true);
+    if (connection_get_status() != JABBER_RAW_CONNECTED) { // FIXME: this is ALWAYS the case, as the connection doesn't finish by this time.
+        cons_show_error("Raw connection attempt failed or not yet completed.");
+        log_info("Raw connection attempt failed or not yet completed.");
+    } //else {
+        char* passwd = ui_ask_password(false);
+        char* confirm_passwd = ui_ask_password(true);
 
-    if (g_strcmp0(passwd, confirm_passwd) == 0) {
-        iq_register_new_account(username, passwd);
-    } else {
-        cons_show("The two passwords do not match.");
-    }
+        if (g_strcmp0(passwd, confirm_passwd) == 0) {
+            log_info("Attempting to register account %s on server %s.", username, server);
+            iq_register_new_account(username, passwd);
+        } else {
+            cons_show("The two passwords do not match.");
+        }
+        free(passwd);
+        free(confirm_passwd);
+    //}
 
-    free(username);
-    free(passwd);
-    free(confirm_passwd);
+    options_destroy(options);
 
+    log_info("we are leaving the registration process");
     return TRUE;
 }
 

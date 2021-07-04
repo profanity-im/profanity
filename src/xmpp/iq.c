@@ -2658,14 +2658,15 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 void
 iq_register_new_account(const char* const user, const char* const password)
 {
-    //char* id = connection_create_stanza_id();
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_stanza_t* iq = stanza_register_new_account(ctx, user, password);
 
     const char* id = xmpp_stanza_get_id(iq);
-    iq_id_handler_add(id, _register_new_account_result_id_handler, NULL, NULL);
+    iq_id_handler_add(id, _register_new_account_result_id_handler, NULL, NULL); // FIXME: function doesn't seem to ever run?
 
+    log_debug("HI hi sending registration stanza");
     iq_send_stanza(iq);
+    log_debug("registration stanza has been sent");
     xmpp_stanza_release(iq);
 }
 

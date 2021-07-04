@@ -81,6 +81,13 @@ cl_ev_connect_account(ProfAccount* account)
     return session_connect_with_account(account);
 }
 
+jabber_conn_status_t
+cl_ev_connect_raw(const char* const altdomain, const int port, const char* const tls_policy, const char* const auth_policy)
+{
+    cons_show("Raw connecting to %s", altdomain);
+    return session_connect_raw(altdomain, port, tls_policy, auth_policy);
+}
+
 void
 cl_ev_disconnect(void)
 {
@@ -262,3 +269,4 @@ cl_ev_send_priv_msg(ProfPrivateWin* privwin, const char* const msg, const char* 
         jid_destroy(jidp);
     }
 }
+
