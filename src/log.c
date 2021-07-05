@@ -250,7 +250,7 @@ _rotate_log_file(void)
 
     rename(log_file, log_file_new);
 
-    log_init(log_get_filter(), log_file);
+    log_init(log_get_filter(), NULL);
 
     free(log_file_new);
     free(log_file);
