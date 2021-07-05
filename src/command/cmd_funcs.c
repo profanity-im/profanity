@@ -9587,32 +9587,29 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
+    char* username = args[0];
     char* server = args[1];
 
-    jabber_conn_status_t conn_status = cl_ev_connect_raw(server, port, tls_policy, auth_policy);
+    char* passwd = ui_ask_password(false);
+    char* confirm_passwd = ui_ask_password(true);
 
-    if (conn_status == JABBER_DISCONNECTED) {
+    if (g_strcmp0(passwd, confirm_passwd) == 0) {
+        log_info("Attempting to register account %s on server %s.", username, server);
+        connection_register((server), port, tls_policy, auth_policy, username, passwd);
+            //iq_register_new_account(username, passwd);
+    } else {
+        cons_show("The two passwords do not match.");
+    }
+    //jabber_conn_status_t conn_status = cl_ev_connect_raw(server, port, tls_policy, auth_policy);
+
+    if (connection_get_status() == JABBER_DISCONNECTED) {
         cons_show_error("Connection attempt to server %s port %d failed.", server, port);
         log_info("Connection attempt to server %s port %d failed.", server, port);
         return TRUE;
     }
 
-    char* username = args[0];
-    if (connection_get_status() != JABBER_RAW_CONNECTED) { // FIXME: this is ALWAYS the case, as the connection doesn't finish by this time.
-        cons_show_error("Raw connection attempt failed or not yet completed.");
-        log_info("Raw connection attempt failed or not yet completed.");
-    } //else {
-        char* passwd = ui_ask_password(false);
-        char* confirm_passwd = ui_ask_password(true);
-
-        if (g_strcmp0(passwd, confirm_passwd) == 0) {
-            log_info("Attempting to register account %s on server %s.", username, server);
-            iq_register_new_account(username, passwd);
-        } else {
-            cons_show("The two passwords do not match.");
-        }
-        free(passwd);
-        free(confirm_passwd);
+    free(passwd);
+    free(confirm_passwd);
     //}
 
     options_destroy(options);

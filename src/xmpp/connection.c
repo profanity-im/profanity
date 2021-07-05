@@ -58,6 +58,7 @@
 #include "event/server_events.h"
 #include "xmpp/connection.h"
 #include "xmpp/session.h"
+#include "xmpp/stanza.h"
 #include "xmpp/iq.h"
 #include "ui/ui.h"
 
@@ -76,6 +77,11 @@ typedef struct prof_conn_t
     GHashTable* features_by_jid;
     GHashTable* requested_features;
 } ProfConnection;
+
+typedef struct {
+    const char* username;
+    const char* password;
+} prof_reg_t;
 
 static ProfConnection conn;
 static gchar* profanity_instance_id = NULL;
@@ -339,6 +345,344 @@ connection_connect_raw(const char* const altdomain, int port,
         port,
         _connection_handler,
         conn.xmpp_ctx);
+#endif
+
+    if (connect_status == 0) {
+        conn.conn_status = JABBER_RAW_CONNECTING;
+    } else {
+        conn.conn_status = JABBER_DISCONNECTED;
+    }
+
+    return conn.conn_status;
+}
+
+static int iq_reg2_cb(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userdata)
+{
+    const char *type;
+
+    (void)userdata;
+
+    type = xmpp_stanza_get_type(stanza);
+    if (!type || strcmp(type, "error") == 0) {
+        char* error_message = stanza_get_error_message(stanza);
+        cons_show_error("Server error: %s", error_message);
+        log_debug("Registration error: %s", error_message);
+        goto quit;
+    }
+
+    if (strcmp(type, "result") != 0) {
+        log_debug("Expected type 'result', but got %s.", type);
+        goto quit;
+    }
+
+    cons_show("Registration successful.");
+    log_info("Registration successful.");
+    goto quit;
+
+quit:
+    connection_disconnect();
+
+    return 0;
+}
+
+static int iq_reg_cb(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userdata)
+{
+    prof_reg_t *reg = (prof_reg_t *)userdata;
+    xmpp_stanza_t *registered = NULL;
+    xmpp_stanza_t *query;
+    const char *type;
+
+    type = xmpp_stanza_get_type(stanza);
+    if (!type || strcmp(type, "error") == 0) {
+        char* error_message = stanza_get_error_message(stanza);
+        cons_show_error("Server error: %s", error_message);
+        log_debug("Registration error: %s", error_message);
+        connection_disconnect();
+        goto quit;
+    }
+
+    if (strcmp(type, "result") != 0) {
+        log_debug("Expected type 'result', but got %s.", type);
+        connection_disconnect();
+        goto quit;
+    }
+
+    query = xmpp_stanza_get_child_by_name(stanza, "query");
+    if (query)
+        registered = xmpp_stanza_get_child_by_name(query, "registered");
+    if (registered != NULL) {
+        cons_show_error("Already registered.");
+        log_debug("Already registered.");
+        connection_disconnect();
+        goto quit;
+    }
+    xmpp_stanza_t* iq = stanza_register_new_account(conn.xmpp_ctx, reg->username, reg->password);
+    xmpp_id_handler_add(xmpp_conn, iq_reg2_cb, xmpp_stanza_get_id(iq), reg);
+    xmpp_send(xmpp_conn, iq);
+
+quit:
+    return 0;
+}
+
+static int
+_register_handle_error(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userdata)
+{
+    (void)stanza;
+    (void)userdata;
+
+    char* error_message = stanza_get_error_message(stanza);
+    cons_show_error("Server error: %s", error_message);
+    log_debug("Registration error: %s", error_message);
+    connection_disconnect();
+
+    return 0;
+}
+
+static int _register_handle_proceedtls_default(xmpp_conn_t *xmpp_conn,
+                                      xmpp_stanza_t *stanza,
+                                      void *userdata)
+{
+    const char *name = xmpp_stanza_get_name(stanza);
+
+    (void)userdata;
+
+    if (strcmp(name, "proceed") == 0) {
+        log_debug("Proceeding with TLS.");
+        if (xmpp_conn_tls_start(xmpp_conn) == 0) {
+            xmpp_handler_delete(xmpp_conn, _register_handle_error);
+            xmpp_conn_open_stream_default(xmpp_conn);
+        } else {
+            log_debug("TLS failed.");
+            /* failed tls spoils the connection, so disconnect */
+            connection_disconnect();
+        }
+    }
+    return 0;
+}
+
+static int _register_handle_missing_features(xmpp_conn_t *xmpp_conn, void *userdata)
+{
+    (void)userdata;
+
+    log_debug("Timeout");
+    connection_disconnect();
+
+    return 0;
+}
+
+static int
+_register_handle_features(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userdata)
+{
+    prof_reg_t *reg = (prof_reg_t *)userdata;
+    xmpp_ctx_t *ctx = conn.xmpp_ctx;
+    xmpp_stanza_t *child;
+    xmpp_stanza_t *iq;
+    char *domain;
+
+    xmpp_timed_handler_delete(xmpp_conn, _register_handle_missing_features);
+
+    /* secure connection if possible */
+    child = xmpp_stanza_get_child_by_name(stanza, "starttls");
+    if (child && (strcmp(xmpp_stanza_get_ns(child), XMPP_NS_TLS) == 0)) {
+        log_debug("Server supports TLS. Attempting to establish...");
+        child = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(child, "starttls");
+        xmpp_stanza_set_ns(child, XMPP_NS_TLS);
+        xmpp_handler_add(xmpp_conn, _register_handle_proceedtls_default, XMPP_NS_TLS, NULL,
+                         NULL, NULL);
+        xmpp_send(xmpp_conn, child);
+        xmpp_stanza_release(child);
+        return 0;
+    }
+
+    /* check whether server supports in-band registration */
+    child = xmpp_stanza_get_child_by_name(stanza, "register");
+    if (child && strcmp(xmpp_stanza_get_ns(child), XMPP_NS_REGISTER) == 0) {
+        log_debug("Server does not support in-band registration.");
+        cons_show_error("Server does not support in-band registration, aborting.");
+        connection_disconnect();
+        return 0;
+    }
+
+    log_debug("Server supports in-band registration. Attempting registration.");
+
+
+    domain = strdup(conn.domain);
+    iq = xmpp_iq_new(ctx, "get", "reg1");
+    xmpp_stanza_set_to(iq, domain);
+    child = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(child, "query");
+    xmpp_stanza_set_ns(child, STANZA_NS_REGISTER);
+    xmpp_stanza_add_child(iq, child);
+
+    xmpp_handler_add(xmpp_conn, iq_reg_cb, STANZA_NS_REGISTER, "iq", NULL, reg);
+    xmpp_send(xmpp_conn, iq);
+
+    xmpp_free(ctx, domain);
+    xmpp_stanza_release(child);
+    xmpp_stanza_release(iq);
+
+    return 0;
+}
+
+static void
+_register_handler(xmpp_conn_t *xmpp_conn,
+                         xmpp_conn_event_t status,
+                         int error,
+                         xmpp_stream_error_t *stream_error,
+                         void *userdata)
+{
+    conn.conn_last_event = status;
+
+    prof_reg_t *reg = (prof_reg_t *)userdata;
+    int secured;
+
+    (void)error;
+    (void)stream_error;
+
+    switch (status) {
+
+    case XMPP_CONN_RAW_CONNECT:
+        log_debug("Raw connection established.");
+        xmpp_conn_open_stream_default(xmpp_conn);
+        conn.conn_status = JABBER_RAW_CONNECTED;
+        break;
+
+    case XMPP_CONN_CONNECT:
+        log_debug("Connected.");
+        secured = xmpp_conn_is_secured(xmpp_conn);
+        conn.conn_status = JABBER_CONNECTED;
+        log_debug("Connection is %s.\n",
+                  secured ? "secured" : "NOT secured");
+
+        Jid* my_jid = jid_create(xmpp_conn_get_jid(xmpp_conn));
+        conn.domain = strdup(my_jid->domainpart);
+        jid_destroy(my_jid);
+
+        xmpp_handler_add(xmpp_conn, _register_handle_error, XMPP_NS_STREAMS, "error", NULL,
+                         NULL);
+        xmpp_handler_add(xmpp_conn, _register_handle_features, XMPP_NS_STREAMS, "features",
+                         NULL, reg);
+        xmpp_timed_handler_add(xmpp_conn, _register_handle_missing_features, 5000,
+                               NULL);
+        break;
+
+    case XMPP_CONN_DISCONNECT:
+        log_debug("Disconnected");
+        conn.conn_status = JABBER_DISCONNECTED;
+        break;
+
+    default:
+        break;
+
+    }
+}
+
+jabber_conn_status_t
+connection_register(const char* const altdomain, int port,
+                   const char* const tls_policy, const char* const auth_policy,
+                   const char* const username, const char* const password)
+{
+    long flags;
+
+    Jid* jidp = jid_create(altdomain);
+    if (jidp == NULL) {
+        log_error("Malformed JID not able to connect: %s", altdomain);
+        conn.conn_status = JABBER_DISCONNECTED;
+        return conn.conn_status;
+    }
+
+    _compute_identifier(jidp->barejid);
+    jid_destroy(jidp);
+
+    if (conn.xmpp_log) {
+        free(conn.xmpp_log);
+    }
+    conn.xmpp_log = _xmpp_get_file_logger();
+
+    if (conn.xmpp_conn) {
+        xmpp_conn_release(conn.xmpp_conn);
+    }
+    if (conn.xmpp_ctx) {
+        xmpp_ctx_free(conn.xmpp_ctx);
+    }
+    conn.xmpp_ctx = xmpp_ctx_new(NULL, conn.xmpp_log);
+    if (conn.xmpp_ctx == NULL) {
+        log_warning("Failed to get libstrophe ctx during connect");
+        return JABBER_DISCONNECTED;
+    }
+    conn.xmpp_conn = xmpp_conn_new(conn.xmpp_ctx);
+    if (conn.xmpp_conn == NULL) {
+        log_warning("Failed to get libstrophe conn during connect");
+        return JABBER_DISCONNECTED;
+    }
+    xmpp_conn_set_jid(conn.xmpp_conn, strdup(altdomain));
+
+    flags = xmpp_conn_get_flags(conn.xmpp_conn);
+
+    if (!tls_policy || (g_strcmp0(tls_policy, "force") == 0)) {
+        flags |= XMPP_CONN_FLAG_MANDATORY_TLS;
+    } else if (g_strcmp0(tls_policy, "trust") == 0) {
+        flags |= XMPP_CONN_FLAG_MANDATORY_TLS;
+        flags |= XMPP_CONN_FLAG_TRUST_TLS;
+    } else if (g_strcmp0(tls_policy, "disable") == 0) {
+        flags |= XMPP_CONN_FLAG_DISABLE_TLS;
+    } else if (g_strcmp0(tls_policy, "legacy") == 0) {
+        flags |= XMPP_CONN_FLAG_LEGACY_SSL;
+    }
+
+    if (auth_policy && (g_strcmp0(auth_policy, "legacy") == 0)) {
+        flags |= XMPP_CONN_FLAG_LEGACY_AUTH;
+    }
+
+    xmpp_conn_set_flags(conn.xmpp_conn, flags);
+
+    /* Print debug logs that can help when users share the logs */
+    if (flags != 0) {
+        log_debug("Connecting with flags (0x%lx):", flags);
+#define LOG_FLAG_IF_SET(name)  \
+    if (flags & name) {        \
+        log_debug("  " #name); \
+    }
+        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_MANDATORY_TLS);
+        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_TRUST_TLS);
+        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_DISABLE_TLS);
+        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_SSL);
+        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_AUTH);
+#undef LOG_FLAG_IF_SET
+    }
+
+    prof_reg_t *reg;
+
+    reg = malloc(sizeof(*reg));
+    if (reg != NULL) {
+        memset(reg, 0, sizeof(*reg));
+    }
+
+    reg->username = strdup(username);
+    reg->password = strdup(password);
+
+#ifdef HAVE_LIBMESODE
+    char* cert_path = prefs_get_tls_certpath();
+    if (cert_path) {
+        xmpp_conn_tlscert_path(conn.xmpp_conn, cert_path);
+        free(cert_path);
+    }
+
+    int connect_status = xmpp_connect_raw(
+        conn.xmpp_conn,
+        strdup(altdomain),
+        port,
+        _connection_certfail_cb,
+        _register_handler,
+        reg);
+#else
+    int connect_status = xmpp_connect_raw(
+        conn.xmpp_conn,
+        strdup(altdomain),
+        port,
+        _register_handler,
+        reg);
 #endif
 
     if (connect_status == 0) {
@@ -620,7 +964,6 @@ char*
 connection_create_stanza_id(void)
 {
     char* rndid = get_random_string(CON_RAND_ID_LEN);
-
     assert(rndid != NULL);
 
     gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA1,
@@ -698,6 +1041,8 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
 
         conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
         g_hash_table_insert(conn.features_by_jid, strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+
+        xmpp_conn_open_stream_default(xmpp_conn);
 
         break;
 

@@ -2755,7 +2755,8 @@ xmpp_stanza_t*
 stanza_register_new_account(xmpp_ctx_t* ctx, const char* const user, const char* const password)
 {
     char* id = connection_create_stanza_id();
-    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    //char* id = "reg2";
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, strdup(id));
     free(id);
 
     xmpp_stanza_t* register_new_account = xmpp_stanza_new(ctx);
