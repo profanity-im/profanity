@@ -3049,7 +3049,7 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    if (strncmp(args[0], "report-", 7) == 0) {
+    if (args[0] && strncmp(args[0], "report-", 7) == 0) {
         char* jid = NULL;
         char* msg = NULL;
         guint argn = g_strv_length(args);
