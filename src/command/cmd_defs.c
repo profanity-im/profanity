@@ -2621,7 +2621,9 @@ static struct cmd_t command_defs[] = {
       CMD_SYN(
               "/editor")
       CMD_DESC(
-              "Spawn external editor to edit message")
+              "Spawn external editor to edit message. "
+              "After editing the inputline may appear empty. Press enter to send the text anyways. "
+              "Use /executable to set your favourite editor." )
       CMD_NOARGS
       CMD_NOEXAMPLES
     },
