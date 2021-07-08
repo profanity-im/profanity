@@ -2590,7 +2590,9 @@ static struct cmd_t command_defs[] = {
       CMD_SYN(
               "/mam <on>|<off>")
       CMD_DESC(
-              "Enable/Disable Message Archive Management (XEP-0313)")
+              "Enable/Disable Message Archive Management (XEP-0313) "
+              "MAM is in experimental state. For regular users there are still many confusing things when enabling this feature. "
+              "We are going to work on this in future releases. So far this setting is mostly here for developers.")
       CMD_ARGS(
               { "on|off", "Enable or disable MAM" })
       CMD_NOEXAMPLES
