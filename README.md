@@ -10,7 +10,7 @@ If you like Profanity consider becoming a sponsor or [donate](https://profanity-
 See the [User Guide](https://profanity-im.github.io/userguide.html) for information on installing and using Profanity.
 
 ## Project
-This project is about freedom, privacy and choice. We want to enable people to chat with one another in a safe way. Thus supporting encryption (OTR, PGP, OMEMO) and being decentralized, meaning everyone can run their own server. We believe [XMPP](https://xmpp.org/) is a great proven protocol with an excellent community serving this purpose well.
+This project is about freedom, privacy and choice. We want to enable people to chat with one another in a safe way. Thus supporting encryption (OTR, PGP, OMEMO, OX) and being decentralized, meaning everyone can run their own server. We believe [XMPP](https://xmpp.org/) is a great proven protocol with an excellent community serving this purpose well.
 
 Feel free to follow us on [twitter](https://twitter.com/profanityim), join our [mailing list](https://lists.notraces.net/mailman/listinfo/profanity) and/or [MUC](xmpp:profanity@rooms.dismail.de?join).
 
