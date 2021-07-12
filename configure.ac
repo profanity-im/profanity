@@ -69,6 +69,8 @@ AC_ARG_WITH([themes],
     [AS_HELP_STRING([--with-themes[[=PATH]]], [install themes (default yes)])])
 AC_ARG_ENABLE([icons-and-clipboard],
     [AS_HELP_STRING([--enable-icons-and-clipboard], [enable GTK tray icons and clipboard paste support])])
+AC_ARG_ENABLE([inline-images],
+    [AS_HELP_STRING([--enable-inline-images], [enable inline display of images])])
 
 ### plugins
 
@@ -323,6 +325,16 @@ if test "x$enable_omemo" != xno; then
    AM_COND_IF([BUILD_OMEMO], [AC_DEFINE([HAVE_OMEMO], [1], [Have OMEMO])])
 fi
 
+if test "x$enable_inline_images" = xyes; then
+    PKG_CHECK_MODULES([pixbuf], [gdk-pixbuf-2.0], [],
+        [AC_MSG_ERROR([gdk-pixbuf-2.0 from glib-2.0 is required for inline image support])])
+
+    PKG_CHECK_MODULES([chafa], [chafa >= 1.4.1], [],
+        [AC_MSG_ERROR([chafa >= 1.4.1 needed for inline image support])])
+
+   AC_DEFINE([HAVE_INLINE_IMAGE], [1], [Have inline image])
+fi
+
 AS_IF([test "x$with_themes" = xno],
     [THEMES_INSTALL="false"],
     [THEMES_INSTALL="true"])
@@ -359,9 +371,9 @@ AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
 AS_IF([test "x$PLATFORM" = xosx],
     [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
 AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
-AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS} ${SQLITE_CFLAGS}"
+AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS} ${SQLITE_CFLAGS} ${chafa_CFLAGS}"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\""
-LIBS="$glib_LIBS $gio_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_EXTRA_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} ${SQLITE_LIBS} $LIBS"
+LIBS="$glib_LIBS $gio_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_EXTRA_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} ${SQLITE_LIBS} ${chafa_LIBS} $LIBS"
 
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)

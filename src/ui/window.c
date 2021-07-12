@@ -52,6 +52,11 @@
 #include <curses.h>
 #endif
 
+#ifdef HAVE_INLINE_IMAGE
+#include <gdk-pixbuf/gdk-pixbuf.h>
+#include <chafa.h>
+#endif
+
 #include "log.h"
 #include "config/theme.h"
 #include "config/preferences.h"
@@ -1992,3 +1997,62 @@ win_insert_last_read_position_marker(ProfWin* window, char* id)
 
     g_date_time_unref(time);
 }
+
+#ifdef HAVE_INLINE_IMAGE
+void
+win_pictest(ProfWin* window)
+{
+    gchar *path = get_expanded_path("~/test.png");
+    GdkPixbuf *file = gdk_pixbuf_new_from_file (path, NULL);
+    if (file == NULL) {
+        win_println(window, THEME_ERROR, "!", "pictest");
+        g_free(path);
+        return;
+    }
+    g_free(path);
+
+    ChafaCanvasConfig *config;
+    ChafaCanvas *canvas;
+    ChafaSymbolMap *symbol_map;
+
+    symbol_map = chafa_symbol_map_new ();
+    chafa_symbol_map_add_by_tags (symbol_map, CHAFA_SYMBOL_TAG_ASCII);
+    //chafa_symbol_map_add_by_tags (symbol_map, CHAFA_SYMBOL_TAG_ALL);
+    //chafa_symbol_map_add_by_tags (symbol_map, CHAFA_SYMBOL_TAG_BRAILLE);
+    //chafa_symbol_map_add_by_tags (symbol_map, CHAFA_SYMBOL_TAG_BLOCK | CHAFA_SYMBOL_TAG_BORDER);
+    //chafa_symbol_map_add_by_tags (symbol_map, CHAFA_SYMBOL_TAG_BLOCK | CHAFA_SYMBOL_TAG_BORDER | CHAFA_SYMBOL_TAG_SPACE);
+
+    // calculate how much space we have on curent screen
+    gint width = getmaxx(stdscr);
+    gint height = screen_mainwin_row_end() - screen_mainwin_row_end();
+    // get recommended canvas size. image will be scaled accordingly
+    chafa_calc_canvas_geometry(gdk_pixbuf_get_width(file), gdk_pixbuf_get_height(file),
+            &width,
+            &height,
+            0.5,
+            TRUE,
+            FALSE);
+
+    // TODO: could be a that a user shrinks its terminal. then we would need to redraw I guess?
+
+    config = chafa_canvas_config_new ();
+    chafa_canvas_config_set_geometry (config, width, height);
+    chafa_canvas_config_set_symbol_map (config, symbol_map);
+
+    // mono for now (no escape code)
+    chafa_canvas_config_set_canvas_mode (config, CHAFA_CANVAS_MODE_FGBG);
+
+    canvas = chafa_canvas_new (config);
+
+    guchar *pixels = gdk_pixbuf_get_pixels (file);
+    chafa_canvas_draw_all_pixels (canvas,
+                                  CHAFA_PIXEL_ARGB8_UNASSOCIATED,
+                                  pixels,
+                                  gdk_pixbuf_get_width(file),
+                                  gdk_pixbuf_get_height(file),
+                                  gdk_pixbuf_get_rowstride(file));
+
+    GString *gs = chafa_canvas_build_ansi (canvas);
+    win_println(window, THEME_DEFAULT, "!", gs->str);
+}
+#endif
