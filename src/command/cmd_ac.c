@@ -2595,6 +2595,33 @@ _omemo_autocomplete(ProfWin* window, const char* const input, gboolean previous)
                 }
             }
         }
+
+        if (window->type == WIN_CHAT) {
+            ProfChatWin* chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            found = autocomplete_param_with_func(input, "/omemo untrust", omemo_fingerprint_autocomplete, previous, chatwin->barejid);
+            if (found) {
+                return found;
+            }
+        } else {
+            found = autocomplete_param_with_func(input, "/omemo untrust", roster_contact_autocomplete, previous, NULL);
+            if (found) {
+                return found;
+            }
+
+            int num_tokens = count_tokens(input);
+            if (num_tokens == 4) {
+                gboolean result;
+                gchar** args = parse_args(input, 2, 3, &result);
+                if (result) {
+                    gchar* jid = g_strdup(args[1]);
+                    found = autocomplete_param_no_with_func(input, "/omemo untrust", 4, omemo_fingerprint_autocomplete, previous, jid);
+                    if (found) {
+                        return found;
+                    }
+                }
+            }
+        }
     }
 
     found = autocomplete_param_with_ac(input, "/omemo", omemo_ac, TRUE, previous);
