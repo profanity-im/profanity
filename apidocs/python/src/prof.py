@@ -442,7 +442,7 @@ def settings_boolean_get(group, key, default):
 
     Example:
     ::
-        prof.settings_get_boolean("myplugin", "notify", False)
+        prof.settings_boolean_get("myplugin", "notify", False)
     """
     pass
 
@@ -460,7 +460,7 @@ def settings_boolean_set(group, key, value):
 
     Example:
     ::
-        prof.settings_set_boolean("myplugin", "activate", True)
+        prof.settings_boolean_set("myplugin", "activate", True)
     """
     pass
 
@@ -478,7 +478,7 @@ def settings_string_get(group, key, default):
 
     Example:
     ::
-        prof.settings_get_string("myplugin", "prefix", "prefix-->")
+        prof.settings_string_get("myplugin", "prefix", "prefix-->")
     """
     pass
 
@@ -496,7 +496,7 @@ def settings_string_set(group, key, value):
 
     Example:
     ::
-        prof.settings_set_string("myplugin", "prefix", "myplugin, ")
+        prof.settings_string_set("myplugin", "prefix", "myplugin, ")
     """
     pass
 
@@ -515,7 +515,7 @@ def settings_string_list_get(group, key):
 
     Example:
     ::
-        prof.settings_get_string_list("someplugin", "somelist")
+        prof.settings_string_list_get("someplugin", "somelist")
     """
     pass
 
@@ -572,7 +572,7 @@ def settings_string_list_clear(group, key):
 
     Example:
     ::
-        prof.settings_string_list_remove_all("someplugin", "somelist")
+        prof.settings_string_list_clear("someplugin", "somelist")
     """
     pass
 
@@ -590,7 +590,7 @@ def settings_int_get(group, key, default):
 
     Example:
     ::
-        prof.settings_get_int("myplugin", "timeout", 10)
+        prof.settings_int_get("myplugin", "timeout", 10)
     """
     pass
 
@@ -608,7 +608,7 @@ def settings_int_set(group, key, value):
 
     Example:
     ::
-        prof.settings_set_int("myplugin", "timeout", 100)
+        prof.settings_int_set("myplugin", "timeout", 100)
     """
     pass
 
