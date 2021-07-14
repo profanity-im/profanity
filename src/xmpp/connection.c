@@ -380,7 +380,7 @@ static int iq_reg2_cb(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userd
     goto quit;
 
 quit:
-    //connection_disconnect();
+    xmpp_disconnect(xmpp_conn);
 
     return 0;
 }
@@ -397,13 +397,13 @@ static int iq_reg_cb(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userda
         char* error_message = stanza_get_error_message(stanza);
         cons_show_error("Server error: %s", error_message);
         log_debug("Registration error: %s", error_message);
-        connection_disconnect();
+        xmpp_disconnect(xmpp_conn);
         goto quit;
     }
 
     if (strcmp(type, "result") != 0) {
         log_debug("Expected type 'result', but got %s.", type);
-        connection_disconnect();
+        xmpp_disconnect(xmpp_conn);
         goto quit;
     }
 
@@ -413,7 +413,7 @@ static int iq_reg_cb(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userda
     if (registered != NULL) {
         cons_show_error("Already registered.");
         log_debug("Already registered.");
-        connection_disconnect();
+        xmpp_disconnect(xmpp_conn);
         goto quit;
     }
     xmpp_stanza_t* iq = stanza_register_new_account(conn.xmpp_ctx, reg->username, reg->password);
@@ -433,7 +433,7 @@ _register_handle_error(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *user
     char* error_message = stanza_get_error_message(stanza);
     cons_show_error("Server error: %s", error_message);
     log_debug("Registration error: %s", error_message);
-    connection_disconnect();
+    xmpp_disconnect(xmpp_conn);
 
     return 0;
 }
@@ -454,7 +454,7 @@ static int _register_handle_proceedtls_default(xmpp_conn_t *xmpp_conn,
         } else {
             log_debug("TLS failed.");
             /* failed tls spoils the connection, so disconnect */
-            connection_disconnect();
+            xmpp_disconnect(xmpp_conn);
         }
     }
     return 0;
@@ -465,7 +465,7 @@ static int _register_handle_missing_features(xmpp_conn_t *xmpp_conn, void *userd
     (void)userdata;
 
     log_debug("Timeout");
-    connection_disconnect();
+    xmpp_disconnect(xmpp_conn);
 
     return 0;
 }
@@ -500,7 +500,7 @@ _register_handle_features(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *u
     if (child && strcmp(xmpp_stanza_get_ns(child), XMPP_NS_REGISTER) == 0) {
         log_debug("Server does not support in-band registration.");
         cons_show_error("Server does not support in-band registration, aborting.");
-        connection_disconnect();
+        xmpp_disconnect(xmpp_conn);
         return 0;
     }
 
