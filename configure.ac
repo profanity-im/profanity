@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([profanity], [0.10.0], [jubalh@iodoru.org])
+AC_INIT([profanity], [0.11.0], [jubalh@iodoru.org])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
@@ -28,7 +28,7 @@ AS_CASE([$host_os],
     [cygwin], [PLATFORM="cygwin"],
     [PLATFORM="nix"])
 
-PACKAGE_STATUS="development"
+PACKAGE_STATUS="release"
 
 ### Get git branch and revision if in development
 if test "x$PACKAGE_STATUS" = xdevelopment; then

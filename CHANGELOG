@@ -1,3 +1,69 @@
+0.11.0 (2021-07-14)
+=====
+
+Six months and 242 commits after 0.10.0 we are happy to release 0.11.0.
+
+10 people contributed code to it: @DebXWoody, @xenrox, @mwuttke97, @dustinlagoy, @kaffeekanne,
+@CIacademic, @rjc, @raspbeguy, @Mic92 and @jubalh.
+
+Thanks a lot to our sponsors: @mdosch, @wstrm, @huhndev, @matteobin and @jamesponddotco
+If you want to support us too: https://profanity-im.github.io/donate.html
+
+Changes:
+- Fix 'headache' and 'whiteness' themes (#1471)
+- Fix help text for `/logging` (#1470)
+- Fix theme loading with -t parameter when a disconnect happens (#1472)
+- Add `/mam` command (MAM is still experimental) (#660)
+- Improve MAM support: load multiple pages with RSM (#660)
+- Fix titlebar MUC name display when no name is set (#1481)
+- Improved window title output (#1493)
+- Show offline members in occupants panel (#1495)
+  `/occupants default show|hide [jid|offline]`
+  `/occupants show|hide [jid|offline]`
+- Support handling `file://` prefix in patchs (#1498)
+- Update HTTP Upload XEP-0363 to 1.0.0 (#1499, #1500)
+- New `/changepassword` command to change users password (XEP-0077) (#1501)
+- Add ability to request 'voice' in MUCs (XEP-0045) (#1211, #1504)
+  `/affiliation request`
+- Add ability to approve MUC voice requests (XEP-0045) (#1507, #1508)
+- Improve `/bookmark` help (#1511)
+- Add ability to register a nickname with a MUC (XEP-0045) (#1510, #1210)
+  `/affiliation register`
+- Fix segfault on `/sendfile` using OMEMO on Raspberry Pi (#1512)
+- Use shorter IDs (#1520)
+- Add abbility to launch external editor to write (multiline) messages (#1485, #1546)
+  `/editor`
+- Introdcue OMEMO trustmode (#1506)
+  `/omemo trustmode manual|firstusage|blind`
+- Fix random string generation (8e588d6)
+- Separate settings to configure printing of typing information in console and titlebar (#1516, #1532)
+  `/intype on|of` -> `/intype titlebar|console on|off`
+- Use direct messages instead of MUC-PMs for non-anonymous MUCs (#1534)
+- Add ability to mark a window with an attention flag as a reminder to read it later (#1543)
+  ALT+F to toggle the flag
+  ALT+M to switch to marked windows
+  `/wins attention` to list windows with the attention flag set
+- Don't log chat states as empty messages (#1550)
+- Fix wrong message display when mention is triggered (#1557, #1231)
+- Add command to show single bookmark details (#1558, #1559)
+  `/bookmark list <jid>`
+- Display a notice when someone tries to call (XEP-0353) (#1525, #1560)
+- Fix logfile rotation (#1518, #1563)
+- Disable notifications by default (#977, #1564)
+- Add support for XEP-0157 server contact information discovery (#1524, #1567)
+  `/disco info` does now include server contact information
+- Fix segfault in `/url open` with OMEMO encrypted files (#1478)
+- Add XEP-0377 Spam Reporting (#1434, #1569)
+  `/blocked report abuse|spam <jid> <msg>`
+- Remember status on reconnect (#1006, #1570)
+- Option to accept chat messages only from known contacts (#955, #1571)
+  `/silence on|off`
+- Improve OX (XEP-0373) handling (#1566)
+- Extend Python API (#1528, #1529)
+- Cleanups (#1513, #1554, #1561)
+- OMEMO related fixes (#1496, #1515, #1539, #1540, #1548, #1549, #1530, #1553, #1565)
+- For details see https://github.com/profanity-im/profanity/milestone/26
+
 0.10.0 (2021-01-09)
 =====
 

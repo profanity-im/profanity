@@ -1,0 +1,43 @@
+.TH man 1 "2021-07-14" "0.10.0" "Profanity XMPP client"
+
+.SH NAME
+/resource
+
+.SH DESCRIPTION
+Override chat session resource, and manage resource display settings.
+
+.SH SYNOPSIS
+/resource set <resource>
+
+.LP
+/resource off
+
+.LP
+/resource title on|off
+
+.LP
+/resource message on|off
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBset <resource>\fR
+.RS 4
+Set the resource to which messages will be sent.
+.RE
+.PP
+\fBoff\fR
+.RS 4
+Let the server choose which resource to route messages to.
+.RE
+.PP
+\fBtitle on|off\fR
+.RS 4
+Show or hide the current resource in the titlebar.
+.RE
+.PP
+\fBmessage on|off\fR
+.RS 4
+Show or hide the resource when showing an incoming message.
+.RE
