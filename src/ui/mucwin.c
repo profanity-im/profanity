@@ -386,12 +386,14 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
     int last_pos = 0;
     int pos;
     GSList* curr = mentions;
+    glong mynick_len = g_utf8_strlen(mynick, -1);
+
     while (curr) {
         pos = GPOINTER_TO_INT(curr->data);
 
         char *before_str = g_utf8_substring(message, last_pos, pos);
 
-        if (strncmp(before_str, "/me ", 4) == 0) {
+        if (last_pos == 0 && strncmp(before_str, "/me ", 4) == 0) {
             win_print_them(window, THEME_ROOMMENTION, ch, flags, "");
             win_append_highlight(window, THEME_ROOMMENTION, "*%s ", from);
             win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str + 4);
@@ -404,7 +406,6 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
         }
         g_free(before_str);
 
-        glong mynick_len = g_utf8_strlen(mynick, -1);
         char* mynick_str = g_utf8_substring(message, pos, pos + mynick_len);
         win_append_highlight(window, THEME_ROOMMENTION_TERM, "%s", mynick_str);
         g_free(mynick_str);
