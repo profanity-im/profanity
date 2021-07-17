@@ -389,7 +389,7 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
     while (curr) {
         pos = GPOINTER_TO_INT(curr->data);
 
-        char *before_str = g_utf8_substring(message, last_pos, last_pos + pos - last_pos);
+        char *before_str = g_utf8_substring(message, last_pos, pos);
 
         if (strncmp(before_str, "/me ", 4) == 0) {
             win_print_them(window, THEME_ROOMMENTION, ch, flags, "");
@@ -416,9 +416,9 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
 
     glong message_len = g_utf8_strlen(message, -1);
     if (last_pos < message_len) {
-        char* rest = g_utf8_substring(message, last_pos, last_pos + message_len);
+        // get tail without allocating a new string
+        char* rest = g_utf8_offset_to_pointer(message, last_pos);
         win_appendln_highlight(window, THEME_ROOMMENTION, "%s", rest);
-        g_free(rest);
     } else {
         win_appendln_highlight(window, THEME_ROOMMENTION, "");
     }
