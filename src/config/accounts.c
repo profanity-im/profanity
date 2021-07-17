@@ -958,6 +958,10 @@ accounts_get_login_status(const char* const account_name)
     if (g_strcmp0(setting, "last") == 0) {
         status = accounts_get_last_status(account_name);
     }
+
+    if (setting) {
+        g_free(setting);
+    }
     return status;
 }
 
