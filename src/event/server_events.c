@@ -193,7 +193,8 @@ sv_ev_roster_received(void)
         cl_ev_presence_send(conn_presence, 0);
     }
 
-    free(last_activity_str);
+    g_free(status_message);
+    g_free(last_activity_str);
 
     const char* fulljid = connection_get_fulljid();
     plugins_on_connect(account_name, fulljid);
