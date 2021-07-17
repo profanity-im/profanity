@@ -168,8 +168,9 @@ sv_ev_roster_received(void)
     resource_presence_t conn_presence = accounts_get_login_presence(account_name);
     char* last_activity_str = accounts_get_last_activity(account_name);
     char* status_message = accounts_get_login_status(account_name);
-    if (prefs_get_boolean(PREF_LASTACTIVITY) && last_activity_str) {
+    int diff_secs = 0;
 
+    if (prefs_get_boolean(PREF_LASTACTIVITY) && last_activity_str) {
         GTimeVal lasttv;
         GDateTime* nowdt = g_date_time_new_now_utc();
         gboolean res = g_time_val_from_iso8601(last_activity_str, &lasttv);
@@ -177,21 +178,14 @@ sv_ev_roster_received(void)
         if (res) {
             GDateTime* lastdt = g_date_time_new_from_timeval_utc(&lasttv);
             GTimeSpan diff_micros = g_date_time_difference(nowdt, lastdt);
-            int diff_secs = (diff_micros / 1000) / 1000;
 
-            connection_set_presence_msg(status_message);
-            cl_ev_presence_send(conn_presence, diff_secs);
-
+            diff_secs = (diff_micros / 1000) / 1000;
             g_date_time_unref(lastdt);
-        } else {
-            connection_set_presence_msg(status_message);
-            cl_ev_presence_send(conn_presence, 0);
         }
         g_date_time_unref(nowdt);
-    } else {
-        connection_set_presence_msg(status_message);
-        cl_ev_presence_send(conn_presence, 0);
     }
+    connection_set_presence_msg(status_message);
+    cl_ev_presence_send(conn_presence, diff_secs);
 
     g_free(status_message);
     g_free(last_activity_str);
