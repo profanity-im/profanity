@@ -908,9 +908,7 @@ accounts_get_last_presence(const char* const account_name)
         result = RESOURCE_ONLINE;
     }
 
-    if (setting) {
-        g_free(setting);
-    }
+    g_free(setting);
     return result;
 }
 
@@ -939,14 +937,11 @@ accounts_get_login_presence(const char* const account_name)
     } else if (strcmp(setting, "last") == 0) {
         result = accounts_get_last_presence(account_name);
     } else {
-        log_warning("Error reading presence.login for account: '%s', value: '%s', defaulting to 'online'",
-                    account_name, setting);
+        log_warning("Error reading presence.login for account: '%s', value: '%s', defaulting to 'online'", account_name, setting);
         result = RESOURCE_ONLINE;
     }
 
-    if (setting) {
-        g_free(setting);
-    }
+    g_free(setting);
     return result;
 }
 
@@ -955,13 +950,12 @@ accounts_get_login_status(const char* const account_name)
 {
     gchar* setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
     gchar* status = NULL;
+
     if (g_strcmp0(setting, "last") == 0) {
         status = accounts_get_last_status(account_name);
     }
 
-    if (setting) {
-        g_free(setting);
-    }
+    g_free(setting);
     return status;
 }
 
