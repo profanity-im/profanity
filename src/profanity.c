@@ -268,3 +268,4 @@ _shutdown(void)
     ui_close();
     prefs_close();
 }
+
