@@ -380,7 +380,7 @@ static int iq_reg2_cb(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userd
     goto quit;
 
 quit:
-    connection_disconnect();
+    //connection_disconnect();
 
     return 0;
 }
@@ -505,7 +505,6 @@ _register_handle_features(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *u
     }
 
     log_debug("Server supports in-band registration. Attempting registration.");
-
 
     domain = strdup(conn.domain);
     iq = xmpp_iq_new(ctx, "get", "reg1");
@@ -671,7 +670,8 @@ connection_register(const char* const altdomain, int port,
 
     int connect_status = xmpp_connect_raw(
         conn.xmpp_conn,
-        strdup(altdomain),
+        //strdup(altdomain),
+        altdomain,
         port,
         _connection_certfail_cb,
         _register_handler,
@@ -679,7 +679,8 @@ connection_register(const char* const altdomain, int port,
 #else
     int connect_status = xmpp_connect_raw(
         conn.xmpp_conn,
-        strdup(altdomain),
+        //strdup(altdomain),
+        altdomain,
         port,
         _register_handler,
         reg);

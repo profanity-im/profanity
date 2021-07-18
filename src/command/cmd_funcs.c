@@ -9595,12 +9595,10 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
 
     if (g_strcmp0(passwd, confirm_passwd) == 0) {
         log_info("Attempting to register account %s on server %s.", username, server);
-        connection_register((server), port, tls_policy, auth_policy, username, passwd);
-            //iq_register_new_account(username, passwd);
+        connection_register(server, port, tls_policy, auth_policy, username, passwd);
     } else {
         cons_show("The two passwords do not match.");
     }
-    //jabber_conn_status_t conn_status = cl_ev_connect_raw(server, port, tls_policy, auth_policy);
 
     if (connection_get_status() == JABBER_DISCONNECTED) {
         cons_show_error("Connection attempt to server %s port %d failed.", server, port);
@@ -9610,7 +9608,6 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
 
     free(passwd);
     free(confirm_passwd);
-    //}
 
     options_destroy(options);
 
