@@ -519,7 +519,11 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 
         while (curr) {
             ProfMessage* msg = curr->data;
+            char *msg_plain = msg->plain;
             msg->plain = plugins_pre_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
+            // This is dirty workaround for memory leak. We reassign msg->plain above so have to free previous object
+            // TODO: Make a better solution, for example, pass msg object to the function and it will replace msg->plain properly if needed.
+            free(msg_plain);
             win_print_history((ProfWin*)chatwin, msg);
             curr = g_slist_next(curr);
         }
