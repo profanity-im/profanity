@@ -196,7 +196,7 @@ PKG_CHECK_MODULES([gio], [gio-2.0], [],
 AC_SEARCH_LIBS([fmod], [m], [],
    [AC_MSG_ERROR([math.h is required])], [])
 
-PKG_CHECK_MODULES([curl], [libcurl], [],
+PKG_CHECK_MODULES([curl], [libcurl >= 7.62.0], [],
     [AC_CHECK_LIB([curl], [main], [],
         [AC_MSG_ERROR([libcurl is required for profanity])])])
 
