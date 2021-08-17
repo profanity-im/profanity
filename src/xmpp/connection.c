@@ -251,111 +251,6 @@ connection_connect(const char* const jid, const char* const passwd, const char* 
     return conn.conn_status;
 }
 
-jabber_conn_status_t
-connection_connect_raw(const char* const altdomain, int port,
-                   const char* const tls_policy, const char* const auth_policy)
-{
-    long flags;
-
-    Jid* jidp = jid_create(altdomain);
-    if (jidp == NULL) {
-        log_error("Malformed JID not able to connect: %s", altdomain);
-        conn.conn_status = JABBER_DISCONNECTED;
-        return conn.conn_status;
-    }
-
-    _compute_identifier(jidp->barejid);
-    jid_destroy(jidp);
-
-    if (conn.xmpp_log) {
-        free(conn.xmpp_log);
-    }
-    conn.xmpp_log = _xmpp_get_file_logger();
-
-    if (conn.xmpp_conn) {
-        xmpp_conn_release(conn.xmpp_conn);
-    }
-    if (conn.xmpp_ctx) {
-        xmpp_ctx_free(conn.xmpp_ctx);
-    }
-    conn.xmpp_ctx = xmpp_ctx_new(NULL, conn.xmpp_log);
-    if (conn.xmpp_ctx == NULL) {
-        log_warning("Failed to get libstrophe ctx during connect");
-        return JABBER_DISCONNECTED;
-    }
-    conn.xmpp_conn = xmpp_conn_new(conn.xmpp_ctx);
-    if (conn.xmpp_conn == NULL) {
-        log_warning("Failed to get libstrophe conn during connect");
-        return JABBER_DISCONNECTED;
-    }
-    xmpp_conn_set_jid(conn.xmpp_conn, altdomain);
-
-    flags = xmpp_conn_get_flags(conn.xmpp_conn);
-
-    if (!tls_policy || (g_strcmp0(tls_policy, "force") == 0)) {
-        flags |= XMPP_CONN_FLAG_MANDATORY_TLS;
-    } else if (g_strcmp0(tls_policy, "trust") == 0) {
-        flags |= XMPP_CONN_FLAG_MANDATORY_TLS;
-        flags |= XMPP_CONN_FLAG_TRUST_TLS;
-    } else if (g_strcmp0(tls_policy, "disable") == 0) {
-        flags |= XMPP_CONN_FLAG_DISABLE_TLS;
-    } else if (g_strcmp0(tls_policy, "legacy") == 0) {
-        flags |= XMPP_CONN_FLAG_LEGACY_SSL;
-    }
-
-    if (auth_policy && (g_strcmp0(auth_policy, "legacy") == 0)) {
-        flags |= XMPP_CONN_FLAG_LEGACY_AUTH;
-    }
-
-    xmpp_conn_set_flags(conn.xmpp_conn, flags);
-
-    /* Print debug logs that can help when users share the logs */
-    if (flags != 0) {
-        log_debug("Connecting with flags (0x%lx):", flags);
-#define LOG_FLAG_IF_SET(name)  \
-    if (flags & name) {        \
-        log_debug("  " #name); \
-    }
-        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_MANDATORY_TLS);
-        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_TRUST_TLS);
-        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_DISABLE_TLS);
-        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_SSL);
-        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_AUTH);
-#undef LOG_FLAG_IF_SET
-    }
-
-#ifdef HAVE_LIBMESODE
-    char* cert_path = prefs_get_tls_certpath();
-    if (cert_path) {
-        xmpp_conn_tlscert_path(conn.xmpp_conn, cert_path);
-        free(cert_path);
-    }
-
-    int connect_status = xmpp_connect_raw(
-        conn.xmpp_conn,
-        altdomain,
-        port,
-        _connection_certfail_cb,
-        _connection_handler,
-        conn.xmpp_ctx);
-#else
-    int connect_status = xmpp_connect_raw(
-        conn.xmpp_conn,
-        altdomain,
-        port,
-        _connection_handler,
-        conn.xmpp_ctx);
-#endif
-
-    if (connect_status == 0) {
-        conn.conn_status = JABBER_RAW_CONNECTING;
-    } else {
-        conn.conn_status = JABBER_DISCONNECTED;
-    }
-
-    return conn.conn_status;
-}
-
 static int iq_reg2_cb(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userdata)
 {
     const char *type;
@@ -578,8 +473,7 @@ _register_handler(xmpp_conn_t *xmpp_conn,
 }
 
 jabber_conn_status_t
-connection_register(const char* const altdomain, int port,
-                   const char* const tls_policy, const char* const auth_policy,
+connection_register(const char* const altdomain, int port, const char* const tls_policy,
                    const char* const username, const char* const password)
 {
     long flags;
@@ -630,10 +524,6 @@ connection_register(const char* const altdomain, int port,
         flags |= XMPP_CONN_FLAG_LEGACY_SSL;
     }
 
-    if (auth_policy && (g_strcmp0(auth_policy, "legacy") == 0)) {
-        flags |= XMPP_CONN_FLAG_LEGACY_AUTH;
-    }
-
     xmpp_conn_set_flags(conn.xmpp_conn, flags);
 
     /* Print debug logs that can help when users share the logs */
@@ -647,7 +537,6 @@ connection_register(const char* const altdomain, int port,
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_TRUST_TLS);
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_DISABLE_TLS);
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_SSL);
-        LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_AUTH);
 #undef LOG_FLAG_IF_SET
     }
 
@@ -670,7 +559,6 @@ connection_register(const char* const altdomain, int port,
 
     int connect_status = xmpp_connect_raw(
         conn.xmpp_conn,
-        //strdup(altdomain),
         altdomain,
         port,
         _connection_certfail_cb,
@@ -679,7 +567,6 @@ connection_register(const char* const altdomain, int port,
 #else
     int connect_status = xmpp_connect_raw(
         conn.xmpp_conn,
-        //strdup(altdomain),
         altdomain,
         port,
         _register_handler,

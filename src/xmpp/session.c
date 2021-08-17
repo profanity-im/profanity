@@ -204,43 +204,6 @@ session_connect_with_details(const char* const jid, const char* const passwd, co
         saved_details.auth_policy);
 }
 
-jabber_conn_status_t
-session_connect_raw(const char* const altdomain, const int port, const char* const tls_policy,
-                    const char* const auth_policy)
-{
-    assert(altdomain != NULL);
-
-    _session_free_saved_account();
-    _session_free_saved_details();
-
-    // save details for reconnect
-    saved_details.altdomain = strdup(altdomain);
-    if (port != 0) {
-        saved_details.port = port;
-    } else {
-        saved_details.port = 0;
-    }
-    if (tls_policy) {
-        saved_details.tls_policy = strdup(tls_policy);
-    } else {
-        saved_details.tls_policy = NULL;
-    }
-    if (auth_policy) {
-        saved_details.auth_policy = strdup(auth_policy);
-    } else {
-        saved_details.auth_policy = NULL;
-    }
-
-    // raw connect
-    log_info("Raw connecting to server: %s", altdomain);
-
-    return connection_connect_raw(
-        saved_details.altdomain,
-        saved_details.port,
-        saved_details.tls_policy,
-        saved_details.auth_policy);
-}
-
 void
 session_autoping_fail(void)
 {

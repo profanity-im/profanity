@@ -186,7 +186,6 @@ jabber_conn_status_t session_connect_with_details(const char* const jid, const c
                                                   const char* const altdomain, const int port, const char* const tls_policy, const char* const auth_policy);
 jabber_conn_status_t session_connect_with_account(const ProfAccount* const account);
 
-jabber_conn_status_t session_connect_raw(const char* const altdomain, const int port, const char* const tls_policy, const char* const auth_policy);
 void session_disconnect(void);
 void session_shutdown(void);
 void session_process_events(void);
@@ -270,7 +269,6 @@ void iq_command_list(const char* const target);
 void iq_command_exec(const char* const target, const char* const command);
 void iq_mam_request(ProfChatWin* win);
 void iq_register_change_password(const char* const user, const char* const password);
-void iq_register_new_account(const char* const user, const char* const password);
 void iq_muc_register_nick(const char* const roomjid);
 
 EntityCapabilities* caps_lookup(const char* const jid);

@@ -2649,7 +2649,7 @@ static struct cmd_t command_defs[] = {
       CMD_TAGS(
               CMD_TAG_CONNECTION)
       CMD_SYN(
-              "/register <username> <server> [port <port>] [tls force|allow|trust|legacy|disable] [auth default|legacy]")
+              "/register <username> <server> [port <port>] [tls force|allow|trust|legacy|disable]")
       CMD_DESC(
               "Register an account on a server.")
       CMD_ARGS(
@@ -2660,9 +2660,7 @@ static struct cmd_t command_defs[] = {
               { "tls allow", "Use TLS for the connection if it is available." },
               { "tls trust", "Force TLS connection and trust the server's certificate." },
               { "tls legacy", "Use legacy TLS for the connection. This forces TLS just after the TCP connection is established. Use when a server doesn't support STARTTLS." },
-              { "tls disable", "Disable TLS for the connection." },
-              { "auth default", "Default authentication process." },
-              { "auth legacy", "Allow legacy authentication." })
+              { "tls disable", "Disable TLS for the connection." })
       CMD_EXAMPLES(
               "/register odin valhalla.edda ",
               "/register freyr vanaheimr.edda port 5678",

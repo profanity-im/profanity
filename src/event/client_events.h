@@ -40,7 +40,6 @@
 
 jabber_conn_status_t cl_ev_connect_jid(const char* const jid, const char* const passwd, const char* const altdomain, const int port, const char* const tls_policy, const char* const auth_policy);
 jabber_conn_status_t cl_ev_connect_account(ProfAccount* account);
-jabber_conn_status_t cl_ev_connect_raw(const char* const altdomain, const int port, const char* const tls_policy, const char* const auth_policy);
 
 void cl_ev_disconnect(void);
 

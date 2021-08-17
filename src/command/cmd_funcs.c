@@ -9579,14 +9579,6 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
         }
     }
 
-    char* auth_policy = g_hash_table_lookup(options, "auth");
-    if (auth_policy && (g_strcmp0(auth_policy, "default") != 0) && (g_strcmp0(auth_policy, "legacy") != 0)) {
-        cons_bad_cmd_usage(command);
-        cons_show("");
-        options_destroy(options);
-        return TRUE;
-    }
-
     char* username = args[0];
     char* server = args[1];
 
@@ -9595,7 +9587,7 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
 
     if (g_strcmp0(passwd, confirm_passwd) == 0) {
         log_info("Attempting to register account %s on server %s.", username, server);
-        connection_register(server, port, tls_policy, auth_policy, username, passwd);
+        connection_register(server, port, tls_policy, username, passwd);
     } else {
         cons_show("The two passwords do not match.");
     }
