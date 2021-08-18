@@ -459,8 +459,25 @@ out:
 static int
 _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
 {
-    GList* device_list = NULL;
     const char* from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char* type = xmpp_stanza_get_type(stanza);
+
+    GList* device_list = NULL;
+
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        log_error("[OMEMO] can't get OMEMO device list");
+        xmpp_stanza_t* error = xmpp_stanza_get_child_by_name(stanza, "error");
+        if (!error) {
+            log_error("[OMEMO] missing error element in device list response");
+            return 1;
+        }
+
+        const char* code = xmpp_stanza_get_attribute(error, "code");
+        if (g_strcmp0(code, "404") == 0) {
+            omemo_set_device_list(from, device_list);
+            return 1;
+        }
+    }
 
     xmpp_stanza_t* root = NULL;
     xmpp_stanza_t* event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
