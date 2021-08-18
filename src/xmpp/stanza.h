@@ -216,6 +216,7 @@
 #define STANZA_NS_PUBSUB       "http://jabber.org/protocol/pubsub"
 #define STANZA_NS_PUBSUB_OWNER "http://jabber.org/protocol/pubsub#owner"
 #define STANZA_NS_PUBSUB_EVENT "http://jabber.org/protocol/pubsub#event"
+#define STANZA_NS_PUBSUB_ERROR "http://jabber.org/protocol/pubsub#error"
 #define STANZA_NS_CARBONS      "urn:xmpp:carbons:2"
 #define STANZA_NS_HINTS        "urn:xmpp:hints"
 #define STANZA_NS_FORWARD      "urn:xmpp:forward:0"

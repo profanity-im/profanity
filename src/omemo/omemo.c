@@ -386,12 +386,11 @@ omemo_publish_crypto_materials(void)
 
     char* barejid = connection_get_barejid();
 
-    /* Ensure device list is properly configured */
-    omemo_devicelist_configure_and_request();
 
     /* Ensure we get our current device list, and it gets updated with our
      * device_id */
     g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_own_device_list);
+    omemo_devicelist_request(barejid);
 
     omemo_bundle_publish(true);
 
