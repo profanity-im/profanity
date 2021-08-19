@@ -474,8 +474,7 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
 
         const char* code = xmpp_stanza_get_attribute(error, "code");
         if (g_strcmp0(code, "404") == 0) {
-            omemo_set_device_list(from, device_list);
-            return 1;
+            goto out;
         }
     }
 
@@ -521,7 +520,7 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
         log_warning("[OMEMO] User %s has a non 'current' device item list: %s.", from, xmpp_stanza_get_id(first));
         item = first;
     } else {
-        return 1;
+        goto out;
     }
 
     xmpp_stanza_t* list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
@@ -543,6 +542,7 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
         }
     }
 
+out:
     omemo_set_device_list(from, device_list);
 
     return 1;
@@ -553,7 +553,6 @@ _omemo_devicelist_publish_result(xmpp_stanza_t* const stanza, void* const userda
 {
     const char* type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
-        cons_show_error("Unable to publish own OMEMO device list");
         log_error("[OMEMO] Publishing device list failed");
 
         xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, "error");
@@ -564,11 +563,21 @@ _omemo_devicelist_publish_result(xmpp_stanza_t* const stanza, void* const userda
 
         xmpp_stanza_t *pubsub_error = xmpp_stanza_get_child_by_ns(error, STANZA_NS_PUBSUB_ERROR);
         if (!pubsub_error) {
+            // TODO
             return 0;
         }
 
         if (g_strcmp0(xmpp_stanza_get_name(pubsub_error), "precondition-not-met") == 0) {
-            omemo_devicelist_configure();
+            static gboolean reconfigured = false;
+            if (!reconfigured) {
+                reconfigured = true;
+                cons_show_error("Unable to publish own OMEMO device list, reconfiguring node");
+                log_error("[OMEMO] Unable to publish own OMEMO device list, reconfiguring node");
+                omemo_devicelist_configure();
+            } else {
+                cons_show_error("Unable to publish own OMEMO device list, previous reconfiguration failed. Giving up.");
+                log_error("[OMEMO] Unable to publish own OMEMO device list, previous reconfiguration failed. Giving up.");
+            }
         }
     }
     return 0;
