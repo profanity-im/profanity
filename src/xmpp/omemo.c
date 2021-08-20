@@ -639,6 +639,8 @@ _omemo_devicelist_configure_result(xmpp_stanza_t* const stanza, void* const user
     char* barejid = connection_get_barejid();
     omemo_devicelist_request(barejid);
 
+    free(barejid);
+
     return 0;
 }
 
