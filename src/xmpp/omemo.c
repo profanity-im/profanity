@@ -47,11 +47,12 @@
 #include "omemo/omemo.h"
 
 static int _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata);
+static int _omemo_devicelist_publish_result(xmpp_stanza_t* const stanza, void* const userdata);
+static int _omemo_devicelist_configure_submit(xmpp_stanza_t* const stanza, void* const userdata);
+static int _omemo_devicelist_configure_result(xmpp_stanza_t* const stanza, void* const userdata);
 static int _omemo_bundle_publish_result(xmpp_stanza_t* const stanza, void* const userdata);
 static int _omemo_bundle_publish_configure(xmpp_stanza_t* const stanza, void* const userdata);
 static int _omemo_bundle_publish_configure_result(xmpp_stanza_t* const stanza, void* const userdata);
-
-static int _omemo_device_list_publish_result(xmpp_stanza_t* const stanza, void* const userdata);
 
 void
 omemo_devicelist_subscribe(void)
@@ -73,10 +74,28 @@ omemo_devicelist_publish(GList* device_list)
         stanza_attach_publish_options(ctx, iq, "pubsub#access_model", "open");
     }
 
-    iq_id_handler_add(xmpp_stanza_get_id(iq), _omemo_device_list_publish_result, NULL, NULL);
+    iq_id_handler_add(xmpp_stanza_get_id(iq), _omemo_devicelist_publish_result, NULL, NULL);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+}
+
+void
+omemo_devicelist_configure(void)
+{
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    char* id = connection_create_stanza_id();
+    Jid* jid = jid_create(connection_get_fulljid());
+
+    xmpp_stanza_t* iq = stanza_create_pubsub_configure_request(ctx, id, jid->barejid, STANZA_NS_OMEMO_DEVICELIST);
+
+    iq_id_handler_add(id, _omemo_devicelist_configure_submit, NULL, NULL);
+
+    iq_send_stanza(iq);
+
+    xmpp_stanza_release(iq);
+    free(id);
+    jid_destroy(jid);
 }
 
 void
@@ -440,8 +459,24 @@ out:
 static int
 _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
 {
-    GList* device_list = NULL;
     const char* from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
+    const char* type = xmpp_stanza_get_type(stanza);
+
+    GList* device_list = NULL;
+
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        log_error("[OMEMO] can't get OMEMO device list");
+        xmpp_stanza_t* error = xmpp_stanza_get_child_by_name(stanza, "error");
+        if (!error) {
+            log_error("[OMEMO] missing error element in device list response");
+            return 1;
+        }
+
+        const char* code = xmpp_stanza_get_attribute(error, "code");
+        if (g_strcmp0(code, "404") == 0) {
+            goto out;
+        }
+    }
 
     xmpp_stanza_t* root = NULL;
     xmpp_stanza_t* event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
@@ -485,7 +520,7 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
         log_warning("[OMEMO] User %s has a non 'current' device item list: %s.", from, xmpp_stanza_get_id(first));
         item = first;
     } else {
-        return 1;
+        goto out;
     }
 
     xmpp_stanza_t* list = xmpp_stanza_get_child_by_ns(item, STANZA_NS_OMEMO);
@@ -507,9 +542,106 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
         }
     }
 
+out:
     omemo_set_device_list(from, device_list);
 
     return 1;
+}
+
+static int
+_omemo_devicelist_publish_result(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    const char* type = xmpp_stanza_get_type(stanza);
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        log_error("[OMEMO] Publishing device list failed");
+
+        xmpp_stanza_t *error = xmpp_stanza_get_child_by_name(stanza, "error");
+        if (!error) {
+            log_error("[OMEMO] Missing error element in device list publication result");
+            return 0;
+        }
+
+        xmpp_stanza_t *pubsub_error = xmpp_stanza_get_child_by_ns(error, STANZA_NS_PUBSUB_ERROR);
+        if (!pubsub_error) {
+            log_error("[OMEMO] Unknown error while publishing our own device list");
+            cons_show_error("Unknown error while publishing our own device list");
+            return 0;
+        }
+
+        if (g_strcmp0(xmpp_stanza_get_name(pubsub_error), "precondition-not-met") == 0) {
+            static gboolean reconfigured = false;
+            if (!reconfigured) {
+                reconfigured = true;
+                cons_show_error("Unable to publish own OMEMO device list, reconfiguring node");
+                log_error("[OMEMO] Unable to publish own OMEMO device list, reconfiguring node");
+                omemo_devicelist_configure();
+            } else {
+                cons_show_error("Unable to publish own OMEMO device list, previous reconfiguration failed. Giving up.");
+                log_error("[OMEMO] Unable to publish own OMEMO device list, previous reconfiguration failed. Giving up.");
+            }
+        }
+    }
+    return 0;
+}
+
+static int
+_omemo_devicelist_configure_submit(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    log_debug("[OMEMO] _omemo_devicelist_configure_submit()");
+
+    xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_name(stanza, "pubsub");
+    if (!pubsub) {
+        log_error("[OMEMO] The stanza doesn't contain a 'pubsub' child");
+        return 0;
+    }
+    xmpp_stanza_t* configure = xmpp_stanza_get_child_by_name(pubsub, STANZA_NAME_CONFIGURE);
+    if (!configure) {
+        log_error("[OMEMO] The stanza doesn't contain a 'configure' child");
+        return 0;
+    }
+    xmpp_stanza_t* x = xmpp_stanza_get_child_by_name(configure, "x");
+    if (!x) {
+        log_error("[OMEMO] The stanza doesn't contain an 'x' child");
+        return 0;
+    }
+
+    DataForm* form = form_create(x);
+    form_set_value(form,  "pubsub#access_model", "open");
+
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    Jid* jid = jid_create(connection_get_fulljid());
+    char* id = connection_create_stanza_id();
+    xmpp_stanza_t* iq = stanza_create_pubsub_configure_submit(ctx, id, jid->barejid, STANZA_NS_OMEMO_DEVICELIST, form);
+
+    iq_id_handler_add(id, _omemo_devicelist_configure_result, NULL, NULL);
+
+    iq_send_stanza(iq);
+
+    xmpp_stanza_release(iq);
+    free(id);
+    jid_destroy(jid);
+    return 0;
+}
+
+static int
+_omemo_devicelist_configure_result(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    const char* type = xmpp_stanza_get_type(stanza);
+
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        log_error("[OMEMO] cannot configure device list to an open access model: Result error");
+        return 0;
+    }
+
+    log_debug("[OMEMO] node configured");
+
+    // Try to publish
+    char* barejid = connection_get_barejid();
+    omemo_devicelist_request(barejid);
+
+    free(barejid);
+
+    return 0;
 }
 
 
@@ -572,11 +704,7 @@ _omemo_bundle_publish_configure(xmpp_stanza_t* const stanza, void* const userdat
     }
 
     DataForm* form = form_create(x);
-    char* tag = g_hash_table_lookup(form->var_to_tag, "pubsub#access_model");
-    if (!tag) {
-        log_error("[OMEMO] cannot configure bundle to an open access model");
-        return 0;
-    }
+    form_set_value(form,  "pubsub#access_model", "open");
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
     Jid* jid = jid_create(connection_get_fulljid());
@@ -610,17 +738,5 @@ _omemo_bundle_publish_configure_result(xmpp_stanza_t* const stanza, void* const 
     // Try to publish again
     omemo_bundle_publish(TRUE);
 
-    return 0;
-}
-
-static int
-_omemo_device_list_publish_result(xmpp_stanza_t* const stanza, void* const userdata)
-{
-    const char* type = xmpp_stanza_get_type(stanza);
-    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
-        cons_show_error("Unable to publish own OMEMO device list");
-        log_error("[OMEMO] Publishing device list failed");
-        return 0;
-    }
     return 0;
 }
