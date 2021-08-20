@@ -563,7 +563,8 @@ _omemo_devicelist_publish_result(xmpp_stanza_t* const stanza, void* const userda
 
         xmpp_stanza_t *pubsub_error = xmpp_stanza_get_child_by_ns(error, STANZA_NS_PUBSUB_ERROR);
         if (!pubsub_error) {
-            // TODO
+            log_error("[OMEMO] Unknown error while publishing our own device list");
+            cons_show_error("Unknown error while publishing our own device list");
             return 0;
         }
 
