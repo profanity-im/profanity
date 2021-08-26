@@ -10,7 +10,7 @@ Usually release candidates are tagged 0.6.0.rc1, 0.6.0.rc2 and tested for a week
 * Build and simple tests in Virtual machines ideally all dists including OSX and Windows (Cygwin)
 
 * Update Inline command help (./src/command/cmd_defs.c)
-* Check copright dates in all files (Copywright 2012-2019)
+* Check copyright dates in all files (Copywright 2012-2019)
 
 * Generate HTML docs (the docgen argument only works when package status is development)
     `./profanity docgen`
@@ -64,7 +64,7 @@ make dist-zip
 AC_INIT([profanity], [0.7.0], [boothj5web@gmail.com])
 ```
 
-* Set the pacakge status back to dev:
+* Set the package status back to dev:
 
 ```
 PACKAGE_STATUS="development"
@@ -76,6 +76,6 @@ PACKAGE_STATUS="development"
 * Push
 
 ## Updating website
-  * Make changes to the git repo incuding uploading the new artefacts at:
+  * Make changes to the git repo including uploading the new artefacts at:
         https://github.com/profanity-im/profanity-im.github.io
   * Update profanity_version.txt
