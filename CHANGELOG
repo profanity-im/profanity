@@ -283,7 +283,7 @@ Changes:
   * `/roster room use jid` to use the jid of the MUC in the roster list.
 - Fix decryption failure for messages sent from Converse.js (@paulfariello) (#1253)
 - Fix crash when OMEMO key is misconfigured (@paulfariello) (#1239)
-- Use OMEMO for offline MUC members (@paulfariello) (#1242) 
+- Use OMEMO for offline MUC members (@paulfariello) (#1242)
 - Fix OMEMO 1on1 chats with psi+ (@svensp) (#1247)
 - Save occupants and roster chars (#1244)
 - Add support for downloading user avatars via XEP-0084 (#1240)
@@ -501,7 +501,7 @@ Changes:
 - /roster and /occupants panel size settings (% of screen width)
 - /account default - Set default account for /connect
 - /account remove
-- /presence - Show/hide contact presence in titlebar 
+- /presence - Show/hide contact presence in titlebar
 - /resource - Override resource during chat, resource display settings
 - Improved chat session handling <http://xmpp.org/rfcs/rfc6121.html#message-chat>
 - Lower CPU usage with dynamic input blocking timeout

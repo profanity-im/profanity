@@ -36,14 +36,14 @@ Themes are specified in ~/.local/share/profanity/plugin_themes
 @param group the group name in the themes file
 @param item the item name within the group
 @param def default colour if the theme cannot be found
-@param message the message to print 
+@param message the message to print
 @return 1 on success, 0 on failure
 */
 int prof_cons_show_themed(const char *const group, const char *const item, const char *const def, const char *const message);
 
-/**	
+/**
 Show a message indicating the command has been called incorrectly.
-@param cmd the command name with leading slash, e.g. "/say" 
+@param cmd the command name with leading slash, e.g. "/say"
 @return 1 on success, 0 on failure
 */
 int prof_cons_bad_cmd_usage(const char *const cmd);
@@ -216,14 +216,14 @@ Show a message in the plugin window.
 */
 int prof_win_show(PROF_WIN_TAG win, char *message);
 
-/**	
+/**
 Show a message in the plugin window, using the specified theme.
 Themes are specified in ~/.local/share/profanity/plugin_themes
 @param tag The {@link PROF_WIN_TAG} of the window to display the message
 @param group the group name in the themes file
 @param key the item name within the group
 @param def default colour if the theme cannot be found or NULL
-@param message the message to print 
+@param message the message to print
 @return 1 on success, 0 on failure
 */
 int prof_win_show_themed(PROF_WIN_TAG tag, char *group, char *key, char *def, char *message);

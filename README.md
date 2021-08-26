@@ -58,7 +58,7 @@ URL: https://profanity-im.github.io/blog
 
 Repo: https://github.com/profanity-im/blog
 
-### Mailinglist 
+### Mailinglist
 Mailing List: https://lists.notraces.net/mailman/listinfo/profanity
 
 ### Chatroom

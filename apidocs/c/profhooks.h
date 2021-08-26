@@ -45,7 +45,7 @@ Called before a chat message is displayed
 @param barejid Jabber ID of the message sender
 @param resource resource of the message sender
 @param message the received message
-@return the new message to display, or NULL to preserve the original message 
+@return the new message to display, or NULL to preserve the original message
 */
 char* prof_pre_chat_message_display(const char * const barejid, const char *const resource, const char *message);
 
@@ -77,14 +77,14 @@ Called before a chat room message is displayed
 @param barejid Jabber ID of the room
 @param nick nickname of message sender
 @param message the received message
-@return the new message to display, or NULL to preserve the original message 
+@return the new message to display, or NULL to preserve the original message
 */
 char* prof_pre_room_message_display(const char * const barejid, const char * const nick, const char *message);
 
 /**
 Called after a chat room message is displayed
 @param barejid Jabber ID of the room
-@param nick nickname of the message sender 
+@param nick nickname of the message sender
 @param message the received message
 */
 void prof_post_room_message_display(const char * const barejid, const char * const nick, const char *message);
@@ -118,14 +118,14 @@ Called before a private chat room message is displayed
 @param barejid Jabber ID of the room
 @param nick nickname of message sender
 @param message the received message
-@return the new message to display, or NULL to preserve the original message 
+@return the new message to display, or NULL to preserve the original message
 */
 char* prof_pre_priv_message_display(const char * const barejid, const char * const nick, const char *message);
 
 /**
 Called after a private chat room message is displayed
 @param barejid Jabber ID of the room
-@param nick nickname of the message sender 
+@param nick nickname of the message sender
 @param message the received message
 */
 void prof_post_priv_message_display(const char * const barejid, const char * const nick, const char *message);

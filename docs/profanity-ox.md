@@ -74,5 +74,3 @@ related to gnupg itself.
 ## Appendix
 
 * https://xmpp.org/extensions/xep-0373.html - 0.4.0 (2018-07-30)
-
-
