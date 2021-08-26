@@ -80,7 +80,7 @@ def prof_pre_chat_message_display(barejid, resource, message):
     :type barejid: str or unicode
     :type resource: str or unicode
     :type message: str or unicode
-    :return: the new message to display, or ``None`` to preserve the original message 
+    :return: the new message to display, or ``None`` to preserve the original message
     :rtype: str or unicode
     """
     pass
@@ -132,7 +132,7 @@ def prof_pre_room_message_display(barejid, nick, message):
     :type barejid: str or unicode
     :type nick: str or unicode
     :type message: str or unicode
-    :return: the new message to display, or ``None`` to preserve the original message 
+    :return: the new message to display, or ``None`` to preserve the original message
     :rtype: str or unicode
     """
     pass
@@ -142,7 +142,7 @@ def prof_post_room_message_display(barejid, nick, message):
     """Called after a chat room message is displayed
 
     :param barejid: Jabber ID of the room
-    :param nick: nickname of the message sender 
+    :param nick: nickname of the message sender
     :param message: the received message
     :type barejid: str or unicode
     :type nick: str or unicode
@@ -199,7 +199,7 @@ def prof_pre_priv_message_display(barejid, nick, message):
     :type barejid: str or unicode
     :type nick: str or unicode
     :type message: str or unicode
-    :return: the new message to display, or ``None`` to preserve the original message 
+    :return: the new message to display, or ``None`` to preserve the original message
     :rtype: str or unicode
     """
     pass
@@ -209,7 +209,7 @@ def prof_post_priv_message_display(barejid, nick, message):
     """Called after a private chat room message is displayed
 
     :param barejid: Jabber ID of the room
-    :param nick: nickname of the message sender 
+    :param nick: nickname of the message sender
     :param message: the received message
     :type barejid: str or unicode
     :type nick: str or unicode

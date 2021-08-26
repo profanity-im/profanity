@@ -9,14 +9,14 @@ Profanity accepts both ``str`` and ``unicode`` objects as string arguments, to a
 """
 
 
-def cons_alert(): 
+def cons_alert():
     """
     Highlights the console window in the status bar.
     """
     pass
 
 
-def cons_show(message): 
+def cons_show(message):
     """Show a message in the console window.
 
     :param message: the message to print
@@ -29,7 +29,7 @@ def cons_show(message):
     pass
 
 
-def cons_show_themed(group, key, default, message): 
+def cons_show_themed(group, key, default, message):
     """Show a message in the console, using the specified theme.\n
     Themes are specified in ``~/.local/share/profanity/plugin_themes``
 
@@ -49,7 +49,7 @@ def cons_show_themed(group, key, default, message):
     pass
 
 
-def cons_bad_cmd_usage(command): 
+def cons_bad_cmd_usage(command):
     """Show a message indicating the command has been called incorrectly.
 
     :param command: the command name with leading slash, e.g. ``"/say"``
@@ -62,7 +62,7 @@ def cons_bad_cmd_usage(command):
     pass
 
 
-def register_command(name, min_args, max_args, synopsis, description, arguments, examples, callback): 
+def register_command(name, min_args, max_args, synopsis, description, arguments, examples, callback):
     """Register a new command, with help information, and callback for command execution.\n
     Profanity will do some basic validation when the command is called using the argument range.
 
@@ -82,7 +82,7 @@ def register_command(name, min_args, max_args, synopsis, description, arguments,
     :type arguments: list of list of str or unicode
     :type examples: list of str or unicode
     :type callback: function
-    
+
     Example:
     ::
         synopsis = [
@@ -100,14 +100,14 @@ def register_command(name, min_args, max_args, synopsis, description, arguments,
             "/newcommand action1",
             "/newcommand print \\"Test debug message\\"",
             "/newcommand dosomething"
-        ]        
+        ]
 
         prof.register_command("/newcommand", 1, 2, synopsis, description, args, examples, my_function)
     """
     pass
 
 
-def register_timed(callback, interval): 
+def register_timed(callback, interval):
     """Register a function that Profanity will call periodically.
 
     :param callback: the function to call
@@ -132,15 +132,15 @@ def completer_add(key, items):
 
     Examples:
     ::
-        prof.completer_add("/mycommand", [ 
+        prof.completer_add("/mycommand", [
             "action1",
-            "action2", 
-            "dosomething" 
+            "action2",
+            "dosomething"
         ])
 
         prof.completer_add("/mycommand dosomething", [
             "thing1",
-            "thing2" 
+            "thing2"
         ])
     """
     pass
@@ -156,7 +156,7 @@ def completer_remove(key, items):
 
     Examples:
     ::
-        prof.completer_remove("/mycommand", [ 
+        prof.completer_remove("/mycommand", [
             "action1",
             "action2"
         ])
@@ -196,7 +196,7 @@ def filepath_completer_add(prefix):
     pass
 
 
-def send_line(line): 
+def send_line(line):
     """Send a line of input to Profanity to execute.
 
     :param line: the line to send
@@ -209,7 +209,7 @@ def send_line(line):
     pass
 
 
-def notify(message, timeout, category): 
+def notify(message, timeout, category):
     """Send a desktop notification.
 
     :param message: the message to display in the notification
@@ -226,7 +226,7 @@ def notify(message, timeout, category):
     pass
 
 
-def get_current_recipient(): 
+def get_current_recipient():
     """Retrieve the Jabber ID of the current chat recipient, when in a chat window.
 
     :return: the Jabber ID of the current chat recipient e.g. ``"buddy@chat.org"``, or ``None`` if not in a chat window.
@@ -235,7 +235,7 @@ def get_current_recipient():
     pass
 
 
-def get_current_muc(): 
+def get_current_muc():
     """Retrieve the Jabber ID of the current room, when in a chat room window.
 
     :return: the Jabber ID of the current chat room e.g. ``"metalchat@conference.chat.org"``, or ``None`` if not in a chat room window.
@@ -244,7 +244,7 @@ def get_current_muc():
     pass
 
 
-def get_current_nick(): 
+def get_current_nick():
     """Retrieve the users nickname in a chat room, when in a chat room window.
 
     :return: the users nickname in the current chat room e.g. ``"eddie"``, or ``None`` if not in a chat room window.
@@ -271,7 +271,7 @@ def get_barejid_from_roster(name):
     pass
 
 
-def get_current_occupants(): 
+def get_current_occupants():
     """Retrieve nicknames of all occupants in a chat room, when in a chat room window.
 
     :return: nicknames of all occupants in the current room or an empty list if not in a chat room window.
@@ -307,7 +307,7 @@ def log_debug(message):
     pass
 
 
-def log_info(): 
+def log_info():
     """Write to the Profanity log at level ``INFO``.
 
     :param message: the message to log
@@ -316,7 +316,7 @@ def log_info():
     pass
 
 
-def log_warning(): 
+def log_warning():
     """Write to the Profanity log at level ``WARNING``.
 
     :param message: the message to log
@@ -325,7 +325,7 @@ def log_warning():
     pass
 
 
-def log_error(): 
+def log_error():
     """Write to the Profanity log at level ``ERROR``.
 
     :param message: the message to log
@@ -337,7 +337,7 @@ def log_error():
 def win_exists(tag):
     """Determine whether or not a plugin window currently exists for the tag.
 
-    :param tag: The tag used when creating the plugin window 
+    :param tag: The tag used when creating the plugin window
     :type tag: str or unicode
     :return: ``True`` if the window exists, ``False`` otherwise.
     :rtype: boolean
@@ -349,12 +349,12 @@ def win_exists(tag):
     pass
 
 
-def win_create(tag, callback): 
+def win_create(tag, callback):
     """Create a plugin window.
 
-    :param tag: The tag used to refer to the window 
+    :param tag: The tag used to refer to the window
     :type tag: str or unicode
-    :param callback: function to call when the window receives input 
+    :param callback: function to call when the window receives input
     :type callback: function
 
     Example:
@@ -364,10 +364,10 @@ def win_create(tag, callback):
     pass
 
 
-def win_focus(tag): 
+def win_focus(tag):
     """Focus a plugin window.
 
-    :param tag: The tag of the window to focus 
+    :param tag: The tag of the window to focus
     :type tag: str or unicode
 
     Example:
@@ -377,7 +377,7 @@ def win_focus(tag):
     pass
 
 
-def win_show(tag, message): 
+def win_show(tag, message):
     """Show a message in the plugin window.
 
     :param tag: The tag of the window to display the message
@@ -392,7 +392,7 @@ def win_show(tag, message):
     pass
 
 
-def win_show_themed(tag, group, key, default, message): 
+def win_show_themed(tag, group, key, default, message):
     """Show a message in the plugin window, using the specified theme.\n
     Themes are specified in ``~/.local/share/profanity/plugin_themes``
 
