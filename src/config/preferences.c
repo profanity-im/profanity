@@ -2251,6 +2251,7 @@ _get_default_boolean(preference_t pref)
     case PREF_COLOR_NICK_OWN:
     case PREF_INTYPE:
     case PREF_INTYPE_CONSOLE:
+    case PREF_NOTIFY_MENTION_WHOLE_WORD:
         return TRUE;
     default:
         return FALSE;
