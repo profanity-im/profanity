@@ -77,10 +77,9 @@ notifier_uninit(void)
 void
 notify_typing(const char* const name)
 {
-    char message[strlen(name) + 1 + 11];
-    sprintf(message, "%s: typing...", name);
-
+    gchar *message = g_strdup_printf("%s: typing...", name);
     notify(message, 10000, "Incoming message");
+    g_free(message);
 }
 
 void
