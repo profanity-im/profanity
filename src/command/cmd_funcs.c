@@ -1651,8 +1651,7 @@ cmd_help(ProfWin* window, const char* const command, gchar** args)
         cons_navigation_help();
     } else {
         char* cmd = args[0];
-        char cmd_with_slash[1 + strlen(cmd) + 1];
-        sprintf(cmd_with_slash, "/%s", cmd);
+        char *cmd_with_slash = g_strdup_printf("/%s", cmd);
 
         Command* command = cmd_get(cmd_with_slash);
         if (command) {
@@ -1666,6 +1665,7 @@ cmd_help(ProfWin* window, const char* const command, gchar** args)
             }
         }
         cons_show("");
+        g_free(cmd_with_slash);
     }
 
     return TRUE;
