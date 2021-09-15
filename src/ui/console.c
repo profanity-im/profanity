@@ -2404,9 +2404,12 @@ cons_navigation_help(void)
     cons_show("Alt-LEFT, Alt-RIGHT      : Previous/next chat window.");
     cons_show("PAGEUP, PAGEDOWN         : Page the main window.");
     cons_show("Alt-PAGEUP, Alt-PAGEDOWN : Page occupants/roster panel.");
+    cons_show("Alt-a                    : Jump to the next unread window.");
+    cons_show("Alt-v                    : Mark current window with attention flag.");
+    cons_show("Alt-m                    : Switch between marked windows.");
     cons_show("");
-    cons_show("/win <n>     : Focus window n, where n is the window number.");
-    cons_show("/win <name>  : Focus window with name, where name is the recipient, room or window title.");
+    cons_show("/win <n>        : Focus window n, where n is the window number.");
+    cons_show("/win <name>     : Focus window with name, where name is the recipient, room or window title.");
     cons_show("");
     cons_show("See '/help win' for more information.");
 
