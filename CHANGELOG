@@ -20,7 +20,7 @@ Changes:
 - Show offline members in occupants panel (#1495)
   `/occupants default show|hide [jid|offline]`
   `/occupants show|hide [jid|offline]`
-- Support handling `file://` prefix in patchs (#1498)
+- Support handling `file://` prefix in paths (#1498)
 - Update HTTP Upload XEP-0363 to 1.0.0 (#1499, #1500)
 - New `/changepassword` command to change users password (XEP-0077) (#1501)
 - Add ability to request 'voice' in MUCs (XEP-0045) (#1211, #1504)
@@ -291,7 +291,7 @@ Changes:
 - Add last read position marker trackbar (#1238)
 - Dont print error message if a valid setting function is called (#1237)
   When printing configuration we often use the same command as setting but without any argument.
-  So far ths displayed "Invalid usage".
+  So far this displayed "Invalid usage".
 - Add support for XEP-0392 consistent color generation for nicks (@aaptel and @jubalh) (#1191)
   See `/color`, `/occupants color`, `/roster color`
 - Call ncurses resize function before move function (#1235)
@@ -322,7 +322,7 @@ Changes:
 - Improve forest theme
 - Change default text colors to default instead of white (@mdosch) (#1213) (#535)
 - Fix date display in chat history (#922)
-- Log incoming MUC messages if origin-id sais they dont come from us (#1201)
+- Log incoming MUC messages if origin-id says they dont come from us (#1201)
 - Support XEP-0359: Unique and Stable Stanza IDs (#1207)
   To help us identify which MUC messages were sent by us.
 - Fix double _XOPEN_SOURCE definition (@pasis) (#1206)
@@ -373,10 +373,10 @@ Changes:
 - Fix plugin unload return code if just one plugin fails (#995)
 - Fix several typos
 - Fix some display indentation issues (#1073)
-- Fail plugin unload if the plugin doesnt exist
+- Fail plugin unload if the plugin doesn't exist
 - Improve encrypted message stub header by mentioning the encryption method
 - Fix GPG encryption (#997)
-- Redraw sceen after entry of PGP key (#906)
+- Redraw screen after entry of PGP key (#906)
 - Fix support for case-sensitive account names (#725)
 - Fix /me display when highlighting user in MUCs (#950)
 - Fix `make dist` (0f0659a)

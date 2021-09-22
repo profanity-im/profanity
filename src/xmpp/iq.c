@@ -2713,8 +2713,8 @@ _muc_register_nick_response_handler(xmpp_stanza_t* const stanza, void* const use
             }
         }
     } else if (g_strcmp0(type, STANZA_TYPE_RESULT) == 0) {
-        cons_show("Registration request succesfully received");
-        log_debug("Registration request succesfully received");
+        cons_show("Registration request successfully received");
+        log_debug("Registration request successfully received");
     }
 
     return 0;
