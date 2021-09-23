@@ -410,7 +410,7 @@ iq_disable_carbons(void)
 }
 
 void
-iq_http_upload_request(HTTPUpload* upload)
+iq_http_upload_request(HTTPUploader* uploader)
 {
     char* jid = connection_jid_for_feature(STANZA_NS_HTTP_UPLOAD);
     if (jid == NULL) {
@@ -420,8 +420,8 @@ iq_http_upload_request(HTTPUpload* upload)
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
     char* id = connection_create_stanza_id();
-    xmpp_stanza_t* iq = stanza_create_http_upload_request(ctx, id, jid, upload);
-    iq_id_handler_add(id, _http_upload_response_id_handler, NULL, upload);
+    xmpp_stanza_t* iq = stanza_create_http_upload_request(ctx, id, jid, uploader);
+    iq_id_handler_add(id, _http_upload_response_id_handler, NULL, uploader);
     free(id);
 
     iq_send_stanza(iq);
@@ -2414,7 +2414,7 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* con
 static int
 _http_upload_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
-    HTTPUpload* upload = (HTTPUpload*)userdata;
+    HTTPUploader* uploader = (HTTPUploader*)userdata;
     const char* from = xmpp_stanza_get_from(stanza);
     const char* type = xmpp_stanza_get_type(stanza);
 
@@ -2428,9 +2428,9 @@ _http_upload_response_id_handler(xmpp_stanza_t* const stanza, void* const userda
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         char* error_message = stanza_get_error_message(stanza);
         if (from) {
-            cons_show_error("Uploading '%s' failed for %s: %s", upload->filename, from, error_message);
+            cons_show_error("Uploading '%s' failed for %s: %s", uploader->filename, from, error_message);
         } else {
-            cons_show_error("Uploading '%s' failed: %s", upload->filename, error_message);
+            cons_show_error("Uploading '%s' failed: %s", uploader->filename, error_message);
         }
         free(error_message);
         return 0;
@@ -2444,24 +2444,24 @@ _http_upload_response_id_handler(xmpp_stanza_t* const stanza, void* const userda
 
         if (put && get) {
             const char* put_url = xmpp_stanza_get_attribute(put, "url");
-            upload->put_url = strdup(put_url);
+            uploader->put_url = strdup(put_url);
             const char* get_url = xmpp_stanza_get_attribute(get, "url");
-            upload->get_url = strdup(get_url);
+            uploader->get_url = strdup(get_url);
 
             // Optional "authorization", "cookie", "expires" headers
-            upload->authorization = upload->cookie = upload->expires = NULL;
+            uploader->authorization = uploader->cookie = uploader->expires = NULL;
             xmpp_stanza_t* header = xmpp_stanza_get_children(put);
             for (; header; header = xmpp_stanza_get_next(header)) {
                 if (g_strcmp0(xmpp_stanza_get_name(header), STANZA_NAME_HEADER) == 0) {
                     const char* header_name = xmpp_stanza_get_attribute(header, STANZA_ATTR_NAME);
                     if (g_strcmp0(header_name, STANZA_HEADER_AUTHORIZATION) == 0) {
-                        upload->authorization = xmpp_stanza_get_text(header);
+                        uploader->authorization = xmpp_stanza_get_text(header);
                     }
                     else if (g_strcmp0(header_name, STANZA_HEADER_COOKIE) == 0) {
-                        upload->cookie = xmpp_stanza_get_text(header);
+                        uploader->cookie = xmpp_stanza_get_text(header);
                     }
                     else if (g_strcmp0(header_name, STANZA_HEADER_EXPIRES) == 0) {
-                        upload->expires = xmpp_stanza_get_text(header);
+                        uploader->expires = xmpp_stanza_get_text(header);
                     }
                     else {
                         log_warning("[HTTP upload] unknown header: %s", header_name);
@@ -2469,8 +2469,8 @@ _http_upload_response_id_handler(xmpp_stanza_t* const stanza, void* const userda
                 }
             }
 
-            pthread_create(&(upload->worker), NULL, &http_file_put, upload);
-            http_upload_add_upload(upload);
+            pthread_create(&(uploader->worker), NULL, &http_uploader_start, uploader);
+            http_uploader_add(uploader);
         } else {
             log_error("Invalid XML in HTTP Upload slot");
             return 1;

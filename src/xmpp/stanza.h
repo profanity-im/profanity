@@ -276,7 +276,7 @@ xmpp_stanza_t* stanza_create_bookmarks_storage_request(xmpp_ctx_t* ctx);
 
 xmpp_stanza_t* stanza_create_blocked_list_request(xmpp_ctx_t* ctx);
 
-xmpp_stanza_t* stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id, const char* const jid, HTTPUpload* upload);
+xmpp_stanza_t* stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id, const char* const jid, HTTPUploader* uploader);
 
 xmpp_stanza_t* stanza_enable_carbons(xmpp_ctx_t* ctx);
 

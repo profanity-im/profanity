@@ -33,6 +33,8 @@
  *
  */
 
+#define _GNU_SOURCE 1
+
 #include "config.h"
 
 #include <stdlib.h>
@@ -64,25 +66,25 @@ struct curl_data_t
     size_t size;
 };
 
-GSList* upload_processes = NULL;
+GSList* http_uploader_processes = NULL;
 
 static int
 _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
 {
-    HTTPUpload* upload = (HTTPUpload*)userdata;
+    HTTPUploader* uploader = (HTTPUploader*)userdata;
 
     pthread_mutex_lock(&lock);
 
-    if (upload->cancel) {
+    if (uploader->cancel) {
         pthread_mutex_unlock(&lock);
         return 1;
     }
 
-    if (upload->bytes_sent == ulnow) {
+    if (uploader->bytes_sent == ulnow) {
         pthread_mutex_unlock(&lock);
         return 0;
     } else {
-        upload->bytes_sent = ulnow;
+        uploader->bytes_sent = ulnow;
     }
 
     unsigned int ulperc = 0;
@@ -126,45 +128,23 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
     return realsize;
 }
 
-int
-format_alt_url(char* original_url, char* new_scheme, char* new_fragment, char** new_url)
-{
-    int ret = 0;
-    CURLU* h = curl_url();
-
-    if ((ret = curl_url_set(h, CURLUPART_URL, original_url, 0)) != 0) {
-        goto out;
+void* http_uploader_start(void* userdata) {
+    HTTPUploader* uploader = (HTTPUploader*)userdata;
+    switch(uploader->type) {
+        case AESGCM_UPLOAD: return aesgcm_upload_start(uploader);
+        case HTTP_UPLOAD: return http_upload_start(uploader);
     }
-
-    if (new_scheme != NULL) {
-        if ((ret = curl_url_set(h, CURLUPART_SCHEME, new_scheme, CURLU_NON_SUPPORT_SCHEME)) != 0) {
-            goto out;
-        }
-    }
-
-    if (new_fragment != NULL) {
-        if ((ret = curl_url_set(h, CURLUPART_FRAGMENT, new_fragment, 0)) != 0) {
-            goto out;
-        }
-    }
-
-    ret = curl_url_get(h, CURLUPART_URL, new_url, 0);
-
-out:
-    curl_url_cleanup(h);
-    return ret;
 }
 
 void*
-http_file_put(void* userdata)
+http_uploader_put(HTTPUploader* uploader)
 {
-    HTTPUpload* upload = (HTTPUpload*)userdata;
-
-    FILE* fh = NULL;
+    FILE* fd = NULL;
 
     char* err = NULL;
     gchar* content_type_header;
-    // Optional headers
+
+    // Optional headers.
     gchar* auth_header = NULL;
     gchar* cookie_header = NULL;
     gchar* expires_header = NULL;
@@ -172,15 +152,16 @@ http_file_put(void* userdata)
     CURL* curl;
     CURLcode res;
 
-    upload->cancel = 0;
-    upload->bytes_sent = 0;
+    uploader->cancel = 0;
+    uploader->bytes_sent = 0;
 
     pthread_mutex_lock(&lock);
-    gchar* msg = g_strdup_printf("Uploading '%s': 0%%", upload->filename);
+
+    gchar* msg = g_strdup_printf( "Uploading '%s': 0%%", uploader->filename);
     if (!msg) {
         msg = g_strdup(FALLBACK_MSG);
     }
-    win_print_http_transfer(upload->window, msg, upload->put_url);
+    win_print_http_upload(uploader->window, msg, uploader->put_url);
     g_free(msg);
 
     char* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
@@ -189,18 +170,18 @@ http_file_put(void* userdata)
     curl_global_init(CURL_GLOBAL_ALL);
     curl = curl_easy_init();
 
-    curl_easy_setopt(curl, CURLOPT_URL, upload->put_url);
+    curl_easy_setopt(curl, CURLOPT_URL, uploader->put_url);
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
 
     struct curl_slist* headers = NULL;
-    content_type_header = g_strdup_printf("Content-Type: %s", upload->mime_type);
+    content_type_header = g_strdup_printf("Content-Type: %s", uploader->mime_type);
     if (!content_type_header) {
         content_type_header = g_strdup(FALLBACK_CONTENTTYPE_HEADER);
     }
     headers = curl_slist_append(headers, content_type_header);
     headers = curl_slist_append(headers, "Expect:");
 
-    // Optional headers
+    // Optional headers.
     if (upload->authorization) {
         auth_header = g_strdup_printf("Authorization: %s", upload->authorization);
         if (!auth_header) {
@@ -227,10 +208,10 @@ http_file_put(void* userdata)
 
 #if LIBCURL_VERSION_NUM >= 0x072000
     curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, _xferinfo);
-    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, upload);
+    curl_easy_setopt(curl, CURLOPT_XFERINFODATA, uploader);
 #else
     curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, _older_progress);
-    curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, upload);
+    curl_easy_setopt(curl, CURLOPT_PROGRESSDATA, uploader);
 #endif
     curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 
@@ -242,14 +223,17 @@ http_file_put(void* userdata)
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "profanity");
 
-    fh = upload->filehandle;
+    if (!(fd = fopen(uploader->filename, "rb"))) {
+        err = g_strdup_printf("failed to open '%s'", uploader->filename);
+        goto end;
+    }
 
     if (cert_path) {
         curl_easy_setopt(curl, CURLOPT_CAPATH, cert_path);
     }
 
-    curl_easy_setopt(curl, CURLOPT_READDATA, fh);
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)(upload->filesize));
+    curl_easy_setopt(curl, CURLOPT_READDATA, fd);
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)(uploader->filesize)));
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     if ((res = curl_easy_perform(curl)) != CURLE_OK) {
@@ -274,90 +258,80 @@ http_file_put(void* userdata)
 #endif
     }
 
+end:
     curl_easy_cleanup(curl);
     curl_global_cleanup();
     curl_slist_free_all(headers);
 
-    if (fh) {
-        fclose(fh);
+    if (fd) {
+        fclose(fd);
     }
     free(output.buffer);
+
     g_free(content_type_header);
     g_free(auth_header);
     g_free(cookie_header);
     g_free(expires_header);
 
     pthread_mutex_lock(&lock);
-    g_free(cert_path);
+    free(cert_path);
 
     if (err) {
-        gchar* msg;
-        if (upload->cancel) {
-            msg = g_strdup_printf("Uploading '%s' failed: Upload was canceled", upload->filename);
+        char* msg;
+        if (uploader->cancel) {
+            msg = g_strdup_printf("Uploading '%s' failed: Upload was canceled", uploader->filename);
             if (!msg) {
                 msg = g_strdup(FALLBACK_MSG);
             }
         } else {
-            msg = g_strdup_printf("Uploading '%s' failed: %s", upload->filename, err);
+            msg = g_strdup_printf("Uploading '%s' failed: %s", uploader->filename, err);
             if (!msg) {
                 msg = g_strdup(FALLBACK_MSG);
             }
-            win_update_entry_message(upload->window, upload->put_url, msg);
+            win_update_entry_message(uploader->window, uploader->put_url, msg);
         }
         cons_show_error(msg);
         g_free(msg);
         free(err);
     } else {
-        if (!upload->cancel) {
-            msg = g_strdup_printf("Uploading '%s': 100%%", upload->filename);
+        if (!uploader->cancel) {
+            msg = g_strdup_printf("Uploading '%s': 100%%", uploader->filename);
             if (!msg) {
                 msg = g_strdup(FALLBACK_MSG);
             }
-            win_update_entry_message(upload->window, upload->put_url, msg);
-            win_mark_received(upload->window, upload->put_url);
+            win_update_entry_message(uploader->window, uploader->put_url, msg);
+            win_mark_received(uploader->window, uploader->put_url);
             g_free(msg);
 
-            char* url = NULL;
-            if (format_alt_url(upload->get_url, upload->alt_scheme, upload->alt_fragment, &url) != 0) {
-                gchar* msg = g_strdup_printf("Uploading '%s' failed: Bad URL ('%s')", upload->filename, upload->get_url);
-                if (!msg) {
-                    msg = g_strdup(FALLBACK_MSG);
-                }
-                cons_show_error(msg);
-                g_free(msg);
-            } else {
-                switch (upload->window->type) {
-                case WIN_CHAT:
-                {
-                    ProfChatWin* chatwin = (ProfChatWin*)(upload->window);
-                    assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-                    cl_ev_send_msg(chatwin, url, url);
-                    break;
-                }
-                case WIN_PRIVATE:
-                {
-                    ProfPrivateWin* privatewin = (ProfPrivateWin*)(upload->window);
-                    assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-                    cl_ev_send_priv_msg(privatewin, url, url);
-                    break;
-                }
-                case WIN_MUC:
-                {
-                    ProfMucWin* mucwin = (ProfMucWin*)(upload->window);
-                    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-                    cl_ev_send_muc_msg(mucwin, url, url);
-                    break;
-                }
-                default:
-                    break;
-                }
-
-                curl_free(url);
+            switch (uploader->window->type) {
+            case WIN_CHAT:
+            {
+                ProfChatWin* chatwin = (ProfChatWin*)(uploader->window);
+                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+                cl_ev_send_msg(chatwin, uploader->get_url, uploader->get_url);
+                break;
+            }
+            case WIN_PRIVATE:
+            {
+                ProfPrivateWin* privatewin = (ProfPrivateWin*)(uploader->window);
+                assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+                cl_ev_send_priv_msg(privatewin, uploader->get_url, uploader->get_url);
+                break;
+            }
+            case WIN_MUC:
+            {
+                ProfMucWin* mucwin = (ProfMucWin*)(uploader->window);
+                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+                cl_ev_send_muc_msg(mucwin, uploader->get_url, uploader->get_url);
+                break;
+            }
+            default:
+                break;
             }
         }
     }
 
-    upload_processes = g_slist_remove(upload_processes, upload);
+    http_uploader_processes = g_slist_remove(http_uploader_processes, uploader);
     pthread_mutex_unlock(&lock);
 
     free(upload->filename);
@@ -374,17 +348,24 @@ http_file_put(void* userdata)
     return NULL;
 }
 
+
+void*
+http_upload_start(Uploader* uploader)
+{
+    http_uploader_put(uploader);
+}
+
 char*
 file_mime_type(const char* const filename)
 {
     char* out_mime_type;
     char file_header[FILE_HEADER_BYTES];
-    FILE* fh;
-    if (!(fh = fopen(filename, "rb"))) {
+    FILE* fd;
+    if (!(fd = fopen(filename, "rb"))) {
         return strdup(FALLBACK_MIMETYPE);
     }
-    size_t file_header_size = fread(file_header, 1, FILE_HEADER_BYTES, fh);
-    fclose(fh);
+    size_t file_header_size = fread(file_header, 1, FILE_HEADER_BYTES, fd);
+    fclose(fd);
 
     char* content_type = g_content_type_guess(filename, (unsigned char*)file_header, file_header_size, NULL);
     if (content_type != NULL) {
@@ -399,29 +380,29 @@ file_mime_type(const char* const filename)
 }
 
 off_t
-file_size(int filedes)
+file_size(const char* const filename)
 {
     struct stat st;
-    fstat(filedes, &st);
+    stat(filename, &st);
     return st.st_size;
 }
 
 void
-http_upload_cancel_processes(ProfWin* window)
+http_uploader_cancel_processes(ProfWin* window)
 {
-    GSList* upload_process = upload_processes;
-    while (upload_process) {
-        HTTPUpload* upload = upload_process->data;
-        if (upload->window == window) {
-            upload->cancel = 1;
+    GSList* process = http_uploader_processes;
+    while (process) {
+        HTTPUpload* uploader = process->data;
+        if (uploader->window == window) {
+            uploader->cancel = 1;
             break;
         }
-        upload_process = g_slist_next(upload_process);
+        process = g_slist_next(process);
     }
 }
 
 void
-http_upload_add_upload(HTTPUpload* upload)
+http_uploader_add(HTTPUploader* uploader)
 {
-    upload_processes = g_slist_append(upload_processes, upload);
+    http_uploader_processes = g_slist_append(http_uploader_processes, uploader);
 }

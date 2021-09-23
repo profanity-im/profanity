@@ -261,7 +261,7 @@ void iq_room_role_set(const char* const room, const char* const nick, char* role
 void iq_room_role_list(const char* const room, char* role);
 void iq_autoping_timer_cancel(void);
 void iq_autoping_check(void);
-void iq_http_upload_request(HTTPUpload* upload);
+void iq_http_upload_request(HTTPUploader* uploader);
 void iq_command_list(const char* const target);
 void iq_command_exec(const char* const target, const char* const command);
 void iq_mam_request(ProfChatWin* win);

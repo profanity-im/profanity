@@ -102,6 +102,7 @@
 #include "omemo/omemo.h"
 #include "xmpp/omemo.h"
 #include "tools/aesgcm_download.h"
+#include "tools/aesgcm_upload.h"
 #endif
 
 #ifdef HAVE_GTK
@@ -4872,54 +4873,11 @@ cmd_disco(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
-// TODO: Move this into its own tools such as HTTPUpload or AESGCMDownload.
-#ifdef HAVE_OMEMO
-char*
-_add_omemo_stream(int* fd, FILE** fh, char** err)
-{
-    // Create temporary file for writing ciphertext.
-    int tmpfd;
-    char* tmpname = NULL;
-    if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
-        *err = "Unable to create temporary file for encrypted transfer.";
-        return NULL;
-    }
-    FILE* tmpfh = fdopen(tmpfd, "wb");
-
-    // The temporary ciphertext file should be removed after it has
-    // been closed.
-    remove(tmpname);
-    free(tmpname);
-
-    int crypt_res;
-    char* fragment;
-    fragment = omemo_encrypt_file(*fh, tmpfh, file_size(*fd), &crypt_res);
-    if (crypt_res != 0) {
-        fclose(tmpfh);
-        return NULL;
-    }
-
-    // Force flush as the upload will read from the same stream.
-    fflush(tmpfh);
-    rewind(tmpfh);
-
-    fclose(*fh); // Also closes descriptor.
-
-    // Switch original stream with temporary ciphertext stream.
-    *fd = tmpfd;
-    *fh = tmpfh;
-
-    return fragment;
-}
-#endif
-
 gboolean
 cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 {
     jabber_conn_status_t conn_status = connection_get_status();
     gchar* filename;
-    char* alt_scheme = NULL;
-    char* alt_fragment = NULL;
 
     // expand ~ to $HOME
     filename = get_expanded_path(args[0]);
@@ -4943,14 +4901,6 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         cons_show_error("Unsupported window for file transmission.");
         goto out;
     }
-
-    int fd;
-    if ((fd = open(filename, O_RDONLY)) == -1) {
-        cons_show_error("Unable to open file descriptor for '%s'.", filename);
-        goto out;
-    }
-
-    FILE* fh = fdopen(fd, "rb");
 
     gboolean omemo_enabled = FALSE;
     gboolean sendfile_enabled = TRUE;
@@ -4985,46 +4935,23 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         goto out;
     }
 
+    HTTPUploader* uploader = malloc(sizeof(HTTPUploader));
+    uploader->window = window;
+    uploader->filename = strdup(filename);
+    uploader->filesize = file_size(filename);
+    uploader->mime_type = file_mime_type(filename);
+
     if (omemo_enabled) {
 #ifdef HAVE_OMEMO
-        char* err = NULL;
-        alt_scheme = OMEMO_AESGCM_URL_SCHEME;
-        alt_fragment = _add_omemo_stream(&fd, &fh, &err);
-        if (err != NULL) {
-            cons_show_error(err);
-            win_println(window, THEME_ERROR, "-", err);
-            goto out;
-        }
+        uploader->type = AESGCM_UPLOAD;
 #endif
-    }
-
-    HTTPUpload* upload = malloc(sizeof(HTTPUpload));
-    upload->window = window;
-
-    upload->filename = strdup(filename);
-    upload->filehandle = fh;
-    upload->filesize = file_size(fd);
-    upload->mime_type = file_mime_type(filename);
-
-    if (alt_scheme != NULL) {
-        upload->alt_scheme = strdup(alt_scheme);
     } else {
-        upload->alt_scheme = NULL;
+        uploader->type = HTTP_UPLOAD;
     }
 
-    if (alt_fragment != NULL) {
-        upload->alt_fragment = strdup(alt_fragment);
-    } else {
-        upload->alt_fragment = NULL;
-    }
-
-    iq_http_upload_request(upload);
+    iq_http_upload_request(uploader);
 
 out:
-#ifdef HAVE_OMEMO
-    if (alt_fragment != NULL)
-        omemo_free(alt_fragment);
-#endif
     if (filename != NULL)
         free(filename);
 

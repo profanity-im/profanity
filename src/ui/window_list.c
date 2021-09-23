@@ -533,7 +533,7 @@ wins_close_by_num(int i)
         ProfWin* window = wins_get_by_num(i);
         if (window) {
             // cancel upload processes of this window
-            http_upload_cancel_processes(window);
+            http_uploader_cancel_processes(window);
 
             switch (window->type) {
             case WIN_CHAT:

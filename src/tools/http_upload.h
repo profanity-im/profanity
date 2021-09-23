@@ -45,33 +45,44 @@
 
 #include "ui/win_types.h"
 
-typedef struct http_upload_t
+typedef enum {
+    AESGCM_UPLOAD,
+    HTTP_UPLOAD,
+} http_uploader_type_t;
+
+typedef struct http_uploader_t
 {
+    http_uploader_type_t type;
+
     char* filename;
-    FILE* filehandle;
-    off_t filesize;
-    curl_off_t bytes_sent;
     char* mime_type;
     char* get_url;
     char* put_url;
-    char* alt_scheme;
-    char* alt_fragment;
-    ProfWin* window;
-    pthread_t worker;
-    int cancel;
-    // Additional headers
-    // (NULL if they shouldn't be send in the PUT)
+
+    // Optional headers (NULL if they shouldn't be send in the PUT).
     char* authorization;
     char* cookie;
     char* expires;
+
+    off_t filesize;
+    curl_off_t bytes_sent;
+
+    ProfWin* window;
+    pthread_t worker;
+
+    int cancel;
+} HTTPUploader;
+
+typedef struct http_upload_t
+{
+    HTTPUploader* uploader;
 } HTTPUpload;
 
-void* http_file_put(void* userdata);
+void* http_uploader_start(void* userdata);
+void http_uploader_cancel_processes(ProfWin* window);
+void http_uploader_add(HTTPUploader* uploader);
 
+off_t file_size(const char* const filename);
 char* file_mime_type(const char* const filename);
-off_t file_size(int filedes);
-
-void http_upload_cancel_processes(ProfWin* window);
-void http_upload_add_upload(HTTPUpload* upload);
 
 #endif

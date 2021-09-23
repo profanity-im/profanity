@@ -221,7 +221,7 @@ stanza_create_bookmarks_pubsub_add(xmpp_ctx_t *ctx, const char *const jid,
 
 xmpp_stanza_t*
 stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id,
-                                  const char* const jid, HTTPUpload* upload)
+                                  const char* const jid, HTTPUploader* uploader)
 {
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
     xmpp_stanza_set_to(iq, jid);
@@ -230,7 +230,7 @@ stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id,
     xmpp_stanza_set_name(request, STANZA_NAME_REQUEST);
     xmpp_stanza_set_ns(request, STANZA_NS_HTTP_UPLOAD);
 
-    char* filename_cpy = strdup(upload->filename);
+    char* filename_cpy = strdup(uploader->filename);
     // strip spaces from filename (servers don't spaces)
     for (int i = 0; i < strlen(filename_cpy); i++) {
         if (filename_cpy[i] == ' ') {
@@ -240,13 +240,13 @@ stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id,
     xmpp_stanza_set_attribute(request, STANZA_ATTR_FILENAME, basename(filename_cpy));
     free(filename_cpy);
 
-    gchar* filesize = g_strdup_printf("%jd", (intmax_t)(upload->filesize));
+    gchar* filesize = g_strdup_printf("%jd", (intmax_t)(uploader->filesize));
     if (filesize) {
         xmpp_stanza_set_attribute(request, STANZA_ATTR_SIZE, filesize);
         g_free(filesize);
     }
 
-    xmpp_stanza_set_attribute(request, STANZA_ATTR_CONTENTTYPE, upload->mime_type);
+    xmpp_stanza_set_attribute(request, STANZA_ATTR_CONTENTTYPE, uploader->mime_type);
 
     xmpp_stanza_add_child(iq, request);
     xmpp_stanza_release(request);
