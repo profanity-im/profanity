@@ -46,7 +46,9 @@
 #include "ui/win_types.h"
 
 typedef enum {
+#ifdef HAVE_OMEMO
     AESGCM_UPLOAD,
+#endif
     HTTP_UPLOAD,
 } http_uploader_type_t;
 
@@ -77,6 +79,13 @@ typedef struct http_upload_t
 {
     HTTPUploader* uploader;
 } HTTPUpload;
+
+#ifdef HAVE_OMEMO
+typedef struct aesgcm_upload_t
+{
+    HTTPUploader* uploader;
+} AESGCMUpload;
+#endif
 
 void* http_uploader_start(void* userdata);
 void http_uploader_cancel_processes(ProfWin* window);

@@ -50,10 +50,15 @@
 #include "profanity.h"
 #include "event/client_events.h"
 #include "tools/http_upload.h"
+#include "tools/http_common.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "common.h"
+
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
 
 #define FALLBACK_MIMETYPE           "application/octet-stream"
 #define FALLBACK_CONTENTTYPE_HEADER "Content-Type: application/octet-stream"
@@ -92,12 +97,7 @@ _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
         ulperc = (100 * ulnow) / ultotal;
     }
 
-    gchar* msg = g_strdup_printf("Uploading '%s': %d%%", upload->filename, ulperc);
-    if (!msg) {
-        msg = g_strdup(FALLBACK_MSG);
-    }
-    win_update_entry_message(upload->window, upload->put_url, msg);
-    g_free(msg);
+    http_print_transfer_update(uploader->window, uploader->put_url, "Uploading '%s': %d%%", uploader->filename, ulperc);
 
     pthread_mutex_unlock(&lock);
 
@@ -128,14 +128,6 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
     return realsize;
 }
 
-void* http_uploader_start(void* userdata) {
-    HTTPUploader* uploader = (HTTPUploader*)userdata;
-    switch(uploader->type) {
-        case AESGCM_UPLOAD: return aesgcm_upload_start(uploader);
-        case HTTP_UPLOAD: return http_upload_start(uploader);
-    }
-}
-
 void*
 http_uploader_put(HTTPUploader* uploader)
 {
@@ -143,6 +135,7 @@ http_uploader_put(HTTPUploader* uploader)
 
     char* err = NULL;
     gchar* content_type_header;
+    gchar* msg;
 
     // Optional headers.
     gchar* auth_header = NULL;
@@ -157,12 +150,7 @@ http_uploader_put(HTTPUploader* uploader)
 
     pthread_mutex_lock(&lock);
 
-    gchar* msg = g_strdup_printf( "Uploading '%s': 0%%", uploader->filename);
-    if (!msg) {
-        msg = g_strdup(FALLBACK_MSG);
-    }
-    win_print_http_upload(uploader->window, msg, uploader->put_url);
-    g_free(msg);
+    http_print_transfer(uploader->window, uploader->put_url, "Uploading '%s': 0%%", uploader->filename);
 
     char* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     pthread_mutex_unlock(&lock);
@@ -182,22 +170,22 @@ http_uploader_put(HTTPUploader* uploader)
     headers = curl_slist_append(headers, "Expect:");
 
     // Optional headers.
-    if (upload->authorization) {
-        auth_header = g_strdup_printf("Authorization: %s", upload->authorization);
+    if (uploader->authorization) {
+        auth_header = g_strdup_printf("Authorization: %s", uploader->authorization);
         if (!auth_header) {
             auth_header = g_strdup(FALLBACK_MSG);
         }
         headers = curl_slist_append(headers, auth_header);
     }
-    if (upload->cookie) {
-        cookie_header = g_strdup_printf("Cookie: %s", upload->cookie);
+    if (uploader->cookie) {
+        cookie_header = g_strdup_printf("Cookie: %s", uploader->cookie);
         if (!cookie_header) {
             cookie_header = g_strdup(FALLBACK_MSG);
         }
         headers = curl_slist_append(headers, cookie_header);
     }
-    if (upload->expires) {
-        expires_header = g_strdup_printf("Expires: %s", upload->expires);
+    if (uploader->expires) {
+        expires_header = g_strdup_printf("Expires: %s", uploader->expires);
         if (!expires_header) {
             expires_header = g_strdup(FALLBACK_MSG);
         }
@@ -233,7 +221,7 @@ http_uploader_put(HTTPUploader* uploader)
     }
 
     curl_easy_setopt(curl, CURLOPT_READDATA, fd);
-    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)(uploader->filesize)));
+    curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)(uploader->filesize));
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     if ((res = curl_easy_perform(curl)) != CURLE_OK) {
@@ -334,26 +322,89 @@ end:
     http_uploader_processes = g_slist_remove(http_uploader_processes, uploader);
     pthread_mutex_unlock(&lock);
 
-    free(upload->filename);
-    free(upload->mime_type);
-    free(upload->get_url);
-    free(upload->put_url);
-    free(upload->alt_scheme);
-    free(upload->alt_fragment);
-    free(upload->authorization);
-    free(upload->cookie);
-    free(upload->expires);
-    free(upload);
+    free(uploader->filename);
+    free(uploader->mime_type);
+    free(uploader->get_url);
+    free(uploader->put_url);
+    free(uploader->authorization);
+    free(uploader->cookie);
+    free(uploader->expires);
+    free(uploader);
 
     return NULL;
 }
 
 
 void*
-http_upload_start(Uploader* uploader)
+http_upload_start(HTTPUploader* uploader)
 {
     http_uploader_put(uploader);
+
+    return NULL;
 }
+
+#ifdef HAVE_OMEMO
+void* aesgcm_upload_start(HTTPUploader* uploader) {
+    // Open a file handle for reading the cleartext.
+    FILE* fh = NULL;
+    if (!(fh = fopen(uploader->filename, "rb"))) {
+        http_print_transfer_update(uploader->window, uploader->put_url,
+                                   "Uploading '%s' failed: Could not open file for reading.",
+                                   uploader->put_url);
+        return NULL;
+    }
+
+    // Create temporary file for writing the ciphertext.
+    gchar* tmpname = NULL;
+    gint tmpfd;
+    if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
+        http_print_transfer_update(uploader->window, uploader->put_url,
+                                   "Uploading '%s' failed: Unable to create "
+                                   "temporary file for encrypted transfer.",
+                                   uploader->put_url);
+        return NULL;
+    }
+
+
+    // Open a file handle for writing the ciphertext.
+    FILE* tmpfh = fopen(tmpname, "rb");
+    if (tmpfh == NULL) {
+        http_print_transfer_update(uploader->window, uploader->put_url,
+                                   "Uploading '%s' failed: Unable to open "
+                                   "temporary file at '%s' for reading (%s).",
+                                   uploader->put_url, tmpname,
+                                   g_strerror(errno));
+        return NULL;
+    }
+
+    // Encrypt the file and store the result in the temporary file previously
+    // created.
+    int crypt_res;
+    char* fragment;
+    fragment = omemo_encrypt_file(fh, tmpfh, file_size(uploader->filename), &crypt_res);
+    if (crypt_res != 0) {
+        http_print_transfer_update(uploader->window, uploader->put_url,
+                                   "Uploading '%s' failed: Failed to encrypt "
+                                   "file (%s).",
+                                   uploader->put_url, gcry_strerror(crypt_res));
+        goto out;
+    }
+
+    // Force flush as the upload will read from the same file.
+    fflush(tmpfh);
+    fclose(tmpfh);
+
+    uploader->filename = strdup(tmpname); // Set the temporary ciphertext as the file to upload.
+    http_uploader_put(uploader);
+
+out:
+    close(tmpfd); // Also closes the stream.
+    remove(tmpname); // Remove the temporary ciphertext.
+    g_free(tmpname);
+
+    return NULL;
+}
+#endif
 
 char*
 file_mime_type(const char* const filename)
@@ -392,7 +443,7 @@ http_uploader_cancel_processes(ProfWin* window)
 {
     GSList* process = http_uploader_processes;
     while (process) {
-        HTTPUpload* uploader = process->data;
+        HTTPUploader* uploader = process->data;
         if (uploader->window == window) {
             uploader->cancel = 1;
             break;
@@ -405,4 +456,16 @@ void
 http_uploader_add(HTTPUploader* uploader)
 {
     http_uploader_processes = g_slist_append(http_uploader_processes, uploader);
+}
+
+void* http_uploader_start(void* userdata) {
+    HTTPUploader* uploader = (HTTPUploader*)userdata;
+    switch(uploader->type) {
+#ifdef HAVE_OMEMO
+        case AESGCM_UPLOAD: return aesgcm_upload_start(uploader);
+#endif
+        case HTTP_UPLOAD: return http_upload_start(uploader);
+    }
+
+    return NULL;
 }

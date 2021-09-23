@@ -102,7 +102,6 @@
 #include "omemo/omemo.h"
 #include "xmpp/omemo.h"
 #include "tools/aesgcm_download.h"
-#include "tools/aesgcm_upload.h"
 #endif
 
 #ifdef HAVE_GTK
@@ -4941,6 +4940,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
     uploader->filesize = file_size(filename);
     uploader->mime_type = file_mime_type(filename);
 
+    // TODO(wstrm): omemo_enabled shouldn't exist in non-HAVE_OMEMO.
     if (omemo_enabled) {
 #ifdef HAVE_OMEMO
         uploader->type = AESGCM_UPLOAD;
