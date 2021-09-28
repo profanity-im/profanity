@@ -1,0 +1,112 @@
+.TH man 1 "2021-09-28" "0.11.0" "Profanity XMPP client"
+
+.SH NAME
+/plugins
+
+.SH DESCRIPTION
+Manage plugins. Passing no arguments lists currently loaded plugins.
+
+.SH SYNOPSIS
+/plugins
+
+.LP
+/plugins sourcepath set <path>
+
+.LP
+/plugins sourcepath clear
+
+.LP
+/plugins install [<path>]
+
+.LP
+/plugins uninstall [<plugin>]
+
+.LP
+/plugins update [<path>]
+
+.LP
+/plugins unload [<plugin>]
+
+.LP
+/plugins load [<plugin>]
+
+.LP
+/plugins reload [<plugin>]
+
+.LP
+/plugins python_version
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBsourcepath set <path>\fR
+.RS 4
+Set the default path to install plugins from, will be used if no arg is passed to /plugins install.
+.RE
+.PP
+\fBsourcepath clear\fR
+.RS 4
+Clear the default plugins source path.
+.RE
+.PP
+\fBinstall [<path>]\fR
+.RS 4
+Install a plugin, or all plugins found in a directory (recursive). Passing no argument will use the sourcepath if one is set.
+.RE
+.PP
+\fBuninstall [<plugin>]\fR
+.RS 4
+Uninstall a plugin.
+.RE
+.PP
+\fBupdate [<path>]\fR
+.RS 4
+Updates an installed plugin
+.RE
+.PP
+\fBload [<plugin>]\fR
+.RS 4
+Load a plugin that already exists in the plugin directory, passing no argument loads all found plugins.
+.RE
+.PP
+\fBunload [<plugin>]\fR
+.RS 4
+Unload a loaded plugin, passing no argument will unload all plugins.
+.RE
+.PP
+\fBreload [<plugin>]\fR
+.RS 4
+Reload a plugin, passing no argument will reload all plugins.
+.RE
+.PP
+\fBpython_version\fR
+.RS 4
+Show the Python interpreter version.
+.RE
+
+.SH EXAMPLES
+/plugins sourcepath set /home/meee/projects/profanity-plugins
+
+.LP
+/plugins install
+
+.LP
+/plugins install /home/steveharris/Downloads/metal.py
+
+.LP
+/plugins update /home/steveharris/Downloads/metal.py
+
+.LP
+/plugins uninstall browser.py
+
+.LP
+/plugins load browser.py
+
+.LP
+/plugins unload say.py
+
+.LP
+/plugins reload wikipedia.py
+
+.LP

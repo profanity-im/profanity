@@ -1,0 +1,44 @@
+.TH man 1 "2021-09-28" "0.11.0" "Profanity XMPP client"
+
+.SH NAME
+/lastactivity
+
+.SH DESCRIPTION
+Enable/disable sending last activity, and send last activity requests.
+
+.SH SYNOPSIS
+/lastactivity set on|off
+
+.LP
+/lastactivity get [<jid>]
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBon|off\fR
+.RS 4
+Enable or disable sending of last activity.
+.RE
+.PP
+\fB<jid>\fR
+.RS 4
+The JID of the entity to query. Omitting the JID will query your server for its uptime.
+.RE
+
+.SH EXAMPLES
+/lastactivity get
+
+.LP
+/lastactivity set off
+
+.LP
+/lastactivity get freyja@asgaard.edda
+
+.LP
+/lastactivity get freyja@asgaard.edda/laptop
+
+.LP
+/lastactivity get someserver.com
+
+.LP

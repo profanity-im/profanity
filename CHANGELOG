@@ -1,3 +1,20 @@
+0.11.1 (2021-09-28)
+=====
+
+5 people contributed to this bugfix release: @a1346054, @d3npa, @paulfariello, @pasis and @jubalh.
+
+Changes:
+- Fix typo in `shade` color theme (#1579)
+- Fix memory leaks (#1583) (#1584) (#1585)
+- Fix buffer overread (#1586)
+- Don't handle /me in the middle of a message with mentions (#1586)
+- Explicitly check for curl version (#1581)
+- Fix OMEMO devicelist access model by reconfiguring it (#1538) (#1591)
+- Cosmetic cleanup (#1593)
+- Change attentionflag shortcut from alt-f to alt+v (#1580)
+- Update man page and /help information
+- Enable whole word only notifications by default (#1578)
+
 0.11.0 (2021-07-14)
 =====
 
