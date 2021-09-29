@@ -2157,10 +2157,10 @@ static struct cmd_t command_defs[] = {
       CMD_DESC(
               "Manage plugins. Passing no arguments lists currently loaded plugins and global plugins which are available for local installation. Global directory for Python plugins is " GLOBAL_PYTHON_PLUGINS_PATH " and for C Plugins is " GLOBAL_C_PLUGINS_PATH ".")
       CMD_ARGS(
-              { "install [<path>]", "Install a plugin, or all plugins found in a directory (recursive)." },
+              { "install [<path>]", "Install a plugin, or all plugins found in a directory (recursive). And loads it/them." },
               { "uninstall [<plugin>]", "Uninstall a plugin." },
               { "update [<path>]", "Updates an installed plugin" },
-              { "load [<plugin>]", "Load a plugin that already exists in the plugin directory, passing no argument loads all found plugins." },
+              { "load [<plugin>]", "Load a plugin that already exists in the plugin directory, passing no argument loads all found plugins. It will be loaded upon next start too unless unloaded." },
               { "unload [<plugin>]", "Unload a loaded plugin, passing no argument will unload all plugins." },
               { "reload [<plugin>]", "Reload a plugin, passing no argument will reload all plugins." },
               { "python_version", "Show the Python interpreter version." })
