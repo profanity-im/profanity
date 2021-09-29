@@ -214,6 +214,11 @@ _prefs_load(void)
         }
     }
 
+    // 0.12 started to remove `sourcepath`
+    if (g_key_file_has_key(prefs, PREF_GROUP_PLUGINS, "sourcepath", NULL)) {
+        g_key_file_remove_key(prefs, PREF_GROUP_PLUGINS, "sourcepath", NULL);
+    }
+
     _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
