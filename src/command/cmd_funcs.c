@@ -7172,6 +7172,42 @@ cmd_plugins_python_version(ProfWin* window, const char* const command, gchar** a
 gboolean
 cmd_plugins(ProfWin* window, const char* const command, gchar** args)
 {
+    GDir* global_pyp_dir = NULL;
+    GDir* global_cp_dir = NULL;
+
+    if (access(GLOBAL_PYTHON_PLUGINS_PATH, R_OK) == 0) {
+        GError* error = NULL;
+        global_pyp_dir = g_dir_open(GLOBAL_PYTHON_PLUGINS_PATH, 0, &error);
+        if (error) {
+            log_warning("Error when trying to open global plugins path: %s", GLOBAL_PYTHON_PLUGINS_PATH);
+            g_error_free(error);
+            return TRUE;
+        }
+    }
+    if (access(GLOBAL_C_PLUGINS_PATH, R_OK) == 0) {
+        GError* error = NULL;
+        global_cp_dir = g_dir_open(GLOBAL_C_PLUGINS_PATH, 0, &error);
+        if (error) {
+            log_warning("Error when trying to open global plugins path: %s", GLOBAL_C_PLUGINS_PATH);
+            g_error_free(error);
+            return TRUE;
+        }
+    }
+    if (global_pyp_dir) {
+        const gchar *filename;
+        cons_show("The following Python plugins are available globally and can be installed:");
+        while ((filename = g_dir_read_name(global_pyp_dir))) {
+            cons_show("  %s", filename);
+        }
+    }
+    if (global_cp_dir) {
+        const gchar *filename;
+        cons_show("The following C plugins are available globally and can be installed:");
+        while ((filename = g_dir_read_name(global_cp_dir))) {
+            cons_show("  %s", filename);
+        }
+    }
+
     GList* plugins = plugins_loaded_list();
     if (plugins == NULL) {
         cons_show("No plugins installed.");
