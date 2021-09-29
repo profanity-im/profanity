@@ -96,6 +96,9 @@ elif test "x$enable_python_plugins" != xno; then
         fi
     fi
     AS_IF([test "x$PLATFORM" = xosx], [rm -f Python.framework])
+    # set path to look for global python plugins
+    GLOBAL_PYTHON_PLUGINS_PATH='${pkgdatadir}/plugins'
+    AC_SUBST(GLOBAL_PYTHON_PLUGINS_PATH)
 else
     AM_CONDITIONAL([BUILD_PYTHON_API], [false])
 fi
@@ -119,6 +122,9 @@ else
                         [AC_MSG_ERROR([dl library needed to run C plugins])],
                     [AM_CONDITIONAL([BUILD_C_API], [false])])
                 ])])
+        # set path to look for global c plugins
+        GLOBAL_C_PLUGINS_PATH='${pkglibdir}/plugins'
+        AC_SUBST(GLOBAL_C_PLUGINS_PATH)
     else
         AM_CONDITIONAL([BUILD_C_API], [false])
     fi
@@ -360,7 +366,7 @@ AS_IF([test "x$PLATFORM" = xosx],
     [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
 AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS} ${SQLITE_CFLAGS}"
-AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\""
+AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\" -DGLOBAL_PYTHON_PLUGINS_PATH=\"\\\"$GLOBAL_PYTHON_PLUGINS_PATH\\\"\" -DGLOBAL_C_PLUGINS_PATH=\"\\\"$GLOBAL_C_PLUGINS_PATH\\\"\""
 LIBS="$glib_LIBS $gio_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_EXTRA_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} ${SQLITE_LIBS} $LIBS"
 
 AC_SUBST(AM_LDFLAGS)
@@ -374,14 +380,16 @@ AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
 echo ""
-echo "PLATFORM       : $host_os"
-echo "PACKAGE_STATUS : $PACKAGE_STATUS"
-echo "AM_CFLAGS      : $AM_CFLAGS"
-echo "AM_CPPFLAGS    : $AM_CPPFLAGS"
-echo "AM_LDFLAGS     : $AM_LDFLAGS"
-echo "LIBS           : $LIBS"
-echo "Install themes : $THEMES_INSTALL"
-echo "Themes path    : $THEMES_PATH"
-echo "Icons path     : $ICONS_PATH"
+echo "PLATFORM                   : $host_os"
+echo "PACKAGE_STATUS             : $PACKAGE_STATUS"
+echo "AM_CFLAGS                  : $AM_CFLAGS"
+echo "AM_CPPFLAGS                : $AM_CPPFLAGS"
+echo "AM_LDFLAGS                 : $AM_LDFLAGS"
+echo "LIBS                       : $LIBS"
+echo "Install themes             : $THEMES_INSTALL"
+echo "Themes path                : $THEMES_PATH"
+echo "Icons path                 : $ICONS_PATH"
+echo "Global Python plugins path : $GLOBAL_PYTHON_PLUGINS_PATH"
+echo "Global C plugins path      : $GLOBAL_C_PLUGINS_PATH"
 echo ""
 echo "Now you can run \`make' to build profanity"

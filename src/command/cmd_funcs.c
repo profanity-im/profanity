@@ -6927,13 +6927,31 @@ cmd_receipts(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
 {
-    char* path;
+    char* path = NULL;
 
     if (args[1] == NULL) {
         cons_show("Please provide a path to the plugin file or directory, see /help plugins");
         return TRUE;
-    } else {
+    }
+
+    // take whole path or build it in case it's just the plugin name
+    if (strchr(args[1], '/')) {
         path = get_expanded_path(args[1]);
+    } else {
+        if (g_str_has_suffix(args[1], ".py")) {
+            path = g_strdup_printf("%s/%s", GLOBAL_PYTHON_PLUGINS_PATH, args[1]);
+        } else if (g_str_has_suffix(args[1], ".so")) {
+            path = g_strdup_printf("%s/%s", GLOBAL_C_PLUGINS_PATH, args[1]);
+        } else {
+            cons_show("Plugins must have one of the following extensions: '.py' '.so'");
+            return TRUE;
+        }
+    }
+
+    if (access(path, R_OK) != 0) {
+        cons_show("Cannot access: %s", path);
+        free(path);
+        return TRUE;
     }
 
     if (is_regular_file(path)) {
