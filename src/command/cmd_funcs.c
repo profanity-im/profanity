@@ -7014,7 +7014,7 @@ cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
     char* path;
 
     if (args[1] == NULL) {
-        cons_show("Please provide a path to the plugin file or directory, see /help plugins");
+        cons_show("Please provide a path to the plugin file, see /help plugins");
         return TRUE;
     } else {
         path = get_expanded_path(args[1]);
@@ -7054,13 +7054,8 @@ cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    if (is_dir(path)) {
-        free(path);
-        return FALSE;
-    }
-
     free(path);
-    cons_show("Argument must be a file or directory.");
+    cons_show("Argument must be a file.");
     return TRUE;
 }
 
