@@ -427,7 +427,7 @@ _show_muc_privacy(ProfMucWin* mucwin)
         wprintw(win, "[");
         wattroff(win, bracket_attrs);
         wattron(win, encrypted_attrs);
-        wprintw(win, mucwin->enctext);
+        wprintw(win, "%s", mucwin->enctext);
         wattroff(win, encrypted_attrs);
         wattron(win, bracket_attrs);
         wprintw(win, "]");
@@ -451,7 +451,7 @@ _show_privacy(ProfChatWin* chatwin)
         wprintw(win, "[");
         wattroff(win, bracket_attrs);
         wattron(win, encrypted_attrs);
-        wprintw(win, chatwin->enctext);
+        wprintw(win, "%s", chatwin->enctext);
         wattroff(win, encrypted_attrs);
         wattron(win, bracket_attrs);
         wprintw(win, "]");
