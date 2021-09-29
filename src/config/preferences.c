@@ -1928,8 +1928,6 @@ _get_group(preference_t pref)
     case PREF_BOOKMARK_INVITE:
     case PREF_ROOM_LIST_CACHE:
         return PREF_GROUP_MUC;
-    case PREF_PLUGINS_SOURCEPATH:
-        return PREF_GROUP_PLUGINS;
     case PREF_OMEMO_LOG:
     case PREF_OMEMO_POLICY:
     case PREF_OMEMO_TRUST_MODE:
@@ -2163,8 +2161,6 @@ _get_key(preference_t pref)
         return "color.occupants.nick";
     case PREF_BOOKMARK_INVITE:
         return "bookmark.invite";
-    case PREF_PLUGINS_SOURCEPATH:
-        return "sourcepath";
     case PREF_ROOM_LIST_CACHE:
         return "rooms.cache";
     case PREF_STATUSBAR_SHOW_NAME:

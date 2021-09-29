@@ -6925,63 +6925,13 @@ cmd_receipts(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
-cmd_plugins_sourcepath(ProfWin* window, const char* const command, gchar** args)
-{
-    if (args[1] == NULL) {
-        char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
-        if (sourcepath) {
-            cons_show("Current plugins sourcepath: %s", sourcepath);
-            g_free(sourcepath);
-        } else {
-            cons_show("Plugins sourcepath not currently set.");
-        }
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[1], "clear") == 0) {
-        prefs_set_string(PREF_PLUGINS_SOURCEPATH, NULL);
-        cons_show("Plugins sourcepath cleared.");
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[1], "set") == 0) {
-        if (args[2] == NULL) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-
-        char* path = get_expanded_path(args[2]);
-
-        if (!is_dir(path)) {
-            cons_show("Plugins sourcepath must be a directory.");
-            free(path);
-            return TRUE;
-        }
-
-        cons_show("Setting plugins sourcepath: %s", path);
-        prefs_set_string(PREF_PLUGINS_SOURCEPATH, path);
-        free(path);
-        return TRUE;
-    }
-
-    cons_bad_cmd_usage(command);
-    return TRUE;
-}
-
-gboolean
 cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
 {
     char* path;
 
     if (args[1] == NULL) {
-        char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
-        if (sourcepath) {
-            path = strdup(sourcepath);
-            g_free(sourcepath);
-        } else {
-            cons_show("Either a path must be provided or the sourcepath property must be set, see /help plugins");
-            return TRUE;
-        }
+        cons_show("Please provide a path to the plugin file or directory, see /help plugins");
+        return TRUE;
     } else {
         path = get_expanded_path(args[1]);
     }
@@ -7046,14 +6996,8 @@ cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
     char* path;
 
     if (args[1] == NULL) {
-        char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
-        if (sourcepath) {
-            path = strdup(sourcepath);
-            g_free(sourcepath);
-        } else {
-            cons_show("Either a path must be provided or the sourcepath property must be set, see /help plugins");
-            return TRUE;
-        }
+        cons_show("Please provide a path to the plugin file or directory, see /help plugins");
+        return TRUE;
     } else {
         path = get_expanded_path(args[1]);
     }
