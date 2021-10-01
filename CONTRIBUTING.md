@@ -54,3 +54,8 @@ make clean
 scan-build make
 scan-view ...
 ```
+
+### Finding typos
+
+We include a `.codespellrc` configuration file for `codespell` in the root directory.
+Before comitting it might make sense to run `codespell` to see if you made any typos.
