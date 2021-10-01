@@ -208,13 +208,13 @@ Called when a presence notification is received from a contact
 void prof_on_contact_presence(const char *const barejid, const char *const resource, const char *const presence, const char *const status, const int priority);
 
 /**
-Called when a chat window is focussed
+Called when a chat window is focused
 @param barejid Jabber ID of the chat window recipient
 */
 void prof_on_chat_win_focus(const char *const barejid);
 
 /**
-Called when a chat room window is focussed
+Called when a chat room window is focused
 @param barejid Jabber ID of the room
 */
 void prof_on_room_win_focus(const char *const barejid);

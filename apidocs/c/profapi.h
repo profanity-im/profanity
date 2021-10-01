@@ -127,7 +127,7 @@ Retrieve the Jabber ID of the current room, when in a chat room window.
 char* prof_get_current_muc(void);
 
 /**
-Determine whether or not the Console window is currently focussed.
+Determine whether or not the Console window is currently focused.
 @return 1 if the user is currently in the Console window, 0 otherwise.
 */
 int prof_current_win_is_console(void);
