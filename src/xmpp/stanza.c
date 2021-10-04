@@ -1180,9 +1180,9 @@ _stanza_get_delay_timestamp_xep0203(xmpp_stanza_t* const delay_stanza)
 
         if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
 
-            GDateTime* utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
-            GDateTime* local_datetime = g_date_time_to_local(utc_datetime);
-            g_date_time_unref(utc_datetime);
+            GDateTime* datetime = g_date_time_new_from_iso8601(stamp, NULL);
+            GDateTime* local_datetime = g_date_time_to_local(datetime);
+            g_date_time_unref(datetime);
 
             return local_datetime;
         }
@@ -1201,9 +1201,9 @@ _stanza_get_delay_timestamp_xep0091(xmpp_stanza_t* const x_stanza)
         const char* stamp = xmpp_stanza_get_attribute(x_stanza, STANZA_ATTR_STAMP);
         if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
 
-            GDateTime* utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
-            GDateTime* local_datetime = g_date_time_to_local(utc_datetime);
-            g_date_time_unref(utc_datetime);
+            GDateTime* datetime = g_date_time_new_from_iso8601(stamp, NULL);
+            GDateTime* local_datetime = g_date_time_to_local(datetime);
+            g_date_time_unref(datetime);
 
             return local_datetime;
         }
