@@ -339,3 +339,8 @@ check-unit: tests/unittests/unittests
 
 format: $(all_c_sources)
 	clang-format -i $(all_c_sources)
+
+spell:
+	codespell
+
+doublecheck: format check spell
