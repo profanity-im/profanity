@@ -1613,7 +1613,7 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
             char* acstring;
             if (output_off) {
                 tmp = g_strdup_printf("%s/%s", directory, dir->d_name);
-                if(!tmp) {
+                if (!tmp) {
                     free(directory);
                     free(foofile);
                     return NULL;
@@ -2482,8 +2482,8 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 
     if (conn_status == JABBER_CONNECTED) {
         found = autocomplete_param_with_func(input, "/ox discover", roster_contact_autocomplete, previous, NULL);
-         if (found) {
-             return found;
+        if (found) {
+            return found;
         }
     }
 

@@ -1651,7 +1651,7 @@ cmd_help(ProfWin* window, const char* const command, gchar** args)
         cons_navigation_help();
     } else {
         char* cmd = args[0];
-        char *cmd_with_slash = g_strdup_printf("/%s", cmd);
+        char* cmd_with_slash = g_strdup_printf("/%s", cmd);
 
         Command* command = cmd_get(cmd_with_slash);
         if (command) {
@@ -4708,8 +4708,8 @@ cmd_bookmark(ProfWin* window, const char* const command, gchar** args)
             cons_show_bookmarks(bookmarks);
             g_list_free(bookmarks);
         } else {
-             // list one bookmark
-            Bookmark *bookmark = bookmark_get_by_jid(bookmark_jid);
+            // list one bookmark
+            Bookmark* bookmark = bookmark_get_by_jid(bookmark_jid);
             cons_show_bookmark(bookmark);
         }
 
@@ -7189,14 +7189,14 @@ cmd_plugins(ProfWin* window, const char* const command, gchar** args)
         }
     }
     if (global_pyp_dir) {
-        const gchar *filename;
+        const gchar* filename;
         cons_show("The following Python plugins are available globally and can be installed:");
         while ((filename = g_dir_read_name(global_pyp_dir))) {
             cons_show("  %s", filename);
         }
     }
     if (global_cp_dir) {
-        const gchar *filename;
+        const gchar* filename;
         cons_show("The following C plugins are available globally and can be installed:");
         while ((filename = g_dir_read_name(global_cp_dir))) {
             cons_show("  %s", filename);
@@ -9460,8 +9460,8 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
     }
 
     // create editor dir if not present
-    char *jid = connection_get_barejid();
-    gchar *path = files_get_account_data_path(DIR_EDITOR, jid);
+    char* jid = connection_get_barejid();
+    gchar* path = files_get_account_data_path(DIR_EDITOR, jid);
     if (g_mkdir_with_parents(path, S_IRWXU) != 0) {
         cons_show_error("Failed to create directory at '%s' with error '%s'", path, strerror(errno));
         free(jid);

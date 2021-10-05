@@ -422,7 +422,7 @@ omemo_start_session(const char* const barejid)
             // Own devices are handled by _handle_own_device_list
             // We won't add _handle_device_list_start_session for ourself
             char* mybarejid = connection_get_barejid();
-            if( g_strcmp0(mybarejid, barejid ) != 0 ) {
+            if (g_strcmp0(mybarejid, barejid) != 0) {
                 g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
             }
             free(mybarejid);
@@ -681,12 +681,12 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     }
 
     if (!trusted) {
-        log_debug("[OMEMO] We don't trust device %d for %s\n", device_id,jid);
+        log_debug("[OMEMO] We don't trust device %d for %s\n", device_id, jid);
         goto out;
     }
 
     if (!contains_session(&address, omemo_ctx.session_store)) {
-        log_debug("[OMEMO] There is no Session for %s ( %d) ,... building session.", address.name, address.device_id );
+        log_debug("[OMEMO] There is no Session for %s ( %d) ,... building session.", address.name, address.device_id);
         int res;
         session_pre_key_bundle* bundle;
         signal_protocol_address* address;
@@ -815,7 +815,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
             // Yourself as recipients in case of MUC
             char* mybarejid = connection_get_barejid();
-            if ( !g_strcmp0(mybarejid, recipients_iter->data) ) {
+            if (!g_strcmp0(mybarejid, recipients_iter->data)) {
                 if (GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
                     free(mybarejid);
                     log_debug("[OMEMO][SEND] Skipping %d (my device) ", GPOINTER_TO_INT(device_ids_iter->data));
@@ -826,15 +826,15 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 
             log_debug("[OMEMO][SEND] recipients with device id %d for %s", GPOINTER_TO_INT(device_ids_iter->data), recipients_iter->data);
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
-            if (res != SG_SUCCESS ) {
+            if (res != SG_SUCCESS) {
                 log_error("[OMEMO][SEND] cannot create cipher for %s device id %d - code: %d", address.name, address.device_id, res);
                 continue;
             }
 
             res = session_cipher_encrypt(cipher, key_tag, AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH, &ciphertext);
             session_cipher_free(cipher);
-            if (res != SG_SUCCESS ) {
-                log_info("[OMEMO][SEND] cannot encrypt key for %s device id %d - code: %d", address.name, address.device_id,res);
+            if (res != SG_SUCCESS) {
+                log_info("[OMEMO][SEND] cannot encrypt key for %s device id %d - code: %d", address.name, address.device_id, res);
                 continue;
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);
@@ -855,9 +855,9 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     // (Since none of the recipients would be able to read the message.)
     if (keys == NULL) {
         win_println(win, THEME_ERROR, "!", "This message cannot be decrypted for any recipient.\n"
-                "You should trust your recipients' device fingerprint(s) using \"/omemo fingerprint trust FINGERPRINT\".\n"
-                "It could also be that the key bundle of the recipient(s) have not been received. "
-                "In this case, you could try \"omemo end\", \"omemo start\", and send the message again.");
+                                           "You should trust your recipients' device fingerprint(s) using \"/omemo fingerprint trust FINGERPRINT\".\n"
+                                           "It could also be that the key bundle of the recipient(s) have not been received. "
+                                           "In this case, you could try \"omemo end\", \"omemo start\", and send the message again.");
         goto out;
     }
 

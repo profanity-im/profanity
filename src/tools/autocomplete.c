@@ -324,7 +324,7 @@ _autocomplete_param_common(const char* const input, char* command, autocomplete_
     if (strncmp(input, command_cpy, len) == 0) {
         int inp_len = strlen(input);
         char prefix[inp_len];
-        char *found;
+        char* found;
 
         for (int i = len; i < inp_len; i++) {
             prefix[i - len] = input[i];

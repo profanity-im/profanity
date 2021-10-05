@@ -119,7 +119,7 @@ files_get_log_file(const char* const log_file)
     GString* logfile;
 
     if (log_file) {
-        gchar *log_path = g_path_get_dirname(log_file);
+        gchar* log_path = g_path_get_dirname(log_file);
         if (!mkdir_recursive(log_path)) {
             log_error("Error while creating directory %s", log_path);
         }

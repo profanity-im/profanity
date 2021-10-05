@@ -1009,7 +1009,6 @@ ui_win_has_attention(int index)
     return ret;
 }
 
-
 char*
 ui_ask_password(gboolean confirm)
 {

@@ -2343,7 +2343,7 @@ _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdat
                     }
                 }
             } else if (g_strcmp0(child_type, STANZA_TYPE_RESULT) == 0) {
-                GHashTable *adr = stanza_get_service_contact_addresses(connection_get_ctx(), child);
+                GHashTable* adr = stanza_get_service_contact_addresses(connection_get_ctx(), child);
                 cons_show_disco_contact_information(adr);
                 g_hash_table_destroy(adr);
             }
@@ -2456,14 +2456,11 @@ _http_upload_response_id_handler(xmpp_stanza_t* const stanza, void* const userda
                     const char* header_name = xmpp_stanza_get_attribute(header, STANZA_ATTR_NAME);
                     if (g_strcmp0(header_name, STANZA_HEADER_AUTHORIZATION) == 0) {
                         upload->authorization = xmpp_stanza_get_text(header);
-                    }
-                    else if (g_strcmp0(header_name, STANZA_HEADER_COOKIE) == 0) {
+                    } else if (g_strcmp0(header_name, STANZA_HEADER_COOKIE) == 0) {
                         upload->cookie = xmpp_stanza_get_text(header);
-                    }
-                    else if (g_strcmp0(header_name, STANZA_HEADER_EXPIRES) == 0) {
+                    } else if (g_strcmp0(header_name, STANZA_HEADER_EXPIRES) == 0) {
                         upload->expires = xmpp_stanza_get_text(header);
-                    }
-                    else {
+                    } else {
                         log_warning("[HTTP upload] unknown header: %s", header_name);
                     }
                 }
@@ -2629,8 +2626,8 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         if (fin) {
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {
-                char *lastid = NULL;
-                xmpp_stanza_t* last =  xmpp_stanza_get_child_by_name(set, STANZA_NAME_LAST);
+                char* lastid = NULL;
+                xmpp_stanza_t* last = xmpp_stanza_get_child_by_name(set, STANZA_NAME_LAST);
                 if (last) {
                     lastid = xmpp_stanza_get_text(last);
                 }

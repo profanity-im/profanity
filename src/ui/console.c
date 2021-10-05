@@ -507,7 +507,8 @@ cons_show_wins(gboolean unread)
 }
 
 void
-cons_show_wins_attention() {
+cons_show_wins_attention()
+{
     ProfWin* console = wins_get_console();
     cons_show("");
     GSList* window_strings = wins_create_summary_attention();
@@ -837,12 +838,14 @@ cons_show_disco_items(GSList* items, const char* const jid)
     cons_alert(NULL);
 }
 
-static void _cons_print_contact_information_item(gpointer data, gpointer user_data)
+static void
+_cons_print_contact_information_item(gpointer data, gpointer user_data)
 {
     cons_show("    %s", (char*)data);
 }
 
-static void _cons_print_contact_information_hashlist_item(gpointer key, gpointer value, gpointer userdata)
+static void
+_cons_print_contact_information_hashlist_item(gpointer key, gpointer value, gpointer userdata)
 {
     cons_show("  %s:", (char*)key);
     g_slist_foreach((GSList*)value, _cons_print_contact_information_item, NULL);

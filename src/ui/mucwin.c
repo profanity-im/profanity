@@ -391,7 +391,7 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
     while (curr) {
         pos = GPOINTER_TO_INT(curr->data);
 
-        char *before_str = g_utf8_substring(message, last_pos, pos);
+        char* before_str = g_utf8_substring(message, last_pos, pos);
 
         if (last_pos == 0 && strncmp(before_str, "/me ", 4) == 0) {
             win_print_them(window, THEME_ROOMMENTION, ch, flags, "");
