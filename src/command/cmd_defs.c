@@ -2622,6 +2622,25 @@ static struct cmd_t command_defs[] = {
       CMD_NOEXAMPLES
     },
 
+    { "/correct-editor",
+      parse_args_as_one, 1, 1, NULL,
+      CMD_NOSUBFUNCS
+      CMD_MAINFUNC(cmd_correct_editor)
+      CMD_TAGS(
+              CMD_TAG_CHAT,
+              CMD_TAG_GROUPCHAT)
+      CMD_SYN(
+              "/correct-editor <message>")
+      CMD_DESC(
+              "Spawn external editor to correct and resend the last message (XEP-0308). "
+              "Use tab completion to get the last sent message. "
+              "For more information on how to configure corrections, see: /help correction. "
+              "Use /executable to set your favourite editor.")
+      CMD_ARGS(
+              { "message", "The corrected message." })
+      CMD_NOEXAMPLES
+    },
+
     { "/silence",
       parse_args, 1, 1, &cons_silence_setting,
       CMD_NOSUBFUNCS

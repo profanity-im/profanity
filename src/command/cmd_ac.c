@@ -1795,6 +1795,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/avatar", _avatar_autocomplete);
     g_hash_table_insert(ac_funcs, "/correction", _correction_autocomplete);
     g_hash_table_insert(ac_funcs, "/correct", _correct_autocomplete);
+    g_hash_table_insert(ac_funcs, "/correct-editor", _correct_autocomplete);
     g_hash_table_insert(ac_funcs, "/software", _software_autocomplete);
     g_hash_table_insert(ac_funcs, "/url", _url_autocomplete);
     g_hash_table_insert(ac_funcs, "/executable", _executable_autocomplete);
@@ -4054,7 +4055,22 @@ _correct_autocomplete(ProfWin* window, const char* const input, gboolean previou
         return NULL;
     }
 
-    GString* result_str = g_string_new("/correct ");
+    // Get command
+    int len = strlen(input);
+    char command[len + 2];
+    int i = 0;
+    while (i < len) {
+        if (input[i] == ' ') {
+            break;
+        } else {
+            command[i] = input[i];
+        }
+        i++;
+    }
+    command[i] = ' ';
+    command[i + 1] = '\0';
+
+    GString* result_str = g_string_new(command);
     g_string_append(result_str, last_message);
     char* result = result_str->str;
     g_string_free(result_str, FALSE);

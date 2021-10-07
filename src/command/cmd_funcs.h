@@ -246,6 +246,7 @@ gboolean cmd_executable_urlsave(ProfWin* window, const char* const command, gcha
 gboolean cmd_executable_editor(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_mam(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_editor(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_correct_editor(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_silence(ProfWin* window, const char* const command, gchar** args);
 
 #endif

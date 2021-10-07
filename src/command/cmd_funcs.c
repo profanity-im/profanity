@@ -9528,6 +9528,122 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_correct_editor(ProfWin* window, const char* const command, gchar** args)
+{
+    jabber_conn_status_t conn_status = connection_get_status();
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are currently not connected.");
+        return TRUE;
+    } else if (!prefs_get_boolean(PREF_CORRECTION_ALLOW)) {
+        win_println(window, THEME_DEFAULT, "!", "Corrections not enabled. See /help correction.");
+        return TRUE;
+    } else if (window->type == WIN_CHAT) {
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+        if (chatwin->last_msg_id == NULL || chatwin->last_message == NULL) {
+            win_println(window, THEME_DEFAULT, "!", "No last message to correct.");
+            return TRUE;
+        }
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin* mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+        if (mucwin->last_msg_id == NULL || mucwin->last_message == NULL) {
+            win_println(window, THEME_DEFAULT, "!", "No last message to correct.");
+            return TRUE;
+        }
+    } else {
+        win_println(window, THEME_DEFAULT, "!", "Command /correct-editor only valid in regular chat windows.");
+        return TRUE;
+    }
+
+    // create editor dir if not present
+    char *jid = connection_get_barejid();
+    gchar *path = files_get_account_data_path(DIR_EDITOR, jid);
+    if (g_mkdir_with_parents(path, S_IRWXU) != 0) {
+        cons_show_error("Failed to create directory at '%s' with error '%s'", path, strerror(errno));
+        free(jid);
+        g_free(path);
+        return TRUE;
+    }
+    // build temp file name. Example: /home/user/.local/share/profanity/editor/jid/compose.md
+    char* filename = g_strdup_printf("%s/compose.md", path);
+    free(jid);
+    g_free(path);
+
+    GError* creation_error = NULL;
+    GFile* file = g_file_new_for_path(filename);
+    GFileOutputStream* fos = g_file_create(file, G_FILE_CREATE_PRIVATE, NULL, &creation_error);
+    int fd_output_file = open(g_file_get_path(file), O_WRONLY);
+
+    const size_t COUNT = 8192;
+    gchar* message = g_strjoinv(" ", args);
+    write(fd_output_file, message, strlen(message));
+
+    free(message);
+    free(filename);
+
+    if (creation_error) {
+        cons_show_error("Editor: could not create temp file");
+        return TRUE;
+    }
+    g_object_unref(fos);
+
+    char* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
+
+    // Fork / exec
+    pid_t pid = fork();
+    if (pid == 0) {
+        int x = execlp(editor, editor, g_file_get_path(file), (char*)NULL);
+        if (x == -1) {
+            cons_show_error("Editor:Failed to exec %s", editor);
+        }
+        _exit(EXIT_FAILURE);
+    } else {
+        if (pid == -1) {
+            return TRUE;
+        }
+        int status = 0;
+        waitpid(pid, &status, 0);
+        int fd_input_file = open(g_file_get_path(file), O_RDONLY);
+        char buf[COUNT];
+        ssize_t size_read = read(fd_input_file, buf, COUNT);
+        if (size_read > 0 && size_read <= COUNT) {
+            buf[size_read - 1] = '\0';
+            GString* text = g_string_new(buf);
+
+            if (window->type == WIN_CHAT) {
+                ProfChatWin* chatwin = (ProfChatWin*)window;
+                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+                cl_ev_send_msg_correct(chatwin, text->str, FALSE, TRUE);
+            } else if (window->type == WIN_MUC) {
+                ProfMucWin* mucwin = (ProfMucWin*)window;
+                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+                cl_ev_send_muc_msg_corrected(mucwin, text->str, FALSE, TRUE);
+            }
+
+            g_string_free(text, TRUE);
+        }
+        close(fd_input_file);
+
+        GError* deletion_error = NULL;
+        g_file_delete(file, NULL, &deletion_error);
+        if (deletion_error) {
+            cons_show("Editor: error during file deletion");
+            return TRUE;
+        }
+        g_object_unref(file);
+        ui_resize();
+        rl_point = rl_end;
+        rl_forced_update_display();
+    }
+    return TRUE;
+}
+
+gboolean
 cmd_silence(ProfWin* window, const char* const command, gchar** args)
 {
     _cmd_set_boolean_preference(args[0], command, "Block all messages from JIDs that are not in the roster", PREF_SILENCE_NON_ROSTER);
