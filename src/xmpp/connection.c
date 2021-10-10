@@ -392,7 +392,7 @@ _register_handle_features(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *u
 
     /* check whether server supports in-band registration */
     child = xmpp_stanza_get_child_by_name(stanza, "register");
-    if (child && strcmp(xmpp_stanza_get_ns(child), XMPP_NS_REGISTER) == 0) {
+    if (!child) {
         log_debug("Server does not support in-band registration.");
         cons_show_error("Server does not support in-band registration, aborting.");
         xmpp_disconnect(xmpp_conn);
