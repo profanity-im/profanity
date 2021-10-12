@@ -93,5 +93,6 @@ void http_uploader_add(HTTPUploader* uploader);
 
 off_t file_size(const char* const filename);
 char* file_mime_type(const char* const filename);
+int aesgcm_url(char* original_url, char* new_scheme, char* new_fragment, char** new_url);
 
 #endif

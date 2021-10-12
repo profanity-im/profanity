@@ -390,6 +390,17 @@ void* aesgcm_upload_start(HTTPUploader* uploader) {
         goto out;
     }
 
+    // Reformat the GET URL to a AESGCM URL.
+    char* get_url = NULL;
+    if (aesgcm_url(uploader->get_url, "aesgcm", fragment, &get_url) != 0) {
+        http_print_transfer_update(uploader->window, uploader->put_url,
+                                   "Uploading '%s' failed: Bad URL file (%s).",
+                                   uploader->put_url, uploader->get_url);
+        goto out;
+    }
+    free(uploader->get_url);
+    uploader->get_url = get_url;
+
     // Force flush as the upload will read from the same file.
     fflush(tmpfh);
     fclose(tmpfh);
@@ -436,6 +447,35 @@ file_size(const char* const filename)
     struct stat st;
     stat(filename, &st);
     return st.st_size;
+}
+
+int
+aesgcm_url(char* original_url, char* new_scheme, char* new_fragment, char** new_url)
+{
+    int ret = 0;
+    CURLU* h = curl_url();
+
+    if ((ret = curl_url_set(h, CURLUPART_URL, original_url, 0)) != 0) {
+        goto out;
+    }
+
+    if (new_scheme != NULL) {
+        if ((ret = curl_url_set(h, CURLUPART_SCHEME, new_scheme, CURLU_NON_SUPPORT_SCHEME)) != 0) {
+            goto out;
+        }
+    }
+
+    if (new_fragment != NULL) {
+        if ((ret = curl_url_set(h, CURLUPART_FRAGMENT, new_fragment, 0)) != 0) {
+            goto out;
+        }
+    }
+
+    ret = curl_url_get(h, CURLUPART_URL, new_url, 0);
+
+out:
+    curl_url_cleanup(h);
+    return ret;
 }
 
 void
