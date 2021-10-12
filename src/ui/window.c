@@ -1843,7 +1843,7 @@ win_unread(ProfWin* window)
 }
 
 gboolean
-win_has_attention(ProfWin* window) 
+win_has_attention(ProfWin* window)
 {
     if (window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
@@ -1857,8 +1857,8 @@ win_has_attention(ProfWin* window)
     return FALSE;
 }
 
-gboolean 
-win_toggle_attention(ProfWin* window) 
+gboolean
+win_toggle_attention(ProfWin* window)
 {
     if (window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
@@ -1873,7 +1873,6 @@ win_toggle_attention(ProfWin* window)
     }
     return FALSE;
 }
-
 
 void
 win_sub_print(WINDOW* win, char* msg, gboolean newline, gboolean wrap, int indent)

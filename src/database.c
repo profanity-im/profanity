@@ -329,18 +329,18 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     }
 
     query = sqlite3_mprintf("INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) SELECT '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q' WHERE NOT EXISTS (SELECT 1 FROM `ChatLogs` WHERE `archive_id` = '%q')",
-            from_jid->barejid,
-            from_jid->resourcepart ? from_jid->resourcepart : "",
-            to_jid->barejid,
-            to_jid->resourcepart ? to_jid->resourcepart : "",
-            message->plain ? message->plain : "",
-            date_fmt ? date_fmt : "",
-            message->id ? message->id : "",
-            message->stanzaid ? message->stanzaid : "",
-            message->replace_id ? message->replace_id : "",
-            type ? type : "",
-            enc ? enc : "",
-            message->stanzaid ? message->stanzaid : "");
+                            from_jid->barejid,
+                            from_jid->resourcepart ? from_jid->resourcepart : "",
+                            to_jid->barejid,
+                            to_jid->resourcepart ? to_jid->resourcepart : "",
+                            message->plain ? message->plain : "",
+                            date_fmt ? date_fmt : "",
+                            message->id ? message->id : "",
+                            message->stanzaid ? message->stanzaid : "",
+                            message->replace_id ? message->replace_id : "",
+                            type ? type : "",
+                            enc ? enc : "",
+                            message->stanzaid ? message->stanzaid : "");
     if (!query) {
         log_error("log_database_add(): SQL query. could not allocate memory");
         return;

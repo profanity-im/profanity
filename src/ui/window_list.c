@@ -1210,7 +1210,7 @@ wins_get_next_unread(void)
     GList* curr = values;
 
     while (curr) {
-        int curr_win_num = GPOINTER_TO_INT(curr->data); 
+        int curr_win_num = GPOINTER_TO_INT(curr->data);
         ProfWin* window = wins_get_by_num(curr_win_num);
 
         // test if window has unread messages

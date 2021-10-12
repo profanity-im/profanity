@@ -89,7 +89,7 @@ chatwin_new(const char* const barejid)
 #endif // HAVE_LIBOTR
     if (omemo_automatic_start(barejid) && is_otr_secure) {
         win_println(window, THEME_DEFAULT, "!", "This chat could be either OMEMO or OTR encrypted, but not both. "
-                "Use '/omemo start' or '/otr start' to select the encryption method.");
+                                                "Use '/omemo start' or '/otr start' to select the encryption method.");
     } else if (omemo_automatic_start(barejid)) {
         // Start the OMEMO session
         omemo_start_session(barejid);
@@ -519,7 +519,7 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 
         while (curr) {
             ProfMessage* msg = curr->data;
-            char *msg_plain = msg->plain;
+            char* msg_plain = msg->plain;
             msg->plain = plugins_pre_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
             // This is dirty workaround for memory leak. We reassign msg->plain above so have to free previous object
             // TODO: Make a better solution, for example, pass msg object to the function and it will replace msg->plain properly if needed.

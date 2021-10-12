@@ -343,7 +343,7 @@ def prof_on_contact_presence(barejid, resource, presence, status, priority):
 
 
 def prof_on_chat_win_focus(barejid):
-    """Called when a chat window is focussed
+    """Called when a chat window is focused
 
     :param barejid: Jabber ID of the chat window recipient
     :type barejid: str or unicode
@@ -352,7 +352,7 @@ def prof_on_chat_win_focus(barejid):
 
 
 def prof_on_room_win_focus(barejid):
-    """Called when a chat room window is focussed
+    """Called when a chat room window is focused
 
     :param barejid: Jabber ID of the room
     :type barejid: str or unicode

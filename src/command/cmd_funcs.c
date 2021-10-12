@@ -1651,7 +1651,7 @@ cmd_help(ProfWin* window, const char* const command, gchar** args)
         cons_navigation_help();
     } else {
         char* cmd = args[0];
-        char *cmd_with_slash = g_strdup_printf("/%s", cmd);
+        char* cmd_with_slash = g_strdup_printf("/%s", cmd);
 
         Command* command = cmd_get(cmd_with_slash);
         if (command) {
@@ -4708,8 +4708,8 @@ cmd_bookmark(ProfWin* window, const char* const command, gchar** args)
             cons_show_bookmarks(bookmarks);
             g_list_free(bookmarks);
         } else {
-             // list one bookmark
-            Bookmark *bookmark = bookmark_get_by_jid(bookmark_jid);
+            // list one bookmark
+            Bookmark* bookmark = bookmark_get_by_jid(bookmark_jid);
             cons_show_bookmark(bookmark);
         }
 
@@ -6852,65 +6852,33 @@ cmd_receipts(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
-cmd_plugins_sourcepath(ProfWin* window, const char* const command, gchar** args)
-{
-    if (args[1] == NULL) {
-        char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
-        if (sourcepath) {
-            cons_show("Current plugins sourcepath: %s", sourcepath);
-            g_free(sourcepath);
-        } else {
-            cons_show("Plugins sourcepath not currently set.");
-        }
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[1], "clear") == 0) {
-        prefs_set_string(PREF_PLUGINS_SOURCEPATH, NULL);
-        cons_show("Plugins sourcepath cleared.");
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[1], "set") == 0) {
-        if (args[2] == NULL) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-
-        char* path = get_expanded_path(args[2]);
-
-        if (!is_dir(path)) {
-            cons_show("Plugins sourcepath must be a directory.");
-            free(path);
-            return TRUE;
-        }
-
-        cons_show("Setting plugins sourcepath: %s", path);
-        prefs_set_string(PREF_PLUGINS_SOURCEPATH, path);
-        free(path);
-        return TRUE;
-    }
-
-    cons_bad_cmd_usage(command);
-    return TRUE;
-}
-
-gboolean
 cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
 {
-    char* path;
+    char* path = NULL;
 
     if (args[1] == NULL) {
-        char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
-        if (sourcepath) {
-            path = strdup(sourcepath);
-            g_free(sourcepath);
+        cons_show("Please provide a path to the plugin file or directory, see /help plugins");
+        return TRUE;
+    }
+
+    // take whole path or build it in case it's just the plugin name
+    if (strchr(args[1], '/')) {
+        path = get_expanded_path(args[1]);
+    } else {
+        if (g_str_has_suffix(args[1], ".py")) {
+            path = g_strdup_printf("%s/%s", GLOBAL_PYTHON_PLUGINS_PATH, args[1]);
+        } else if (g_str_has_suffix(args[1], ".so")) {
+            path = g_strdup_printf("%s/%s", GLOBAL_C_PLUGINS_PATH, args[1]);
         } else {
-            cons_show("Either a path must be provided or the sourcepath property must be set, see /help plugins");
+            cons_show("Plugins must have one of the following extensions: '.py' '.so'");
             return TRUE;
         }
-    } else {
-        path = get_expanded_path(args[1]);
+    }
+
+    if (access(path, R_OK) != 0) {
+        cons_show("Cannot access: %s", path);
+        free(path);
+        return TRUE;
     }
 
     if (is_regular_file(path)) {
@@ -6924,7 +6892,7 @@ cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
         gchar* plugin_name = g_path_get_basename(path);
         gboolean result = plugins_install(plugin_name, path, error_message);
         if (result) {
-            cons_show("Plugin installed: %s", plugin_name);
+            cons_show("Plugin installed and loaded: %s", plugin_name);
         } else {
             cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
         }
@@ -6937,7 +6905,7 @@ cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
         if (result->installed || result->failed) {
             if (result->installed) {
                 cons_show("");
-                cons_show("Installed plugins:");
+                cons_show("Installed and loaded plugins:");
                 GSList* curr = result->installed;
                 while (curr) {
                     cons_show("  %s", curr->data);
@@ -6973,14 +6941,8 @@ cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
     char* path;
 
     if (args[1] == NULL) {
-        char* sourcepath = prefs_get_string(PREF_PLUGINS_SOURCEPATH);
-        if (sourcepath) {
-            path = strdup(sourcepath);
-            g_free(sourcepath);
-        } else {
-            cons_show("Either a path must be provided or the sourcepath property must be set, see /help plugins");
-            return TRUE;
-        }
+        cons_show("Please provide a path to the plugin file, see /help plugins");
+        return TRUE;
     } else {
         path = get_expanded_path(args[1]);
     }
@@ -7019,13 +6981,8 @@ cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    if (is_dir(path)) {
-        free(path);
-        return FALSE;
-    }
-
     free(path);
-    cons_show("Argument must be a file or directory.");
+    cons_show("Argument must be a file.");
     return TRUE;
 }
 
@@ -7137,6 +7094,42 @@ cmd_plugins_python_version(ProfWin* window, const char* const command, gchar** a
 gboolean
 cmd_plugins(ProfWin* window, const char* const command, gchar** args)
 {
+    GDir* global_pyp_dir = NULL;
+    GDir* global_cp_dir = NULL;
+
+    if (access(GLOBAL_PYTHON_PLUGINS_PATH, R_OK) == 0) {
+        GError* error = NULL;
+        global_pyp_dir = g_dir_open(GLOBAL_PYTHON_PLUGINS_PATH, 0, &error);
+        if (error) {
+            log_warning("Error when trying to open global plugins path: %s", GLOBAL_PYTHON_PLUGINS_PATH);
+            g_error_free(error);
+            return TRUE;
+        }
+    }
+    if (access(GLOBAL_C_PLUGINS_PATH, R_OK) == 0) {
+        GError* error = NULL;
+        global_cp_dir = g_dir_open(GLOBAL_C_PLUGINS_PATH, 0, &error);
+        if (error) {
+            log_warning("Error when trying to open global plugins path: %s", GLOBAL_C_PLUGINS_PATH);
+            g_error_free(error);
+            return TRUE;
+        }
+    }
+    if (global_pyp_dir) {
+        const gchar* filename;
+        cons_show("The following Python plugins are available globally and can be installed:");
+        while ((filename = g_dir_read_name(global_pyp_dir))) {
+            cons_show("  %s", filename);
+        }
+    }
+    if (global_cp_dir) {
+        const gchar* filename;
+        cons_show("The following C plugins are available globally and can be installed:");
+        while ((filename = g_dir_read_name(global_cp_dir))) {
+            cons_show("  %s", filename);
+        }
+    }
+
     GList* plugins = plugins_loaded_list();
     if (plugins == NULL) {
         cons_show("No plugins installed.");
@@ -9394,8 +9387,8 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
     }
 
     // create editor dir if not present
-    char *jid = connection_get_barejid();
-    gchar *path = files_get_account_data_path(DIR_EDITOR, jid);
+    char* jid = connection_get_barejid();
+    gchar* path = files_get_account_data_path(DIR_EDITOR, jid);
     if (g_mkdir_with_parents(path, S_IRWXU) != 0) {
         cons_show_error("Failed to create directory at '%s' with error '%s'", path, strerror(errno));
         free(jid);

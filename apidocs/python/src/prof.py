@@ -290,7 +290,7 @@ def get_room_nick(barejid):
 
 
 def current_win_is_console():
-    """Determine whether or not the Console window is currently focussed.
+    """Determine whether or not the Console window is currently focused.
 
     :return: ``True`` if the user is currently in the Console window, ``False`` otherwise.
     :rtype: boolean

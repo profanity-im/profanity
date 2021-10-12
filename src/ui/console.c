@@ -507,7 +507,8 @@ cons_show_wins(gboolean unread)
 }
 
 void
-cons_show_wins_attention() {
+cons_show_wins_attention()
+{
     ProfWin* console = wins_get_console();
     cons_show("");
     GSList* window_strings = wins_create_summary_attention();
@@ -837,12 +838,14 @@ cons_show_disco_items(GSList* items, const char* const jid)
     cons_alert(NULL);
 }
 
-static void _cons_print_contact_information_item(gpointer data, gpointer user_data)
+static void
+_cons_print_contact_information_item(gpointer data, gpointer user_data)
 {
     cons_show("    %s", (char*)data);
 }
 
-static void _cons_print_contact_information_hashlist_item(gpointer key, gpointer value, gpointer userdata)
+static void
+_cons_print_contact_information_hashlist_item(gpointer key, gpointer value, gpointer userdata)
 {
     cons_show("  %s:", (char*)key);
     g_slist_foreach((GSList*)value, _cons_print_contact_information_item, NULL);
@@ -2404,9 +2407,12 @@ cons_navigation_help(void)
     cons_show("Alt-LEFT, Alt-RIGHT      : Previous/next chat window.");
     cons_show("PAGEUP, PAGEDOWN         : Page the main window.");
     cons_show("Alt-PAGEUP, Alt-PAGEDOWN : Page occupants/roster panel.");
+    cons_show("Alt-a                    : Jump to the next unread window.");
+    cons_show("Alt-v                    : Mark current window with attention flag.");
+    cons_show("Alt-m                    : Switch between marked windows.");
     cons_show("");
-    cons_show("/win <n>     : Focus window n, where n is the window number.");
-    cons_show("/win <name>  : Focus window with name, where name is the recipient, room or window title.");
+    cons_show("/win <n>        : Focus window n, where n is the window number.");
+    cons_show("/win <name>     : Focus window with name, where name is the recipient, room or window title.");
     cons_show("");
     cons_show("See '/help win' for more information.");
 

@@ -116,6 +116,7 @@ omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res)
 void omemo_free(void* a){};
 
 uint32_t
-omemo_device_id() {
-	return 123;
+omemo_device_id()
+{
+    return 123;
 }

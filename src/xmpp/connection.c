@@ -522,7 +522,7 @@ connection_create_stanza_id(void)
                                             (guchar*)prof_identifier, strlen(prof_identifier),
                                             rndid, strlen(rndid));
 
-    char *ret = g_strdup_printf("%s%s", rndid, hmac);
+    char* ret = g_strdup_printf("%s%s", rndid, hmac);
 
     free(rndid);
     g_free(hmac);
@@ -746,8 +746,8 @@ _compute_identifier(const char* barejid)
     free(prof_identifier);
 
     prof_identifier = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
-                                            (guchar*)profanity_instance_id, strlen(profanity_instance_id),
-                                            barejid, strlen(barejid));
+                                                (guchar*)profanity_instance_id, strlen(profanity_instance_id),
+                                                barejid, strlen(barejid));
 }
 
 const char*

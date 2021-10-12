@@ -1,0 +1,2 @@
+[codespell]
+skip = libtool,./autom4te.cache/*,*.html,./build-aux/*,./.git/*,aclocal*,./m4/*,./config.status,./configure,./config.log,todo

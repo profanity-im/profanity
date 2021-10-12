@@ -123,7 +123,7 @@ ox_announce_public_key(const char* const filename)
 
         xmpp_stanza_t* item = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
-        char *timestamp = _gettimestamp();
+        char* timestamp = _gettimestamp();
         xmpp_stanza_set_attribute(item, STANZA_ATTR_ID, timestamp);
         free(timestamp);
 
@@ -305,7 +305,7 @@ _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* 
 
     while (pubkeymetadata) {
         const char* fingerprint = xmpp_stanza_get_attribute(pubkeymetadata, STANZA_ATTR_V4_FINGERPRINT);
-        if ( strlen( fingerprint ) == KEYID_LENGTH ) {
+        if (strlen(fingerprint) == KEYID_LENGTH) {
             cons_show(fingerprint);
         } else {
             cons_show("OX: Wrong char size of public key");

@@ -1180,9 +1180,9 @@ _stanza_get_delay_timestamp_xep0203(xmpp_stanza_t* const delay_stanza)
 
         if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
 
-            GDateTime* utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
-            GDateTime* local_datetime = g_date_time_to_local(utc_datetime);
-            g_date_time_unref(utc_datetime);
+            GDateTime* datetime = g_date_time_new_from_iso8601(stamp, NULL);
+            GDateTime* local_datetime = g_date_time_to_local(datetime);
+            g_date_time_unref(datetime);
 
             return local_datetime;
         }
@@ -1201,9 +1201,9 @@ _stanza_get_delay_timestamp_xep0091(xmpp_stanza_t* const x_stanza)
         const char* stamp = xmpp_stanza_get_attribute(x_stanza, STANZA_ATTR_STAMP);
         if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
 
-            GDateTime* utc_datetime = g_date_time_new_from_timeval_utc(&utc_stamp);
-            GDateTime* local_datetime = g_date_time_to_local(utc_datetime);
-            g_date_time_unref(utc_datetime);
+            GDateTime* datetime = g_date_time_new_from_iso8601(stamp, NULL);
+            GDateTime* local_datetime = g_date_time_to_local(datetime);
+            g_date_time_unref(datetime);
 
             return local_datetime;
         }
@@ -1947,7 +1947,7 @@ stanza_attach_publish_options_va(xmpp_ctx_t* const ctx, xmpp_stanza_t* const iq,
     int j;
     for (j = 0; j < count; j += 2) {
         const char* const option = va_arg(ap, char* const);
-        const char* const value  = va_arg(ap, char* const);
+        const char* const value = va_arg(ap, char* const);
 
         xmpp_stanza_t* field = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(field, STANZA_NAME_FIELD);
@@ -1966,7 +1966,6 @@ stanza_attach_publish_options_va(xmpp_ctx_t* const ctx, xmpp_stanza_t* const iq,
     }
     va_end(ap);
 
-
     xmpp_stanza_release(form_type_value_text);
     xmpp_stanza_release(form_type_value);
     xmpp_stanza_release(form_type);
@@ -1979,7 +1978,6 @@ stanza_attach_publish_options(xmpp_ctx_t* const ctx, xmpp_stanza_t* const iq, co
 {
     stanza_attach_publish_options_va(ctx, iq, 2, option, value);
 }
-
 
 void
 stanza_attach_priority(xmpp_ctx_t* const ctx, xmpp_stanza_t* const presence, const int pri)
@@ -2324,7 +2322,7 @@ stanza_create_omemo_devicelist_publish(xmpp_ctx_t* ctx, GList* const ids)
     xmpp_stanza_set_name(list, "list");
     xmpp_stanza_set_ns(list, "eu.siacs.conversations.axolotl");
 
-    for (GList *i = ids; i != NULL; i = i->next) {
+    for (GList* i = ids; i != NULL; i = i->next) {
         xmpp_stanza_t* device = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(device, "device");
         char* id = g_strdup_printf("%d", GPOINTER_TO_INT(i->data));
@@ -2608,7 +2606,7 @@ stanza_attach_correction(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza, const char* con
 }
 
 xmpp_stanza_t*
-stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char *const lastid)
+stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const lastid)
 {
     char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
@@ -2859,7 +2857,7 @@ stanza_get_service_contact_addresses(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza)
 
         if (g_strcmp0(child_name, STANZA_NAME_FIELD) == 0 && g_strcmp0(child_type, STANZA_TYPE_LIST_MULTI) == 0) {
             // extract key (eg 'admin-addresses')
-            const char* var = xmpp_stanza_get_attribute(fields, STANZA_ATTR_VAR );
+            const char* var = xmpp_stanza_get_attribute(fields, STANZA_ATTR_VAR);
 
             // extract values (a list of contact addresses eg mailto:xmpp@shakespeare.lit, xmpp:admins@shakespeare.lit)
             xmpp_stanza_t* values = xmpp_stanza_get_children(fields);

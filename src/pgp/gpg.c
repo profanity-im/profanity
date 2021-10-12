@@ -1143,7 +1143,7 @@ p_ox_gpg_decrypt(char* base64)
 {
     // if there is no private key avaibale,
     // we don't try do decrypt
-    if(!ox_is_private_key_available(connection_get_barejid())) {
+    if (!ox_is_private_key_available(connection_get_barejid())) {
         return NULL;
     }
     setlocale(LC_ALL, "");

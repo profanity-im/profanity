@@ -398,7 +398,7 @@ _status_bar_draw_tab(StatusBarTab* tab, int pos, int num)
     }
     if (show_name) {
         char* display_name = _display_name(tab);
-        mvwprintw(statusbar_win, 0, pos, display_name);
+        mvwprintw(statusbar_win, 0, pos, "%s", display_name);
         pos += utf8_display_len(display_name);
         free(display_name);
     }
@@ -417,7 +417,7 @@ _status_bar_draw_bracket(gboolean current, int pos, char* ch)
     if (current) {
         mvwprintw(statusbar_win, 0, pos, "-");
     } else {
-        mvwprintw(statusbar_win, 0, pos, ch);
+        mvwprintw(statusbar_win, 0, pos, "%s", ch);
     }
     wattroff(statusbar_win, bracket_attrs);
     pos++;
@@ -453,7 +453,7 @@ _status_bar_draw_time(int pos)
     pos++;
     wattroff(statusbar_win, bracket_attrs);
     wattron(statusbar_win, time_attrs);
-    mvwprintw(statusbar_win, 0, pos, statusbar->time);
+    mvwprintw(statusbar_win, 0, pos, "%s", statusbar->time);
     pos += len;
     wattroff(statusbar_win, time_attrs);
     wattron(statusbar_win, bracket_attrs);
@@ -470,7 +470,7 @@ static void
 _status_bar_draw_maintext(int pos)
 {
     if (statusbar->prompt) {
-        mvwprintw(statusbar_win, 0, pos, statusbar->prompt);
+        mvwprintw(statusbar_win, 0, pos, "%s", statusbar->prompt);
         return;
     }
 
@@ -483,12 +483,12 @@ _status_bar_draw_maintext(int pos)
             stop = true;
         } else if (g_strcmp0(pref, "user") == 0) {
             Jid* jidp = jid_create(statusbar->fulljid);
-            mvwprintw(statusbar_win, 0, pos, jidp->localpart);
+            mvwprintw(statusbar_win, 0, pos, "%s", jidp->localpart);
             jid_destroy(jidp);
             stop = true;
         } else if (g_strcmp0(pref, "barejid") == 0) {
             Jid* jidp = jid_create(statusbar->fulljid);
-            mvwprintw(statusbar_win, 0, pos, jidp->barejid);
+            mvwprintw(statusbar_win, 0, pos, "%s", jidp->barejid);
             jid_destroy(jidp);
             stop = true;
         }
@@ -497,7 +497,7 @@ _status_bar_draw_maintext(int pos)
         if (stop) {
             return;
         }
-        mvwprintw(statusbar_win, 0, pos, statusbar->fulljid);
+        mvwprintw(statusbar_win, 0, pos, "%s", statusbar->fulljid);
     }
 }
 

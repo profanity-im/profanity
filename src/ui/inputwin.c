@@ -811,9 +811,10 @@ _inp_rl_win_next_unread_handler(int count, int key)
 }
 
 static int
-_inp_rl_win_attention_handler(int count, int key) {
+_inp_rl_win_attention_handler(int count, int key)
+{
     ProfWin* current = wins_get_current();
-    if ( current ) {
+    if (current) {
         gboolean attention = win_toggle_attention(current);
         if (attention) {
             win_println(current, THEME_DEFAULT, "!", "Attention flag has been activated");
@@ -826,14 +827,14 @@ _inp_rl_win_attention_handler(int count, int key) {
 }
 
 static int
-_inp_rl_win_attention_next_handler(int count, int key) {
+_inp_rl_win_attention_next_handler(int count, int key)
+{
     ProfWin* window = wins_get_next_attention();
     if (window) {
         ui_focus_win(window);
     }
     return 0;
 }
-
 
 static int
 _inp_rl_win_pageup_handler(int count, int key)

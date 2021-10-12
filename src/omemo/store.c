@@ -431,7 +431,7 @@ is_trusted_identity(const signal_protocol_address* address, uint8_t* key_data,
     signal_buffer* buffer = signal_buffer_create(key_data, key_len);
     signal_buffer* original = g_hash_table_lookup(trusted, GINT_TO_POINTER(address->device_id));
 
-    if(!original) {
+    if (!original) {
         log_debug("[OMEMO][STORE] original not found %s (%d)", address->name, address->device_id);
     }
     ret = original != NULL && signal_buffer_compare(buffer, original) == 0;

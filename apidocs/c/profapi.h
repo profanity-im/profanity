@@ -127,14 +127,14 @@ Retrieve the Jabber ID of the current room, when in a chat room window.
 char* prof_get_current_muc(void);
 
 /**
-Determine whether or not the Console window is currently focussed.
+Determine whether or not the Console window is currently focused.
 @return 1 if the user is currently in the Console window, 0 otherwise.
 */
 int prof_current_win_is_console(void);
 
 /**
 Retrieve the users nickname in a chat room, when in a chat room window.
-@return the users nickname in the current chat room e.g. "eddie", or NULLL if not in a chat room window.
+@return the users nickname in the current chat room e.g. "eddie", or NULL if not in a chat room window.
 */
 char* prof_get_current_nick(void);
 
@@ -146,7 +146,7 @@ char* prof_get_name_from_roster(const char *barejid);
 
 /**
 Retrieve the barejid for a given nickname if it is in the roster.
-@return the users barejid e.g. "eddie@server.tld", or NULLL if the nickname is not in the roster.
+@return the users barejid e.g. "eddie@server.tld", or NULL if the nickname is not in the roster.
 */
 char* prof_get_barejid_from_roster(const char *name);
 

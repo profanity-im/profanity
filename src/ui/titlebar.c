@@ -427,7 +427,7 @@ _show_muc_privacy(ProfMucWin* mucwin)
         wprintw(win, "[");
         wattroff(win, bracket_attrs);
         wattron(win, encrypted_attrs);
-        wprintw(win, mucwin->enctext);
+        wprintw(win, "%s", mucwin->enctext);
         wattroff(win, encrypted_attrs);
         wattron(win, bracket_attrs);
         wprintw(win, "]");
@@ -451,7 +451,7 @@ _show_privacy(ProfChatWin* chatwin)
         wprintw(win, "[");
         wattroff(win, bracket_attrs);
         wattron(win, encrypted_attrs);
-        wprintw(win, chatwin->enctext);
+        wprintw(win, "%s", chatwin->enctext);
         wattroff(win, encrypted_attrs);
         wattron(win, bracket_attrs);
         wprintw(win, "]");
@@ -525,7 +525,7 @@ _show_privacy(ProfChatWin* chatwin)
         wprintw(win, "[");
         wattroff(win, bracket_attrs);
         wattron(win, encrypted_attrs);
-        wprintw(win, pgpmsg->str);
+        wprintw(win, "%s", pgpmsg->str);
         wattroff(win, encrypted_attrs);
         wattron(win, bracket_attrs);
         wprintw(win, "]");
@@ -581,7 +581,7 @@ _show_contact_presence(ProfChatWin* chatwin, int pos, int maxpos)
         int needed = strlen(resource) + 1;
         if (pos + needed < maxpos) {
             wprintw(win, "/");
-            wprintw(win, resource);
+            wprintw(win, "%s", resource);
         }
     }
 
@@ -623,7 +623,7 @@ _show_contact_presence(ProfChatWin* chatwin, int pos, int maxpos)
         wprintw(win, "[");
         wattroff(win, bracket_attrs);
         wattron(win, presence_attrs);
-        wprintw(win, presence);
+        wprintw(win, "%s", presence);
         wattroff(win, presence_attrs);
         wattron(win, bracket_attrs);
         wprintw(win, "]");

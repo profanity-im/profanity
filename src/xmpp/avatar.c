@@ -154,11 +154,11 @@ _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
                 const char* id = xmpp_stanza_get_id(info);
                 const char* type = xmpp_stanza_get_attribute(info, "type");
 
-                if(id && type) {
+                if (id && type) {
                     log_debug("Avatar ID for %s is: %s", from, id);
 
                     avatar_metadata* data = malloc(sizeof(avatar_metadata));
-                    if(data) {
+                    if (data) {
                         data->type = strdup(type);
                         data->id = strdup(id);
 

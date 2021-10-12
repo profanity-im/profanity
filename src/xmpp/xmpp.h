@@ -165,7 +165,7 @@ typedef struct prof_message_t
     /* stanza-id from XEP 0359. Used for MAM. archive_id in our database (see database.c)
      * coming in as <stanza-id> for live messages
      * coming in as <result id=""> for MAM messages*/
-    char *stanzaid;
+    char* stanzaid;
     /* The raw body from xmpp message, either plaintext or OTR encrypted text */
     char* body;
     /* The encrypted message as for PGP */
