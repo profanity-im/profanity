@@ -261,6 +261,8 @@ session_process_events(void)
     switch (conn_status) {
     case JABBER_CONNECTED:
     case JABBER_CONNECTING:
+    case JABBER_RAW_CONNECTED:
+    case JABBER_RAW_CONNECTING:
     case JABBER_DISCONNECTING:
         connection_check_events();
         break;
@@ -543,3 +545,4 @@ _session_free_saved_details(void)
     FREE_SET_NULL(saved_details.tls_policy);
     FREE_SET_NULL(saved_details.auth_policy);
 }
+

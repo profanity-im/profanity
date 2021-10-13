@@ -52,3 +52,4 @@ void cl_ev_send_muc_msg(ProfMucWin* mucwin, const char* const msg, const char* c
 void cl_ev_send_priv_msg(ProfPrivateWin* privwin, const char* const msg, const char* const oob_url);
 
 #endif
+

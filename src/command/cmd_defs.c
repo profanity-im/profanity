@@ -2636,6 +2636,32 @@ static struct cmd_t command_defs[] = {
       CMD_NOEXAMPLES
     },
 
+    { "/register",
+      parse_args, 2, 6, NULL,
+      CMD_NOSUBFUNCS
+      CMD_MAINFUNC(cmd_register)
+      CMD_TAGS(
+              CMD_TAG_CONNECTION)
+      CMD_SYN(
+              "/register <username> <server> [port <port>] [tls force|allow|trust|legacy|disable]")
+      CMD_DESC(
+              "Register an account on a server.")
+      CMD_ARGS(
+              { "<username>", "Username to register with." },
+              { "<server>", "Server to register account on." },
+              { "port <port>", "The port to use if different to the default (5222, or 5223 for SSL)." },
+              { "tls force", "Force TLS connection, and fail if one cannot be established. This is the default behavior." },
+              { "tls allow", "Use TLS for the connection if it is available." },
+              { "tls trust", "Force TLS connection and trust the server's certificate." },
+              { "tls legacy", "Use legacy TLS for the connection. This forces TLS just after the TCP connection is established. Use when a server doesn't support STARTTLS." },
+              { "tls disable", "Disable TLS for the connection." })
+      CMD_EXAMPLES(
+              "/register odin valhalla.edda ",
+              "/register freyr vanaheimr.edda port 5678",
+              "/register me 127.0.0.1 tls disable",
+              "/register someuser my.xmppserv.er port 5443 tls force")
+    },
+
     // NEXT-COMMAND (search helper)
 };
 
@@ -3006,3 +3032,4 @@ command_mangen(void)
     g_free(header);
     g_list_free(cmds);
 }
+

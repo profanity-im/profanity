@@ -2750,6 +2750,43 @@ stanza_change_password(xmpp_ctx_t* ctx, const char* const user, const char* cons
 }
 
 xmpp_stanza_t*
+stanza_register_new_account(xmpp_ctx_t* ctx, const char* const user, const char* const password)
+{
+    char* id = connection_create_stanza_id();
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    free(id);
+
+    xmpp_stanza_t* register_new_account = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(register_new_account, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(register_new_account, STANZA_NS_REGISTER);
+
+    xmpp_stanza_t* username_st = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(username_st, STANZA_NAME_USERNAME);
+    xmpp_stanza_t* username_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(username_text, user);
+    xmpp_stanza_add_child(username_st, username_text);
+    xmpp_stanza_release(username_text);
+
+    xmpp_stanza_t* password_st = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(password_st, STANZA_NAME_PASSWORD);
+    xmpp_stanza_t* password_text = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(password_text, password);
+    xmpp_stanza_add_child(password_st, password_text);
+    xmpp_stanza_release(password_text);
+
+    xmpp_stanza_add_child(register_new_account, username_st);
+    xmpp_stanza_release(username_st);
+
+    xmpp_stanza_add_child(register_new_account, password_st);
+    xmpp_stanza_release(password_st);
+
+    xmpp_stanza_add_child(iq, register_new_account);
+    xmpp_stanza_release(register_new_account);
+
+    return iq;
+}
+
+xmpp_stanza_t*
 stanza_request_voice(xmpp_ctx_t* ctx, const char* const room)
 {
     char* id = connection_create_stanza_id();
@@ -2887,3 +2924,4 @@ stanza_get_service_contact_addresses(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza)
 
     return addresses;
 }
+

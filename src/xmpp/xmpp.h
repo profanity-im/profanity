@@ -76,7 +76,9 @@ typedef enum {
     JABBER_CONNECTING,
     JABBER_CONNECTED,
     JABBER_DISCONNECTING,
-    JABBER_DISCONNECTED
+    JABBER_DISCONNECTED,
+    JABBER_RAW_CONNECTING,
+    JABBER_RAW_CONNECTED
 } jabber_conn_status_t;
 
 typedef enum {
@@ -183,6 +185,7 @@ void session_init(void);
 jabber_conn_status_t session_connect_with_details(const char* const jid, const char* const passwd,
                                                   const char* const altdomain, const int port, const char* const tls_policy, const char* const auth_policy);
 jabber_conn_status_t session_connect_with_account(const ProfAccount* const account);
+
 void session_disconnect(void);
 void session_shutdown(void);
 void session_process_events(void);
@@ -313,3 +316,4 @@ Autocomplete form_get_value_ac(DataForm* form, const char* const tag);
 void form_reset_autocompleters(DataForm* form);
 
 #endif
+

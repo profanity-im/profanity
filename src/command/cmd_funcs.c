@@ -9534,3 +9534,69 @@ cmd_silence(ProfWin* window, const char* const command, gchar** args)
 
     return TRUE;
 }
+
+gboolean
+cmd_register(ProfWin* window, const char* const command, gchar** args)
+{
+    gchar* opt_keys[] = { "port", "tls", "auth", NULL };
+    gboolean parsed;
+
+    GHashTable* options = parse_options(&args[2], opt_keys, &parsed);
+    if (!parsed) {
+        cons_bad_cmd_usage(command);
+        cons_show("");
+        options_destroy(options);
+        return TRUE;
+    }
+
+    char* tls_policy = g_hash_table_lookup(options, "tls");
+    if (tls_policy && (g_strcmp0(tls_policy, "force") != 0) && (g_strcmp0(tls_policy, "allow") != 0) && (g_strcmp0(tls_policy, "trust") != 0) && (g_strcmp0(tls_policy, "disable") != 0) && (g_strcmp0(tls_policy, "legacy") != 0)) {
+        cons_bad_cmd_usage(command);
+        cons_show("");
+        options_destroy(options);
+        return TRUE;
+    }
+
+    int port = 0;
+    if (g_hash_table_contains(options, "port")) {
+        char* port_str = g_hash_table_lookup(options, "port");
+        char* err_msg = NULL;
+        gboolean res = strtoi_range(port_str, &port, 1, 65535, &err_msg);
+        if (!res) {
+            cons_show(err_msg);
+            cons_show("");
+            free(err_msg);
+            port = 0;
+            options_destroy(options);
+            return TRUE;
+        }
+    }
+
+    char* username = args[0];
+    char* server = args[1];
+
+    char* passwd = ui_ask_password(false);
+    char* confirm_passwd = ui_ask_password(true);
+
+    if (g_strcmp0(passwd, confirm_passwd) == 0) {
+        log_info("Attempting to register account %s on server %s.", username, server);
+        connection_register(server, port, tls_policy, username, passwd);
+    } else {
+        cons_show("The two passwords do not match.");
+    }
+
+    if (connection_get_status() == JABBER_DISCONNECTED) {
+        cons_show_error("Connection attempt to server %s port %d failed.", server, port);
+        log_info("Connection attempt to server %s port %d failed.", server, port);
+        return TRUE;
+    }
+
+    free(passwd);
+    free(confirm_passwd);
+
+    options_destroy(options);
+
+    log_info("we are leaving the registration process");
+    return TRUE;
+}
+
