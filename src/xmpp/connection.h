@@ -47,7 +47,7 @@ void connection_check_events(void);
 jabber_conn_status_t connection_connect(const char* const fulljid, const char* const passwd, const char* const altdomain, int port,
                                         const char* const tls_policy, const char* const auth_policy);
 jabber_conn_status_t connection_register(const char* const altdomain, int port, const char* const tls_policy,
-                                        const char* const username, const char* const password);
+                                         const char* const username, const char* const password);
 void connection_disconnect(void);
 void connection_set_disconnected(void);
 
@@ -70,4 +70,3 @@ void connection_remove_available_resource(const char* const resource);
 char* connection_create_stanza_id(void);
 
 #endif
-

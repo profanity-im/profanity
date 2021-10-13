@@ -262,4 +262,3 @@ cl_ev_send_priv_msg(ProfPrivateWin* privwin, const char* const msg, const char* 
         jid_destroy(jidp);
     }
 }
-

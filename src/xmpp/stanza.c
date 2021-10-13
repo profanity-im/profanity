@@ -2924,4 +2924,3 @@ stanza_get_service_contact_addresses(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza)
 
     return addresses;
 }
-

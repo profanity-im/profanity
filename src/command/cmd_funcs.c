@@ -9599,4 +9599,3 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
     log_info("we are leaving the registration process");
     return TRUE;
 }
-

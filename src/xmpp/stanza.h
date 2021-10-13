@@ -415,4 +415,3 @@ xmpp_stanza_t* stanza_create_approve_voice(xmpp_ctx_t* ctx, const char* const id
 xmpp_stanza_t* stanza_create_muc_register_nick(xmpp_ctx_t* ctx, const char* const id, const char* const jid, const char* const node, DataForm* form);
 
 #endif
-

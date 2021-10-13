@@ -2804,4 +2804,3 @@ iq_muc_register_nick(const char* const roomjid)
     xmpp_stanza_release(iq);
     xmpp_stanza_release(query);
 }
-

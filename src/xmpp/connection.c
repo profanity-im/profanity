@@ -78,7 +78,8 @@ typedef struct prof_conn_t
     GHashTable* requested_features;
 } ProfConnection;
 
-typedef struct {
+typedef struct
+{
     const char* username;
     const char* password;
 } prof_reg_t;
@@ -251,9 +252,10 @@ connection_connect(const char* const jid, const char* const passwd, const char* 
     return conn.conn_status;
 }
 
-static int iq_reg2_cb(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userdata)
+static int
+iq_reg2_cb(xmpp_conn_t* xmpp_conn, xmpp_stanza_t* stanza, void* userdata)
 {
-    const char *type;
+    const char* type;
 
     (void)userdata;
 
@@ -280,12 +282,13 @@ quit:
     return 0;
 }
 
-static int iq_reg_cb(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userdata)
+static int
+iq_reg_cb(xmpp_conn_t* xmpp_conn, xmpp_stanza_t* stanza, void* userdata)
 {
-    prof_reg_t *reg = (prof_reg_t *)userdata;
-    xmpp_stanza_t *registered = NULL;
-    xmpp_stanza_t *query;
-    const char *type;
+    prof_reg_t* reg = (prof_reg_t*)userdata;
+    xmpp_stanza_t* registered = NULL;
+    xmpp_stanza_t* query;
+    const char* type;
 
     type = xmpp_stanza_get_type(stanza);
     if (!type || strcmp(type, "error") == 0) {
@@ -320,7 +323,7 @@ quit:
 }
 
 static int
-_register_handle_error(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userdata)
+_register_handle_error(xmpp_conn_t* xmpp_conn, xmpp_stanza_t* stanza, void* userdata)
 {
     (void)stanza;
     (void)userdata;
@@ -333,11 +336,12 @@ _register_handle_error(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *user
     return 0;
 }
 
-static int _register_handle_proceedtls_default(xmpp_conn_t *xmpp_conn,
-                                      xmpp_stanza_t *stanza,
-                                      void *userdata)
+static int
+_register_handle_proceedtls_default(xmpp_conn_t* xmpp_conn,
+                                    xmpp_stanza_t* stanza,
+                                    void* userdata)
 {
-    const char *name = xmpp_stanza_get_name(stanza);
+    const char* name = xmpp_stanza_get_name(stanza);
 
     (void)userdata;
 
@@ -355,7 +359,8 @@ static int _register_handle_proceedtls_default(xmpp_conn_t *xmpp_conn,
     return 0;
 }
 
-static int _register_handle_missing_features(xmpp_conn_t *xmpp_conn, void *userdata)
+static int
+_register_handle_missing_features(xmpp_conn_t* xmpp_conn, void* userdata)
 {
     (void)userdata;
 
@@ -366,13 +371,13 @@ static int _register_handle_missing_features(xmpp_conn_t *xmpp_conn, void *userd
 }
 
 static int
-_register_handle_features(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *userdata)
+_register_handle_features(xmpp_conn_t* xmpp_conn, xmpp_stanza_t* stanza, void* userdata)
 {
-    prof_reg_t *reg = (prof_reg_t *)userdata;
-    xmpp_ctx_t *ctx = conn.xmpp_ctx;
-    xmpp_stanza_t *child;
-    xmpp_stanza_t *iq;
-    char *domain;
+    prof_reg_t* reg = (prof_reg_t*)userdata;
+    xmpp_ctx_t* ctx = conn.xmpp_ctx;
+    xmpp_stanza_t* child;
+    xmpp_stanza_t* iq;
+    char* domain;
 
     xmpp_timed_handler_delete(xmpp_conn, _register_handle_missing_features);
 
@@ -420,15 +425,15 @@ _register_handle_features(xmpp_conn_t *xmpp_conn, xmpp_stanza_t *stanza, void *u
 }
 
 static void
-_register_handler(xmpp_conn_t *xmpp_conn,
-                         xmpp_conn_event_t status,
-                         int error,
-                         xmpp_stream_error_t *stream_error,
-                         void *userdata)
+_register_handler(xmpp_conn_t* xmpp_conn,
+                  xmpp_conn_event_t status,
+                  int error,
+                  xmpp_stream_error_t* stream_error,
+                  void* userdata)
 {
     conn.conn_last_event = status;
 
-    prof_reg_t *reg = (prof_reg_t *)userdata;
+    prof_reg_t* reg = (prof_reg_t*)userdata;
     int secured;
 
     (void)error;
@@ -468,13 +473,12 @@ _register_handler(xmpp_conn_t *xmpp_conn,
 
     default:
         break;
-
     }
 }
 
 jabber_conn_status_t
 connection_register(const char* const altdomain, int port, const char* const tls_policy,
-                   const char* const username, const char* const password)
+                    const char* const username, const char* const password)
 {
     long flags;
 
@@ -540,7 +544,7 @@ connection_register(const char* const altdomain, int port, const char* const tls
 #undef LOG_FLAG_IF_SET
     }
 
-    prof_reg_t *reg;
+    prof_reg_t* reg;
 
     reg = calloc(1, sizeof(*reg));
     if (reg == NULL) {
@@ -1109,4 +1113,3 @@ connection_get_profanity_identifier(void)
 {
     return prof_identifier;
 }
-

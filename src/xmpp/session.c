@@ -545,4 +545,3 @@ _session_free_saved_details(void)
     FREE_SET_NULL(saved_details.tls_policy);
     FREE_SET_NULL(saved_details.auth_policy);
 }
-

@@ -60,6 +60,6 @@ scan-view ...
 ### Finding typos
 
 We include a `.codespellrc` configuration file for `codespell` in the root directory.
-Before comitting it might make sense to run `codespell` to see if you made any typos.
+Before committing it might make sense to run `codespell` to see if you made any typos.
 
 You can run the `make spell` command for this.

@@ -3032,4 +3032,3 @@ command_mangen(void)
     g_free(header);
     g_list_free(cmds);
 }
-

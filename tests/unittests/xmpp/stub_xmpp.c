@@ -146,7 +146,7 @@ connection_get_profanity_identifier(void)
 
 jabber_conn_status_t
 connection_register(const char* const altdomain, int port, const char* const tls_policy,
-                   const char* const username, const char* const password)
+                    const char* const username, const char* const password)
 {
     check_expected(altdomain);
     check_expected(port);

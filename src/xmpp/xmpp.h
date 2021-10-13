@@ -316,4 +316,3 @@ Autocomplete form_get_value_ac(DataForm* form, const char* const tag);
 void form_reset_autocompleters(DataForm* form);
 
 #endif
-
