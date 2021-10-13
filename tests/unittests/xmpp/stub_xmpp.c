@@ -144,6 +144,18 @@ connection_get_profanity_identifier(void)
     return "profident";
 }
 
+jabber_conn_status_t
+connection_register(const char* const altdomain, int port, const char* const tls_policy,
+                   const char* const username, const char* const password)
+{
+    check_expected(altdomain);
+    check_expected(port);
+    check_expected(tls_policy);
+    check_expected(username);
+    check_expected(password);
+    return mock_type(jabber_conn_status_t);
+}
+
 // message functions
 char*
 message_send_chat(const char* const barejid, const char* const msg, const char* const oob_url, gboolean request_receipt, const char* const replace_id)
