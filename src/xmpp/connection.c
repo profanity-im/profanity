@@ -509,7 +509,7 @@ connection_register(const char* const altdomain, int port, const char* const tls
         log_warning("Failed to get libstrophe conn during connect");
         return JABBER_DISCONNECTED;
     }
-    xmpp_conn_set_jid(conn.xmpp_conn, strdup(altdomain));
+    xmpp_conn_set_jid(conn.xmpp_conn, altdomain);
 
     flags = xmpp_conn_get_flags(conn.xmpp_conn);
 
@@ -542,9 +542,10 @@ connection_register(const char* const altdomain, int port, const char* const tls
 
     prof_reg_t *reg;
 
-    reg = malloc(sizeof(*reg));
-    if (reg != NULL) {
-        memset(reg, 0, sizeof(*reg));
+    reg = calloc(1, sizeof(*reg));
+    if (reg == NULL) {
+        log_warning("Failed to allocate registration data struct during connect");
+        return JABBER_DISCONNECTED;
     }
 
     reg->username = strdup(username);
