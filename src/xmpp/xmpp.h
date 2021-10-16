@@ -307,4 +307,6 @@ FormField* form_get_field_by_tag(DataForm* form, const char* const tag);
 Autocomplete form_get_value_ac(DataForm* form, const char* const tag);
 void form_reset_autocompleters(DataForm* form);
 
+void publish_user_mood(const char* const mood, const char* const text);
+
 #endif

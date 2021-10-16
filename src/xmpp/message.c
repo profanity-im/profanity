@@ -161,8 +161,13 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
     } else if (type && g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0) {
         // XEP-0045: Multi-User Chat
         _handle_groupchat(stanza);
+
     } else if (type && g_strcmp0(type, STANZA_TYPE_HEADLINE) == 0) {
-        _handle_headline(stanza);
+        xmpp_stanza_t* event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
+        if (event) {
+            _handle_pubsub(stanza, event);
+            return 1;
+        }
     } else if (type == NULL || g_strcmp0(type, STANZA_TYPE_CHAT) == 0 || g_strcmp0(type, STANZA_TYPE_NORMAL) == 0) {
         // type: chat, normal (==NULL)
 
@@ -247,6 +252,8 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
         if (msg_stanza) {
             _handle_chat(msg_stanza, FALSE, is_carbon, NULL, NULL);
         }
+    } else if (type && g_strcmp0(type, STANZA_TYPE_HEADLINE) == 0) {
+        _handle_headline(stanza);
     } else {
         // none of the allowed types
         char* text;

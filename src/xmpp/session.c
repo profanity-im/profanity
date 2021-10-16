@@ -286,6 +286,38 @@ session_get_account_name(void)
     return saved_account.name;
 }
 
+static int _receive_mood(xmpp_stanza_t* const stanza, void* const userdata);
+
+static int
+_receive_mood(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    const char* from = xmpp_stanza_get_from(stanza);
+    xmpp_stanza_t* event = xmpp_stanza_get_child_by_name_and_ns(stanza, "event", "http://jabber.org/protocol/pubsub#event");
+    if (event) {
+        xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(event, "items");
+        if (items) {
+            xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, "item");
+            if (item) {
+                xmpp_stanza_t* mood = xmpp_stanza_get_child_by_name_and_ns(item, "mood", "http://jabber.org/protocol/mood");
+                if (mood) {
+                    xmpp_stanza_t* c = xmpp_stanza_get_children(mood);
+                    if (c) {
+                        const char* m = xmpp_stanza_get_name(c);
+                        xmpp_stanza_t* t = xmpp_stanza_get_child_by_name(mood, "text");
+                        if (t) {
+                            const char* text = xmpp_stanza_get_text(t);
+                            cons_show("Mood from %s %s (%s)", from, m, text);
+                        } else {
+                            cons_show("Mood from %s %s", from, m);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return TRUE;
+}
+
 void
 session_login_success(gboolean secured)
 {
@@ -330,6 +362,9 @@ session_login_success(gboolean secured)
         g_timer_destroy(reconnect_timer);
         reconnect_timer = NULL;
     }
+
+    message_pubsub_event_handler_add("http://jabber.org/protocol/mood", _receive_mood, NULL, NULL);
+    caps_add_feature("http://jabber.org/protocol/mood+notify");
 }
 
 void

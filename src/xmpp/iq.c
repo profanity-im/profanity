@@ -2798,3 +2798,55 @@ iq_muc_register_nick(const char* const roomjid)
     xmpp_stanza_release(iq);
     xmpp_stanza_release(query);
 }
+
+void
+publish_user_mood(const char* const mood, const char* const text)
+{
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    char* id = connection_create_stanza_id();
+
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+
+    xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, "pubsub");
+    xmpp_stanza_set_ns(pubsub, "http://jabber.org/protocol/pubsub");
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_t* publish = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish, "publish");
+    xmpp_stanza_set_attribute(publish, "node", "http://jabber.org/protocol/mood");
+    xmpp_stanza_add_child(pubsub, publish);
+
+    xmpp_stanza_t* item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, "item");
+    xmpp_stanza_set_attribute(item, "id", "current");
+    xmpp_stanza_add_child(publish, item);
+
+    xmpp_stanza_t* mood_t = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(mood_t, "mood");
+    xmpp_stanza_set_ns(mood_t, "http://jabber.org/protocol/mood");
+    xmpp_stanza_add_child(item, mood_t);
+
+    xmpp_stanza_t* x = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x, mood);
+    xmpp_stanza_add_child(mood_t, x);
+
+    xmpp_stanza_t* text_t = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(text_t, "text");
+    xmpp_stanza_add_child(mood_t, text_t);
+
+    xmpp_stanza_t* t = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(t, text);
+    xmpp_stanza_add_child(text_t, t);
+
+    iq_send_stanza(iq);
+
+    xmpp_stanza_release(iq);
+    xmpp_stanza_release(pubsub);
+    xmpp_stanza_release(publish);
+    xmpp_stanza_release(item);
+    xmpp_stanza_release(mood_t);
+    xmpp_stanza_release(x);
+    xmpp_stanza_release(text_t);
+    xmpp_stanza_release(t);
+}
