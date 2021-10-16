@@ -45,11 +45,11 @@ case $(uname | tr '[:upper:]' '[:lower:]') in
         "--enable-notifications --enable-icons-and-clipboard --enable-otr --enable-pgp
         --enable-omemo --enable-plugins --enable-c-plugins
         --enable-python-plugins --with-xscreensaver"
-        "--disable-notifications --disable-icons --disable-otr --disable-pgp
+        "--disable-notifications --disable-icons-and-clipboard --disable-otr --disable-pgp
         --disable-omemo --disable-plugins --disable-c-plugins
         --disable-python-plugins --without-xscreensaver"
         "--disable-notifications"
-        "--disable-icons"
+        "--disable-icons-and-clipboard"
         "--disable-otr"
         "--disable-pgp"
         "--disable-omemo"
@@ -67,11 +67,11 @@ case $(uname | tr '[:upper:]' '[:lower:]') in
         "--enable-notifications --enable-icons-and-clipboard --enable-otr --enable-pgp
         --enable-omemo --enable-plugins --enable-c-plugins
         --enable-python-plugins"
-        "--disable-notifications --disable-icons --disable-otr --disable-pgp
+        "--disable-notifications --disable-icons-and-clipboard --disable-otr --disable-pgp
         --disable-omemo --disable-plugins --disable-c-plugins
         --disable-python-plugins"
         "--disable-notifications"
-        "--disable-icons"
+        "--disable-icons-and-clipboard"
         "--disable-otr"
         "--disable-pgp"
         "--disable-omemo"
@@ -95,11 +95,11 @@ case $(uname | tr '[:upper:]' '[:lower:]') in
         "--enable-notifications --enable-icons-and-clipboard --enable-otr --enable-pgp
         --enable-omemo --enable-plugins --enable-c-plugins
         --enable-python-plugins"
-        "--disable-notifications --disable-icons --disable-otr --disable-pgp
+        "--disable-notifications --disable-icons-and-clipboard --disable-otr --disable-pgp
         --disable-omemo --disable-plugins --disable-c-plugins
         --disable-python-plugins"
         "--disable-notifications"
-        "--disable-icons"
+        "--disable-icons-and-clipboard"
         "--disable-otr"
         "--disable-pgp"
         "--disable-omemo"
