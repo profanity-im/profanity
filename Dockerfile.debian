@@ -26,6 +26,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   make \
   pkg-config \
   python3-dev \
+  python-dev-is-python3 \
   libsqlite3-dev
 
 RUN mkdir -p /usr/src/{stabber,libmesode,profanity}
