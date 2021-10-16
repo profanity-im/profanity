@@ -426,6 +426,11 @@ iq_muc_register_nick(const char* const roomjid)
 {
 }
 
+void
+publish_user_mood(const char* const mood, const char* const text)
+{
+}
+
 // caps functions
 void
 caps_add_feature(char* feature)
