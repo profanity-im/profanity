@@ -9649,13 +9649,14 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_mood(ProfWin* window, const char* const command, gchar** args)
 {
-
     if (g_strcmp0(args[0], "set") == 0) {
-        cons_show("Your mood: %s", args[1]);
-        if (args[2]) {
-            publish_user_mood(args[1], args[2]);
-        } else {
-            publish_user_mood(args[1], args[1]);
+        if(args[1]) {
+            cons_show("Your mood: %s", args[1]);
+            if (args[2]) {
+                publish_user_mood(args[1], args[2]);
+            } else {
+                publish_user_mood(args[1], args[1]);
+            }
         }
     }
     return TRUE;

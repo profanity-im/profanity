@@ -286,24 +286,22 @@ session_get_account_name(void)
     return saved_account.name;
 }
 
-static int _receive_mood(xmpp_stanza_t* const stanza, void* const userdata);
-
 static int
 _receive_mood(xmpp_stanza_t* const stanza, void* const userdata)
 {
     const char* from = xmpp_stanza_get_from(stanza);
-    xmpp_stanza_t* event = xmpp_stanza_get_child_by_name_and_ns(stanza, "event", "http://jabber.org/protocol/pubsub#event");
+    xmpp_stanza_t* event = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_EVENT, STANZA_NS_PUBSUB_EVENT);
     if (event) {
-        xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(event, "items");
+        xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(event, STANZA_NAME_ITEMS);
         if (items) {
-            xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, "item");
+            xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, STANZA_NAME_ITEM);
             if (item) {
-                xmpp_stanza_t* mood = xmpp_stanza_get_child_by_name_and_ns(item, "mood", "http://jabber.org/protocol/mood");
+                xmpp_stanza_t* mood = xmpp_stanza_get_child_by_name_and_ns(item, STANZA_NAME_MOOD, STANZA_NS_MOOD);
                 if (mood) {
                     xmpp_stanza_t* c = xmpp_stanza_get_children(mood);
                     if (c) {
                         const char* m = xmpp_stanza_get_name(c);
-                        xmpp_stanza_t* t = xmpp_stanza_get_child_by_name(mood, "text");
+                        xmpp_stanza_t* t = xmpp_stanza_get_child_by_name(mood, STANZA_NAME_TEXT);
                         if (t) {
                             const char* text = xmpp_stanza_get_text(t);
                             cons_show("Mood from %s %s (%s)", from, m, text);
@@ -363,8 +361,8 @@ session_login_success(gboolean secured)
         reconnect_timer = NULL;
     }
 
-    message_pubsub_event_handler_add("http://jabber.org/protocol/mood", _receive_mood, NULL, NULL);
-    caps_add_feature("http://jabber.org/protocol/mood+notify");
+    message_pubsub_event_handler_add(STANZA_NS_MOOD, _receive_mood, NULL, NULL);
+    caps_add_feature(STANZA_NS_MOOD_NOTIFY);
 }
 
 void

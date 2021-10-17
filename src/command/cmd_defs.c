@@ -2688,9 +2688,12 @@ static struct cmd_t command_defs[] = {
       CMD_SYN(
               "/mood set <mood> [\"Text\"]")
       CMD_DESC(
-              "Set your mood")
-      CMD_NOARGS
-      CMD_NOEXAMPLES
+              "Set your mood. Use the tab key to switch through the available moods")
+      CMD_ARGS(
+              { "set <mood>", "Your mood" },
+              { "<text>", "Additional Text" })
+      CMD_EXAMPLES(
+              "/mood set happy \"I'm happy\"")
     },
     // NEXT-COMMAND (search helper)
 };

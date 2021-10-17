@@ -1460,6 +1460,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(executable_ac);
     autocomplete_reset(intype_ac);
     autocomplete_reset(mood_ac);
+    autocomplete_reset(mood_type_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -4247,17 +4248,10 @@ _mood_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         return result;
     }
 
-    //jabber_conn_status_t conn_status = connection_get_status();
-    //if (conn_status == JABBER_CONNECTED) {
     result = autocomplete_param_with_ac(input, "/mood set", mood_type_ac, FALSE, previous);
     if (result) {
         return result;
     }
 
-    //    result = autocomplete_param_with_func(input, "/mood get", roster_barejid_autocomplete, previous, NULL);
-    //        if (result) {
-    //            return result;
-    //        }
-    //}
     return result;
 }

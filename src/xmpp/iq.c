@@ -2808,23 +2808,23 @@ publish_user_mood(const char* const mood, const char* const text)
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
 
     xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(pubsub, "pubsub");
-    xmpp_stanza_set_ns(pubsub, "http://jabber.org/protocol/pubsub");
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
     xmpp_stanza_add_child(iq, pubsub);
 
     xmpp_stanza_t* publish = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(publish, "publish");
-    xmpp_stanza_set_attribute(publish, "node", "http://jabber.org/protocol/mood");
+    xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
+    xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, STANZA_NS_MOOD);
     xmpp_stanza_add_child(pubsub, publish);
 
     xmpp_stanza_t* item = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(item, "item");
+    xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
     xmpp_stanza_set_attribute(item, "id", "current");
     xmpp_stanza_add_child(publish, item);
 
     xmpp_stanza_t* mood_t = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(mood_t, "mood");
-    xmpp_stanza_set_ns(mood_t, "http://jabber.org/protocol/mood");
+    xmpp_stanza_set_name(mood_t, STANZA_NAME_MOOD);
+    xmpp_stanza_set_ns(mood_t, STANZA_NS_MOOD);
     xmpp_stanza_add_child(item, mood_t);
 
     xmpp_stanza_t* x = xmpp_stanza_new(ctx);
@@ -2832,7 +2832,7 @@ publish_user_mood(const char* const mood, const char* const text)
     xmpp_stanza_add_child(mood_t, x);
 
     xmpp_stanza_t* text_t = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(text_t, "text");
+    xmpp_stanza_set_name(text_t, STANZA_NAME_TEXT);
     xmpp_stanza_add_child(mood_t, text_t);
 
     xmpp_stanza_t* t = xmpp_stanza_new(ctx);
