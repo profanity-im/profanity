@@ -1795,7 +1795,6 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/avatar", _avatar_autocomplete);
     g_hash_table_insert(ac_funcs, "/correction", _correction_autocomplete);
     g_hash_table_insert(ac_funcs, "/correct", _correct_autocomplete);
-    g_hash_table_insert(ac_funcs, "/correct-editor", _correct_autocomplete);
     g_hash_table_insert(ac_funcs, "/software", _software_autocomplete);
     g_hash_table_insert(ac_funcs, "/url", _url_autocomplete);
     g_hash_table_insert(ac_funcs, "/executable", _executable_autocomplete);
@@ -4032,6 +4031,17 @@ _correction_autocomplete(ProfWin* window, const char* const input, gboolean prev
 static char*
 _correct_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
+    GString* result_str = g_string_new("/correct ");
+    g_string_append(result_str, _get_last_message(window));
+    char* result = result_str->str;
+    g_string_free(result_str, FALSE);
+
+    return result;
+}
+
+char*
+_get_last_message(ProfWin* window)
+{
     char* last_message = NULL;
     switch (window->type) {
     case WIN_CHAT:
@@ -4055,27 +4065,7 @@ _correct_autocomplete(ProfWin* window, const char* const input, gboolean previou
         return NULL;
     }
 
-    // Get command
-    int len = strlen(input);
-    char command[len + 2];
-    int i = 0;
-    while (i < len) {
-        if (input[i] == ' ') {
-            break;
-        } else {
-            command[i] = input[i];
-        }
-        i++;
-    }
-    command[i] = ' ';
-    command[i + 1] = '\0';
-
-    GString* result_str = g_string_new(command);
-    g_string_append(result_str, last_message);
-    char* result = result_str->str;
-    g_string_free(result_str, FALSE);
-
-    return result;
+    return last_message;
 }
 
 static char*

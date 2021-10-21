@@ -59,5 +59,6 @@ void cmd_ac_add_form_fields(DataForm* form);
 void cmd_ac_remove_form_fields(DataForm* form);
 
 char* cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean previous);
+char* _get_last_message(ProfWin* window);
 
 #endif

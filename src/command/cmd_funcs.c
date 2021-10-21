@@ -9461,7 +9461,7 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
-// Returns true if any error occured
+// Returns true if an error occured
 gboolean
 _get_message_from_editor(gchar* message, gchar** returned_message)
 {
@@ -9569,14 +9569,12 @@ cmd_correct_editor(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    gchar* initial_message = g_strjoinv(" ", args);
+    gchar* initial_message = _get_last_message(window);
 
     gchar* message = NULL;
     if (_get_message_from_editor(initial_message, &message)) {
         return TRUE;
     }
-
-    free(initial_message);
 
     if (window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
