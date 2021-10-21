@@ -254,8 +254,8 @@ gboolean prefs_set_omemo_char(char* ch);
 char* prefs_get_ox_char(void);
 gboolean prefs_set_ox_char(char* ch);
 
-char prefs_get_roster_header_char(void);
-void prefs_set_roster_header_char(char ch);
+char* prefs_get_roster_header_char(void);
+void prefs_set_roster_header_char(char* ch);
 void prefs_clear_roster_header_char(void);
 char prefs_get_roster_contact_char(void);
 void prefs_set_roster_contact_char(char ch);

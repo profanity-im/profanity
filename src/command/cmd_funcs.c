@@ -2388,8 +2388,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                 cons_show("Roster header char removed.");
                 rosterwin_roster();
             } else {
-                prefs_set_roster_header_char(args[2][0]);
-                cons_show("Roster header char set to %c.", args[2][0]);
+                prefs_set_roster_header_char(args[2]);
+                cons_show("Roster header char set to %c.", args[2]);
                 rosterwin_roster();
             }
         } else {

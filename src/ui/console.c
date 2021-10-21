@@ -1475,11 +1475,12 @@ cons_roster_setting(void)
     else
         cons_show("Roster offline (/roster)            : hide");
 
-    char header_ch = prefs_get_roster_header_char();
+    char* header_ch = prefs_get_roster_header_char();
     if (header_ch)
-        cons_show("Roster header char (/roster)        : %c", header_ch);
+        cons_show("Roster header char (/roster)        : %s", header_ch);
     else
         cons_show("Roster header char (/roster)        : none");
+    free(header_ch);
 
     char contact_ch = prefs_get_roster_contact_char();
     if (contact_ch)

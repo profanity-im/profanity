@@ -1080,31 +1080,29 @@ prefs_set_omemo_char(char* ch)
     return _prefs_set_encryption_char(ch, PREF_GROUP_OMEMO, "omemo.char");
 }
 
-char
+char*
 prefs_get_roster_header_char(void)
 {
-    char result = 0;
+    char* result = NULL;
 
     char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.header.char", NULL);
-    if (!resultstr) {
-        result = 0;
-    } else {
-        result = resultstr[0];
+    if (resultstr) {
+        result = resultstr;
     }
-    free(resultstr);
 
     return result;
 }
 
 void
-prefs_set_roster_header_char(char ch)
+prefs_set_roster_header_char(char* ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.header.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.header.char", ch);
+    } else {
+        log_error("Could not set roster header char: %s", ch);
+    }
 }
+
 
 void
 prefs_clear_roster_header_char(void)

@@ -1028,9 +1028,10 @@ _rosterwin_unsubscribed_header(ProfLayoutSplit* layout, GList* wins)
     win_sub_newline_lazy(layout->subwin);
 
     GString* header = g_string_new(" ");
-    char ch = prefs_get_roster_header_char();
+    char* ch = prefs_get_roster_header_char();
     if (ch) {
-        g_string_append_printf(header, "%c", ch);
+        g_string_append_printf(header, "%s", ch);
+        free(ch);
     }
 
     g_string_append(header, "Unsubscribed");
@@ -1074,9 +1075,10 @@ _rosterwin_contacts_header(ProfLayoutSplit* layout, const char* const title, GSL
     win_sub_newline_lazy(layout->subwin);
 
     GString* header = g_string_new(" ");
-    char ch = prefs_get_roster_header_char();
+    char* ch = prefs_get_roster_header_char();
     if (ch) {
-        g_string_append_printf(header, "%c", ch);
+        g_string_append_printf(header, "%s", ch);
+        free(ch);
     }
 
     g_string_append(header, title);
@@ -1125,9 +1127,10 @@ _rosterwin_rooms_header(ProfLayoutSplit* layout, GList* rooms, char* title)
 {
     win_sub_newline_lazy(layout->subwin);
     GString* header = g_string_new(" ");
-    char ch = prefs_get_roster_header_char();
+    char* ch = prefs_get_roster_header_char();
     if (ch) {
-        g_string_append_printf(header, "%c", ch);
+        g_string_append_printf(header, "%s", ch);
+        free(ch);
     }
     g_string_append(header, title);
 
@@ -1188,9 +1191,10 @@ _rosterwin_private_header(ProfLayoutSplit* layout, GList* privs)
     win_sub_newline_lazy(layout->subwin);
 
     GString* title_str = g_string_new(" ");
-    char ch = prefs_get_roster_header_char();
+    char* ch = prefs_get_roster_header_char();
     if (ch) {
-        g_string_append_printf(title_str, "%c", ch);
+        g_string_append_printf(title_str, "%s", ch);
+        free(ch);
     }
     g_string_append(title_str, "Private chats");
 
