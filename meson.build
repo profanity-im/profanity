@@ -45,9 +45,17 @@ libstrophe_dep = dependency('libstrophe', version: '>= 0.10.0')
 conf.set('HAVE_LIBSTROPHE', 1)
 
 
+# optional dependencies
+notify_dep = dependency('libnotify', required : get_option('notifications'))
+if notify_dep.found()
+  conf.set_quoted('HAVE_LIBNOTIFY', '1')
+endif
+
+
 conf.set_quoted('PACKAGE_VERSION', meson.project_version())
 conf.set_quoted('PACKAGE_STATUS', 'development')
 # TODO: PROF_GIT_BRANCH, PROF_GIT_REVISION, PACKAGE_STATUS,
+
 
 # change later:
 conf.set_quoted('GLOBAL_PYTHON_PLUGINS_PATH', '')
@@ -67,6 +75,7 @@ profanity = executable('profanity',
                              thread_dep,
                              m_dep,
                              curses_dep,
+                             notify_dep,
                              libstrophe_dep ],
             include_directories : incdir,
             install : true)

@@ -1,0 +1,1 @@
+option('notifications', type: 'feature', value: 'auto', description: 'enable desktop notifications')
