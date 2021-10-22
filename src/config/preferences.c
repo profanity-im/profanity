@@ -948,30 +948,22 @@ prefs_set_occupants_indent(gint value)
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "occupants.indent", value);
 }
 
-char
+char*
 prefs_get_occupants_header_char(void)
 {
-    char result = 0;
-
-    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.header.char", NULL);
-    if (!resultstr) {
-        result = 0;
-    } else {
-        result = resultstr[0];
-    }
-    free(resultstr);
+    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.header.char", NULL);
 
     return result;
 }
 
 void
-prefs_set_occupants_header_char(char ch)
+prefs_set_occupants_header_char(char* ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "occupants.header.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "occupants.header.char", ch);
+    } else {
+        log_error("Could not set roster resource char: %s", ch);
+    }
 }
 
 void

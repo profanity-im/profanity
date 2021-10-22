@@ -2389,7 +2389,7 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                 rosterwin_roster();
             } else {
                 prefs_set_roster_header_char(args[2]);
-                cons_show("Roster header char set to %c.", args[2]);
+                cons_show("Roster header char set to %s.", args[2]);
                 rosterwin_roster();
             }
         } else {
@@ -4470,8 +4470,8 @@ cmd_occupants(ProfWin* window, const char* const command, gchar** args)
 
                 occupantswin_occupants_all();
             } else {
-                prefs_set_occupants_header_char(args[2][0]);
-                cons_show("Occupants header char set to %c.", args[2][0]);
+                prefs_set_occupants_header_char(args[2]);
+                cons_show("Occupants header char set to %s.", args[2]);
 
                 occupantswin_occupants_all();
             }

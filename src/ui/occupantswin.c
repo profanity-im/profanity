@@ -131,9 +131,10 @@ occupantswin_occupants(const char* const roomjid)
 
             GString* prefix = g_string_new(" ");
 
-            char ch = prefs_get_occupants_header_char();
+            char* ch = prefs_get_occupants_header_char();
             if (ch) {
-                g_string_append_printf(prefix, "%c", ch);
+                g_string_append_printf(prefix, "%s", ch);
+                free(ch);
             }
 
             if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
