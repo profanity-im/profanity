@@ -1511,11 +1511,13 @@ cons_roster_setting(void)
     else
         cons_show("Roster room private char (/roster)  : none");
 
-    char private_ch = prefs_get_roster_private_char();
-    if (private_ch)
+    char* private_ch = prefs_get_roster_private_char();
+    if (private_ch) {
         cons_show("Roster private char (/roster)       : %c", private_ch);
-    else
+        free(private_ch);
+    } else {
         cons_show("Roster private char (/roster)       : none");
+    }
 
     gint contact_indent = prefs_get_roster_contact_indent();
     cons_show("Roster contact indent (/roster)     : %d", contact_indent);

@@ -2680,8 +2680,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                 cons_show("Roster private room chat char removed.");
                 rosterwin_roster();
             } else {
-                prefs_set_roster_private_char(args[2][0]);
-                cons_show("Roster private room chat char set to %c.", args[2][0]);
+                prefs_set_roster_private_char(args[2]);
+                cons_show("Roster private room chat char set to %s.", args[2]);
                 rosterwin_roster();
             }
             return TRUE;

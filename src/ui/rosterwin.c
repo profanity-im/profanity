@@ -951,9 +951,10 @@ _rosterwin_private_chats(ProfLayoutSplit* layout, GList* orphaned_privchats)
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
 
-            char ch = prefs_get_roster_private_char();
+            char* ch = prefs_get_roster_private_char();
             if (ch) {
-                g_string_append_printf(privmsg, "%c", ch);
+                g_string_append_printf(privmsg, "%s", ch);
+                free(ch);
             }
 
             g_string_append(privmsg, privwin->fulljid);
