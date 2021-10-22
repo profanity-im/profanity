@@ -77,9 +77,10 @@ _occuptantswin_occupant(ProfLayoutSplit* layout, GList* item, gboolean showjid, 
 
     GString* msg = g_string_new(spaces->str);
 
-    char ch = prefs_get_occupants_char();
+    char* ch = prefs_get_occupants_char();
     if (ch) {
-        g_string_append_printf(msg, "%c", ch);
+        g_string_append_printf(msg, "%s", ch);
+        free(ch);
     }
 
     gboolean wrap = prefs_get_boolean(PREF_OCCUPANTS_WRAP);

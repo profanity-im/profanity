@@ -1340,11 +1340,13 @@ cons_occupants_setting(void)
     else
         cons_show("Occupants wrap (/occupants)         : OFF");
 
-    char occupants_ch = prefs_get_occupants_char();
-    if (occupants_ch)
-        cons_show("Occupants char (/occupants)         : %c", occupants_ch);
-    else
+    char* occupants_ch = prefs_get_occupants_char();
+    if (occupants_ch) {
+        cons_show("Occupants char (/occupants)         : %s", occupants_ch);
+        free(occupants_ch);
+    } else {
         cons_show("Occupants char (/occupants)         : none");
+    }
 
     gint occupant_indent = prefs_get_occupants_indent();
     cons_show("Occupant indent (/occupants)        : %d", occupant_indent);
@@ -1509,7 +1511,7 @@ cons_roster_setting(void)
 
     char* room_priv_ch = prefs_get_roster_room_private_char();
     if (room_priv_ch) {
-        cons_show("Roster room private char (/roster)  : %c", room_priv_ch);
+        cons_show("Roster room private char (/roster)  : %s", room_priv_ch);
         free(room_priv_ch);
     } else {
         cons_show("Roster room private char (/roster)  : none");
@@ -1517,7 +1519,7 @@ cons_roster_setting(void)
 
     char* private_ch = prefs_get_roster_private_char();
     if (private_ch) {
-        cons_show("Roster private char (/roster)       : %c", private_ch);
+        cons_show("Roster private char (/roster)       : %s", private_ch);
         free(private_ch);
     } else {
         cons_show("Roster private char (/roster)       : none");

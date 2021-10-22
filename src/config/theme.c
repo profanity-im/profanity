@@ -406,8 +406,8 @@ _load_preferences(void)
     // with custom set functions
     if (g_key_file_has_key(theme, "ui", "occupants.char", NULL)) {
         gchar* ch = g_key_file_get_string(theme, "ui", "occupants.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_occupants_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_occupants_char(ch);
             g_free(ch);
         }
     }
