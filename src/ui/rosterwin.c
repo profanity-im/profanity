@@ -857,9 +857,10 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
 
-            char ch = prefs_get_roster_room_private_char();
+            ch = prefs_get_roster_room_private_char();
             if (ch) {
-                g_string_append_printf(privmsg, "%c", ch);
+                g_string_append_printf(privmsg, "%s", ch);
+                free(ch);
             }
 
             char* nick = privwin->fulljid + strlen(mucwin->roomjid) + 1;
