@@ -9569,7 +9569,7 @@ cmd_correct_editor(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    gchar* initial_message = _get_last_message(window);
+    gchar* initial_message = win_get_last_sent_message(window);
 
     gchar* message = NULL;
     if (_get_message_from_editor(initial_message, &message)) {

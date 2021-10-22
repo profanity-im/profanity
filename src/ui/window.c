@@ -399,6 +399,35 @@ win_get_tab_identifier(ProfWin* window)
 }
 
 char*
+win_get_last_sent_message(ProfWin* window)
+{
+    char* last_message = NULL;
+    switch (window->type) {
+    case WIN_CHAT:
+    {
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        last_message = chatwin->last_message;
+        break;
+    }
+    case WIN_MUC:
+    {
+        ProfMucWin* mucwin = (ProfMucWin*)window;
+        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        last_message = mucwin->last_message;
+    }
+    default:
+        break;
+    }
+
+    if (last_message == NULL) {
+        return NULL;
+    }
+
+    return last_message;
+}
+
+char*
 win_to_string(ProfWin* window)
 {
     assert(window != NULL);

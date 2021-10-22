@@ -398,6 +398,7 @@ void win_command_exec_error(ProfWin* window, const char* const command, const ch
 void win_handle_command_list(ProfWin* window, GSList* cmds);
 void win_handle_command_exec_status(ProfWin* window, const char* const type, const char* const value);
 void win_handle_command_exec_result_note(ProfWin* window, const char* const type, const char* const value);
+char* win_get_last_sent_message(ProfWin* window);
 
 // desktop notifications
 void notifier_initialise(void);
