@@ -2388,8 +2388,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                 cons_show("Roster header char removed.");
                 rosterwin_roster();
             } else {
-                prefs_set_roster_header_char(args[2][0]);
-                cons_show("Roster header char set to %c.", args[2][0]);
+                prefs_set_roster_header_char(args[2]);
+                cons_show("Roster header char set to %s.", args[2]);
                 rosterwin_roster();
             }
         } else {
@@ -2407,8 +2407,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                 cons_show("Roster contact char removed.");
                 rosterwin_roster();
             } else {
-                prefs_set_roster_contact_char(args[2][0]);
-                cons_show("Roster contact char set to %c.", args[2][0]);
+                prefs_set_roster_contact_char(args[2]);
+                cons_show("Roster contact char set to %s.", args[2]);
                 rosterwin_roster();
             }
         } else if (g_strcmp0(args[1], "indent") == 0) {
@@ -2442,8 +2442,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                 cons_show("Roster resource char removed.");
                 rosterwin_roster();
             } else {
-                prefs_set_roster_resource_char(args[2][0]);
-                cons_show("Roster resource char set to %c.", args[2][0]);
+                prefs_set_roster_resource_char(args[2]);
+                cons_show("Roster resource char set to %s.", args[2]);
                 rosterwin_roster();
             }
         } else if (g_strcmp0(args[1], "indent") == 0) {
@@ -2680,8 +2680,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                 cons_show("Roster private room chat char removed.");
                 rosterwin_roster();
             } else {
-                prefs_set_roster_private_char(args[2][0]);
-                cons_show("Roster private room chat char set to %c.", args[2][0]);
+                prefs_set_roster_private_char(args[2]);
+                cons_show("Roster private room chat char set to %s.", args[2]);
                 rosterwin_roster();
             }
             return TRUE;
@@ -2720,8 +2720,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                 cons_show("Roster room char removed.");
                 rosterwin_roster();
             } else {
-                prefs_set_roster_room_char(args[2][0]);
-                cons_show("Roster room char set to %c.", args[2][0]);
+                prefs_set_roster_room_char(args[2]);
+                cons_show("Roster room char set to %s.", args[2]);
                 rosterwin_roster();
             }
             return TRUE;
@@ -2798,8 +2798,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                     cons_show("Roster room private char removed.");
                     rosterwin_roster();
                 } else {
-                    prefs_set_roster_room_private_char(args[3][0]);
-                    cons_show("Roster room private char set to %c.", args[3][0]);
+                    prefs_set_roster_room_private_char(args[3]);
+                    cons_show("Roster room private char set to %s.", args[3]);
                     rosterwin_roster();
                 }
                 return TRUE;
@@ -4414,8 +4414,8 @@ cmd_occupants(ProfWin* window, const char* const command, gchar** args)
 
             occupantswin_occupants_all();
         } else {
-            prefs_set_occupants_char(args[1][0]);
-            cons_show("Occupants char set to %c.", args[1][0]);
+            prefs_set_occupants_char(args[1]);
+            cons_show("Occupants char set to %s.", args[1]);
 
             occupantswin_occupants_all();
         }
@@ -4470,8 +4470,8 @@ cmd_occupants(ProfWin* window, const char* const command, gchar** args)
 
                 occupantswin_occupants_all();
             } else {
-                prefs_set_occupants_header_char(args[2][0]);
-                cons_show("Occupants header char set to %c.", args[2][0]);
+                prefs_set_occupants_header_char(args[2]);
+                cons_show("Occupants header char set to %s.", args[2]);
 
                 occupantswin_occupants_all();
             }

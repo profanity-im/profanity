@@ -1340,11 +1340,13 @@ cons_occupants_setting(void)
     else
         cons_show("Occupants wrap (/occupants)         : OFF");
 
-    char occupants_ch = prefs_get_occupants_char();
-    if (occupants_ch)
-        cons_show("Occupants char (/occupants)         : %c", occupants_ch);
-    else
+    char* occupants_ch = prefs_get_occupants_char();
+    if (occupants_ch) {
+        cons_show("Occupants char (/occupants)         : %s", occupants_ch);
+        free(occupants_ch);
+    } else {
         cons_show("Occupants char (/occupants)         : none");
+    }
 
     gint occupant_indent = prefs_get_occupants_indent();
     cons_show("Occupant indent (/occupants)        : %d", occupant_indent);
@@ -1352,11 +1354,13 @@ cons_occupants_setting(void)
     int size = prefs_get_occupants_size();
     cons_show("Occupants size (/occupants)         : %d", size);
 
-    char header_ch = prefs_get_occupants_header_char();
-    if (header_ch)
-        cons_show("Occupants header char (/occupants)  : %c", header_ch);
-    else
+    char* header_ch = prefs_get_occupants_header_char();
+    if (header_ch) {
+        cons_show("Occupants header char (/occupants)  : %s", header_ch);
+        free(header_ch);
+    } else {
         cons_show("Occupants header char (/occupants)  : none");
+    }
 }
 
 void
@@ -1475,41 +1479,53 @@ cons_roster_setting(void)
     else
         cons_show("Roster offline (/roster)            : hide");
 
-    char header_ch = prefs_get_roster_header_char();
-    if (header_ch)
-        cons_show("Roster header char (/roster)        : %c", header_ch);
-    else
+    char* header_ch = prefs_get_roster_header_char();
+    if (header_ch) {
+        cons_show("Roster header char (/roster)        : %s", header_ch);
+        free(header_ch);
+    } else {
         cons_show("Roster header char (/roster)        : none");
+    }
 
-    char contact_ch = prefs_get_roster_contact_char();
-    if (contact_ch)
-        cons_show("Roster contact char (/roster)       : %c", contact_ch);
-    else
+    char* contact_ch = prefs_get_roster_contact_char();
+    if (contact_ch) {
+        cons_show("Roster contact char (/roster)       : %s", contact_ch);
+        free(contact_ch);
+    } else {
         cons_show("Roster contact char (/roster)       : none");
+    }
 
-    char resource_ch = prefs_get_roster_resource_char();
-    if (resource_ch)
-        cons_show("Roster resource char (/roster)      : %c", resource_ch);
-    else
+    char* resource_ch = prefs_get_roster_resource_char();
+    if (resource_ch) {
+        cons_show("Roster resource char (/roster)      : %s", resource_ch);
+        free(resource_ch);
+    } else {
         cons_show("Roster resource char (/roster)      : none");
+    }
 
-    char room_ch = prefs_get_roster_room_char();
-    if (room_ch)
-        cons_show("Roster room char (/roster)          : %c", room_ch);
-    else
+    char* room_ch = prefs_get_roster_room_char();
+    if (room_ch) {
+        cons_show("Roster room char (/roster)          : %s", room_ch);
+        free(room_ch);
+    } else {
         cons_show("Roster room char (/roster)          : none");
+    }
 
-    char room_priv_ch = prefs_get_roster_room_private_char();
-    if (room_priv_ch)
-        cons_show("Roster room private char (/roster)  : %c", room_priv_ch);
-    else
+    char* room_priv_ch = prefs_get_roster_room_private_char();
+    if (room_priv_ch) {
+        cons_show("Roster room private char (/roster)  : %s", room_priv_ch);
+        free(room_priv_ch);
+    } else {
         cons_show("Roster room private char (/roster)  : none");
+    }
 
-    char private_ch = prefs_get_roster_private_char();
-    if (private_ch)
-        cons_show("Roster private char (/roster)       : %c", private_ch);
-    else
+    char* private_ch = prefs_get_roster_private_char();
+    if (private_ch) {
+        cons_show("Roster private char (/roster)       : %s", private_ch);
+        free(private_ch);
+    } else {
         cons_show("Roster private char (/roster)       : none");
+    }
 
     gint contact_indent = prefs_get_roster_contact_indent();
     cons_show("Roster contact indent (/roster)     : %d", contact_indent);

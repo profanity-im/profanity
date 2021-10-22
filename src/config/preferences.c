@@ -902,30 +902,23 @@ prefs_get_occupants_size(void)
     }
 }
 
-char
+char*
 prefs_get_occupants_char(void)
 {
-    char result = 0;
 
-    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.char", NULL);
-    if (!resultstr) {
-        result = 0;
-    } else {
-        result = resultstr[0];
-    }
-    free(resultstr);
+    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.char", NULL);
 
     return result;
 }
 
 void
-prefs_set_occupants_char(char ch)
+prefs_set_occupants_char(char* ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "occupants.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "occupants.char", ch);
+    } else {
+        log_error("Could not set roster resource char: %s", ch);
+    }
 }
 
 void
@@ -955,30 +948,22 @@ prefs_set_occupants_indent(gint value)
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "occupants.indent", value);
 }
 
-char
+char*
 prefs_get_occupants_header_char(void)
 {
-    char result = 0;
-
-    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.header.char", NULL);
-    if (!resultstr) {
-        result = 0;
-    } else {
-        result = resultstr[0];
-    }
-    free(resultstr);
+    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.header.char", NULL);
 
     return result;
 }
 
 void
-prefs_set_occupants_header_char(char ch)
+prefs_set_occupants_header_char(char* ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "occupants.header.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "occupants.header.char", ch);
+    } else {
+        log_error("Could not set roster resource char: %s", ch);
+    }
 }
 
 void
@@ -1080,31 +1065,29 @@ prefs_set_omemo_char(char* ch)
     return _prefs_set_encryption_char(ch, PREF_GROUP_OMEMO, "omemo.char");
 }
 
-char
+char*
 prefs_get_roster_header_char(void)
 {
-    char result = 0;
+    char* result = NULL;
 
     char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.header.char", NULL);
-    if (!resultstr) {
-        result = 0;
-    } else {
-        result = resultstr[0];
+    if (resultstr) {
+        result = resultstr;
     }
-    free(resultstr);
 
     return result;
 }
 
 void
-prefs_set_roster_header_char(char ch)
+prefs_set_roster_header_char(char* ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.header.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.header.char", ch);
+    } else {
+        log_error("Could not set roster header char: %s", ch);
+    }
 }
+
 
 void
 prefs_clear_roster_header_char(void)
@@ -1112,30 +1095,22 @@ prefs_clear_roster_header_char(void)
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.header.char", NULL);
 }
 
-char
+char*
 prefs_get_roster_contact_char(void)
 {
-    char result = 0;
-
-    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.contact.char", NULL);
-    if (!resultstr) {
-        result = 0;
-    } else {
-        result = resultstr[0];
-    }
-    free(resultstr);
+    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.contact.char", NULL);
 
     return result;
 }
 
 void
-prefs_set_roster_contact_char(char ch)
+prefs_set_roster_contact_char(char* ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.contact.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.contact.char", ch);
+    } else {
+        log_error("Could not set roster contact char: %s", ch);
+    }
 }
 
 void
@@ -1144,30 +1119,22 @@ prefs_clear_roster_contact_char(void)
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.contact.char", NULL);
 }
 
-char
+char*
 prefs_get_roster_resource_char(void)
 {
-    char result = 0;
-
-    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.resource.char", NULL);
-    if (!resultstr) {
-        result = 0;
-    } else {
-        result = resultstr[0];
-    }
-    free(resultstr);
+    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.resource.char", NULL);
 
     return result;
 }
 
 void
-prefs_set_roster_resource_char(char ch)
+prefs_set_roster_resource_char(char* ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.resource.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.resource.char", ch);
+    } else {
+        log_error("Could not set roster resource char: %s", ch);
+    }
 }
 
 void
@@ -1176,30 +1143,22 @@ prefs_clear_roster_resource_char(void)
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.resource.char", NULL);
 }
 
-char
+char*
 prefs_get_roster_private_char(void)
 {
-    char result = 0;
-
-    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
-    if (!resultstr) {
-        result = 0;
-    } else {
-        result = resultstr[0];
-    }
-    free(resultstr);
+    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
 
     return result;
 }
 
 void
-prefs_set_roster_private_char(char ch)
+prefs_set_roster_private_char(char* ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.private.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.private.char", ch);
+    } else {
+        log_error("Could not set roster resource char: %s", ch);
+    }
 }
 
 void
@@ -1208,30 +1167,22 @@ prefs_clear_roster_private_char(void)
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
 }
 
-char
+char*
 prefs_get_roster_room_char(void)
 {
-    char result = 0;
-
-    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
-    if (!resultstr) {
-        result = 0;
-    } else {
-        result = resultstr[0];
-    }
-    free(resultstr);
+    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
 
     return result;
 }
 
 void
-prefs_set_roster_room_char(char ch)
+prefs_set_roster_room_char(char* ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.char", ch);
+    } else {
+        log_error("Could not set roster resource char: %s", ch);
+    }
 }
 
 void
@@ -1240,30 +1191,22 @@ prefs_clear_roster_room_char(void)
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
 }
 
-char
+char*
 prefs_get_roster_room_private_char(void)
 {
-    char result = 0;
-
-    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", NULL);
-    if (!resultstr) {
-        result = 0;
-    } else {
-        result = resultstr[0];
-    }
-    free(resultstr);
+    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", NULL);
 
     return result;
 }
 
 void
-prefs_set_roster_room_private_char(char ch)
+prefs_set_roster_room_private_char(char* ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", ch);
+    } else {
+        log_error("Could not set roster resource char: %s", ch);
+    }
 }
 
 void

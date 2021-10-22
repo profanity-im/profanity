@@ -406,40 +406,40 @@ _load_preferences(void)
     // with custom set functions
     if (g_key_file_has_key(theme, "ui", "occupants.char", NULL)) {
         gchar* ch = g_key_file_get_string(theme, "ui", "occupants.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_occupants_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_occupants_char(ch);
             g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "occupants.header.char", NULL)) {
         gchar* ch = g_key_file_get_string(theme, "ui", "occupants.header.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_occupants_header_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_occupants_header_char(ch);
             g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.header.char", NULL)) {
         gchar* ch = g_key_file_get_string(theme, "ui", "roster.header.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_roster_header_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_roster_header_char(ch);
             g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.contact.char", NULL)) {
         gchar* ch = g_key_file_get_string(theme, "ui", "roster.contact.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_roster_contact_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_roster_contact_char(ch);
             g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.resource.char", NULL)) {
         gchar* ch = g_key_file_get_string(theme, "ui", "roster.resource.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_roster_resource_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_roster_resource_char(ch);
             g_free(ch);
         }
     } else {
@@ -448,24 +448,24 @@ _load_preferences(void)
 
     if (g_key_file_has_key(theme, "ui", "roster.rooms.char", NULL)) {
         gchar* ch = g_key_file_get_string(theme, "ui", "roster.rooms.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_roster_room_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_roster_room_char(ch);
             g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.rooms.private.char", NULL)) {
         gchar* ch = g_key_file_get_string(theme, "ui", "roster.rooms.private.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_roster_room_private_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_roster_room_private_char(ch);
             g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.private.char", NULL)) {
         gchar* ch = g_key_file_get_string(theme, "ui", "roster.private.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_roster_private_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_roster_private_char(ch);
             g_free(ch);
         }
     }
