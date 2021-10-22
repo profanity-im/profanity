@@ -1499,11 +1499,13 @@ cons_roster_setting(void)
         cons_show("Roster resource char (/roster)      : none");
     }
 
-    char room_ch = prefs_get_roster_room_char();
-    if (room_ch)
-        cons_show("Roster room char (/roster)          : %c", room_ch);
-    else
+    char* room_ch = prefs_get_roster_room_char();
+    if (room_ch) {
+        cons_show("Roster room char (/roster)          : %s", room_ch);
+        free(room_ch);
+    } else {
         cons_show("Roster room char (/roster)          : none");
+    }
 
     char room_priv_ch = prefs_get_roster_room_private_char();
     if (room_priv_ch)

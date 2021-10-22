@@ -448,8 +448,8 @@ _load_preferences(void)
 
     if (g_key_file_has_key(theme, "ui", "roster.rooms.char", NULL)) {
         gchar* ch = g_key_file_get_string(theme, "ui", "roster.rooms.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_roster_room_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_roster_room_char(ch);
             g_free(ch);
         }
     }

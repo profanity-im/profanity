@@ -2720,8 +2720,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                 cons_show("Roster room char removed.");
                 rosterwin_roster();
             } else {
-                prefs_set_roster_room_char(args[2][0]);
-                cons_show("Roster room char set to %c.", args[2][0]);
+                prefs_set_roster_room_char(args[2]);
+                cons_show("Roster room char set to %s.", args[2]);
                 rosterwin_roster();
             }
             return TRUE;

@@ -756,9 +756,10 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
             indent--;
         }
     }
-    char ch = prefs_get_roster_room_char();
+    char* ch = prefs_get_roster_room_char();
     if (ch) {
-        g_string_append_printf(msg, "%c", ch);
+        g_string_append_printf(msg, "%s", ch);
+        free(ch);
     }
 
     char* unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
@@ -856,7 +857,7 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
 
-            ch = prefs_get_roster_room_private_char();
+            char ch = prefs_get_roster_room_private_char();
             if (ch) {
                 g_string_append_printf(privmsg, "%c", ch);
             }
