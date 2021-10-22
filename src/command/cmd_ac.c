@@ -49,6 +49,7 @@
 #include "command/cmd_funcs.h"
 #include "tools/parser.h"
 #include "plugins/plugins.h"
+#include "ui/ui.h"
 #include "ui/win_types.h"
 #include "ui/window_list.h"
 #include "xmpp/muc.h"
@@ -4031,31 +4032,8 @@ _correction_autocomplete(ProfWin* window, const char* const input, gboolean prev
 static char*
 _correct_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
-    char* last_message = NULL;
-    switch (window->type) {
-    case WIN_CHAT:
-    {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        last_message = chatwin->last_message;
-        break;
-    }
-    case WIN_MUC:
-    {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        last_message = mucwin->last_message;
-    }
-    default:
-        break;
-    }
-
-    if (last_message == NULL) {
-        return NULL;
-    }
-
     GString* result_str = g_string_new("/correct ");
-    g_string_append(result_str, last_message);
+    g_string_append(result_str, win_get_last_sent_message(window));
     char* result = result_str->str;
     g_string_free(result_str, FALSE);
 

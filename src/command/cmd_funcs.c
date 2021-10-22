@@ -9101,52 +9101,64 @@ cmd_correction(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
-cmd_correct(ProfWin* window, const char* const command, gchar** args)
+_can_correct(ProfWin* window)
 {
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are currently not connected.");
-        return TRUE;
-    }
-
-    if (!prefs_get_boolean(PREF_CORRECTION_ALLOW)) {
+        return FALSE;
+    } else if (!prefs_get_boolean(PREF_CORRECTION_ALLOW)) {
         win_println(window, THEME_DEFAULT, "!", "Corrections not enabled. See /help correction.");
-        return TRUE;
-    }
-
-    if (window->type == WIN_CHAT) {
+        return FALSE;
+    } else if (window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
         if (chatwin->last_msg_id == NULL || chatwin->last_message == NULL) {
             win_println(window, THEME_DEFAULT, "!", "No last message to correct.");
-            return TRUE;
+            return FALSE;
         }
-
-        // send message again, with replace flag
-        gchar* message = g_strjoinv(" ", args);
-        cl_ev_send_msg_correct(chatwin, message, FALSE, TRUE);
-
-        free(message);
-        return TRUE;
     } else if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
         if (mucwin->last_msg_id == NULL || mucwin->last_message == NULL) {
             win_println(window, THEME_DEFAULT, "!", "No last message to correct.");
-            return TRUE;
+            return FALSE;
         }
+    } else {
+        win_println(window, THEME_DEFAULT, "!", "Command /correct-editor only valid in regular chat windows.");
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+gboolean
+cmd_correct(ProfWin* window, const char* const command, gchar** args)
+{
+    if (!_can_correct(window)) {
+        return TRUE;
+    }
+
+    if (window->type == WIN_CHAT) {
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+
+        // send message again, with replace flag
+        gchar* message = g_strjoinv(" ", args);
+        cl_ev_send_msg_correct(chatwin, message, FALSE, TRUE);
+
+        free(message);
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin* mucwin = (ProfMucWin*)window;
 
         // send message again, with replace flag
         gchar* message = g_strjoinv(" ", args);
         cl_ev_send_muc_msg_corrected(mucwin, message, FALSE, TRUE);
 
         free(message);
-        return TRUE;
     }
 
-    win_println(window, THEME_DEFAULT, "!", "Command /correct only valid in regular chat windows.");
     return TRUE;
 }
 
@@ -9449,16 +9461,10 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
+// Returns true if an error occured
 gboolean
-cmd_editor(ProfWin* window, const char* const command, gchar** args)
+_get_message_from_editor(gchar* message, gchar** returned_message)
 {
-    jabber_conn_status_t conn_status = connection_get_status();
-
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are currently not connected.");
-        return TRUE;
-    }
-
     // create editor dir if not present
     char* jid = connection_get_barejid();
     gchar* path = files_get_account_data_path(DIR_EDITOR, jid);
@@ -9476,6 +9482,12 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
     GError* creation_error = NULL;
     GFile* file = g_file_new_for_path(filename);
     GFileOutputStream* fos = g_file_create(file, G_FILE_CREATE_PRIVATE, NULL, &creation_error);
+
+    if (message != NULL && strlen(message) > 0) {
+        int fd_output_file = open(g_file_get_path(file), O_WRONLY);
+        write(fd_output_file, message, strlen(message));
+        close(fd_output_file);
+    }
 
     free(filename);
 
@@ -9508,7 +9520,7 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
         if (size_read > 0 && size_read <= COUNT) {
             buf[size_read - 1] = '\0';
             GString* text = g_string_new(buf);
-            rl_insert_text(text->str);
+            *returned_message = g_strdup(text->str);
             g_string_free(text, TRUE);
         }
         close(fd_input_file);
@@ -9520,10 +9532,62 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
             return TRUE;
         }
         g_object_unref(file);
-        ui_resize();
-        rl_point = rl_end;
-        rl_forced_update_display();
     }
+
+    return FALSE;
+}
+
+gboolean
+cmd_editor(ProfWin* window, const char* const command, gchar** args)
+{
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are currently not connected.");
+        return TRUE;
+    }
+
+    gchar* message = NULL;
+
+    if (_get_message_from_editor(NULL, &message)) {
+        return TRUE;
+    }
+
+    rl_insert_text(message);
+    ui_resize();
+    rl_point = rl_end;
+    rl_forced_update_display();
+    g_free(message);
+
+    return TRUE;
+}
+
+gboolean
+cmd_correct_editor(ProfWin* window, const char* const command, gchar** args)
+{
+    if (!_can_correct(window)) {
+        return TRUE;
+    }
+
+    gchar* initial_message = win_get_last_sent_message(window);
+
+    gchar* message = NULL;
+    if (_get_message_from_editor(initial_message, &message)) {
+        return TRUE;
+    }
+
+    if (window->type == WIN_CHAT) {
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+
+        cl_ev_send_msg_correct(chatwin, message, FALSE, TRUE);
+    } else if (window->type == WIN_MUC) {
+        ProfMucWin* mucwin = (ProfMucWin*)window;
+
+        cl_ev_send_muc_msg_corrected(mucwin, message, FALSE, TRUE);
+    }
+
+    g_free(message);
+
     return TRUE;
 }
 
