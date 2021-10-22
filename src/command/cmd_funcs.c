@@ -2442,8 +2442,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                 cons_show("Roster resource char removed.");
                 rosterwin_roster();
             } else {
-                prefs_set_roster_resource_char(args[2][0]);
-                cons_show("Roster resource char set to %c.", args[2][0]);
+                prefs_set_roster_resource_char(args[2]);
+                cons_show("Roster resource char set to %s.", args[2]);
                 rosterwin_roster();
             }
         } else if (g_strcmp0(args[1], "indent") == 0) {

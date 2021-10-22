@@ -317,6 +317,7 @@ _rosterwin_unsubscribed_item(ProfLayoutSplit* layout, ProfChatWin* chatwin)
     char *ch = prefs_get_roster_contact_char();
     if (ch) {
         g_string_append_printf(msg, "%s", ch);
+        free(ch);
     }
 
     char* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
@@ -379,6 +380,7 @@ _rosterwin_contact(ProfLayoutSplit* layout, PContact contact)
     char *ch = prefs_get_roster_contact_char();
     if (ch) {
         g_string_append_printf(msg, "%s", ch);
+        free(ch);
     }
 
     char* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
@@ -527,9 +529,10 @@ _rosterwin_resources(ProfLayoutSplit* layout, PContact contact, int current_inde
 
             wattron(layout->subwin, theme_attrs(resource_presence_colour));
             GString* msg = g_string_new("");
-            char ch = prefs_get_roster_resource_char();
+            char* ch = prefs_get_roster_resource_char();
             if (ch) {
-                g_string_append_printf(msg, "%c", ch);
+                g_string_append_printf(msg, "%s", ch);
+                free(ch);
             } else {
                 g_string_append(msg, " ");
             }
@@ -590,9 +593,10 @@ _rosterwin_resources(ProfLayoutSplit* layout, PContact contact, int current_inde
                     g_string_append(msg, " ");
                     this_indent--;
                 }
-                char ch = prefs_get_roster_resource_char();
+                char* ch = prefs_get_roster_resource_char();
                 if (ch) {
-                    g_string_append_printf(msg, "%c", ch);
+                    g_string_append_printf(msg, "%s", ch);
+                    free(ch);
                 }
                 g_string_append(msg, resource->name);
                 if (prefs_get_boolean(PREF_ROSTER_PRIORITY)) {
