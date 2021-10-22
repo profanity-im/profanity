@@ -1307,6 +1307,11 @@ win_get_title(ProfWin* window)
 {
     return NULL;
 }
+char*
+win_get_last_sent_message(ProfWin* window)
+{
+    return NULL;
+}
 void
 win_show_occupant(ProfWin* window, Occupant* occupant)
 {
