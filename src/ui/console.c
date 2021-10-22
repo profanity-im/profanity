@@ -1476,17 +1476,20 @@ cons_roster_setting(void)
         cons_show("Roster offline (/roster)            : hide");
 
     char* header_ch = prefs_get_roster_header_char();
-    if (header_ch)
+    if (header_ch) {
         cons_show("Roster header char (/roster)        : %s", header_ch);
-    else
+        free(header_ch);
+    } else {
         cons_show("Roster header char (/roster)        : none");
-    free(header_ch);
+    }
 
-    char contact_ch = prefs_get_roster_contact_char();
-    if (contact_ch)
-        cons_show("Roster contact char (/roster)       : %c", contact_ch);
-    else
+    char* contact_ch = prefs_get_roster_contact_char();
+    if (contact_ch) {
+        cons_show("Roster contact char (/roster)       : %s", contact_ch);
+        free(contact_ch);
+    } else {
         cons_show("Roster contact char (/roster)       : none");
+    }
 
     char resource_ch = prefs_get_roster_resource_char();
     if (resource_ch)
