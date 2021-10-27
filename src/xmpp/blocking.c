@@ -38,13 +38,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-
-#ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
-#endif
 
 #include <glib.h>
 

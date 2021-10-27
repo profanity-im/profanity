@@ -43,13 +43,7 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#ifdef HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-
-#ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
-#endif
 
 #include "common.h"
 #include "log.h"
