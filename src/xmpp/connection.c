@@ -88,10 +88,8 @@ static void _xmpp_file_logger(void* const userdata, const xmpp_log_level_t level
 static void _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status, const int error,
                                 xmpp_stream_error_t* const stream_error, void* const userdata);
 
-#ifdef HAVE_LIBMESODE
-TLSCertificate* _xmppcert_to_profcert(xmpp_tlscert_t* xmpptlscert);
-static int _connection_certfail_cb(xmpp_tlscert_t* xmpptlscert, const char* const errormsg);
-#endif
+TLSCertificate* _xmppcert_to_profcert(const xmpp_tlscert_t* xmpptlscert);
+static int _connection_certfail_cb(const xmpp_tlscert_t* xmpptlscert, const char* errormsg);
 
 static void _random_bytes_init(void);
 static void _random_bytes_close(void);
@@ -214,28 +212,20 @@ connection_connect(const char* const jid, const char* const passwd, const char* 
 #undef LOG_FLAG_IF_SET
     }
 
-#ifdef HAVE_LIBMESODE
     char* cert_path = prefs_get_tls_certpath();
     if (cert_path) {
-        xmpp_conn_tlscert_path(conn.xmpp_conn, cert_path);
+        xmpp_conn_set_capath(conn.xmpp_conn, cert_path);
         free(cert_path);
     }
+
+    xmpp_conn_set_certfail_handler(conn.xmpp_conn, _connection_certfail_cb);
 
     int connect_status = xmpp_connect_client(
         conn.xmpp_conn,
         altdomain,
         port,
-        _connection_certfail_cb,
         _connection_handler,
         conn.xmpp_ctx);
-#else
-    int connect_status = xmpp_connect_client(
-        conn.xmpp_conn,
-        altdomain,
-        port,
-        _connection_handler,
-        conn.xmpp_ctx);
-#endif
 
     if (connect_status == 0) {
         conn.conn_status = JABBER_CONNECTING;
@@ -549,28 +539,20 @@ connection_register(const char* const altdomain, int port, const char* const tls
     reg->username = strdup(username);
     reg->password = strdup(password);
 
-#ifdef HAVE_LIBMESODE
     char* cert_path = prefs_get_tls_certpath();
     if (cert_path) {
-        xmpp_conn_tlscert_path(conn.xmpp_conn, cert_path);
+        xmpp_conn_set_capath(conn.xmpp_conn, cert_path);
         free(cert_path);
     }
+
+    xmpp_conn_set_certfail_handler(conn.xmpp_conn, _connection_certfail_cb);
 
     int connect_status = xmpp_connect_raw(
         conn.xmpp_conn,
         altdomain,
         port,
-        _connection_certfail_cb,
         _register_handler,
         reg);
-#else
-    int connect_status = xmpp_connect_raw(
-        conn.xmpp_conn,
-        altdomain,
-        port,
-        _register_handler,
-        reg);
-#endif
 
     if (connect_status == 0) {
         conn.conn_status = JABBER_RAW_CONNECTING;
@@ -639,17 +621,15 @@ connection_clear_data(void)
     }
 }
 
-#ifdef HAVE_LIBMESODE
 TLSCertificate*
 connection_get_tls_peer_cert(void)
 {
-    xmpp_tlscert_t* xmpptlscert = xmpp_conn_tls_peer_cert(conn.xmpp_conn);
+    xmpp_tlscert_t* xmpptlscert = xmpp_conn_get_peer_cert(conn.xmpp_conn);
     TLSCertificate* cert = _xmppcert_to_profcert(xmpptlscert);
-    xmpp_conn_free_tlscert(conn.xmpp_ctx, xmpptlscert);
+    xmpp_tlscert_free(xmpptlscert);
 
     return cert;
 }
-#endif
 
 gboolean
 connection_is_secured(void)
@@ -965,9 +945,8 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
     }
 }
 
-#ifdef HAVE_LIBMESODE
 static int
-_connection_certfail_cb(xmpp_tlscert_t* xmpptlscert, const char* const errormsg)
+_connection_certfail_cb(const xmpp_tlscert_t* xmpptlscert, const char* errormsg)
 {
     TLSCertificate* cert = _xmppcert_to_profcert(xmpptlscert);
 
@@ -978,20 +957,21 @@ _connection_certfail_cb(xmpp_tlscert_t* xmpptlscert, const char* const errormsg)
 }
 
 TLSCertificate*
-_xmppcert_to_profcert(xmpp_tlscert_t* xmpptlscert)
+_xmppcert_to_profcert(const xmpp_tlscert_t* xmpptlscert)
 {
+    int version = (int)strtol(
+        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_VERSION), NULL, 10);
     return tlscerts_new(
-        xmpp_conn_tlscert_fingerprint(xmpptlscert),
-        xmpp_conn_tlscert_version(xmpptlscert),
-        xmpp_conn_tlscert_serialnumber(xmpptlscert),
-        xmpp_conn_tlscert_subjectname(xmpptlscert),
-        xmpp_conn_tlscert_issuername(xmpptlscert),
-        xmpp_conn_tlscert_notbefore(xmpptlscert),
-        xmpp_conn_tlscert_notafter(xmpptlscert),
-        xmpp_conn_tlscert_key_algorithm(xmpptlscert),
-        xmpp_conn_tlscert_signature_algorithm(xmpptlscert));
+        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_FINGERPRINT_SHA1),
+        version,
+        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_SERIALNUMBER),
+        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_SUBJECT),
+        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_ISSUER),
+        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_NOTBEFORE),
+        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_NOTAFTER),
+        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_KEYALG),
+        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_SIGALG));
 }
-#endif
 
 static xmpp_log_t*
 _xmpp_get_file_logger(void)
