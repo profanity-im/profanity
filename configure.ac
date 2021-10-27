@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([profanity], [0.12.0], [jubalh@iodoru.org])
+AC_INIT([profanity],[0.12.0],[jubalh@iodoru.org])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
@@ -10,7 +10,7 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 ### Checks for programs.
 AC_PROG_CC
-AC_PROG_LIBTOOL
+LT_INIT
 
 ## Check for LFS
 AC_SYS_LARGEFILE
