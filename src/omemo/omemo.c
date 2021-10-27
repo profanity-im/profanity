@@ -84,6 +84,7 @@ static unsigned char* _omemo_fingerprint_decode(const char* const fingerprint, s
 static char* _omemo_unformat_fingerprint(const char* const fingerprint_formatted);
 static void _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key* identity);
 static void _g_hash_table_free(GHashTable* hash_table);
+static void _omemo_sender_devices(void);
 
 typedef gboolean (*OmemoDeviceListHandler)(const char* const jid, GList* device_list);
 
@@ -303,6 +304,9 @@ omemo_on_connect(ProfAccount* account)
         log_warning("[OMEMO] no such file: %s", omemo_ctx.trust_filename->str);
         g_error_free(error);
     }
+
+    log_debug("[OMEMO] Acquiring sender devices for current account");
+    _omemo_sender_devices();
 }
 
 void
@@ -384,14 +388,14 @@ omemo_publish_crypto_materials(void)
         return;
     }
 
+    omemo_bundle_publish(true);
+}
+
+static void _omemo_sender_devices(void) {
     char* barejid = connection_get_barejid();
 
-    /* Ensure we get our current device list, and it gets updated with our
-     * device_id */
     g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_own_device_list);
     omemo_devicelist_request(barejid);
-
-    omemo_bundle_publish(true);
 
     free(barejid);
 }
