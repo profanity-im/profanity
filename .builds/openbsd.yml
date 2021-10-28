@@ -23,7 +23,7 @@ packages:
   - sqlite3
 
 sources:
-  - https://github.com/profanity-im/libmesode.git#0.10.1
+  - https://github.com/strophe/libstrophe.git#0.11.0
   - https://github.com/profanity-im/profanity
 
 environment:
@@ -38,7 +38,7 @@ tasks:
       export AUTOCONF_VERSION=2.69
       export AUTOMAKE_VERSION=1.16
 
-      cd ~/libmesode
+      cd ~/libstrophe
       ./bootstrap.sh
       ./configure
       make

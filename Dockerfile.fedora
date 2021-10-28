@@ -53,9 +53,9 @@ RUN make
 RUN make install
 
 WORKDIR /usr/src
-RUN mkdir -p /usr/src/libmesode
-RUN git clone git://github.com/profanity-im/libmesode.git
-WORKDIR /usr/src/libmesode
+RUN mkdir -p /usr/src/libstrophe
+RUN git clone git://github.com/strophe/libstrophe.git
+WORKDIR /usr/src/libstrophe
 RUN ./bootstrap.sh
 RUN ./configure --prefix=/usr
 RUN make
