@@ -135,7 +135,7 @@ CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
 
 ### Check for libstrophe
-PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.10.0],
+PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.11.0],
     [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" XMPP_LIB="libstrophe" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
     [XMPP_LIB=""])
 
