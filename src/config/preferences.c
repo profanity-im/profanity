@@ -1088,7 +1088,6 @@ prefs_set_roster_header_char(char* ch)
     }
 }
 
-
 void
 prefs_clear_roster_header_char(void)
 {

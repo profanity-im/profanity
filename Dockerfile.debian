@@ -29,11 +29,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   python-dev-is-python3 \
   libsqlite3-dev
 
-RUN mkdir -p /usr/src/{stabber,libmesode,profanity}
+RUN mkdir -p /usr/src/{stabber,libstrophe,profanity}
 WORKDIR /usr/src
 
 RUN git clone git://github.com/boothj5/stabber.git
-RUN git clone git://github.com/profanity-im/libmesode.git
+RUN git clone git://github.com/strophe/libstrophe.git
 
 WORKDIR /usr/src/stabber
 RUN ./bootstrap.sh
@@ -41,7 +41,7 @@ RUN ./configure --prefix=/usr --disable-dependency-tracking
 RUN make
 RUN make install
 
-WORKDIR /usr/src/libmesode
+WORKDIR /usr/src/libstrophe
 RUN ./bootstrap.sh
 RUN ./configure --prefix=/usr
 RUN make

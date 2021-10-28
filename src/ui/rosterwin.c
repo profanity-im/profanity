@@ -314,7 +314,7 @@ _rosterwin_unsubscribed_item(ProfLayoutSplit* layout, ProfChatWin* chatwin)
             indent--;
         }
     }
-    char *ch = prefs_get_roster_contact_char();
+    char* ch = prefs_get_roster_contact_char();
     if (ch) {
         g_string_append_printf(msg, "%s", ch);
         free(ch);
@@ -377,7 +377,7 @@ _rosterwin_contact(ProfLayoutSplit* layout, PContact contact)
             indent--;
         }
     }
-    char *ch = prefs_get_roster_contact_char();
+    char* ch = prefs_get_roster_contact_char();
     if (ch) {
         g_string_append_printf(msg, "%s", ch);
         free(ch);

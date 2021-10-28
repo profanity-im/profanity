@@ -40,13 +40,7 @@
 
 #include "config.h"
 
-#ifdef HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-
-#ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
-#endif
 
 #include "config/accounts.h"
 #include "config/tlscerts.h"
@@ -199,9 +193,7 @@ char* connection_get_barejid(void);
 char* connection_get_user(void);
 char* connection_create_uuid(void);
 void connection_free_uuid(char* uuid);
-#ifdef HAVE_LIBMESODE
 TLSCertificate* connection_get_tls_peer_cert(void);
-#endif
 gboolean connection_is_secured(void);
 gboolean connection_send_stanza(const char* const stanza);
 GList* connection_get_available_resources(void);

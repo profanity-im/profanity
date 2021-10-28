@@ -177,7 +177,6 @@ cmd_execute_connect(ProfWin* window, const char* const account)
 gboolean
 cmd_tls_certpath(ProfWin* window, const char* const command, gchar** args)
 {
-#ifdef HAVE_LIBMESODE
     if (g_strcmp0(args[1], "set") == 0) {
         if (args[2] == NULL) {
             cons_bad_cmd_usage(command);
@@ -212,16 +211,11 @@ cmd_tls_certpath(ProfWin* window, const char* const command, gchar** args)
         cons_bad_cmd_usage(command);
         return TRUE;
     }
-#else
-    cons_show("Certificate path setting only supported when built with libmesode.");
-    return TRUE;
-#endif
 }
 
 gboolean
 cmd_tls_trust(ProfWin* window, const char* const command, gchar** args)
 {
-#ifdef HAVE_LIBMESODE
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are currently not connected.");
@@ -245,16 +239,11 @@ cmd_tls_trust(ProfWin* window, const char* const command, gchar** args)
     tlscerts_add(cert);
     tlscerts_free(cert);
     return TRUE;
-#else
-    cons_show("Manual certificate trust only supported when built with libmesode.");
-    return TRUE;
-#endif
 }
 
 gboolean
 cmd_tls_trusted(ProfWin* window, const char* const command, gchar** args)
 {
-#ifdef HAVE_LIBMESODE
     GList* certs = tlscerts_list();
     GList* curr = certs;
 
@@ -272,16 +261,11 @@ cmd_tls_trusted(ProfWin* window, const char* const command, gchar** args)
     }
     g_list_free_full(certs, (GDestroyNotify)tlscerts_free);
     return TRUE;
-#else
-    cons_show("Manual certificate trust only supported when built with libmesode.");
-    return TRUE;
-#endif
 }
 
 gboolean
 cmd_tls_revoke(ProfWin* window, const char* const command, gchar** args)
 {
-#ifdef HAVE_LIBMESODE
     if (args[1] == NULL) {
         cons_bad_cmd_usage(command);
     } else {
@@ -293,16 +277,11 @@ cmd_tls_revoke(ProfWin* window, const char* const command, gchar** args)
         }
     }
     return TRUE;
-#else
-    cons_show("Manual certificate trust only supported when built with libmesode.");
-    return TRUE;
-#endif
 }
 
 gboolean
 cmd_tls_cert(ProfWin* window, const char* const command, gchar** args)
 {
-#ifdef HAVE_LIBMESODE
     if (args[1]) {
         TLSCertificate* cert = tlscerts_get_trusted(args[1]);
         if (!cert) {
@@ -332,10 +311,6 @@ cmd_tls_cert(ProfWin* window, const char* const command, gchar** args)
         tlscerts_free(cert);
         return TRUE;
     }
-#else
-    cons_show("Certificate fetching not supported.");
-    return TRUE;
-#endif
 }
 
 gboolean

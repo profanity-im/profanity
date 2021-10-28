@@ -125,12 +125,7 @@ main(int argc, char** argv)
 
         g_print("Build information:\n");
 
-#ifdef HAVE_LIBMESODE
-        g_print("XMPP library: libmesode\n");
-#endif
-#ifdef HAVE_LIBSTROPHE
         g_print("XMPP library: libstrophe\n");
-#endif
 
         if (is_notify_enabled()) {
             g_print("Desktop notification support: Enabled\n");

@@ -44,13 +44,7 @@
 #include <stdio.h>
 #include <glib.h>
 
-#ifdef HAVE_LIBMESODE
-#include <mesode.h>
-#endif
-
-#ifdef HAVE_LIBSTROPHE
 #include <strophe.h>
-#endif
 
 #include "profanity.h"
 #include "log.h"

@@ -29,11 +29,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   python-dev \
   libsqlite3-dev
 
-RUN mkdir -p /usr/src/{stabber,libmesode,profanity}
+RUN mkdir -p /usr/src/{stabber,libstrophe,profanity}
 WORKDIR /usr/src
 
 RUN git clone git://github.com/boothj5/stabber.git
-RUN git clone git://github.com/profanity-im/libmesode.git
+RUN git clone git://github.com/strophe/libstrophe.git
 
 # TODO: Re-enable once libmicrohttpd-dev has been updated.
 #WORKDIR /usr/src/stabber
@@ -42,7 +42,7 @@ RUN git clone git://github.com/profanity-im/libmesode.git
 #RUN make
 #RUN make install
 
-WORKDIR /usr/src/libmesode
+WORKDIR /usr/src/libstrophe
 RUN ./bootstrap.sh
 RUN ./configure --prefix=/usr
 RUN make

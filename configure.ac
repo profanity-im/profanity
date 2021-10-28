@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([profanity], [0.12.0], [jubalh@iodoru.org])
+AC_INIT([profanity],[0.12.0],[jubalh@iodoru.org])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
@@ -10,7 +10,7 @@ AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 ### Checks for programs.
 AC_PROG_CC
-AC_PROG_LIBTOOL
+LT_INIT
 
 ## Check for LFS
 AC_SYS_LARGEFILE
@@ -134,21 +134,14 @@ LIBS="$PTHREAD_LIBS $LIBS"
 CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
 
-### Check for libmesode, fall back to libstrophe
-### TODO libmesode support will be removed in the future, rewrite this section
-PKG_CHECK_MODULES([libmesode], [libmesode >= 0.10.0],
-    [LIBS="$libmesode_LIBS $LIBS" CFLAGS="$CFLAGS $libmesode_CFLAGS" XMPP_LIB="libmesode" AC_DEFINE([HAVE_LIBMESODE], [1], [libmesode])],
-    [PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.10.0],
-        [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" XMPP_LIB="libstrophe" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
-        [XMPP_LIB=""])])
+### Check for libstrophe
+PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.11.0],
+    [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" XMPP_LIB="libstrophe" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
+    [XMPP_LIB=""])
 
 AC_MSG_CHECKING([whether ${XMPP_LIB} works])
 AC_LINK_IFELSE([AC_LANG_SOURCE([[
-    #ifdef HAVE_LIBMESODE
-    #include <mesode.h>
-    #else
     #include <strophe.h>
-    #endif
 
     int main() {
         xmpp_initialize();
