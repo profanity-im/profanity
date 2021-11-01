@@ -9443,28 +9443,35 @@ _get_message_from_editor(gchar* message, gchar** returned_message)
     // create editor dir if not present
     char* jid = connection_get_barejid();
     gchar* path = files_get_account_data_path(DIR_EDITOR, jid);
+    free(jid);
     if (g_mkdir_with_parents(path, S_IRWXU) != 0) {
         cons_show_error("Failed to create directory at '%s' with error '%s'", path, strerror(errno));
-        free(jid);
         g_free(path);
         return TRUE;
     }
+
     // build temp file name. Example: /home/user/.local/share/profanity/editor/jid/compose.md
     char* filename = g_strdup_printf("%s/compose.md", path);
-    free(jid);
     g_free(path);
 
     GError* creation_error = NULL;
     GFile* file = g_file_new_for_path(filename);
     GFileOutputStream* fos = g_file_create(file, G_FILE_CREATE_PRIVATE, NULL, &creation_error);
 
+    free(filename);
+
     if (message != NULL && strlen(message) > 0) {
         int fd_output_file = open(g_file_get_path(file), O_WRONLY);
-        write(fd_output_file, message, strlen(message));
+        if (fd_output_file < 0) {
+            cons_show_error("Editor: Could not open file '%s': %s", file, strerror(errno));
+            return TRUE;
+        }
+        if (-1 == write(fd_output_file, message, strlen(message))) {
+            cons_show_error("Editor: failed to write '%s' to file: %s", message, strerror(errno));
+            return TRUE;
+        }
         close(fd_output_file);
     }
-
-    free(filename);
 
     if (creation_error) {
         cons_show_error("Editor: could not create temp file");
