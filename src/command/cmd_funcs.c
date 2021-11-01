@@ -4859,7 +4859,7 @@ _add_omemo_stream(int* fd, FILE** fh, char** err)
         *err = "Unable to create temporary file for encrypted transfer.";
         return NULL;
     }
-    FILE* tmpfh = fdopen(tmpfd, "wb");
+    FILE* tmpfh = fdopen(tmpfd, "w+b");
 
     // The temporary ciphertext file should be removed after it has
     // been closed.
