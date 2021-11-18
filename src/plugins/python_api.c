@@ -196,7 +196,7 @@ python_api_register_command(PyObject* self, PyObject* args)
             free(c_synopsis[i++]);
         }
         i = 0;
-        while (c_arguments[i] != NULL && c_arguments[i][0] != NULL) {
+        while (c_arguments[i][0] != NULL) {
             free(c_arguments[i][0]);
             free(c_arguments[i][1]);
             i++;
