@@ -211,20 +211,20 @@ AS_IF([test "x$enable_icons_and_clipboard" != xno],
 
 AS_IF([test "x$PLATFORM" = xosx],
         [AC_PATH_PROG([BREW], [brew], ["failed"],
-            [$PATH$PATH_SEPARATOR/opt/homebrew/bin$PATH_SEPARATOR/usr/local/bin])
+            [$PATH:/opt/homebrew/bin:/usr/local/bin])
         AS_IF([test "x$BREW" = xfailed],
-            [AC_CHECK_FILE([/opt/local/lib],
+            [AC_CHECK_FILE([/opt/local/lib/libreadline.dylib],
                 [READLINE_PREFIX="/opt/local"],
                 [READLINE_PREFIX="/usr/local"])],
             [READLINE_PREFIX="`$BREW --prefix readline`"])])
 
 AS_IF([test "x$PLATFORM" = xosx],
-    [AC_CHECK_FILE([$READLINE_PREFIX/lib],
+    [AC_CHECK_FILE([$READLINE_PREFIX/lib/libreadline.dylib],
         [LIBS="-lreadline $LIBS"
             AM_CPPFLAGS="-I$READLINE_PREFIX/include $AM_CPPFLAGS"
             AM_LDFLAGS="-L$READLINE_PREFIX/lib $AM_LDFLAGS"
             AC_SUBST(AM_LDFLAGS)],
-        [AC_MSG_ERROR([libreadline is required for profanity])])],
+        [AC_MSG_ERROR([libreadline is required for profanity. Install it with Homebrew, MacPorts, or manually into /usr/local])])],
 
       [test "x$PLATFORM" = xopenbsd],
       [AC_CHECK_FILE([/usr/local/include/ereadline],
