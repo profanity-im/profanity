@@ -210,10 +210,19 @@ AS_IF([test "x$enable_icons_and_clipboard" != xno],
                                   [AC_MSG_NOTICE([gtk+-3.0/gtk+2.0 not found, icons and clipboard not enabled])])])])])
 
 AS_IF([test "x$PLATFORM" = xosx],
-    [AC_CHECK_FILE([/usr/local/opt/readline/lib],
+        [AC_PATH_PROG([BREW], [brew], ["failed"],
+            [$PATH$PATH_SEPARATOR/opt/homebrew/bin$PATH_SEPARATOR/usr/local/bin])
+        AS_IF([test "x$BREW" = xfailed],
+            [AC_CHECK_FILE([/opt/local/lib],
+                [READLINE_PREFIX="/opt/local"],
+                [READLINE_PREFIX="/usr/local"])],
+            [READLINE_PREFIX="`$BREW --prefix readline`"])])
+
+AS_IF([test "x$PLATFORM" = xosx],
+    [AC_CHECK_FILE([$READLINE_PREFIX/lib],
         [LIBS="-lreadline $LIBS"
-            AM_CPPFLAGS="-I/usr/local/opt/readline/include $AM_CPPFLAGS"
-            AM_LDFLAGS="-L/usr/local/opt/readline/lib $AM_LDFLAGS"
+            AM_CPPFLAGS="-I$READLINE_PREFIX/include $AM_CPPFLAGS"
+            AM_LDFLAGS="-L$READLINE_PREFIX/lib $AM_LDFLAGS"
             AC_SUBST(AM_LDFLAGS)],
         [AC_MSG_ERROR([libreadline is required for profanity])])],
 
