@@ -223,7 +223,13 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
         gboolean is_carbon = FALSE;
 
         // XEP-0280: Message Carbons
-        xmpp_stanza_t* carbons = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_CARBONS);
+        // Only allow `<sent xmlns='urn:xmpp:carbons:2'>` and `<received xmlns='urn:xmpp:carbons:2'>` carbons
+        // Thus ignoring `<private xmlns="urn:xmpp:carbons:2"/>`
+        xmpp_stanza_t* carbons = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_SENT, STANZA_NS_CARBONS);
+        if (!carbons) {
+            carbons = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_RECEIVED, STANZA_NS_CARBONS);
+        }
+
         if (carbons) {
 
             // carbon must come from ourselves
@@ -1283,7 +1289,7 @@ _handle_carbons(xmpp_stanza_t* const stanza)
     }
     */
 
-    if ((g_strcmp0(name, "received") != 0) && (g_strcmp0(name, "sent") != 0)) {
+    if ((g_strcmp0(name, STANZA_NAME_RECEIVED) != 0) && (g_strcmp0(name, STANZA_NAME_SENT) != 0)) {
         log_warning("Carbon received with unrecognised stanza name: %s", name);
         return NULL;
     }
