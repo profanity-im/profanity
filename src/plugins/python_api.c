@@ -158,7 +158,7 @@ python_api_register_command(PyObject* self, PyObject* args)
         c_synopsis[len] = NULL;
 
         Py_ssize_t args_len = PyList_Size(arguments);
-        char* c_arguments[args_len == 0 ? 0 : args_len + 1][2];
+        char* c_arguments[args_len + 1][2];
         for (i = 0; i < args_len; i++) {
             PyObject* item = PyList_GetItem(arguments, i);
             Py_ssize_t len2 = PyList_Size(item);
@@ -196,7 +196,7 @@ python_api_register_command(PyObject* self, PyObject* args)
             free(c_synopsis[i++]);
         }
         i = 0;
-        while (c_arguments[i] != NULL && c_arguments[i][0] != NULL) {
+        while (c_arguments[i][0] != NULL) {
             free(c_arguments[i][0]);
             free(c_arguments[i][1]);
             i++;
