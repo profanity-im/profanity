@@ -50,7 +50,34 @@ notify_dep = dependency('libnotify', required : get_option('notifications'))
 if notify_dep.found()
   conf.set_quoted('HAVE_LIBNOTIFY', '1')
 endif
+# TODO: check for otr3 and otr4
+otr_dep = dependency('libotr', version: '>= 4.0', required : get_option('otr'))
+if otr_dep.found()
+  conf.set_quoted('BUILD_OTR', '1')
+endif
+pgp_dep = dependency('gpgme', required : get_option('pgp'))
+if pgp_dep.found()
+  conf.set_quoted('BUILD_PGP', '1')
+endif
+# TODO: HAVE_LIBSIGNAL_LT_2_3_2
+omemo_libsignal_dep = dependency('libsignal-protocol-c', version: '>= 2.3.2', required : get_option('pgp'))
+omemo_gcrypt_dep = dependency('libsignal-protocol-c', version: '>= 1.7.0', required : get_option('pgp'))
+if omemo_libsignal_dep.found() and omemo_gcrypt_dep.found()
+  conf.set_quoted('BUILD_OMEMO', '1')
+endif
+# TODO: Xss not detected?
+screensaver_xss_dep = dependency('Xss', required : get_option('xscreensaver'))
+screensaver_x11_dep = dependency('X11', required : get_option('xscreensaver'))
+if screensaver_xss_dep.found() and screensaver_x11_dep.found()
+  conf.set_quoted('HAVE_LIBXSS', '1')
+endif
+icons_clipboard_gtk_dep = dependency('gtk+-3.0', version: '>= 3.24.0', required : get_option('icons-and-clipboard'))
+if icons_clipboard_gtk_dep.found()
+  conf.set_quoted('HAVE_GTK', '1')
+endif
 
+
+# TODO: set ICONS_PATH
 
 conf.set_quoted('PACKAGE_VERSION', meson.project_version())
 conf.set_quoted('PACKAGE_STATUS', 'development')
@@ -66,6 +93,8 @@ config_h = configure_file(output : 'config.h', configuration : conf)
 
 subdir('src')
 
+# TODO: output build info
+
 profanity = executable('profanity',
             core_sources_c,
             dependencies : [ glib_dep,
@@ -76,6 +105,13 @@ profanity = executable('profanity',
                              m_dep,
                              curses_dep,
                              notify_dep,
+                             otr_dep,
+                             pgp_dep,
+                             omemo_libsignal_dep,
+                             omemo_gcrypt_dep,
+                             screensaver_xss_dep,
+                             screensaver_x11_dep,
+                             icons_clipboard_gtk_dep,
                              libstrophe_dep ],
             include_directories : incdir,
             install : true)
