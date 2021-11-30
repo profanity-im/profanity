@@ -84,6 +84,7 @@ static unsigned char* _omemo_fingerprint_decode(const char* const fingerprint, s
 static char* _omemo_unformat_fingerprint(const char* const fingerprint_formatted);
 static void _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key* identity);
 static void _g_hash_table_free(GHashTable* hash_table);
+static void _acquire_sender_devices_list(void);
 
 typedef gboolean (*OmemoDeviceListHandler)(const char* const jid, GList* device_list);
 
@@ -384,14 +385,14 @@ omemo_publish_crypto_materials(void)
         return;
     }
 
+    omemo_bundle_publish(true);
+}
+
+static void _acquire_sender_devices_list(void) {
     char* barejid = connection_get_barejid();
 
-    /* Ensure we get our current device list, and it gets updated with our
-     * device_id */
     g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_own_device_list);
     omemo_devicelist_request(barejid);
-
-    omemo_bundle_publish(true);
 
     free(barejid);
 }
@@ -399,6 +400,11 @@ omemo_publish_crypto_materials(void)
 void
 omemo_start_sessions(void)
 {
+    // before any session may be started, a list on
+    // available sender devices must be acquired
+    log_debug("[OMEMO] Acquiring sender devices list");
+    _acquire_sender_devices_list();
+
     GSList* contacts = roster_get_contacts(ROSTER_ORD_NAME);
     if (contacts) {
         GSList* curr;
