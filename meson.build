@@ -41,7 +41,7 @@ foreach h : check_headers
 endforeach
 
 
-libstrophe_dep = dependency('libstrophe', version: '>= 0.10.0')
+libstrophe_dep = dependency('libstrophe', version: '>= 0.11.0')
 conf.set('HAVE_LIBSTROPHE', 1)
 
 
