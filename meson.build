@@ -59,9 +59,11 @@ pgp_dep = dependency('gpgme', required : get_option('pgp'))
 if pgp_dep.found()
   conf.set_quoted('HAVE_LIBGPGME', '1')
 endif
-# TODO: HAVE_LIBSIGNAL_LT_2_3_2
 omemo_libsignal_dep = dependency('libsignal-protocol-c', version: '>= 2.3.2', required : get_option('omemo'))
-omemo_gcrypt_dep = dependency('libsignal-protocol-c', version: '>= 1.7.0', required : get_option('omemo'))
+if omemo_libsignal_dep.version().version_compare('< 2.3.2')
+    conf.set_quoted('HAVE_LIBSIGNAL_LT_2_3_2', '1')
+endif
+omemo_gcrypt_dep = dependency('gcrypt', version: '>= 1.7.0', required : get_option('omemo'))
 if omemo_libsignal_dep.found() and omemo_gcrypt_dep.found()
   conf.set_quoted('HAVE_OMEMO', '1')
 endif
