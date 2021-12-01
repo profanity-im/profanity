@@ -93,3 +93,16 @@ if otr_dep.found()
 
   otr_internal_dep = declare_dependency(sources: otr_sources, include_directories: include_directories('otr'), dependencies: otr_dep)
 endif
+
+omemo_internal_dep = declare_dependency()
+if omemo_libsignal_dep.found() and omemo_gcrypt_dep.found()
+  omemo_sources = [ files('omemo/omemo.c',
+                          'omemo/crypto.c',
+                          'omemo/store.c',
+                          'xmpp/omemo.c',
+                          'tools/aesgcm_download.c'
+                          )
+                ]
+
+  omemo_internal_dep = declare_dependency(sources: omemo_sources, include_directories: include_directories('omemo'))
+endif
