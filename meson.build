@@ -53,17 +53,17 @@ endif
 # TODO: check for otr3 and otr4
 otr_dep = dependency('libotr', version: '>= 4.0', required : get_option('otr'))
 if otr_dep.found()
-  conf.set_quoted('BUILD_OTR', '1')
+  conf.set_quoted('HAVE_LIBOTR', '1')
 endif
 pgp_dep = dependency('gpgme', required : get_option('pgp'))
 if pgp_dep.found()
   conf.set_quoted('HAVE_LIBGPGME', '1')
 endif
 # TODO: HAVE_LIBSIGNAL_LT_2_3_2
-omemo_libsignal_dep = dependency('libsignal-protocol-c', version: '>= 2.3.2', required : get_option('pgp'))
-omemo_gcrypt_dep = dependency('libsignal-protocol-c', version: '>= 1.7.0', required : get_option('pgp'))
+omemo_libsignal_dep = dependency('libsignal-protocol-c', version: '>= 2.3.2', required : get_option('omemo'))
+omemo_gcrypt_dep = dependency('libsignal-protocol-c', version: '>= 1.7.0', required : get_option('omemo'))
 if omemo_libsignal_dep.found() and omemo_gcrypt_dep.found()
-  conf.set_quoted('BUILD_OMEMO', '1')
+  conf.set_quoted('HAVE_OMEMO', '1')
 endif
 # TODO: Xss not detected?
 screensaver_xss_dep = dependency('xscrnsaver', required : get_option('xscreensaver'))
