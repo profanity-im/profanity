@@ -85,8 +85,9 @@ endif
 
 otr_internal_dep = declare_dependency()
 if otr_dep.found()
-  otr_sources = [ 'src/otr/otrlibv4.c',
-                  'src/otr/otr.c',
+  otr_sources = [ files('otr/otrlibv4.c',
+                        'otr/otr.c',
+                       )
                 ]
 
   otr_internal_dep = declare_dependency(sources: otr_sources, include_directories: include_directories('otr'), dependencies: otr_dep)
