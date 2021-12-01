@@ -1,3 +1,4 @@
+# main sources
 core_sources_c = [ 'src/main.c',
                    'src/profanity.c',
                    'src/log.c',
@@ -73,4 +74,20 @@ core_sources_c = [ 'src/main.c',
                    config_h
 ]
 
+sources = core_sources_c
 incdir = include_directories('.', 'command', 'config', 'ui', 'plugins', 'xmpp')
+
+# optional sources
+
+if pgp_dep.found()
+  sources += 'src/pgp/gpg.c'
+endif
+
+if otr_dep.found()
+  otr_sources = [ 'src/otr/otrlibv4.c',
+                 'src/otr/otr.c',
+                 ]
+  incdir += include_directories('otr')
+
+  sources += otr_sources
+endif

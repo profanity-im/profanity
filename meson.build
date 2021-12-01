@@ -57,7 +57,7 @@ if otr_dep.found()
 endif
 pgp_dep = dependency('gpgme', required : get_option('pgp'))
 if pgp_dep.found()
-  conf.set_quoted('BUILD_PGP', '1')
+  conf.set_quoted('HAVE_LIBGPGME', '1')
 endif
 # TODO: HAVE_LIBSIGNAL_LT_2_3_2
 omemo_libsignal_dep = dependency('libsignal-protocol-c', version: '>= 2.3.2', required : get_option('pgp'))
@@ -96,7 +96,7 @@ subdir('src')
 # TODO: output build info
 
 profanity = executable('profanity',
-            core_sources_c,
+            sources,
             dependencies : [ glib_dep,
                              gio_dep,
                              curl_dep,
