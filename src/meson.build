@@ -83,11 +83,11 @@ if pgp_dep.found()
   sources += 'src/pgp/gpg.c'
 endif
 
+otr_internal_dep = declare_dependency()
 if otr_dep.found()
   otr_sources = [ 'src/otr/otrlibv4.c',
-                 'src/otr/otr.c',
-                 ]
-  incdir += include_directories('otr')
+                  'src/otr/otr.c',
+                ]
 
-  sources += otr_sources
+  otr_internal_dep = declare_dependency(sources: otr_sources, include_directories: include_directories('otr'), dependencies: otr_dep)
 endif
