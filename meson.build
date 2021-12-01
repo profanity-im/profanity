@@ -66,7 +66,7 @@ if omemo_libsignal_dep.found() and omemo_gcrypt_dep.found()
   conf.set_quoted('BUILD_OMEMO', '1')
 endif
 # TODO: Xss not detected?
-screensaver_xss_dep = dependency('Xss', required : get_option('xscreensaver'))
+screensaver_xss_dep = dependency('xscrnsaver', required : get_option('xscreensaver'))
 screensaver_x11_dep = dependency('X11', required : get_option('xscreensaver'))
 if screensaver_xss_dep.found() and screensaver_x11_dep.found()
   conf.set_quoted('HAVE_LIBXSS', '1')
