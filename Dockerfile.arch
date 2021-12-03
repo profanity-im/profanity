@@ -1,4 +1,4 @@
-FROM archlinux/base
+FROM archlinux/latest
 
 RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   autoconf \
