@@ -2679,6 +2679,22 @@ static struct cmd_t command_defs[] = {
               "/register someuser my.xmppserv.er port 5443 tls force")
     },
 
+    { "/mood",
+      parse_args, 2, 3, NULL,
+      CMD_NOSUBFUNCS
+      CMD_MAINFUNC(cmd_mood)
+      CMD_TAGS(
+              CMD_TAG_CHAT)
+      CMD_SYN(
+              "/mood set <mood> [text]")
+      CMD_DESC(
+              "Set your mood (XEP-0107). Use tab to switch through predefined moods.")
+      CMD_ARGS(
+              { "set <mood>", "Setting your mood." },
+              { "<text>", "Additional Text." })
+      CMD_EXAMPLES(
+              "/mood set happy \"So happy to use Profanity!\"")
+    },
     // NEXT-COMMAND (search helper)
 };
 

@@ -161,8 +161,16 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
     } else if (type && g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0) {
         // XEP-0045: Multi-User Chat
         _handle_groupchat(stanza);
+
     } else if (type && g_strcmp0(type, STANZA_TYPE_HEADLINE) == 0) {
-        _handle_headline(stanza);
+        xmpp_stanza_t* event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
+        // TODO: do we want to handle all pubsub here or should additionaly check for STANZA_NS_MOOD?
+        if (event) {
+            _handle_pubsub(stanza, event);
+            return 1;
+        } else {
+            _handle_headline(stanza);
+        }
     } else if (type == NULL || g_strcmp0(type, STANZA_TYPE_CHAT) == 0 || g_strcmp0(type, STANZA_TYPE_NORMAL) == 0) {
         // type: chat, normal (==NULL)
 

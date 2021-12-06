@@ -129,6 +129,7 @@ static char* _url_autocomplete(ProfWin* window, const char* const input, gboolea
 static char* _executable_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _intype_autocomplete(ProfWin* window, const char* const input, gboolean previous);
+static char* _mood_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char* const prefix, gboolean previous, void* context);
 
@@ -269,6 +270,8 @@ static Autocomplete avatar_ac;
 static Autocomplete url_ac;
 static Autocomplete executable_ac;
 static Autocomplete intype_ac;
+static Autocomplete mood_ac;
+static Autocomplete mood_type_ac;
 
 /*!
  * \brief Initialization of auto completion for commands.
@@ -1057,6 +1060,90 @@ cmd_ac_init(void)
     intype_ac = autocomplete_new();
     autocomplete_add(intype_ac, "console");
     autocomplete_add(intype_ac, "titlebar");
+
+    mood_ac = autocomplete_new();
+    autocomplete_add(mood_ac, "set");
+    mood_type_ac = autocomplete_new();
+    autocomplete_add(mood_type_ac, "afraid");
+    autocomplete_add(mood_type_ac, "amazed");
+    autocomplete_add(mood_type_ac, "angry");
+    autocomplete_add(mood_type_ac, "amorous");
+    autocomplete_add(mood_type_ac, "annoyed");
+    autocomplete_add(mood_type_ac, "anxious");
+    autocomplete_add(mood_type_ac, "aroused");
+    autocomplete_add(mood_type_ac, "ashamed");
+    autocomplete_add(mood_type_ac, "bored");
+    autocomplete_add(mood_type_ac, "brave");
+    autocomplete_add(mood_type_ac, "calm");
+    autocomplete_add(mood_type_ac, "cautious");
+    autocomplete_add(mood_type_ac, "cold");
+    autocomplete_add(mood_type_ac, "confident");
+    autocomplete_add(mood_type_ac, "confused");
+    autocomplete_add(mood_type_ac, "contemplative");
+    autocomplete_add(mood_type_ac, "contented");
+    autocomplete_add(mood_type_ac, "cranky");
+    autocomplete_add(mood_type_ac, "crazy");
+    autocomplete_add(mood_type_ac, "creative");
+    autocomplete_add(mood_type_ac, "curious");
+    autocomplete_add(mood_type_ac, "dejected");
+    autocomplete_add(mood_type_ac, "depressed");
+    autocomplete_add(mood_type_ac, "disappointed");
+    autocomplete_add(mood_type_ac, "disgusted");
+    autocomplete_add(mood_type_ac, "dismayed");
+    autocomplete_add(mood_type_ac, "distracted");
+    autocomplete_add(mood_type_ac, "embarrassed");
+    autocomplete_add(mood_type_ac, "envious");
+    autocomplete_add(mood_type_ac, "excited");
+    autocomplete_add(mood_type_ac, "flirtatious");
+    autocomplete_add(mood_type_ac, "frustrated");
+    autocomplete_add(mood_type_ac, "grumpy");
+    autocomplete_add(mood_type_ac, "guilty");
+    autocomplete_add(mood_type_ac, "happy");
+    autocomplete_add(mood_type_ac, "hopeful");
+    autocomplete_add(mood_type_ac, "hot");
+    autocomplete_add(mood_type_ac, "humbled");
+    autocomplete_add(mood_type_ac, "humiliated");
+    autocomplete_add(mood_type_ac, "hungry");
+    autocomplete_add(mood_type_ac, "hurt");
+    autocomplete_add(mood_type_ac, "impressed");
+    autocomplete_add(mood_type_ac, "in_awe");
+    autocomplete_add(mood_type_ac, "in_love");
+    autocomplete_add(mood_type_ac, "indignant");
+    autocomplete_add(mood_type_ac, "interested");
+    autocomplete_add(mood_type_ac, "intoxicated");
+    autocomplete_add(mood_type_ac, "invincible");
+    autocomplete_add(mood_type_ac, "jealous");
+    autocomplete_add(mood_type_ac, "lonely");
+    autocomplete_add(mood_type_ac, "lucky");
+    autocomplete_add(mood_type_ac, "mean");
+    autocomplete_add(mood_type_ac, "moody");
+    autocomplete_add(mood_type_ac, "nervous");
+    autocomplete_add(mood_type_ac, "neutral");
+    autocomplete_add(mood_type_ac, "offended");
+    autocomplete_add(mood_type_ac, "outraged");
+    autocomplete_add(mood_type_ac, "playful");
+    autocomplete_add(mood_type_ac, "proud");
+    autocomplete_add(mood_type_ac, "relaxed");
+    autocomplete_add(mood_type_ac, "relieved");
+    autocomplete_add(mood_type_ac, "remorseful");
+    autocomplete_add(mood_type_ac, "restless");
+    autocomplete_add(mood_type_ac, "sad");
+    autocomplete_add(mood_type_ac, "sarcastic");
+    autocomplete_add(mood_type_ac, "serious");
+    autocomplete_add(mood_type_ac, "shocked");
+    autocomplete_add(mood_type_ac, "shy");
+    autocomplete_add(mood_type_ac, "sick");
+    autocomplete_add(mood_type_ac, "sleepy");
+    autocomplete_add(mood_type_ac, "spontaneous");
+    autocomplete_add(mood_type_ac, "stressed");
+    autocomplete_add(mood_type_ac, "strong");
+    autocomplete_add(mood_type_ac, "surprised");
+    autocomplete_add(mood_type_ac, "thankful");
+    autocomplete_add(mood_type_ac, "thirsty");
+    autocomplete_add(mood_type_ac, "tired");
+    autocomplete_add(mood_type_ac, "undefined");
+    autocomplete_add(mood_type_ac, "weak");
+    autocomplete_add(mood_type_ac, "worried");
 }
 
 void
@@ -1372,6 +1459,8 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(url_ac);
     autocomplete_reset(executable_ac);
     autocomplete_reset(intype_ac);
+    autocomplete_reset(mood_ac);
+    autocomplete_reset(mood_type_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1801,6 +1890,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/executable", _executable_autocomplete);
     g_hash_table_insert(ac_funcs, "/lastactivity", _lastactivity_autocomplete);
     g_hash_table_insert(ac_funcs, "/intype", _intype_autocomplete);
+    g_hash_table_insert(ac_funcs, "/mood", _mood_autocomplete);
 
     int len = strlen(input);
     char parsed[len + 1];
@@ -4145,5 +4235,23 @@ _intype_autocomplete(ProfWin* window, const char* const input, gboolean previous
     }
 
     result = autocomplete_param_with_ac(input, "/intype", intype_ac, FALSE, previous);
+    return result;
+}
+
+static char*
+_mood_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+{
+    char* result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/mood", status_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/mood set", mood_type_ac, FALSE, previous);
+    if (result) {
+        return result;
+    }
+
     return result;
 }

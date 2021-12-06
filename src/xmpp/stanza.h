@@ -117,6 +117,8 @@
 #define STANZA_NAME_USERNAME         "username"
 #define STANZA_NAME_PROPOSE          "propose"
 #define STANZA_NAME_REPORT           "report"
+#define STANZA_NAME_EVENT            "event"
+#define STANZA_NAME_MOOD             "mood"
 #define STANZA_NAME_RECEIVED         "received"
 #define STANZA_NAME_SENT             "sent"
 
@@ -241,6 +243,8 @@
 #define STANZA_NS_JINGLE_MESSAGE          "urn:xmpp:jingle-message:0"
 #define STANZA_NS_JINGLE_RTP              "urn:xmpp:jingle:apps:rtp:1"
 #define STANZA_NS_REPORTING               "urn:xmpp:reporting:1"
+#define STANZA_NS_MOOD                    "http://jabber.org/protocol/mood"
+#define STANZA_NS_MOOD_NOTIFY             "http://jabber.org/protocol/mood+notify"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
