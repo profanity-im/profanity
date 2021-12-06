@@ -2686,14 +2686,14 @@ static struct cmd_t command_defs[] = {
       CMD_TAGS(
               CMD_TAG_CHAT)
       CMD_SYN(
-              "/mood set <mood> [\"Text\"]")
+              "/mood set <mood> [text]")
       CMD_DESC(
-              "Set your mood. Use the tab key to switch through the available moods")
+              "Set your mood (XEP-0107). Use tab to switch through predefined moods.")
       CMD_ARGS(
-              { "set <mood>", "Your mood" },
-              { "<text>", "Additional Text" })
+              { "set <mood>", "Setting your mood." },
+              { "<text>", "Additional Text." })
       CMD_EXAMPLES(
-              "/mood set happy \"I'm happy\"")
+              "/mood set happy \"So happy to use Profanity!\"")
     },
     // NEXT-COMMAND (search helper)
 };
