@@ -82,7 +82,7 @@ _free_command_help(CommandHelp* help)
     free(help->desc);
 
     i = 0;
-    while (help->args[i] != NULL && help->args[i][0] != NULL) {
+    while (help->args[i][0] != NULL) {
         free(help->args[i][0]);
         free(help->args[i][1]);
         i++;

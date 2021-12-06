@@ -119,6 +119,8 @@
 #define STANZA_NAME_REPORT           "report"
 #define STANZA_NAME_EVENT            "event"
 #define STANZA_NAME_MOOD             "mood"
+#define STANZA_NAME_RECEIVED         "received"
+#define STANZA_NAME_SENT             "sent"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST             "bad-request"
