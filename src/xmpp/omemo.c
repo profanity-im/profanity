@@ -72,6 +72,8 @@ omemo_devicelist_publish(GList* device_list)
 
     if (connection_supports(XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS)) {
         stanza_attach_publish_options(ctx, iq, "pubsub#access_model", "open");
+    } else {
+        log_debug("[OMEMO] Cannot publish devicelist: no PUBSUB feature announced");
     }
 
     iq_id_handler_add(xmpp_stanza_get_id(iq), _omemo_devicelist_publish_result, NULL, NULL);
@@ -148,6 +150,8 @@ omemo_bundle_publish(gboolean first)
                                          4, // 2 * number of key-value pairs
                                          "pubsub#persist_items", "true",
                                          "pubsub#access_model", "open");
+    } else {
+        log_debug("[OMEMO] Cannot publish bundle: no PUBSUB feature announced");
     }
 
     iq_id_handler_add(id, _omemo_bundle_publish_result, NULL, GINT_TO_POINTER(first));
