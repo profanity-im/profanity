@@ -1,14 +1,15 @@
-image: openbsd/6.8
+image: openbsd/7.0
 
 packages:
+  - gcc-11.2.0p0
   - cmake
   - gmake
   - cmocka
   - libtool
-  - automake-1.16.2
+  - automake-1.16.3
   - pkgconf
   - readline
-  - python-3.8.6p0
+  - python-3.8.12
   - autoconf-2.69p3
   - autoconf-archive
   - curl

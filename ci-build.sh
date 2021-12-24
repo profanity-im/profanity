@@ -89,7 +89,7 @@ case $(uname | tr '[:upper:]' '[:lower:]') in
         # `-std=gnu99 -fexec-charset=UTF-8` to silence:
         # src/event/server_events.c:1453:19: error: universal character names are only valid in C++ and C99
         # src/event/server_events.c:1454:19: error: universal character names are only valid in C++ and C99
-        CC="gcc -std=gnu99 -fexec-charset=UTF-8"
+        CC="egcc -std=gnu99 -fexec-charset=UTF-8"
 
         tests=(
         "--enable-notifications --enable-icons-and-clipboard --enable-otr --enable-pgp
