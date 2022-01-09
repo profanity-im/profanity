@@ -61,6 +61,7 @@
 #include "command/cmd_defs.h"
 #include "plugins/plugins.h"
 #include "event/client_events.h"
+#include "ui/inputwin.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/resource.h"
@@ -91,7 +92,7 @@ static gboolean _main_update(gpointer data);
 
 pthread_mutex_t lock;
 static gboolean force_quit = FALSE;
-static GMainLoop* main_loop = NULL;
+GMainLoop* mainloop = NULL;
 
 void
 prof_run(char* log_level, char* account_name, char* config_file, char* log_file, char* theme_name)
@@ -106,9 +107,10 @@ prof_run(char* log_level, char* account_name, char* config_file, char* log_file,
 
     session_init_activity();
 
-    main_loop = g_main_loop_new(NULL, TRUE);
+    mainloop = g_main_loop_new(NULL, TRUE);
     g_timeout_add(1000/60, _main_update, NULL);
-    g_main_loop_run(main_loop);
+    inp_add_watch();
+    g_main_loop_run(mainloop);
 }
 
 void
@@ -123,15 +125,6 @@ _main_update(gpointer data)
     log_stderr_handler();
     session_check_autoaway();
 
-    gboolean cont = TRUE;
-    char *line = inp_readline();
-    if (line) {
-        ProfWin* window = wins_get_current();
-        cont = cmd_process_input(window, line);
-        free(line);
-        line = NULL;
-    }
-
 #ifdef HAVE_LIBOTR
     otr_poll();
 #endif
@@ -143,9 +136,6 @@ _main_update(gpointer data)
 #ifdef HAVE_GTK
     tray_update();
 #endif
-
-    if (!cont)
-        g_main_loop_quit(main_loop);
 
     // Always repeat
     return TRUE;

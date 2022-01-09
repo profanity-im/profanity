@@ -171,6 +171,44 @@ create_input_window(void)
     _inp_win_update_virtual();
 }
 
+static gboolean
+_inp_callback(GIOChannel *source, GIOCondition condition, gpointer data)
+{
+    rl_callback_read_char();
+
+    ui_reset_idle_time();
+    if (!get_password) {
+        // Update the input buffer on screen
+        _inp_write(rl_line_buffer, rl_point);
+    }
+    // TODO set idle or activity with a timeout
+    //chat_state_idle();
+    //chat_state_activity();
+
+    if (inp_line) {
+        ProfWin* window = wins_get_current();
+
+        if (!cmd_process_input(window, inp_line))
+            g_main_loop_quit(mainloop);
+
+        free(inp_line);
+        inp_line = NULL;
+    }
+
+    return TRUE;
+}
+
+void
+inp_add_watch(void)
+{
+    GIOChannel* channel = g_io_channel_unix_new(fileno(rl_instream));
+    if (g_io_channel_set_encoding(channel, NULL, NULL) != G_IO_STATUS_NORMAL) {
+        log_error("cannot set NULL encoding");
+    }
+
+    g_io_add_watch(channel, G_IO_IN, _inp_callback, NULL);
+}
+
 char*
 inp_readline(void)
 {
