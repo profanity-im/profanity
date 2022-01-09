@@ -47,6 +47,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <glib.h>
 
@@ -89,15 +90,15 @@
 static void _init(char* log_level, char* config_file, char* log_file, char* theme_name);
 static void _shutdown(void);
 static void _connect_default(const char* const account);
+static gboolean _main_update(gpointer data);
 
 pthread_mutex_t lock;
 static gboolean force_quit = FALSE;
+static GMainLoop* main_loop = NULL;
 
 void
 prof_run(char* log_level, char* account_name, char* config_file, char* log_file, char* theme_name)
 {
-    gboolean cont = TRUE;
-
     _init(log_level, config_file, log_file, theme_name);
     plugins_on_start();
     _connect_default(account_name);
@@ -108,39 +109,49 @@ prof_run(char* log_level, char* account_name, char* config_file, char* log_file,
 
     session_init_activity();
 
-    char* line = NULL;
-    while (cont && !force_quit) {
-        log_stderr_handler();
-        session_check_autoaway();
-
-        line = inp_readline();
-        if (line) {
-            ProfWin* window = wins_get_current();
-            cont = cmd_process_input(window, line);
-            free(line);
-            line = NULL;
-        } else {
-            cont = TRUE;
-        }
-
-#ifdef HAVE_LIBOTR
-        otr_poll();
-#endif
-        plugins_run_timed();
-        notify_remind();
-        session_process_events();
-        iq_autoping_check();
-        ui_update();
-#ifdef HAVE_GTK
-        tray_update();
-#endif
-    }
+    main_loop = g_main_loop_new(NULL, TRUE);
+    g_timeout_add(1000/60, _main_update, NULL);
+    g_main_loop_run(main_loop);
 }
 
 void
 prof_set_quit(void)
 {
     force_quit = TRUE;
+}
+
+static gboolean
+_main_update(gpointer data)
+{
+    log_stderr_handler();
+    session_check_autoaway();
+
+    gboolean cont = TRUE;
+    char *line = inp_readline();
+    if (line) {
+        ProfWin* window = wins_get_current();
+        cont = cmd_process_input(window, line);
+        free(line);
+        line = NULL;
+    }
+
+#ifdef HAVE_LIBOTR
+    otr_poll();
+#endif
+    plugins_run_timed();
+    notify_remind();
+    session_process_events();
+    iq_autoping_check();
+    ui_update();
+#ifdef HAVE_GTK
+    tray_update();
+#endif
+
+    if (!cont)
+        g_main_loop_quit(main_loop);
+
+    // Always repeat
+    return TRUE;
 }
 
 static void
