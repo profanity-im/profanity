@@ -45,7 +45,7 @@ RUN mkdir -p /usr/src
 WORKDIR /usr/src
 
 RUN mkdir -p /usr/src/stabber
-RUN git clone git://github.com/boothj5/stabber.git
+RUN git clone https://github.com/boothj5/stabber
 WORKDIR /usr/src/stabber
 RUN ./bootstrap.sh
 RUN ./configure --prefix=/usr --disable-dependency-tracking
@@ -54,7 +54,7 @@ RUN make install
 
 WORKDIR /usr/src
 RUN mkdir -p /usr/src/libstrophe
-RUN git clone git://github.com/strophe/libstrophe.git
+RUN git clone https://github.com/strophe/libstrophe
 WORKDIR /usr/src/libstrophe
 RUN ./bootstrap.sh
 RUN ./configure --prefix=/usr

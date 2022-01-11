@@ -53,7 +53,7 @@ RUN pacman -U --noconfirm libstrophe-git/libstrophe-git-*.pkg.tar.zst
 RUN pacman -U --noconfirm libsignal-protocol-c/libsignal-protocol-c-*.pkg.tar.zst
 
 WORKDIR /usr/src
-RUN git clone git://github.com/boothj5/stabber.git
+RUN git clone https://github.com/boothj5/stabber
 
 WORKDIR /usr/src/stabber
 RUN ./bootstrap.sh

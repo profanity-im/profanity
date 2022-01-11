@@ -32,8 +32,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN mkdir -p /usr/src/{stabber,libstrophe,profanity}
 WORKDIR /usr/src
 
-RUN git clone git://github.com/boothj5/stabber.git
-RUN git clone git://github.com/strophe/libstrophe.git
+RUN git clone https://github.com/boothj5/stabber
+RUN git clone https://github.com/strophe/libstrophe
 
 WORKDIR /usr/src/stabber
 RUN ./bootstrap.sh
