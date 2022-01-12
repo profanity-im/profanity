@@ -33,7 +33,7 @@ RUN mkdir -p /usr/src/{stabber,libstrophe,profanity}
 WORKDIR /usr/src
 
 #RUN git clone https://github.com/boothj5/stabber
-RUN git clone https://github.com/strophe/libstrophe
+RUN git clone -c http.sslverify=false https://github.com/strophe/libstrophe
 
 #WORKDIR /usr/src/stabber
 #RUN ./bootstrap.sh

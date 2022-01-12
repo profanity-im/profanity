@@ -54,7 +54,7 @@ WORKDIR /usr/src
 
 WORKDIR /usr/src
 RUN mkdir -p /usr/src/libstrophe
-RUN git clone https://github.com/strophe/libstrophe
+RUN git clone -c http.sslverify=false https://github.com/strophe/libstrophe
 WORKDIR /usr/src/libstrophe
 RUN ./bootstrap.sh
 RUN ./configure --prefix=/usr
