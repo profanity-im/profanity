@@ -44,13 +44,13 @@ ENV LC_ALL en_US.UTF-8
 RUN mkdir -p /usr/src
 WORKDIR /usr/src
 
-RUN mkdir -p /usr/src/stabber
-RUN git clone https://github.com/boothj5/stabber
-WORKDIR /usr/src/stabber
-RUN ./bootstrap.sh
-RUN ./configure --prefix=/usr --disable-dependency-tracking
-RUN make
-RUN make install
+#RUN mkdir -p /usr/src/stabber
+#RUN git clone https://github.com/boothj5/stabber
+#WORKDIR /usr/src/stabber
+#RUN ./bootstrap.sh
+#RUN ./configure --prefix=/usr --disable-dependency-tracking
+#RUN make
+#RUN make install
 
 WORKDIR /usr/src
 RUN mkdir -p /usr/src/libstrophe
