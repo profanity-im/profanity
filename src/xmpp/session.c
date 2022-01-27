@@ -98,7 +98,7 @@ static char* saved_status;
 
 static void _session_reconnect(void);
 
-static void _session_free_saved_account(void);
+static void _session_free_internals(void);
 static void _session_free_saved_details(void);
 
 void
@@ -117,8 +117,7 @@ session_connect_with_account(const ProfAccount* const account)
 
     log_info("Connecting using account: %s", account->name);
 
-    _session_free_saved_account();
-    _session_free_saved_details();
+    _session_free_internals();
 
     // save account name and password for reconnect
     saved_account.name = strdup(account->name);
@@ -152,8 +151,7 @@ session_connect_with_details(const char* const jid, const char* const passwd, co
     assert(jid != NULL);
     assert(passwd != NULL);
 
-    _session_free_saved_account();
-    _session_free_saved_details();
+    _session_free_internals();
 
     // save details for reconnect, remember name for account creating on success
     saved_details.name = strdup(jid);
@@ -240,8 +238,7 @@ session_disconnect(void)
 void
 session_shutdown(void)
 {
-    _session_free_saved_account();
-    _session_free_saved_details();
+    _session_free_internals();
 
     chat_sessions_clear();
     presence_clear_sub_requests();
@@ -371,8 +368,7 @@ session_login_failed(void)
     if (reconnect_timer == NULL) {
         log_debug("Connection handler: No reconnect timer");
         sv_ev_failed_login();
-        _session_free_saved_account();
-        _session_free_saved_details();
+        _session_free_internals();
     } else {
         log_debug("Connection handler: Restarting reconnect timer");
         if (prefs_get_reconnect() != 0) {
@@ -394,8 +390,7 @@ session_lost_connection(void)
         assert(reconnect_timer == NULL);
         reconnect_timer = g_timer_new();
     } else {
-        _session_free_saved_account();
-        _session_free_saved_details();
+        _session_free_internals();
     }
 }
 
@@ -562,10 +557,11 @@ _session_reconnect(void)
 }
 
 static void
-_session_free_saved_account(void)
+_session_free_internals(void)
 {
     FREE_SET_NULL(saved_account.name);
     FREE_SET_NULL(saved_account.passwd);
+    _session_free_saved_details();
 }
 
 static void
