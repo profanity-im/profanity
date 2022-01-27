@@ -747,15 +747,19 @@ _muc_user_self_handler(xmpp_stanza_t* stanza)
             g_slist_free_full(status_codes, free);
         }
     } else {
-        gboolean config_required = stanza_muc_requires_config(stanza);
-        const char* actor = stanza_get_actor(stanza);
-        char* reason = stanza_get_reason(stanza);
         char* nick = from_jid->resourcepart;
+        if (!nick) {
+            log_warning("presence: jid without resource");
+            return;
+        }
+        char* reason = stanza_get_reason(stanza);
         char* show_str = stanza_get_show(stanza, "online");
         char* status_str = stanza_get_status(stanza, NULL);
+        const char* actor = stanza_get_actor(stanza);
         const char* jid = NULL;
         const char* role = NULL;
         const char* affiliation = NULL;
+        gboolean config_required = stanza_muc_requires_config(stanza);
         xmpp_stanza_t* x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_MUC_USER);
         if (x) {
             xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(x, STANZA_NAME_ITEM);
@@ -785,6 +789,11 @@ _muc_user_occupant_handler(xmpp_stanza_t* stanza)
     char* room = from_jid->barejid;
     char* nick = from_jid->resourcepart;
     char* status_str = stanza_get_status(stanza, NULL);
+
+    if (!nick) {
+        log_warning("presence: jid without resource");
+        return;
+    }
 
     const char* type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, STANZA_TYPE_UNAVAILABLE) == 0) {
