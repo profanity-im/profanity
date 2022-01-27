@@ -99,7 +99,7 @@ typedef struct bookmark_t
     char* password;
     char* name;
     gboolean autojoin;
-    int ext_gajim_minimize; //0 - non existent, 1 - true, 2 - false
+    int ext_gajim_minimize; // 0 - non existent, 1 - true, 2 - false
 } Bookmark;
 
 typedef struct disco_identity_t

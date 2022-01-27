@@ -292,7 +292,7 @@ otr_on_message_recv(const char* const barejid, const char* const resource, const
     prof_otrpolicy_t policy = otr_get_policy(barejid);
     char* whitespace_base = strstr(message, OTRL_MESSAGE_TAG_BASE);
 
-    //check for OTR whitespace (opportunistic or always)
+    // check for OTR whitespace (opportunistic or always)
     if (policy == PROF_OTRPOLICY_OPPORTUNISTIC || policy == PROF_OTRPOLICY_ALWAYS) {
         if (whitespace_base) {
             if (strstr(message, OTRL_MESSAGE_TAG_V2) || strstr(message, OTRL_MESSAGE_TAG_V1)) {

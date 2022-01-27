@@ -79,7 +79,7 @@ avatar_pep_subscribe(void)
     message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_METADATA, _avatar_metadata_handler, NULL, NULL);
     message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_DATA, _avatar_metadata_handler, NULL, NULL);
 
-    //caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+    // caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 
     if (looking_for) {
         g_hash_table_destroy(looking_for);

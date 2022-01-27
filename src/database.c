@@ -178,7 +178,7 @@ _log_database_add_outgoing(char* type, const char* const id, const char* const b
     msg->from_jid = jid_create(barejid);
     msg->plain = message ? strdup(message) : NULL;
     msg->replace_id = replace_id ? strdup(replace_id) : NULL;
-    msg->timestamp = g_date_time_new_now_local(); //TODO: get from outside. best to have whole ProfMessage from outside
+    msg->timestamp = g_date_time_new_now_local(); // TODO: get from outside. best to have whole ProfMessage from outside
     msg->enc = enc;
 
     Jid* myjid = jid_create(connection_get_fulljid());

@@ -522,7 +522,7 @@ _sv_ev_incoming_ox(ProfChatWin* chatwin, gboolean new_win, ProfMessage* message,
         chat_log_pgp_msg_in(message);
     }
     chatwin->pgp_recv = TRUE;
-    //p_gpg_free_decrypted(message->plain);
+    // p_gpg_free_decrypted(message->plain);
     message->plain = NULL;
 #endif
 }

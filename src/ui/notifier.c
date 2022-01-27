@@ -234,10 +234,10 @@ notify(const char* const message, int timeout, const char* const category)
     NOTIFYICONDATA nid;
     memset(&nid, 0, sizeof(nid));
     nid.cbSize = sizeof(NOTIFYICONDATA);
-    //nid.hWnd = hWnd;
+    // nid.hWnd = hWnd;
     nid.uID = 100;
     nid.uVersion = NOTIFYICON_VERSION;
-    //nid.uCallbackMessage = WM_MYMESSAGE;
+    // nid.uCallbackMessage = WM_MYMESSAGE;
     nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
     strcpy(nid.szTip, "Tray Icon");
     nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;

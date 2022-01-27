@@ -46,8 +46,8 @@
 static void
 _occuptantswin_occupant(ProfLayoutSplit* layout, GList* item, gboolean showjid, gboolean isoffline)
 {
-    int colour = 0;                                     //init to workaround compiler warning
-    theme_item_t presence_colour = THEME_ROSTER_ONLINE; //init to workaround compiler warning
+    int colour = 0;                                     // init to workaround compiler warning
+    theme_item_t presence_colour = THEME_ROSTER_ONLINE; // init to workaround compiler warning
     Occupant* occupant = item->data;
 
     if (isoffline) {

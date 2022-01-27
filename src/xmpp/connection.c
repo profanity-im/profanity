@@ -1074,7 +1074,7 @@ _random_bytes_close(void)
 static void
 _compute_identifier(const char* barejid)
 {
-    //in case of reconnect (lost connection)
+    // in case of reconnect (lost connection)
     free(prof_identifier);
 
     prof_identifier = g_compute_hmac_for_string(G_CHECKSUM_SHA256,

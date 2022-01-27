@@ -2159,8 +2159,8 @@ cons_executable_setting(void)
     cons_show("Default '/avatar open' command (/executable avatar)                      : %s", avatar);
     g_free(avatar);
 
-    //TODO: there needs to be a way to get all the "locales"/schemes so we can
-    //display the default openers for all filetypes
+    // TODO: there needs to be a way to get all the "locales"/schemes so we can
+    // display the default openers for all filetypes
     gchar* urlopen = prefs_get_string(PREF_URL_OPEN_CMD);
     cons_show("Default '/url open' command (/executable urlopen)                        : %s", urlopen);
     g_free(urlopen);

@@ -871,15 +871,15 @@ ox_gpg_public_keys(void)
     }
     gpgme_release(ctx);
 
-    //autocomplete_clear(key_ac);
-    //    GList *ids = g_hash_table_get_keys(result);
-    //    GList *curr = ids;
-    //    while (curr) {
-    //        ProfPGPKey *key = g_hash_table_lookup(result, curr->data);
-    //        autocomplete_add(key_ac, key->id);
-    //        curr = curr->next;
-    //    }
-    //    g_list_free(ids);
+    // autocomplete_clear(key_ac);
+    //     GList *ids = g_hash_table_get_keys(result);
+    //     GList *curr = ids;
+    //     while (curr) {
+    //         ProfPGPKey *key = g_hash_table_lookup(result, curr->data);
+    //         autocomplete_add(key_ac, key->id);
+    //         curr = curr->next;
+    //     }
+    //     g_list_free(ids);
 
     return result;
 }
@@ -1210,14 +1210,14 @@ p_ox_gpg_decrypt(char* base64)
  *
  * This function is used to read a key and push it on PEP. There are some checks
  * in this function:
- * 
+ *
  * Key is not
- * - gkey->revoked 
- * - gkey->expired 
+ * - gkey->revoked
+ * - gkey->expired
  * - gkey->disabled
- * - gkey->invalid 
+ * - gkey->invalid
  * - gkey->secret
- * 
+ *
  * Only one key in the file.
  *
  * \param filename filename to read the file.

@@ -388,7 +388,9 @@ omemo_publish_crypto_materials(void)
     omemo_bundle_publish(true);
 }
 
-static void _acquire_sender_devices_list(void) {
+static void
+_acquire_sender_devices_list(void)
+{
     char* barejid = connection_get_barejid();
 
     g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_own_device_list);
