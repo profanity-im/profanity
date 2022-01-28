@@ -72,7 +72,8 @@ typedef enum {
     JABBER_DISCONNECTING,
     JABBER_DISCONNECTED,
     JABBER_RAW_CONNECTING,
-    JABBER_RAW_CONNECTED
+    JABBER_RAW_CONNECTED,
+    JABBER_RECONNECT
 } jabber_conn_status_t;
 
 typedef enum {

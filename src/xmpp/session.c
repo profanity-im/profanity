@@ -272,6 +272,9 @@ session_process_events(void)
             }
         }
         break;
+    case JABBER_RECONNECT:
+        _session_reconnect();
+        break;
     default:
         break;
     }
@@ -532,6 +535,24 @@ session_check_autoaway(void)
     g_free(mode);
 }
 
+static struct
+{
+    gchar* altdomain;
+    unsigned short altport;
+} reconnect;
+
+/* This takes ownership of `altdomain`, i.e. the caller must not
+ * free the value after calling this function.
+ */
+void
+session_reconnect(gchar* altdomain, unsigned short altport)
+{
+    reconnect.altdomain = altdomain;
+    reconnect.altport = altport;
+    assert(reconnect_timer == NULL);
+    reconnect_timer = g_timer_new();
+}
+
 static void
 _session_reconnect(void)
 {
@@ -548,9 +569,18 @@ _session_reconnect(void)
     } else {
         jid = strdup(account->jid);
     }
+    const char* server;
+    unsigned short port;
+    if (reconnect.altdomain) {
+        server = reconnect.altdomain;
+        port = reconnect.altport;
+    } else {
+        server = account->server;
+        port = account->port;
+    }
 
     log_debug("Attempting reconnect with account %s", account->name);
-    connection_connect(jid, saved_account.passwd, account->server, account->port, account->tls_policy, account->auth_policy);
+    connection_connect(jid, saved_account.passwd, server, port, account->tls_policy, account->auth_policy);
     free(jid);
     account_free(account);
     g_timer_start(reconnect_timer);
@@ -561,6 +591,7 @@ _session_free_internals(void)
 {
     FREE_SET_NULL(saved_account.name);
     FREE_SET_NULL(saved_account.passwd);
+    GFREE_SET_NULL(reconnect.altdomain);
     _session_free_saved_details();
 }
 
