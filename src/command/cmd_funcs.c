@@ -9650,7 +9650,7 @@ gboolean
 cmd_mood(ProfWin* window, const char* const command, gchar** args)
 {
     if (g_strcmp0(args[0], "set") == 0) {
-        if(args[1]) {
+        if (args[1]) {
             cons_show("Your mood: %s", args[1]);
             if (args[2]) {
                 publish_user_mood(args[1], args[2]);
@@ -9658,6 +9658,9 @@ cmd_mood(ProfWin* window, const char* const command, gchar** args)
                 publish_user_mood(args[1], args[1]);
             }
         }
+    } else if (g_strcmp0(args[0], "clean") == 0) {
+        cons_show("Cleaning your user mood.");
+        publish_user_mood(NULL, NULL);
     }
     return TRUE;
 }

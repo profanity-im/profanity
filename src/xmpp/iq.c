@@ -2828,17 +2828,18 @@ publish_user_mood(const char* const mood, const char* const text)
     xmpp_stanza_add_child(item, mood_t);
 
     xmpp_stanza_t* x = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(x, mood);
-    xmpp_stanza_add_child(mood_t, x);
-
     xmpp_stanza_t* text_t = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(text_t, STANZA_NAME_TEXT);
-    xmpp_stanza_add_child(mood_t, text_t);
-
     xmpp_stanza_t* t = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(t, text);
-    xmpp_stanza_add_child(text_t, t);
+    if (mood) {
+        xmpp_stanza_set_name(x, mood);
+        xmpp_stanza_add_child(mood_t, x);
 
+        xmpp_stanza_set_name(text_t, STANZA_NAME_TEXT);
+        xmpp_stanza_add_child(mood_t, text_t);
+
+        xmpp_stanza_set_text(t, text);
+        xmpp_stanza_add_child(text_t, t);
+    }
     iq_send_stanza(iq);
 
     xmpp_stanza_release(iq);

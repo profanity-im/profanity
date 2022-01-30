@@ -1063,6 +1063,7 @@ cmd_ac_init(void)
 
     mood_ac = autocomplete_new();
     autocomplete_add(mood_ac, "set");
+    autocomplete_add(mood_ac, "clean");
     mood_type_ac = autocomplete_new();
     autocomplete_add(mood_type_ac, "afraid");
     autocomplete_add(mood_type_ac, "amazed");
@@ -4243,7 +4244,7 @@ _mood_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
     char* result = NULL;
 
-    result = autocomplete_param_with_ac(input, "/mood", status_ac, TRUE, previous);
+    result = autocomplete_param_with_ac(input, "/mood", mood_ac, TRUE, previous);
     if (result) {
         return result;
     }
