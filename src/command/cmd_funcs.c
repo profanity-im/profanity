@@ -9659,7 +9659,7 @@ cmd_mood(ProfWin* window, const char* const command, gchar** args)
             }
         }
     } else if (g_strcmp0(args[0], "clear") == 0) {
-        cons_show("Cleaning your user mood.");
+        cons_show("Clearing the user mood.");
         publish_user_mood(NULL, NULL);
     }
     return TRUE;
