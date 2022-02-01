@@ -896,6 +896,61 @@ _get_soh_error(xmpp_stanza_t* error_stanza)
 }
 #endif
 
+#if GLIB_CHECK_VERSION(2, 66, 0)
+static gboolean
+_split_url(const char* alturi, gchar** host, gint* port)
+{
+    /* Construct a valid URI with `schema://` as `g_uri_split_network()`
+     * requires this to be there.
+     */
+    const char* xmpp = "xmpp://";
+    char* xmpp_uri = malloc(strlen(xmpp) + strlen(alturi) + 1);
+    if (!xmpp_uri) {
+        log_debug("_get_other_host: malloc failed \"%s\"", alturi);
+        return false;
+    }
+    memcpy(xmpp_uri, xmpp, strlen(xmpp));
+    memcpy(xmpp_uri + strlen(xmpp), alturi, strlen(alturi) + 1);
+    gboolean ret = g_uri_split_network(xmpp_uri, 0, NULL, host, port, NULL);
+    free(xmpp_uri);
+    /* fix-up `port` as g_uri_split_network() sets port to `-1` if it's missing
+     * in the passed-in URI, but libstrophe expects a "missing port"
+     * to be passed as `0` (which then results in connecting to the standard port).
+     */
+    if (*port == -1)
+        *port = 0;
+    return ret;
+}
+#else
+/* poor-mans URL splitting */
+static gboolean
+_split_url(const char* alturi, gchar** host, gint* port)
+{
+    ptrdiff_t hostlen;
+    /* search ':' from start and end
+     * if `first` matches `last` it's a `hostname:port` combination
+     * if `first` is different than `last` it's `[ip:v6]:port`
+     */
+    char* first = strchr(alturi, ':');
+    char* last = strrchr(alturi, ':');
+    if (first && first == last) {
+        hostlen = last - alturi;
+        if (!strtoi_range(last + 1, port, 1, 65535, NULL))
+            return FALSE;
+    } else {
+        hostlen = strlen(alturi) + 1;
+        *port = 0;
+    }
+    gchar* buf = g_malloc(hostlen);
+    if (!buf)
+        return FALSE;
+    memcpy(buf, alturi, hostlen);
+    buf[hostlen - 1] = '\0';
+    *host = buf;
+    return TRUE;
+}
+#endif
+
 static bool
 _get_other_host(xmpp_stanza_t* error_stanza, gchar** host, int* port)
 {
@@ -909,30 +964,11 @@ _get_other_host(xmpp_stanza_t* error_stanza, gchar** host, int* port)
         log_debug("_get_other_host: see-other-host contains no text");
         return false;
     }
-    /* Construct a valid URI with `schema://` as `g_uri_split_network()`
-     * requires this to be there.
-     */
-    const char* xmpp = "xmpp://";
-    char* xmpp_uri = malloc(strlen(xmpp) + strlen(alturi) + 1);
-    if (!xmpp_uri) {
-        log_debug("_get_other_host: malloc failed \"%s\"", alturi);
-        return false;
-    }
-    memcpy(xmpp_uri, xmpp, strlen(xmpp));
-    memcpy(xmpp_uri + strlen(xmpp), alturi, strlen(alturi) + 1);
 
-    if (!g_uri_split_network(xmpp_uri, 0, NULL, host, port, NULL)) {
-        log_debug("_get_other_host: Could not split \"%s\"", xmpp_uri);
-        free(xmpp_uri);
+    if (!_split_url(alturi, host, port)) {
+        log_debug("_get_other_host: Could not split \"%s\"", alturi);
         return false;
     }
-    free(xmpp_uri);
-    /* fix-up `port` as g_uri_split_network() sets port to `-1` if it's missing
-     * in the passed-in URI, but libstrophe expects a "missing port"
-     * to be passed as `0` (which then results in connecting to the standard port).
-     */
-    if (*port == -1)
-        *port = 0;
     return true;
 }
 
