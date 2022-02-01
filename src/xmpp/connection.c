@@ -935,7 +935,7 @@ _split_url(const char* alturi, gchar** host, gint* port)
     char* last = strrchr(alturi, ':');
     if (first) {
         if (first == last) {
-            hostlen = last - alturi;
+            hostlen = last - alturi + 1;
             if (!strtoi_range(last + 1, port, 1, 65535, NULL))
                 return FALSE;
         } else {
@@ -949,7 +949,7 @@ _split_url(const char* alturi, gchar** host, gint* port)
                 *port = 0;
             } else {
                 /* `[ip:v6]:port` */
-                hostlen = last - alturi;
+                hostlen = last - alturi + 1;
                 if (!strtoi_range(last + 1, port, 1, 65535, NULL))
                     return FALSE;
             }
