@@ -929,14 +929,31 @@ _split_url(const char* alturi, gchar** host, gint* port)
     ptrdiff_t hostlen;
     /* search ':' from start and end
      * if `first` matches `last` it's a `hostname:port` combination
-     * if `first` is different than `last` it's `[ip:v6]:port`
+     * if `first` is different than `last` it's `[ip:v6]` or `[ip:v6]:port`
      */
     char* first = strchr(alturi, ':');
     char* last = strrchr(alturi, ':');
-    if (first && first == last) {
-        hostlen = last - alturi;
-        if (!strtoi_range(last + 1, port, 1, 65535, NULL))
-            return FALSE;
+    if (first) {
+        if (first == last) {
+            hostlen = last - alturi;
+            if (!strtoi_range(last + 1, port, 1, 65535, NULL))
+                return FALSE;
+        } else {
+            /* IPv6 handling */
+            char* bracket = strrchr(alturi, ']');
+            if (!bracket)
+                return FALSE;
+            if (bracket > last) {
+                /* `[ip:v6]` */
+                hostlen = strlen(alturi) + 1;
+                *port = 0;
+            } else {
+                /* `[ip:v6]:port` */
+                hostlen = last - alturi;
+                if (!strtoi_range(last + 1, port, 1, 65535, NULL))
+                    return FALSE;
+            }
+        }
     } else {
         hostlen = strlen(alturi) + 1;
         *port = 0;
