@@ -61,6 +61,6 @@ returns_commands(void** state)
     assert_true(foundCommand1 && foundCommand2 && foundCommand3);
 
     g_list_free(names);
-    //TODO: why does this make the test fail?
-    //callbacks_close();
+    // TODO: why does this make the test fail?
+    // callbacks_close();
 }

@@ -2,7 +2,7 @@
  * ox.h
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2020 Stefan Kropp <stefan@debxwoody.de> 
+ * Copyright (C) 2020 Stefan Kropp <stefan@debxwoody.de>
  *
  * This file is part of Profanity.
  *
@@ -35,10 +35,10 @@
 
 /*!
  * \page OX OX Implementation
- * 
+ *
  * \section OX XEP-0373: OpenPGP for XMPP
  * XEP-0373: OpenPGP for XMPP (OX) is the implementation of OpenPGP for XMPP
- * replace the XEP-0027.  
+ * replace the XEP-0027.
  *
  * https://xmpp.org/extensions/xep-0373.html
  */
@@ -48,10 +48,10 @@
  *
  * Reads the public key from the given file. Checks the key-information and
  * pushes the key on PEP.
- *  
+ *
  * https://xmpp.org/extensions/xep-0373.html#announcing-pubkey
  *
- * \param filename name of the file with the public key 
+ * \param filename name of the file with the public key
  * \return TRUE: success; FALSE: failed
  */
 

@@ -245,6 +245,8 @@
 #define STANZA_NS_REPORTING               "urn:xmpp:reporting:1"
 #define STANZA_NS_MOOD                    "http://jabber.org/protocol/mood"
 #define STANZA_NS_MOOD_NOTIFY             "http://jabber.org/protocol/mood+notify"
+#define STANZA_NS_STREAMS                 "http://etherx.jabber.org/streams"
+#define STANZA_NS_XMPP_STREAMS            "urn:ietf:params:xml:ns:xmpp-streams"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 

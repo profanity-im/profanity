@@ -63,7 +63,7 @@ clipboard_get(void)
         return NULL;
     }
 
-    //while(!gtk_clipboard_wait_is_text_available(cld)) {}
+    // while(!gtk_clipboard_wait_is_text_available(cld)) {}
 
     clip = gtk_clipboard_wait_for_text(cl);
     return clip;

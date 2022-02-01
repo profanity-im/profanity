@@ -437,7 +437,7 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted)
         keys = g_list_append(keys, key);
         continue;
 
-    skip:
+skip:
         free(key);
     }
 

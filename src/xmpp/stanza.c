@@ -2605,7 +2605,7 @@ stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const s
     char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
     free(id);
-    //xmpp_stanza_set_to(iq, jid);
+    // xmpp_stanza_set_to(iq, jid);
 
     xmpp_stanza_t* query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);

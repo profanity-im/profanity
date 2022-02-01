@@ -22,6 +22,7 @@ AlignOperands: true
 AlignTrailingComments: true
 AllowAllArgumentsOnNextLine: true
 AllowShortBlocksOnASingleLine: true
+IndentGotoLabels: false
 IndentWidth: 4
 BreakBeforeBraces: Custom
 BraceWrapping:

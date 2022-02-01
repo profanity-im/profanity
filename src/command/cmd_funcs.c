@@ -1144,7 +1144,7 @@ cmd_export(ProfWin* window, const char* const command, gchar** args)
         g_slist_free(list);
         close(fd);
         return TRUE;
-    write_error:
+write_error:
         cons_show("error: write failed: %s", strerror(errno));
         cons_show("");
         g_slist_free(list);

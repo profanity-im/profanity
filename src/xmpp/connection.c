@@ -872,6 +872,106 @@ connection_set_priority(const int priority)
     conn.priority = priority;
 }
 
+#if defined(LIBXMPP_VERSION_MAJOR) && defined(LIBXMPP_VERSION_MINOR) \
+    && ((LIBXMPP_VERSION_MAJOR > 0) || (LIBXMPP_VERSION_MINOR >= 12))
+static xmpp_stanza_t*
+_get_soh_error(xmpp_stanza_t* error_stanza)
+{
+    return xmpp_stanza_get_child_by_path(error_stanza,
+                                         XMPP_STANZA_NAME_IN_NS("error", STANZA_NS_STREAMS),
+                                         XMPP_STANZA_NAME_IN_NS("see-other-host", STANZA_NS_XMPP_STREAMS),
+                                         NULL);
+}
+#else
+static xmpp_stanza_t*
+_get_soh_error(xmpp_stanza_t* error_stanza)
+{
+    const char* name = xmpp_stanza_get_name(error_stanza);
+    const char* ns = xmpp_stanza_get_ns(error_stanza);
+    if (!name || !ns || strcmp(name, "error") || strcmp(ns, STANZA_NS_STREAMS)) {
+        log_debug("_get_soh_error: could not find error stanza");
+        return NULL;
+    }
+    return xmpp_stanza_get_child_by_name_and_ns(error_stanza, "see-other-host", STANZA_NS_XMPP_STREAMS);
+}
+#endif
+
+#if GLIB_CHECK_VERSION(2, 66, 0)
+static gboolean
+_split_url(const char* alturi, gchar** host, gint* port)
+{
+    /* Construct a valid URI with `schema://` as `g_uri_split_network()`
+     * requires this to be there.
+     */
+    const char* xmpp = "xmpp://";
+    char* xmpp_uri = malloc(strlen(xmpp) + strlen(alturi) + 1);
+    if (!xmpp_uri) {
+        log_debug("_get_other_host: malloc failed \"%s\"", alturi);
+        return false;
+    }
+    memcpy(xmpp_uri, xmpp, strlen(xmpp));
+    memcpy(xmpp_uri + strlen(xmpp), alturi, strlen(alturi) + 1);
+    gboolean ret = g_uri_split_network(xmpp_uri, 0, NULL, host, port, NULL);
+    free(xmpp_uri);
+    /* fix-up `port` as g_uri_split_network() sets port to `-1` if it's missing
+     * in the passed-in URI, but libstrophe expects a "missing port"
+     * to be passed as `0` (which then results in connecting to the standard port).
+     */
+    if (*port == -1)
+        *port = 0;
+    return ret;
+}
+#else
+/* poor-mans URL splitting */
+static gboolean
+_split_url(const char* alturi, gchar** host, gint* port)
+{
+    ptrdiff_t hostlen;
+    /* search ':' from start and end
+     * if `first` matches `last` it's a `hostname:port` combination
+     * if `first` is different than `last` it's `[ip:v6]:port`
+     */
+    char* first = strchr(alturi, ':');
+    char* last = strrchr(alturi, ':');
+    if (first && first == last) {
+        hostlen = last - alturi;
+        if (!strtoi_range(last + 1, port, 1, 65535, NULL))
+            return FALSE;
+    } else {
+        hostlen = strlen(alturi) + 1;
+        *port = 0;
+    }
+    gchar* buf = g_malloc(hostlen);
+    if (!buf)
+        return FALSE;
+    memcpy(buf, alturi, hostlen);
+    buf[hostlen - 1] = '\0';
+    *host = buf;
+    return TRUE;
+}
+#endif
+
+static bool
+_get_other_host(xmpp_stanza_t* error_stanza, gchar** host, int* port)
+{
+    xmpp_stanza_t* soh_error = _get_soh_error(error_stanza);
+    if (!soh_error || !xmpp_stanza_get_children(soh_error)) {
+        log_debug("_get_other_host: stream-error contains no see-other-host");
+        return false;
+    }
+    const char* alturi = xmpp_stanza_get_text_ptr(xmpp_stanza_get_children(soh_error));
+    if (!alturi) {
+        log_debug("_get_other_host: see-other-host contains no text");
+        return false;
+    }
+
+    if (!_split_url(alturi, host, port)) {
+        log_debug("_get_other_host: Could not split \"%s\"", alturi);
+        return false;
+    }
+    return true;
+}
+
 static void
 _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status, const int error,
                     xmpp_stream_error_t* const stream_error, void* const userdata)
@@ -924,6 +1024,14 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
 
             // login attempt failed
         } else if (conn.conn_status != JABBER_DISCONNECTING) {
+            gchar* host;
+            int port;
+            if (stream_error && stream_error->stanza && _get_other_host(stream_error->stanza, &host, &port)) {
+                session_reconnect(host, port);
+                log_debug("Connection handler: Forcing a re-connect to \"%s\"", host);
+                conn.conn_status = JABBER_RECONNECT;
+                return;
+            }
             log_debug("Connection handler: Login failed");
             session_login_failed();
         }
@@ -1074,7 +1182,7 @@ _random_bytes_close(void)
 static void
 _compute_identifier(const char* barejid)
 {
-    //in case of reconnect (lost connection)
+    // in case of reconnect (lost connection)
     free(prof_identifier);
 
     prof_identifier = g_compute_hmac_for_string(G_CHECKSUM_SHA256,

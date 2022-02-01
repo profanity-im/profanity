@@ -98,7 +98,7 @@ static char* saved_status;
 
 static void _session_reconnect(void);
 
-static void _session_free_saved_account(void);
+static void _session_free_internals(void);
 static void _session_free_saved_details(void);
 
 void
@@ -117,8 +117,7 @@ session_connect_with_account(const ProfAccount* const account)
 
     log_info("Connecting using account: %s", account->name);
 
-    _session_free_saved_account();
-    _session_free_saved_details();
+    _session_free_internals();
 
     // save account name and password for reconnect
     saved_account.name = strdup(account->name);
@@ -152,8 +151,7 @@ session_connect_with_details(const char* const jid, const char* const passwd, co
     assert(jid != NULL);
     assert(passwd != NULL);
 
-    _session_free_saved_account();
-    _session_free_saved_details();
+    _session_free_internals();
 
     // save details for reconnect, remember name for account creating on success
     saved_details.name = strdup(jid);
@@ -240,8 +238,7 @@ session_disconnect(void)
 void
 session_shutdown(void)
 {
-    _session_free_saved_account();
-    _session_free_saved_details();
+    _session_free_internals();
 
     chat_sessions_clear();
     presence_clear_sub_requests();
@@ -274,6 +271,9 @@ session_process_events(void)
                 _session_reconnect();
             }
         }
+        break;
+    case JABBER_RECONNECT:
+        _session_reconnect();
         break;
     default:
         break;
@@ -371,8 +371,7 @@ session_login_failed(void)
     if (reconnect_timer == NULL) {
         log_debug("Connection handler: No reconnect timer");
         sv_ev_failed_login();
-        _session_free_saved_account();
-        _session_free_saved_details();
+        _session_free_internals();
     } else {
         log_debug("Connection handler: Restarting reconnect timer");
         if (prefs_get_reconnect() != 0) {
@@ -394,8 +393,7 @@ session_lost_connection(void)
         assert(reconnect_timer == NULL);
         reconnect_timer = g_timer_new();
     } else {
-        _session_free_saved_account();
-        _session_free_saved_details();
+        _session_free_internals();
     }
 }
 
@@ -537,6 +535,24 @@ session_check_autoaway(void)
     g_free(mode);
 }
 
+static struct
+{
+    gchar* altdomain;
+    unsigned short altport;
+} reconnect;
+
+/* This takes ownership of `altdomain`, i.e. the caller must not
+ * free the value after calling this function.
+ */
+void
+session_reconnect(gchar* altdomain, unsigned short altport)
+{
+    reconnect.altdomain = altdomain;
+    reconnect.altport = altport;
+    assert(reconnect_timer == NULL);
+    reconnect_timer = g_timer_new();
+}
+
 static void
 _session_reconnect(void)
 {
@@ -553,19 +569,30 @@ _session_reconnect(void)
     } else {
         jid = strdup(account->jid);
     }
+    const char* server;
+    unsigned short port;
+    if (reconnect.altdomain) {
+        server = reconnect.altdomain;
+        port = reconnect.altport;
+    } else {
+        server = account->server;
+        port = account->port;
+    }
 
     log_debug("Attempting reconnect with account %s", account->name);
-    connection_connect(jid, saved_account.passwd, account->server, account->port, account->tls_policy, account->auth_policy);
+    connection_connect(jid, saved_account.passwd, server, port, account->tls_policy, account->auth_policy);
     free(jid);
     account_free(account);
     g_timer_start(reconnect_timer);
 }
 
 static void
-_session_free_saved_account(void)
+_session_free_internals(void)
 {
     FREE_SET_NULL(saved_account.name);
     FREE_SET_NULL(saved_account.passwd);
+    GFREE_SET_NULL(reconnect.altdomain);
+    _session_free_saved_details();
 }
 
 static void

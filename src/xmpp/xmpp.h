@@ -72,7 +72,8 @@ typedef enum {
     JABBER_DISCONNECTING,
     JABBER_DISCONNECTED,
     JABBER_RAW_CONNECTING,
-    JABBER_RAW_CONNECTED
+    JABBER_RAW_CONNECTED,
+    JABBER_RECONNECT
 } jabber_conn_status_t;
 
 typedef enum {
@@ -99,7 +100,7 @@ typedef struct bookmark_t
     char* password;
     char* name;
     gboolean autojoin;
-    int ext_gajim_minimize; //0 - non existent, 1 - true, 2 - false
+    int ext_gajim_minimize; // 0 - non existent, 1 - true, 2 - false
 } Bookmark;
 
 typedef struct disco_identity_t

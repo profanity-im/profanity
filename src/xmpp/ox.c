@@ -222,7 +222,7 @@ ox_request_public_key(const char* const jid, const char* const fingerprint)
       </item>
     </publish>
   </pubsub>
-</iq>    
+</iq>
 </pre>
  *
  */
