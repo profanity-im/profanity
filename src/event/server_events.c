@@ -908,8 +908,12 @@ sv_ev_room_occupent_banned(const char* const room, const char* const nick, const
     }
 
     Jid* jidp = jid_create_from_bare_and_resource(room, nick);
+
+    muc_members_remove(room, jidp->fulljid);
     ProfPrivateWin* privwin = wins_get_private(jidp->fulljid);
+
     jid_destroy(jidp);
+
     if (privwin != NULL) {
         privwin_occupant_banned(privwin, actor, reason);
     }
