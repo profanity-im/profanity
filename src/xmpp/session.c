@@ -549,8 +549,6 @@ session_reconnect(gchar* altdomain, unsigned short altport)
 {
     reconnect.altdomain = altdomain;
     reconnect.altport = altport;
-    assert(reconnect_timer == NULL);
-    reconnect_timer = g_timer_new();
 }
 
 static void
@@ -583,7 +581,8 @@ _session_reconnect(void)
     connection_connect(jid, saved_account.passwd, server, port, account->tls_policy, account->auth_policy);
     free(jid);
     account_free(account);
-    g_timer_start(reconnect_timer);
+    if (reconnect_timer)
+        g_timer_start(reconnect_timer);
 }
 
 static void
