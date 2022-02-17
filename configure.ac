@@ -65,6 +65,28 @@ AC_ARG_WITH([themes],
 AC_ARG_ENABLE([icons-and-clipboard],
     [AS_HELP_STRING([--enable-icons-and-clipboard], [enable GTK tray icons and clipboard paste support])])
 
+# Required dependencies
+
+AC_CHECK_FUNCS([atexit memset strdup strstr])
+
+PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.62.0], [],
+    [AC_MSG_ERROR([glib 2.62.0 or higher is required])])
+PKG_CHECK_MODULES([gio], [gio-2.0], [],
+    [AC_MSG_ERROR([libgio-2.0 from glib-2.0 is required])])
+
+AC_SEARCH_LIBS([fmod], [m], [],
+   [AC_MSG_ERROR([math.h is required])], [])
+
+PKG_CHECK_MODULES([curl], [libcurl >= 7.62.0], [],
+    [AC_CHECK_LIB([curl], [main], [],
+        [AC_MSG_ERROR([libcurl 7.62.0 or higher is required])])])
+
+PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.22.0], [],
+    [AC_MSG_ERROR([sqlite3 3.22.0 or higher is required])])
+
+ACX_PTHREAD([], [AC_MSG_ERROR([pthread is required])])
+AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
+
 ### plugins
 
 ## python
@@ -125,14 +147,6 @@ else
     fi
 fi
 
-### Check for dependencies
-
-## Threading
-AX_PTHREAD([],[AC_MSG_ERROR([pthread is required])])
-LIBS="$PTHREAD_LIBS $LIBS"
-CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
-AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
-
 ## Check for libstrophe
 PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.11.0],
     [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" XMPP_LIB="libstrophe" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
@@ -182,31 +196,10 @@ CFLAGS="$CFLAGS_RESTORE"
 AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
     [AC_MSG_ERROR([ncurses does not support wide characters])])
 
-## Check for glib libraries
-PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.62.0], [],
-    [AC_MSG_ERROR([glib 2.62.0 or higher is required])])
-PKG_CHECK_MODULES([gio], [gio-2.0], [],
-    [AC_MSG_ERROR([libgio-2.0 from glib-2.0 is required])])
-
-## Check for other profanity dependencies
-AC_SEARCH_LIBS([fmod], [m], [],
-   [AC_MSG_ERROR([math.h is required])], [])
-
-PKG_CHECK_MODULES([curl], [libcurl >= 7.62.0], [],
-    [AC_CHECK_LIB([curl], [main], [],
-        [AC_MSG_ERROR([libcurl 7.62.0 or higher is required])])])
-
-PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.22.0], [],
-    [AC_MSG_ERROR([sqlite3 3.22.0 or higher is required])])
-
-AS_IF([test "x$enable_icons_and_clipboard" != xno],
-    [PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.24.0],
-        [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
-        [AS_IF([test "x$enable_icons_and_clipboard" = xyes],
-               [PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10],
-                                  [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
-                                  [AC_MSG_ERROR([gtk+-2.0 >= 2.24.10 or gtk+-3.0 >= 3.24.0 is required for icons and clipboard])],
-                                  [AC_MSG_NOTICE([gtk+-3.0/gtk+2.0 not found, icons and clipboard not enabled])])])])])
+## Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
+AC_CHECK_HEADERS([ncursesw/ncurses.h], [], [])
+AC_CHECK_HEADERS([ncurses.h], [], [])
+AC_CHECK_HEADERS([curses.h], [], [])
 
 # Check for readline
 AS_IF([test "x$PLATFORM" = xosx],
@@ -236,7 +229,22 @@ AS_IF([test "x$PLATFORM" = xosx],
     [AC_CHECK_LIB([readline], [main], [],
         [AC_MSG_ERROR([libreadline is required for profanity])])])
 
-## Check for optional dependencies
+## Check for optional dependencies depending on feature flags
+
+dnl feature: icons-and-clipboard
+AS_IF([test "x$enable_icons_and_clipboard" != xno],
+    [PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.24.0],
+        [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
+        [AS_IF([test "x$enable_icons_and_clipboard" = xyes],
+               [PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10],
+                                  [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
+                                  [AC_MSG_ERROR([gtk+-2.0 >= 2.24.10 or gtk+-3.0 >= 3.24.0 is required for icons and clipboard])],
+                                  [AC_MSG_NOTICE([gtk+-3.0/gtk+2.0 not found, icons and clipboard not enabled])])])])])
+
+ICONS_PATH='${pkgdatadir}/icons'
+AC_SUBST(ICONS_PATH)
+
+dnl feature: notifications
 
 ## Check for desktop notification support
 ## Linux/FreeBSD require libnotify
@@ -260,6 +268,8 @@ AS_IF([test "x$PLATFORM" = xosx],
                     [AC_MSG_ERROR([libnotify is required but does not exist])],
                     [AC_MSG_NOTICE([libnotify support will be disabled])])])])])
 
+dnl feature: xscreensaver
+
 # TODO: rewrite this
 if test "x$with_xscreensaver" = xyes; then
     AC_CHECK_LIB([Xss], [main], [],
@@ -273,6 +283,7 @@ elif test "x$with_xscreensaver" = x; then
         [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
 fi
 
+dnl feature: pgp
 AM_CONDITIONAL([BUILD_PGP], [false])
 if test "x$enable_pgp" != xno; then
     AC_CHECK_LIB([gpgme], [main],
@@ -287,6 +298,7 @@ if test "x$enable_pgp" != xno; then
             [AC_MSG_NOTICE([libgpgme not found, pgp support not enabled])])])
 fi
 
+dnl feature: otr
 AM_CONDITIONAL([BUILD_OTR], [false])
 AM_CONDITIONAL([BUILD_OTR3], [false])
 AM_CONDITIONAL([BUILD_OTR4], [false])
@@ -307,6 +319,7 @@ if test "x$enable_otr" != xno; then
             [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])])
 fi
 
+dnl feature: omemo
 AM_CONDITIONAL([BUILD_OMEMO], [false])
 if test "x$enable_omemo" != xno; then
    AM_CONDITIONAL([BUILD_OMEMO], [true])
@@ -331,6 +344,7 @@ if test "x$enable_omemo" != xno; then
    AM_COND_IF([BUILD_OMEMO], [AC_DEFINE([HAVE_OMEMO], [1], [Have OMEMO])])
 fi
 
+dnl feature: themes
 AS_IF([test "x$with_themes" = xno],
     [THEMES_INSTALL="false"],
     [THEMES_INSTALL="true"])
@@ -340,11 +354,10 @@ AS_IF([test "x$with_themes" = xno -o "x$with_themes" = xyes -o "x$with_themes" =
 AC_SUBST(THEMES_PATH)
 AM_CONDITIONAL([THEMES_INSTALL], "$THEMES_INSTALL")
 
-ICONS_PATH='${pkgdatadir}/icons'
-AC_SUBST(ICONS_PATH)
+## Tests
 
-## cmocka is required only for tests, profanity shouldn't be linked with it
-## TODO: pass cmocka_CFLAGS and cmocka_LIBS to Makefile.am
+# cmocka is required only for tests, profanity shouldn't be linked with it
+# TODO: pass cmocka_CFLAGS and cmocka_LIBS to Makefile.am
 PKG_CHECK_MODULES([cmocka], [cmocka], [],
     [AC_MSG_NOTICE([cmocka is not found, will not be able to run tests])])
 
@@ -355,29 +368,25 @@ AM_CONDITIONAL([HAVE_EXPECT], [false])
 AC_CHECK_LIB([expect], [exp_expectl], [AM_CONDITIONAL([HAVE_EXPECT], [true])],
     [AC_MSG_NOTICE([libexpect not found, will not be able to run functional tests])])
 
-## Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
-AC_CHECK_HEADERS([ncursesw/ncurses.h], [], [])
-AC_CHECK_HEADERS([ncurses.h], [], [])
-AC_CHECK_HEADERS([curses.h], [], [])
-
 ## Default parameters
 AM_CFLAGS="-Wall -Wno-deprecated-declarations -std=gnu99"
+AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
+
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
 AS_IF([test "x$PLATFORM" = xosx],
     [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
-AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
+
+AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS"
 AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS} ${SQLITE_CFLAGS}"
 AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\" -DGLOBAL_PYTHON_PLUGINS_PATH=\"\\\"$GLOBAL_PYTHON_PLUGINS_PATH\\\"\" -DGLOBAL_C_PLUGINS_PATH=\"\\\"$GLOBAL_C_PLUGINS_PATH\\\"\""
-LIBS="$glib_LIBS $gio_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_EXTRA_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} ${SQLITE_LIBS} $LIBS"
+LIBS="$glib_LIBS $gio_LIBS $PTHREAD_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_EXTRA_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} ${SQLITE_LIBS} $LIBS"
 
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
 
-## Checks for library functions.
-AC_CHECK_FUNCS([atexit memset strdup strstr])
-
+## Output
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
@@ -395,6 +404,6 @@ CPPFLAGS                   : $AM_CPPFLAGS
 LDFLAGS                    : $AM_LDFLAGS
 LIBS                       : $LIBS
 
-Now you can run \`make' to build profanity])
+Run `make' to build profanity])
 
 dnl vim: expandtab:ts=4:sts=4:sw=4
