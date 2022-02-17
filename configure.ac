@@ -378,19 +378,20 @@ AC_CHECK_FUNCS([atexit memset strdup strstr])
 AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
-echo ""
-echo "PLATFORM                   : $host_os"
-echo "PACKAGE_STATUS             : $PACKAGE_STATUS"
-echo "AM_CFLAGS                  : $AM_CFLAGS"
-echo "AM_CPPFLAGS                : $AM_CPPFLAGS"
-echo "AM_LDFLAGS                 : $AM_LDFLAGS"
-echo "LIBS                       : $LIBS"
-echo "Install themes             : $THEMES_INSTALL"
-echo "Themes path                : $THEMES_PATH"
-echo "Icons path                 : $ICONS_PATH"
-echo "Global Python plugins path : $GLOBAL_PYTHON_PLUGINS_PATH"
-echo "Global C plugins path      : $GLOBAL_C_PLUGINS_PATH"
-echo ""
-echo "Now you can run \`make' to build profanity"
+AC_MSG_NOTICE([Summary of build options:
+PLATFORM                   : $host_os
+PACKAGE_STATUS             : $PACKAGE_STATUS
+LIBS                       : $LIBS
+Install themes             : $THEMES_INSTALL
+Themes path                : $THEMES_PATH
+Icons path                 : $ICONS_PATH
+Global Python plugins path : $GLOBAL_PYTHON_PLUGINS_PATH
+Global C plugins path      : $GLOBAL_C_PLUGINS_PATH
+CFLAGS                     : $AM_CFLAGS
+CPPFLAGS                   : $AM_CPPFLAGS
+LDFLAGS                    : $AM_LDFLAGS
+LIBS                       : $LIBS
+
+Now you can run \`make' to build profanity])
 
 dnl vim: expandtab:ts=4:sts=4:sw=4
