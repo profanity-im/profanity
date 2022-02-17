@@ -68,11 +68,7 @@ void identity_key_store_new(identity_key_store_t* identity_key_store);
  * @param address the address of the remote client
  * @return 1 if the session was loaded, 0 if the session was not found, negative on failure
  */
-#ifdef HAVE_LIBSIGNAL_LT_2_3_2
-int load_session(signal_buffer** record, const signal_protocol_address* address, void* user_data);
-#else
 int load_session(signal_buffer** record, signal_buffer** user_record, const signal_protocol_address* address, void* user_data);
-#endif
 
 /**
  * Returns all known devices with active sessions for a recipient
@@ -94,11 +90,7 @@ int get_sub_device_sessions(signal_int_list** sessions, const char* name, size_t
  * @param record_len length of the serialized session record
  * @return 0 on success, negative on failure
  */
-#ifdef HAVE_LIBSIGNAL_LT_2_3_2
-int store_session(const signal_protocol_address* address, uint8_t* record, size_t record_len, void* user_data);
-#else
 int store_session(const signal_protocol_address* address, uint8_t* record, size_t record_len, uint8_t* user_record, size_t user_record_len, void* user_data);
-#endif
 
 /**
  * Determine whether there is a committed session record for a

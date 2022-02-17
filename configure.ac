@@ -324,14 +324,7 @@ if test "x$enable_omemo" != xno; then
    AM_CONDITIONAL([BUILD_OMEMO], [true])
     PKG_CHECK_MODULES([libsignal], [libsignal-protocol-c >= 2.3.2],
         [LIBS="-lsignal-protocol-c $LIBS"],
-        [AC_MSG_NOTICE([libsignal >= 2.3.2 not found, checking for libsignal 2.3.x...])
-         PKG_CHECK_MODULES([libsignal], [libsignal-protocol-c >= 2.3.0],
-            [LIBS="-lsignal-protocol-c $LIBS"
-             AC_DEFINE([HAVE_LIBSIGNAL_LT_2_3_2], [1], [Have libsignal-protocol-c < 2.3.2])],
-            [AM_CONDITIONAL([BUILD_OMEMO], [false])
-             AS_IF([test "x$enable_omemo" = xyes],
-                   [AC_MSG_ERROR([libsignal-protocol-c is required for OMEMO support])],
-                   [AC_MSG_NOTICE([libsignal-protocol-c not found, OMEMO support not enabled])])])])
+        [AC_MSG_NOTICE([libsignal-protocol-c >= 2.3.2 not found, OMEMO support not enabled])])
 
     AC_CHECK_LIB([gcrypt], [gcry_md_extract],
         [LIBS="-lgcrypt $LIBS"],
