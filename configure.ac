@@ -1,4 +1,3 @@
-#                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
 AC_INIT([profanity],[0.12.0],[jubalh@iodoru.org])
@@ -393,3 +392,5 @@ echo "Global Python plugins path : $GLOBAL_PYTHON_PLUGINS_PATH"
 echo "Global C plugins path      : $GLOBAL_C_PLUGINS_PATH"
 echo ""
 echo "Now you can run \`make' to build profanity"
+
+dnl vim: expandtab:ts=4:sts=4:sw=4
