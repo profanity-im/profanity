@@ -1,6 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
-AC_INIT([profanity],[0.12.0],[jubalh@iodoru.org])
+AC_PREREQ([2.69])
+AC_INIT([profanity],[0.12.0],[jubalh@iodoru.org],[profanity],[https://profanity-im.github.io/])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
@@ -128,7 +129,7 @@ else
 fi
 
 # threading
-ACX_PTHREAD([], [AC_MSG_ERROR([pthread is required])])
+AX_PTHREAD([],[AC_MSG_ERROR([pthread is required])])
 LIBS="$PTHREAD_LIBS $LIBS"
 CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
