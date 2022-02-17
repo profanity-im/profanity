@@ -8,14 +8,11 @@ AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
-### Checks for programs.
 AC_PROG_CC
 LT_INIT
-
-## Check for LFS
 AC_SYS_LARGEFILE
 
-### Get canonical host
+## Determine platform
 AC_CANONICAL_HOST
 PLATFORM="unknown"
 AS_CASE([$host_os],
@@ -28,7 +25,7 @@ AS_CASE([$host_os],
 
 PACKAGE_STATUS="development"
 
-### Get git branch and revision if in development
+## Get git branch and revision if in development
 if test "x$PACKAGE_STATUS" = xdevelopment; then
     AM_CONDITIONAL([INCLUDE_GIT_VERSION], [true])
     AC_DEFINE([HAVE_GIT_VERSION], [1], [Include git info])
@@ -43,10 +40,10 @@ AS_IF([test "x$PLATFORM" = xcygwin],
 AS_IF([test "x$PLATFORM" = xosx],
     [AC_DEFINE([PLATFORM_OSX], [1], [OSx])])
 
-### Environment variables
+## Environment variables
 AC_ARG_VAR([PYTHON_FRAMEWORK], [Set base directory for Python Framework])
 
-### Options
+## Options
 AC_ARG_ENABLE([notifications],
     [AS_HELP_STRING([--enable-notifications], [enable desktop notifications])])
 AC_ARG_ENABLE([python-plugins],
@@ -70,7 +67,7 @@ AC_ARG_ENABLE([icons-and-clipboard],
 
 ### plugins
 
-# python
+## python
 if test "x$enable_plugins" = xno; then
     AM_CONDITIONAL([BUILD_PYTHON_API], [false])
 elif test "x$enable_python_plugins" != xno; then
@@ -101,7 +98,7 @@ else
     AM_CONDITIONAL([BUILD_PYTHON_API], [false])
 fi
 
-# c
+## C
 if test "x$PLATFORM" = xcygwin; then
     AM_CONDITIONAL([BUILD_C_API], [false])
 else
@@ -128,13 +125,15 @@ else
     fi
 fi
 
-# threading
+### Check for dependencies
+
+## Threading
 AX_PTHREAD([],[AC_MSG_ERROR([pthread is required])])
 LIBS="$PTHREAD_LIBS $LIBS"
 CFLAGS="$CFLAGS $PTHREAD_CFLAGS"
 AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
 
-### Check for libstrophe
+## Check for libstrophe
 PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.11.0],
     [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" XMPP_LIB="libstrophe" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
     [XMPP_LIB=""])
@@ -151,7 +150,7 @@ AC_LINK_IFELSE([AC_LANG_SOURCE([[
     [AC_MSG_RESULT([yes])],
     [AC_MSG_ERROR([${XMPP_LIB} is broken, check config.log for details])])
 
-### Check for curses library
+## Check for curses library
 PKG_CHECK_MODULES([ncursesw], [ncursesw],
     [NCURSES_CFLAGS="$ncursesw_CFLAGS"; NCURSES_LIBS="$ncursesw_LIBS"; CURSES="ncursesw"],
     [PKG_CHECK_MODULES([ncurses], [ncurses],
@@ -164,7 +163,7 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw],
 AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
 LIBS="$NCURSES_LIBS $LIBS"
 
-### Check wide characters support in curses library
+## Check wide characters support in curses library
 CFLAGS_RESTORE="$CFLAGS"
 CFLAGS="$CFLAGS $NCURSES_CFLAGS"
 AC_CACHE_CHECK([for wget_wch support in $CURSES], ncurses_cv_wget_wch,
@@ -183,22 +182,22 @@ CFLAGS="$CFLAGS_RESTORE"
 AS_IF([test "x$ncurses_cv_wget_wch" != xyes],
     [AC_MSG_ERROR([ncurses does not support wide characters])])
 
-### Check for glib libraries
+## Check for glib libraries
 PKG_CHECK_MODULES([glib], [glib-2.0 >= 2.62.0], [],
-    [AC_MSG_ERROR([glib 2.62.0 or higher is required for profanity])])
+    [AC_MSG_ERROR([glib 2.62.0 or higher is required])])
 PKG_CHECK_MODULES([gio], [gio-2.0], [],
-    [AC_MSG_ERROR([libgio-2.0 from glib-2.0 is required for profanity])])
+    [AC_MSG_ERROR([libgio-2.0 from glib-2.0 is required])])
 
-### Check for other profanity dependencies
+## Check for other profanity dependencies
 AC_SEARCH_LIBS([fmod], [m], [],
    [AC_MSG_ERROR([math.h is required])], [])
 
 PKG_CHECK_MODULES([curl], [libcurl >= 7.62.0], [],
     [AC_CHECK_LIB([curl], [main], [],
-        [AC_MSG_ERROR([libcurl is required for profanity])])])
+        [AC_MSG_ERROR([libcurl 7.62.0 or higher is required])])])
 
 PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.22.0], [],
-    [AC_MSG_ERROR([sqlite3 3.22.0 or higher is required for profanity])])
+    [AC_MSG_ERROR([sqlite3 3.22.0 or higher is required])])
 
 AS_IF([test "x$enable_icons_and_clipboard" != xno],
     [PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.24.0],
@@ -209,6 +208,7 @@ AS_IF([test "x$enable_icons_and_clipboard" != xno],
                                   [AC_MSG_ERROR([gtk+-2.0 >= 2.24.10 or gtk+-3.0 >= 3.24.0 is required for icons and clipboard])],
                                   [AC_MSG_NOTICE([gtk+-3.0/gtk+2.0 not found, icons and clipboard not enabled])])])])])
 
+# Check for readline
 AS_IF([test "x$PLATFORM" = xosx],
         [AC_PATH_PROG([BREW], [brew], ["failed"],
             [$PATH:/opt/homebrew/bin:/usr/local/bin])
@@ -236,10 +236,12 @@ AS_IF([test "x$PLATFORM" = xosx],
     [AC_CHECK_LIB([readline], [main], [],
         [AC_MSG_ERROR([libreadline is required for profanity])])])
 
-### Check for desktop notification support
-### Linux/FreeBSD require libnotify
-### Windows uses native OS calls
-### OSX requires terminal-notifier
+## Check for optional dependencies
+
+## Check for desktop notification support
+## Linux/FreeBSD require libnotify
+## Windows uses native OS calls
+## OSX requires terminal-notifier
 
 AS_IF([test "x$PLATFORM" = xosx],
         [AS_IF([test "x$enable_notifications" != xno],
@@ -341,8 +343,8 @@ AM_CONDITIONAL([THEMES_INSTALL], "$THEMES_INSTALL")
 ICONS_PATH='${pkgdatadir}/icons'
 AC_SUBST(ICONS_PATH)
 
-### cmocka is required only for tests, profanity shouldn't be linked with it
-### TODO: pass cmocka_CFLAGS and cmocka_LIBS to Makefile.am
+## cmocka is required only for tests, profanity shouldn't be linked with it
+## TODO: pass cmocka_CFLAGS and cmocka_LIBS to Makefile.am
 PKG_CHECK_MODULES([cmocka], [cmocka], [],
     [AC_MSG_NOTICE([cmocka is not found, will not be able to run tests])])
 
@@ -353,12 +355,12 @@ AM_CONDITIONAL([HAVE_EXPECT], [false])
 AC_CHECK_LIB([expect], [exp_expectl], [AM_CONDITIONAL([HAVE_EXPECT], [true])],
     [AC_MSG_NOTICE([libexpect not found, will not be able to run functional tests])])
 
-### Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
+## Check for ncursesw/ncurses.h first, Arch linux uses ncurses.h for ncursesw
 AC_CHECK_HEADERS([ncursesw/ncurses.h], [], [])
 AC_CHECK_HEADERS([ncurses.h], [], [])
 AC_CHECK_HEADERS([curses.h], [], [])
 
-### Default parameters
+## Default parameters
 AM_CFLAGS="-Wall -Wno-deprecated-declarations -std=gnu99"
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
     [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
@@ -373,7 +375,7 @@ AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
 
-### Checks for library functions.
+## Checks for library functions.
 AC_CHECK_FUNCS([atexit memset strdup strstr])
 
 AC_CONFIG_FILES([Makefile])
