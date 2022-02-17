@@ -149,10 +149,9 @@ fi
 
 ## Check for libstrophe
 PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.11.0],
-    [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS" XMPP_LIB="libstrophe" AC_DEFINE([HAVE_LIBSTROPHE], [1], [libstrophe])],
-    [XMPP_LIB=""])
+    [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS"])
 
-AC_MSG_CHECKING([whether ${XMPP_LIB} works])
+AC_MSG_CHECKING([whether libstrophe works])
 AC_LINK_IFELSE([AC_LANG_SOURCE([[
     #include <strophe.h>
 
@@ -162,7 +161,7 @@ AC_LINK_IFELSE([AC_LANG_SOURCE([[
     }
     ]])],
     [AC_MSG_RESULT([yes])],
-    [AC_MSG_ERROR([${XMPP_LIB} is broken, check config.log for details])])
+    [AC_MSG_ERROR([libstrophe is broken, check config.log for details])])
 
 ## Check for curses library
 PKG_CHECK_MODULES([ncursesw], [ncursesw],
