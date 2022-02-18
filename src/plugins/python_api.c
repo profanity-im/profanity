@@ -1575,7 +1575,7 @@ static PyMethodDef apiMethods[] = {
     { NULL, NULL, 0, NULL }
 };
 
-#if PY_MAJOR_VERSION >= 3
+#ifdef PY_IS_PYTHON3
 static struct PyModuleDef profModule = {
     PyModuleDef_HEAD_INIT,
     "prof",
@@ -1588,7 +1588,7 @@ static struct PyModuleDef profModule = {
 PyMODINIT_FUNC
 python_api_init(void)
 {
-#if PY_MAJOR_VERSION >= 3
+#ifdef PY_IS_PYTHON3
     PyObject* result = PyModule_Create(&profModule);
     if (!result) {
         log_debug("Failed to initialise prof module");
@@ -1604,7 +1604,7 @@ python_api_init(void)
 void
 python_init_prof(void)
 {
-#if PY_MAJOR_VERSION >= 3
+#ifdef PY_IS_PYTHON3
     PyImport_AppendInittab("prof", python_api_init);
     Py_Initialize();
     PyEval_InitThreads();
@@ -1640,7 +1640,7 @@ python_str_or_unicode_to_string(void* obj)
         return NULL;
     }
 
-#if PY_MAJOR_VERSION >= 3
+#ifdef PY_IS_PYTHON3
     if (PyUnicode_Check(pyobj)) {
         PyObject* utf8_str = PyUnicode_AsUTF8String(pyobj);
         char* result = strdup(PyBytes_AS_STRING(utf8_str));

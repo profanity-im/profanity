@@ -908,7 +908,7 @@ _handle_string_or_none_result(ProfPlugin* plugin, PyObject* result, char* hook)
         _python_undefined_error(plugin, hook, "string, unicode or None");
         return NULL;
     }
-#if PY_MAJOR_VERSION >= 3
+#ifdef PY_IS_PYTHON3
     if (result != Py_None && !PyUnicode_Check(result) && !PyBytes_Check(result)) {
         allow_python_threads();
         _python_type_error(plugin, hook, "string, unicode or None");
