@@ -9436,7 +9436,7 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
-// Returns true if an error occured
+// Returns true if an error occurred
 gboolean
 _get_message_from_editor(gchar* message, gchar** returned_message)
 {

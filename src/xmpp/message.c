@@ -164,7 +164,7 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
 
     } else if (type && g_strcmp0(type, STANZA_TYPE_HEADLINE) == 0) {
         xmpp_stanza_t* event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
-        // TODO: do we want to handle all pubsub here or should additionaly check for STANZA_NS_MOOD?
+        // TODO: do we want to handle all pubsub here or should additionally check for STANZA_NS_MOOD?
         if (event) {
             _handle_pubsub(stanza, event);
             return 1;
