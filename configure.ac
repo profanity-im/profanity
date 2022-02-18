@@ -98,10 +98,9 @@ elif test "x$enable_python_plugins" != xno; then
         AC_MSG_NOTICE([Symlinking Python.framework to $PYTHON_FRAMEWORK])
         rm -f Python.framework
         ln -s $PYTHON_FRAMEWORK Python.framework ])
-    AC_CHECK_PROG(PYTHON_CONFIG_EXISTS, python-config, yes, no)
-    AC_CHECK_PROG(PYTHON3_CONFIG_EXISTS, python3-config, yes, no)
+    PKG_CHECK_MODULES([python], [python-embed], [PYTHON_CONFIG_EXISTS=yes], [PYTHON_CONFIG_EXISTS=no])
+    PKG_CHECK_MODULES([python], [python3-embed], [PYTHON3_CONFIG_EXISTS=yes; AC_DEFINE(PY_IS_PYTHON3, [1], [Is Python version 3])], [PYTHON3_CONFIG_EXISTS=no])
     if test "$PYTHON_CONFIG_EXISTS" = "yes" || test "$PYTHON3_CONFIG_EXISTS" = "yes"; then
-        AX_PYTHON_DEVEL
         AM_CONDITIONAL([BUILD_PYTHON_API], [true])
         AC_DEFINE([HAVE_PYTHON], [1], [Python support])
     else
@@ -357,9 +356,9 @@ AS_IF([test "x$PLATFORM" = xosx],
     [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
 
 AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS ${SQLITE_CFLAGS}"
-AM_CFLAGS="$AM_CFLAGS $libnotify_CFLAGS ${GTK_CFLAGS} $PYTHON_CPPFLAGS" dnl https://bugs.python.org/issue15018
+AM_CFLAGS="$AM_CFLAGS $libnotify_CFLAGS ${GTK_CFLAGS} $python_CFLAGS" dnl https://bugs.python.org/issue15018
 AM_CFLAGS="$AM_CFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\" -DGLOBAL_PYTHON_PLUGINS_PATH=\"\\\"$GLOBAL_PYTHON_PLUGINS_PATH\\\"\" -DGLOBAL_C_PLUGINS_PATH=\"\\\"$GLOBAL_C_PLUGINS_PATH\\\"\""
-LIBS="$glib_LIBS $gio_LIBS $PTHREAD_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_EXTRA_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} ${SQLITE_LIBS} $LIBS"
+LIBS="$glib_LIBS $gio_LIBS $PTHREAD_LIBS $curl_LIBS $libnotify_LIBS $python_LIBS ${GTK_LIBS} ${SQLITE_LIBS} $LIBS"
 
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
