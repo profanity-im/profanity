@@ -1,3 +1,0 @@
-#!/bin/sh
-
-./configure --enable-python-plugins --enable-c-plugins CFLAGS='-g -O0' CXXFLAGS='-g -O0'
