@@ -13,9 +13,9 @@ LT_INIT
 AC_SYS_LARGEFILE
 
 ## Determine platform
-AC_CANONICAL_HOST
+AC_CANONICAL_TARGET
 PLATFORM="unknown"
-AS_CASE([$host_os],
+AS_CASE([$target_os],
     [freebsd*], [PLATFORM="freebsd"],
     [netbsd*], [PLATFORM="netbsd"],
     [openbsd*], [PLATFORM="openbsd"],
@@ -370,7 +370,7 @@ AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
 AC_MSG_NOTICE([Summary of build options:
-PLATFORM                   : $host_os
+PLATFORM                   : $target_os
 PACKAGE_STATUS             : $PACKAGE_STATUS
 LIBS                       : $LIBS
 Install themes             : $THEMES_INSTALL
