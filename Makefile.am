@@ -187,9 +187,6 @@ pgp_sources = \
 pgp_unittest_sources = \
 	tests/unittests/pgp/stub_gpg.c
 
-otr3_sources = \
-	src/otr/otrlib.h src/otr/otrlibv3.c src/otr/otr.h src/otr/otr.c
-
 otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
 
@@ -229,12 +226,7 @@ endif
 
 if BUILD_OTR
 unittest_sources += $(otr_unittest_sources)
-if BUILD_OTR3
-core_sources += $(otr3_sources)
-endif
-if BUILD_OTR4
 core_sources += $(otr4_sources)
-endif
 endif
 
 if BUILD_OMEMO
@@ -244,7 +236,7 @@ endif
 
 all_c_sources = $(core_sources) $(unittest_sources) \
 				$(pgp_sources) $(pgp_unittest_sources) \
-				$(otr3_sources) $(otr4_sources) $(otr_unittest_sources) \
+				$(otr4_sources) $(otr_unittest_sources) \
 				$(omemo_sources) $(omemo_unittest_sources) \
 				$(c_sources) $(python_sources) \
 				$(main_source)

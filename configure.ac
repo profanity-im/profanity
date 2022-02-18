@@ -299,23 +299,17 @@ fi
 
 dnl feature: otr
 AM_CONDITIONAL([BUILD_OTR], [false])
-AM_CONDITIONAL([BUILD_OTR3], [false])
-AM_CONDITIONAL([BUILD_OTR4], [false])
 if test "x$enable_otr" != xno; then
     AM_CONDITIONAL([BUILD_OTR], [true])
-    PKG_CHECK_MODULES([libotr], [libotr >= 4.0],
-        [AM_CONDITIONAL([BUILD_OTR4], [true])],
-        [AC_MSG_NOTICE([libotr >= 4.0 not found, checking for libotr-3.x...])
-         PKG_CHECK_MODULES([libotr], [libotr >= 3.0],
-            [AM_CONDITIONAL([BUILD_OTR3], [true])],
-            [AM_CONDITIONAL([BUILD_OTR], [false])])])
 
-    AM_COND_IF([BUILD_OTR],
-        [LIBS="$libotr_LIBS $LIBS" CFLAGS="$CFLAGS $libotr_CFLAGS"
-         AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])],
-        [AS_IF([test "x$enable_otr" = xyes],
-            [AC_MSG_ERROR([libotr is required for otr encryption support])],
-            [AC_MSG_NOTICE([libotr not found, otr encryption support not enabled])])])
+    PKG_CHECK_MODULES([libotr], [libotr >= 4.0],
+        [LIBS="$libotr_LIBS $LIBS" CFLAGS="$libotr_CFLAGS $cflags"],
+        [AM_CONDITIONAL([BUILD_OTR], [false])
+         AS_IF([test "x$enable_otr" = xyes],
+               [AC_MSG_ERROR([libotr >= 4.0 is required for OTR support])],
+               [AC_MSG_NOTICE([libotr >= 4.0 not found, OTR support not enabled])])])
+
+   AM_COND_IF([BUILD_OTR], [AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])])
 fi
 
 dnl feature: omemo
