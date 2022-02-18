@@ -71,8 +71,12 @@ what may have been staged/committed.
 If you're in a hurry you can add the `--no-verify` flag when issuing `git push`
 and the `pre-push` hook will be skipped.
 
-## Pull Requests
-Before submitting a Pull Request please run valgrind and the clang static code analyzer.
+## Finding mistakes
+Test your changes with the following tools to find mistakes.
+
+### unit tests
+
+Run `make check` to run the unit tests with your current configuration or `./ci-build.sh` to check with different switches passed to configure.
 
 ### valgrind
 We provide a suppressions file `prof.supp`. It is a combination of the suppressions for shipped with glib2, python and custom rules.
