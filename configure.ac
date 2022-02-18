@@ -268,19 +268,12 @@ AS_IF([test "x$PLATFORM" = xosx],
                     [AC_MSG_NOTICE([libnotify support will be disabled])])])])])
 
 dnl feature: xscreensaver
-
-# TODO: rewrite this
-if test "x$with_xscreensaver" = xyes; then
-    AC_CHECK_LIB([Xss], [main], [],
-        [AC_MSG_ERROR([libXss is required for x autoaway support])])
-    AC_CHECK_LIB([X11], [main], [],
-        [AC_MSG_ERROR([libX11 is required for x autoaway support])])
-elif test "x$with_xscreensaver" = x; then
-    AC_CHECK_LIB([Xss], [main], [],
-        [AC_MSG_NOTICE([libXss not found, falling back to profanity auto-away])])
-    AC_CHECK_LIB([X11], [main], [],
-        [AC_MSG_NOTICE([libX11 not found, falling back to profanity auto-away])])
-fi
+AS_IF([test "x$enable_xscreensaver" != xno],
+    [PKG_CHECK_MODULES([xscrnsaver], [xscrnsaver],
+        [AC_MSG_NOTICE([xscreensaver support is enabled])],
+        [AS_IF([test "x$enable_xscreensaver" = xyes],
+            [AC_MSG_ERROR([xscreensaver is required but does not exist])],
+            [AC_MSG_NOTICE([xscreensaver support is disabled])])])])
 
 dnl feature: pgp
 AM_CONDITIONAL([BUILD_PGP], [false])
