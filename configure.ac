@@ -173,7 +173,7 @@ PKG_CHECK_MODULES([ncursesw], [ncursesw],
                 [AC_CHECK_LIB([curses], [main],
                     [LIBS="$LIBS -lcurses"; CURSES="curses"],
                     [AC_MSG_ERROR([ncurses or curses is required for profanity])])])])])])
-AM_CPPFLAGS="$AM_CPPFLAGS $NCURSES_CFLAGS"
+AM_CFLAGS="$AM_CFLAGS $NCURSES_CFLAGS"
 LIBS="$NCURSES_LIBS $LIBS"
 
 ## Check wide characters support in curses library
@@ -221,7 +221,7 @@ AS_IF([test "x$PLATFORM" = xosx],
       [test "x$PLATFORM" = xopenbsd],
       [AC_CHECK_FILE([/usr/local/include/ereadline],
           [LIBS="-lereadline $LIBS"
-              AM_CPPFLAGS="-I/usr/local/include/ereadline $AM_CPPFLAGS"
+              AM_CFLAGS="-I/usr/local/include/ereadline $AM_CFLAGS"
               AM_LDFLAGS="-L/usr/local/lib $AM_LDFLAGS"
               AC_SUBST(AM_LDFLAGS)])],
 
@@ -291,7 +291,7 @@ if test "x$enable_pgp" != xno; then
          AC_PATH_PROG([GPGME_CONFIG], [gpgme-config], ["failed"])
          AS_IF([test "x$GPGME_CONFIG" = xfailed],
             [LIBS="-lgpgme $LIBS"],
-            [LIBS="`$GPGME_CONFIG --libs` $LIBS" AM_CPPFLAGS="`$GPGME_CONFIG --cflags` $AM_CPPFLAGS"])],
+            [LIBS="`$GPGME_CONFIG --libs` $LIBS" AM_CFLAGS="`$GPGME_CONFIG --cflags` $AM_CFLAGS"])],
         [AS_IF([test "x$enable_pgp" = xyes],
             [AC_MSG_ERROR([libgpgme is required for pgp support])],
             [AC_MSG_NOTICE([libgpgme not found, pgp support not enabled])])])
@@ -363,9 +363,9 @@ AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
 AS_IF([test "x$PLATFORM" = xosx],
     [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
 
-AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS"
-AM_CPPFLAGS="$AM_CPPFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS $libnotify_CFLAGS $PYTHON_CPPFLAGS ${GTK_CFLAGS} ${SQLITE_CFLAGS}"
-AM_CPPFLAGS="$AM_CPPFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\" -DGLOBAL_PYTHON_PLUGINS_PATH=\"\\\"$GLOBAL_PYTHON_PLUGINS_PATH\\\"\" -DGLOBAL_C_PLUGINS_PATH=\"\\\"$GLOBAL_C_PLUGINS_PATH\\\"\""
+AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS ${SQLITE_CFLAGS}"
+AM_CFLAGS="$AM_CFLAGS $libnotify_CFLAGS ${GTK_CFLAGS} $PYTHON_CPPFLAGS" dnl https://bugs.python.org/issue15018
+AM_CFLAGS="$AM_CFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\" -DGLOBAL_PYTHON_PLUGINS_PATH=\"\\\"$GLOBAL_PYTHON_PLUGINS_PATH\\\"\" -DGLOBAL_C_PLUGINS_PATH=\"\\\"$GLOBAL_C_PLUGINS_PATH\\\"\""
 LIBS="$glib_LIBS $gio_LIBS $PTHREAD_LIBS $curl_LIBS $libnotify_LIBS $PYTHON_LIBS $PYTHON_EXTRA_LIBS $PYTHON_LDFLAGS ${GTK_LIBS} ${SQLITE_LIBS} $LIBS"
 
 AC_SUBST(AM_LDFLAGS)
