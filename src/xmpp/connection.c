@@ -170,6 +170,7 @@ connection_connect(const char* const jid, const char* const passwd, const char* 
         log_warning("Failed to get libstrophe ctx during connect");
         return JABBER_DISCONNECTED;
     }
+    xmpp_ctx_set_verbosity(conn.xmpp_ctx, 0);
     conn.xmpp_conn = xmpp_conn_new(conn.xmpp_ctx);
     if (conn.xmpp_conn == NULL) {
         log_warning("Failed to get libstrophe conn during connect");
