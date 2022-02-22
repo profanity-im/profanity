@@ -37,6 +37,7 @@
     <os>FreeBSD</os>
     <os>OpenBSD</os>
     <os>Android (Termux)</os>
+    <os>Windows (WSL)</os>
 
     <category rdf:resource='https://linkmauve.fr/ns/xmpp-doap#category-client'/>
 
