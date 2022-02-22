@@ -23,6 +23,7 @@ Usually release candidates are tagged 0.6.0.rc1, 0.6.0.rc2 and tested for a week
 * Update plugin API docs (./apidocs/c and ./apidocs/python) need to run the `gen.sh` and commit the results to the website git repo
 * Update CHANGELOG
 * Update profrc.example
+* Update profanity.doap (new XEPs and latest version)
 
 ## Creating artefacts
 * Set the correct release version in configure.ac:
@@ -79,3 +80,4 @@ PACKAGE_STATUS="development"
   * Make changes to the git repo including uploading the new artefacts at:
         https://github.com/profanity-im/profanity-im.github.io
   * Update profanity_version.txt
+  * Take results from profanity.doap and put them into xeps.html
