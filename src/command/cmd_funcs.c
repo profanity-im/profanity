@@ -122,6 +122,7 @@ static void _who_roster(ProfWin* window, const char* const command, gchar** args
 static gboolean _cmd_execute(ProfWin* window, const char* const command, const char* const inp);
 static gboolean _cmd_execute_default(ProfWin* window, const char* inp);
 static gboolean _cmd_execute_alias(ProfWin* window, const char* const inp, gboolean* ran);
+gboolean _get_message_from_editor(gchar* message, gchar** returned_message);
 
 /*
  * Take a line of input and process it, return TRUE if profanity is to
@@ -4088,6 +4089,22 @@ cmd_subject(ProfWin* window, const char* const command, gchar** args)
     if (g_strcmp0(args[0], "edit") == 0) {
         if (args[1]) {
             message_send_groupchat_subject(mucwin->roomjid, args[1]);
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "editor") == 0) {
+        gchar* message = NULL;
+        char* subject = muc_subject(mucwin->roomjid);
+
+        if (_get_message_from_editor(subject, &message)) {
+            return TRUE;
+        }
+
+        if (message) {
+            message_send_groupchat_subject(mucwin->roomjid, message);
         } else {
             cons_bad_cmd_usage(command);
         }

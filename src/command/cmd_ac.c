@@ -780,6 +780,7 @@ cmd_ac_init(void)
     subject_ac = autocomplete_new();
     autocomplete_add(subject_ac, "set");
     autocomplete_add(subject_ac, "edit");
+    autocomplete_add(subject_ac, "editor");
     autocomplete_add(subject_ac, "prepend");
     autocomplete_add(subject_ac, "append");
     autocomplete_add(subject_ac, "clear");
@@ -3656,11 +3657,7 @@ _subject_autocomplete(ProfWin* window, const char* const input, gboolean previou
     char* result = NULL;
 
     if (window->type == WIN_MUC) {
-        if ((g_strcmp0(input, "/subject e") == 0)
-            || (g_strcmp0(input, "/subject ed") == 0)
-            || (g_strcmp0(input, "/subject edi") == 0)
-            || (g_strcmp0(input, "/subject edit") == 0)
-            || (g_strcmp0(input, "/subject edit ") == 0)
+        if ((g_strcmp0(input, "/subject edit ") == 0)
             || (g_strcmp0(input, "/subject edit \"") == 0)) {
             ProfMucWin* mucwin = (ProfMucWin*)window;
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
