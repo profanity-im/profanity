@@ -1,5 +1,10 @@
 # Contributing to Profanity
 
+## Build
+
+Please follow the [build section](https://profanity-im.github.io/guide/latest/build.html) in our user guide.
+You might also take a look at the `Dockerfile.*` in the root directory.
+
 ## Submitting patches
 We recommend for people to always work on a dedicated git branch for each fix or feature.
 Don't work on master.
