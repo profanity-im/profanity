@@ -220,7 +220,7 @@ AS_IF([test "x$PLATFORM" = xosx],
       [test "x$PLATFORM" = xopenbsd],
       [AC_CHECK_FILE([/usr/local/include/ereadline],
           [LIBS="-lereadline $LIBS"
-              AM_CFLAGS="-I/usr/local/include/ereadline $AM_CFLAGS"
+              AM_CPPFLAGS="-I/usr/local/include/ereadline $AM_CFLAGS"
               AM_LDFLAGS="-L/usr/local/lib $AM_LDFLAGS"
               AC_SUBST(AM_LDFLAGS)])],
 
