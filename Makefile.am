@@ -275,15 +275,15 @@ tests_unittests_unittests_LDADD = -lcmocka
 # https://github.com/profanity-im/stabber/issues/5
 # Once this issue is resolved functional tests should be enabled again
 #
-#if HAVE_STABBER
-#if HAVE_EXPECT
-#TESTS += tests/functionaltests/functionaltests
-#check_PROGRAMS += tests/functionaltests/functionaltests
-#tests_functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
-#tests_functionaltests_functionaltests_CFLAGS = $(AM_CFLAGS) -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
-#tests_functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect
-#endif
-#endif
+if HAVE_STABBER
+if HAVE_EXPECT
+TESTS += tests/functionaltests/functionaltests
+check_PROGRAMS += tests/functionaltests/functionaltests
+tests_functionaltests_functionaltests_SOURCES = $(functionaltest_sources)
+tests_functionaltests_functionaltests_CFLAGS = $(AM_CFLAGS) -I/usr/include/tcl8.6 -I/usr/include/tcl8.5
+tests_functionaltests_functionaltests_LDADD = -lcmocka -lstabber -lexpect
+endif
+endif
 
 man_MANS = $(man_sources)
 
