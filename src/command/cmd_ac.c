@@ -2589,6 +2589,10 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         return found;
     }
 
+    if (strncmp(input, "/ox announce ", 13) == 0) {
+        return cmd_ac_complete_filepath(input, "/ox announce", previous);
+    }
+
     gboolean result;
     gchar** args = parse_args(input, 2, 3, &result);
     if ((strncmp(input, "/ox", 4) == 0) && (result == TRUE)) {
