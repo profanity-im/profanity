@@ -1,5 +1,5 @@
 # Profanity
-![Build Status](https://github.com/profanity-im/profanity/workflows/CI/badge.svg) [![builds.sr.ht status](https://builds.sr.ht/~wstrm/profanity.svg)](https://builds.sr.ht/~wstrm/profanity?) [![Packaging status](https://repology.org/badge/tiny-repos/profanity.svg)](https://repology.org/project/profanity/versions) [![GitHub contributors](https://img.shields.io/github/contributors/profanity-im/profanity.svg)](https://github.com/profanity-im/profanity/graphs/contributors/)
+![Build Status](https://github.com/profanity-im/profanity/workflows/CI/badge.svg) [![builds.sr.ht status](https://builds.sr.ht/~wstrm/profanity.svg)](https://builds.sr.ht/~wstrm/profanity?) [![GitHub contributors](https://img.shields.io/github/contributors/profanity-im/profanity.svg)](https://github.com/profanity-im/profanity/graphs/contributors/) [![Packaging status](https://repology.org/badge/tiny-repos/profanity.svg)](https://repology.org/project/profanity/versions)
 
 Profanity is a console based XMPP client inspired by [Irssi](http://www.irssi.org/).
 
