@@ -1101,6 +1101,7 @@ cmd_export(ProfWin* window, const char* const command, gchar** args)
         char* path = get_expanded_path(args[0]);
 
         fd = open(path, O_WRONLY | O_CREAT, 00600);
+        free(path);
 
         if (-1 == fd) {
             cons_show("error: cannot open %s: %s", args[0], strerror(errno));
