@@ -1133,8 +1133,6 @@ _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret)
 /*!
  * @brief XMPP-OX: Decrypt OX Message.
  *
- *
- *
  * @param base64  base64_encode OpenPGP message.
  *
  * @result decrypt XMPP OX Message NULL terminated C-String
@@ -1226,11 +1224,9 @@ p_ox_gpg_decrypt(char* base64)
  * \param fp result with the fingerprint or NULL
  *
  */
-
 void
 p_ox_gpg_readkey(const char* const filename, char** key, char** fp)
 {
-
     log_info("PX: Read OpenPGP Key from file %s", filename);
 
     GError* error = NULL;
