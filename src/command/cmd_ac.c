@@ -2553,11 +2553,6 @@ _pgp_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     return NULL;
 }
 
-/*!
- * \brief Auto completion for XEP-0373: OpenPGP for XMPP command.
- *
- *
- */
 static char*
 _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
