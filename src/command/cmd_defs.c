@@ -676,6 +676,7 @@ static struct cmd_t command_defs[] = {
       CMD_SYN(
               "/subject set <subject>",
               "/subject edit <subject>",
+              "/subject editor",
               "/subject prepend <text>",
               "/subject append <text>",
               "/subject clear")
@@ -684,6 +685,7 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "set <subject>", "Set the room subject." },
               { "edit <subject>", "Edit the current room subject, tab autocompletion will display the subject to edit." },
+              { "editor", "Edit the current room subject in external editor." },
               { "prepend <text>", "Prepend text to the current room subject, use double quotes if a trailing space is needed." },
               { "append <text>", "Append text to the current room subject, use double quotes if a preceding space is needed." },
               { "clear", "Clear the room subject." })
