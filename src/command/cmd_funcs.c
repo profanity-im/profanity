@@ -122,7 +122,6 @@ static void _who_roster(ProfWin* window, const char* const command, gchar** args
 static gboolean _cmd_execute(ProfWin* window, const char* const command, const char* const inp);
 static gboolean _cmd_execute_default(ProfWin* window, const char* inp);
 static gboolean _cmd_execute_alias(ProfWin* window, const char* const inp, gboolean* ran);
-gboolean _get_message_from_editor(gchar* message, gchar** returned_message);
 
 /*
  * Take a line of input and process it, return TRUE if profanity is to
@@ -4099,7 +4098,7 @@ cmd_subject(ProfWin* window, const char* const command, gchar** args)
         gchar* message = NULL;
         char* subject = muc_subject(mucwin->roomjid);
 
-        if (_get_message_from_editor(subject, &message)) {
+        if (get_message_from_editor(subject, &message)) {
             return TRUE;
         }
 
@@ -9455,7 +9454,7 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
 
 // Returns true if an error occurred
 gboolean
-_get_message_from_editor(gchar* message, gchar** returned_message)
+get_message_from_editor(gchar* message, gchar** returned_message)
 {
     // create editor dir if not present
     char* jid = connection_get_barejid();
@@ -9548,7 +9547,7 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
 
     gchar* message = NULL;
 
-    if (_get_message_from_editor(NULL, &message)) {
+    if (get_message_from_editor(NULL, &message)) {
         return TRUE;
     }
 
@@ -9571,7 +9570,7 @@ cmd_correct_editor(ProfWin* window, const char* const command, gchar** args)
     gchar* initial_message = win_get_last_sent_message(window);
 
     gchar* message = NULL;
-    if (_get_message_from_editor(initial_message, &message)) {
+    if (get_message_from_editor(initial_message, &message)) {
         return TRUE;
     }
 

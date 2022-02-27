@@ -60,6 +60,7 @@
 #include "log.h"
 #include "common.h"
 #include "command/cmd_ac.h"
+#include "command/cmd_funcs.h"
 #include "config/files.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
@@ -133,6 +134,7 @@ static int _inp_rl_subwin_pageup_handler(int count, int key);
 static int _inp_rl_subwin_pagedown_handler(int count, int key);
 static int _inp_rl_startup_hook(void);
 static int _inp_rl_down_arrow_handler(int count, int key);
+static int _inp_rl_send_to_editor(int count, int key);
 
 void
 create_input_window(void)
@@ -434,6 +436,7 @@ _inp_rl_addfuncs(void)
     rl_add_funmap_entry("prof_subwin_pagedown", _inp_rl_subwin_pagedown_handler);
     rl_add_funmap_entry("prof_win_clear", _inp_rl_win_clear_handler);
     rl_add_funmap_entry("prof_win_close", _inp_rl_win_close_handler);
+    rl_add_funmap_entry("prof_send_to_editor", _inp_rl_send_to_editor);
 }
 
 // Readline callbacks
@@ -484,6 +487,7 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\ea", _inp_rl_win_next_unread_handler);
     rl_bind_keyseq("\\ev", _inp_rl_win_attention_handler);
     rl_bind_keyseq("\\em", _inp_rl_win_attention_next_handler);
+    rl_bind_keyseq("\\ed", _inp_rl_send_to_editor);
 
     rl_bind_keyseq("\\e\\e[5~", _inp_rl_subwin_pageup_handler);
     rl_bind_keyseq("\\e[5;3~", _inp_rl_subwin_pageup_handler);
@@ -875,5 +879,27 @@ _inp_rl_down_arrow_handler(int count, int key)
     using_history();
     rl_replace_line("", 0);
     rl_redisplay();
+    return 0;
+}
+
+static int
+_inp_rl_send_to_editor(int count, int key)
+{
+    if (rl_point != rl_end || !rl_line_buffer) {
+        return 0;
+    }
+
+    gchar* message = NULL;
+
+    if (get_message_from_editor(rl_line_buffer, &message)) {
+        return TRUE;
+    }
+
+    rl_replace_line(message, 0);
+    ui_resize();
+    rl_point = rl_end;
+    rl_forced_update_display();
+    g_free(message);
+
     return 0;
 }
