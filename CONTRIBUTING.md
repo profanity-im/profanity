@@ -39,6 +39,10 @@ And create your patch using the [`git-format-patch`](https://git-scm.com/docs/gi
 * Each patch or pull request should only contain related modifications.
 * Run the tests and code formatters before submitting (c.f. Chapter 'Check everything' of this README).
 
+### Hints and Pitfalls
+
+* When adding a new hotkey/shortcut make sure it's not registered in Profanity already. And also that it's not a default shortcut of readline.
+
 ## Coding style
 Follow the style already present ;-)
 
