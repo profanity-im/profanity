@@ -51,6 +51,7 @@ core_sources = \
 	src/tools/bookmark_ignore.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/clipboard.c src/tools/clipboard.h \
+	src/tools/editor.c src/tools/editor.h \
 	src/config/files.c src/config/files.h \
 	src/config/conflists.c src/config/conflists.h \
 	src/config/accounts.c src/config/accounts.h \
@@ -91,6 +92,7 @@ unittest_sources = \
 	src/tools/parser.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
 	src/tools/clipboard.c src/tools/clipboard.h \
+	src/tools/editor.c src/tools/editor.h \
 	src/tools/bookmark_ignore.c \
 	src/tools/bookmark_ignore.h \
 	src/config/accounts.h \

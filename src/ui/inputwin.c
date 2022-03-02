@@ -60,7 +60,6 @@
 #include "log.h"
 #include "common.h"
 #include "command/cmd_ac.h"
-#include "command/cmd_funcs.h"
 #include "config/files.h"
 #include "config/accounts.h"
 #include "config/preferences.h"
@@ -75,6 +74,7 @@
 #include "xmpp/muc.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/chat_state.h"
+#include "tools/editor.h"
 
 static WINDOW* inp_win;
 static int pad_start = 0;
@@ -487,7 +487,7 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\ea", _inp_rl_win_next_unread_handler);
     rl_bind_keyseq("\\ev", _inp_rl_win_attention_handler);
     rl_bind_keyseq("\\em", _inp_rl_win_attention_next_handler);
-    rl_bind_keyseq("\\ed", _inp_rl_send_to_editor);
+    rl_bind_keyseq("\\ee", _inp_rl_send_to_editor);
 
     rl_bind_keyseq("\\e\\e[5~", _inp_rl_subwin_pageup_handler);
     rl_bind_keyseq("\\e[5;3~", _inp_rl_subwin_pageup_handler);
@@ -885,14 +885,14 @@ _inp_rl_down_arrow_handler(int count, int key)
 static int
 _inp_rl_send_to_editor(int count, int key)
 {
-    if (rl_point != rl_end || !rl_line_buffer) {
+    if (!rl_line_buffer) {
         return 0;
     }
 
     gchar* message = NULL;
 
     if (get_message_from_editor(rl_line_buffer, &message)) {
-        return TRUE;
+        return 0;
     }
 
     rl_replace_line(message, 0);
