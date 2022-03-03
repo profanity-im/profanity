@@ -51,6 +51,9 @@ get_message_from_editor(gchar* message, gchar** returned_message)
 {
     // create editor dir if not present
     char* jid = connection_get_barejid();
+    if (!jid) {
+        return TRUE;
+    }
     gchar* path = files_get_account_data_path(DIR_EDITOR, jid);
     free(jid);
     if (g_mkdir_with_parents(path, S_IRWXU) != 0) {
