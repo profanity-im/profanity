@@ -487,7 +487,7 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\ea", _inp_rl_win_next_unread_handler);
     rl_bind_keyseq("\\ev", _inp_rl_win_attention_handler);
     rl_bind_keyseq("\\em", _inp_rl_win_attention_next_handler);
-    rl_bind_keyseq("\\ee", _inp_rl_send_to_editor);
+    rl_bind_keyseq("\\ec", _inp_rl_send_to_editor);
 
     rl_bind_keyseq("\\e\\e[5~", _inp_rl_subwin_pageup_handler);
     rl_bind_keyseq("\\e[5;3~", _inp_rl_subwin_pageup_handler);
