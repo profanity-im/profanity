@@ -35,8 +35,9 @@
  */
 
 #include <fcntl.h>
-#include <glib.h>
 #include <sys/wait.h>
+#include <errno.h>
+#include <glib.h>
 #include <gio/gio.h>
 
 #include "config/files.h"
