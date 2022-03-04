@@ -35,6 +35,7 @@
  */
 
 #include <fcntl.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <errno.h>
 #include <glib.h>
