@@ -366,7 +366,7 @@
    <!-- XEP-0384: OMEMO Encryption -->
     <implements>
       <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0377.html'/>
+        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0384.html'/>
         <xmpp:status>complete</xmpp:status>
         <xmpp:version>0.3.0</xmpp:version>
         <xmpp:since>0.7.0</xmpp:since>
