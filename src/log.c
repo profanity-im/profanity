@@ -90,9 +90,7 @@ static struct dated_chat_log* _create_log(const char* const other, const char* c
 static struct dated_chat_log* _create_groupchat_log(const char* const room, const char* const login);
 static void _free_chat_log(struct dated_chat_log* dated_log);
 static gboolean _key_equals(void* key1, void* key2);
-static char* _get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean create);
-static char* _get_groupchat_log_filename(const char* const room, const char* const login, GDateTime* dt,
-                                         gboolean create);
+static char* _get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean is_room);
 static void _rotate_log_file(void);
 static char* _log_string_from_level(log_level_t level);
 static void _chat_log_chat(const char* const login, const char* const other, const gchar* const msg,
@@ -612,7 +610,7 @@ static struct dated_chat_log*
 _create_log(const char* const other, const char* const login)
 {
     GDateTime* now = g_date_time_new_now_local();
-    char* filename = _get_log_filename(other, login, now, TRUE);
+    char* filename = _get_log_filename(other, login, now, FALSE);
 
     struct dated_chat_log* new_log = malloc(sizeof(struct dated_chat_log));
     new_log->filename = strdup(filename);
@@ -627,7 +625,7 @@ static struct dated_chat_log*
 _create_groupchat_log(const char* const room, const char* const login)
 {
     GDateTime* now = g_date_time_new_now_local();
-    char* filename = _get_groupchat_log_filename(room, login, now, TRUE);
+    char* filename = _get_log_filename(room, login, now, TRUE);
 
     struct dated_chat_log* new_log = malloc(sizeof(struct dated_chat_log));
     new_log->filename = strdup(filename);
@@ -677,70 +675,16 @@ _key_equals(void* key1, void* key2)
 }
 
 static char*
-_get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean create)
+_get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean is_room)
 {
-    char* chatlogs_dir = files_get_data_path(DIR_CHATLOGS);
-    GString* log_file = g_string_new(chatlogs_dir);
-    free(chatlogs_dir);
+    gchar* chatlogs_dir = files_file_in_account_data_path(DIR_CHATLOGS, login, is_room ? "rooms" : NULL);
+    gchar* logfile_name = g_date_time_format(dt, "%Y_%m_%d.log");
+    gchar* logfile_path = files_file_in_account_data_path(chatlogs_dir, other, logfile_name);
 
-    gchar* login_dir = str_replace(login, "@", "_at_");
-    g_string_append_printf(log_file, "/%s", login_dir);
-    if (create) {
-        create_dir(log_file->str);
-    }
-    free(login_dir);
+    g_free(logfile_name);
+    g_free(chatlogs_dir);
 
-    gchar* other_file = str_replace(other, "@", "_at_");
-    g_string_append_printf(log_file, "/%s", other_file);
-    if (create) {
-        create_dir(log_file->str);
-    }
-    free(other_file);
-
-    gchar* date = g_date_time_format(dt, "/%Y_%m_%d.log");
-    g_string_append(log_file, date);
-    g_free(date);
-
-    char* result = strdup(log_file->str);
-    g_string_free(log_file, TRUE);
-
-    return result;
-}
-
-static char*
-_get_groupchat_log_filename(const char* const room, const char* const login, GDateTime* dt, gboolean create)
-{
-    char* chatlogs_dir = files_get_data_path(DIR_CHATLOGS);
-    GString* log_file = g_string_new(chatlogs_dir);
-    free(chatlogs_dir);
-
-    gchar* login_dir = str_replace(login, "@", "_at_");
-    g_string_append_printf(log_file, "/%s", login_dir);
-    if (create) {
-        create_dir(log_file->str);
-    }
-    free(login_dir);
-
-    g_string_append(log_file, "/rooms");
-    if (create) {
-        create_dir(log_file->str);
-    }
-
-    gchar* room_file = str_replace(room, "@", "_at_");
-    g_string_append_printf(log_file, "/%s", room_file);
-    if (create) {
-        create_dir(log_file->str);
-    }
-    free(room_file);
-
-    gchar* date = g_date_time_format(dt, "/%Y_%m_%d.log");
-    g_string_append(log_file, date);
-    g_free(date);
-
-    char* result = strdup(log_file->str);
-    g_string_free(log_file, TRUE);
-
-    return result;
+    return logfile_path;
 }
 
 static char*
