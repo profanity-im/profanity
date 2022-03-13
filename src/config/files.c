@@ -67,19 +67,19 @@ files_create_directories(void)
     GString* plugins_dir = g_string_new(xdg_data);
     g_string_append(plugins_dir, "/profanity/plugins");
 
-    if (!mkdir_recursive(themes_dir->str)) {
+    if (!create_dir(themes_dir->str)) {
         log_error("Error while creating directory %s", themes_dir->str);
     }
-    if (!mkdir_recursive(icons_dir->str)) {
+    if (!create_dir(icons_dir->str)) {
         log_error("Error while creating directory %s", icons_dir->str);
     }
-    if (!mkdir_recursive(chatlogs_dir->str)) {
+    if (!create_dir(chatlogs_dir->str)) {
         log_error("Error while creating directory %s", chatlogs_dir->str);
     }
-    if (!mkdir_recursive(logs_dir->str)) {
+    if (!create_dir(logs_dir->str)) {
         log_error("Error while creating directory %s", logs_dir->str);
     }
-    if (!mkdir_recursive(plugins_dir->str)) {
+    if (!create_dir(plugins_dir->str)) {
         log_error("Error while creating directory %s", plugins_dir->str);
     }
 
@@ -122,7 +122,7 @@ files_get_log_file(const char* const log_file)
 
     if (log_file) {
         gchar* log_path = g_path_get_dirname(log_file);
-        if (!mkdir_recursive(log_path)) {
+        if (!create_dir(log_path)) {
             log_error("Error while creating directory %s", log_path);
         }
         g_free(log_path);
@@ -198,8 +198,7 @@ files_file_in_account_data_path(const char* const specific_dir, const char* cons
 {
     gchar* data_path = files_get_account_data_path(specific_dir, jid);
 
-    if (g_mkdir_with_parents(data_path, S_IRWXU) != 0) {
-        log_error("Failed to create directory at '%s' with error '%s'", data_path, strerror(errno));
+    if (!create_dir(data_path)) {
         g_free(data_path);
         return NULL;
     }

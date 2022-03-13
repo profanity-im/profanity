@@ -16,7 +16,7 @@ void
 create_config_dir(void** state)
 {
     setenv("XDG_CONFIG_HOME", "./tests/files/xdg_config_home", 1);
-    if (!mkdir_recursive("./tests/files/xdg_config_home/profanity")) {
+    if (!create_dir("./tests/files/xdg_config_home/profanity")) {
         assert_true(FALSE);
     }
 }
@@ -32,7 +32,7 @@ void
 create_data_dir(void** state)
 {
     setenv("XDG_DATA_HOME", "./tests/files/xdg_data_home", 1);
-    if (!mkdir_recursive("./tests/files/xdg_data_home/profanity")) {
+    if (!create_dir("./tests/files/xdg_data_home/profanity")) {
         assert_true(FALSE);
     }
 }

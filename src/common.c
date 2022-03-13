@@ -71,41 +71,13 @@ struct curl_data_t
 static size_t _data_callback(void* ptr, size_t size, size_t nmemb, void* data);
 
 gboolean
-create_dir(char* name)
+create_dir(const char* name)
 {
-    struct stat sb;
-
-    if (stat(name, &sb) != 0) {
-        if (errno != ENOENT || mkdir(name, S_IRWXU) != 0) {
-            return FALSE;
-        }
-    } else {
-        if ((sb.st_mode & S_IFDIR) != S_IFDIR) {
-            log_debug("create_dir: %s exists and is not a directory!", name);
-            return FALSE;
-        }
+    if (g_mkdir_with_parents(name, S_IRWXU) != 0) {
+        log_error("Failed to create directory at '%s' with error '%s'", name, strerror(errno));
+        return FALSE;
     }
-
     return TRUE;
-}
-
-gboolean
-mkdir_recursive(const char* dir)
-{
-    gboolean result = TRUE;
-
-    for (int i = 1; i <= strlen(dir); i++) {
-        if (dir[i] == '/' || dir[i] == '\0') {
-            gchar* next_dir = g_strndup(dir, i);
-            result = create_dir(next_dir);
-            g_free(next_dir);
-            if (!result) {
-                break;
-            }
-        }
-    }
-
-    return result;
 }
 
 gboolean

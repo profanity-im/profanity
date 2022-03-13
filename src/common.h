@@ -80,8 +80,7 @@ typedef enum {
     RESOURCE_XA
 } resource_presence_t;
 
-gboolean create_dir(char* name);
-gboolean mkdir_recursive(const char* dir);
+gboolean create_dir(const char* name);
 gboolean copy_file(const char* const src, const char* const target, const gboolean overwrite_existing);
 char* str_replace(const char* string, const char* substr, const char* replacement);
 gboolean strtoi_range(char* str, int* saveptr, int min, int max, char** err_msg);
