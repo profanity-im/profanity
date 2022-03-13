@@ -69,4 +69,7 @@ gchar* files_get_account_data_path(const char* const specific_dir, const char* c
 gchar* files_get_log_file(const char* const log_file);
 gchar* files_get_inputrc_file(void);
 
+gchar*
+files_file_in_account_data_path(const char* const specific_dir, const char* const jid, const char* const file_name);
+
 #endif

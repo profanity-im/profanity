@@ -38,6 +38,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <glib.h>
 
 #include "common.h"
@@ -189,6 +191,25 @@ files_get_account_data_path(const char* const specific_dir, const char* const ji
     g_string_free(result_dir, TRUE);
 
     return result;
+}
+
+gchar*
+files_file_in_account_data_path(const char* const specific_dir, const char* const jid, const char* const file_name)
+{
+    gchar* data_path = files_get_account_data_path(specific_dir, jid);
+
+    if (g_mkdir_with_parents(data_path, S_IRWXU) != 0) {
+        log_error("Failed to create directory at '%s' with error '%s'", data_path, strerror(errno));
+        g_free(data_path);
+        return NULL;
+    }
+
+    if (!file_name) {
+        return data_path;
+    }
+    gchar* filename = g_strdup_printf("%s/%s", data_path, file_name);
+    g_free(data_path);
+    return filename;
 }
 
 static char*

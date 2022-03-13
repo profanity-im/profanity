@@ -231,7 +231,11 @@ omemo_on_connect(ProfAccount* account)
     omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
     omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_g_hash_table_free);
 
-    gchar* omemo_dir = files_get_account_data_path(DIR_OMEMO, account->jid);
+    gchar* omemo_dir = files_file_in_account_data_path(DIR_OMEMO, account->jid, NULL);
+    if (!omemo_dir) {
+        log_error("[OMEMO] failed creating directory");
+        return;
+    }
 
     omemo_ctx.identity_filename = g_string_new(omemo_dir);
     g_string_append(omemo_ctx.identity_filename, "/identity.txt");
@@ -241,17 +245,6 @@ omemo_on_connect(ProfAccount* account)
     g_string_append(omemo_ctx.sessions_filename, "/sessions.txt");
     omemo_ctx.known_devices_filename = g_string_new(omemo_dir);
     g_string_append(omemo_ctx.known_devices_filename, "/known_devices.txt");
-
-    errno = 0;
-    int res = g_mkdir_with_parents(omemo_dir, S_IRWXU);
-    if (res == -1) {
-        const char* errmsg = strerror(errno);
-        if (errmsg) {
-            log_error("[OMEMO] error creating directory: %s, %s", omemo_dir, errmsg);
-        } else {
-            log_error("[OMEMO] creating directory: %s", omemo_dir);
-        }
-    }
 
     g_free(omemo_dir);
 
