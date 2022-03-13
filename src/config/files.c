@@ -151,13 +151,8 @@ gchar*
 files_get_config_path(const char* const config_base)
 {
     gchar* xdg_config = _files_get_xdg_config_home();
-    GString* file_str = g_string_new(xdg_config);
-    g_string_append(file_str, "/profanity/");
-    g_string_append(file_str, config_base);
-    gchar* result = g_strdup(file_str->str);
+    gchar* result = g_strdup_printf("%s/profanity/%s", xdg_config, config_base);
     g_free(xdg_config);
-    g_string_free(file_str, TRUE);
-
     return result;
 }
 
@@ -165,13 +160,8 @@ gchar*
 files_get_data_path(const char* const data_base)
 {
     gchar* xdg_data = _files_get_xdg_data_home();
-    GString* file_str = g_string_new(xdg_data);
-    g_string_append(file_str, "/profanity/");
-    g_string_append(file_str, data_base);
-    gchar* result = g_strdup(file_str->str);
+    gchar* result = g_strdup_printf("%s/profanity/%s", xdg_data, data_base);
     g_free(xdg_data);
-    g_string_free(file_str, TRUE);
-
     return result;
 }
 
@@ -179,16 +169,12 @@ gchar*
 files_get_account_data_path(const char* const specific_dir, const char* const jid)
 {
     gchar* data_dir = files_get_data_path(specific_dir);
-    GString* result_dir = g_string_new(data_dir);
-    g_free(data_dir);
-
     gchar* account_dir = str_replace(jid, "@", "_at_");
-    g_string_append(result_dir, "/");
-    g_string_append(result_dir, account_dir);
-    g_free(account_dir);
 
-    gchar* result = g_strdup(result_dir->str);
-    g_string_free(result_dir, TRUE);
+    gchar* result = g_strdup_printf("%s/%s", data_dir, account_dir);
+
+    g_free(account_dir);
+    g_free(data_dir);
 
     return result;
 }
