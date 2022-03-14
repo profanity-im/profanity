@@ -3,7 +3,8 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2022 Michael Vetter <jubalh@iodoru.org>
- * Copyright (C) 2022 MarcoPolo PasTonMolo  <marcopolopastonmolo@protonmail.com>
+ * Copyright (C) 2022 MarcoPolo PasTonMolo <marcopolopastonmolo@protonmail.com>
+ * Copyright (C) 2022 Steffen Jaeckel <jaeckel-floss@eyet-services.de>
  *
  * This file is part of Profanity.
  *
@@ -35,97 +36,87 @@
  */
 
 #include <fcntl.h>
-#include <sys/stat.h>
-#include <sys/wait.h>
-#include <errno.h>
 #include <glib.h>
-#include <gio/gio.h>
+#include <errno.h>
+#include <sys/wait.h>
+#include <unistd.h>
 
 #include "config/files.h"
 #include "config/preferences.h"
-#include "ui/ui.h"
+#include "log.h"
 
 // Returns true if an error occurred
 gboolean
 get_message_from_editor(gchar* message, gchar** returned_message)
 {
-    // create editor dir if not present
+    /* Make sure that there's no junk in the return-pointer in error cases */
+    *returned_message = NULL;
+
+    gchar* filename = NULL;
+    GError* glib_error = NULL;
     char* jid = connection_get_barejid();
-    gchar* path = files_get_account_data_path(DIR_EDITOR, jid);
-    free(jid);
-    if (g_mkdir_with_parents(path, S_IRWXU) != 0) {
-        cons_show_error("Failed to create directory at '%s' with error '%s'", path, strerror(errno));
-        g_free(path);
+    if (jid) {
+        filename = files_file_in_account_data_path(DIR_EDITOR, jid, "compose.md");
+    } else {
+        log_debug("[Editor] could not get JID");
+        gchar* data_dir = files_get_data_path(DIR_EDITOR);
+        if (!create_dir(data_dir)) {
+            return TRUE;
+        }
+        filename = g_strdup_printf("%s/compose.md", data_dir);
+        g_free(data_dir);
+    }
+    if (!filename) {
+        log_error("[Editor] something went wrong while creating compose file");
         return TRUE;
     }
 
-    // build temp file name. Example: /home/user/.local/share/profanity/editor/jid/compose.md
-    char* filename = g_strdup_printf("%s/compose.md", path);
-    g_free(path);
-
-    GError* creation_error = NULL;
-    GFile* file = g_file_new_for_path(filename);
-    GFileOutputStream* fos = g_file_create(file, G_FILE_CREATE_PRIVATE, NULL, &creation_error);
-
-    free(filename);
-
-    if (message != NULL && strlen(message) > 0) {
-        int fd_output_file = open(g_file_get_path(file), O_WRONLY);
-        if (fd_output_file < 0) {
-            cons_show_error("Editor: Could not open file '%s': %s", file, strerror(errno));
-            return TRUE;
+    gsize messagelen = strlen(message);
+    if (!g_file_set_contents(filename, message, messagelen, &glib_error)) {
+        log_error("[Editor] could not write to %s: %s", filename, glib_error ? glib_error->message : "No GLib error given");
+        if (glib_error) {
+            g_error_free(glib_error);
         }
-        if (-1 == write(fd_output_file, message, strlen(message))) {
-            cons_show_error("Editor: failed to write '%s' to file: %s", message, strerror(errno));
-            return TRUE;
-        }
-        close(fd_output_file);
-    }
-
-    if (creation_error) {
-        cons_show_error("Editor: could not create temp file");
+        g_free(filename);
         return TRUE;
     }
-    g_object_unref(fos);
 
     char* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
 
     // Fork / exec
     pid_t pid = fork();
     if (pid == 0) {
-        int x = execlp(editor, editor, g_file_get_path(file), (char*)NULL);
+        int x = execlp(editor, editor, filename, (char*)NULL);
         if (x == -1) {
-            cons_show_error("Editor:Failed to exec %s", editor);
+            log_error("[Editor] Failed to exec %s", editor);
         }
         _exit(EXIT_FAILURE);
     } else {
         if (pid == -1) {
             return TRUE;
         }
-        int status = 0;
-        waitpid(pid, &status, 0);
-        int fd_input_file = open(g_file_get_path(file), O_RDONLY);
-        const size_t COUNT = 8192;
-        char buf[COUNT];
-        ssize_t size_read = read(fd_input_file, buf, COUNT);
-        if (size_read > 0 && size_read <= COUNT) {
-            buf[size_read - 1] = '\0';
-            GString* text = g_string_new(buf);
-            *returned_message = g_strdup(text->str);
-            g_string_free(text, TRUE);
-        } else {
-            *returned_message = g_strdup("");
-        }
-        close(fd_input_file);
+        waitpid(pid, NULL, 0);
 
-        GError* deletion_error = NULL;
-        g_file_delete(file, NULL, &deletion_error);
-        if (deletion_error) {
-            cons_show("Editor: error during file deletion");
-            g_free(*returned_message);
+        gchar* contents;
+        gsize length;
+        if (!g_file_get_contents(filename, &contents, &length, &glib_error)) {
+            log_error("[Editor] could not read from %s: %s", filename, glib_error ? glib_error->message : "No GLib error given");
+            if (glib_error) {
+                g_error_free(glib_error);
+            }
+            g_free(filename);
+            g_free(editor);
             return TRUE;
         }
-        g_object_unref(file);
+        /* Remove all trailing new-line characters */
+        g_strchomp(contents);
+        *returned_message = contents;
+        if (remove(filename) != 0) {
+            log_error("[Editor] error during file deletion of %s", filename);
+        } else {
+            log_debug("[Editor] deleted file: %s", filename);
+        }
+        g_free(filename);
     }
 
     g_free(editor);

@@ -56,27 +56,7 @@ static prof_msg_type_t _get_message_type_type(const char* const type);
 static char*
 _get_db_filename(ProfAccount* account)
 {
-    gchar* database_dir = files_get_account_data_path(DIR_DATABASE, account->jid);
-
-    int res = g_mkdir_with_parents(database_dir, S_IRWXU);
-    if (res == -1) {
-        const char* errmsg = strerror(errno);
-        if (errmsg) {
-            log_error("DATABASE: error creating directory: %s, %s", database_dir, errmsg);
-        } else {
-            log_error("DATABASE: creating directory: %s", database_dir);
-        }
-        g_free(database_dir);
-        return NULL;
-    }
-
-    GString* chatlog_filename = g_string_new(database_dir);
-    g_string_append(chatlog_filename, "/chatlog.db");
-    gchar* result = g_strdup(chatlog_filename->str);
-    g_string_free(chatlog_filename, TRUE);
-    g_free(database_dir);
-
-    return result;
+    return files_file_in_account_data_path(DIR_DATABASE, account->jid, "chatlog.db");
 }
 
 gboolean

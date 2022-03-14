@@ -38,6 +38,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
 #include <glib.h>
 
 #include "common.h"
@@ -65,19 +67,19 @@ files_create_directories(void)
     GString* plugins_dir = g_string_new(xdg_data);
     g_string_append(plugins_dir, "/profanity/plugins");
 
-    if (!mkdir_recursive(themes_dir->str)) {
+    if (!create_dir(themes_dir->str)) {
         log_error("Error while creating directory %s", themes_dir->str);
     }
-    if (!mkdir_recursive(icons_dir->str)) {
+    if (!create_dir(icons_dir->str)) {
         log_error("Error while creating directory %s", icons_dir->str);
     }
-    if (!mkdir_recursive(chatlogs_dir->str)) {
+    if (!create_dir(chatlogs_dir->str)) {
         log_error("Error while creating directory %s", chatlogs_dir->str);
     }
-    if (!mkdir_recursive(logs_dir->str)) {
+    if (!create_dir(logs_dir->str)) {
         log_error("Error while creating directory %s", logs_dir->str);
     }
-    if (!mkdir_recursive(plugins_dir->str)) {
+    if (!create_dir(plugins_dir->str)) {
         log_error("Error while creating directory %s", plugins_dir->str);
     }
 
@@ -120,7 +122,7 @@ files_get_log_file(const char* const log_file)
 
     if (log_file) {
         gchar* log_path = g_path_get_dirname(log_file);
-        if (!mkdir_recursive(log_path)) {
+        if (!create_dir(log_path)) {
             log_error("Error while creating directory %s", log_path);
         }
         g_free(log_path);
@@ -149,13 +151,8 @@ gchar*
 files_get_config_path(const char* const config_base)
 {
     gchar* xdg_config = _files_get_xdg_config_home();
-    GString* file_str = g_string_new(xdg_config);
-    g_string_append(file_str, "/profanity/");
-    g_string_append(file_str, config_base);
-    gchar* result = g_strdup(file_str->str);
+    gchar* result = g_strdup_printf("%s/profanity/%s", xdg_config, config_base);
     g_free(xdg_config);
-    g_string_free(file_str, TRUE);
-
     return result;
 }
 
@@ -163,13 +160,8 @@ gchar*
 files_get_data_path(const char* const data_base)
 {
     gchar* xdg_data = _files_get_xdg_data_home();
-    GString* file_str = g_string_new(xdg_data);
-    g_string_append(file_str, "/profanity/");
-    g_string_append(file_str, data_base);
-    gchar* result = g_strdup(file_str->str);
+    gchar* result = g_strdup_printf("%s/profanity/%s", xdg_data, data_base);
     g_free(xdg_data);
-    g_string_free(file_str, TRUE);
-
     return result;
 }
 
@@ -177,18 +169,32 @@ gchar*
 files_get_account_data_path(const char* const specific_dir, const char* const jid)
 {
     gchar* data_dir = files_get_data_path(specific_dir);
-    GString* result_dir = g_string_new(data_dir);
+    gchar* account_dir = str_replace(jid, "@", "_at_");
+
+    gchar* result = g_strdup_printf("%s/%s", data_dir, account_dir);
+
+    g_free(account_dir);
     g_free(data_dir);
 
-    gchar* account_dir = str_replace(jid, "@", "_at_");
-    g_string_append(result_dir, "/");
-    g_string_append(result_dir, account_dir);
-    g_free(account_dir);
-
-    gchar* result = g_strdup(result_dir->str);
-    g_string_free(result_dir, TRUE);
-
     return result;
+}
+
+gchar*
+files_file_in_account_data_path(const char* const specific_dir, const char* const jid, const char* const file_name)
+{
+    gchar* data_path = files_get_account_data_path(specific_dir, jid);
+
+    if (!create_dir(data_path)) {
+        g_free(data_path);
+        return NULL;
+    }
+
+    if (!file_name) {
+        return data_path;
+    }
+    gchar* filename = g_strdup_printf("%s/%s", data_path, file_name);
+    g_free(data_path);
+    return filename;
 }
 
 static char*

@@ -3004,7 +3004,7 @@ command_mangen(void)
         cmds = g_list_insert_sorted(cmds, pcmd, (GCompareFunc)_cmp_command);
     }
 
-    mkdir_recursive("docs");
+    create_dir("docs");
 
     GDateTime* now = g_date_time_new_now_local();
     gchar* date = g_date_time_format(now, "%F");

@@ -747,6 +747,8 @@ connection_get_ctx(void)
 const char*
 connection_get_fulljid(void)
 {
+    if (!conn.xmpp_conn)
+        return NULL;
     const char* jid = xmpp_conn_get_bound_jid(conn.xmpp_conn);
     if (jid) {
         return jid;
@@ -759,10 +761,11 @@ char*
 connection_get_barejid(void)
 {
     const char* jid = connection_get_fulljid();
-    char* result;
+    if (!jid)
+        return NULL;
 
     Jid* jidp = jid_create(jid);
-    result = strdup(jidp->barejid);
+    char* result = strdup(jidp->barejid);
     jid_destroy(jidp);
 
     return result;
@@ -772,8 +775,9 @@ char*
 connection_get_user(void)
 {
     const char* jid = connection_get_fulljid();
-    char* result;
-    result = strdup(jid);
+    if (!jid)
+        return NULL;
+    char* result = strdup(jid);
 
     char* split = strchr(result, '@');
     *split = '\0';

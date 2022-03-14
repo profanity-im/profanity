@@ -129,19 +129,20 @@ static void
 cb_write_fingerprints(void* opdata)
 {
     gcry_error_t err = 0;
-    gchar* otr_dir = files_get_account_data_path(DIR_OTR, jid);
-
-    GString* fpsfilename = g_string_new(otr_dir);
-    g_string_append(fpsfilename, "/fingerprints.txt");
-
-    err = otrl_privkey_write_fingerprints(user_state, fpsfilename->str);
-    if (err != GPG_ERR_NO_ERROR) {
-        log_error("Failed to write fingerprints file");
+    gchar* fpsfilename = files_file_in_account_data_path(DIR_OTR, jid, "fingerprints.txt");
+    if (!fpsfilename) {
+        log_error("Failed to create fingerprints file");
         cons_show_error("Failed to create fingerprints file");
+        return;
     }
 
-    g_free(otr_dir);
-    g_string_free(fpsfilename, TRUE);
+    err = otrl_privkey_write_fingerprints(user_state, fpsfilename);
+    if (err != GPG_ERR_NO_ERROR) {
+        log_error("Failed to write fingerprints file");
+        cons_show_error("Failed to write fingerprints file");
+    }
+
+    g_free(fpsfilename);
 }
 
 static void
@@ -212,12 +213,10 @@ otr_on_connect(ProfAccount* account)
     jid = strdup(account->jid);
     log_info("Loading OTR key for %s", jid);
 
-    gchar* otr_dir = files_get_account_data_path(DIR_OTR, jid);
-
-    if (!mkdir_recursive(otr_dir)) {
-        log_error("Could not create %s for account %s.", otr_dir, jid);
-        cons_show_error("Could not create %s for account %s.", otr_dir, jid);
-        g_free(otr_dir);
+    gchar* otr_dir = files_file_in_account_data_path(DIR_OTR, jid, NULL);
+    if (!otr_dir) {
+        log_error("Could not create directory for account %s.", jid);
+        cons_show_error("Could not create directory for account %s.", jid);
         return;
     }
 
@@ -381,12 +380,11 @@ otr_keygen(ProfAccount* account)
     jid = strdup(account->jid);
     log_info("Generating OTR key for %s", jid);
 
-    gchar* otr_dir = files_get_account_data_path(DIR_OTR, jid);
+    gchar* otr_dir = files_file_in_account_data_path(DIR_OTR, jid, NULL);
 
-    if (!mkdir_recursive(otr_dir)) {
-        log_error("Could not create %s for account %s.", otr_dir, jid);
-        cons_show_error("Could not create %s for account %s.", otr_dir, jid);
-        g_free(otr_dir);
+    if (!otr_dir) {
+        log_error("Could not create directory for account %s.", jid);
+        cons_show_error("Could not create directory for account %s.", jid);
         return;
     }
 

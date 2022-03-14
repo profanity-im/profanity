@@ -161,26 +161,12 @@ p_gpg_close(void)
 void
 p_gpg_on_connect(const char* const barejid)
 {
-    gchar* pubsfile = files_get_account_data_path(DIR_PGP, barejid);
-
-    // mkdir if doesn't exist for account
-    errno = 0;
-    int res = g_mkdir_with_parents(pubsfile, S_IRWXU);
-    if (res == -1) {
-        const char* errmsg = strerror(errno);
-        if (errmsg) {
-            log_error("Error creating directory: %s, %s", pubsfile, errmsg);
-        } else {
-            log_error("Error creating directory: %s", pubsfile);
-        }
+    pubsloc = files_file_in_account_data_path(DIR_PGP, barejid, "pubkeys");
+    if (!pubsloc) {
+        log_error("Could not create directory for account %s.", barejid);
+        cons_show_error("Could not create directory for account %s.", barejid);
+        return;
     }
-
-    // create or read publickeys
-    GString* pubtmp = g_string_new(pubsfile);
-    g_string_append(pubtmp, "/pubkeys");
-    pubsloc = pubtmp->str;
-    g_string_free(pubtmp, FALSE);
-    g_free(pubsfile);
 
     if (g_file_test(pubsloc, G_FILE_TEST_EXISTS)) {
         g_chmod(pubsloc, S_IRUSR | S_IWUSR);
