@@ -2020,3 +2020,26 @@ win_insert_last_read_position_marker(ProfWin* window, char* id)
 
     g_date_time_unref(time);
 }
+
+char*
+win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+{
+    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
+        return NULL;
+    }
+
+    char* result = autocomplete_complete(window->quotes_ac, input + 1, FALSE, previous);
+    if (result == NULL) {
+        return NULL;
+    }
+
+    GString* replace_with = g_string_new("> ");
+    g_string_append(replace_with, result);
+    g_string_replace(replace_with, "\n", "\n> ", 0);
+    g_string_append(replace_with, "\n");
+
+    g_free(result);
+    result = replace_with->str;
+    g_string_free(replace_with, FALSE);
+    return result;
+}

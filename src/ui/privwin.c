@@ -82,6 +82,7 @@ privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
     }
 
     wins_add_urls_ac(window, message);
+    wins_add_quotes_ac(window, message->plain);
 
     if (prefs_get_boolean(PREF_BEEP)) {
         beep();
@@ -99,6 +100,8 @@ privwin_outgoing_msg(ProfPrivateWin* privwin, const char* const message)
 {
     assert(privwin != NULL);
 
+    ProfWin* window = (ProfWin*)privwin;
+    wins_add_quotes_ac(window, message);
     win_print_outgoing((ProfWin*)privwin, "-", NULL, NULL, message);
 }
 
