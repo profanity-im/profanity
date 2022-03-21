@@ -1100,7 +1100,8 @@ _xmppcert_to_profcert(const xmpp_tlscert_t* xmpptlscert)
         xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_NOTBEFORE),
         xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_NOTAFTER),
         xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_KEYALG),
-        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_SIGALG));
+        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_SIGALG),
+        xmpp_tlscert_get_pem(xmpptlscert));
 }
 
 static xmpp_log_t*
