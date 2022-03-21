@@ -148,6 +148,7 @@ typedef struct prof_win_t
     win_type_t type;
     ProfLayout* layout;
     Autocomplete urls_ac;
+    Autocomplete quotes_ac;
 } ProfWin;
 
 typedef struct prof_console_win_t

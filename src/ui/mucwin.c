@@ -541,6 +541,8 @@ mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* c
     if (id) {
         _mucwin_set_last_message(mucwin, id, message);
     }
+
+    wins_add_quotes_ac(window, message);
 }
 
 void
@@ -576,6 +578,7 @@ mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList
 
     win_insert_last_read_position_marker((ProfWin*)mucwin, mucwin->roomjid);
     wins_add_urls_ac(window, message);
+    wins_add_quotes_ac(window, message->plain);
 
     if (g_slist_length(mentions) > 0) {
         _mucwin_print_mention(window, message->plain, message->from_jid->resourcepart, mynick, mentions, ch, flags);

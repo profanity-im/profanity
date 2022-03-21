@@ -323,6 +323,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     }
 
     wins_add_urls_ac(window, message);
+    wins_add_quotes_ac(window, message->plain);
 
     if (prefs_get_boolean(PREF_BEEP)) {
         beep();
@@ -345,6 +346,9 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
                      gboolean request_receipt, const char* const replace_id)
 {
     assert(chatwin != NULL);
+
+    ProfWin* window = (ProfWin*)chatwin;
+    wins_add_quotes_ac(window, message);
 
     char* enc_char;
     if (chatwin->outgoing_char) {

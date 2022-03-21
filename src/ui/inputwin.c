@@ -558,6 +558,10 @@ _inp_rl_getc(FILE* stream)
     if (_inp_edited(ch)) {
         ProfWin* window = wins_get_current();
         cmd_ac_reset(window);
+
+        if ((window->type == WIN_CHAT || window->type == WIN_MUC || window->type == WIN_PRIVATE) && window->quotes_ac != NULL) {
+            autocomplete_reset(window->quotes_ac);
+        }
     }
     return ch;
 }
@@ -597,6 +601,17 @@ _inp_rl_tab_handler(int count, int key)
         }
     }
 
+    if (strncmp(rl_line_buffer, ">", 1) == 0) {
+        ProfWin* window = wins_get_current();
+        char* result = win_quote_autocomplete(window, rl_line_buffer, FALSE);
+        if (result) {
+            rl_replace_line(result, 1);
+            rl_point = rl_end;
+            free(result);
+            return 0;
+        }
+    }
+
     ProfWin* current = wins_get_current();
     if (current->type == WIN_MUC) {
         char* result = muc_autocomplete(current, rl_line_buffer, FALSE);
@@ -606,7 +621,6 @@ _inp_rl_tab_handler(int count, int key)
             free(result);
         }
     }
-
 
     return 0;
 }
@@ -621,6 +635,17 @@ _inp_rl_shift_tab_handler(int count, int key)
     if (strncmp(rl_line_buffer, "/", 1) == 0) {
         ProfWin* window = wins_get_current();
         char* result = cmd_ac_complete(window, rl_line_buffer, TRUE);
+        if (result) {
+            rl_replace_line(result, 1);
+            rl_point = rl_end;
+            free(result);
+            return 0;
+        }
+    }
+
+    if (strncmp(rl_line_buffer, ">", 1) == 0) {
+        ProfWin* window = wins_get_current();
+        char* result = win_quote_autocomplete(window, rl_line_buffer, TRUE);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;

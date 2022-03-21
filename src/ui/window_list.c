@@ -554,6 +554,7 @@ wins_close_by_num(int i)
                     }
                 }
                 autocomplete_free(window->urls_ac);
+                autocomplete_free(window->quotes_ac);
                 break;
             }
             case WIN_MUC:
@@ -566,6 +567,7 @@ wins_close_by_num(int i)
                     g_date_time_unref(mucwin->last_msg_timestamp);
                 }
                 autocomplete_free(window->urls_ac);
+                autocomplete_free(window->quotes_ac);
                 break;
             }
             case WIN_PRIVATE:
@@ -574,6 +576,7 @@ wins_close_by_num(int i)
                 autocomplete_remove(wins_ac, privwin->fulljid);
                 autocomplete_remove(wins_close_ac, privwin->fulljid);
                 autocomplete_free(window->urls_ac);
+                autocomplete_free(window->quotes_ac);
                 break;
             }
             case WIN_XML:
@@ -646,6 +649,7 @@ wins_new_chat(const char* const barejid)
         }
     }
     newwin->urls_ac = autocomplete_new();
+    newwin->quotes_ac = autocomplete_new();
 
     return newwin;
 }
@@ -661,6 +665,7 @@ wins_new_muc(const char* const roomjid)
     autocomplete_add(wins_ac, roomjid);
     autocomplete_add(wins_close_ac, roomjid);
     newwin->urls_ac = autocomplete_new();
+    newwin->quotes_ac = autocomplete_new();
 
     return newwin;
 }
@@ -688,6 +693,7 @@ wins_new_private(const char* const fulljid)
     autocomplete_add(wins_ac, fulljid);
     autocomplete_add(wins_close_ac, fulljid);
     newwin->urls_ac = autocomplete_new();
+    newwin->quotes_ac = autocomplete_new();
 
     return newwin;
 }
@@ -1299,10 +1305,26 @@ wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message)
     g_regex_unref(regex);
 }
 
+void
+wins_add_quotes_ac(const ProfWin* const win, const char* const message)
+{
+    autocomplete_add_reverse(win->quotes_ac, message);
+    // for people who run profanity a long time, we don't want to waste a lot of memory
+    autocomplete_remove_older_than_max_reverse(win->quotes_ac, 20);
+}
+
 char*
 wins_get_url(const char* const search_str, gboolean previous, void* context)
 {
     ProfWin* win = (ProfWin*)context;
 
     return autocomplete_complete(win->urls_ac, search_str, FALSE, previous);
+}
+
+char*
+wins_get_quote(const char* const search_str, gboolean previous, void* context)
+{
+    ProfWin* win = (ProfWin*)context;
+
+    return autocomplete_complete(win->quotes_ac, search_str, FALSE, previous);
 }
