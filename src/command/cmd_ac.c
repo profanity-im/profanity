@@ -130,6 +130,7 @@ static char* _executable_autocomplete(ProfWin* window, const char* const input, 
 static char* _lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _intype_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _mood_autocomplete(ProfWin* window, const char* const input, gboolean previous);
+static char* _adhoc_cmd_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 
 static char* _script_autocomplete_func(const char* const prefix, gboolean previous, void* context);
 
@@ -272,6 +273,7 @@ static Autocomplete executable_ac;
 static Autocomplete intype_ac;
 static Autocomplete mood_ac;
 static Autocomplete mood_type_ac;
+static Autocomplete adhoc_cmd_ac;
 
 /*!
  * \brief Initialization of auto completion for commands.
@@ -1146,6 +1148,10 @@ cmd_ac_init(void)
     autocomplete_add(mood_type_ac, "undefined");
     autocomplete_add(mood_type_ac, "weak");
     autocomplete_add(mood_type_ac, "worried");
+
+    adhoc_cmd_ac = autocomplete_new();
+    autocomplete_add(adhoc_cmd_ac, "list");
+    autocomplete_add(adhoc_cmd_ac, "exec");
 }
 
 void
@@ -1463,6 +1469,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(intype_ac);
     autocomplete_reset(mood_ac);
     autocomplete_reset(mood_type_ac);
+    autocomplete_reset(adhoc_cmd_ac);
 
     autocomplete_reset(script_ac);
     if (script_show_ac) {
@@ -1627,6 +1634,7 @@ cmd_ac_uninit(void)
     autocomplete_free(url_ac);
     autocomplete_free(executable_ac);
     autocomplete_free(intype_ac);
+    autocomplete_free(adhoc_cmd_ac);
 }
 
 static void
@@ -1893,6 +1901,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/lastactivity", _lastactivity_autocomplete);
     g_hash_table_insert(ac_funcs, "/intype", _intype_autocomplete);
     g_hash_table_insert(ac_funcs, "/mood", _mood_autocomplete);
+    g_hash_table_insert(ac_funcs, "/cmd", _adhoc_cmd_autocomplete);
 
     int len = strlen(input);
     char parsed[len + 1];
@@ -4231,6 +4240,16 @@ _mood_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     if (result) {
         return result;
     }
+
+    return result;
+}
+
+static char*
+_adhoc_cmd_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+{
+    char* result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/cmd", adhoc_cmd_ac, TRUE, previous);
 
     return result;
 }
