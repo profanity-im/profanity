@@ -2033,12 +2033,17 @@ win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previo
         return NULL;
     }
 
+    gchar **parts = g_strsplit(result, "\n", -1);
+    gchar *quoted_result = g_strjoinv("\n> ", parts);
+
     GString* replace_with = g_string_new("> ");
-    g_string_append(replace_with, result);
-    g_string_replace(replace_with, "\n", "\n> ", 0);
+    g_string_append(replace_with, quoted_result);
     g_string_append(replace_with, "\n");
 
     g_free(result);
+    g_free(quoted_result);
+    g_strfreev(parts);
+
     result = replace_with->str;
     g_string_free(replace_with, FALSE);
     return result;
