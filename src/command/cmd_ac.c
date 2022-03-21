@@ -2554,11 +2554,6 @@ _pgp_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     return NULL;
 }
 
-/*!
- * \brief Auto completion for XEP-0373: OpenPGP for XMPP command.
- *
- *
- */
 static char*
 _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
@@ -2590,23 +2585,9 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         return found;
     }
 
-    gboolean result;
-    gchar** args = parse_args(input, 2, 3, &result);
-    if ((strncmp(input, "/ox", 4) == 0) && (result == TRUE)) {
-        GString* beginning = g_string_new("/ox ");
-        g_string_append(beginning, args[0]);
-        if (args[1]) {
-            g_string_append(beginning, " ");
-            g_string_append(beginning, args[1]);
-        }
-        found = autocomplete_param_with_func(input, beginning->str, p_gpg_autocomplete_key, previous, NULL);
-        g_string_free(beginning, TRUE);
-        if (found) {
-            g_strfreev(args);
-            return found;
-        }
+    if (strncmp(input, "/ox announce ", 13) == 0) {
+        return cmd_ac_complete_filepath(input, "/ox announce", previous);
     }
-    g_strfreev(args);
 
     if (conn_status == JABBER_CONNECTED) {
         found = autocomplete_param_with_func(input, "/ox setkey", roster_barejid_autocomplete, previous, NULL);

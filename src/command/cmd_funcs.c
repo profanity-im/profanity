@@ -1102,6 +1102,7 @@ cmd_export(ProfWin* window, const char* const command, gchar** args)
         char* path = get_expanded_path(args[0]);
 
         fd = open(path, O_WRONLY | O_CREAT, 00600);
+        free(path);
 
         if (-1 == fd) {
             cons_show("error: cannot open %s: %s", args[0], strerror(errno));
@@ -7630,7 +7631,22 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     } else if (g_strcmp0(args[0], "announce") == 0) {
         if (args[1]) {
-            ox_announce_public_key(args[1]);
+            gchar* filename = get_expanded_path(args[1]);
+
+            if (access(filename, R_OK) != 0) {
+                cons_show_error("File not found: %s", filename);
+                g_free(filename);
+                return TRUE;
+            }
+
+            if (!is_regular_file(filename)) {
+                cons_show_error("Not a file: %s", filename);
+                g_free(filename);
+                return TRUE;
+            }
+
+            ox_announce_public_key(filename);
+            free(filename);
         } else {
             cons_show("Filename is required");
         }

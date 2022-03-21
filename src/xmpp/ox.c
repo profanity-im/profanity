@@ -102,50 +102,51 @@ ox_announce_public_key(const char* const filename)
     if (!(key && fp)) {
         cons_show("Error during OpenPGP OX announce. See log file for more information");
         return FALSE;
-    } else {
-        log_info("[OX] Annonuce OpenPGP Key for Fingerprint: %s", fp);
-        xmpp_ctx_t* const ctx = connection_get_ctx();
-        char* id = xmpp_uuid_gen(ctx);
-        xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
-        xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
-
-        xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
-        xmpp_stanza_set_ns(pubsub, XMPP_FEATURE_PUBSUB);
-
-        GString* node_name = g_string_new(STANZA_NS_OPENPGP_0_PUBLIC_KEYS);
-        g_string_append(node_name, ":");
-        g_string_append(node_name, fp);
-
-        xmpp_stanza_t* publish = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
-        xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, node_name->str);
-
-        xmpp_stanza_t* item = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
-        char* timestamp = _gettimestamp();
-        xmpp_stanza_set_attribute(item, STANZA_ATTR_ID, timestamp);
-        free(timestamp);
-
-        xmpp_stanza_t* pubkey = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(pubkey, STANZA_NAME_PUPKEY);
-        xmpp_stanza_set_ns(pubkey, STANZA_NS_OPENPGP_0);
-
-        xmpp_stanza_t* data = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(data, STANZA_NAME_DATA);
-        xmpp_stanza_t* keydata = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_text(keydata, key);
-
-        xmpp_stanza_add_child(data, keydata);
-        xmpp_stanza_add_child(pubkey, data);
-        xmpp_stanza_add_child(item, pubkey);
-        xmpp_stanza_add_child(publish, item);
-        xmpp_stanza_add_child(pubsub, publish);
-        xmpp_stanza_add_child(iq, pubsub);
-        xmpp_send(connection_get_conn(), iq);
-
-        _ox_metadata_node__public_key(fp);
     }
+
+    log_info("[OX] Annonuce OpenPGP Key for Fingerprint: %s", fp);
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    char* id = xmpp_uuid_gen(ctx);
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
+
+    xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, XMPP_FEATURE_PUBSUB);
+
+    GString* node_name = g_string_new(STANZA_NS_OPENPGP_0_PUBLIC_KEYS);
+    g_string_append(node_name, ":");
+    g_string_append(node_name, fp);
+
+    xmpp_stanza_t* publish = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
+    xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, node_name->str);
+
+    xmpp_stanza_t* item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
+    char* timestamp = _gettimestamp();
+    xmpp_stanza_set_attribute(item, STANZA_ATTR_ID, timestamp);
+    free(timestamp);
+
+    xmpp_stanza_t* pubkey = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubkey, STANZA_NAME_PUPKEY);
+    xmpp_stanza_set_ns(pubkey, STANZA_NS_OPENPGP_0);
+
+    xmpp_stanza_t* data = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(data, STANZA_NAME_DATA);
+    xmpp_stanza_t* keydata = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(keydata, key);
+
+    xmpp_stanza_add_child(data, keydata);
+    xmpp_stanza_add_child(pubkey, data);
+    xmpp_stanza_add_child(item, pubkey);
+    xmpp_stanza_add_child(publish, item);
+    xmpp_stanza_add_child(pubsub, publish);
+    xmpp_stanza_add_child(iq, pubsub);
+    xmpp_send(connection_get_conn(), iq);
+
+    _ox_metadata_node__public_key(fp);
+
     return TRUE;
 }
 
