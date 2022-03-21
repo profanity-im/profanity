@@ -156,58 +156,34 @@ tlscerts_new(const char* const fingerprint, int version, const char* const seria
              const char* const issuername, const char* const notbefore, const char* const notafter,
              const char* const key_alg, const char* const signature_alg)
 {
-    TLSCertificate* cert = malloc(sizeof(TLSCertificate));
+    TLSCertificate* cert = calloc(1, sizeof(TLSCertificate));
 
     if (fingerprint) {
         cert->fingerprint = strdup(fingerprint);
-    } else {
-        cert->fingerprint = NULL;
     }
     cert->version = version;
     if (serialnumber) {
         cert->serialnumber = strdup(serialnumber);
-    } else {
-        cert->serialnumber = NULL;
     }
     if (subjectname) {
         cert->subjectname = strdup(subjectname);
-    } else {
-        cert->subjectname = NULL;
     }
     if (issuername) {
         cert->issuername = strdup(issuername);
-    } else {
-        cert->issuername = NULL;
     }
     if (notbefore) {
         cert->notbefore = strdup(notbefore);
-    } else {
-        cert->notbefore = NULL;
     }
     if (notafter) {
         cert->notafter = strdup(notafter);
-    } else {
-        cert->notafter = NULL;
     }
     if (key_alg) {
         cert->key_alg = strdup(key_alg);
-    } else {
-        cert->key_alg = NULL;
     }
     if (signature_alg) {
         cert->signature_alg = strdup(signature_alg);
-    } else {
-        cert->signature_alg = NULL;
     }
 
-    cert->subject_country = NULL;
-    cert->subject_state = NULL;
-    cert->subject_distinguishedname = NULL;
-    cert->subject_serialnumber = NULL;
-    cert->subject_commonname = NULL;
-    cert->subject_organisation = NULL;
-    cert->subject_organisation_unit = NULL;
-    cert->subject_email = NULL;
     gchar** fields = g_strsplit(subjectname, "/", 0);
     for (int i = 0; i < g_strv_length(fields); i++) {
         gchar** keyval = g_strsplit(fields[i], "=", 2);
@@ -241,14 +217,6 @@ tlscerts_new(const char* const fingerprint, int version, const char* const seria
     }
     g_strfreev(fields);
 
-    cert->issuer_country = NULL;
-    cert->issuer_state = NULL;
-    cert->issuer_distinguishedname = NULL;
-    cert->issuer_serialnumber = NULL;
-    cert->issuer_commonname = NULL;
-    cert->issuer_organisation = NULL;
-    cert->issuer_organisation_unit = NULL;
-    cert->issuer_email = NULL;
     fields = g_strsplit(issuername, "/", 0);
     for (int i = 0; i < g_strv_length(fields); i++) {
         gchar** keyval = g_strsplit(fields[i], "=", 2);
