@@ -181,7 +181,7 @@ cons_show_error(const char* const msg, ...)
 }
 
 void
-cons_show_tlscert_summary(TLSCertificate* cert)
+cons_show_tlscert_summary(const TLSCertificate* cert)
 {
     if (!cert) {
         return;
@@ -193,7 +193,7 @@ cons_show_tlscert_summary(TLSCertificate* cert)
 }
 
 void
-cons_show_tlscert(TLSCertificate* cert)
+cons_show_tlscert(const TLSCertificate* cert)
 {
     if (!cert) {
         return;

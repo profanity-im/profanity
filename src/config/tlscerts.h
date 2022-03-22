@@ -82,7 +82,7 @@ void tlscerts_clear_current(void);
 
 gboolean tlscerts_exists(const char* const fingerprint);
 
-void tlscerts_add(TLSCertificate* cert);
+void tlscerts_add(const TLSCertificate* cert);
 
 gboolean tlscerts_revoke(const char* const fingerprint);
 

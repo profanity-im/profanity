@@ -257,7 +257,7 @@ tlscerts_new(const char* const fingerprint, int version, const char* const seria
 }
 
 void
-tlscerts_add(TLSCertificate* cert)
+tlscerts_add(const TLSCertificate* cert)
 {
     if (!cert) {
         return;

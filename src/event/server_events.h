@@ -86,7 +86,7 @@ void sv_ev_roster_update(const char* const barejid, const char* const name,
                          GSList* groups, const char* const subscription, gboolean pending_out);
 void sv_ev_roster_received(void);
 void sv_ev_connection_features_received(void);
-int sv_ev_certfail(const char* const errormsg, TLSCertificate* cert);
+int sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert);
 void sv_ev_lastactivity_response(const char* const from, const int seconds, const char* const msg);
 void sv_ev_bookmark_autojoin(Bookmark* bookmark);
 

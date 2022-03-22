@@ -1134,7 +1134,7 @@ sv_ev_muc_occupant_online(const char* const room, const char* const nick, const 
 }
 
 int
-sv_ev_certfail(const char* const errormsg, TLSCertificate* cert)
+sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert)
 {
     // check profanity trusted certs
     if (tlscerts_exists(cert->fingerprint)) {
