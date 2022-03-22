@@ -9292,6 +9292,8 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
     _url_external_method(cmd_template, url, NULL);
 
 out:
+    // reset autocompletion to start from latest url and not where we left of
+    autocomplete_reset(window->urls_ac);
 
     free(cmd_template);
     free(filename);
@@ -9348,6 +9350,8 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
     }
 
 out:
+    // reset autocompletion to start from latest url and not where we left of
+    autocomplete_reset(window->urls_ac);
 
     free(filename);
     free(cmd_template);
