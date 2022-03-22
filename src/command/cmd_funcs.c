@@ -67,6 +67,7 @@
 #include "config/files.h"
 #include "config/accounts.h"
 #include "config/account.h"
+#include "config/cafile.h"
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "config/tlscerts.h"
@@ -231,6 +232,7 @@ cmd_tls_trust(ProfWin* window, const char* const command, gchar** args)
         cons_show("Error getting TLS certificate.");
         return TRUE;
     }
+    cafile_add(cert);
     if (tlscerts_exists(cert->fingerprint)) {
         cons_show("Certificate %s already trusted.", cert->fingerprint);
         tlscerts_free(cert);

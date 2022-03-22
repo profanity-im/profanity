@@ -61,6 +61,7 @@ core_sources = \
 	src/config/theme.c src/config/theme.h \
 	src/config/color.c src/config/color.h \
 	src/config/scripts.c src/config/scripts.h \
+	src/config/cafile.c src/config/cafile.h \
 	src/plugins/plugins.h src/plugins/plugins.c \
 	src/plugins/api.h src/plugins/api.c \
 	src/plugins/callbacks.h src/plugins/callbacks.c \
@@ -124,6 +125,7 @@ unittest_sources = \
 	tests/unittests/log/stub_log.c \
 	tests/unittests/database/stub_database.c \
 	tests/unittests/config/stub_accounts.c \
+	tests/unittests/config/stub_cafile.c \
 	tests/unittests/tools/stub_http_upload.c \
 	tests/unittests/tools/stub_http_download.c \
 	tests/unittests/tools/stub_aesgcm_download.c \

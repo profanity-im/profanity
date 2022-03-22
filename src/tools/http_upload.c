@@ -48,6 +48,7 @@
 #include "profanity.h"
 #include "event/client_events.h"
 #include "tools/http_upload.h"
+#include "config/cafile.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
@@ -184,6 +185,7 @@ http_file_put(void* userdata)
     g_free(msg);
 
     char* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
+    gchar* cafile = cafile_get_name();
     pthread_mutex_unlock(&lock);
 
     curl_global_init(CURL_GLOBAL_ALL);
@@ -244,6 +246,9 @@ http_file_put(void* userdata)
 
     fh = upload->filehandle;
 
+    if (cafile) {
+        curl_easy_setopt(curl, CURLOPT_CAINFO, cafile);
+    }
     if (cert_path) {
         curl_easy_setopt(curl, CURLOPT_CAPATH, cert_path);
     }
@@ -288,6 +293,7 @@ http_file_put(void* userdata)
     g_free(expires_header);
 
     pthread_mutex_lock(&lock);
+    g_free(cafile);
     g_free(cert_path);
 
     if (err) {
