@@ -649,11 +649,11 @@ jabber_get_tls_peer_cert(void)
     return NULL;
 }
 void
-cons_show_tlscert(TLSCertificate* cert)
+cons_show_tlscert(const TLSCertificate* cert)
 {
 }
 void
-cons_show_tlscert_summary(TLSCertificate* cert)
+cons_show_tlscert_summary(const TLSCertificate* cert)
 {
 }
 

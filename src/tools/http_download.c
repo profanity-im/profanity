@@ -50,6 +50,7 @@
 #include "profanity.h"
 #include "event/client_events.h"
 #include "tools/http_download.h"
+#include "config/cafile.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"
@@ -125,6 +126,10 @@ http_file_get(void* userdata)
     }
 
     char* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
+    gchar* cafile = cafile_get_name();
+    ProfAccount* account = accounts_get_account(session_get_account_name());
+    gboolean insecure = strcmp(account->tls_policy, "trust") == 0;
+    account_free(account);
     pthread_mutex_unlock(&lock);
 
     curl_global_init(CURL_GLOBAL_ALL);
@@ -145,8 +150,15 @@ http_file_get(void* userdata)
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "profanity");
 
+    if (cafile) {
+        curl_easy_setopt(curl, CURLOPT_CAINFO, cafile);
+    }
     if (cert_path) {
         curl_easy_setopt(curl, CURLOPT_CAPATH, cert_path);
+    }
+    if (insecure) {
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+        curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     }
 
     if ((res = curl_easy_perform(curl)) != CURLE_OK) {
@@ -161,6 +173,7 @@ http_file_get(void* userdata)
     }
 
     pthread_mutex_lock(&lock);
+    g_free(cafile);
     g_free(cert_path);
     if (err) {
         if (download->cancel) {
