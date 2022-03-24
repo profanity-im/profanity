@@ -71,7 +71,11 @@ get_message_from_editor(gchar* message, gchar** returned_message)
         return TRUE;
     }
 
-    gsize messagelen = strlen(message);
+    gsize messagelen = 0;
+    if (message != NULL) {
+        messagelen = strlen(message);
+    }
+
     if (!g_file_set_contents(filename, message, messagelen, &glib_error)) {
         log_error("[Editor] could not write to %s: %s", filename, glib_error ? glib_error->message : "No GLib error given");
         if (glib_error) {
