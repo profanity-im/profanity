@@ -6,7 +6,6 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
-AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_PROG_CC
 LT_INIT
@@ -22,6 +21,8 @@ AS_CASE([$target_os],
     [darwin*], [PLATFORM="osx"],
     [cygwin], [PLATFORM="cygwin"],
     [PLATFORM="nix"])
+
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 PACKAGE_STATUS="development"
 
