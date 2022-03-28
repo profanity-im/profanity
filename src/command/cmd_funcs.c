@@ -124,6 +124,31 @@ static void _who_roster(ProfWin* window, const char* const command, gchar** args
 static gboolean _cmd_execute(ProfWin* window, const char* const command, const char* const inp);
 static gboolean _cmd_execute_default(ProfWin* window, const char* inp);
 static gboolean _cmd_execute_alias(ProfWin* window, const char* const inp, gboolean* ran);
+static gboolean
+_string_matches_one_of(const char* is, bool is_can_be_null, const char* first, ...) __attribute__((sentinel));
+
+static gboolean
+_string_matches_one_of(const char* is, bool is_can_be_null, const char* first, ...)
+{
+    gboolean ret = FALSE;
+    va_list ap;
+    const char* cur = first;
+    if (!is)
+        return is_can_be_null;
+
+    log_debug("%s vs.", is);
+    va_start(ap, first);
+    while (cur != NULL) {
+        log_debug("%s", cur);
+        if (g_strcmp0(is, cur) == 0) {
+            ret = TRUE;
+            break;
+        }
+        cur = va_arg(ap, const char*);
+    }
+    va_end(ap);
+    return ret;
+}
 
 /*
  * Take a line of input and process it, return TRUE if profanity is to
@@ -339,7 +364,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
     char* altdomain = g_hash_table_lookup(options, "server");
 
     char* tls_policy = g_hash_table_lookup(options, "tls");
-    if (tls_policy && (g_strcmp0(tls_policy, "force") != 0) && (g_strcmp0(tls_policy, "allow") != 0) && (g_strcmp0(tls_policy, "trust") != 0) && (g_strcmp0(tls_policy, "disable") != 0) && (g_strcmp0(tls_policy, "legacy") != 0)) {
+    if (!_string_matches_one_of(tls_policy, TRUE, "force", "allow", "trust", "disable", "legacy", NULL)) {
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
@@ -347,7 +372,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* auth_policy = g_hash_table_lookup(options, "auth");
-    if (auth_policy && (g_strcmp0(auth_policy, "default") != 0) && (g_strcmp0(auth_policy, "legacy") != 0)) {
+    if (!_string_matches_one_of(auth_policy, TRUE, "default", "legacy", NULL)) {
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
@@ -732,9 +757,7 @@ _account_set_nick(char* account_name, char* nick)
 gboolean
 _account_set_otr(char* account_name, char* policy)
 {
-    if ((g_strcmp0(policy, "manual") != 0)
-        && (g_strcmp0(policy, "opportunistic") != 0)
-        && (g_strcmp0(policy, "always") != 0)) {
+    if (!_string_matches_one_of(policy, FALSE, "manual", "opportunistic", "always", NULL)) {
         cons_show("OTR policy must be one of: manual, opportunistic or always.");
     } else {
         accounts_set_otr_policy(account_name, policy);
@@ -821,11 +844,7 @@ _account_set_theme(char* account_name, char* theme)
 gboolean
 _account_set_tls(char* account_name, char* policy)
 {
-    if ((g_strcmp0(policy, "force") != 0)
-        && (g_strcmp0(policy, "allow") != 0)
-        && (g_strcmp0(policy, "trust") != 0)
-        && (g_strcmp0(policy, "disable") != 0)
-        && (g_strcmp0(policy, "legacy") != 0)) {
+    if (!_string_matches_one_of(policy, FALSE, "force", "allow", "trust", "disable", "legacy", NULL)) {
         cons_show("TLS policy must be one of: force, allow, legacy or disable.");
     } else {
         accounts_set_tls_policy(account_name, policy);
@@ -838,8 +857,7 @@ _account_set_tls(char* account_name, char* policy)
 gboolean
 _account_set_auth(char* account_name, char* policy)
 {
-    if ((g_strcmp0(policy, "default") != 0)
-        && (g_strcmp0(policy, "legacy") != 0)) {
+    if (!_string_matches_one_of(policy, FALSE, "default", "legacy", NULL)) {
         cons_show("Auth policy must be either default or legacy.");
     } else {
         accounts_set_auth_policy(account_name, policy);
@@ -3773,7 +3791,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             if (cmd) {
                 value = args[1];
             }
-            if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
+            if (!_string_matches_one_of(cmd, FALSE, "add", "remove", NULL)) {
                 win_println(window, THEME_DEFAULT, "-", "Invalid command, usage:");
                 confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, "-", "");
@@ -3827,7 +3845,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             if (cmd) {
                 value = args[1];
             }
-            if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
+            if (!_string_matches_one_of(cmd, FALSE, "add", "remove", NULL)) {
                 win_println(window, THEME_DEFAULT, "-", "Invalid command, usage:");
                 confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, "-", "");
@@ -3878,7 +3896,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             if (cmd) {
                 value = args[1];
             }
-            if ((g_strcmp0(cmd, "add") != 0) && (g_strcmp0(cmd, "remove"))) {
+            if (!_string_matches_one_of(cmd, FALSE, "add", "remove", NULL)) {
                 win_println(window, THEME_DEFAULT, "-", "Invalid command, usage:");
                 confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, "-", "");
@@ -4183,7 +4201,7 @@ cmd_affiliation(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* affiliation = args[1];
-    if (affiliation && (g_strcmp0(affiliation, "owner") != 0) && (g_strcmp0(affiliation, "admin") != 0) && (g_strcmp0(affiliation, "member") != 0) && (g_strcmp0(affiliation, "none") != 0) && (g_strcmp0(affiliation, "outcast") != 0)) {
+    if (!_string_matches_one_of(affiliation, TRUE, "owner", "admin", "member", "none", "outcast", NULL)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -4258,7 +4276,7 @@ cmd_role(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* role = args[1];
-    if (role && (g_strcmp0(role, "visitor") != 0) && (g_strcmp0(role, "participant") != 0) && (g_strcmp0(role, "moderator") != 0) && (g_strcmp0(role, "none") != 0)) {
+    if (!_string_matches_one_of(role, TRUE, "visitor", "participant", "moderator", "none", NULL)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -5248,7 +5266,7 @@ cmd_console(ProfWin* window, const char* const command, gchar** args)
     }
 
     gchar* setting = args[1];
-    if ((g_strcmp0(setting, "all") != 0) && (g_strcmp0(setting, "first") != 0) && (g_strcmp0(setting, "none") != 0)) {
+    if (!_string_matches_one_of(setting, FALSE, "all", "first", "none", NULL)) {
         if (!(isMuc && (g_strcmp0(setting, "mention") == 0))) {
             cons_bad_cmd_usage(command);
             return TRUE;
@@ -7752,7 +7770,7 @@ cmd_otr_policy(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* choice = args[1];
-    if ((g_strcmp0(choice, "manual") != 0) && (g_strcmp0(choice, "opportunistic") != 0) && (g_strcmp0(choice, "always") != 0)) {
+    if (!_string_matches_one_of(choice, FALSE, "manual", "opportunistic", "always", NULL)) {
         cons_show("OTR policy can be set to: manual, opportunistic or always.");
         return TRUE;
     }
@@ -8942,7 +8960,7 @@ cmd_omemo_policy(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* choice = args[1];
-    if ((g_strcmp0(choice, "manual") != 0) && (g_strcmp0(choice, "automatic") != 0) && (g_strcmp0(choice, "always") != 0)) {
+    if (!_string_matches_one_of(choice, FALSE, "manual", "automatic", "always", NULL)) {
         cons_show("OMEMO policy can be set to: manual, automatic or always.");
         return TRUE;
     }
@@ -9556,7 +9574,7 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* tls_policy = g_hash_table_lookup(options, "tls");
-    if (tls_policy && (g_strcmp0(tls_policy, "force") != 0) && (g_strcmp0(tls_policy, "allow") != 0) && (g_strcmp0(tls_policy, "trust") != 0) && (g_strcmp0(tls_policy, "disable") != 0) && (g_strcmp0(tls_policy, "legacy") != 0)) {
+    if (!_string_matches_one_of(tls_policy, TRUE, "force", "allow", "trust", "disable", "legacy", NULL)) {
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
