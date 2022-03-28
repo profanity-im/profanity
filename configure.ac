@@ -6,7 +6,6 @@ AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_HEADERS([src/config.h])
-AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 AC_PROG_CC
 LT_INIT
@@ -22,6 +21,8 @@ AS_CASE([$target_os],
     [darwin*], [PLATFORM="osx"],
     [cygwin], [PLATFORM="cygwin"],
     [PLATFORM="nix"])
+
+AM_INIT_AUTOMAKE([foreign subdir-objects])
 
 PACKAGE_STATUS="development"
 
@@ -347,7 +348,7 @@ AC_CHECK_LIB([expect], [exp_expectl], [AM_CONDITIONAL([HAVE_EXPECT], [true])],
     [AC_MSG_NOTICE([libexpect not found, will not be able to run functional tests])])
 
 ## Default parameters
-AM_CFLAGS="-Wall -Wno-deprecated-declarations -std=gnu99"
+AM_CFLAGS="$AM_CFLAGS -Wall -Wno-deprecated-declarations -std=gnu99"
 AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
 
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
@@ -355,7 +356,7 @@ AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
 AS_IF([test "x$PLATFORM" = xosx],
     [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
 
-AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS ${SQLITE_CFLAGS}"
+AM_CFLAGS="$AM_CFLAGS $PTHREAD_CFLAGS $glib_CFLAGS $gio_CFLAGS $curl_CFLAGS ${SQLITE_CFLAGS} $libstrophe_CFLAGS"
 AM_CFLAGS="$AM_CFLAGS $libnotify_CFLAGS ${GTK_CFLAGS} $python_CFLAGS"
 AM_CFLAGS="$AM_CFLAGS -DTHEMES_PATH=\"\\\"$THEMES_PATH\\\"\" -DICONS_PATH=\"\\\"$ICONS_PATH\\\"\" -DGLOBAL_PYTHON_PLUGINS_PATH=\"\\\"$GLOBAL_PYTHON_PLUGINS_PATH\\\"\" -DGLOBAL_C_PLUGINS_PATH=\"\\\"$GLOBAL_C_PLUGINS_PATH\\\"\""
 LIBS="$glib_LIBS $gio_LIBS $PTHREAD_LIBS $curl_LIBS $libnotify_LIBS $python_LIBS ${GTK_LIBS} ${SQLITE_LIBS} $LIBS"
