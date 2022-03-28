@@ -627,6 +627,7 @@ cmd_ac_init(void)
     autocomplete_add(who_room_ac, "owner");
     autocomplete_add(who_room_ac, "admin");
     autocomplete_add(who_room_ac, "member");
+    autocomplete_add(who_room_ac, "none");
 
     bookmark_ac = autocomplete_new();
     autocomplete_add(bookmark_ac, "list");

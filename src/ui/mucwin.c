@@ -723,6 +723,9 @@ mucwin_show_affiliation_list(ProfMucWin* mucwin, muc_affiliation_t affiliation)
         case MUC_AFFILIATION_OUTCAST:
             win_println(window, THEME_DEFAULT, "!", "No outcasts found.");
             break;
+        case MUC_AFFILIATION_NONE:
+            win_println(window, THEME_DEFAULT, "!", "No nones found.");
+            break;
         default:
             break;
         }
@@ -740,6 +743,9 @@ mucwin_show_affiliation_list(ProfMucWin* mucwin, muc_affiliation_t affiliation)
             break;
         case MUC_AFFILIATION_OUTCAST:
             win_println(window, THEME_DEFAULT, "!", "Outcasts:");
+            break;
+        case MUC_AFFILIATION_NONE:
+            win_println(window, THEME_DEFAULT, "!", "Nones:");
             break;
         default:
             break;

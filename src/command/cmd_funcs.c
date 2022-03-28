@@ -1763,7 +1763,7 @@ _who_room(ProfWin* window, const char* const command, gchar** args)
     }
 
     // bad arg
-    if (args[0] && (g_strcmp0(args[0], "online") != 0) && (g_strcmp0(args[0], "available") != 0) && (g_strcmp0(args[0], "unavailable") != 0) && (g_strcmp0(args[0], "away") != 0) && (g_strcmp0(args[0], "chat") != 0) && (g_strcmp0(args[0], "xa") != 0) && (g_strcmp0(args[0], "dnd") != 0) && (g_strcmp0(args[0], "any") != 0) && (g_strcmp0(args[0], "moderator") != 0) && (g_strcmp0(args[0], "participant") != 0) && (g_strcmp0(args[0], "visitor") != 0) && (g_strcmp0(args[0], "owner") != 0) && (g_strcmp0(args[0], "admin") != 0) && (g_strcmp0(args[0], "member") != 0) && (g_strcmp0(args[0], "outcast") != 0)) {
+    if (args[0] && (g_strcmp0(args[0], "online") != 0) && (g_strcmp0(args[0], "available") != 0) && (g_strcmp0(args[0], "unavailable") != 0) && (g_strcmp0(args[0], "away") != 0) && (g_strcmp0(args[0], "chat") != 0) && (g_strcmp0(args[0], "xa") != 0) && (g_strcmp0(args[0], "dnd") != 0) && (g_strcmp0(args[0], "any") != 0) && (g_strcmp0(args[0], "moderator") != 0) && (g_strcmp0(args[0], "participant") != 0) && (g_strcmp0(args[0], "visitor") != 0) && (g_strcmp0(args[0], "owner") != 0) && (g_strcmp0(args[0], "admin") != 0) && (g_strcmp0(args[0], "member") != 0) && (g_strcmp0(args[0], "outcast") != 0) && (g_strcmp0(args[0], "none") != 0)) {
         cons_bad_cmd_usage(command);
         return;
     }
@@ -1856,6 +1856,10 @@ _who_room(ProfWin* window, const char* const command, gchar** args)
         }
         if (g_strcmp0(args[0], "outcast") == 0) {
             mucwin_show_affiliation_list(mucwin, MUC_AFFILIATION_OUTCAST);
+            return;
+        }
+        if (g_strcmp0(args[0], "none") == 0) {
+            mucwin_show_affiliation_list(mucwin, MUC_AFFILIATION_NONE);
             return;
         }
     }

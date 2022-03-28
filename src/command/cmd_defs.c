@@ -1049,7 +1049,7 @@ static struct cmd_t command_defs[] = {
               "/who",
               "/who online|offline|away|dnd|xa|chat|available|unavailable|any [<group>]",
               "/who moderator|participant|visitor",
-              "/who owner|admin|member")
+              "/who owner|admin|member|none")
       CMD_DESC(
               "Show contacts or room occupants with chosen status, role or affiliation.")
       CMD_ARGS(
@@ -1060,7 +1060,7 @@ static struct cmd_t command_defs[] = {
               { "any", "Contacts with any status (same as calling with no argument)." },
               { "<group>", "Filter the results by the specified roster group, not applicable in chat rooms." },
               { "moderator|participant|visitor", "Room occupants with the specified role." },
-              { "owner|admin|member", "Room occupants with the specified affiliation." })
+              { "owner|admin|member|none", "Room occupants with the specified affiliation." })
       CMD_EXAMPLES(
               "/who",
               "/who xa",
