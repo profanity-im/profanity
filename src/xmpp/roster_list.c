@@ -199,6 +199,12 @@ roster_get_msg_display_name(const char* const barejid, const char* const resourc
 {
     assert(roster != NULL);
 
+    char* incoming_str = prefs_get_string(PREF_INCOMING_STR);
+
+    if (incoming_str) {
+        return incoming_str;
+    }
+
     GString* result = g_string_new("");
 
     PContact contact = roster_get_contact(barejid);

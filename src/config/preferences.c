@@ -1817,6 +1817,8 @@ _get_group(preference_t pref)
     case PREF_TITLEBAR_MUC_TITLE_NAME:
     case PREF_SLASH_GUARD:
     case PREF_COMPOSE_EDITOR:
+    case PREF_OUTGOING_STR:
+    case PREF_INCOMING_STR:
         return PREF_GROUP_UI;
     case PREF_STATES:
     case PREF_OUTTYPE:
@@ -2144,6 +2146,10 @@ _get_key(preference_t pref)
         return "compose.editor";
     case PREF_SILENCE_NON_ROSTER:
         return "silence.incoming.nonroster";
+    case PREF_OUTGOING_STR:
+        return "stamp.outgoing";
+    case PREF_INCOMING_STR:
+        return "stamp.incoming";
     default:
         return NULL;
     }
@@ -2281,6 +2287,10 @@ _get_default_string(preference_t pref)
         gchar* editor = getenv("EDITOR");
         return editor ? editor : "vim";
     }
+    case PREF_OUTGOING_STR:
+        return "me:";
+    case PREF_INCOMING_STR:
+        return NULL;
     case PREF_URL_SAVE_CMD:
         return NULL; // Default to built-in method.
     default:

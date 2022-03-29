@@ -9020,6 +9020,57 @@ cmd_paste(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_stamp(ProfWin* window, const char* const command, gchar** args)
+{
+    if (g_strv_length(args) == 0) {
+        char* def = prefs_get_string(PREF_OUTGOING_STR);
+        if (def) {
+            cons_show("The outgoing stamp is: %s", def);
+            free(def);
+        } else {
+            cons_show("No outgoing stamp.");
+        }
+        def = prefs_get_string(PREF_INCOMING_STR);
+        if (def) {
+            cons_show("The incoming stamp is: %s", def);
+            free(def);
+        } else {
+            cons_show("No incoming stamp.");
+        }
+        return TRUE;
+    }
+
+    if (g_strv_length(args) == 1) {
+        cons_show("Wrong usage: need a parameter.");
+        return TRUE;
+    }
+
+    if (g_strv_length(args) == 2) {
+        if (g_strcmp0(args[0], "outgoing") == 0) {
+            prefs_set_string(PREF_OUTGOING_STR, args[1]);
+            cons_show("Outgoing stamp set to: %s", args[1]);
+        } else if (g_strcmp0(args[0], "incoming") == 0) {
+            prefs_set_string(PREF_INCOMING_STR, args[1]);
+            cons_show("Incoming stamp set to: %s", args[1]);
+        } else if (g_strcmp0(args[0], "unset") == 0) {
+            if (g_strcmp0(args[1], "incoming") == 0) {
+                prefs_set_string(PREF_INCOMING_STR, NULL);
+                cons_show("Incoming stamp unset");
+            } else if (g_strcmp0(args[1], "outgoing") == 0) {
+                prefs_set_string(PREF_OUTGOING_STR, NULL);
+                cons_show("Outgoing stamp unset");
+            } else {
+                cons_bad_cmd_usage(command);
+            }
+        } else {
+            cons_bad_cmd_usage(command);
+        }
+    }
+
+    return TRUE;
+}
+
+gboolean
 cmd_color(ProfWin* window, const char* const command, gchar** args)
 {
     if (g_strcmp0(args[0], "on") == 0) {

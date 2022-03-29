@@ -2411,6 +2411,30 @@ static struct cmd_t command_defs[] = {
               "/color own off")
     },
 
+    { "/stamp",
+      parse_args, 0, 2, NULL,
+      CMD_NOSUBFUNCS
+      CMD_MAINFUNC(cmd_stamp)
+      CMD_TAGS(
+              CMD_TAG_UI)
+      CMD_SYN(
+              "/stamp outgoing <string>",
+              "/stamp incoming <string>",
+              "/stamp unset outgoing|incoming")
+      CMD_DESC(
+              "Set chat window stamp values. "
+              "Current format of single log-line in the chat window next: \"<timestamp> <encryption sign> <stamp> <message>\" "
+              "where <stamp> is \"me:\" for incoming messages or \"username@server/resource\" for outcoming messages. "
+              "This command allows to change <stamp> value.")
+      CMD_ARGS(
+              { "outgoing", "Set outgoing messages stamp" },
+              { "incoming", "Set incoming stamp"},
+              { "unset outgoing|incoming", "unset stamp"})
+      CMD_EXAMPLES(
+              "/stamp outgoing -->",
+              "/stamp incoming <--")
+    },
+
     { "/avatar",
       parse_args, 2, 2, NULL,
       CMD_NOSUBFUNCS

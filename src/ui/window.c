@@ -1248,7 +1248,8 @@ win_print_outgoing(ProfWin* window, const char* show_char, const char* const id,
     if (replace_id) {
         _win_correct(window, message, id, replace_id, myjid);
     } else {
-        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, "me", myjid, id, "%s", message);
+        char* outgoing_str = prefs_get_string(PREF_OUTGOING_STR);
+        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, outgoing_str, myjid, id, "%s", message);
     }
 
     inp_nonblocking(TRUE);
@@ -1599,7 +1600,7 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
             offset = 4;
             me_message = TRUE;
         } else {
-            wprintw(window->layout->win, "%s: ", from);
+            wprintw(window->layout->win, "%s ", from);
             wattroff(window->layout->win, colour);
         }
     }
