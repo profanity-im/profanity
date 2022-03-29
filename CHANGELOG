@@ -11,6 +11,9 @@ Eight months and 203 commits after 0.11.0 we are happy to release 0.12.0.
 Thanks a lot to our sponsors: @mdosch, @wstrm, @LeSpocky and @jamesponddotco
 If you want to support us too: https://profanity-im.github.io/donate.html
 
+This release depends on libstrophe >= 0.11.0, libsignal-protocol-c >= 2.3.2 and glib >= 2.62.0.
+libmesode was deprecated, all functionality was merged into libstrophe.
+
 Changes:
 - Fix format string for ncurses 6.3 (#1597)
 - Remove `/python sourcepath` command (#1598)
