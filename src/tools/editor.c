@@ -112,6 +112,13 @@ get_message_from_editor(gchar* message, gchar** returned_message)
             g_free(editor);
             return TRUE;
         }
+        if (length && contents[0] == '/') {
+            gchar* new_content = g_malloc(length + 1);
+            new_content[0]='/';
+            g_stpcpy(new_content + 1, contents);
+            g_free(contents);
+            contents = new_content;
+        }
         /* Remove all trailing new-line characters */
         g_strchomp(contents);
         *returned_message = contents;
