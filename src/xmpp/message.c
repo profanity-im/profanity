@@ -619,12 +619,13 @@ message_send_chat_otr(const char* const barejid, const char* const msg, gboolean
 
 #ifdef HAVE_OMEMO
 char*
-message_send_chat_omemo(const char* const jid, uint32_t sid, GList* keys,
+message_send_chat_omemo(const char* const barejid, uint32_t sid, GList* keys,
                         const unsigned char* const iv, size_t iv_len,
                         const unsigned char* const ciphertext, size_t ciphertext_len,
                         gboolean request_receipt, gboolean muc, const char* const replace_id)
 {
-    char* state = chat_session_get_state(jid);
+    char* state = chat_session_get_state(barejid);
+    char* jid = chat_session_get_jid(barejid);
     xmpp_ctx_t* const ctx = connection_get_ctx();
     char* id;
     xmpp_stanza_t* message;
