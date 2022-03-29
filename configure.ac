@@ -349,6 +349,7 @@ AC_CHECK_LIB([expect], [exp_expectl], [AM_CONDITIONAL([HAVE_EXPECT], [true])],
 
 ## Default parameters
 AM_CFLAGS="$AM_CFLAGS -Wall -Wno-deprecated-declarations -std=gnu99"
+AM_CFLAGS="$AM_CFLAGS -Wall -Wno-deprecated-declarations -std=gnu99 -ggdb3"
 AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
 
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
