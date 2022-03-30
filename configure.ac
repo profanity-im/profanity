@@ -24,7 +24,7 @@ AS_CASE([$target_os],
 
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
-PACKAGE_STATUS="development"
+PACKAGE_STATUS="release"
 
 ## Get git branch and revision if in development
 if test "x$PACKAGE_STATUS" = xdevelopment; then
