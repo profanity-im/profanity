@@ -87,6 +87,18 @@ for current input line.
 .TP
 .BI CTRL+DOWN
 Store current input line in history but do not execute it.
+.PP
+.I Note:
+Profanity is using GNU Readline library to handle input so
+default configuration file
+.I ~/.inputrc
+affects operation. In addition to that
+.I $XDG_CONFIG_HOME/profanity/inputrc
+is read after all default keybindigs are set so one can override
+or add settings there. For reference, see Readline documentation:
+.I "info readline ""Command Line Editing"" ""Readline Init File"" ""Readline Init File Syntax"""
+and the list of available Profanity commands in
+.IR inputwin.c .
 .SH USING PROFANITY
 The user guide can be found at <https://profanity-im.github.io/userguide.html>.
 .SH SEE ALSO
