@@ -221,7 +221,7 @@ icons_sources = $(top_srcdir)/icons/*
 
 script_sources = bootstrap.sh
 
-man_sources = $(wildcard docs/profanity*.1)
+man1_sources = $(wildcard $(top_srcdir)/docs/profanity*.1)
 
 if BUILD_PGP
 core_sources += $(pgp_sources)
@@ -289,9 +289,9 @@ tests_unittests_unittests_LDADD = -lcmocka
 #endif
 #endif
 
-man_MANS = $(man_sources)
+man1_MANS = $(man1_sources)
 
-EXTRA_DIST = $(man_sources) $(icons_sources) $(themes_sources) $(script_sources) profrc.example theme_template LICENSE.txt README.md CHANGELOG
+EXTRA_DIST = $(man1_sources) $(icons_sources) $(themes_sources) $(script_sources) profrc.example theme_template LICENSE.txt README.md CHANGELOG
 
 # Ship API documentation with `make dist`
 EXTRA_DIST += \
