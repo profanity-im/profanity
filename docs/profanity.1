@@ -41,8 +41,17 @@ Specify which theme to use.
 .I THEME
 must be one of the themes installed in $XDG_CONFIG_HOME/profanity/themes
 .SH KEYBINDINGS
-.BI ALT+1..Alt-0
-Choose window 1..0.
+.TP
+.BR Tab , " Shift+Tab"
+Tab completion next, previous.  Works for commands, nicks and
+quotes (when input line starts with
+.BR > ).
+.TP
+.BR ALT+1..Alt-0 " or " F1..F10
+Choose window 1..10.
+.TP
+.BR ALT+q..Alt-p " (in QWERTY layout)"
+Choose window 11..20.
 .TP
 .BI ALT+LEFT
 Choose previous chat window.
@@ -70,6 +79,14 @@ Mark current window for later reading with an attention flag.
 .TP
 .BI ALT+m
 Switch between windows marked with the attention flag.
+.TP
+.BI ALT+c
+Run external editor (see
+.BR profanity-editor (1))
+for current input line.
+.TP
+.BI CTRL+DOWN
+Store current input line in history but do not execute it.
 .SH USING PROFANITY
 The user guide can be found at <https://profanity-im.github.io/userguide.html>.
 .SH SEE ALSO
