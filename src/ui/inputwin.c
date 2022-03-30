@@ -434,13 +434,18 @@ _inp_rl_addfuncs(void)
     rl_add_funmap_entry("prof_win_prev", _inp_rl_win_prev_handler);
     rl_add_funmap_entry("prof_win_next", _inp_rl_win_next_handler);
     rl_add_funmap_entry("prof_win_next_unread", _inp_rl_win_next_unread_handler);
+    rl_add_funmap_entry("prof_win_set_attention", _inp_rl_win_attention_handler);
+    rl_add_funmap_entry("prof_win_attention_next", _inp_rl_win_attention_next_handler);
     rl_add_funmap_entry("prof_win_pageup", _inp_rl_win_pageup_handler);
     rl_add_funmap_entry("prof_win_pagedown", _inp_rl_win_pagedown_handler);
     rl_add_funmap_entry("prof_subwin_pageup", _inp_rl_subwin_pageup_handler);
     rl_add_funmap_entry("prof_subwin_pagedown", _inp_rl_subwin_pagedown_handler);
+    rl_add_funmap_entry("prof_complete_next", _inp_rl_tab_handler);
+    rl_add_funmap_entry("prof_complete_prev", _inp_rl_shift_tab_handler);
     rl_add_funmap_entry("prof_win_clear", _inp_rl_win_clear_handler);
     rl_add_funmap_entry("prof_win_close", _inp_rl_win_close_handler);
     rl_add_funmap_entry("prof_send_to_editor", _inp_rl_send_to_editor);
+    rl_add_funmap_entry("prof_cut_to_history", _inp_rl_down_arrow_handler);
 }
 
 // Readline callbacks
