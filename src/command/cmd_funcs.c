@@ -1781,7 +1781,7 @@ _who_room(ProfWin* window, const char* const command, gchar** args)
     }
 
     // bad arg
-    if (args[0] && (g_strcmp0(args[0], "online") != 0) && (g_strcmp0(args[0], "available") != 0) && (g_strcmp0(args[0], "unavailable") != 0) && (g_strcmp0(args[0], "away") != 0) && (g_strcmp0(args[0], "chat") != 0) && (g_strcmp0(args[0], "xa") != 0) && (g_strcmp0(args[0], "dnd") != 0) && (g_strcmp0(args[0], "any") != 0) && (g_strcmp0(args[0], "moderator") != 0) && (g_strcmp0(args[0], "participant") != 0) && (g_strcmp0(args[0], "visitor") != 0) && (g_strcmp0(args[0], "owner") != 0) && (g_strcmp0(args[0], "admin") != 0) && (g_strcmp0(args[0], "member") != 0) && (g_strcmp0(args[0], "outcast") != 0) && (g_strcmp0(args[0], "none") != 0)) {
+    if (!_string_matches_one_of(args[0], FALSE, "online", "available", "unavailable", "away", "chat", "xa", "dnd", "any", "moderator", "participant", "visitor", "owner", "admin", "member", "outcast", "none", NULL)) {
         cons_bad_cmd_usage(command);
         return;
     }
@@ -1790,7 +1790,7 @@ _who_room(ProfWin* window, const char* const command, gchar** args)
     assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
     // presence filter
-    if (args[0] == NULL || (g_strcmp0(args[0], "online") == 0) || (g_strcmp0(args[0], "available") == 0) || (g_strcmp0(args[0], "unavailable") == 0) || (g_strcmp0(args[0], "away") == 0) || (g_strcmp0(args[0], "chat") == 0) || (g_strcmp0(args[0], "xa") == 0) || (g_strcmp0(args[0], "dnd") == 0) || (g_strcmp0(args[0], "any") == 0)) {
+    if (_string_matches_one_of(args[0], TRUE, "online", "available", "unavailable", "away", "chat", "xa", "dnd", "any", NULL)) {
 
         char* presence = args[0];
         GList* occupants = muc_roster(mucwin->roomjid);
@@ -1889,16 +1889,7 @@ _who_roster(ProfWin* window, const char* const command, gchar** args)
     char* presence = args[0];
 
     // bad arg
-    if (presence
-        && (strcmp(presence, "online") != 0)
-        && (strcmp(presence, "available") != 0)
-        && (strcmp(presence, "unavailable") != 0)
-        && (strcmp(presence, "offline") != 0)
-        && (strcmp(presence, "away") != 0)
-        && (strcmp(presence, "chat") != 0)
-        && (strcmp(presence, "xa") != 0)
-        && (strcmp(presence, "dnd") != 0)
-        && (strcmp(presence, "any") != 0)) {
+    if (!_string_matches_one_of(presence, TRUE, "online", "available", "unavailable", "offline", "away", "chat", "xa", "dnd", "any", NULL)) {
         cons_bad_cmd_usage(command);
         return;
     }
@@ -3952,7 +3943,7 @@ cmd_form(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    if ((g_strcmp0(args[0], "submit") != 0) && (g_strcmp0(args[0], "cancel") != 0) && (g_strcmp0(args[0], "show") != 0) && (g_strcmp0(args[0], "help") != 0)) {
+    if (!_string_matches_one_of(args[0], FALSE, "submit", "cancel", "show", "help", NULL)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -5260,7 +5251,7 @@ cmd_console(ProfWin* window, const char* const command, gchar** args)
 {
     gboolean isMuc = (g_strcmp0(args[0], "muc") == 0);
 
-    if ((g_strcmp0(args[0], "chat") != 0) && !isMuc && (g_strcmp0(args[0], "private") != 0)) {
+    if (!_string_matches_one_of(args[0], "chat", "private", NULL) && !isMuc) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -6576,13 +6567,13 @@ cmd_ping(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_autoaway(ProfWin* window, const char* const command, gchar** args)
 {
-    if ((g_strcmp0(args[0], "mode") != 0) && (g_strcmp0(args[0], "time") != 0) && (g_strcmp0(args[0], "message") != 0) && (g_strcmp0(args[0], "check") != 0)) {
+    if (!_string_matches_one_of(args[0], FALSE, "mode", "time", "message", "check", NULL)) {
         cons_show("Setting must be one of 'mode', 'time', 'message' or 'check'");
         return TRUE;
     }
 
     if (g_strcmp0(args[0], "mode") == 0) {
-        if ((g_strcmp0(args[1], "idle") != 0) && (g_strcmp0(args[1], "away") != 0) && (g_strcmp0(args[1], "off") != 0)) {
+        if (!_string_matches_one_of(args[1], FALSE, "idle", "away", "off", NULL)) {
             cons_show("Mode must be one of 'idle', 'away' or 'off'");
         } else {
             prefs_set_string(PREF_AUTOAWAY_MODE, args[1]);
