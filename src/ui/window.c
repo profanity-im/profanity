@@ -415,6 +415,7 @@ win_get_last_sent_message(ProfWin* window)
         ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         last_message = mucwin->last_message;
+        break;
     }
     default:
         break;
@@ -1578,7 +1579,7 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
 
         char* color_pref = prefs_get_string(PREF_COLOR_NICK);
         if (color_pref != NULL && (strcmp(color_pref, "false") != 0)) {
-            if (flags & NO_ME || (!(flags & NO_ME) && prefs_get_boolean(PREF_COLOR_NICK_OWN))) {
+            if ((flags & NO_ME) || (!(flags & NO_ME) && prefs_get_boolean(PREF_COLOR_NICK_OWN))) {
                 colour = theme_hash_attrs(from);
             }
         }
