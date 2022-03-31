@@ -125,10 +125,10 @@ static gboolean _cmd_execute(ProfWin* window, const char* const command, const c
 static gboolean _cmd_execute_default(ProfWin* window, const char* inp);
 static gboolean _cmd_execute_alias(ProfWin* window, const char* const inp, gboolean* ran);
 static gboolean
-_string_matches_one_of(const char* is, bool is_can_be_null, const char* first, ...) __attribute__((sentinel));
+_string_matches_one_of(const char* what, const char* is, bool is_can_be_null, const char* first, ...) __attribute__((sentinel));
 
 static gboolean
-_string_matches_one_of(const char* is, bool is_can_be_null, const char* first, ...)
+_string_matches_one_of(const char* what, const char* is, bool is_can_be_null, const char* first, ...)
 {
     gboolean ret = FALSE;
     va_list ap;
@@ -136,10 +136,8 @@ _string_matches_one_of(const char* is, bool is_can_be_null, const char* first, .
     if (!is)
         return is_can_be_null;
 
-    log_debug("%s vs.", is);
     va_start(ap, first);
     while (cur != NULL) {
-        log_debug("%s", cur);
         if (g_strcmp0(is, cur) == 0) {
             ret = TRUE;
             break;
@@ -147,6 +145,39 @@ _string_matches_one_of(const char* is, bool is_can_be_null, const char* first, .
         cur = va_arg(ap, const char*);
     }
     va_end(ap);
+    if (!ret && what) {
+        cons_show("Invalid %s: '%s'", what, is);
+        char errmsg[256] = { 0 };
+        size_t sz = 0;
+        int s = snprintf(errmsg, sizeof(errmsg) - sz, "%s must be one of:", what);
+        if (s < 0 || s + sz >= sizeof(errmsg))
+            return ret;
+        sz += s;
+
+        cur = first;
+        va_start(ap, first);
+        while (cur != NULL) {
+            const char* next = va_arg(ap, const char*);
+            if (next) {
+                s = snprintf(errmsg + sz, sizeof(errmsg) - sz, " '%s',", cur);
+            } else {
+                /* remove last ',' */
+                sz--;
+                errmsg[sz] = '\0';
+                s = snprintf(errmsg + sz, sizeof(errmsg) - sz, " or '%s'.", cur);
+            }
+            if (s < 0 || s + sz >= sizeof(errmsg)) {
+                log_debug("Error message too long or some other error occurred (%d).", s);
+                s = -1;
+                break;
+            }
+            sz += s;
+            cur = next;
+        }
+        va_end(ap);
+        if (s > 0)
+            cons_show(errmsg);
+    }
     return ret;
 }
 
@@ -364,7 +395,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
     char* altdomain = g_hash_table_lookup(options, "server");
 
     char* tls_policy = g_hash_table_lookup(options, "tls");
-    if (!_string_matches_one_of(tls_policy, TRUE, "force", "allow", "trust", "disable", "legacy", NULL)) {
+    if (!_string_matches_one_of("TLS policy", tls_policy, TRUE, "force", "allow", "trust", "disable", "legacy", NULL)) {
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
@@ -372,7 +403,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* auth_policy = g_hash_table_lookup(options, "auth");
-    if (!_string_matches_one_of(auth_policy, TRUE, "default", "legacy", NULL)) {
+    if (!_string_matches_one_of("Auth policy", auth_policy, TRUE, "default", "legacy", NULL)) {
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
@@ -757,9 +788,7 @@ _account_set_nick(char* account_name, char* nick)
 gboolean
 _account_set_otr(char* account_name, char* policy)
 {
-    if (!_string_matches_one_of(policy, FALSE, "manual", "opportunistic", "always", NULL)) {
-        cons_show("OTR policy must be one of: manual, opportunistic or always.");
-    } else {
+    if (_string_matches_one_of("OTR policy", policy, FALSE, "manual", "opportunistic", "always", NULL)) {
         accounts_set_otr_policy(account_name, policy);
         cons_show("Updated OTR policy for account %s: %s", account_name, policy);
         cons_show("");
@@ -844,9 +873,7 @@ _account_set_theme(char* account_name, char* theme)
 gboolean
 _account_set_tls(char* account_name, char* policy)
 {
-    if (!_string_matches_one_of(policy, FALSE, "force", "allow", "trust", "disable", "legacy", NULL)) {
-        cons_show("TLS policy must be one of: force, allow, legacy or disable.");
-    } else {
+    if (_string_matches_one_of("TLS policy", policy, FALSE, "force", "allow", "trust", "disable", "legacy", NULL)) {
         accounts_set_tls_policy(account_name, policy);
         cons_show("Updated TLS policy for account %s: %s", account_name, policy);
         cons_show("");
@@ -857,9 +884,7 @@ _account_set_tls(char* account_name, char* policy)
 gboolean
 _account_set_auth(char* account_name, char* policy)
 {
-    if (!_string_matches_one_of(policy, FALSE, "default", "legacy", NULL)) {
-        cons_show("Auth policy must be either default or legacy.");
-    } else {
+    if (_string_matches_one_of("Auth policy", policy, FALSE, "default", "legacy", NULL)) {
         accounts_set_auth_policy(account_name, policy);
         cons_show("Updated auth policy for account %s: %s", account_name, policy);
         cons_show("");
@@ -1781,7 +1806,7 @@ _who_room(ProfWin* window, const char* const command, gchar** args)
     }
 
     // bad arg
-    if (!_string_matches_one_of(args[0], FALSE, "online", "available", "unavailable", "away", "chat", "xa", "dnd", "any", "moderator", "participant", "visitor", "owner", "admin", "member", "outcast", "none", NULL)) {
+    if (!_string_matches_one_of(NULL, args[0], TRUE, "online", "available", "unavailable", "away", "chat", "xa", "dnd", "any", "moderator", "participant", "visitor", "owner", "admin", "member", "outcast", "none", NULL)) {
         cons_bad_cmd_usage(command);
         return;
     }
@@ -1790,7 +1815,7 @@ _who_room(ProfWin* window, const char* const command, gchar** args)
     assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
     // presence filter
-    if (_string_matches_one_of(args[0], TRUE, "online", "available", "unavailable", "away", "chat", "xa", "dnd", "any", NULL)) {
+    if (_string_matches_one_of(NULL, args[0], TRUE, "online", "available", "unavailable", "away", "chat", "xa", "dnd", "any", NULL)) {
 
         char* presence = args[0];
         GList* occupants = muc_roster(mucwin->roomjid);
@@ -1889,7 +1914,7 @@ _who_roster(ProfWin* window, const char* const command, gchar** args)
     char* presence = args[0];
 
     // bad arg
-    if (!_string_matches_one_of(presence, TRUE, "online", "available", "unavailable", "offline", "away", "chat", "xa", "dnd", "any", NULL)) {
+    if (!_string_matches_one_of(NULL, presence, TRUE, "online", "available", "unavailable", "offline", "away", "chat", "xa", "dnd", "any", NULL)) {
         cons_bad_cmd_usage(command);
         return;
     }
@@ -3782,7 +3807,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             if (cmd) {
                 value = args[1];
             }
-            if (!_string_matches_one_of(cmd, FALSE, "add", "remove", NULL)) {
+            if (!_string_matches_one_of(NULL, cmd, FALSE, "add", "remove", NULL)) {
                 win_println(window, THEME_DEFAULT, "-", "Invalid command, usage:");
                 confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, "-", "");
@@ -3836,7 +3861,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             if (cmd) {
                 value = args[1];
             }
-            if (!_string_matches_one_of(cmd, FALSE, "add", "remove", NULL)) {
+            if (!_string_matches_one_of(NULL, cmd, FALSE, "add", "remove", NULL)) {
                 win_println(window, THEME_DEFAULT, "-", "Invalid command, usage:");
                 confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, "-", "");
@@ -3887,7 +3912,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             if (cmd) {
                 value = args[1];
             }
-            if (!_string_matches_one_of(cmd, FALSE, "add", "remove", NULL)) {
+            if (!_string_matches_one_of(NULL, cmd, FALSE, "add", "remove", NULL)) {
                 win_println(window, THEME_DEFAULT, "-", "Invalid command, usage:");
                 confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, "-", "");
@@ -3943,7 +3968,7 @@ cmd_form(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    if (!_string_matches_one_of(args[0], FALSE, "submit", "cancel", "show", "help", NULL)) {
+    if (!_string_matches_one_of(NULL, args[0], FALSE, "submit", "cancel", "show", "help", NULL)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -4192,7 +4217,7 @@ cmd_affiliation(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* affiliation = args[1];
-    if (!_string_matches_one_of(affiliation, TRUE, "owner", "admin", "member", "none", "outcast", NULL)) {
+    if (!_string_matches_one_of(NULL, affiliation, TRUE, "owner", "admin", "member", "none", "outcast", NULL)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -4267,7 +4292,7 @@ cmd_role(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* role = args[1];
-    if (!_string_matches_one_of(role, TRUE, "visitor", "participant", "moderator", "none", NULL)) {
+    if (!_string_matches_one_of(NULL, role, TRUE, "visitor", "participant", "moderator", "none", NULL)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -5251,13 +5276,13 @@ cmd_console(ProfWin* window, const char* const command, gchar** args)
 {
     gboolean isMuc = (g_strcmp0(args[0], "muc") == 0);
 
-    if (!_string_matches_one_of(args[0], "chat", "private", NULL) && !isMuc) {
+    if (!_string_matches_one_of(NULL, args[0], FALSE, "chat", "private", NULL) && !isMuc) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
 
     gchar* setting = args[1];
-    if (!_string_matches_one_of(setting, FALSE, "all", "first", "none", NULL)) {
+    if (!_string_matches_one_of(NULL, setting, FALSE, "all", "first", "none", NULL)) {
         if (!(isMuc && (g_strcmp0(setting, "mention") == 0))) {
             cons_bad_cmd_usage(command);
             return TRUE;
@@ -6567,15 +6592,12 @@ cmd_ping(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_autoaway(ProfWin* window, const char* const command, gchar** args)
 {
-    if (!_string_matches_one_of(args[0], FALSE, "mode", "time", "message", "check", NULL)) {
-        cons_show("Setting must be one of 'mode', 'time', 'message' or 'check'");
+    if (!_string_matches_one_of("Setting", args[0], FALSE, "mode", "time", "message", "check", NULL)) {
         return TRUE;
     }
 
     if (g_strcmp0(args[0], "mode") == 0) {
-        if (!_string_matches_one_of(args[1], FALSE, "idle", "away", "off", NULL)) {
-            cons_show("Mode must be one of 'idle', 'away' or 'off'");
-        } else {
+        if (_string_matches_one_of("Mode", args[1], FALSE, "idle", "away", "off", NULL)) {
             prefs_set_string(PREF_AUTOAWAY_MODE, args[1]);
             cons_show("Auto away mode set to: %s.", args[1]);
         }
@@ -7761,8 +7783,7 @@ cmd_otr_policy(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* choice = args[1];
-    if (!_string_matches_one_of(choice, FALSE, "manual", "opportunistic", "always", NULL)) {
-        cons_show("OTR policy can be set to: manual, opportunistic or always.");
+    if (!_string_matches_one_of("OTR policy", choice, FALSE, "manual", "opportunistic", "always", NULL)) {
         return TRUE;
     }
 
@@ -8951,8 +8972,7 @@ cmd_omemo_policy(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* choice = args[1];
-    if (!_string_matches_one_of(choice, FALSE, "manual", "automatic", "always", NULL)) {
-        cons_show("OMEMO policy can be set to: manual, automatic or always.");
+    if (!_string_matches_one_of("OMEMO policy", choice, FALSE, "manual", "automatic", "always", NULL)) {
         return TRUE;
     }
 
@@ -9565,7 +9585,7 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* tls_policy = g_hash_table_lookup(options, "tls");
-    if (!_string_matches_one_of(tls_policy, TRUE, "force", "allow", "trust", "disable", "legacy", NULL)) {
+    if (!_string_matches_one_of("TLS policy", tls_policy, TRUE, "force", "allow", "trust", "disable", "legacy", NULL)) {
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
