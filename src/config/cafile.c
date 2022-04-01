@@ -33,6 +33,8 @@
  *
  */
 
+#include "config.h"
+
 #include <fcntl.h>
 #include <glib.h>
 #include <errno.h>
