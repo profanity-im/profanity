@@ -2111,7 +2111,7 @@ static struct cmd_t command_defs[] = {
               { "set <account> tls disable", "Disable TLS for the connection." },
               { "set <account> auth default", "Use default authentication process." },
               { "set <account> auth legacy", "Allow legacy authentication." },
-              { "set <account> <theme>", "Set the UI theme for the account." },
+              { "set <account> theme <theme>", "Set the UI theme for the account." },
               { "clear <account> server", "Remove the server setting for this account." },
               { "clear <account> port", "Remove the port setting for this account." },
               { "clear <account> password", "Remove the password setting for this account." },
