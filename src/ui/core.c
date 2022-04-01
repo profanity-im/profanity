@@ -144,10 +144,8 @@ ui_update(void)
     doupdate();
 
     if (perform_resize) {
-        signal(SIGWINCH, SIG_IGN);
-        ui_resize();
         perform_resize = FALSE;
-        signal(SIGWINCH, ui_sigwinch_handler);
+        ui_resize();
     }
 }
 
