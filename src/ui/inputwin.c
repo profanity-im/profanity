@@ -596,7 +596,7 @@ _inp_rl_win_close_handler(int count, int key)
 }
 
 static int
-_inp_rl_tab_handler(int count, int key)
+_inp_rl_tab_com_handler(int count, int key, gboolean previous)
 {
     if (rl_point != rl_end || !rl_line_buffer) {
         return 0;
@@ -604,7 +604,7 @@ _inp_rl_tab_handler(int count, int key)
 
     if (strncmp(rl_line_buffer, "/", 1) == 0) {
         ProfWin* window = wins_get_current();
-        char* result = cmd_ac_complete(window, rl_line_buffer, FALSE);
+        char* result = cmd_ac_complete(window, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -615,7 +615,7 @@ _inp_rl_tab_handler(int count, int key)
 
     if (strncmp(rl_line_buffer, ">", 1) == 0) {
         ProfWin* window = wins_get_current();
-        char* result = win_quote_autocomplete(window, rl_line_buffer, FALSE);
+        char* result = win_quote_autocomplete(window, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -626,7 +626,7 @@ _inp_rl_tab_handler(int count, int key)
 
     ProfWin* current = wins_get_current();
     if (current->type == WIN_MUC) {
-        char* result = muc_autocomplete(current, rl_line_buffer, FALSE);
+        char* result = muc_autocomplete(current, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -638,45 +638,15 @@ _inp_rl_tab_handler(int count, int key)
 }
 
 static int
+_inp_rl_tab_handler(int count, int key)
+{
+    return _inp_rl_tab_com_handler(count, key, FALSE);
+}
+
+static int
 _inp_rl_shift_tab_handler(int count, int key)
 {
-    if (rl_point != rl_end || !rl_line_buffer) {
-        return 0;
-    }
-
-    if (strncmp(rl_line_buffer, "/", 1) == 0) {
-        ProfWin* window = wins_get_current();
-        char* result = cmd_ac_complete(window, rl_line_buffer, TRUE);
-        if (result) {
-            rl_replace_line(result, 1);
-            rl_point = rl_end;
-            free(result);
-            return 0;
-        }
-    }
-
-    if (strncmp(rl_line_buffer, ">", 1) == 0) {
-        ProfWin* window = wins_get_current();
-        char* result = win_quote_autocomplete(window, rl_line_buffer, TRUE);
-        if (result) {
-            rl_replace_line(result, 1);
-            rl_point = rl_end;
-            free(result);
-            return 0;
-        }
-    }
-
-    ProfWin* current = wins_get_current();
-    if (current->type == WIN_MUC) {
-        char* result = muc_autocomplete(current, rl_line_buffer, TRUE);
-        if (result) {
-            rl_replace_line(result, 1);
-            rl_point = rl_end;
-            free(result);
-        }
-    }
-
-    return 0;
+    return _inp_rl_tab_com_handler(count, key, TRUE);
 }
 
 static void
