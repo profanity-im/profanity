@@ -488,10 +488,12 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\e[1;9D", _inp_rl_win_prev_handler);
     rl_bind_keyseq("\\e[1;3D", _inp_rl_win_prev_handler);
     rl_bind_keyseq("\\e\\e[D", _inp_rl_win_prev_handler);
+    rl_bind_keyseq("\\e\\eOD", _inp_rl_win_prev_handler);
 
     rl_bind_keyseq("\\e[1;9C", _inp_rl_win_next_handler);
     rl_bind_keyseq("\\e[1;3C", _inp_rl_win_next_handler);
     rl_bind_keyseq("\\e\\e[C", _inp_rl_win_next_handler);
+    rl_bind_keyseq("\\e\\eOC", _inp_rl_win_next_handler);
 
     rl_bind_keyseq("\\ea", _inp_rl_win_next_unread_handler);
     rl_bind_keyseq("\\ev", _inp_rl_win_attention_handler);
@@ -515,6 +517,7 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\e[Z", _inp_rl_shift_tab_handler);
 
     rl_bind_keyseq("\\e[1;5B", _inp_rl_down_arrow_handler); // ctrl+arrow down
+    rl_bind_keyseq("\\eOb", _inp_rl_down_arrow_handler);
 
     // unbind unwanted mappings
     rl_bind_keyseq("\\e=", NULL);
