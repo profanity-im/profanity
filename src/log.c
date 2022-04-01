@@ -680,8 +680,14 @@ _get_log_filename(const char* const other, const char* const login, GDateTime* d
     gchar* chatlogs_dir = files_file_in_account_data_path(DIR_CHATLOGS, login, is_room ? "rooms" : NULL);
     gchar* logfile_name = g_date_time_format(dt, "%Y_%m_%d.log");
     gchar* other_ = str_replace(other, "@", "_at_");
-    gchar* logfile_path = g_strdup_printf("%s/%s/%s", chatlogs_dir, other_, logfile_name);
+    gchar* logs_path = g_strdup_printf("%s/%s", chatlogs_dir, other_);
+    gchar* logfile_path = NULL;
 
+    if (create_dir(logs_path)) {
+        logfile_path = g_strdup_printf("%s/%s", logs_path, logfile_name);
+    }
+
+    g_free(logs_path);
     g_free(other_);
     g_free(logfile_name);
     g_free(chatlogs_dir);
