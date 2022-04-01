@@ -663,20 +663,21 @@ theme_get_bkgnd(void)
 static void
 _theme_prep_fgnd(char* setting, GString* lookup_str, gboolean* bold)
 {
-    gchar* val = g_key_file_get_string(theme, "colours", setting, NULL);
-    if (!val) {
-        char* def = g_hash_table_lookup(defaults, setting);
-        g_string_append(lookup_str, def);
+    gchar* conf_str = g_key_file_get_string(theme, "colours", setting, NULL);
+    gchar* val = conf_str;
+
+    if (!val)
+        val = g_hash_table_lookup(defaults, setting);
+
+    if (g_str_has_prefix(val, "bold_")) {
+        g_string_append(lookup_str, &val[5]);
+        *bold = TRUE;
     } else {
-        if (g_str_has_prefix(val, "bold_")) {
-            g_string_append(lookup_str, &val[5]);
-            *bold = TRUE;
-        } else {
-            g_string_append(lookup_str, val);
-            *bold = FALSE;
-        }
+        g_string_append(lookup_str, val);
+        *bold = FALSE;
     }
-    g_free(val);
+
+    g_free(conf_str);
 }
 
 char*
