@@ -1270,6 +1270,7 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
         display_name = strdup("me");
     } else {
         display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
+        flags = NO_ME;
     }
 
     jid_destroy(jidp);
