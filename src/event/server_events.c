@@ -231,8 +231,8 @@ sv_ev_lost_connection(void)
 void
 sv_ev_failed_login(void)
 {
-    cons_show_error("Login failed.");
-    log_info("Login failed");
+    cons_show_error("Connection closed.");
+    log_info("Connection closed");
     tlscerts_clear_current();
 }
 
