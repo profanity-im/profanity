@@ -77,6 +77,10 @@ apidocs/python/src/plugin.pyc
 apidocs/c/html/
 apidocs/c/doxygen_sqlite3.db
 
+# man pages
+docs/*.1
+!docs/profanity.1
+
 # Temp Vim files
 **/*.swp
 
