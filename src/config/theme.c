@@ -184,6 +184,9 @@ theme_exists(const char* const theme_name)
 gboolean
 theme_load(const char* const theme_name, gboolean load_theme_prefs)
 {
+    if (!theme_exists(theme_name))
+        return FALSE;
+
     color_pair_cache_reset();
 
     if (_theme_load_file(theme_name)) {
