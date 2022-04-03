@@ -2624,6 +2624,24 @@ static struct cmd_t command_defs[] = {
       CMD_NOEXAMPLES
     },
 
+    { "/raw",
+      parse_args, 0, 0, NULL,
+      CMD_NOSUBFUNCS
+      CMD_MAINFUNC(cmd_raw)
+      CMD_TAGS(
+              CMD_TAG_CHAT,
+              CMD_TAG_GROUPCHAT)
+      CMD_SYN(
+              "/raw")
+      CMD_DESC(
+              "Spawn external editor to edit and send a raw message without processing "
+              "(check if the line starts with slash) like /editor does. "
+              "After editing the inputline may appear empty. Press enter to send the text anyways. "
+              "Use /executable to set your favourite editor." )
+      CMD_NOARGS
+      CMD_NOEXAMPLES
+    },
+
     { "/correct-editor",
       parse_args, 0, 0, NULL,
       CMD_NOSUBFUNCS

@@ -126,6 +126,7 @@ static gboolean _cmd_execute_default(ProfWin* window, const char* inp);
 static gboolean _cmd_execute_alias(ProfWin* window, const char* const inp, gboolean* ran);
 static gboolean
 _string_matches_one_of(const char* what, const char* is, bool is_can_be_null, const char* first, ...) __attribute__((sentinel));
+static void _send_msg(ProfWin* window, const char* inp);
 
 static gboolean
 _string_matches_one_of(const char* what, const char* is, bool is_can_be_null, const char* first, ...)
@@ -8396,6 +8397,14 @@ _cmd_execute_default(ProfWin* window, const char* inp)
         return TRUE;
     }
 
+    _send_msg(window, inp);
+
+    return TRUE;
+}
+
+static void
+_send_msg(ProfWin* window, const char* inp)
+{
     switch (window->type) {
     case WIN_CHAT:
     {
@@ -8426,8 +8435,6 @@ _cmd_execute_default(ProfWin* window, const char* inp)
     default:
         break;
     }
-
-    return TRUE;
 }
 
 static gboolean
@@ -9528,6 +9535,33 @@ cmd_editor(ProfWin* window, const char* const command, gchar** args)
     ui_resize();
     rl_point = rl_end;
     rl_forced_update_display();
+    g_free(message);
+
+    return TRUE;
+}
+
+gboolean
+cmd_raw(ProfWin* window, const char* const command, gchar** args)
+{
+    jabber_conn_status_t conn_status = connection_get_status();
+
+    if (conn_status != JABBER_CONNECTED) {
+        cons_show("You are currently not connected.");
+        return TRUE;
+    }
+
+    gchar* message = NULL;
+
+    if (get_message_from_editor(NULL, &message)) {
+        return TRUE;
+    }
+
+    _send_msg(window, message);
+
+    ui_resize();
+    rl_point = rl_end;
+    rl_forced_update_display();
+
     g_free(message);
 
     return TRUE;
