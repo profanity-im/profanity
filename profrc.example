@@ -37,6 +37,8 @@ message.text=true
 room.text=true
 
 [alias]
+colour=/color
+topic=/subject
 friends=/who online friends
 bob=/msg bob@server.org hey wassup?
 
