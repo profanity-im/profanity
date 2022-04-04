@@ -1,0 +1,98 @@
+.TH man 1 "2022-04-04" "0.12.0" "Profanity XMPP client"
+
+.SH NAME
+/win
+
+.SH DESCRIPTION
+Move to the specified window.
+
+.SH SYNOPSIS
+/win console
+
+.LP
+/win <num>
+
+.LP
+/win <barejid>
+
+.LP
+/win <nick>
+
+.LP
+/win <roomjid>
+
+.LP
+/win <roomoccupantjid>
+
+.LP
+/win xmlconsole
+
+.LP
+/win <plugin>
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBconsole\fR
+.RS 4
+Focus the Console window.
+.RE
+.PP
+\fB<num>\fR
+.RS 4
+Focus specified window number.
+.RE
+.PP
+\fB<barejid>\fR
+.RS 4
+Focus chat window with contact by JID if open.
+.RE
+.PP
+\fB<nick>\fR
+.RS 4
+Focus chat window with contact by nickname if open.
+.RE
+.PP
+\fB<roomjid>\fR
+.RS 4
+Focus chat room window with roomjid if open.
+.RE
+.PP
+\fB<roomoccupantjid>\fR
+.RS 4
+Focus private chat roomoccupantjid if open.
+.RE
+.PP
+\fBxmlconsole\fR
+.RS 4
+Focus the XML Console window if open.
+.RE
+.PP
+\fB<plugin>\fR
+.RS 4
+Focus the plugin window.
+.RE
+
+.SH EXAMPLES
+/win console
+
+.LP
+/win 4
+
+.LP
+/win odin@valhalla.edda
+
+.LP
+/win Eddie
+
+.LP
+/win bigroom@conference.chat.org
+
+.LP
+/win bigroom@conference.chat.org/thor
+
+.LP
+/win wikipedia
+
+.LP

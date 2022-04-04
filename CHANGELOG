@@ -1,3 +1,23 @@
+0.12.1 (2022-04-04)
+=====
+
+5 people contributed to this bugfix release: @sjaeckel, @paulfertser, @akaWolf, Max Wuttke and @jubalh.
+
+Thanks a lot to our sponsors: @mdosch, @wstrm, @LeSpocky and @jamesponddotco
+If you want to support us too: https://profanity-im.github.io/donate.html
+
+Changes:
+- Fix resetting colors when loading invalid theme (#1681)
+- Use correct color for nick of others in history (#1675)
+- Fix a segfault when uploading or downloading files (f11ad16)
+- Fix logging of text chatlogs (#1672, #1673)
+- Simplification of tab completion code (#1664)
+- Add Alt/Ctrl-arrows combinations for GNU Screen (#1667)
+- Make all existing input functions bindable from config (#1669)
+- Cleanup (#1665, #1670)
+- Improve man pages (#1666, #1668)
+- Fix race condition on resize (#1671)
+
 0.12.0 (2022-03-30)
 =====
 

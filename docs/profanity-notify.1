@@ -1,0 +1,229 @@
+.TH man 1 "2022-04-04" "0.12.0" "Profanity XMPP client"
+
+.SH NAME
+/notify
+
+.SH DESCRIPTION
+Configure desktop notifications. To configure presence update messages in the console, chat and chat room windows, see '/help presence'.
+
+.SH SYNOPSIS
+/notify chat on|off
+
+.LP
+/notify chat current on|off
+
+.LP
+/notify chat text on|off
+
+.LP
+/notify room on|off
+
+.LP
+/notify room mention on|off
+
+.LP
+/notify room mention case_sensitive|case_insensitive
+
+.LP
+/notify room mention word_whole|word_part
+
+.LP
+/notify room current on|off
+
+.LP
+/notify room text on|off
+
+.LP
+/notify room trigger add <text>
+
+.LP
+/notify room trigger remove <text>
+
+.LP
+/notify room trigger list
+
+.LP
+/notify room trigger on|off
+
+.LP
+/notify on|off
+
+.LP
+/notify mention on|off
+
+.LP
+/notify trigger on|off
+
+.LP
+/notify reset
+
+.LP
+/notify remind <seconds>
+
+.LP
+/notify typing on|off
+
+.LP
+/notify typing current on|off
+
+.LP
+/notify invite on|off
+
+.LP
+/notify sub on|off
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBchat on|off\fR
+.RS 4
+Notifications for regular chat messages.
+.RE
+.PP
+\fBchat current on|off\fR
+.RS 4
+Whether to show regular chat message notifications when the window is focused.
+.RE
+.PP
+\fBchat text on|off\fR
+.RS 4
+Show message text in regular message notifications.
+.RE
+.PP
+\fBroom on|off\fR
+.RS 4
+Notifications for all chat room messages.
+.RE
+.PP
+\fBroom mention on|off\fR
+.RS 4
+Notifications for chat room messages when your nick is mentioned.
+.RE
+.PP
+\fBroom mention case_sensitive\fR
+.RS 4
+Set room mention notifications as case sensitive.
+.RE
+.PP
+\fBroom mention case_insensitive\fR
+.RS 4
+Set room mention notifications as case insensitive.
+.RE
+.PP
+\fBroom mention word_whole\fR
+.RS 4
+Set room mention notifications only on whole word match, i.e. when nickname is not part of a larger word.
+.RE
+.PP
+\fBroom mention word_part\fR
+.RS 4
+Set room mention notifications on partial word match, i.e. nickname may be part of a larger word.
+.RE
+.PP
+\fBroom current on|off\fR
+.RS 4
+Whether to show all chat room messages notifications when the window is focused.
+.RE
+.PP
+\fBroom text on|off\fR
+.RS 4
+Show message text in chat room message notifications.
+.RE
+.PP
+\fBroom trigger add <text>\fR
+.RS 4
+Notify when specified text included in all chat room messages.
+.RE
+.PP
+\fBroom trigger remove <text>\fR
+.RS 4
+Remove chat room notification trigger.
+.RE
+.PP
+\fBroom trigger list\fR
+.RS 4
+List all chat room highlight triggers.
+.RE
+.PP
+\fBroom trigger on|off\fR
+.RS 4
+Enable or disable all chat room notification triggers.
+.RE
+.PP
+\fBon|off\fR
+.RS 4
+Override the global message setting for the current chat room.
+.RE
+.PP
+\fBmention on|off\fR
+.RS 4
+Override the global 'mention' setting for the current chat room.
+.RE
+.PP
+\fBtrigger on|off\fR
+.RS 4
+Override the global 'trigger' setting for the current chat room.
+.RE
+.PP
+\fBreset\fR
+.RS 4
+Reset to global notification settings for the current chat room.
+.RE
+.PP
+\fBremind <seconds>\fR
+.RS 4
+Notification reminder period for unread messages, use 0 to disable.
+.RE
+.PP
+\fBtyping on|off\fR
+.RS 4
+Notifications when contacts are typing.
+.RE
+.PP
+\fBtyping current on|off\fR
+.RS 4
+Whether typing notifications are triggered for the current window.
+.RE
+.PP
+\fBinvite on|off\fR
+.RS 4
+Notifications for chat room invites.
+.RE
+.PP
+\fBsub on|off\fR
+.RS 4
+Notifications for subscription requests.
+.RE
+
+.SH EXAMPLES
+/notify chat on
+
+.LP
+/notify chat text on
+
+.LP
+/notify room mention on
+
+.LP
+/notify room trigger add beer
+
+.LP
+/notify room trigger on
+
+.LP
+/notify room current off
+
+.LP
+/notify room text off
+
+.LP
+/notify remind 60
+
+.LP
+/notify typing on
+
+.LP
+/notify invite on
+
+.LP
