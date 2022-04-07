@@ -2214,8 +2214,6 @@ _get_default_string(preference_t pref)
     case PREF_OTR_POLICY:
         return "manual";
     case PREF_STATUSES_CONSOLE:
-    case PREF_STATUSES_CHAT:
-    case PREF_STATUSES_MUC:
         return "all";
     case PREF_ROSTER_BY:
         return "presence";
@@ -2228,6 +2226,8 @@ _get_default_string(preference_t pref)
     case PREF_ROSTER_ROOMS_POS:
         return "last";
     case PREF_ROSTER_ROOMS_BY:
+    case PREF_STATUSES_CHAT:
+    case PREF_STATUSES_MUC:
         return "none";
     case PREF_ROSTER_ROOMS_USE_AS_NAME:
         return "name";
