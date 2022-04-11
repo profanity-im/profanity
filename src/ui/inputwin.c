@@ -328,7 +328,30 @@ _inp_write(char* line, int offset)
     getyx(inp_win, y, x);
     col += x;
 
-    waddstr(inp_win, line);
+    for (size_t i = 0; line[i] != '\0'; i++) {
+        char* c = &line[i];
+        char retc[MB_CUR_MAX];
+
+        size_t ch_len = mbrlen(c, MB_CUR_MAX, NULL);
+        if ((ch_len == (size_t)-2) || (ch_len == (size_t)-1)) {
+            waddch(inp_win, ' ');
+            continue;
+        }
+
+        if (line[i] == '\n') {
+            c = retc;
+            ch_len = wctomb(retc, L'\u23ce'); /* return symbol */
+            if (ch_len == -1) {               /* not representable */
+                retc[0] = '\\';
+                ch_len = 1;
+            }
+        } else {
+            i += ch_len - 1;
+        }
+
+        waddnstr(inp_win, c, ch_len);
+    }
+
     wmove(inp_win, 0, col);
     _inp_win_handle_scroll();
 
