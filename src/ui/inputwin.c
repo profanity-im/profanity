@@ -95,6 +95,7 @@ static int _inp_edited(const wint_t ch);
 static void _inp_win_handle_scroll(void);
 static int _inp_offset_to_col(char* str, int offset);
 static void _inp_write(char* line, int offset);
+static void _inp_redisplay(void);
 
 static void _inp_rl_addfuncs(void);
 static int _inp_rl_getc(FILE* stream);
@@ -149,6 +150,7 @@ create_input_window(void)
     rl_readline_name = "profanity";
     _inp_rl_addfuncs();
     rl_getc_function = _inp_rl_getc;
+    rl_redisplay_function = _inp_redisplay;
     rl_startup_hook = _inp_rl_startup_hook;
     rl_callback_handler_install(NULL, _inp_rl_linehandler);
 
@@ -190,9 +192,6 @@ inp_readline(void)
         }
 
         ui_reset_idle_time();
-        if (!get_password) {
-            _inp_write(rl_line_buffer, rl_point);
-        }
         inp_nonblocking(TRUE);
     } else {
         inp_nonblocking(FALSE);
@@ -320,9 +319,39 @@ _inp_win_update_virtual(void)
 static void
 _inp_write(char* line, int offset)
 {
+    int x;
+    int y __attribute__((unused));
     int col = _inp_offset_to_col(line, offset);
     werase(inp_win);
-    waddstr(inp_win, line);
+
+    waddstr(inp_win, rl_display_prompt);
+    getyx(inp_win, y, x);
+    col += x;
+
+    for (size_t i = 0; line[i] != '\0'; i++) {
+        char* c = &line[i];
+        char retc[MB_CUR_MAX];
+
+        size_t ch_len = mbrlen(c, MB_CUR_MAX, NULL);
+        if ((ch_len == (size_t)-2) || (ch_len == (size_t)-1)) {
+            waddch(inp_win, ' ');
+            continue;
+        }
+
+        if (line[i] == '\n') {
+            c = retc;
+            ch_len = wctomb(retc, L'\u23ce'); /* return symbol */
+            if (ch_len == -1) {               /* not representable */
+                retc[0] = '\\';
+                ch_len = 1;
+            }
+        } else {
+            i += ch_len - 1;
+        }
+
+        waddnstr(inp_win, c, ch_len);
+    }
+
     wmove(inp_win, 0, col);
     _inp_win_handle_scroll();
 
@@ -576,6 +605,14 @@ _inp_rl_getc(FILE* stream)
         }
     }
     return ch;
+}
+
+static void
+_inp_redisplay(void)
+{
+    if (!get_password) {
+        _inp_write(rl_line_buffer, rl_point);
+    }
 }
 
 static int

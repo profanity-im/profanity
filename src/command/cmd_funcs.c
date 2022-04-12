@@ -9511,13 +9511,6 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_editor(ProfWin* window, const char* const command, gchar** args)
 {
-    jabber_conn_status_t conn_status = connection_get_status();
-
-    if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are currently not connected.");
-        return TRUE;
-    }
-
     gchar* message = NULL;
 
     if (get_message_from_editor(NULL, &message)) {
