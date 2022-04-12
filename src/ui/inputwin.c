@@ -95,6 +95,7 @@ static int _inp_edited(const wint_t ch);
 static void _inp_win_handle_scroll(void);
 static int _inp_offset_to_col(char* str, int offset);
 static void _inp_write(char* line, int offset);
+static void _inp_redisplay(void);
 
 static void _inp_rl_addfuncs(void);
 static int _inp_rl_getc(FILE* stream);
@@ -149,6 +150,7 @@ create_input_window(void)
     rl_readline_name = "profanity";
     _inp_rl_addfuncs();
     rl_getc_function = _inp_rl_getc;
+    rl_redisplay_function = _inp_redisplay;
     rl_startup_hook = _inp_rl_startup_hook;
     rl_callback_handler_install(NULL, _inp_rl_linehandler);
 
@@ -190,9 +192,6 @@ inp_readline(void)
         }
 
         ui_reset_idle_time();
-        if (!get_password) {
-            _inp_write(rl_line_buffer, rl_point);
-        }
         inp_nonblocking(TRUE);
     } else {
         inp_nonblocking(FALSE);
@@ -583,6 +582,14 @@ _inp_rl_getc(FILE* stream)
         }
     }
     return ch;
+}
+
+static void
+_inp_redisplay(void)
+{
+    if (!get_password) {
+        _inp_write(rl_line_buffer, rl_point);
+    }
 }
 
 static int
