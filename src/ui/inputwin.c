@@ -320,8 +320,15 @@ _inp_win_update_virtual(void)
 static void
 _inp_write(char* line, int offset)
 {
+    int x;
+    int y __attribute__((unused));
     int col = _inp_offset_to_col(line, offset);
     werase(inp_win);
+
+    waddstr(inp_win, rl_display_prompt);
+    getyx(inp_win, y, x);
+    col += x;
+
     waddstr(inp_win, line);
     wmove(inp_win, 0, col);
     _inp_win_handle_scroll();
