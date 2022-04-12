@@ -1483,7 +1483,7 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
                 xmpp_stanza_t* b = xmpp_stanza_get_child_by_name(p, "body");
                 if (!b) {
                     log_warning("OX Stanza - no body");
-                    message->plain = "OX error: No paylod body found";
+                    message->plain = "OX error: No payload body found";
                     return;
                 }
                 message->plain = xmpp_stanza_get_text(b);
