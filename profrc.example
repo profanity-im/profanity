@@ -35,6 +35,7 @@ typing=true
 typing.current=false
 message.text=true
 room.text=true
+room.offline=true
 
 [alias]
 colour=/color

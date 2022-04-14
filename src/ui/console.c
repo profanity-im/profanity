@@ -1717,6 +1717,11 @@ cons_notify_setting(void)
     else
         cons_show("Room mention (/notify room)         : OFF");
 
+    if (prefs_get_boolean(PREF_NOTIFY_ROOM_OFFLINE))
+        cons_show("Room offline messages (/notify room): ON");
+    else
+        cons_show("Room offline messages (/notify room): OFF");
+
     if (prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE))
         cons_show("Room mention case (/notify room)    : Case sensitive");
     else
