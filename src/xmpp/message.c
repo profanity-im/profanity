@@ -1458,10 +1458,6 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
 
     message_free(message);
 }
-
-/*!
- * @brief Handle incoming XMMP-OX chat message.
- */
 static void
 _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_mam)
 {
