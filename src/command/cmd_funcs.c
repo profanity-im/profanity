@@ -7503,11 +7503,6 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
 
 #ifdef HAVE_LIBGPGME
 
-/*!
- * \brief Command for XEP-0373: OpenPGP for XMPP
- *
- */
-
 gboolean
 cmd_ox(ProfWin* window, const char* const command, gchar** args)
 {
@@ -7700,7 +7695,7 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
             cons_show("JID and OpenPGP Key ID are required");
         }
     } else {
-        cons_show("OX not implemented");
+        cons_bad_cmd_usage(command);
     }
     return TRUE;
 }
