@@ -7503,11 +7503,6 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
 
 #ifdef HAVE_LIBGPGME
 
-/*!
- * \brief Command for XEP-0373: OpenPGP for XMPP
- *
- */
-
 gboolean
 cmd_ox(ProfWin* window, const char* const command, gchar** args)
 {
