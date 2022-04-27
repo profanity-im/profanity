@@ -7695,7 +7695,7 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
             cons_show("JID and OpenPGP Key ID are required");
         }
     } else {
-        cons_show("OX not implemented");
+        cons_bad_cmd_usage(command);
     }
     return TRUE;
 }
