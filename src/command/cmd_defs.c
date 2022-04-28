@@ -2417,22 +2417,20 @@ static struct cmd_t command_defs[] = {
       CMD_MAINFUNC(cmd_stamp)
       CMD_TAGS(
               CMD_TAG_UI)
-      CMD_SYN(
-              "/stamp outgoing <string>",
+      CMD_SYN("/stamp outgoing <string>",
               "/stamp incoming <string>",
               "/stamp unset outgoing|incoming")
-      CMD_DESC(
-              "Set chat window stamp values. "
-              "Current format of single log-line in the chat window next: \"<timestamp> <encryption sign> <stamp> <message>\" "
-              "where <stamp> is \"me:\" for incoming messages or \"username@server/resource\" for outcoming messages. "
-              "This command allows to change <stamp> value.")
-      CMD_ARGS(
-              { "outgoing", "Set outgoing messages stamp" },
-              { "incoming", "Set incoming stamp"},
-              { "unset outgoing|incoming", "unset stamp"})
+      CMD_DESC("Set chat window stamp. "
+               "The format of line in the chat window is: \"<timestamp> <encryption sign> <stamp> <message>\" "
+               "where <stamp> is \"me:\" for incoming messages or \"username@server/resource\" for outgoing messages. "
+               "This command allows to change <stamp> value.")
+      CMD_ARGS({ "outgoing", "Set outgoing stamp" },
+               { "incoming", "Set incoming stamp"},
+               { "unset outgoing|incoming", "Use the defaults"})
       CMD_EXAMPLES(
               "/stamp outgoing -->",
-              "/stamp incoming <--")
+              "/stamp incoming <--",
+              "/stamp unset incoming")
     },
 
     { "/avatar",
