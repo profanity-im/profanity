@@ -1436,6 +1436,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
     autocomplete_reset(pgp_sendfile_ac);
+    autocomplete_reset(ox_ac);
 #endif
     autocomplete_reset(tls_ac);
     autocomplete_reset(titlebar_ac);
@@ -1597,6 +1598,9 @@ cmd_ac_uninit(void)
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
     autocomplete_free(pgp_sendfile_ac);
+    autocomplete_free(ox_ac);
+    autocomplete_free(ox_log_ac);
+    autocomplete_free(ox_sendfile_ac);
 #endif
     autocomplete_free(tls_ac);
     autocomplete_free(titlebar_ac);
@@ -2568,6 +2572,11 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
     char* found = NULL;
 
+    found = autocomplete_param_with_ac(input, "/ox", ox_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status == JABBER_CONNECTED) {
@@ -2601,9 +2610,7 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         return cmd_ac_complete_filepath(input, "/ox announce", previous);
     }
 
-    found = autocomplete_param_with_ac(input, "/ox", ox_ac, TRUE, previous);
-
-    return found;
+    return NULL;
 }
 #endif
 
