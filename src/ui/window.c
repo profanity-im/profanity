@@ -1248,7 +1248,7 @@ win_print_outgoing(ProfWin* window, const char* show_char, const char* const id,
     if (replace_id) {
         _win_correct(window, message, id, replace_id, myjid);
     } else {
-        char* outgoing_str = prefs_get_string(PREF_OUTGOING_STR);
+        char* outgoing_str = prefs_get_string(PREF_OUTGOING_STAMP);
         _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, outgoing_str, myjid, id, "%s", message);
     }
 

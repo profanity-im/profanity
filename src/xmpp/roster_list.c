@@ -199,7 +199,7 @@ roster_get_msg_display_name(const char* const barejid, const char* const resourc
 {
     assert(roster != NULL);
 
-    char* incoming_str = prefs_get_string(PREF_INCOMING_STR);
+    char* incoming_str = prefs_get_string(PREF_INCOMING_STAMP);
 
     if (incoming_str) {
         return incoming_str;

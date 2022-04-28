@@ -176,8 +176,8 @@ typedef enum {
     PREF_URL_SAVE_CMD,
     PREF_COMPOSE_EDITOR,
     PREF_SILENCE_NON_ROSTER,
-    PREF_OUTGOING_STR,
-    PREF_INCOMING_STR,
+    PREF_OUTGOING_STAMP,
+    PREF_INCOMING_STAMP,
 } preference_t;
 
 typedef struct prof_alias_t
