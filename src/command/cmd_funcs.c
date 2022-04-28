@@ -9028,20 +9028,20 @@ cmd_stamp(ProfWin* window, const char* const command, gchar** args)
             cons_show("The outgoing stamp is: %s", def);
             free(def);
         } else {
-            cons_show("No outgoing stamp.");
+            cons_show("The default outgoing stamp is used.");
         }
         def = prefs_get_string(PREF_INCOMING_STAMP);
         if (def) {
             cons_show("The incoming stamp is: %s", def);
             free(def);
         } else {
-            cons_show("No incoming stamp.");
+            cons_show("The default incoming stamp is used.");
         }
         return TRUE;
     }
 
     if (g_strv_length(args) == 1) {
-        cons_show("Wrong usage: need a parameter.");
+        cons_bad_cmd_usage(command);
         return TRUE;
     }
 
