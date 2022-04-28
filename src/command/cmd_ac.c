@@ -876,7 +876,6 @@ cmd_ac_init(void)
     autocomplete_add(pgp_sendfile_ac, "on");
     autocomplete_add(pgp_sendfile_ac, "off");
 
-    // XEP-0373: OX
     ox_ac = autocomplete_new();
     autocomplete_add(ox_ac, "keys");
     autocomplete_add(ox_ac, "contacts");
@@ -2576,10 +2575,13 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         if (found) {
             return found;
         }
-    }
 
-    if (conn_status == JABBER_CONNECTED) {
         found = autocomplete_param_with_func(input, "/ox discover", roster_contact_autocomplete, previous, NULL);
+        if (found) {
+            return found;
+        }
+
+        found = autocomplete_param_with_func(input, "/ox setkey", roster_barejid_autocomplete, previous, NULL);
         if (found) {
             return found;
         }
@@ -2597,13 +2599,6 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 
     if (strncmp(input, "/ox announce ", 13) == 0) {
         return cmd_ac_complete_filepath(input, "/ox announce", previous);
-    }
-
-    if (conn_status == JABBER_CONNECTED) {
-        found = autocomplete_param_with_func(input, "/ox setkey", roster_barejid_autocomplete, previous, NULL);
-        if (found) {
-            return found;
-        }
     }
 
     found = autocomplete_param_with_ac(input, "/ox", ox_ac, TRUE, previous);
