@@ -146,6 +146,7 @@ static Autocomplete notify_chat_ac;
 static Autocomplete notify_room_ac;
 static Autocomplete notify_typing_ac;
 static Autocomplete notify_mention_ac;
+static Autocomplete notify_offline_ac;
 static Autocomplete notify_trigger_ac;
 static Autocomplete prefs_ac;
 static Autocomplete sub_ac;
@@ -344,6 +345,7 @@ cmd_ac_init(void)
     autocomplete_add(notify_room_ac, "on");
     autocomplete_add(notify_room_ac, "off");
     autocomplete_add(notify_room_ac, "mention");
+    autocomplete_add(notify_room_ac, "offline");
     autocomplete_add(notify_room_ac, "current");
     autocomplete_add(notify_room_ac, "text");
     autocomplete_add(notify_room_ac, "trigger");
@@ -360,6 +362,10 @@ cmd_ac_init(void)
     autocomplete_add(notify_mention_ac, "case_insensitive");
     autocomplete_add(notify_mention_ac, "word_whole");
     autocomplete_add(notify_mention_ac, "word_part");
+
+    notify_offline_ac = autocomplete_new();
+    autocomplete_add(notify_offline_ac, "on");
+    autocomplete_add(notify_offline_ac, "off");
 
     notify_trigger_ac = autocomplete_new();
     autocomplete_add(notify_trigger_ac, "add");
@@ -2337,6 +2343,11 @@ _notify_autocomplete(ProfWin* window, const char* const input, gboolean previous
     }
 
     result = autocomplete_param_with_ac(input, "/notify room mention", notify_mention_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/notify room offline", notify_offline_ac, TRUE, previous);
     if (result) {
         return result;
     }

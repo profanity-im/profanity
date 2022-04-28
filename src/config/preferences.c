@@ -1828,6 +1828,7 @@ _get_group(preference_t pref)
     case PREF_NOTIFY_CHAT_TEXT:
     case PREF_NOTIFY_ROOM:
     case PREF_NOTIFY_ROOM_MENTION:
+    case PREF_NOTIFY_ROOM_OFFLINE:
     case PREF_NOTIFY_ROOM_TRIGGER:
     case PREF_NOTIFY_ROOM_CURRENT:
     case PREF_NOTIFY_ROOM_TEXT:
@@ -1964,6 +1965,8 @@ _get_key(preference_t pref)
         return "room.trigger";
     case PREF_NOTIFY_ROOM_MENTION:
         return "room.mention";
+    case PREF_NOTIFY_ROOM_OFFLINE:
+        return "room.offline";
     case PREF_NOTIFY_ROOM_CURRENT:
         return "room.current";
     case PREF_NOTIFY_ROOM_TEXT:

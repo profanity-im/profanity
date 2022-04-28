@@ -55,7 +55,7 @@ void sv_ev_delayed_private_message(ProfMessage* message);
 void sv_ev_typing(char* barejid, char* resource);
 void sv_ev_paused(char* barejid, char* resource);
 void sv_ev_inactive(char* barejid, char* resource);
-void sv_ev_activity(char* barejid, char* resource, gboolean send_states);
+void sv_ev_activity(const char* barejid, const char* resource, gboolean send_states);
 void sv_ev_gone(const char* const barejid, const char* const resource);
 void sv_ev_subscription(const char* from, jabber_subscr_t type);
 void sv_ev_message_receipt(const char* const barejid, const char* const id);

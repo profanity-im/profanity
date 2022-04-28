@@ -176,6 +176,7 @@ typedef enum {
     PREF_URL_SAVE_CMD,
     PREF_COMPOSE_EDITOR,
     PREF_SILENCE_NON_ROSTER,
+    PREF_NOTIFY_ROOM_OFFLINE,
 } preference_t;
 
 typedef struct prof_alias_t

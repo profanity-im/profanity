@@ -50,6 +50,7 @@
 #include "config/cafile.h"
 #include "config/scripts.h"
 #include "event/client_events.h"
+#include "event/server_events.h"
 #include "event/common.h"
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
@@ -272,6 +273,33 @@ sv_ev_room_subject(const char* const room, const char* const nick, const char* c
 void
 sv_ev_room_history(ProfMessage* message)
 {
+    if (prefs_get_boolean(PREF_NOTIFY_ROOM_OFFLINE)) {
+        // check if this message was sent while we were offline.
+        // if so, treat it as a new message rather than a history event.
+        char* account_name = session_get_account_name();
+        char* last_activity = accounts_get_last_activity(account_name);
+        int msg_is_new = 0;
+
+        if (last_activity) {
+            GTimeVal lasttv;
+
+            if (g_time_val_from_iso8601(last_activity, &lasttv)) {
+                GDateTime* lastdt = g_date_time_new_from_timeval_utc(&lasttv);
+                GDateTime* msgdt = message->timestamp;
+                GTimeSpan time_diff = g_date_time_difference(msgdt, lastdt);
+
+                msg_is_new = (time_diff > 0);
+                g_date_time_unref(lastdt);
+            }
+            g_free(last_activity);
+
+            if (msg_is_new) {
+                sv_ev_room_message(message);
+                return;
+            }
+        }
+    }
+
     ProfMucWin* mucwin = wins_get_muc(message->from_jid->barejid);
     if (mucwin) {
         // if this is the first successful connection

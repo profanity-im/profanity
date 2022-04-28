@@ -5775,6 +5775,16 @@ cmd_notify(ProfWin* window, const char* const command, gchar** args)
             } else {
                 cons_show("Usage: /notify room mention on|off");
             }
+        } else if (g_strcmp0(args[1], "offline") == 0) {
+            if (g_strcmp0(args[2], "on") == 0) {
+                cons_show("Room notifications for offline messages enabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_OFFLINE, TRUE);
+            } else if (g_strcmp0(args[2], "off") == 0) {
+                cons_show("Room notifications for offline messages disabled.");
+                prefs_set_boolean(PREF_NOTIFY_ROOM_OFFLINE, FALSE);
+            } else {
+                cons_show("Usage: /notify room offline on|off");
+            }
         } else if (g_strcmp0(args[1], "current") == 0) {
             if (g_strcmp0(args[2], "on") == 0) {
                 cons_show("Current window chat room message notifications enabled.");
