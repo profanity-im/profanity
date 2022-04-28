@@ -95,6 +95,7 @@ static int _inp_edited(const wint_t ch);
 static void _inp_win_handle_scroll(void);
 static int _inp_offset_to_col(char* str, int offset);
 static void _inp_write(char* line, int offset);
+static void _inp_redisplay(void);
 
 static void _inp_rl_addfuncs(void);
 static int _inp_rl_getc(FILE* stream);
@@ -149,6 +150,7 @@ create_input_window(void)
     rl_readline_name = "profanity";
     _inp_rl_addfuncs();
     rl_getc_function = _inp_rl_getc;
+    rl_redisplay_function = _inp_redisplay;
     rl_startup_hook = _inp_rl_startup_hook;
     rl_callback_handler_install(NULL, _inp_rl_linehandler);
 
@@ -190,9 +192,6 @@ inp_readline(void)
         }
 
         ui_reset_idle_time();
-        if (!get_password) {
-            _inp_write(rl_line_buffer, rl_point);
-        }
         inp_nonblocking(TRUE);
     } else {
         inp_nonblocking(FALSE);
@@ -320,9 +319,39 @@ _inp_win_update_virtual(void)
 static void
 _inp_write(char* line, int offset)
 {
+    int x;
+    int y __attribute__((unused));
     int col = _inp_offset_to_col(line, offset);
     werase(inp_win);
-    waddstr(inp_win, line);
+
+    waddstr(inp_win, rl_display_prompt);
+    getyx(inp_win, y, x);
+    col += x;
+
+    for (size_t i = 0; line[i] != '\0'; i++) {
+        char* c = &line[i];
+        char retc[MB_CUR_MAX];
+
+        size_t ch_len = mbrlen(c, MB_CUR_MAX, NULL);
+        if ((ch_len == (size_t)-2) || (ch_len == (size_t)-1)) {
+            waddch(inp_win, ' ');
+            continue;
+        }
+
+        if (line[i] == '\n') {
+            c = retc;
+            ch_len = wctomb(retc, L'\u23ce'); /* return symbol */
+            if (ch_len == -1) {               /* not representable */
+                retc[0] = '\\';
+                ch_len = 1;
+            }
+        } else {
+            i += ch_len - 1;
+        }
+
+        waddnstr(inp_win, c, ch_len);
+    }
+
     wmove(inp_win, 0, col);
     _inp_win_handle_scroll();
 
@@ -373,6 +402,10 @@ _inp_offset_to_col(char* str, int offset)
     while (i < offset && str[i] != '\0') {
         gunichar uni = g_utf8_get_char(&str[i]);
         size_t ch_len = mbrlen(&str[i], MB_CUR_MAX, NULL);
+        if ((ch_len == (size_t)-2) || (ch_len == (size_t)-1)) {
+            i++;
+            continue;
+        }
         i += ch_len;
         col++;
         if (g_unichar_iswide(uni)) {
@@ -430,13 +463,18 @@ _inp_rl_addfuncs(void)
     rl_add_funmap_entry("prof_win_prev", _inp_rl_win_prev_handler);
     rl_add_funmap_entry("prof_win_next", _inp_rl_win_next_handler);
     rl_add_funmap_entry("prof_win_next_unread", _inp_rl_win_next_unread_handler);
+    rl_add_funmap_entry("prof_win_set_attention", _inp_rl_win_attention_handler);
+    rl_add_funmap_entry("prof_win_attention_next", _inp_rl_win_attention_next_handler);
     rl_add_funmap_entry("prof_win_pageup", _inp_rl_win_pageup_handler);
     rl_add_funmap_entry("prof_win_pagedown", _inp_rl_win_pagedown_handler);
     rl_add_funmap_entry("prof_subwin_pageup", _inp_rl_subwin_pageup_handler);
     rl_add_funmap_entry("prof_subwin_pagedown", _inp_rl_subwin_pagedown_handler);
+    rl_add_funmap_entry("prof_complete_next", _inp_rl_tab_handler);
+    rl_add_funmap_entry("prof_complete_prev", _inp_rl_shift_tab_handler);
     rl_add_funmap_entry("prof_win_clear", _inp_rl_win_clear_handler);
     rl_add_funmap_entry("prof_win_close", _inp_rl_win_close_handler);
     rl_add_funmap_entry("prof_send_to_editor", _inp_rl_send_to_editor);
+    rl_add_funmap_entry("prof_cut_to_history", _inp_rl_down_arrow_handler);
 }
 
 // Readline callbacks
@@ -479,10 +517,12 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\e[1;9D", _inp_rl_win_prev_handler);
     rl_bind_keyseq("\\e[1;3D", _inp_rl_win_prev_handler);
     rl_bind_keyseq("\\e\\e[D", _inp_rl_win_prev_handler);
+    rl_bind_keyseq("\\e\\eOD", _inp_rl_win_prev_handler);
 
     rl_bind_keyseq("\\e[1;9C", _inp_rl_win_next_handler);
     rl_bind_keyseq("\\e[1;3C", _inp_rl_win_next_handler);
     rl_bind_keyseq("\\e\\e[C", _inp_rl_win_next_handler);
+    rl_bind_keyseq("\\e\\eOC", _inp_rl_win_next_handler);
 
     rl_bind_keyseq("\\ea", _inp_rl_win_next_unread_handler);
     rl_bind_keyseq("\\ev", _inp_rl_win_attention_handler);
@@ -506,6 +546,7 @@ _inp_rl_startup_hook(void)
     rl_bind_keyseq("\\e[Z", _inp_rl_shift_tab_handler);
 
     rl_bind_keyseq("\\e[1;5B", _inp_rl_down_arrow_handler); // ctrl+arrow down
+    rl_bind_keyseq("\\eOb", _inp_rl_down_arrow_handler);
 
     // unbind unwanted mappings
     rl_bind_keyseq("\\e=", NULL);
@@ -566,6 +607,14 @@ _inp_rl_getc(FILE* stream)
     return ch;
 }
 
+static void
+_inp_redisplay(void)
+{
+    if (!get_password) {
+        _inp_write(rl_line_buffer, rl_point);
+    }
+}
+
 static int
 _inp_rl_win_clear_handler(int count, int key)
 {
@@ -584,7 +633,7 @@ _inp_rl_win_close_handler(int count, int key)
 }
 
 static int
-_inp_rl_tab_handler(int count, int key)
+_inp_rl_tab_com_handler(int count, int key, gboolean previous)
 {
     if (rl_point != rl_end || !rl_line_buffer) {
         return 0;
@@ -592,7 +641,7 @@ _inp_rl_tab_handler(int count, int key)
 
     if (strncmp(rl_line_buffer, "/", 1) == 0) {
         ProfWin* window = wins_get_current();
-        char* result = cmd_ac_complete(window, rl_line_buffer, FALSE);
+        char* result = cmd_ac_complete(window, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -603,7 +652,7 @@ _inp_rl_tab_handler(int count, int key)
 
     if (strncmp(rl_line_buffer, ">", 1) == 0) {
         ProfWin* window = wins_get_current();
-        char* result = win_quote_autocomplete(window, rl_line_buffer, FALSE);
+        char* result = win_quote_autocomplete(window, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -614,7 +663,7 @@ _inp_rl_tab_handler(int count, int key)
 
     ProfWin* current = wins_get_current();
     if (current->type == WIN_MUC) {
-        char* result = muc_autocomplete(current, rl_line_buffer, FALSE);
+        char* result = muc_autocomplete(current, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -626,45 +675,15 @@ _inp_rl_tab_handler(int count, int key)
 }
 
 static int
+_inp_rl_tab_handler(int count, int key)
+{
+    return _inp_rl_tab_com_handler(count, key, FALSE);
+}
+
+static int
 _inp_rl_shift_tab_handler(int count, int key)
 {
-    if (rl_point != rl_end || !rl_line_buffer) {
-        return 0;
-    }
-
-    if (strncmp(rl_line_buffer, "/", 1) == 0) {
-        ProfWin* window = wins_get_current();
-        char* result = cmd_ac_complete(window, rl_line_buffer, TRUE);
-        if (result) {
-            rl_replace_line(result, 1);
-            rl_point = rl_end;
-            free(result);
-            return 0;
-        }
-    }
-
-    if (strncmp(rl_line_buffer, ">", 1) == 0) {
-        ProfWin* window = wins_get_current();
-        char* result = win_quote_autocomplete(window, rl_line_buffer, TRUE);
-        if (result) {
-            rl_replace_line(result, 1);
-            rl_point = rl_end;
-            free(result);
-            return 0;
-        }
-    }
-
-    ProfWin* current = wins_get_current();
-    if (current->type == WIN_MUC) {
-        char* result = muc_autocomplete(current, rl_line_buffer, TRUE);
-        if (result) {
-            rl_replace_line(result, 1);
-            rl_point = rl_end;
-            free(result);
-        }
-    }
-
-    return 0;
+    return _inp_rl_tab_com_handler(count, key, TRUE);
 }
 
 static void

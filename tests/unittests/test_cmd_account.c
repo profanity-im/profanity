@@ -571,7 +571,8 @@ cmd_account_show_message_for_invalid_otr_policy(void** state)
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
 
-    expect_cons_show("OTR policy must be one of: manual, opportunistic or always.");
+    expect_cons_show("Invalid OTR policy: 'bad_otr_policy'");
+    expect_cons_show("OTR policy must be one of: 'manual', 'opportunistic' or 'always'.");
 
     gboolean result = cmd_account_set(NULL, CMD_ACCOUNT, args);
     assert_true(result);

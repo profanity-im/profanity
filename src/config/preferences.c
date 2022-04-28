@@ -1830,6 +1830,7 @@ _get_group(preference_t pref)
     case PREF_NOTIFY_CHAT_TEXT:
     case PREF_NOTIFY_ROOM:
     case PREF_NOTIFY_ROOM_MENTION:
+    case PREF_NOTIFY_ROOM_OFFLINE:
     case PREF_NOTIFY_ROOM_TRIGGER:
     case PREF_NOTIFY_ROOM_CURRENT:
     case PREF_NOTIFY_ROOM_TEXT:
@@ -1966,6 +1967,8 @@ _get_key(preference_t pref)
         return "room.trigger";
     case PREF_NOTIFY_ROOM_MENTION:
         return "room.mention";
+    case PREF_NOTIFY_ROOM_OFFLINE:
+        return "room.offline";
     case PREF_NOTIFY_ROOM_CURRENT:
         return "room.current";
     case PREF_NOTIFY_ROOM_TEXT:
@@ -2220,8 +2223,6 @@ _get_default_string(preference_t pref)
     case PREF_OTR_POLICY:
         return "manual";
     case PREF_STATUSES_CONSOLE:
-    case PREF_STATUSES_CHAT:
-    case PREF_STATUSES_MUC:
         return "all";
     case PREF_ROSTER_BY:
         return "presence";
@@ -2234,6 +2235,8 @@ _get_default_string(preference_t pref)
     case PREF_ROSTER_ROOMS_POS:
         return "last";
     case PREF_ROSTER_ROOMS_BY:
+    case PREF_STATUSES_CHAT:
+    case PREF_STATUSES_MUC:
         return "none";
     case PREF_ROSTER_ROOMS_USE_AS_NAME:
         return "name";
@@ -2283,7 +2286,8 @@ _get_default_string(preference_t pref)
         return "xdg-open";
     case PREF_URL_OPEN_CMD:
         return "xdg-open %u";
-    case PREF_COMPOSE_EDITOR: {
+    case PREF_COMPOSE_EDITOR:
+    {
         gchar* editor = getenv("EDITOR");
         return editor ? editor : "vim";
     }

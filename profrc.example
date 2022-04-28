@@ -3,7 +3,7 @@ splash=true
 intype=true
 beep=false
 statuses.muc=all
-theme=boothj5
+theme=default
 history=true
 titlebar=true
 mouse=false
@@ -35,8 +35,11 @@ typing=true
 typing.current=false
 message.text=true
 room.text=true
+room.offline=true
 
 [alias]
+colour=/color
+topic=/subject
 friends=/who online friends
 bob=/msg bob@server.org hey wassup?
 

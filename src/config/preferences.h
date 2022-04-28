@@ -178,6 +178,7 @@ typedef enum {
     PREF_SILENCE_NON_ROSTER,
     PREF_OUTGOING_STAMP,
     PREF_INCOMING_STAMP,
+    PREF_NOTIFY_ROOM_OFFLINE,
 } preference_t;
 
 typedef struct prof_alias_t

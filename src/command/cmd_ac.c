@@ -146,6 +146,7 @@ static Autocomplete notify_chat_ac;
 static Autocomplete notify_room_ac;
 static Autocomplete notify_typing_ac;
 static Autocomplete notify_mention_ac;
+static Autocomplete notify_offline_ac;
 static Autocomplete notify_trigger_ac;
 static Autocomplete prefs_ac;
 static Autocomplete sub_ac;
@@ -344,6 +345,7 @@ cmd_ac_init(void)
     autocomplete_add(notify_room_ac, "on");
     autocomplete_add(notify_room_ac, "off");
     autocomplete_add(notify_room_ac, "mention");
+    autocomplete_add(notify_room_ac, "offline");
     autocomplete_add(notify_room_ac, "current");
     autocomplete_add(notify_room_ac, "text");
     autocomplete_add(notify_room_ac, "trigger");
@@ -360,6 +362,10 @@ cmd_ac_init(void)
     autocomplete_add(notify_mention_ac, "case_insensitive");
     autocomplete_add(notify_mention_ac, "word_whole");
     autocomplete_add(notify_mention_ac, "word_part");
+
+    notify_offline_ac = autocomplete_new();
+    autocomplete_add(notify_offline_ac, "on");
+    autocomplete_add(notify_offline_ac, "off");
 
     notify_trigger_ac = autocomplete_new();
     autocomplete_add(notify_trigger_ac, "add");
@@ -876,7 +882,6 @@ cmd_ac_init(void)
     autocomplete_add(pgp_sendfile_ac, "on");
     autocomplete_add(pgp_sendfile_ac, "off");
 
-    // XEP-0373: OX
     ox_ac = autocomplete_new();
     autocomplete_add(ox_ac, "keys");
     autocomplete_add(ox_ac, "contacts");
@@ -1437,6 +1442,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
     autocomplete_reset(pgp_sendfile_ac);
+    autocomplete_reset(ox_ac);
 #endif
     autocomplete_reset(tls_ac);
     autocomplete_reset(titlebar_ac);
@@ -1598,6 +1604,9 @@ cmd_ac_uninit(void)
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
     autocomplete_free(pgp_sendfile_ac);
+    autocomplete_free(ox_ac);
+    autocomplete_free(ox_log_ac);
+    autocomplete_free(ox_sendfile_ac);
 #endif
     autocomplete_free(tls_ac);
     autocomplete_free(titlebar_ac);
@@ -2338,6 +2347,11 @@ _notify_autocomplete(ProfWin* window, const char* const input, gboolean previous
         return result;
     }
 
+    result = autocomplete_param_with_ac(input, "/notify room offline", notify_offline_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
     result = autocomplete_param_with_ac(input, "/notify room trigger", notify_trigger_ac, TRUE, previous);
     if (result) {
         return result;
@@ -2569,6 +2583,11 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
     char* found = NULL;
 
+    found = autocomplete_param_with_ac(input, "/ox", ox_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status == JABBER_CONNECTED) {
@@ -2576,10 +2595,13 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         if (found) {
             return found;
         }
-    }
 
-    if (conn_status == JABBER_CONNECTED) {
         found = autocomplete_param_with_func(input, "/ox discover", roster_contact_autocomplete, previous, NULL);
+        if (found) {
+            return found;
+        }
+
+        found = autocomplete_param_with_func(input, "/ox setkey", roster_barejid_autocomplete, previous, NULL);
         if (found) {
             return found;
         }
@@ -2599,16 +2621,7 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         return cmd_ac_complete_filepath(input, "/ox announce", previous);
     }
 
-    if (conn_status == JABBER_CONNECTED) {
-        found = autocomplete_param_with_func(input, "/ox setkey", roster_barejid_autocomplete, previous, NULL);
-        if (found) {
-            return found;
-        }
-    }
-
-    found = autocomplete_param_with_ac(input, "/ox", ox_ac, TRUE, previous);
-
-    return found;
+    return NULL;
 }
 #endif
 

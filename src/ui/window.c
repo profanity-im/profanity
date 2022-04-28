@@ -415,6 +415,7 @@ win_get_last_sent_message(ProfWin* window)
         ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         last_message = mucwin->last_message;
+        break;
     }
     default:
         break;
@@ -1270,6 +1271,7 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
         display_name = strdup("me");
     } else {
         display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
+        flags = NO_ME;
     }
 
     jid_destroy(jidp);
@@ -1579,7 +1581,7 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
 
         char* color_pref = prefs_get_string(PREF_COLOR_NICK);
         if (color_pref != NULL && (strcmp(color_pref, "false") != 0)) {
-            if (flags & NO_ME || (!(flags & NO_ME) && prefs_get_boolean(PREF_COLOR_NICK_OWN))) {
+            if ((flags & NO_ME) || (!(flags & NO_ME) && prefs_get_boolean(PREF_COLOR_NICK_OWN))) {
                 colour = theme_hash_attrs(from);
             }
         }
@@ -2034,8 +2036,8 @@ win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previo
         return NULL;
     }
 
-    gchar **parts = g_strsplit(result, "\n", -1);
-    gchar *quoted_result = g_strjoinv("\n> ", parts);
+    gchar** parts = g_strsplit(result, "\n", -1);
+    gchar* quoted_result = g_strjoinv("\n> ", parts);
 
     GString* replace_with = g_string_new("> ");
     g_string_append(replace_with, quoted_result);

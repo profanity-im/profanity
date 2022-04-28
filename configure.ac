@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([profanity],[0.12.0],[jubalh@iodoru.org],[profanity],[https://profanity-im.github.io/])
+AC_INIT([profanity],[0.12.1],[jubalh@iodoru.org],[profanity],[https://profanity-im.github.io/])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
@@ -270,7 +270,8 @@ AS_IF([test "x$PLATFORM" = xosx],
 dnl feature: xscreensaver
 AS_IF([test "x$enable_xscreensaver" != xno],
     [PKG_CHECK_MODULES([xscrnsaver], [xscrnsaver],
-        [AC_MSG_NOTICE([xscreensaver support is enabled])],
+        [AC_MSG_NOTICE([xscreensaver support is enabled]);
+         LIBS="$xscrnsaver_LIBS $LIBS" CFLAGS="$CFLAGS $xscrnsaver_CFLAGS"],
         [AS_IF([test "x$enable_xscreensaver" = xyes],
             [AC_MSG_ERROR([xscreensaver is required but does not exist])],
             [AC_MSG_NOTICE([xscreensaver support is disabled])])])])

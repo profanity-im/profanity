@@ -1,4 +1,4 @@
-.TH man 1 "2021-09-28" "0.11.1" "Profanity XMPP client"
+.TH man 1 "2022-04-04" "0.12.1" "Profanity XMPP client"
 .SH NAME
 Profanity \- a simple console based XMPP chat client.
 .SH SYNOPSIS
@@ -41,8 +41,17 @@ Specify which theme to use.
 .I THEME
 must be one of the themes installed in $XDG_CONFIG_HOME/profanity/themes
 .SH KEYBINDINGS
-.BI ALT+1..Alt-0
-Choose window 1..0.
+.TP
+.BR Tab , " Shift+Tab"
+Tab completion next, previous.  Works for commands, nicks and
+quotes (when input line starts with
+.BR > ).
+.TP
+.BR ALT+1..Alt-0 " or " F1..F10
+Choose window 1..10.
+.TP
+.BR ALT+q..Alt-p " (in QWERTY layout)"
+Choose window 11..20.
 .TP
 .BI ALT+LEFT
 Choose previous chat window.
@@ -70,13 +79,43 @@ Mark current window for later reading with an attention flag.
 .TP
 .BI ALT+m
 Switch between windows marked with the attention flag.
+.TP
+.BI ALT+c
+Run external editor (see
+.BR profanity-editor (1))
+for current input line.
+.TP
+.BI CTRL+DOWN
+Store current input line in history but do not execute it.
+.PP
+.I Note:
+Profanity is using GNU Readline library to handle input so
+default configuration file
+.I ~/.inputrc
+affects operation. In addition to that
+.I $XDG_CONFIG_HOME/profanity/inputrc
+is read after all default keybindigs are set so one can override
+or add settings there. For reference, see Readline documentation:
+.I "info readline ""Command Line Editing"" ""Readline Init File"" ""Readline Init File Syntax"""
+and the list of available Profanity commands in
+.IR inputwin.c .
+Standard Readline keybindings are supported, including
+.B C-r
+for interactive history search and
+.B C-x C-r
+for reloading inputrc without restart.
 .SH USING PROFANITY
 The user guide can be found at <https://profanity-im.github.io/userguide.html>.
 .SH SEE ALSO
 .B Profanity
-itself has a lot of built\-in help. Check the /help command for more information.
-Type "/help help" for information on how to use help itself.
-Profanity ships with one man page for each built-in command. For /account there is man profanity-account.
+itself has a lot of built\-in help. Check the
+.I /help
+command for more information.  Type "/help help" for information
+on how to use help itself.  Profanity ships with one man page for
+each built-in command, e.g. there is
+.BR profanity-account (1)
+for
+.IR /account .
 .SH CONFIGURATION
 Configuration for
 .B Profanity

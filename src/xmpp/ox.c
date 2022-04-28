@@ -91,8 +91,8 @@ ox_announce_public_key(const char* const filename)
 {
     assert(filename);
 
-    cons_show("Annonuce OpenPGP Key for OX %s ...", filename);
-    log_info("[OX] Annonuce OpenPGP Key of OX: %s", filename);
+    cons_show("Announce OpenPGP Key for OX %s ...", filename);
+    log_info("[OX] Announce OpenPGP Key of OX: %s", filename);
 
     // key the key and the fingerprint via GnuPG from file
     char* key = NULL;
@@ -104,7 +104,7 @@ ox_announce_public_key(const char* const filename)
         return FALSE;
     }
 
-    log_info("[OX] Annonuce OpenPGP Key for Fingerprint: %s", fp);
+    log_info("[OX] Announce OpenPGP Key for Fingerprint: %s", fp);
     xmpp_ctx_t* const ctx = connection_get_ctx();
     char* id = xmpp_uuid_gen(ctx);
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
@@ -231,7 +231,7 @@ ox_request_public_key(const char* const jid, const char* const fingerprint)
 void
 _ox_metadata_node__public_key(const char* const fingerprint)
 {
-    log_info("Annonuce OpenPGP metadata: %s", fingerprint);
+    log_info("Announce OpenPGP metadata: %s", fingerprint);
     assert(fingerprint);
     assert(strlen(fingerprint) == KEYID_LENGTH);
     // iq
@@ -340,7 +340,11 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
 {
     assert(jid);
     assert(fingerprint);
-    assert(strlen(fingerprint) == KEYID_LENGTH);
+
+    if (strlen(fingerprint) != KEYID_LENGTH) {
+        cons_show_error("Invalid fingerprint length for: %s", fingerprint);
+    }
+
     cons_show("Requesting Public Key %s for %s", fingerprint, jid);
     log_info("[OX] Request %s's public key %s.", jid, fingerprint);
     // iq

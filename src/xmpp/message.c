@@ -1452,16 +1452,13 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
 
     // 0085 works only with resource
     if (jid->resourcepart) {
-        // XEP-0085: Chat State Notifications
+        // XEP-0085: Chat Stase Notifications
         _handle_chat_states(stanza, jid);
     }
 
     message_free(message);
 }
 
-/*!
- * @brief Handle incoming XMMP-OX chat message.
- */
 static void
 _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_mam)
 {
@@ -1482,8 +1479,7 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
                 }
                 xmpp_stanza_t* b = xmpp_stanza_get_child_by_name(p, "body");
                 if (!b) {
-                    log_warning("OX Stanza - no body");
-                    message->plain = "OX error: No paylod body found";
+                    log_debug("OX Stanza - no body");
                     return;
                 }
                 message->plain = xmpp_stanza_get_text(b);

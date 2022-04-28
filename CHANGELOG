@@ -1,3 +1,86 @@
+0.12.1 (2022-04-04)
+=====
+
+5 people contributed to this bugfix release: @sjaeckel, @paulfertser, @akaWolf, Max Wuttke and @jubalh.
+
+Thanks a lot to our sponsors: @mdosch, @wstrm, @LeSpocky and @jamesponddotco
+If you want to support us too: https://profanity-im.github.io/donate.html
+
+Changes:
+- Fix resetting colors when loading invalid theme (#1681)
+- Use correct color for nick of others in history (#1675)
+- Fix a segfault when uploading or downloading files (f11ad16)
+- Fix logging of text chatlogs (#1672, #1673)
+- Simplification of tab completion code (#1664)
+- Add Alt/Ctrl-arrows combinations for GNU Screen (#1667)
+- Make all existing input functions bindable from config (#1669)
+- Cleanup (#1665, #1670)
+- Improve man pages (#1666, #1668)
+- Fix race condition on resize (#1671)
+
+0.12.0 (2022-03-30)
+=====
+
+Eight months and 207 commits after 0.11.0 we are happy to release 0.12.0.
+
+16 people contributed code to it: @sjaeckel, @MarcoPolo-PasTonMolo, @paulfertser,
+@DebXWoody, @trofi, @nandesu-utils, @carlocab, @binex-dsk, @nlfx, @JurajMlich,
+@wstrm, @arya-pratap-singh, @a02c1175-5220-4e75-b7a1-18e20548305f,
+@mdosch, @jugendhacker and @jubalh.
+
+Thanks a lot to our sponsors: @mdosch, @wstrm, @LeSpocky and @jamesponddotco
+If you want to support us too: https://profanity-im.github.io/donate.html
+
+This release depends on libstrophe >= 0.11.0, libsignal-protocol-c >= 2.3.2 and glib >= 2.62.0.
+libmesode was deprecated, all functionality was merged into libstrophe.
+
+Changes:
+- Fix format string for ncurses 6.3 (#1597)
+- Remove `/python sourcepath` command (#1598)
+- Add option to install plugins from global plugin installation directory (#945)
+- Fix wrong timestamp display in MUC history (#1423)
+- Add in-band account registration (XEP-0077) (#1574)
+- New theme: snikket (#1604)
+- Allow more UI indicator signs to be UTF-8 characters (#1607)
+- Add /correct-editor command (#1596)
+- Fix message encryption for sender devices (#1609)
+- Deprecate libmesode. We require libstrophe >= 0.11.0 (#1608)
+- Fix OMEMO /sendfile on non-glibc systems (#1478)
+- Cleanup plugins code (#1616)
+- Make readline check more portable (#1617)
+- Fix carbons criteria (#1614, #1618)
+- Add support for User Mood (XEP 0107) (#1605)
+- Use wildcard for man pages in Makefile.am (#1622)
+- Fix inserting messages to chat logs if archive_id is empty (#1589, #1625)
+- Implement RFC 6120 see-other-host during login (#1628, #1631, #1632, #1633, #1637)
+- Guard against invalid input in presence stanza (#1630)
+- Do not check for OMEMO device id for JIDs banned of a MUC (#1594)
+- Minor cleanups (#1635, #1653)
+- Cleanup build files (#1641, #1642, #1657, #1659)
+- Improve documentation for new developers (#1640)
+- Set libstrophe log verbosity to fix jump on unconditional value (e55f6d)
+- Add DOAP file (XEP-0453) (bd8c32)
+- Add `/subject editor` command
+- Improve OX user experience (#1644)
+- Add hotkey for sending readline text to editor (#1645, #1648)
+- Fix breaking autocompletion with nicknames containing '/' (#1474)
+- Add autocompletion for `/cmd` (#1650)
+- Add easy quoting (#1651)
+  When typing `>` you can now use TAB to cycle through the messages in the chat
+  window to quote those messages easily.
+- Make sendfile work with self signed certificates (#1624)
+- Reset URL autocompletion after usage (#1654)
+- Use EDITOR environment variable and only use vim if this is unset (#1658)
+- Fix invalid mbrlen in input field (#1660)
+
+Tips:
+- You can press alt+c to open an external editor. This is handy for multiline editing
+  Like replies, editing MUC subjects, long texts or copying texts from various files.
+- Use `>` <TAB> to quote messages from the main window. Combine this with alt+c for
+  multiline editing.
+- We also want to highlight alt+a from an earlier release to switch between windows
+  with new activity.
+
 0.11.1 (2021-09-28)
 =====
 
