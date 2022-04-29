@@ -59,9 +59,6 @@
 static FILE* logp;
 static gchar* mainlogfile = NULL;
 static gboolean user_provided_log = FALSE;
-
-static GTimeZone* tz;
-static GDateTime* dt;
 static log_level_t level_filter;
 
 static GHashTable* logs;
@@ -150,7 +147,6 @@ void
 log_init(log_level_t filter, char* log_file)
 {
     level_filter = filter;
-    tz = g_time_zone_new_local();
 
     if (log_file) {
         user_provided_log = TRUE;
@@ -182,7 +178,6 @@ log_close(void)
 {
     g_free(mainlogfile);
     mainlogfile = NULL;
-    g_time_zone_unref(tz);
     if (logp) {
         fclose(logp);
     }
@@ -192,7 +187,7 @@ void
 log_msg(log_level_t level, const char* const area, const char* const msg)
 {
     if (level >= level_filter && logp) {
-        dt = g_date_time_new_now(tz);
+        GDateTime* dt = g_date_time_new_now_local();
 
         char* level_str = _log_string_from_level(level);
 
@@ -235,16 +230,26 @@ _rotate_log_file(void)
 {
     gchar* log_file = g_strdup(mainlogfile);
     size_t len = strlen(log_file);
-    gchar* log_file_new = malloc(len + 4);
+    gchar* log_file_new = malloc(len + 5);
+
+    // the mainlog file should always end in '.log', lets remove this last part
+    // so that we can have profanity.001.log later
+    if (len > 4) {
+        log_file[len - 4] = '\0';
+    }
 
     // find an empty name. from .log -> log.001 -> log.999
     for (int i = 1; i < 1000; i++) {
-        g_sprintf(log_file_new, "%s.%03d", log_file, i);
+        g_sprintf(log_file_new, "%s.%03d.log", log_file, i);
         if (!g_file_test(log_file_new, G_FILE_TEST_EXISTS))
             break;
     }
 
     log_close();
+
+    if (len > 4) {
+        log_file[len - 4] = '.';
+    }
 
     rename(log_file, log_file_new);
 
