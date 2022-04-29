@@ -196,7 +196,7 @@ log_msg(log_level_t level, const char* const area, const char* const msg)
 
         char* level_str = _log_string_from_level(level);
 
-        gchar* date_fmt = g_date_time_format(dt, "%d/%m/%Y %H:%M:%S");
+        gchar* date_fmt = g_date_time_format_iso8601(dt);
 
         fprintf(logp, "%s: %s: %s: %s\n", date_fmt, area, level_str, msg);
         g_date_time_unref(dt);
