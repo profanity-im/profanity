@@ -237,9 +237,9 @@ _rotate_log_file(void)
     size_t len = strlen(log_file);
     gchar* log_file_new = malloc(len + 4);
 
-    // find an empty name. from .log -> log.01 -> log.99
-    for (int i = 1; i < 100; i++) {
-        g_sprintf(log_file_new, "%s.%02d", log_file, i);
+    // find an empty name. from .log -> log.001 -> log.999
+    for (int i = 1; i < 1000; i++) {
+        g_sprintf(log_file_new, "%s.%03d", log_file, i);
         if (!g_file_test(log_file_new, G_FILE_TEST_EXISTS))
             break;
     }
