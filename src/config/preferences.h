@@ -42,7 +42,7 @@
 #include <glib.h>
 
 #define PREFS_MIN_LOG_SIZE 64
-#define PREFS_MAX_LOG_SIZE 1048580
+#define PREFS_MAX_LOG_SIZE (10 * 1024 * 1024)
 
 // represents all settings in .profrc
 // each enum value is mapped to a group and key in .profrc (see preferences.c)
