@@ -1110,6 +1110,12 @@ _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret)
     gboolean result = TRUE;
 
     if (key->revoked || key->expired || key->disabled) {
+        log_info("OX:  %s's key is revoked, expired or disabled", barejid);
+        result = FALSE;
+    }
+
+    if (key->owner_trust < GPGME_VALIDITY_MARGINAL) {
+        log_info("OX: Owner trust of %s's key is < GPGME_VALIDITY_MARGINAL", barejid);
         result = FALSE;
     }
 
