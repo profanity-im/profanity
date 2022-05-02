@@ -2605,6 +2605,11 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         if (found) {
             return found;
         }
+
+        found = autocomplete_param_with_func(input, "/ox request", roster_barejid_autocomplete, previous, NULL);
+        if (found) {
+            return found;
+        }
     }
 
     found = autocomplete_param_with_ac(input, "/ox log", ox_log_ac, TRUE, previous);
