@@ -38,6 +38,7 @@ And create your patch using the [`git-format-patch`](https://git-scm.com/docs/gi
 * If your patch adds a new theming option add this to the `theme_template` file.
 * Each patch or pull request should only contain related modifications.
 * Run the tests and code formatters before submitting (c.f. Chapter 'Check everything' of this README).
+* When changing the UI it would be appreciated if you could add a before and after screenshot for comparison.
 
 ### Hints and Pitfalls
 
