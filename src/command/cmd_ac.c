@@ -2596,7 +2596,7 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
             return found;
         }
 
-        found = autocomplete_param_with_func(input, "/ox discover", roster_contact_autocomplete, previous, NULL);
+        found = autocomplete_param_with_func(input, "/ox discover", roster_barejid_autocomplete, previous, NULL);
         if (found) {
             return found;
         }
