@@ -55,14 +55,13 @@ static int _ox_metadata_result(xmpp_stanza_t* const stanza, void* const userdata
 static void _ox_request_public_key(const char* const jid, const char* const fingerprint);
 static int _ox_public_key_result(xmpp_stanza_t* const stanza, void* const userdata);
 
-/*!
- * \brief Current Date and Time.
+/* Return Current Date and Time.
  *
  * XEP-0082: XMPP Date and Time Profiles
  * https://xmpp.org/extensions/xep-0082.html
  *
- * \return YYYY-MM-DDThh:mm:ssZ
- *
+ * According to ISO8601
+ * YYYY-MM-DDThh:mm:ssZ
  */
 
 static char* _gettimestamp();
@@ -268,7 +267,9 @@ _ox_metadata_node__public_key(const char* const fingerprint)
     xmpp_stanza_t* pubkeymetadata = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(pubkeymetadata, STANZA_NAME_PUBKEY_METADATA);
     xmpp_stanza_set_attribute(pubkeymetadata, STANZA_ATTR_V4_FINGERPRINT, fingerprint);
-    xmpp_stanza_set_attribute(pubkeymetadata, STANZA_ATTR_DATE, _gettimestamp());
+    char* timestamp = _gettimestamp();
+    xmpp_stanza_set_attribute(pubkeymetadata, STANZA_ATTR_DATE, timestamp);
+    free(timestamp);
 
     xmpp_stanza_add_child(publickeyslist, pubkeymetadata);
     xmpp_stanza_add_child(item, publickeyslist);
@@ -476,13 +477,10 @@ _ox_public_key_result(xmpp_stanza_t* const stanza, void* const userdata)
 char*
 _gettimestamp()
 {
-    time_t now = time(NULL);
-    struct tm* tm = localtime(&now);
-    char buf[255];
-    strftime(buf, sizeof(buf), "%FT%T", tm);
-    GString* d = g_string_new(buf);
-    g_string_append(d, "Z");
-    return strdup(d->str);
+    GDateTime* dt = g_date_time_new_now_local();
+    gchar* datestr = g_date_time_format(dt, "%FT%TZ");
+    g_date_time_unref(dt);
+    return datestr;
 }
 
 #endif // HAVE_LIBGPGME
