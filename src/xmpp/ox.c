@@ -50,10 +50,10 @@
 #define KEYID_LENGTH 40
 
 static void _ox_metadata_node__public_key(const char* const fingerprint);
-static int _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
+static int _ox_metadata_result(xmpp_stanza_t* const stanza, void* const userdata);
 
 static void _ox_request_public_key(const char* const jid, const char* const fingerprint);
-static int _ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
+static int _ox_public_key_result(xmpp_stanza_t* const stanza, void* const userdata);
 
 /*!
  * \brief Current Date and Time.
@@ -199,7 +199,7 @@ ox_discover_public_key(const char* const jid)
     xmpp_stanza_add_child(pubsub, items);
     xmpp_stanza_add_child(iq, pubsub);
 
-    xmpp_id_handler_add(connection_get_conn(), _ox_metadata_result, id, strdup(jid));
+    iq_id_handler_add(xmpp_stanza_get_id(iq), _ox_metadata_result, NULL, NULL);
     iq_send_stanza(iq);
 
     xmpp_stanza_release(iq);
@@ -281,7 +281,7 @@ _ox_metadata_node__public_key(const char* const fingerprint)
 }
 
 static int
-_ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
+_ox_metadata_result(xmpp_stanza_t* const stanza, void* const userdata)
 {
     log_debug("[OX] Processing result %s's metadata.", (char*)userdata);
 
@@ -382,7 +382,7 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
     xmpp_stanza_add_child(pubsub, items);
     xmpp_stanza_add_child(iq, pubsub);
 
-    xmpp_id_handler_add(connection_get_conn(), _ox_public_key_result, id, NULL);
+    iq_id_handler_add(xmpp_stanza_get_id(iq), _ox_public_key_result, NULL, NULL);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -413,7 +413,7 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
  */
 
 int
-_ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
+_ox_public_key_result(xmpp_stanza_t* const stanza, void* const userdata)
 {
     log_debug("[OX] Processing result public key");
 
