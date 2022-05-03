@@ -1,0 +1,153 @@
+.TH man 1 "2022-05-03" "0.12.1" "Profanity XMPP client"
+.SH NAME
+Profanity \- a simple console based XMPP chat client.
+.SH DESCRIPTION
+.ie "\f[CB]x\f[]"x" \{\
+. ftr V B
+. ftr VI BI
+. ftr VB B
+. ftr VBI BI
+.\}
+.el \{\
+. ftr V CR
+. ftr VI CI
+. ftr VB CB
+. ftr VBI CBI
+.\}
+.PP
+This man page is intended to help you set up XEP-0374: OpenPGP for XMPP
+Instant Messaging.
+Also known as OX.
+.PP
+For details on usage see man profanity-ox or \f[V]/help ox\f[R].
+.PP
+Profanity wants to give the user a maximum freedom in setting up their
+system.
+So we won\[cq]t touch your GPG settings directly.
+Which means you will need to do some manual steps.
+They are described here
+.SH Generate OpenPGP key materials
+.PP
+The first step is to create a OpenPGP key pair.
+The key pair generation will be done with the \f[V]gpg\f[R] command of
+GnuPG.
+.IP
+.nf
+\f[C]
+gpg --quick-generate-key xmpp:alice\[at]domain.tld future-default default 3y
+\f[R]
+.fi
+.PP
+This command will generated a OpenPGP key with a UID
+\f[V]xmpp:alice\[at]domain.tld\f[R].
+The option \f[V]future-default\f[R] has been used to generate a
+ed25519/cv25519 key.
+The key is set to expire in threeyears.
+.PP
+Replace the Jabber ID with your JID and do \f[B]not\f[R] forget the URI
+\f[V]xmpp:\f[R] prefix.
+.PP
+Example output:
+.IP
+.nf
+\f[C]
+pub   ed25519 2021-09-21 [SC] [verf\[:a]llt: 2024-09-20]
+      583BAE703A801095B6B71A56BD801174B1A0B84A
+uid                      xmpp:alice\[at]domain.tld
+sub   cv25519 2021-09-21 [E]
+\f[R]
+.fi
+.SH Export your public key
+.PP
+You need to export your public key so you can later upload it into a PEP
+node.
+It\[cq]s just a way how your chat partners can retrieve the public key
+from you.
+Use the command below to export public key:
+.PP
+Example command:
+.IP
+.nf
+\f[C]
+gpg --export \[rs]
+  --export-options export-minimal \[rs]
+  --export-filter \[aq]keep-uid=uid =\[ti] xmpp:alice\[at]domain.tld\[aq] \[rs]
+  --export-filter \[aq]drop-subkey=usage =\[ti] a\[aq] \[rs]
+  583BAE703A801095B6B71A56BD801174B1A0B84A \[rs]
+  > /tmp/pep-key.gpg
+\f[R]
+.fi
+.PP
+The key will be exported to \f[V]/tmp/pep-key.gpg\f[R].
+You may check the key with the command below:
+.PP
+\f[V]gpg --show-key --with-sig-list /tmp/pep-key.gpg\f[R]
+.PP
+Keep in mind: Public keys may have some information (signatures, name,
+e-mail address).
+Be careful which data will be exported.
+The \f[V]export-options\f[R] and \f[V]export-filter\f[R] option of GnuPG
+will help you to filter the data.
+.SH Publish your key
+.PP
+You can use profanity to publish your exported key into your account
+(PEP).
+The \f[V]/ox announce\f[R] command will publish your key.
+.IP
+.nf
+\f[C]
+/ox announce /tmp/pep-key.gpg
+\f[R]
+.fi
+.PP
+The command will create two PEP node records to store the key.
+.SH Discover keys
+.PP
+To discover public keys of your partners use the \f[V]/ox discover\f[R]
+command.
+.PP
+Example output:
+.IP
+.nf
+\f[C]
+/ox discover buddy\[at]domain.tld
+Discovering Public Key for buddy\[at]domain.tld 
+1234567890ABCDEF1234567890ABCDEF12345678
+\f[R]
+.fi
+.PP
+To request and import a key, you can use the \f[V]/ox request\f[R]
+command.
+.IP
+.nf
+\f[C]
+/ox request buddy\[at]domain.tld 1234567890ABCDEF1234567890ABCDEF12345678
+Requesting Public Key 1234567890ABCDEF1234567890ABCDEF12345678 for buddy\[at]domain.tld
+Public Key imported 
+\f[R]
+.fi
+.PP
+The key will be imported into your gnupg keyring.
+.SH Sign the imported key
+.PP
+The key can been shown via gpg
+\f[V]gpg -k xmpp:buddy\[at]domain.tld\f[R].
+Make sure the key is the key of your buddy and sign the key with your
+key.
+.IP
+.nf
+\f[C]
+gpg --ask-cert-level --default-key 583BAE703A801095B6B71A56BD801174B1A0B84A --sign-key 1234567890ABCDEF1234567890ABCDEF12345678
+\f[R]
+.fi
+.PP
+The command \f[V]/ox contacts\f[R] will show the keys with XMPP-UID.
+The command \f[V]/ox keys\f[R] will show all known OpenPGP keys.
+.PP
+Only once you signed the key you can actually use OX with your partner.
+.SH Use OX
+.PP
+Within a chat window you can start OX via \f[V]/ox start\f[R] and stop
+it via \f[V]/ox end\f[R].
+.PP
+Messages will be send signed and encrypted.
