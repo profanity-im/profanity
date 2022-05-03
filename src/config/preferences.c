@@ -2292,7 +2292,7 @@ _get_default_string(preference_t pref)
         return editor ? editor : "vim";
     }
     case PREF_OUTGOING_STAMP:
-        return "me:";
+        return "me";
     case PREF_INCOMING_STAMP:
         return NULL;
     case PREF_URL_SAVE_CMD:

@@ -1602,7 +1602,7 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
             offset = 4;
             me_message = TRUE;
         } else {
-            wprintw(window->layout->win, "%s ", from);
+            wprintw(window->layout->win, "%s: ", from);
             wattroff(window->layout->win, colour);
         }
     }
