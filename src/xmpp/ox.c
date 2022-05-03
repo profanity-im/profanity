@@ -107,7 +107,7 @@ ox_announce_public_key(const char* const filename)
 
     log_info("[OX] Announce OpenPGP Key for Fingerprint: %s", fp);
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = xmpp_uuid_gen(ctx);
+    char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
     xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
 
@@ -183,7 +183,7 @@ ox_discover_public_key(const char* const jid)
     cons_show("Discovering Public Key for %s", jid);
     // iq
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = xmpp_uuid_gen(ctx);
+    char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
     xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
     xmpp_stanza_set_to(iq, jid);
@@ -246,7 +246,7 @@ _ox_metadata_node__public_key(const char* const fingerprint)
     assert(strlen(fingerprint) == KEYID_LENGTH);
     // iq
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = xmpp_uuid_gen(ctx);
+    char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
     xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
     // pubsub
@@ -361,7 +361,7 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
     log_info("[OX] Request %s's public key %s.", jid, fingerprint);
     // iq
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = xmpp_uuid_gen(ctx);
+    char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
     xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
     xmpp_stanza_set_to(iq, jid);
