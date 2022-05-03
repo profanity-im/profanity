@@ -914,6 +914,7 @@ p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient
     // lookup own key
     recp[0] = _ox_key_lookup(sender_barejid, TRUE);
     if (error != 0) {
+        cons_show_error("Can't find OX key for %s", xmpp_jid_me);
         log_error("OX: Key not found for %s. Error: %s", xmpp_jid_me, gpgme_strerror(error));
         return NULL;
     }
@@ -927,13 +928,14 @@ p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient
     // lookup key of recipient
     recp[1] = _ox_key_lookup(recipient_barejid, FALSE);
     if (error != 0) {
+        cons_show_error("Can't find OX key for %s", xmpp_jid_recipient);
         log_error("OX: Key not found for %s. Error: %s", xmpp_jid_recipient, gpgme_strerror(error));
         return NULL;
     }
 
     recp[2] = NULL;
-    log_debug("%s <%s>", recp[0]->uids->name, recp[0]->uids->email);
-    log_debug("%s <%s>", recp[1]->uids->name, recp[1]->uids->email);
+    log_debug("OX: %s <%s>", recp[0]->uids->name, recp[0]->uids->email);
+    log_debug("OX: %s <%s>", recp[1]->uids->name, recp[1]->uids->email);
 
     gpgme_encrypt_flags_t flags = 0;
 
@@ -1110,6 +1112,7 @@ _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret)
     gboolean result = TRUE;
 
     if (key->revoked || key->expired || key->disabled) {
+        cons_show_error("%s's key is revoked, expired or disabled", barejid);
         log_info("OX:  %s's key is revoked, expired or disabled", barejid);
         result = FALSE;
     }
@@ -1119,6 +1122,7 @@ _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret)
     // trust leven in gpg. I'll add an example to this commit body.
     /*
     if (key->owner_trust < GPGME_VALIDITY_MARGINAL) {
+        cons_show_error(" %s's key is has a trust level lower than marginal", barejid);
         log_info("OX: Owner trust of %s's key is < GPGME_VALIDITY_MARGINAL", barejid);
         result = FALSE;
     }
