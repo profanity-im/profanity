@@ -143,6 +143,13 @@ ox_announce_public_key(const char* const filename)
     xmpp_stanza_add_child(publish, item);
     xmpp_stanza_add_child(pubsub, publish);
     xmpp_stanza_add_child(iq, pubsub);
+
+    if (connection_supports(XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS)) {
+        stanza_attach_publish_options(ctx, iq, "pubsub#access_model", "open");
+    } else {
+        log_debug("[OX] Cannot publish public key: no PUBSUB feature announced");
+    }
+
     xmpp_send(connection_get_conn(), iq);
 
     _ox_metadata_node__public_key(fp);
