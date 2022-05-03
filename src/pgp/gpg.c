@@ -1114,10 +1114,15 @@ _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret)
         result = FALSE;
     }
 
+    // This might be a nice features but AFAIK is not defined in the XEP.
+    // If we add this we need to expand our documentation on how to set the
+    // trust leven in gpg. I'll add an example to this commit body.
+    /*
     if (key->owner_trust < GPGME_VALIDITY_MARGINAL) {
         log_info("OX: Owner trust of %s's key is < GPGME_VALIDITY_MARGINAL", barejid);
         result = FALSE;
     }
+    */
 
     return result;
 }
