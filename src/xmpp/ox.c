@@ -42,6 +42,7 @@
 #include "ui/ui.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
+#include "xmpp/iq.h"
 #include "pgp/gpg.h"
 
 #ifdef HAVE_LIBGPGME
@@ -150,7 +151,8 @@ ox_announce_public_key(const char* const filename)
         log_debug("[OX] Cannot publish public key: no PUBSUB feature announced");
     }
 
-    xmpp_send(connection_get_conn(), iq);
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 
     _ox_metadata_node__public_key(fp);
 
@@ -198,7 +200,8 @@ ox_discover_public_key(const char* const jid)
     xmpp_stanza_add_child(iq, pubsub);
 
     xmpp_id_handler_add(connection_get_conn(), _ox_metadata_result, id, strdup(jid));
-    xmpp_send(connection_get_conn(), iq);
+    iq_send_stanza(iq);
+
     xmpp_stanza_release(iq);
 }
 
@@ -272,7 +275,9 @@ _ox_metadata_node__public_key(const char* const fingerprint)
     xmpp_stanza_add_child(publish, item);
     xmpp_stanza_add_child(pubsub, publish);
     xmpp_stanza_add_child(iq, pubsub);
-    xmpp_send(connection_get_conn(), iq);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 }
 
 static int
@@ -379,7 +384,8 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
 
     xmpp_id_handler_add(connection_get_conn(), _ox_public_key_result, id, NULL);
 
-    xmpp_send(connection_get_conn(), iq);
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 }
 
 /*!
