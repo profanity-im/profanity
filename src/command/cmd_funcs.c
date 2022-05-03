@@ -7671,6 +7671,18 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
         chatwin->is_ox = TRUE;
         win_println(window, THEME_DEFAULT, "!", "OX encryption enabled.");
         return TRUE;
+    } else if (g_strcmp0(args[0], "end") == 0) {
+        if (window->type != WIN_CHAT && args[1] == NULL) {
+            cons_show("You must be in a regular chat window to stop OX encrpytion.");
+            return TRUE;
+        }
+
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+        chatwin->is_ox = FALSE;
+        win_println(window, THEME_DEFAULT, "!", "OX encryption disabled.");
+        return TRUE;
     } else if (g_strcmp0(args[0], "announce") == 0) {
         if (args[1]) {
             gchar* filename = get_expanded_path(args[1]);
