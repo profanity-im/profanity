@@ -1195,11 +1195,13 @@ p_ox_gpg_decrypt(char* base64)
             return NULL;
         }
     }
+
     size_t len;
     char* plain_str = gpgme_data_release_and_get_mem(plain, &len);
     char* result = malloc(len + 1);
-    strcpy(result, plain_str);
+    memcpy(result, plain_str, len);
     result[len] = '\0';
+    gpgme_free(plain_str);
     return result;
 }
 
