@@ -355,7 +355,8 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
     assert(fingerprint);
 
     if (strlen(fingerprint) != KEYID_LENGTH) {
-        cons_show_error("Invalid fingerprint length for: %s", fingerprint);
+        cons_show_error("Invalid fingerprint length %s for %s", fingerprint, jid);
+        return;
     }
 
     cons_show("Requesting Public Key %s for %s", fingerprint, jid);
