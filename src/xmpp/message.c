@@ -91,7 +91,7 @@ static gboolean _handle_jingle_message(xmpp_stanza_t* const stanza);
 static gboolean _should_ignore_based_on_silence(xmpp_stanza_t* const stanza);
 
 #ifdef HAVE_LIBGPGME
-static xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text);
+static xmpp_stanza_t* _ox_openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text);
 #endif // HAVE_LIBGPGME
 
 static GHashTable* pubsub_event_handlers;
@@ -540,7 +540,7 @@ message_send_chat_ox(const char* const barejid, const char* const msg, gboolean 
     xmpp_stanza_set_name(openpgp, STANZA_NAME_OPENPGP);
     xmpp_stanza_set_ns(openpgp, STANZA_NS_OPENPGP_0);
 
-    xmpp_stanza_t* signcrypt = _openpgp_signcrypt(ctx, barejid, msg);
+    xmpp_stanza_t* signcrypt = _ox_openpgp_signcrypt(ctx, barejid, msg);
     char* c;
     size_t s;
     xmpp_stanza_to_text(signcrypt, &c, &s);
@@ -1610,7 +1610,7 @@ message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
 
 #ifdef HAVE_LIBGPGME
 static xmpp_stanza_t*
-_openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text)
+_ox_openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text)
 {
     time_t now = time(NULL);
     struct tm* tm = localtime(&now);
