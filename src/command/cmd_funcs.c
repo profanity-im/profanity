@@ -7650,7 +7650,7 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
         }
 
         if (chatwin->is_ox) {
-            win_println(window, THEME_DEFAULT, "!", "You have already started OX encryption.");
+            win_println(window, THEME_DEFAULT, "!", "You have already started an OX encrypted session.");
             return TRUE;
         }
 
@@ -7670,6 +7670,22 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
 
         chatwin->is_ox = TRUE;
         win_println(window, THEME_DEFAULT, "!", "OX encryption enabled.");
+        return TRUE;
+    } else if (g_strcmp0(args[0], "end") == 0) {
+        if (window->type != WIN_CHAT && args[1] == NULL) {
+            cons_show("You must be in a regular chat window to stop OX encryption.");
+            return TRUE;
+        }
+
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+        if (!chatwin->is_ox) {
+            win_println(window, THEME_DEFAULT, "!", "No OX session has been started.");
+        } else {
+            chatwin->is_ox = FALSE;
+            win_println(window, THEME_DEFAULT, "!", "OX encryption disabled.");
+        }
         return TRUE;
     } else if (g_strcmp0(args[0], "announce") == 0) {
         if (args[1]) {

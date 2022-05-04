@@ -42,6 +42,7 @@
 #include "ui/ui.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
+#include "xmpp/iq.h"
 #include "pgp/gpg.h"
 
 #ifdef HAVE_LIBGPGME
@@ -49,19 +50,18 @@
 #define KEYID_LENGTH 40
 
 static void _ox_metadata_node__public_key(const char* const fingerprint);
-static int _ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
+static int _ox_metadata_result(xmpp_stanza_t* const stanza, void* const userdata);
 
 static void _ox_request_public_key(const char* const jid, const char* const fingerprint);
-static int _ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
+static int _ox_public_key_result(xmpp_stanza_t* const stanza, void* const userdata);
 
-/*!
- * \brief Current Date and Time.
+/* Return Current Date and Time.
  *
  * XEP-0082: XMPP Date and Time Profiles
  * https://xmpp.org/extensions/xep-0082.html
  *
- * \return YYYY-MM-DDThh:mm:ssZ
- *
+ * According to ISO8601
+ * YYYY-MM-DDThh:mm:ssZ
  */
 
 static char* _gettimestamp();
@@ -106,7 +106,7 @@ ox_announce_public_key(const char* const filename)
 
     log_info("[OX] Announce OpenPGP Key for Fingerprint: %s", fp);
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = xmpp_uuid_gen(ctx);
+    char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
     xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
 
@@ -143,7 +143,15 @@ ox_announce_public_key(const char* const filename)
     xmpp_stanza_add_child(publish, item);
     xmpp_stanza_add_child(pubsub, publish);
     xmpp_stanza_add_child(iq, pubsub);
-    xmpp_send(connection_get_conn(), iq);
+
+    if (connection_supports(XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS)) {
+        stanza_attach_publish_options(ctx, iq, "pubsub#access_model", "open");
+    } else {
+        log_debug("[OX] Cannot publish public key: no PUBSUB feature announced");
+    }
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 
     _ox_metadata_node__public_key(fp);
 
@@ -174,7 +182,7 @@ ox_discover_public_key(const char* const jid)
     cons_show("Discovering Public Key for %s", jid);
     // iq
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = xmpp_uuid_gen(ctx);
+    char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
     xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
     xmpp_stanza_set_to(iq, jid);
@@ -190,8 +198,9 @@ ox_discover_public_key(const char* const jid)
     xmpp_stanza_add_child(pubsub, items);
     xmpp_stanza_add_child(iq, pubsub);
 
-    xmpp_id_handler_add(connection_get_conn(), _ox_metadata_result, id, strdup(jid));
-    xmpp_send(connection_get_conn(), iq);
+    iq_id_handler_add(xmpp_stanza_get_id(iq), _ox_metadata_result, NULL, NULL);
+    iq_send_stanza(iq);
+
     xmpp_stanza_release(iq);
 }
 
@@ -236,7 +245,7 @@ _ox_metadata_node__public_key(const char* const fingerprint)
     assert(strlen(fingerprint) == KEYID_LENGTH);
     // iq
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = xmpp_uuid_gen(ctx);
+    char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
     xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
     // pubsub
@@ -258,18 +267,22 @@ _ox_metadata_node__public_key(const char* const fingerprint)
     xmpp_stanza_t* pubkeymetadata = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(pubkeymetadata, STANZA_NAME_PUBKEY_METADATA);
     xmpp_stanza_set_attribute(pubkeymetadata, STANZA_ATTR_V4_FINGERPRINT, fingerprint);
-    xmpp_stanza_set_attribute(pubkeymetadata, STANZA_ATTR_DATE, _gettimestamp());
+    char* timestamp = _gettimestamp();
+    xmpp_stanza_set_attribute(pubkeymetadata, STANZA_ATTR_DATE, timestamp);
+    free(timestamp);
 
     xmpp_stanza_add_child(publickeyslist, pubkeymetadata);
     xmpp_stanza_add_child(item, publickeyslist);
     xmpp_stanza_add_child(publish, item);
     xmpp_stanza_add_child(pubsub, publish);
     xmpp_stanza_add_child(iq, pubsub);
-    xmpp_send(connection_get_conn(), iq);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 }
 
 static int
-_ox_metadata_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
+_ox_metadata_result(xmpp_stanza_t* const stanza, void* const userdata)
 {
     log_debug("[OX] Processing result %s's metadata.", (char*)userdata);
 
@@ -349,7 +362,7 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
     log_info("[OX] Request %s's public key %s.", jid, fingerprint);
     // iq
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = xmpp_uuid_gen(ctx);
+    char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
     xmpp_stanza_set_from(iq, xmpp_conn_get_jid(connection_get_conn()));
     xmpp_stanza_set_to(iq, jid);
@@ -370,9 +383,10 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
     xmpp_stanza_add_child(pubsub, items);
     xmpp_stanza_add_child(iq, pubsub);
 
-    xmpp_id_handler_add(connection_get_conn(), _ox_public_key_result, id, NULL);
+    iq_id_handler_add(xmpp_stanza_get_id(iq), _ox_public_key_result, NULL, NULL);
 
-    xmpp_send(connection_get_conn(), iq);
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 }
 
 /*!
@@ -400,7 +414,7 @@ _ox_request_public_key(const char* const jid, const char* const fingerprint)
  */
 
 int
-_ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
+_ox_public_key_result(xmpp_stanza_t* const stanza, void* const userdata)
 {
     log_debug("[OX] Processing result public key");
 
@@ -463,13 +477,10 @@ _ox_public_key_result(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void
 char*
 _gettimestamp()
 {
-    time_t now = time(NULL);
-    struct tm* tm = localtime(&now);
-    char buf[255];
-    strftime(buf, sizeof(buf), "%FT%T", tm);
-    GString* d = g_string_new(buf);
-    g_string_append(d, "Z");
-    return strdup(d->str);
+    GDateTime* dt = g_date_time_new_now_local();
+    gchar* datestr = g_date_time_format(dt, "%FT%TZ");
+    g_date_time_unref(dt);
+    return datestr;
 }
 
 #endif // HAVE_LIBGPGME

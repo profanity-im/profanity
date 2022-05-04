@@ -1616,11 +1616,13 @@ _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text
     struct tm* tm = localtime(&now);
     char buf[255];
     strftime(buf, sizeof(buf), "%FT%T%z", tm);
-    int randnr = rand() % 5;
-    char rpad_data[randnr];
 
-    for (int i = 0; i < randnr - 1; i++) {
-        rpad_data[i] = 'c';
+    // build rpad
+    int randnr = (rand() % 100) + 1;
+    char rpad_data[randnr];
+    for (int i = 0; i < randnr; i++) {
+        int rchar = (rand() % 52) + 65;
+        rpad_data[i] = rchar;
     }
     rpad_data[randnr - 1] = '\0';
 
