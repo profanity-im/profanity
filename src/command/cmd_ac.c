@@ -234,7 +234,6 @@ static Autocomplete pgp_log_ac;
 static Autocomplete pgp_sendfile_ac;
 static Autocomplete ox_ac;
 static Autocomplete ox_log_ac;
-static Autocomplete ox_sendfile_ac;
 #endif
 static Autocomplete tls_ac;
 static Autocomplete titlebar_ac;
@@ -890,7 +889,6 @@ cmd_ac_init(void)
     autocomplete_add(ox_ac, "end");
     autocomplete_add(ox_ac, "log");
     autocomplete_add(ox_ac, "char");
-    autocomplete_add(ox_ac, "sendfile");
     autocomplete_add(ox_ac, "announce");
     autocomplete_add(ox_ac, "discover");
     autocomplete_add(ox_ac, "request");
@@ -1613,7 +1611,6 @@ cmd_ac_uninit(void)
     autocomplete_free(pgp_sendfile_ac);
     autocomplete_free(ox_ac);
     autocomplete_free(ox_log_ac);
-    autocomplete_free(ox_sendfile_ac);
 #endif
     autocomplete_free(tls_ac);
     autocomplete_free(titlebar_ac);
@@ -2620,11 +2617,6 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     found = autocomplete_param_with_ac(input, "/ox log", ox_log_ac, TRUE, previous);
-    if (found) {
-        return found;
-    }
-
-    found = autocomplete_param_with_ac(input, "/ox sendfile", ox_sendfile_ac, TRUE, previous);
     if (found) {
         return found;
     }
