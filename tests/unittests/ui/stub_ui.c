@@ -790,6 +790,10 @@ void
 cons_show_omemo_prefs(void)
 {
 }
+void
+cons_show_ox_prefs(void)
+{
+}
 
 void
 cons_show_account(ProfAccount* account)

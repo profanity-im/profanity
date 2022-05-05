@@ -2315,6 +2315,29 @@ cons_show_omemo_prefs(void)
 }
 
 void
+cons_show_ox_prefs(void)
+{
+    cons_show("OX preferences:");
+    cons_show("");
+
+    char* log_value = prefs_get_string(PREF_OX_LOG);
+    if (strcmp(log_value, "on") == 0) {
+        cons_show("OX logging (/ox log)   : ON");
+    } else if (strcmp(log_value, "off") == 0) {
+        cons_show("OX logging (/ox log)   : OFF");
+    } else {
+        cons_show("OX logging (/ox log)   : Redacted");
+    }
+    g_free(log_value);
+
+    char* ch = prefs_get_ox_char();
+    cons_show("OX char (/ox char)     : %s", ch);
+    free(ch);
+
+    cons_alert(NULL);
+}
+
+void
 cons_show_themes(GSList* themes)
 {
     cons_show("");
@@ -2389,6 +2412,8 @@ cons_prefs(void)
     cons_show_pgp_prefs();
     cons_show("");
     cons_show_omemo_prefs();
+    cons_show("");
+    cons_show_ox_prefs();
     cons_show("");
 
     cons_alert(NULL);

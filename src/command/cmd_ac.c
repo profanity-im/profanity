@@ -317,6 +317,7 @@ cmd_ac_init(void)
 #endif
 #ifdef HAVE_LIBGPGME
     autocomplete_add(prefs_ac, "pgp");
+    autocomplete_add(prefs_ac, "ox");
 #endif
 #ifdef HAVE_OMEMO
     autocomplete_add(prefs_ac, "omemo");
