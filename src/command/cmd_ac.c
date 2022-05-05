@@ -893,6 +893,11 @@ cmd_ac_init(void)
     autocomplete_add(ox_ac, "announce");
     autocomplete_add(ox_ac, "discover");
     autocomplete_add(ox_ac, "request");
+
+    ox_log_ac = autocomplete_new();
+    autocomplete_add(ox_log_ac, "on");
+    autocomplete_add(ox_log_ac, "off");
+    autocomplete_add(ox_log_ac, "redact");
 #endif
 
     tls_ac = autocomplete_new();
@@ -1443,6 +1448,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(pgp_log_ac);
     autocomplete_reset(pgp_sendfile_ac);
     autocomplete_reset(ox_ac);
+    autocomplete_reset(ox_log_ac);
 #endif
     autocomplete_reset(tls_ac);
     autocomplete_reset(titlebar_ac);

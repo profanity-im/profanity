@@ -1715,7 +1715,8 @@ static struct cmd_t command_defs[] = {
 #ifdef HAVE_LIBGPGME
     { "/ox",
       parse_args, 1, 3, NULL,
-      CMD_NOSUBFUNCS
+      CMD_SUBFUNCS(
+              { "log", cmd_ox_log })
       CMD_MAINFUNC(cmd_ox)
       CMD_TAGS(
       CMD_TAG_CHAT,
