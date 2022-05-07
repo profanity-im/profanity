@@ -23,7 +23,7 @@ test_with_connection_status(jabber_conn_status_t status)
 {
     will_return(connection_get_status, status);
 
-    expect_cons_show("You are not currently connected.");
+    expect_cons_show("You are currently not connected.");
 
     gboolean result = cmd_join(NULL, CMD_JOIN, NULL);
     assert_true(result);

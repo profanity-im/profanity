@@ -318,7 +318,7 @@ cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void** state)
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
-    expect_win_println("You are not currently in an OTR session.");
+    expect_win_println("You are currently not in an OTR session.");
 
     gboolean result = cmd_otr_theirfp((ProfWin*)&chatwin, CMD_OTR, args);
 

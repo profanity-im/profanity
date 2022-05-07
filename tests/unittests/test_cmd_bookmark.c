@@ -28,7 +28,7 @@ test_with_connection_status(jabber_conn_status_t status)
     ProfWin window;
     window.type = WIN_CONSOLE;
     will_return(connection_get_status, status);
-    expect_cons_show("You are not currently connected.");
+    expect_cons_show("You are currently not connected.");
 
     gboolean result = cmd_bookmark(&window, CMD_BOOKMARK, NULL);
     assert_true(result);
