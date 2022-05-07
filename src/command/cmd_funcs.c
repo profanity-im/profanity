@@ -353,7 +353,7 @@ cmd_tls_cert(ProfWin* window, const char* const command, gchar** args)
     } else {
         jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
             return TRUE;
         }
         if (!connection_is_secured()) {
@@ -1138,7 +1138,7 @@ cmd_export(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         cons_show("");
         return TRUE;
     } else {
@@ -1294,7 +1294,7 @@ gboolean
 cmd_disconnect(ProfWin* window, const char* const command, gchar** args)
 {
     if (connection_get_status() != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -2118,7 +2118,7 @@ cmd_who(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
     } else if (window->type == WIN_MUC) {
         _who_room(window, command, args);
     } else {
@@ -2168,7 +2168,7 @@ cmd_msg(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -2232,7 +2232,7 @@ cmd_group(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -2341,7 +2341,7 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
     // show roster
     if (args[0] == NULL) {
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
             return TRUE;
         }
 
@@ -2353,7 +2353,7 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
         // show roster, only online contacts
     } else if (g_strcmp0(args[0], "online") == 0) {
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
             return TRUE;
         }
 
@@ -2894,7 +2894,7 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
         // add contact
     } else if (strcmp(args[0], "add") == 0) {
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
             return TRUE;
         }
         char* jid = args[1];
@@ -2909,7 +2909,7 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
         // remove contact
     } else if (strcmp(args[0], "remove") == 0) {
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
             return TRUE;
         }
         char* jid = args[1];
@@ -2926,7 +2926,7 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
             return TRUE;
         }
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
             return TRUE;
         }
 
@@ -2944,7 +2944,7 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
         // change nickname
     } else if (strcmp(args[0], "nick") == 0) {
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
             return TRUE;
         }
         char* jid = args[1];
@@ -2982,7 +2982,7 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
         // remove nickname
     } else if (strcmp(args[0], "clearnick") == 0) {
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
             return TRUE;
         }
         char* jid = args[1];
@@ -3020,7 +3020,7 @@ gboolean
 cmd_blocked(ProfWin* window, const char* const command, gchar** args)
 {
     if (connection_get_status() != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -3150,7 +3150,7 @@ cmd_resource(ProfWin* window, const char* const command, gchar** args)
 
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -3239,7 +3239,7 @@ cmd_status_get(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -3325,7 +3325,7 @@ cmd_info(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -3399,7 +3399,7 @@ cmd_caps(ProfWin* window, const char* const command, gchar** args)
     Occupant* occupant = NULL;
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -3489,7 +3489,7 @@ cmd_software(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -3565,7 +3565,7 @@ cmd_serversoftware(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -3583,7 +3583,7 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
 {
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -3691,7 +3691,7 @@ cmd_invite(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -3959,7 +3959,7 @@ cmd_form(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -4034,7 +4034,7 @@ cmd_kick(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -4067,7 +4067,7 @@ cmd_ban(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -4095,7 +4095,7 @@ cmd_subject(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -4201,7 +4201,7 @@ cmd_affiliation(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -4276,7 +4276,7 @@ cmd_role(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -4340,7 +4340,7 @@ cmd_room(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -4516,7 +4516,7 @@ cmd_occupants(ProfWin* window, const char* const command, gchar** args)
 
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -4561,7 +4561,7 @@ cmd_rooms(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -4674,7 +4674,7 @@ cmd_bookmark(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         cons_alert(NULL);
         return TRUE;
     }
@@ -4845,7 +4845,7 @@ cmd_bookmark_ignore(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         cons_alert(NULL);
         return TRUE;
     }
@@ -4881,7 +4881,7 @@ cmd_disco(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -4968,7 +4968,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         goto out;
     }
 
@@ -5086,7 +5086,7 @@ cmd_lastactivity(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -5117,7 +5117,7 @@ cmd_nick(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
     if (window->type != WIN_MUC) {
@@ -5921,7 +5921,7 @@ cmd_notify(ProfWin* window, const char* const command, gchar** args)
         jabber_conn_status_t conn_status = connection_get_status();
 
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
         } else {
             ProfWin* window = wins_get_current();
             if (window->type != WIN_MUC) {
@@ -5936,7 +5936,7 @@ cmd_notify(ProfWin* window, const char* const command, gchar** args)
         jabber_conn_status_t conn_status = connection_get_status();
 
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
         } else {
             ProfWin* window = wins_get_current();
             if (window->type != WIN_MUC) {
@@ -5951,7 +5951,7 @@ cmd_notify(ProfWin* window, const char* const command, gchar** args)
         jabber_conn_status_t conn_status = connection_get_status();
 
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
         } else {
             if (g_strcmp0(args[1], "on") == 0) {
                 ProfWin* window = wins_get_current();
@@ -5979,7 +5979,7 @@ cmd_notify(ProfWin* window, const char* const command, gchar** args)
         jabber_conn_status_t conn_status = connection_get_status();
 
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
         } else {
             if (g_strcmp0(args[1], "on") == 0) {
                 ProfWin* window = wins_get_current();
@@ -6007,7 +6007,7 @@ cmd_notify(ProfWin* window, const char* const command, gchar** args)
         jabber_conn_status_t conn_status = connection_get_status();
 
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
         } else {
             ProfWin* window = wins_get_current();
             if (window->type != WIN_MUC) {
@@ -6575,7 +6575,7 @@ cmd_ping(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -6707,7 +6707,7 @@ cmd_priority(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -7338,7 +7338,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
     if (g_strcmp0(args[0], "setkey") == 0) {
         jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
             return TRUE;
         }
 
@@ -7367,7 +7367,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
     if (g_strcmp0(args[0], "contacts") == 0) {
         jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
             return TRUE;
         }
         GHashTable* pubkeys = p_gpg_pubkeys();
@@ -7478,7 +7478,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
     if (g_strcmp0(args[0], "end") == 0) {
         jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
             return TRUE;
         }
 
@@ -7578,7 +7578,7 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
         GSList* roster_list = NULL;
         jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
+            cons_show("You are currently not connected.");
         } else {
             roster_list = roster_get_contacts(ROSTER_ORD_NAME);
         }
@@ -7893,7 +7893,7 @@ cmd_otr_theirfp(ProfWin* window, const char* const command, gchar** args)
     ProfChatWin* chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        win_println(window, THEME_DEFAULT, "!", "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, "!", "You are currently not in an OTR session.");
         return TRUE;
     }
 
@@ -8013,7 +8013,7 @@ cmd_otr_end(ProfWin* window, const char* const command, gchar** args)
     ProfChatWin* chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        win_println(window, THEME_DEFAULT, "!", "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, "!", "You are currently not in an OTR session.");
         return TRUE;
     }
 
@@ -8043,7 +8043,7 @@ cmd_otr_trust(ProfWin* window, const char* const command, gchar** args)
     ProfChatWin* chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        win_println(window, THEME_DEFAULT, "!", "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, "!", "You are currently not in an OTR session.");
         return TRUE;
     }
 
@@ -8073,7 +8073,7 @@ cmd_otr_untrust(ProfWin* window, const char* const command, gchar** args)
     ProfChatWin* chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        win_println(window, THEME_DEFAULT, "!", "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, "!", "You are currently not in an OTR session.");
         return TRUE;
     }
 
@@ -8103,7 +8103,7 @@ cmd_otr_secret(ProfWin* window, const char* const command, gchar** args)
     ProfChatWin* chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        win_println(window, THEME_DEFAULT, "!", "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, "!", "You are currently not in an OTR session.");
         return TRUE;
     }
 
@@ -8145,7 +8145,7 @@ cmd_otr_question(ProfWin* window, const char* const command, gchar** args)
     ProfChatWin* chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        win_println(window, THEME_DEFAULT, "!", "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, "!", "You are currently not in an OTR session.");
         return TRUE;
     }
 
@@ -8174,7 +8174,7 @@ cmd_otr_answer(ProfWin* window, const char* const command, gchar** args)
     ProfChatWin* chatwin = (ProfChatWin*)window;
     assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
     if (chatwin->is_otr == FALSE) {
-        win_println(window, THEME_DEFAULT, "!", "You are not currently in an OTR session.");
+        win_println(window, THEME_DEFAULT, "!", "You are currently not in an OTR session.");
         return TRUE;
     }
 
@@ -8211,7 +8211,7 @@ cmd_command_list(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -8267,7 +8267,7 @@ cmd_command_exec(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
@@ -8413,7 +8413,7 @@ _cmd_execute_default(ProfWin* window, const char* inp)
 
     jabber_conn_status_t status = connection_get_status();
     if (status != JABBER_CONNECTED) {
-        win_println(window, THEME_DEFAULT, "-", "You are not currently connected.");
+        win_println(window, THEME_DEFAULT, "-", "You are currently not connected.");
         return TRUE;
     }
 
@@ -8491,7 +8491,7 @@ _update_presence(const resource_presence_t resource_presence,
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
     } else {
         connection_set_presence_msg(msg);
         cl_ev_presence_send(resource_presence, 0);
@@ -8728,7 +8728,7 @@ cmd_omemo_end(ProfWin* window, const char* const command, gchar** args)
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
         if (!chatwin->is_omemo) {
-            win_println(window, THEME_DEFAULT, "!", "You are not currently in an OMEMO session.");
+            win_println(window, THEME_DEFAULT, "!", "You are currently not in an OMEMO session.");
             return TRUE;
         }
 
@@ -8739,7 +8739,7 @@ cmd_omemo_end(ProfWin* window, const char* const command, gchar** args)
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
         if (!mucwin->is_omemo) {
-            win_println(window, THEME_DEFAULT, "!", "You are not currently in an OMEMO session.");
+            win_println(window, THEME_DEFAULT, "!", "You are currently not in an OMEMO session.");
             return TRUE;
         }
 
@@ -9559,7 +9559,7 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
     jabber_conn_status_t conn_status = connection_get_status();
 
     if (conn_status != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
+        cons_show("You are currently not connected.");
         return TRUE;
     }
 
