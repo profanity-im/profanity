@@ -2223,7 +2223,7 @@ _get_default_string(preference_t pref)
     case PREF_AUTOAWAY_MODE:
         return "off";
     case PREF_OTR_LOG:
-        return "redact";
+        return "on";
     case PREF_OTR_POLICY:
         return "manual";
     case PREF_STATUSES_CONSOLE:
@@ -2267,7 +2267,7 @@ _get_default_string(preference_t pref)
     case PREF_TIME_LASTACTIVITY:
         return "%d/%m/%y %H:%M:%S";
     case PREF_PGP_LOG:
-        return "redact";
+        return "on";
     case PREF_CONSOLE_MUC:
     case PREF_CONSOLE_PRIVATE:
     case PREF_CONSOLE_CHAT:
@@ -2279,7 +2279,7 @@ _get_default_string(preference_t pref)
     case PREF_STATUSBAR_ROOM:
         return "room";
     case PREF_OMEMO_LOG:
-        return "redact";
+        return "on";
     case PREF_OMEMO_POLICY:
         return "automatic";
     case PREF_OMEMO_TRUST_MODE:
@@ -2302,7 +2302,7 @@ _get_default_string(preference_t pref)
     case PREF_URL_SAVE_CMD:
         return NULL; // Default to built-in method.
     case PREF_OX_LOG:
-        return "redact";
+        return "on";
     default:
         return NULL;
     }
