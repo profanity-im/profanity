@@ -179,6 +179,7 @@ typedef enum {
     PREF_OUTGOING_STAMP,
     PREF_INCOMING_STAMP,
     PREF_NOTIFY_ROOM_OFFLINE,
+    PREF_OX_LOG,
 } preference_t;
 
 typedef struct prof_alias_t

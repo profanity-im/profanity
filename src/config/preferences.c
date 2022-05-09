@@ -1882,6 +1882,8 @@ _get_group(preference_t pref)
     case PREF_OMEMO_POLICY:
     case PREF_OMEMO_TRUST_MODE:
         return PREF_GROUP_OMEMO;
+    case PREF_OX_LOG:
+        return PREF_GROUP_OX;
     default:
         return NULL;
     }
@@ -2153,6 +2155,8 @@ _get_key(preference_t pref)
         return "stamp.outgoing";
     case PREF_INCOMING_STAMP:
         return "stamp.incoming";
+    case PREF_OX_LOG:
+        return "log";
     default:
         return NULL;
     }
@@ -2297,6 +2301,8 @@ _get_default_string(preference_t pref)
         return NULL;
     case PREF_URL_SAVE_CMD:
         return NULL; // Default to built-in method.
+    case PREF_OX_LOG:
+        return "redact";
     default:
         return NULL;
     }

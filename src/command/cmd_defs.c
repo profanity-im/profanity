@@ -1715,7 +1715,8 @@ static struct cmd_t command_defs[] = {
 #ifdef HAVE_LIBGPGME
     { "/ox",
       parse_args, 1, 3, NULL,
-      CMD_NOSUBFUNCS
+      CMD_SUBFUNCS(
+              { "log", cmd_ox_log })
       CMD_MAINFUNC(cmd_ox)
       CMD_TAGS(
       CMD_TAG_CHAT,
@@ -1727,7 +1728,6 @@ static struct cmd_t command_defs[] = {
               "/ox end",
               "/ox log on|off|redact",
               "/ox char <char>",
-              "/ox sendfile on|off",
               "/ox announce <file>",
               "/ox discover <jid>",
               "/ox request <jid> <keyid>")
@@ -1746,8 +1746,7 @@ static struct cmd_t command_defs[] = {
               { "char <char>", "Set the character to be displayed next to PGP encrypted messages." },
               { "announce <file>", "Announce a public key by pushing it on the XMPP Server" },
               { "discover <jid>", "Discover public keys of a jid. The OpenPGP Key IDs will be displayed" },
-              { "request <jid> <keyid>", "Request public key. See /ox discover to to get available key IDs." },
-              { "sendfile on|off", "Allow /sendfile to send unencrypted files while otherwise using PGP." })
+              { "request <jid> <keyid>", "Request public key. See /ox discover to to get available key IDs." })
       CMD_EXAMPLES(
               "/ox log off",
               "/ox start odin@valhalla.edda",

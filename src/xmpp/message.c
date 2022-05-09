@@ -91,7 +91,7 @@ static gboolean _handle_jingle_message(xmpp_stanza_t* const stanza);
 static gboolean _should_ignore_based_on_silence(xmpp_stanza_t* const stanza);
 
 #ifdef HAVE_LIBGPGME
-static xmpp_stanza_t* _openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text);
+static xmpp_stanza_t* _ox_openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text);
 #endif // HAVE_LIBGPGME
 
 static GHashTable* pubsub_event_handlers;
@@ -540,7 +540,7 @@ message_send_chat_ox(const char* const barejid, const char* const msg, gboolean 
     xmpp_stanza_set_name(openpgp, STANZA_NAME_OPENPGP);
     xmpp_stanza_set_ns(openpgp, STANZA_NS_OPENPGP_0);
 
-    xmpp_stanza_t* signcrypt = _openpgp_signcrypt(ctx, barejid, msg);
+    xmpp_stanza_t* signcrypt = _ox_openpgp_signcrypt(ctx, barejid, msg);
     char* c;
     size_t s;
     xmpp_stanza_to_text(signcrypt, &c, &s);
@@ -1467,14 +1467,13 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
 #ifdef HAVE_LIBGPGME
     xmpp_stanza_t* ox = xmpp_stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
     if (ox) {
-        message->plain = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
-        if (message->plain) {
-            xmpp_stanza_t* x = xmpp_stanza_new_from_string(connection_get_ctx(), message->plain);
-            if (x) {
-                xmpp_stanza_t* p = xmpp_stanza_get_child_by_name(x, "payload");
+        gchar* decrypted = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
+        if (decrypted) {
+            xmpp_stanza_t* decrypted_stanza = xmpp_stanza_new_from_string(connection_get_ctx(), decrypted);
+            if (decrypted_stanza) {
+                xmpp_stanza_t* p = xmpp_stanza_get_child_by_name(decrypted_stanza, "payload");
                 if (!p) {
                     log_warning("OX Stanza - no Payload");
-                    message->plain = "OX error: No payload found";
                     return;
                 }
                 xmpp_stanza_t* b = xmpp_stanza_get_child_by_name(p, "body");
@@ -1484,18 +1483,18 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
                 }
                 message->plain = xmpp_stanza_get_text(b);
                 message->encrypted = xmpp_stanza_get_text(ox);
-                if (message->plain == NULL) {
-                    message->plain = xmpp_stanza_get_text(stanza);
-                }
             } else {
-                message->plain = "Unable to decrypt OX message (XEP-0373: OpenPGP for XMPP)";
+                cons_show("Unable to decrypt OX message (XEP-0373: OpenPGP for XMPP)");
                 log_warning("OX Stanza text to stanza failed");
             }
         } else {
-            message->plain = "Unable to decrypt OX message (XEP-0373: OpenPGP for XMPP)";
+            // get alternative text from message body
+            xmpp_stanza_t* b = xmpp_stanza_get_child_by_name(stanza, "body");
+            if (b) {
+                message->plain = xmpp_stanza_get_text(b);
+            }
         }
     } else {
-        message->plain = "OX stanza without openpgp name";
         log_warning("OX Stanza without openpgp stanza");
     }
 #endif // HAVE_LIBGPGME
@@ -1610,7 +1609,7 @@ message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
 
 #ifdef HAVE_LIBGPGME
 static xmpp_stanza_t*
-_openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text)
+_ox_openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text)
 {
     time_t now = time(NULL);
     struct tm* tm = localtime(&now);

@@ -1743,6 +1743,10 @@ cmd_prefs(ProfWin* window, const char* const command, gchar** args)
         cons_show("");
         cons_show_omemo_prefs();
         cons_show("");
+    } else if (strcmp(args[0], "ox") == 0) {
+        cons_show("");
+        cons_show_ox_prefs();
+        cons_show("");
     } else {
         cons_bad_cmd_usage(command);
     }
@@ -7719,6 +7723,31 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
             ox_request_public_key(args[1], args[2]);
         } else {
             cons_show("JID and OpenPGP Key ID are required");
+        }
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+    return TRUE;
+}
+
+gboolean
+cmd_ox_log(ProfWin* window, const char* const command, gchar** args)
+{
+    char* choice = args[1];
+    if (g_strcmp0(choice, "on") == 0) {
+        prefs_set_string(PREF_OX_LOG, "on");
+        cons_show("OX messages will be logged as plaintext.");
+        if (!prefs_get_boolean(PREF_CHLOG)) {
+            cons_show("Chat logging is currently disabled, use '/logging chat on' to enable.");
+        }
+    } else if (g_strcmp0(choice, "off") == 0) {
+        prefs_set_string(PREF_OX_LOG, "off");
+        cons_show("OX message logging disabled.");
+    } else if (g_strcmp0(choice, "redact") == 0) {
+        prefs_set_string(PREF_OX_LOG, "redact");
+        cons_show("OX messages will be logged as '[redacted]'.");
+        if (!prefs_get_boolean(PREF_CHLOG)) {
+            cons_show("Chat logging is currently disabled, use '/logging chat on' to enable.");
         }
     } else {
         cons_bad_cmd_usage(command);
