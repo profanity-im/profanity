@@ -1742,7 +1742,7 @@ static struct cmd_t command_defs[] = {
               { "start [<contact>]", "Start PGP encrypted chat, current contact will be used if not specified." },
               { "end", "End PGP encrypted chat with the current recipient." },
               { "log on|off", "Enable or disable plaintext logging of PGP encrypted messages." },
-              { "log redact", "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." },
+              { "log redact", "Log PGP encrypted messages, but replace the contents with [redacted]." },
               { "char <char>", "Set the character to be displayed next to PGP encrypted messages." },
               { "announce <file>", "Announce a public key by pushing it on the XMPP Server" },
               { "discover <jid>", "Discover public keys of a jid. The OpenPGP Key IDs will be displayed" },
@@ -1811,7 +1811,7 @@ static struct cmd_t command_defs[] = {
               { "policy always", "Set the global OTR policy to always, an error will be displayed if an OTR session cannot be initiated upon starting a conversation." },
               { "policy always <contact>", "Set the OTR policy to always for a specific contact." },
               { "log on|off", "Enable or disable plaintext logging of OTR encrypted messages." },
-              { "log redact", "Log OTR encrypted messages, but replace the contents with [redacted]. This is the default." },
+              { "log redact", "Log OTR encrypted messages, but replace the contents with [redacted]." },
               { "char <char>", "Set the character to be displayed next to OTR encrypted messages." },
               { "sendfile on|off", "Allow /sendfile to send unencrypted files while in an OTR session." })
       CMD_EXAMPLES(
@@ -2335,7 +2335,7 @@ static struct cmd_t command_defs[] = {
             { "start [<contact>]",       "Start an OMEMO session with contact, or current recipient if omitted." },
             { "end",                     "End the current OMEMO session." },
             { "log on|off",              "Enable or disable plaintext logging of OMEMO encrypted messages." },
-            { "log redact",              "Log OMEMO encrypted messages, but replace the contents with [redacted]. This is the default." },
+            { "log redact",              "Log OMEMO encrypted messages, but replace the contents with [redacted]." },
             { "fingerprint [<contact>]", "Show contact fingerprints, or current recipient if omitted." },
             { "char <char>",             "Set the character to be displayed next to OMEMO encrypted messages." },
             { "trustmode manual",        "Set the global OMEMO trust mode to manual, OMEMO keys has to be trusted manually." },
