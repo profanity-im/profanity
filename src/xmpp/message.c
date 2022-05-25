@@ -59,6 +59,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/form.h"
+#include "xmpp/iq.h"
 
 #ifdef HAVE_OMEMO
 #include "xmpp/omemo.h"
@@ -1006,6 +1007,28 @@ _handle_captcha(xmpp_stanza_t* const stanza)
     xmpp_free(ctx, message);
 }
 
+// Handle changes to muc configuration
+static int
+_room_config_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    const char* from = xmpp_stanza_get_from(stanza);
+    xmpp_stanza_t* query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    EntityCapabilities* capabilities = stanza_create_caps_from_query_element(query);
+
+    // Update window name
+    ProfMucWin* win = wins_get_muc(from);
+    if (win != NULL) {
+        free(win->room_name);
+        win->room_name = strdup(capabilities->identity->name);
+
+        // Update features
+        muc_set_features(from, capabilities->features);
+    }
+    caps_destroy(capabilities);
+
+    return 0;
+}
+
 static void
 _handle_groupchat(xmpp_stanza_t* const stanza)
 {
@@ -1037,6 +1060,28 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
         char* broadcast;
         broadcast = xmpp_message_get_body(stanza);
         if (!broadcast) {
+            xmpp_stanza_t* x = xmpp_stanza_get_child_by_name(stanza, "x");
+
+            if (x) {
+                xmpp_stanza_t* status = xmpp_stanza_get_child_by_name(x, "status");
+
+                if (status) {
+                    const char* code = xmpp_stanza_get_attribute(status, "code");
+
+                    if (code) {
+                        // If configuration change notification send disco info to get updated info of the muc
+                        char* disqo_info_id = connection_create_stanza_id();
+                        xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, disqo_info_id, room_jid, NULL);
+                        iq_id_handler_add(disqo_info_id, _room_config_handler, NULL, NULL);
+                        free(disqo_info_id);
+                        iq_send_stanza(iq);
+                        xmpp_stanza_release(iq);
+
+                        return;
+                    }
+                }
+            }
+
             jid_destroy(from_jid);
             return;
         }
