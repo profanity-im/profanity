@@ -2587,6 +2587,107 @@ stanza_create_avatar_retrieve_data_request(xmpp_ctx_t* ctx, const char* stanza_i
 }
 
 xmpp_stanza_t*
+stanza_create_avatar_data_publish_iq(xmpp_ctx_t* ctx, const char* img_data, gsize len)
+{
+    char* id = connection_create_stanza_id();
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    free(id);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_FROM, connection_get_fulljid());
+
+    xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t* publish = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
+    xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, STANZA_NS_USER_AVATAR_DATA);
+
+    xmpp_stanza_t* item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
+    char* sha1 = xmpp_sha1(ctx, (guchar*)img_data, len);
+    xmpp_stanza_set_attribute(item, "id", sha1);
+    xmpp_free(ctx, sha1);
+
+    xmpp_stanza_t* data = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(data, STANZA_NAME_DATA);
+    xmpp_stanza_set_ns(data, STANZA_NS_USER_AVATAR_DATA);
+
+    xmpp_stanza_t* text = xmpp_stanza_new(ctx);
+    gchar* base64 = g_base64_encode((guchar*)img_data, len);
+    xmpp_stanza_set_text(text, base64);
+    free(base64);
+
+    xmpp_stanza_add_child(data, text);
+    xmpp_stanza_add_child(item, data);
+    xmpp_stanza_add_child(publish, item);
+    xmpp_stanza_add_child(pubsub, publish);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(text);
+    xmpp_stanza_release(data);
+    xmpp_stanza_release(item);
+    xmpp_stanza_release(publish);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
+stanza_create_avatar_metadata_publish_iq(xmpp_ctx_t* ctx, const char* img_data, gsize len, int height, int width)
+{
+    char* id = id = connection_create_stanza_id();
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    free(id);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_FROM, connection_get_fulljid());
+
+    xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t* publish = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
+    xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, STANZA_NS_USER_AVATAR_METADATA);
+
+    xmpp_stanza_t* item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
+    char* sha1 = xmpp_sha1(ctx, (guchar*)img_data, len);
+    xmpp_stanza_set_attribute(item, "id", sha1);
+
+    xmpp_stanza_t* metadata = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(metadata, STANZA_NAME_METADATA);
+    xmpp_stanza_set_ns(metadata, STANZA_NS_USER_AVATAR_METADATA);
+
+    xmpp_stanza_t* info = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(info, STANZA_NAME_INFO);
+    xmpp_stanza_set_attribute(info, "id", sha1);
+    xmpp_free(ctx, sha1);
+    char* bytes = g_strdup_printf("%lu", len);
+    char* h = g_strdup_printf("%d", height);
+    char* w = g_strdup_printf("%d", width);
+    xmpp_stanza_set_attribute(info, "bytes", bytes);
+    xmpp_stanza_set_attribute(info, "type", "img/png");
+    xmpp_stanza_set_attribute(info, "height", h);
+    xmpp_stanza_set_attribute(info, "width", w);
+    g_free(bytes);
+    g_free(h);
+    g_free(w);
+
+    xmpp_stanza_add_child(metadata, info);
+    xmpp_stanza_add_child(item, metadata);
+    xmpp_stanza_add_child(publish, item);
+    xmpp_stanza_add_child(pubsub, publish);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(info);
+    xmpp_stanza_release(metadata);
+    xmpp_stanza_release(item);
+    xmpp_stanza_release(publish);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
 stanza_attach_correction(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza, const char* const replace_id)
 {
     xmpp_stanza_t* replace_stanza = xmpp_stanza_new(ctx);

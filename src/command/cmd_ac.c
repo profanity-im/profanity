@@ -1057,6 +1057,7 @@ cmd_ac_init(void)
     autocomplete_add(correction_ac, "char");
 
     avatar_ac = autocomplete_new();
+    autocomplete_add(avatar_ac, "set");
     autocomplete_add(avatar_ac, "get");
     autocomplete_add(avatar_ac, "open");
 
@@ -4101,6 +4102,11 @@ _avatar_autocomplete(ProfWin* window, const char* const input, gboolean previous
 
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
+        result = cmd_ac_complete_filepath(input, "/avatar set", previous);
+        if (result) {
+            return result;
+        }
+
         result = autocomplete_param_with_func(input, "/avatar get", roster_barejid_autocomplete, previous, NULL);
         if (result) {
             return result;

@@ -36,10 +36,12 @@
 #include "config.h"
 
 #include <glib.h>
+#include <gdk-pixbuf-2.0/gdk-pixbuf/gdk-pixbuf.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <assert.h>
 #include <sys/stat.h>
 
 #include "log.h"
@@ -59,6 +61,7 @@ typedef struct avatar_metadata
 
 static GHashTable* looking_for = NULL; // contains nicks/barejids from who we want to get the avatar
 static GHashTable* shall_open = NULL;  // contains a list of nicks that shall not just downloaded but also opened
+const int MAX_PIXEL = 192;
 
 static void _avatar_request_item_by_id(const char* jid, avatar_metadata* data);
 static int _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata);
@@ -90,6 +93,58 @@ avatar_pep_subscribe(void)
         g_hash_table_destroy(shall_open);
     }
     shall_open = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+}
+
+gboolean
+avatar_set(const char* path)
+{
+    char* expanded_path = get_expanded_path(path);
+
+    GError* err = NULL;
+    GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(expanded_path, &err);
+
+    if (pixbuf == NULL) {
+        cons_show("An error occurred while opening %s: %s.", expanded_path, err ? err->message : "No error message given");
+        return FALSE;
+    }
+    free(expanded_path);
+
+    // Scale img
+    int w = gdk_pixbuf_get_width(pixbuf);
+    int h = gdk_pixbuf_get_height(pixbuf);
+
+    if (w >= h && w > MAX_PIXEL) {
+        int dest_height = (int)((float)MAX_PIXEL / w * h);
+        GdkPixbuf* new_pixbuf = gdk_pixbuf_scale_simple(pixbuf, MAX_PIXEL, dest_height, GDK_INTERP_BILINEAR);
+        g_object_unref(pixbuf);
+        pixbuf = new_pixbuf;
+    } else if (h > w && w > MAX_PIXEL) {
+        int dest_width = (int)((float)MAX_PIXEL / h * w);
+        GdkPixbuf* new_pixbuf = gdk_pixbuf_scale_simple(pixbuf, dest_width, MAX_PIXEL, GDK_INTERP_BILINEAR);
+        g_object_unref(pixbuf);
+        pixbuf = new_pixbuf;
+    }
+
+    gchar* img_data;
+    gsize len = -1;
+
+    if (!gdk_pixbuf_save_to_buffer(pixbuf, &img_data, &len, "png", &err, NULL)) {
+        cons_show("Unable to scale and convert avatar.");
+        return FALSE;
+    }
+
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    xmpp_stanza_t* iq = stanza_create_avatar_data_publish_iq(ctx, img_data, len);
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+
+    iq = stanza_create_avatar_metadata_publish_iq(ctx, img_data, len, gdk_pixbuf_get_height(pixbuf), gdk_pixbuf_get_width(pixbuf));
+    free(img_data);
+    g_object_unref(pixbuf);
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+
+    return TRUE;
 }
 
 gboolean

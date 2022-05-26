@@ -9195,7 +9195,11 @@ cmd_avatar(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    if (g_strcmp0(args[0], "get") == 0) {
+    if (g_strcmp0(args[0], "set") == 0) {
+        if (avatar_set(args[1])) {
+            cons_show("Avatar updated successfully");
+        }
+    } else if (g_strcmp0(args[0], "get") == 0) {
         avatar_get_by_nick(args[1], false);
     } else if (g_strcmp0(args[0], "open") == 0) {
         avatar_get_by_nick(args[1], true);

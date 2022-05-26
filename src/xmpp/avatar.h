@@ -40,5 +40,6 @@
 
 void avatar_pep_subscribe(void);
 gboolean avatar_get_by_nick(const char* nick, gboolean open);
+gboolean avatar_set(const char* path);
 
 #endif
