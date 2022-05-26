@@ -752,6 +752,8 @@ _muc_user_self_handler(xmpp_stanza_t* stanza)
             log_warning("presence: jid without resource");
             return;
         }
+
+        muc_nick_change_complete(room, nick);
         char* reason = stanza_get_reason(stanza);
         char* show_str = stanza_get_show(stanza, "online");
         char* status_str = stanza_get_status(stanza, NULL);
