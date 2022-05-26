@@ -325,11 +325,14 @@ _ox_metadata_result(xmpp_stanza_t* const stanza, void* const userdata)
 
     while (pubkeymetadata) {
         const char* fingerprint = xmpp_stanza_get_attribute(pubkeymetadata, STANZA_ATTR_V4_FINGERPRINT);
-        if (strlen(fingerprint) == KEYID_LENGTH) {
-            cons_show(fingerprint);
-        } else {
-            cons_show("OX: Wrong char size of public key");
-            log_error("[OX] Wrong chat size of public key %s", fingerprint);
+
+        if (fingerprint) {
+            if (strlen(fingerprint) == KEYID_LENGTH) {
+                cons_show(fingerprint);
+            } else {
+                cons_show("OX: Wrong char size of public key");
+                log_error("[OX] Wrong chat size of public key %s", fingerprint);
+            }
         }
         pubkeymetadata = xmpp_stanza_get_next(pubkeymetadata);
     }
