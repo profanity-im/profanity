@@ -40,6 +40,8 @@
 
 void avatar_pep_subscribe(void);
 gboolean avatar_get_by_nick(const char* nick, gboolean open);
+#ifdef HAVE_PIXBUF
 gboolean avatar_set(const char* path);
+#endif
 
 #endif

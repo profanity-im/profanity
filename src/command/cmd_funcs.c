@@ -9196,9 +9196,13 @@ cmd_avatar(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (g_strcmp0(args[0], "set") == 0) {
+#ifdef HAVE_PIXBUF
         if (avatar_set(args[1])) {
             cons_show("Avatar updated successfully");
         }
+#else
+        cons_show("This version of Profanity has not been built with GDK Pixbuf support enabled");
+#endif
     } else if (g_strcmp0(args[0], "get") == 0) {
         avatar_get_by_nick(args[1], false);
     } else if (g_strcmp0(args[0], "open") == 0) {

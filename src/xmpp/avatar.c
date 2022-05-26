@@ -95,6 +95,7 @@ avatar_pep_subscribe(void)
     shall_open = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 }
 
+#ifdef HAVE_PIXBUF
 gboolean
 avatar_set(const char* path)
 {
@@ -104,7 +105,7 @@ avatar_set(const char* path)
     GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(expanded_path, &err);
 
     if (pixbuf == NULL) {
-        cons_show("An error occurred while opening %s: %s.", expanded_path, err ? err->message : "No error message given");
+        cons_show_error("An error occurred while opening %s: %s.", expanded_path, err ? err->message : "No error message given");
         return FALSE;
     }
     free(expanded_path);
@@ -129,7 +130,7 @@ avatar_set(const char* path)
     gsize len = -1;
 
     if (!gdk_pixbuf_save_to_buffer(pixbuf, &img_data, &len, "png", &err, NULL)) {
-        cons_show("Unable to scale and convert avatar.");
+        cons_show_error("Unable to scale and convert avatar.");
         return FALSE;
     }
 
@@ -146,6 +147,7 @@ avatar_set(const char* path)
 
     return TRUE;
 }
+#endif
 
 gboolean
 avatar_get_by_nick(const char* nick, gboolean open)
