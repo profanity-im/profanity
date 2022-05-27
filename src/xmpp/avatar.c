@@ -36,12 +36,13 @@
 #include "config.h"
 
 #include <glib.h>
+#ifdef HAVE_PIXBUF
 #include <gdk-pixbuf-2.0/gdk-pixbuf/gdk-pixbuf.h>
+#endif
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <assert.h>
 #include <sys/stat.h>
 
 #include "log.h"
@@ -61,7 +62,7 @@ typedef struct avatar_metadata
 
 static GHashTable* looking_for = NULL; // contains nicks/barejids from who we want to get the avatar
 static GHashTable* shall_open = NULL;  // contains a list of nicks that shall not just downloaded but also opened
-const int MAX_PIXEL = 192;
+const int MAX_PIXEL = 192;             // max pixel width/height for an avatar
 
 static void _avatar_request_item_by_id(const char* jid, avatar_metadata* data);
 static int _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata);

@@ -2452,7 +2452,7 @@ static struct cmd_t command_defs[] = {
               "If nothing happens after using this command the user either doesn't have an avatar set at all "
               "or doesn't use XEP-0084 to publish it.")
       CMD_ARGS(
-              { "set <path>", "Set avatar to the img at <path>." },
+              { "set <path>", "Set avatar to the image at <path>." },
               { "get <barejid>", "Download the avatar. barejid is the JID to download avatar from." },
               { "open <barejid>", "Download avatar and open it with command." })
       CMD_EXAMPLES(

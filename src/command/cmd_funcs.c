@@ -9201,7 +9201,7 @@ cmd_avatar(ProfWin* window, const char* const command, gchar** args)
             cons_show("Avatar updated successfully");
         }
 #else
-        cons_show("This version of Profanity has not been built with GDK Pixbuf support enabled");
+        cons_show("Profanity has not been built with GDK Pixbuf support enabled which is needed to scale the avatar when uploading.");
 #endif
     } else if (g_strcmp0(args[0], "get") == 0) {
         avatar_get_by_nick(args[1], false);
