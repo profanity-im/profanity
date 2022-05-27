@@ -44,7 +44,7 @@ case $(uname | tr '[:upper:]' '[:lower:]') in
         tests=(
         "--enable-notifications --enable-icons-and-clipboard --enable-otr --enable-pgp
         --enable-omemo --enable-plugins --enable-c-plugins
-        --enable-python-plugins --with-xscreensaver"
+        --enable-python-plugins --with-xscreensaver --enable-gdk-pixbuf"
         "--disable-notifications --disable-icons-and-clipboard --disable-otr --disable-pgp
         --disable-omemo --disable-plugins --disable-c-plugins
         --disable-python-plugins --without-xscreensaver"
@@ -60,6 +60,7 @@ case $(uname | tr '[:upper:]' '[:lower:]') in
         "--disable-c-plugins"
         "--disable-c-plugins --disable-python-plugins"
         "--without-xscreensaver"
+        "--disable-gdk-pixbuf"
         "")
         ;;
     darwin*)

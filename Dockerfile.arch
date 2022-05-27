@@ -26,7 +26,8 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   pkg-config \
   python \
   wget \
-  sqlite
+  sqlite \
+  gdk-pixbuf2
 
 RUN mkdir -p /usr/src/{stabber,profanity}
 

@@ -311,7 +311,8 @@ fi
 dnl feature: pixbuf / used for scaling avatars before uploading via `/avatar set`
 AS_IF([test "x$enable_pixbuf" != xno],
     [PKG_CHECK_MODULES([gdk_pixbuf], [gdk-pixbuf-2.0 >= 2.4],
-        [AC_DEFINE([HAVE_PIXBUF], [1], [gdk-pixbuf module])],
+        [AC_DEFINE([HAVE_PIXBUF], [1], [gdk-pixbuf module])
+         LIBS="$gdk_pixbuf_LIBS $LIBS" CFLAGS="$gdk_pixbuf_CFLAGS $CFLAGS"],
         [AS_IF([test "x$enable_pixbuf" = xyes],
                [AC_MSG_ERROR([gdk-pixbuf-2.0 >= 2.4 is required to scale avatars before uploading])],
                [AC_MSG_NOTICE([gdk-pixbuf-2.0 >= 2.4 not found, GDK Pixbuf support not enabled])])])])
