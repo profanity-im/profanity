@@ -9778,4 +9778,3 @@ cmd_mood(ProfWin* window, const char* const command, gchar** args)
     }
     return TRUE;
 }
-
