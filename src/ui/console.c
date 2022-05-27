@@ -878,18 +878,16 @@ cons_show_omemo_qrcode(const char* const text)
 
     ProfWin* console = wins_get_console();
 
+    char buf[(width * 4) + 1];
+    memset(buf, 0, sizeof buf);
     for (size_t y = 0; y < width; y+=ZOOM_SIZE) {
-        //size_t y_index = y * width;
         for (size_t x = 0; x < width; x+=ZOOM_SIZE) {
-            if (x==0) {
-                win_print(console, THEME_DEFAULT, "", "%s", (*data & 1) ? "A" : "B");
-            } else {
-                win_append(console, THEME_DEFAULT, "", "%s", (*data & 1) ? "A" : "B");
-            }
+            strcat(buf, (*data & 1) ? "\u2588\u2588" : "\u2800\u2800");
 
             data++;
         }
-        win_println(console, THEME_DEFAULT, "", "");
+        win_println(console, THEME_DEFAULT, "", "%s", buf);
+        memset(buf, 0, sizeof buf);
     }
 
     QRcode_free(qrcode);
@@ -2928,3 +2926,4 @@ cons_remove_alert(ProfWin* window)
     g_list_free_full(item, g_free);
     free(win_name);
 }
+

@@ -9039,7 +9039,18 @@ gboolean
 cmd_omemo_qrcode(ProfWin* window, const char* const command, gchar** args)
 {
 #ifdef HAVE_OMEMO
-    cons_show_omemo_qrcode("some text from me");
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You must be connected with an account to load OMEMO information.");
+        return TRUE;
+    }
+
+    if (!omemo_loaded()) {
+        win_println(window, THEME_DEFAULT, "!", "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
+        return TRUE;
+    }
+
+    char* fingerprint = omemo_own_fingerprint(TRUE);
+    cons_show_omemo_qrcode(fingerprint);
     return TRUE;
 #else
     cons_show("This version of Profanity has not been built with OMEMO support enabled");
@@ -9767,3 +9778,4 @@ cmd_mood(ProfWin* window, const char* const command, gchar** args)
     }
     return TRUE;
 }
+
