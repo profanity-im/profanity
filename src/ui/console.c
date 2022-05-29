@@ -904,6 +904,8 @@ cons_show_omemo_qrcode(const char* const text)
     win_println(console, THEME_DEFAULT, "", "%s", tmp);
 
     QRcode_free(qrcode);
+#else
+    cons_show("This version of Profanity has not been built with libqrencode");
 #endif
 }
 

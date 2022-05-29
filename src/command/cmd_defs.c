@@ -2328,7 +2328,8 @@ static struct cmd_t command_defs[] = {
             "/omemo char <char>",
             "/omemo trustmode manual|firstusage|blind",
             "/omemo policy manual|automatic|always",
-            "/omemo clear_device_list")
+            "/omemo clear_device_list",
+            "/omemo qrcode")
         CMD_DESC(
             "OMEMO commands to manage keys, and perform encryption during chat sessions.")
         CMD_ARGS(
@@ -2345,7 +2346,8 @@ static struct cmd_t command_defs[] = {
             { "policy manual",           "Set the global OMEMO policy to manual, OMEMO sessions must be started manually." },
             { "policy automatic",        "Set the global OMEMO policy to opportunistic, an OMEMO session will be attempted upon starting a conversation." },
             { "policy always",           "Set the global OMEMO policy to always, an error will be displayed if an OMEMO session cannot be initiated upon starting a conversation." },
-            { "clear_device_list",       "Clear your own device list on server side. Each client will reannounce itself when connected back."})
+            { "clear_device_list",       "Clear your own device list on server side. Each client will reannounce itself when connected back."},
+            { "qrcode",                  "Display QR code of your OMEMO fingerprint"})
         CMD_EXAMPLES(
             "/omemo gen",
             "/omemo start odin@valhalla.edda",
