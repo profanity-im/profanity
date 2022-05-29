@@ -1314,6 +1314,14 @@ _handle_carbons(xmpp_stanza_t* const stanza)
         return NULL;
     }
 
+    // Eliminate duplicate messages in chat with oneself when another client is sending a message
+    char* bare_from = xmpp_jid_bare(connection_get_ctx(), xmpp_stanza_get_from(message_stanza));
+    if (g_strcmp0(bare_from, xmpp_stanza_get_to(message_stanza)) == 0) {
+        free(bare_from);
+        return NULL;
+    }
+    free(bare_from);
+
     return message_stanza;
 }
 

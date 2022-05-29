@@ -60,6 +60,7 @@
 #include "ui/screen.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
+#include "xmpp/connection.h"
 
 #define CONS_WIN_TITLE "Profanity. Type /help for help information."
 #define XML_WIN_TITLE  "XML Console"
@@ -1192,7 +1193,10 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
         if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
             _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->barejid);
         } else {
-            _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
+            // Prevent duplicate messages when current client is sending a message
+            if (g_strcmp0(message->from_jid->fulljid, connection_get_fulljid()) != 0) {
+                _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
+            }
         }
 
         free(enc_char);
