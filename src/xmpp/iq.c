@@ -892,13 +892,6 @@ _caps_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             log_debug("Capabilities not cached: %s, storing", given_sha1);
             EntityCapabilities* capabilities = stanza_create_caps_from_query_element(query);
 
-            // Update window name
-            ProfMucWin* win = wins_get_muc(from);
-            if (win != NULL) {
-                free(win->room_name);
-                win->room_name = strdup(capabilities->identity->name);
-            }
-
             caps_add_by_ver(given_sha1, capabilities);
             caps_destroy(capabilities);
         }
