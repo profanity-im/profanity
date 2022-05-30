@@ -348,10 +348,8 @@ AC_SUBST(THEMES_PATH)
 AM_CONDITIONAL([THEMES_INSTALL], "$THEMES_INSTALL")
 
 if test "x$enable_omemo_qrcode" != xno; then
-    AC_DEFINE([HAVE_QRENCODE], [1], [Have QRencode])
-
     PKG_CHECK_MODULES([libqrencode], [libqrencode],
-        [LIBS="$libqrencode_LIBS $LIBS" CFLAGS="$libqrencode_CFLAGS $cflags"],
+        [AC_DEFINE([HAVE_QRENCODE], [1], [Have QRencode]) LIBS="$libqrencode_LIBS $LIBS" CFLAGS="$libqrencode_CFLAGS $CFLAGS"],
         [AC_DEFINE([HAVE_QRENCODE], [0], [Dont have QRencode])
          AS_IF([test "x$enable_qrcode" = xyes],
                [AC_MSG_ERROR([libqrencode not found])],
