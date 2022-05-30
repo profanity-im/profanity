@@ -8,3 +8,9 @@ avatar_get_by_nick(const char* nick)
 {
     return TRUE;
 }
+
+gboolean
+avatar_set(const char* path)
+{
+    return TRUE;
+}

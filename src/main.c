@@ -173,6 +173,12 @@ main(int argc, char** argv)
         g_print("GTK icons/clipboard: Disabled\n");
 #endif
 
+#ifdef HAVE_PIXBUF
+        g_print("GDK Pixbuf: Enabled\n");
+#else
+        g_print("GDK Pixbuf: Disabled\n");
+#endif
+
         return 0;
     }
 

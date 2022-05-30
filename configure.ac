@@ -65,6 +65,8 @@ AC_ARG_WITH([themes],
     [AS_HELP_STRING([--with-themes[[=PATH]]], [install themes (default yes)])])
 AC_ARG_ENABLE([icons-and-clipboard],
     [AS_HELP_STRING([--enable-icons-and-clipboard], [enable GTK tray icons and clipboard paste support])])
+AC_ARG_ENABLE([gdk-pixbuf],
+    [AS_HELP_STRING([--enable-gdk-pixbuf], [enable GDK Pixbuf support to scale avatars before uploading])])
 
 # Required dependencies
 
@@ -305,6 +307,15 @@ if test "x$enable_otr" != xno; then
 
    AM_COND_IF([BUILD_OTR], [AC_DEFINE([HAVE_LIBOTR], [1], [Have libotr])])
 fi
+
+dnl feature: pixbuf / used for scaling avatars before uploading via `/avatar set`
+AS_IF([test "x$enable_pixbuf" != xno],
+    [PKG_CHECK_MODULES([gdk_pixbuf], [gdk-pixbuf-2.0 >= 2.4],
+        [AC_DEFINE([HAVE_PIXBUF], [1], [gdk-pixbuf module])
+         LIBS="$gdk_pixbuf_LIBS $LIBS" CFLAGS="$gdk_pixbuf_CFLAGS $CFLAGS"],
+        [AS_IF([test "x$enable_pixbuf" = xyes],
+               [AC_MSG_ERROR([gdk-pixbuf-2.0 >= 2.4 is required to scale avatars before uploading])],
+               [AC_MSG_NOTICE([gdk-pixbuf-2.0 >= 2.4 not found, GDK Pixbuf support not enabled])])])])
 
 dnl feature: omemo
 AM_CONDITIONAL([BUILD_OMEMO], [false])

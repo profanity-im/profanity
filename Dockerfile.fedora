@@ -34,7 +34,8 @@ RUN dnf install -y \
   python3-devel \
   readline-devel \
   openssl-devel \
-  sqlite-devel
+  sqlite-devel \
+  gdk-pixbuf2-devel
 
 # https://github.com/openSUSE/docker-containers-build/issues/26
 ENV LANG en_US.UTF-8

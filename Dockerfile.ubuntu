@@ -28,7 +28,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   pkg-config \
   python3-dev \
   python-dev-is-python3 \
-  libsqlite3-dev
+  libsqlite3-dev \
+  libgdk-pixbuf-2.0-dev
 
 RUN mkdir -p /usr/src/{stabber,libstrophe,profanity}
 WORKDIR /usr/src

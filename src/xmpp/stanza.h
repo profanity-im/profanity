@@ -62,6 +62,8 @@
 #define STANZA_NAME_PUBLIC_KEYS_LIST "public-keys-list"
 #define STANZA_NAME_PUBKEY_METADATA  "pubkey-metadata"
 #define STANZA_NAME_DATA             "data"
+#define STANZA_NAME_METADATA         "metadata"
+#define STANZA_NAME_INFO             "info"
 #define STANZA_NAME_SHOW             "show"
 #define STANZA_NAME_STATUS           "status"
 #define STANZA_NAME_IQ               "iq"
@@ -409,6 +411,8 @@ XMPPCaps* stanza_parse_caps(xmpp_stanza_t* const stanza);
 void stanza_free_caps(XMPPCaps* caps);
 
 xmpp_stanza_t* stanza_create_avatar_retrieve_data_request(xmpp_ctx_t* ctx, const char* stanza_id, const char* const item_id, const char* const jid);
+xmpp_stanza_t* stanza_create_avatar_data_publish_iq(xmpp_ctx_t* ctx, const char* img_data, gsize len);
+xmpp_stanza_t* stanza_create_avatar_metadata_publish_iq(xmpp_ctx_t* ctx, const char* img_data, gsize len, int height, int width);
 xmpp_stanza_t* stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const lastid);
 xmpp_stanza_t* stanza_change_password(xmpp_ctx_t* ctx, const char* const user, const char* const password);
 xmpp_stanza_t* stanza_register_new_account(xmpp_ctx_t* ctx, const char* const user, const char* const password);
