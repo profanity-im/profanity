@@ -9036,6 +9036,18 @@ cmd_omemo_policy(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_omemo_qrcode(ProfWin* window, const char* const command, gchar** args)
+{
+#ifdef HAVE_OMEMO
+    cons_show_omemo_qrcode("some text from me");
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
 cmd_save(ProfWin* window, const char* const command, gchar** args)
 {
     log_info("Saving preferences to configuration file");

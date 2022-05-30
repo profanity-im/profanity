@@ -2312,7 +2312,8 @@ static struct cmd_t command_defs[] = {
             { "fingerprint", cmd_omemo_fingerprint },
             { "char", cmd_omemo_char },
             { "policy", cmd_omemo_policy },
-            { "clear_device_list", cmd_omemo_clear_device_list })
+            { "clear_device_list", cmd_omemo_clear_device_list },
+            { "qrcode", cmd_omemo_qrcode })
         CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CHAT,

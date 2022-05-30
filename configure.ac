@@ -67,6 +67,8 @@ AC_ARG_ENABLE([icons-and-clipboard],
     [AS_HELP_STRING([--enable-icons-and-clipboard], [enable GTK tray icons and clipboard paste support])])
 AC_ARG_ENABLE([gdk-pixbuf],
     [AS_HELP_STRING([--enable-gdk-pixbuf], [enable GDK Pixbuf support to scale avatars before uploading])])
+AC_ARG_ENABLE([omemo-qrcode],
+    [AS_HELP_STRING([--enable-omemo-qrcode], [enable ability to display omemo qr code])])
 
 # Required dependencies
 
@@ -344,6 +346,12 @@ AS_IF([test "x$with_themes" = xno -o "x$with_themes" = xyes -o "x$with_themes" =
     [THEMES_PATH="$with_themes"])
 AC_SUBST(THEMES_PATH)
 AM_CONDITIONAL([THEMES_INSTALL], "$THEMES_INSTALL")
+
+dnl feature: omemo qrcode
+AS_IF([test "x$omemo_qrcode" != xno],
+    [PKG_CHECK_MODULES([libqrencode], [libqrencode],
+        [AC_DEFINE([HAVE_QRENCODE], [1], [qrcode module])]
+        [LIBS="-lqrencode $LIBS"]], []))
 
 ## Tests
 

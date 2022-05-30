@@ -48,6 +48,10 @@
 #include <curses.h>
 #endif
 
+#ifdef HAVE_QRENCODE
+#include <qrencode.h>
+#endif
+
 #include "common.h"
 #include "log.h"
 #include "config/preferences.h"
@@ -860,6 +864,36 @@ cons_show_disco_contact_information(GHashTable* addresses)
 
         g_hash_table_foreach(addresses, _cons_print_contact_information_hashlist_item, NULL);
     }
+}
+
+void
+cons_show_omemo_qrcode(const char* const text)
+{
+#ifdef HAVE_QRENCODE
+    static const size_t ZOOM_SIZE = 10;
+    QRcode *qrcode = QRcode_encodeString(text, 0, QR_ECLEVEL_L, QR_MODE_8, 1);
+
+    int width = (qrcode->width * ZOOM_SIZE);
+    unsigned char *data = qrcode->data;
+
+    ProfWin* console = wins_get_console();
+
+    for (size_t y = 0; y < width; y+=ZOOM_SIZE) {
+        //size_t y_index = y * width;
+        for (size_t x = 0; x < width; x+=ZOOM_SIZE) {
+            if (x==0) {
+                win_print(console, THEME_DEFAULT, "", "%s", (*data & 1) ? "A" : "B");
+            } else {
+                win_append(console, THEME_DEFAULT, "", "%s", (*data & 1) ? "A" : "B");
+            }
+
+            data++;
+        }
+        win_println(console, THEME_DEFAULT, "", "");
+    }
+
+    QRcode_free(qrcode);
+#endif
 }
 
 void
