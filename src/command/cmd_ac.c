@@ -700,6 +700,7 @@ cmd_ac_init(void)
     autocomplete_add(omemo_ac, "policy");
     autocomplete_add(omemo_ac, "trustmode");
     autocomplete_add(omemo_ac, "char");
+    autocomplete_add(omemo_ac, "qrcode");
 
     omemo_log_ac = autocomplete_new();
     autocomplete_add(omemo_log_ac, "on");

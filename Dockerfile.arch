@@ -27,7 +27,8 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   python \
   wget \
   sqlite \
-  gdk-pixbuf2
+  gdk-pixbuf2 \
+  qrencode
 
 RUN mkdir -p /usr/src/{stabber,profanity}
 

@@ -277,7 +277,11 @@ void cons_show_bookmarks(const GList* list);
 void cons_show_bookmarks_ignore(gchar** list, gsize len);
 void cons_show_disco_items(GSList* items, const char* const jid);
 void cons_show_disco_info(const char* from, GSList* identities, GSList* features);
+
 void cons_show_disco_contact_information(GHashTable* addresses);
+
+void cons_show_omemo_qrcode(const char* const text);
+
 void cons_show_room_invite(const char* const invitor, const char* const room, const char* const reason);
 void cons_check_version(gboolean not_available_msg);
 void cons_show_typing(const char* const barejid);

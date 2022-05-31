@@ -35,7 +35,8 @@ RUN zypper --non-interactive in --no-recommends \
   python38-devel \
   readline-devel \
   sqlite3-devel \
-  gdk-pixbuf-devel
+  gdk-pixbuf-devel \
+  qrencode-devel
 
 # https://github.com/openSUSE/docker-containers-build/issues/26
 ENV LANG en_US.UTF-8
