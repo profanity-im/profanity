@@ -867,7 +867,7 @@ cons_show_disco_contact_information(GHashTable* addresses)
 }
 
 void
-cons_show_omemo_qrcode(const char* const text)
+cons_show_qrcode(const char* const text)
 {
 #ifdef HAVE_QRENCODE
     static const size_t ZOOM_SIZE = 10;

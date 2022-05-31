@@ -120,3 +120,9 @@ omemo_device_id()
 {
     return 123;
 }
+
+char*
+omemo_qrcode_str()
+{
+    return NULL;
+}

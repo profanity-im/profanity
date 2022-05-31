@@ -9049,8 +9049,10 @@ cmd_omemo_qrcode(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    char* fingerprint = omemo_own_fingerprint(TRUE);
-    cons_show_omemo_qrcode(fingerprint);
+    char* qrstr = omemo_qrcode_str();
+    cons_show_qrcode(qrstr);
+    free(qrstr);
+
     return TRUE;
 #else
     cons_show("This version of Profanity has not been built with OMEMO support enabled");

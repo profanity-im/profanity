@@ -105,3 +105,5 @@ char* omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res);
 gcry_error_t omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char* fragment);
 void omemo_free(void* a);
 int omemo_parse_aesgcm_url(const char* aesgcm_url, char** https_url, char** fragment);
+
+char* omemo_qrcode_str();
