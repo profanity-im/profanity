@@ -930,7 +930,7 @@ cons_show_disco_info(const char* from, GSList* identities, GSList* features)
 }
 
 void
-cons_show_omemo_qrcode(const char* const text)
+cons_show_qrcode(const char* const text)
 {
 }
 
