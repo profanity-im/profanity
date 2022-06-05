@@ -856,7 +856,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     // (Since none of the recipients would be able to read the message.)
     if (keys == NULL) {
         win_println(win, THEME_ERROR, "!", "This message cannot be decrypted for any recipient.\n"
-                                           "You should trust your recipients' device fingerprint(s) using \"/omemo fingerprint trust FINGERPRINT\".\n"
+                                           "You should trust your recipients' device fingerprint(s) using \"/omemo trust FINGERPRINT\".\n"
                                            "It could also be that the key bundle of the recipient(s) have not been received. "
                                            "In this case, you could try \"omemo end\", \"omemo start\", and send the message again.");
         goto out;
