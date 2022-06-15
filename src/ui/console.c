@@ -903,7 +903,7 @@ cons_show_qrcode(const char* const text)
         // The extra squares are for padding, so that the QR code doesn't
         // "blend in" with the rest of the terminal window.
         win_println(console, THEME_DEFAULT, "", "\u2588\u2588%s\u2588\u2588", buf);
-        memset(buf, 0, sizeof buf);
+        buf = { 0 };
     }
     win_println(console, THEME_DEFAULT, "", "%s", pad);
 
