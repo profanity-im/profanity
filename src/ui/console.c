@@ -878,9 +878,8 @@ cons_show_qrcode(const char* const text)
 
     ProfWin* console = wins_get_console();
 
-    char *buf = calloc((width * 4) + 1, 1);
-
-    char *pad = calloc((width * 4) + 5, 1);
+    char* buf = calloc((width * 4) + 1, 1);
+    char* pad = calloc((width * 4) + 5, 1);
 
     if (!buf || !pad) {
         free(pad);
@@ -903,7 +902,7 @@ cons_show_qrcode(const char* const text)
         // The extra squares are for padding, so that the QR code doesn't
         // "blend in" with the rest of the terminal window.
         win_println(console, THEME_DEFAULT, "", "\u2588\u2588%s\u2588\u2588", buf);
-        buf = { 0 };
+        buf[0] = '\0';
     }
     win_println(console, THEME_DEFAULT, "", "%s", pad);
 
@@ -2948,4 +2947,3 @@ cons_remove_alert(ProfWin* window)
     g_list_free_full(item, g_free);
     free(win_name);
 }
-
