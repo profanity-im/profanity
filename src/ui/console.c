@@ -878,17 +878,21 @@ cons_show_qrcode(const char* const text)
 
     ProfWin* console = wins_get_console();
 
-    char buf[(width * 4) + 1];
-    memset(buf, 0, sizeof buf);
+    char *buf = calloc((width * 4) + 1, 1);
 
-    char tmp[(width * 4) + 5];
-    memset(tmp, 0, sizeof tmp);
+    char *pad = calloc((width * 4) + 5, 1);
 
-    for (int i = 0; i < width + 2 * ZOOM_SIZE; i += ZOOM_SIZE) {
-        strcat(tmp, "\u2588\u2588");
+    if (!buf || !pad) {
+        free(pad);
+        free(buf);
+        return;
     }
 
-    win_println(console, THEME_DEFAULT, "", tmp);
+    for (int i = 0; i < width + 2 * ZOOM_SIZE; i += ZOOM_SIZE) {
+        strcat(pad, "\u2588\u2588");
+    }
+
+    win_println(console, THEME_DEFAULT, "", pad);
     for (size_t y = 0; y < width; y += ZOOM_SIZE) {
         for (size_t x = 0; x < width; x += ZOOM_SIZE) {
             strcat(buf, !(*data & 1) ? "\u2588\u2588" : "\u2800\u2800");
@@ -901,7 +905,10 @@ cons_show_qrcode(const char* const text)
         win_println(console, THEME_DEFAULT, "", "\u2588\u2588%s\u2588\u2588", buf);
         memset(buf, 0, sizeof buf);
     }
-    win_println(console, THEME_DEFAULT, "", "%s", tmp);
+    win_println(console, THEME_DEFAULT, "", "%s", pad);
+
+    free(pad);
+    free(buf);
 
     QRcode_free(qrcode);
 #else
@@ -2941,3 +2948,4 @@ cons_remove_alert(ProfWin* window)
     g_list_free_full(item, g_free);
     free(win_name);
 }
+
