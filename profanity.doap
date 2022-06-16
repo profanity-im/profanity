@@ -41,21 +41,19 @@
 
     <category rdf:resource='https://linkmauve.fr/ns/xmpp-doap#category-client'/>
 
-    <!-- No comment :/
-    <repository>
-      <GitRepository>
-        <browse rdf:resource=''/>
-        <location rdf:resource=''/>
-      </GitRepository>
-    </repository>
-    -->
-
     <maintainer>
         <foaf:Person>
             <foaf:name>Michael Vetter</foaf:name>
             <foaf:homepage rdf:resource="https://iodoru.org/"/>
         </foaf:Person>
     </maintainer>
+
+    <repository>
+      <GitRepository>
+        <browse rdf:resource='https://github.com/profanity-im/profanity'/>
+        <location rdf:resource='https://github.com/profanity-im/profanity.git'/>
+      </GitRepository>
+    </repository>
 
     <implements rdf:resource='https://datatracker.ietf.org/doc/html/rfc6120'/>
     <implements rdf:resource='https://datatracker.ietf.org/doc/html/rfc6121'/>
