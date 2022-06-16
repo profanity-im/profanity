@@ -398,6 +398,20 @@
 
     <release>
       <Version>
+        <revision>0.12.1</revision>
+        <created>2022-04-04</created>
+        <file-release rdf:resource='https://profanity-im.github.io/profanity-0.12.1.tar.gz'/>
+      </Version>
+    </release>
+    <release>
+      <Version>
+        <revision>0.12.0</revision>
+        <created>2022-03-30</created>
+        <file-release rdf:resource='https://profanity-im.github.io/profanity-0.12.0.tar.gz'/>
+      </Version>
+    </release>
+    <release>
+      <Version>
         <revision>0.11.1</revision>
         <created>2021-09-28</created>
         <file-release rdf:resource='https://profanity-im.github.io/profanity-0.11.1.tar.gz'/>
