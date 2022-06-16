@@ -50,6 +50,13 @@
     </repository>
     -->
 
+    <maintainer>
+        <foaf:Person>
+            <foaf:name>Michael Vetter</foaf:name>
+            <foaf:homepage rdf:resource="https://iodoru.org/"/>
+        </foaf:Person>
+    </maintainer>
+
     <implements rdf:resource='https://datatracker.ietf.org/doc/html/rfc6120'/>
     <implements rdf:resource='https://datatracker.ietf.org/doc/html/rfc6121'/>
     <implements rdf:resource='https://datatracker.ietf.org/doc/html/rfc6122'/>
