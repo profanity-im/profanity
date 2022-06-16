@@ -83,8 +83,17 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
                     i++;
                     gchar* next_ch = g_utf8_next_char(curr_ch);
                     gunichar next_uni = g_utf8_get_char(next_ch);
-                    token_start = next_ch;
-                    token_size += g_unichar_to_utf8(next_uni, NULL);
+
+                    if (next_uni == '"') {
+                        tokens = g_slist_append(tokens, g_strndup(curr_ch,
+                                                                  0));
+                        token_size = 0;
+                        in_token = FALSE;
+                        in_quotes = FALSE;
+                    } else {
+                        token_start = next_ch;
+                        token_size += g_unichar_to_utf8(next_uni, NULL);
+                    }
                 }
                 if (curr_uni == '"') {
                     gchar* next_ch = g_utf8_next_char(curr_ch);
@@ -115,7 +124,7 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
                                                               token_size));
                     token_size = 0;
                     in_token = FALSE;
-                } else if (curr_uni != '"') {
+                } else {
                     token_size += g_unichar_to_utf8(curr_uni, NULL);
                 }
             }
