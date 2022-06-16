@@ -26,7 +26,7 @@
     <language>en</language>
 
     <schema:logo rdf:resource="https://profanity-im.github.io/images/profanity_logo.png"/>
-    <schema:screenshot rdf:resource='https://profanity-im.github.io/images/prof-1.png'/>
+    <schema:screenshot rdf:resource='https://profanity-im.github.io/images/prof-2.png'/>
 
     <programming-language>C</programming-language>
 
