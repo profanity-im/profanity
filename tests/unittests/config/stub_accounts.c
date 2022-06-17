@@ -318,3 +318,13 @@ void
 accounts_add_omemo_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
 {
 }
+
+void
+accounts_add_pgp_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
+{
+}
+
+void
+accounts_add_ox_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
+{
+}

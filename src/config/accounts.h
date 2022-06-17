@@ -100,6 +100,8 @@ void accounts_clear_muc(const char* const account_name);
 void accounts_clear_resource(const char* const account_name);
 void accounts_add_otr_policy(const char* const account_name, const char* const contact_jid, const char* const policy);
 void accounts_add_omemo_state(const char* const account_name, const char* const contact_jid, gboolean enabled);
+void accounts_add_ox_state(const char* const account_name, const char* const contact_jid, gboolean enabled);
+void accounts_add_pgp_state(const char* const account_name, const char* const contact_jid, gboolean enabled);
 void accounts_clear_omemo_state(const char* const account_name, const char* const contact_jid);
 
 #endif
