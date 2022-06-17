@@ -132,9 +132,11 @@ chatwin_new(const char* const barejid)
         win_println(window, THEME_DEFAULT, "!", "This chat could be either OMEMO, PGP, OX or OTR encrypted, but not more than one. "
                                                 "Use '/omemo start', '/pgp start', '/ox start' or '/otr start' to select the encryption method.");
     } else if (is_omemo_secure) {
+#ifdef HAVE_OMEMO
         // Start the OMEMO session
         omemo_start_session(barejid);
         chatwin->is_omemo = TRUE;
+#endif
     } else if (_pgp_automatic_start(barejid)) {
         // Start the PGP session
         chatwin->pgp_send = TRUE;
