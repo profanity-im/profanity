@@ -57,8 +57,9 @@ account_new(const gchar* const name, const gchar* const jid,
             const gchar* const muc_service, const gchar* const muc_nick,
             const gchar* const otr_policy, GList* otr_manual, GList* otr_opportunistic,
             GList* otr_always, const gchar* const omemo_policy, GList* omemo_enabled,
-            GList* omemo_disabled, const gchar* const pgp_keyid, const char* const startscript,
-            const char* const theme, gchar* tls_policy, gchar* auth_policy)
+            GList* omemo_disabled, GList* ox_enabled, GList* pgp_enabled,
+            const gchar* const pgp_keyid, const char* const startscript, const char* const theme,
+            gchar* tls_policy, gchar* auth_policy)
 {
     ProfAccount* new_account = malloc(sizeof(ProfAccount));
     memset(new_account, 0, sizeof(ProfAccount));
@@ -153,6 +154,10 @@ account_new(const gchar* const name, const gchar* const jid,
 
     new_account->omemo_enabled = omemo_enabled;
     new_account->omemo_disabled = omemo_disabled;
+
+    new_account->ox_enabled = ox_enabled;
+
+    new_account->pgp_enabled = pgp_enabled;
 
     if (pgp_keyid != NULL) {
         new_account->pgp_keyid = strdup(pgp_keyid);
@@ -281,6 +286,8 @@ account_free(ProfAccount* account)
     g_list_free_full(account->otr_always, g_free);
     g_list_free_full(account->omemo_enabled, g_free);
     g_list_free_full(account->omemo_disabled, g_free);
+    g_list_free_full(account->ox_enabled, g_free);
+    g_list_free_full(account->pgp_enabled, g_free);
     free(account);
 }
 

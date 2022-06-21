@@ -7475,6 +7475,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
         }
 
         chatwin->pgp_send = TRUE;
+        accounts_add_pgp_state(session_get_account_name(), chatwin->barejid, TRUE);
         win_println(window, THEME_DEFAULT, "!", "PGP encryption enabled.");
         return TRUE;
     }
@@ -7498,6 +7499,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
         }
 
         chatwin->pgp_send = FALSE;
+        accounts_add_pgp_state(session_get_account_name(), chatwin->barejid, FALSE);
         win_println(window, THEME_DEFAULT, "!", "PGP encryption disabled.");
         return TRUE;
     }
@@ -7673,6 +7675,7 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
         }
 
         chatwin->is_ox = TRUE;
+        accounts_add_ox_state(session_get_account_name(), chatwin->barejid, TRUE);
         win_println(window, THEME_DEFAULT, "!", "OX encryption enabled.");
         return TRUE;
     } else if (g_strcmp0(args[0], "end") == 0) {
@@ -7688,6 +7691,7 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
             win_println(window, THEME_DEFAULT, "!", "No OX session has been started.");
         } else {
             chatwin->is_ox = FALSE;
+            accounts_add_ox_state(session_get_account_name(), chatwin->barejid, FALSE);
             win_println(window, THEME_DEFAULT, "!", "OX encryption disabled.");
         }
         return TRUE;

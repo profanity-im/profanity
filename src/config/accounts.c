@@ -283,21 +283,39 @@ accounts_get_account(const char* const name)
         }
 
         GList* omemo_enabled = NULL;
-        gchar** enabled_list = g_key_file_get_string_list(accounts, name, "omemo.enabled", &length, NULL);
-        if (enabled_list) {
+        gchar** omemo_enabled_list = g_key_file_get_string_list(accounts, name, "omemo.enabled", &length, NULL);
+        if (omemo_enabled_list) {
             for (int i = 0; i < length; i++) {
-                omemo_enabled = g_list_append(omemo_enabled, strdup(enabled_list[i]));
+                omemo_enabled = g_list_append(omemo_enabled, strdup(omemo_enabled_list[i]));
             }
-            g_strfreev(enabled_list);
+            g_strfreev(omemo_enabled_list);
         }
 
         GList* omemo_disabled = NULL;
-        gchar** disabled_list = g_key_file_get_string_list(accounts, name, "omemo.disabled", &length, NULL);
-        if (disabled_list) {
+        gchar** omemo_disabled_list = g_key_file_get_string_list(accounts, name, "omemo.disabled", &length, NULL);
+        if (omemo_disabled_list) {
             for (int i = 0; i < length; i++) {
-                omemo_disabled = g_list_append(omemo_disabled, strdup(disabled_list[i]));
+                omemo_disabled = g_list_append(omemo_disabled, strdup(omemo_disabled_list[i]));
             }
-            g_strfreev(disabled_list);
+            g_strfreev(omemo_disabled_list);
+        }
+
+        GList* ox_enabled = NULL;
+        gchar** ox_enabled_list = g_key_file_get_string_list(accounts, name, "ox.enabled", &length, NULL);
+        if (ox_enabled_list) {
+            for (int i = 0; i < length; i++) {
+                ox_enabled = g_list_append(ox_enabled, strdup(ox_enabled_list[i]));
+            }
+            g_strfreev(ox_enabled_list);
+        }
+
+        GList* pgp_enabled = NULL;
+        gchar** pgp_enabled_list = g_key_file_get_string_list(accounts, name, "pgp.enabled", &length, NULL);
+        if (pgp_enabled_list) {
+            for (int i = 0; i < length; i++) {
+                pgp_enabled = g_list_append(pgp_enabled, strdup(pgp_enabled_list[i]));
+            }
+            g_strfreev(pgp_enabled_list);
         }
 
         gchar* pgp_keyid = NULL;
@@ -328,8 +346,8 @@ accounts_get_account(const char* const name)
                                                priority_online, priority_chat, priority_away, priority_xa,
                                                priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
                                                otr_opportunistic, otr_always, omemo_policy, omemo_enabled,
-                                               omemo_disabled, pgp_keyid, startscript, theme, tls_policy,
-                                               auth_policy);
+                                               omemo_disabled, ox_enabled, pgp_enabled, pgp_keyid,
+                                               startscript, theme, tls_policy, auth_policy);
 
         g_free(jid);
         g_free(password);
@@ -415,6 +433,8 @@ accounts_rename(const char* const account_name, const char* const new_name)
         "omemo.policy",
         "omemo.enabled",
         "omemo.disabled",
+        "ox.enabled",
+        "pgp.enabled",
         "pgp.keyid",
         "last.activity",
         "script.start",
@@ -671,6 +691,36 @@ accounts_add_omemo_state(const char* const account_name, const char* const conta
         } else {
             conf_string_list_add(accounts, account_name, "omemo.disabled", contact_jid);
             conf_string_list_remove(accounts, account_name, "omemo.enabled", contact_jid);
+        }
+
+        _save_accounts();
+    }
+}
+
+void
+accounts_add_ox_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
+{
+    if (accounts_account_exists(account_name)) {
+        if (enabled) {
+            conf_string_list_add(accounts, account_name, "ox.enabled", contact_jid);
+        } else {
+            conf_string_list_remove(accounts, account_name, "ox.enabled", contact_jid);
+        }
+
+        _save_accounts();
+    }
+}
+
+void
+accounts_add_pgp_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
+{
+    if (accounts_account_exists(account_name)) {
+        if (enabled) {
+            conf_string_list_add(accounts, account_name, "pgp.enabled", contact_jid);
+            conf_string_list_remove(accounts, account_name, "pgp.disabled", contact_jid);
+        } else {
+            conf_string_list_add(accounts, account_name, "pgp.disabled", contact_jid);
+            conf_string_list_remove(accounts, account_name, "pgp.enabled", contact_jid);
         }
 
         _save_accounts();

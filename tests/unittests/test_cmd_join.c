@@ -71,7 +71,7 @@ cmd_join_uses_account_mucservice_when_no_service_specified(void** state)
     char* expected_room = "room@conference.server.org";
     gchar* args[] = { room, "nick", nick, NULL };
     ProfAccount* account = account_new(account_name, "user@server.org", NULL, NULL,
-                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     muc_init();
 
@@ -99,7 +99,7 @@ cmd_join_uses_supplied_nick(void** state)
     char* nick = "bob";
     gchar* args[] = { room, "nick", nick, NULL };
     ProfAccount* account = account_new(account_name, "user@server.org", NULL, NULL,
-                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     muc_init();
 
@@ -127,7 +127,7 @@ cmd_join_uses_account_nick_when_not_supplied(void** state)
     char* account_nick = "a_nick";
     gchar* args[] = { room, NULL };
     ProfAccount* account = account_new(account_name, "user@server.org", NULL, NULL,
-                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, NULL, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     muc_init();
 
@@ -158,7 +158,7 @@ cmd_join_uses_password_when_supplied(void** state)
     char* expected_room = "room@a_service";
     gchar* args[] = { room, "password", password, NULL };
     ProfAccount* account = account_new(account_name, "user@server.org", NULL, NULL,
-                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, "laptop", NULL, NULL, 0, 0, 0, 0, 0, account_service, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     muc_init();
 

@@ -60,6 +60,36 @@
 static void _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid);
 static void _chatwin_set_last_message(ProfChatWin* chatwin, const char* const id, const char* const message);
 
+gboolean
+_pgp_automatic_start(const char* const recipient)
+{
+    gboolean result = FALSE;
+    char* account_name = session_get_account_name();
+    ProfAccount* account = accounts_get_account(account_name);
+
+    if (g_list_find_custom(account->pgp_enabled, recipient, (GCompareFunc)g_strcmp0)) {
+        result = TRUE;
+    }
+
+    account_free(account);
+    return result;
+}
+
+gboolean
+_ox_automatic_start(const char* const recipient)
+{
+    gboolean result = FALSE;
+    char* account_name = session_get_account_name();
+    ProfAccount* account = accounts_get_account(account_name);
+
+    if (g_list_find_custom(account->ox_enabled, recipient, (GCompareFunc)g_strcmp0)) {
+        result = TRUE;
+    }
+
+    account_free(account);
+    return result;
+}
+
 ProfChatWin*
 chatwin_new(const char* const barejid)
 {
@@ -82,20 +112,38 @@ chatwin_new(const char* const barejid)
 
     // We start a new OMEMO session if this contact has been configured accordingly.
     // However, if OTR is *also* configured, ask the user to choose between OMEMO and OTR.
-#ifdef HAVE_OMEMO
+
+    gboolean is_ox_secure = FALSE;
     gboolean is_otr_secure = FALSE;
+    gboolean is_omemo_secure = FALSE;
+#ifdef HAVE_LIBGPGME
+    is_ox_secure = _ox_automatic_start(barejid);
+#endif
+
+#ifdef HAVE_OMEMO
+    is_omemo_secure = omemo_automatic_start(barejid);
+#endif
+
 #ifdef HAVE_LIBOTR
     is_otr_secure = otr_is_secure(barejid);
-#endif // HAVE_LIBOTR
-    if (omemo_automatic_start(barejid) && is_otr_secure) {
-        win_println(window, THEME_DEFAULT, "!", "This chat could be either OMEMO or OTR encrypted, but not both. "
-                                                "Use '/omemo start' or '/otr start' to select the encryption method.");
-    } else if (omemo_automatic_start(barejid)) {
+#endif
+
+    if (is_omemo_secure + is_otr_secure + _pgp_automatic_start(barejid) + is_ox_secure > 1) {
+        win_println(window, THEME_DEFAULT, "!", "This chat could be either OMEMO, PGP, OX or OTR encrypted, but not more than one. "
+                                                "Use '/omemo start', '/pgp start', '/ox start' or '/otr start' to select the encryption method.");
+    } else if (is_omemo_secure) {
+#ifdef HAVE_OMEMO
         // Start the OMEMO session
         omemo_start_session(barejid);
         chatwin->is_omemo = TRUE;
+#endif
+    } else if (_pgp_automatic_start(barejid)) {
+        // Start the PGP session
+        chatwin->pgp_send = TRUE;
+    } else if (is_ox_secure) {
+        // Start the OX session
+        chatwin->is_ox = TRUE;
     }
-#endif // HAVE_OMEMO
 
     if (prefs_get_boolean(PREF_MAM)) {
         iq_mam_request(chatwin);
