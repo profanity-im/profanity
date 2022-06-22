@@ -2020,7 +2020,7 @@ cons_log_setting(void)
         cons_show("Shared log (/log shared)    : OFF");
 
     log_level_t filter = log_get_filter();
-    const gchar *level = log_string_from_level(filter);
+    const gchar* level = log_string_from_level(filter);
     cons_show("Log level (/log level)      : %s", level);
 }
 
