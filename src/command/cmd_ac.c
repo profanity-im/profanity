@@ -1079,6 +1079,8 @@ cmd_ac_init(void)
     mood_ac = autocomplete_new();
     autocomplete_add(mood_ac, "set");
     autocomplete_add(mood_ac, "clear");
+    autocomplete_add(mood_ac, "on");
+    autocomplete_add(mood_ac, "off");
     mood_type_ac = autocomplete_new();
     autocomplete_add(mood_type_ac, "afraid");
     autocomplete_add(mood_type_ac, "amazed");

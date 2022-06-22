@@ -1819,6 +1819,7 @@ _get_group(preference_t pref)
     case PREF_COMPOSE_EDITOR:
     case PREF_OUTGOING_STAMP:
     case PREF_INCOMING_STAMP:
+    case PREF_MOOD:
         return PREF_GROUP_UI;
     case PREF_STATES:
     case PREF_OUTTYPE:
@@ -2157,6 +2158,8 @@ _get_key(preference_t pref)
         return "stamp.incoming";
     case PREF_OX_LOG:
         return "log";
+    case PREF_MOOD:
+        return "mood";
     default:
         return NULL;
     }
@@ -2208,6 +2211,7 @@ _get_default_boolean(preference_t pref)
     case PREF_INTYPE:
     case PREF_INTYPE_CONSOLE:
     case PREF_NOTIFY_MENTION_WHOLE_WORD:
+    case PREF_MOOD:
         return TRUE;
     default:
         return FALSE;

@@ -1733,6 +1733,7 @@ cons_show_ui_prefs(void)
     cons_inpblock_setting();
     cons_titlebar_setting();
     cons_statusbar_setting();
+    cons_mood_setting();
 
     cons_alert(NULL);
 }
@@ -2946,4 +2947,14 @@ cons_remove_alert(ProfWin* window)
     alert_list = g_list_remove_link(alert_list, item);
     g_list_free_full(item, g_free);
     free(win_name);
+}
+
+void
+cons_mood_setting(void)
+{
+    if (prefs_get_boolean(PREF_MOOD)) {
+        cons_show("Display user mood (/mood)                 : ON");
+    } else {
+        cons_show("Display user mood (/mood)                 : OFF");
+    }
 }
