@@ -89,7 +89,7 @@ static void _free_chat_log(struct dated_chat_log* dated_log);
 static gboolean _key_equals(void* key1, void* key2);
 static char* _get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean is_room);
 static void _rotate_log_file(void);
-static char* _log_string_from_level(log_level_t level);
+static char* _log_abbreviation_string_from_level(log_level_t level);
 static void _chat_log_chat(const char* const login, const char* const other, const gchar* const msg,
                            chat_log_direction_t direction, GDateTime* timestamp, const char* const resourcepart);
 static void _groupchat_log_chat(const gchar* const login, const gchar* const room, const gchar* const nick,
@@ -189,7 +189,7 @@ log_msg(log_level_t level, const char* const area, const char* const msg)
     if (level >= level_filter && logp) {
         GDateTime* dt = g_date_time_new_now_local();
 
-        char* level_str = _log_string_from_level(level);
+        char* level_str = _log_abbreviation_string_from_level(level);
 
         gchar* date_fmt = g_date_time_format_iso8601(dt);
 
@@ -222,6 +222,23 @@ log_level_from_string(char* log_level)
         return PROF_LEVEL_ERROR;
     } else { // default logging is warn
         return PROF_LEVEL_WARN;
+    }
+}
+
+const char*
+log_string_from_level(log_level_t level)
+{
+    switch (level) {
+    case PROF_LEVEL_ERROR:
+        return "ERROR";
+    case PROF_LEVEL_WARN:
+        return "WARN";
+    case PROF_LEVEL_INFO:
+        return "INFO";
+    case PROF_LEVEL_DEBUG:
+        return "DEBUG";
+    default:
+        return "LOG";
     }
 }
 
@@ -700,8 +717,9 @@ _get_log_filename(const char* const other, const char* const login, GDateTime* d
     return logfile_path;
 }
 
+// abbreviation string is the prefix thats used in the log file
 static char*
-_log_string_from_level(log_level_t level)
+_log_abbreviation_string_from_level(log_level_t level)
 {
     switch (level) {
     case PROF_LEVEL_ERROR:
