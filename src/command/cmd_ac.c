@@ -391,6 +391,7 @@ cmd_ac_init(void)
     autocomplete_add(log_ac, "rotate");
     autocomplete_add(log_ac, "shared");
     autocomplete_add(log_ac, "where");
+    autocomplete_add(log_ac, "level");
 
     autoaway_ac = autocomplete_new();
     autocomplete_add(autoaway_ac, "mode");

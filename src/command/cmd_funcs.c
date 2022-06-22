@@ -6495,9 +6495,19 @@ cmd_log(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    cons_bad_cmd_usage(command);
+    if (strcmp(subcmd, "level") == 0) {
+        if (g_strcmp0(value, "INFO") == 0 || g_strcmp0(value, "DEBUG") == 0 || g_strcmp0(value, "WARN") == 0 || g_strcmp0(value, "ERROR") == 0) {
 
-    /* TODO: make 'level' subcommand for debug level */
+            log_level_t prof_log_level = log_level_from_string(value);
+            log_close();
+            log_init(prof_log_level, NULL);
+
+            cons_show("Log level changed to: %s.", value);
+            return TRUE;
+        }
+    }
+
+    cons_bad_cmd_usage(command);
 
     return TRUE;
 }
