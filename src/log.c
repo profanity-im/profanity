@@ -225,6 +225,23 @@ log_level_from_string(char* log_level)
     }
 }
 
+const char*
+log_string_from_level(log_level_t level)
+{
+    switch (level) {
+    case PROF_LEVEL_ERROR:
+        return "ERROR";
+    case PROF_LEVEL_WARN:
+        return "WARN";
+    case PROF_LEVEL_INFO:
+        return "INFO";
+    case PROF_LEVEL_DEBUG:
+        return "DEBUG";
+    default:
+        return "LOG";
+    }
+}
+
 static void
 _rotate_log_file(void)
 {
