@@ -1819,6 +1819,7 @@ _get_group(preference_t pref)
     case PREF_COMPOSE_EDITOR:
     case PREF_OUTGOING_STAMP:
     case PREF_INCOMING_STAMP:
+    case PREF_MOOD:
         return PREF_GROUP_UI;
     case PREF_STATES:
     case PREF_OUTTYPE:
@@ -1867,7 +1868,6 @@ _get_group(preference_t pref)
     case PREF_CORRECTION_ALLOW:
     case PREF_MAM:
     case PREF_SILENCE_NON_ROSTER:
-    case PREF_MOOD:
         return PREF_GROUP_CONNECTION;
     case PREF_OTR_LOG:
     case PREF_OTR_POLICY:

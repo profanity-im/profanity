@@ -2714,7 +2714,7 @@ static struct cmd_t command_defs[] = {
     },
 
     { "/mood",
-      parse_args, 1, 3, NULL,
+      parse_args, 1, 3, &cons_mood_setting,
       CMD_NOSUBFUNCS
       CMD_MAINFUNC(cmd_mood)
       CMD_TAGS(

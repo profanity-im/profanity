@@ -1150,6 +1150,11 @@ cons_silence_setting(void)
 }
 
 void
+cons_mood_setting(void)
+{
+}
+
+void
 cons_show_bookmarks_ignore(gchar** list, gsize len)
 {
 }

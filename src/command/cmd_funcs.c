@@ -9773,7 +9773,7 @@ cmd_mood(ProfWin* window, const char* const command, gchar** args)
     if (g_strcmp0(args[0], "on") == 0) {
         _cmd_set_boolean_preference(args[0], command, "User mood", PREF_MOOD);
         caps_add_feature(STANZA_NS_MOOD_NOTIFY);
-    }  else if (g_strcmp0(args[0], "off") == 0) {
+    } else if (g_strcmp0(args[0], "off") == 0) {
         _cmd_set_boolean_preference(args[0], command, "User mood", PREF_MOOD);
         caps_remove_feature(STANZA_NS_MOOD_NOTIFY);
     } else if (g_strcmp0(args[0], "set") == 0) {
