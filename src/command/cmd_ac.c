@@ -151,6 +151,7 @@ static Autocomplete notify_trigger_ac;
 static Autocomplete prefs_ac;
 static Autocomplete sub_ac;
 static Autocomplete log_ac;
+static Autocomplete log_level_ac;
 static Autocomplete autoaway_ac;
 static Autocomplete autoaway_mode_ac;
 static Autocomplete autoaway_presence_ac;
@@ -392,6 +393,12 @@ cmd_ac_init(void)
     autocomplete_add(log_ac, "shared");
     autocomplete_add(log_ac, "where");
     autocomplete_add(log_ac, "level");
+
+    log_level_ac = autocomplete_new();
+    autocomplete_add(log_level_ac, "WARN");
+    autocomplete_add(log_level_ac, "INFO");
+    autocomplete_add(log_level_ac, "DEBUG");
+    autocomplete_add(log_level_ac, "ERROR");
 
     autoaway_ac = autocomplete_new();
     autocomplete_add(autoaway_ac, "mode");
@@ -1354,6 +1361,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(who_roster_ac);
     autocomplete_reset(prefs_ac);
     autocomplete_reset(log_ac);
+    autocomplete_reset(log_level_ac);
     autocomplete_reset(commands_ac);
     autocomplete_reset(autoaway_ac);
     autocomplete_reset(autoaway_mode_ac);
@@ -1534,6 +1542,7 @@ cmd_ac_uninit(void)
     autocomplete_free(sub_ac);
     autocomplete_free(wintitle_ac);
     autocomplete_free(log_ac);
+    autocomplete_free(log_level_ac);
     autocomplete_free(prefs_ac);
     autocomplete_free(autoaway_ac);
     autocomplete_free(autoaway_mode_ac);
@@ -2439,6 +2448,10 @@ _log_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         return result;
     }
     result = autocomplete_param_with_func(input, "/log shared", prefs_autocomplete_boolean_choice, previous, NULL);
+    if (result) {
+        return result;
+    }
+    result = autocomplete_param_with_ac(input, "/log level", log_level_ac, TRUE, previous);
     if (result) {
         return result;
     }
