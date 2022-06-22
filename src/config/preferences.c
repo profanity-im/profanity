@@ -1867,6 +1867,7 @@ _get_group(preference_t pref)
     case PREF_CORRECTION_ALLOW:
     case PREF_MAM:
     case PREF_SILENCE_NON_ROSTER:
+    case PREF_MOOD:
         return PREF_GROUP_CONNECTION;
     case PREF_OTR_LOG:
     case PREF_OTR_POLICY:
@@ -2157,6 +2158,8 @@ _get_key(preference_t pref)
         return "stamp.incoming";
     case PREF_OX_LOG:
         return "log";
+    case PREF_MOOD:
+        return "mood";
     default:
         return NULL;
     }
@@ -2208,6 +2211,7 @@ _get_default_boolean(preference_t pref)
     case PREF_INTYPE:
     case PREF_INTYPE_CONSOLE:
     case PREF_NOTIFY_MENTION_WHOLE_WORD:
+    case PREF_MOOD:
         return TRUE;
     default:
         return FALSE;

@@ -2720,11 +2720,13 @@ static struct cmd_t command_defs[] = {
       CMD_TAGS(
               CMD_TAG_CHAT)
       CMD_SYN(
+              "/mood on|off",
               "/mood set <mood> [text]",
               "/mood clear")
       CMD_DESC(
               "Set your mood (XEP-0107).")
       CMD_ARGS(
+              { "on|off", "Enable or disable displaying the mood of other users. On by default."},
               { "set <mood> [text]", "Set user mood to <mood> with an optional [text]. Use /mood set <tab> to toggle through predfined moods." },
               { "clear", "Clear your user mood." })
       CMD_EXAMPLES(

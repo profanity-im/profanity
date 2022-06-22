@@ -286,9 +286,13 @@ session_get_account_name(void)
     return saved_account.name;
 }
 
-static int
+static gboolean
 _receive_mood(xmpp_stanza_t* const stanza, void* const userdata)
 {
+    if (!prefs_get_boolean(PREF_MOOD)) {
+        return TRUE;
+    }
+
     const char* from = xmpp_stanza_get_from(stanza);
     xmpp_stanza_t* event = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_EVENT, STANZA_NS_PUBSUB_EVENT);
     if (event) {
@@ -362,7 +366,9 @@ session_login_success(gboolean secured)
     }
 
     message_pubsub_event_handler_add(STANZA_NS_MOOD, _receive_mood, NULL, NULL);
-    caps_add_feature(STANZA_NS_MOOD_NOTIFY);
+    if (prefs_get_boolean(PREF_MOOD)) {
+        caps_add_feature(STANZA_NS_MOOD_NOTIFY);
+    }
 }
 
 void
