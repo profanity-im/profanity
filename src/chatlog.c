@@ -66,11 +66,10 @@ struct dated_chat_log
 };
 
 static gboolean _log_roll_needed(struct dated_chat_log* dated_log);
-static struct dated_chat_log* _create_log(const char* const other, const char* const login);
+static struct dated_chat_log* _create_chatlog(const char* const other, const char* const login);
 static struct dated_chat_log* _create_groupchat_log(const char* const room, const char* const login);
 static void _free_chat_log(struct dated_chat_log* dated_log);
 static gboolean _key_equals(void* key1, void* key2);
-static char* _get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean is_room);
 static void _chat_log_chat(const char* const login, const char* const other, const gchar* const msg,
                            chat_log_direction_t direction, GDateTime* timestamp, const char* const resourcepart);
 static void _groupchat_log_chat(const gchar* const login, const gchar* const room, const gchar* const nick,
@@ -82,14 +81,6 @@ chat_log_init(void)
     log_info("Initialising chat logs");
     logs = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, free,
                                  (GDestroyNotify)_free_chat_log);
-}
-
-void
-groupchat_log_init(void)
-{
-    log_info("Initialising groupchat logs");
-    groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, free,
-                                           (GDestroyNotify)_free_chat_log);
 }
 
 void
@@ -259,17 +250,17 @@ _chat_log_chat(const char* const login, const char* const other, const char* con
 
     // no log for user
     if (dated_log == NULL) {
-        dated_log = _create_log(other_name, login);
+        dated_log = _create_chatlog(other_name, login);
         g_hash_table_insert(logs, strdup(other_name), dated_log);
 
         // log entry exists but file removed
     } else if (!g_file_test(dated_log->filename, G_FILE_TEST_EXISTS)) {
-        dated_log = _create_log(other_name, login);
+        dated_log = _create_chatlog(other_name, login);
         g_hash_table_replace(logs, strdup(other_name), dated_log);
 
         // log file needs rolling
     } else if (_log_roll_needed(dated_log)) {
-        dated_log = _create_log(other_name, login);
+        dated_log = _create_chatlog(other_name, login);
         g_hash_table_replace(logs, strdup(other_name), dated_log);
     }
 
@@ -317,6 +308,14 @@ _chat_log_chat(const char* const login, const char* const other, const char* con
 
     g_free(date_fmt);
     g_date_time_unref(timestamp);
+}
+
+void
+groupchat_log_init(void)
+{
+    log_info("Initialising groupchat logs");
+    groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, free,
+                                           (GDestroyNotify)_free_chat_log);
 }
 
 void
@@ -426,8 +425,29 @@ chat_log_close(void)
     g_date_time_unref(session_started);
 }
 
+static char*
+_get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean is_room)
+{
+    gchar* chatlogs_dir = files_file_in_account_data_path(DIR_CHATLOGS, login, is_room ? "rooms" : NULL);
+    gchar* logfile_name = g_date_time_format(dt, "%Y_%m_%d.log");
+    gchar* other_ = str_replace(other, "@", "_at_");
+    gchar* logs_path = g_strdup_printf("%s/%s", chatlogs_dir, other_);
+    gchar* logfile_path = NULL;
+
+    if (create_dir(logs_path)) {
+        logfile_path = g_strdup_printf("%s/%s", logs_path, logfile_name);
+    }
+
+    g_free(logs_path);
+    g_free(other_);
+    g_free(logfile_name);
+    g_free(chatlogs_dir);
+
+    return logfile_path;
+}
+
 static struct dated_chat_log*
-_create_log(const char* const other, const char* const login)
+_create_chatlog(const char* const other, const char* const login)
 {
     GDateTime* now = g_date_time_new_now_local();
     char* filename = _get_log_filename(other, login, now, FALSE);
@@ -493,25 +513,3 @@ _key_equals(void* key1, void* key2)
 
     return (g_strcmp0(str1, str2) == 0);
 }
-
-static char*
-_get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean is_room)
-{
-    gchar* chatlogs_dir = files_file_in_account_data_path(DIR_CHATLOGS, login, is_room ? "rooms" : NULL);
-    gchar* logfile_name = g_date_time_format(dt, "%Y_%m_%d.log");
-    gchar* other_ = str_replace(other, "@", "_at_");
-    gchar* logs_path = g_strdup_printf("%s/%s", chatlogs_dir, other_);
-    gchar* logfile_path = NULL;
-
-    if (create_dir(logs_path)) {
-        logfile_path = g_strdup_printf("%s/%s", logs_path, logfile_name);
-    }
-
-    g_free(logs_path);
-    g_free(other_);
-    g_free(logfile_name);
-    g_free(chatlogs_dir);
-
-    return logfile_path;
-}
-
