@@ -41,6 +41,7 @@
 
 #include "common.h"
 #include "config/files.h"
+#include "xmpp/xmpp.h"
 #include "log.h"
 
 void

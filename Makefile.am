@@ -74,7 +74,6 @@ core_sources = \
 
 unittest_sources = \
 	src/xmpp/contact.c src/xmpp/contact.h src/common.c \
-	src/chatlog.c src/chatlog.h \
 	src/log.h src/profanity.c src/common.h \
 	src/profanity.h src/xmpp/chat_session.c \
 	src/xmpp/chat_session.h src/xmpp/muc.c src/xmpp/muc.h src/xmpp/jid.h src/xmpp/jid.c \
@@ -125,6 +124,7 @@ unittest_sources = \
 	tests/unittests/xmpp/stub_message.c \
 	tests/unittests/ui/stub_ui.c tests/unittests/ui/stub_ui.h \
 	tests/unittests/log/stub_log.c \
+	tests/unittests/chatlog/stub_chatlog.c \
 	tests/unittests/database/stub_database.c \
 	tests/unittests/config/stub_accounts.c \
 	tests/unittests/config/stub_cafile.c \
