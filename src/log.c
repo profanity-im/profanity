@@ -70,8 +70,58 @@ enum {
     STDERR_RETRY_NR = 5,
 };
 
-static void _rotate_log_file(void);
-static char* _log_abbreviation_string_from_level(log_level_t level);
+static void
+_rotate_log_file(void)
+{
+    gchar* log_file = g_strdup(mainlogfile);
+    size_t len = strlen(log_file);
+    gchar* log_file_new = malloc(len + 5);
+
+    // the mainlog file should always end in '.log', lets remove this last part
+    // so that we can have profanity.001.log later
+    if (len > 4) {
+        log_file[len - 4] = '\0';
+    }
+
+    // find an empty name. from .log -> log.001 -> log.999
+    for (int i = 1; i < 1000; i++) {
+        g_sprintf(log_file_new, "%s.%03d.log", log_file, i);
+        if (!g_file_test(log_file_new, G_FILE_TEST_EXISTS))
+            break;
+    }
+
+    log_close();
+
+    if (len > 4) {
+        log_file[len - 4] = '.';
+    }
+
+    rename(log_file, log_file_new);
+
+    log_init(log_get_filter(), NULL);
+
+    free(log_file_new);
+    free(log_file);
+    log_info("Log has been rotated");
+}
+
+// abbreviation string is the prefix thats used in the log file
+static char*
+_log_abbreviation_string_from_level(log_level_t level)
+{
+    switch (level) {
+    case PROF_LEVEL_ERROR:
+        return "ERR";
+    case PROF_LEVEL_WARN:
+        return "WRN";
+    case PROF_LEVEL_INFO:
+        return "INF";
+    case PROF_LEVEL_DEBUG:
+        return "DBG";
+    default:
+        return "LOG";
+    }
+}
 
 void
 log_debug(const char* const msg, ...)
@@ -215,59 +265,6 @@ log_string_from_level(log_level_t level)
         return "INFO";
     case PROF_LEVEL_DEBUG:
         return "DEBUG";
-    default:
-        return "LOG";
-    }
-}
-
-static void
-_rotate_log_file(void)
-{
-    gchar* log_file = g_strdup(mainlogfile);
-    size_t len = strlen(log_file);
-    gchar* log_file_new = malloc(len + 5);
-
-    // the mainlog file should always end in '.log', lets remove this last part
-    // so that we can have profanity.001.log later
-    if (len > 4) {
-        log_file[len - 4] = '\0';
-    }
-
-    // find an empty name. from .log -> log.001 -> log.999
-    for (int i = 1; i < 1000; i++) {
-        g_sprintf(log_file_new, "%s.%03d.log", log_file, i);
-        if (!g_file_test(log_file_new, G_FILE_TEST_EXISTS))
-            break;
-    }
-
-    log_close();
-
-    if (len > 4) {
-        log_file[len - 4] = '.';
-    }
-
-    rename(log_file, log_file_new);
-
-    log_init(log_get_filter(), NULL);
-
-    free(log_file_new);
-    free(log_file);
-    log_info("Log has been rotated");
-}
-
-// abbreviation string is the prefix thats used in the log file
-static char*
-_log_abbreviation_string_from_level(log_level_t level)
-{
-    switch (level) {
-    case PROF_LEVEL_ERROR:
-        return "ERR";
-    case PROF_LEVEL_WARN:
-        return "WRN";
-    case PROF_LEVEL_INFO:
-        return "INF";
-    case PROF_LEVEL_DEBUG:
-        return "DBG";
     default:
         return "LOG";
     }
