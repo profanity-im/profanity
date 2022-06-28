@@ -44,6 +44,7 @@
 #include "common.h"
 #include "config/files.h"
 #include "log.h"
+#include "xmpp/xmpp.h"
 
 static gchar*
 _cafile_name(void)

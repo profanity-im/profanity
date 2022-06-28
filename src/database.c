@@ -46,6 +46,8 @@
 #include "log.h"
 #include "common.h"
 #include "config/files.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/message.h"
 
 static sqlite3* g_chatlog_database;
 

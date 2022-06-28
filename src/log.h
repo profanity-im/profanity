@@ -38,8 +38,6 @@
 
 #include <glib.h>
 
-#include "xmpp/message.h"
-
 // log levels
 typedef enum {
     PROF_LEVEL_DEBUG,
@@ -47,11 +45,6 @@ typedef enum {
     PROF_LEVEL_WARN,
     PROF_LEVEL_ERROR
 } log_level_t;
-
-typedef enum {
-    PROF_IN_LOG,
-    PROF_OUT_LOG
-} chat_log_direction_t;
 
 void log_init(log_level_t filter, char* log_file);
 log_level_t log_get_filter(void);
@@ -68,26 +61,5 @@ const char* log_string_from_level(log_level_t level);
 void log_stderr_init(log_level_t level);
 void log_stderr_close(void);
 void log_stderr_handler(void);
-
-void chat_log_init(void);
-
-void chat_log_msg_out(const char* const barejid, const char* const msg, const char* resource);
-void chat_log_otr_msg_out(const char* const barejid, const char* const msg, const char* resource);
-void chat_log_pgp_msg_out(const char* const barejid, const char* const msg, const char* resource);
-void chat_log_omemo_msg_out(const char* const barejid, const char* const msg, const char* resource);
-
-void chat_log_msg_in(ProfMessage* message);
-void chat_log_otr_msg_in(ProfMessage* message);
-void chat_log_pgp_msg_in(ProfMessage* message);
-void chat_log_omemo_msg_in(ProfMessage* message);
-
-void chat_log_close(void);
-
-void groupchat_log_init(void);
-
-void groupchat_log_msg_out(const gchar* const room, const gchar* const msg);
-void groupchat_log_msg_in(const gchar* const room, const gchar* const nick, const gchar* const msg);
-void groupchat_log_omemo_msg_out(const gchar* const room, const gchar* const msg);
-void groupchat_log_omemo_msg_in(const gchar* const room, const gchar* const nick, const gchar* const msg);
 
 #endif

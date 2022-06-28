@@ -44,6 +44,8 @@
 
 #include "log.h"
 
+#include "xmpp/xmpp.h"
+
 static GKeyFile* bookmark_ignore_keyfile = NULL;
 static gchar* account_jid = NULL;
 

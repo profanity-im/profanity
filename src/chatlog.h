@@ -1,8 +1,8 @@
 /*
- * stub_cafile.c
+ * chatlog.h
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2022 Steffen Jaeckel <jaeckel-floss@eyet-services.de>
+ * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
  *
  * This file is part of Profanity.
  *
@@ -33,24 +33,37 @@
  *
  */
 
-#include <fcntl.h>
+#ifndef CHATLOG_H
+#define CHATLOG_H
+
 #include <glib.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/wait.h>
 
-#include "common.h"
-#include "config/files.h"
-#include "xmpp/xmpp.h"
-#include "log.h"
+#include "xmpp/message.h"
 
-void
-cafile_add(const TLSCertificate* cert)
-{
-}
+typedef enum {
+    PROF_IN_LOG,
+    PROF_OUT_LOG
+} chat_log_direction_t;
 
-gchar*
-cafile_get_name(void)
-{
-    return NULL;
-}
+void chat_log_init(void);
+
+void chat_log_msg_out(const char* const barejid, const char* const msg, const char* resource);
+void chat_log_otr_msg_out(const char* const barejid, const char* const msg, const char* resource);
+void chat_log_pgp_msg_out(const char* const barejid, const char* const msg, const char* resource);
+void chat_log_omemo_msg_out(const char* const barejid, const char* const msg, const char* resource);
+
+void chat_log_msg_in(ProfMessage* message);
+void chat_log_otr_msg_in(ProfMessage* message);
+void chat_log_pgp_msg_in(ProfMessage* message);
+void chat_log_omemo_msg_in(ProfMessage* message);
+
+void chat_log_close(void);
+
+void groupchat_log_init(void);
+
+void groupchat_log_msg_out(const gchar* const room, const gchar* const msg);
+void groupchat_log_msg_in(const gchar* const room, const gchar* const nick, const gchar* const msg);
+void groupchat_log_omemo_msg_out(const gchar* const room, const gchar* const msg);
+void groupchat_log_omemo_msg_in(const gchar* const room, const gchar* const nick, const gchar* const msg);
+
+#endif

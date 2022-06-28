@@ -44,6 +44,8 @@
 #include "config/files.h"
 #include "config/preferences.h"
 #include "log.h"
+#include "common.h"
+#include "xmpp/xmpp.h"
 
 // Returns true if an error occurred
 gboolean
