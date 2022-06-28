@@ -42,6 +42,7 @@
 #include <glib.h>
 
 #include "log.h"
+#include "chatlog.h"
 #include "database.h"
 #include "config/preferences.h"
 #include "config/files.h"

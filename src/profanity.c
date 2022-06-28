@@ -53,6 +53,7 @@
 #include "profanity.h"
 #include "common.h"
 #include "log.h"
+#include "chatlog.h"
 #include "config/files.h"
 #include "config/tlscerts.h"
 #include "config/accounts.h"

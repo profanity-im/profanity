@@ -43,6 +43,7 @@
 #include "config/accounts.h"
 #include "profanity.h"
 #include "log.h"
+#include "chatlog.h"
 #include "database.h"
 #include "config/preferences.h"
 #include "config/tlscerts.h"
