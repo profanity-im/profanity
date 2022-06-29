@@ -301,7 +301,7 @@ if test "x$enable_otr" != xno; then
     AM_CONDITIONAL([BUILD_OTR], [true])
 
     PKG_CHECK_MODULES([libotr], [libotr >= 4.0],
-        [LIBS="$libotr_LIBS $LIBS" CFLAGS="$libotr_CFLAGS $cflags"],
+        [LIBS="$libotr_LIBS $LIBS" CFLAGS="$libotr_CFLAGS $CFLAGS"],
         [AM_CONDITIONAL([BUILD_OTR], [false])
          AS_IF([test "x$enable_otr" = xyes],
                [AC_MSG_ERROR([libotr >= 4.0 is required for OTR support])],

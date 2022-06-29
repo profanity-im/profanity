@@ -2635,7 +2635,7 @@ stanza_create_avatar_data_publish_iq(xmpp_ctx_t* ctx, const char* img_data, gsiz
 xmpp_stanza_t*
 stanza_create_avatar_metadata_publish_iq(xmpp_ctx_t* ctx, const char* img_data, gsize len, int height, int width)
 {
-    char* id = id = connection_create_stanza_id();
+    char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
     free(id);
     xmpp_stanza_set_attribute(iq, STANZA_ATTR_FROM, connection_get_fulljid());

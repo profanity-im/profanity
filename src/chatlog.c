@@ -57,7 +57,6 @@
 
 static GHashTable* logs;
 static GHashTable* groupchat_logs;
-static GDateTime* session_started;
 
 struct dated_chat_log
 {
@@ -77,7 +76,6 @@ static void _groupchat_log_chat(const gchar* const login, const gchar* const roo
 void
 chat_log_init(void)
 {
-    session_started = g_date_time_new_now_local();
     log_info("Initialising chat logs");
     logs = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, free,
                                  (GDestroyNotify)_free_chat_log);
@@ -422,7 +420,6 @@ chat_log_close(void)
 {
     g_hash_table_destroy(logs);
     g_hash_table_destroy(groupchat_logs);
-    g_date_time_unref(session_started);
 }
 
 static char*
