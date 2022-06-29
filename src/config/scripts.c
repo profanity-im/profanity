@@ -112,10 +112,9 @@ scripts_read(const char* const script)
 
     char* line = NULL;
     size_t len = 0;
-    ssize_t read;
     GSList* result = NULL;
 
-    while ((read = getline(&line, &len, scriptfile)) != -1) {
+    while (getline(&line, &len, scriptfile) != -1) {
         if (g_str_has_suffix(line, "\n")) {
             result = g_slist_append(result, g_strndup(line, strlen(line) - 1));
         } else {
@@ -150,9 +149,8 @@ scripts_exec(const char* const script)
 
     char* line = NULL;
     size_t len = 0;
-    ssize_t read;
 
-    while ((read = getline(&line, &len, scriptfile)) != -1) {
+    while (getline(&line, &len, scriptfile) != -1) {
         ProfWin* win = wins_get_current();
         cmd_process_input(win, line);
         session_process_events();
