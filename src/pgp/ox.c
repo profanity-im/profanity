@@ -139,16 +139,6 @@ ox_gpg_public_keys(void)
     }
     gpgme_release(ctx);
 
-    // autocomplete_clear(key_ac);
-    //     GList *ids = g_hash_table_get_keys(result);
-    //     GList *curr = ids;
-    //     while (curr) {
-    //         ProfPGPKey *key = g_hash_table_lookup(result, curr->data);
-    //         autocomplete_add(key_ac, key->id);
-    //         curr = curr->next;
-    //     }
-    //     g_list_free(ids);
-
     return result;
 }
 
