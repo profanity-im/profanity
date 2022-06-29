@@ -44,13 +44,6 @@ char* p_ox_gpg_decrypt(char* base64);
 void p_ox_gpg_readkey(const char* const filename, char** key, char** fp);
 gboolean p_ox_gpg_import(char* base64_public_key);
 
-/*!
- * \brief List of public keys with xmpp-URI.
- *
- * @returns GHashTable* with GString* xmpp-uri and ProfPGPKey* value. Empty
- * hash, if there is no key. NULL in case of error.
- *
- */
 GHashTable* ox_gpg_public_keys(void);
 
 gboolean ox_is_private_key_available(const char* const barejid);

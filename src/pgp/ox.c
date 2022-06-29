@@ -60,6 +60,9 @@ static gboolean _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gb
  *
  * This function will look for all public key with a XMPP-URI as UID.
  *
+ * @returns GHashTable* with GString* xmpp-uri and ProfPGPKey* value. Empty
+ * hash, if there is no key. NULL in case of error.
+ *
  */
 GHashTable*
 ox_gpg_public_keys(void)
