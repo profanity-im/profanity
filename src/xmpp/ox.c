@@ -43,7 +43,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/iq.h"
-#include "pgp/gpg.h"
+#include "pgp/ox.h"
 
 #ifdef HAVE_LIBGPGME
 

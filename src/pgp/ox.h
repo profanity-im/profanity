@@ -1,8 +1,9 @@
 /*
- * gpg.h
+ * ox.h
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2020 Stefan Kropp <stefan@debxwoody.de>
+ * Copyright (C) 2020 - 2022 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -33,48 +34,19 @@
  *
  */
 
-#ifndef PGP_GPG_H
-#define PGP_GPG_H
+#ifndef PGP_OX_H
+#define PGP_OX_H
 
-typedef struct pgp_key_t
-{
-    char* id;
-    char* name;
-    char* fp;
-    gboolean encrypt;
-    gboolean sign;
-    gboolean certify;
-    gboolean authenticate;
-    gboolean secret;
-} ProfPGPKey;
+#include <pgp/gpg.h>
 
-typedef struct pgp_pubkeyid_t
-{
-    char* id;
-    gboolean received;
-} ProfPGPPubKeyId;
+char* p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient_barejid, const char* const message);
+char* p_ox_gpg_decrypt(char* base64);
+void p_ox_gpg_readkey(const char* const filename, char** key, char** fp);
+gboolean p_ox_gpg_import(char* base64_public_key);
 
-void p_gpg_init(void);
-void p_gpg_close(void);
-void p_gpg_on_connect(const char* const barejid);
-void p_gpg_on_disconnect(void);
-GHashTable* p_gpg_list_keys(void);
-void p_gpg_free_keys(GHashTable* keys);
-gboolean p_gpg_addkey(const char* const jid, const char* const keyid);
-GHashTable* p_gpg_pubkeys(void);
-gboolean p_gpg_valid_key(const char* const keyid, char** err_str);
-gboolean p_gpg_available(const char* const barejid);
-const char* p_gpg_libver(void);
-char* p_gpg_sign(const char* const str, const char* const fp);
-void p_gpg_verify(const char* const barejid, const char* const sign);
-char* p_gpg_encrypt(const char* const barejid, const char* const message, const char* const fp);
-char* p_gpg_decrypt(const char* const cipher);
-void p_gpg_free_decrypted(char* decrypted);
-char* p_gpg_autocomplete_key(const char* const search_str, gboolean previous, void* context);
-void p_gpg_autocomplete_key_reset(void);
-char* p_gpg_format_fp_str(char* fp);
+GHashTable* ox_gpg_public_keys(void);
 
-ProfPGPKey* p_gpg_key_new(void);
-void p_gpg_free_key(ProfPGPKey* key);
+gboolean ox_is_private_key_available(const char* const barejid);
+gboolean ox_is_public_key_available(const char* const barejid);
 
 #endif
