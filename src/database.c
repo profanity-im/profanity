@@ -285,7 +285,7 @@ _get_message_enc_str(prof_enc_t enc)
         return "none";
     }
 
-    return "none"; // do not return none - return NULL
+    return "none";
 }
 
 static prof_enc_t
