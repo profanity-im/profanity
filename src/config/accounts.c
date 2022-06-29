@@ -3,6 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 - 2022 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -510,148 +511,127 @@ accounts_set_port(const char* const account_name, const int value)
     }
 }
 
+static void
+_accounts_set_string_option(const char* account_name, const char* const option, const char* const value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_string(accounts, account_name, option, value);
+        _save_accounts();
+    }
+}
+
+static void
+_accounts_set_int_option(const char* account_name, const char* const option, int value)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_set_integer(accounts, account_name, option, value);
+        _save_accounts();
+    }
+}
+
+static void
+_accounts_clear_string_option(const char* account_name, const char* const option)
+{
+    if (accounts_account_exists(account_name)) {
+        g_key_file_remove_key(accounts, account_name, option, NULL);
+        _save_accounts();
+    }
+}
+
 void
 accounts_set_resource(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "resource", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "resource", value);
 }
 
 void
 accounts_set_password(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "password", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "password", value);
 }
 
 void
 accounts_set_eval_password(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "eval_password", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "eval_password", value);
 }
 
 void
 accounts_set_pgp_keyid(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "pgp.keyid", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "pgp.keyid", value);
 }
 
 void
 accounts_set_script_start(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "script.start", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "script.start", value);
 }
 
 void
 accounts_set_theme(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "theme", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "theme", value);
 }
 
 void
 accounts_clear_password(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_remove_key(accounts, account_name, "password", NULL);
-        _save_accounts();
-    }
+    _accounts_clear_string_option(account_name, "password");
 }
 
 void
 accounts_clear_eval_password(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_remove_key(accounts, account_name, "eval_password", NULL);
-        _save_accounts();
-    }
+    _accounts_clear_string_option(account_name, "eval_password");
 }
 
 void
 accounts_clear_server(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_remove_key(accounts, account_name, "server", NULL);
-        _save_accounts();
-    }
+    _accounts_clear_string_option(account_name, "server");
 }
 
 void
 accounts_clear_port(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_remove_key(accounts, account_name, "port", NULL);
-        _save_accounts();
-    }
+    _accounts_clear_string_option(account_name, "port");
 }
 
 void
 accounts_clear_pgp_keyid(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_remove_key(accounts, account_name, "pgp.keyid", NULL);
-        _save_accounts();
-    }
+    _accounts_clear_string_option(account_name, "pgp.keyid");
 }
 
 void
 accounts_clear_script_start(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_remove_key(accounts, account_name, "script.start", NULL);
-        _save_accounts();
-    }
+    _accounts_clear_string_option(account_name, "script.start");
 }
 
 void
 accounts_clear_theme(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_remove_key(accounts, account_name, "theme", NULL);
-        _save_accounts();
-    }
+    _accounts_clear_string_option(account_name, "theme");
 }
 
 void
 accounts_clear_muc(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_remove_key(accounts, account_name, "muc.service", NULL);
-        _save_accounts();
-    }
+    _accounts_clear_string_option(account_name, "muc.service");
 }
 
 void
 accounts_clear_resource(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_remove_key(accounts, account_name, "resource", NULL);
-        _save_accounts();
-    }
+    _accounts_clear_string_option(account_name, "resource");
 }
 
 void
 accounts_clear_otr(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_remove_key(accounts, account_name, "otr.policy", NULL);
-        _save_accounts();
-    }
+    _accounts_clear_string_option(account_name, "otr.policy");
 }
 
 void
@@ -740,100 +720,67 @@ accounts_clear_omemo_state(const char* const account_name, const char* const con
 void
 accounts_set_muc_service(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "muc.service", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "muc.service", value);
 }
 
 void
 accounts_set_muc_nick(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "muc.nick", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "muc.nick", value);
 }
 
 void
 accounts_set_otr_policy(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "otr.policy", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "otr.policy", value);
 }
 
 void
 accounts_set_omemo_policy(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "omemo.policy", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "omemo.policy", value);
 }
 
 void
 accounts_set_tls_policy(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "tls.policy", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "tls.policy", value);
 }
 
 void
 accounts_set_auth_policy(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "auth.policy", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "auth.policy", value);
 }
 
 void
 accounts_set_priority_online(const char* const account_name, const gint value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_integer(accounts, account_name, "priority.online", value);
-        _save_accounts();
-    }
+    _accounts_set_int_option(account_name, "priority.online", value);
 }
 
 void
 accounts_set_priority_chat(const char* const account_name, const gint value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_integer(accounts, account_name, "priority.chat", value);
-        _save_accounts();
-    }
+    _accounts_set_int_option(account_name, "priority.chat", value);
 }
 
 void
 accounts_set_priority_away(const char* const account_name, const gint value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_integer(accounts, account_name, "priority.away", value);
-        _save_accounts();
-    }
+    _accounts_set_int_option(account_name, "priority.away", value);
 }
 
 void
 accounts_set_priority_xa(const char* const account_name, const gint value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_integer(accounts, account_name, "priority.xa", value);
-        _save_accounts();
-    }
+    _accounts_set_int_option(account_name, "priority.xa", value);
 }
 
 void
 accounts_set_priority_dnd(const char* const account_name, const gint value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_integer(accounts, account_name, "priority.dnd", value);
-        _save_accounts();
-    }
+    _accounts_set_int_option(account_name, "priority.dnd", value);
 }
 
 void
@@ -845,7 +792,6 @@ accounts_set_priority_all(const char* const account_name, const gint value)
         accounts_set_priority_away(account_name, value);
         accounts_set_priority_xa(account_name, value);
         accounts_set_priority_dnd(account_name, value);
-        _save_accounts();
     }
 }
 
@@ -882,21 +828,13 @@ accounts_get_priority_for_presence_type(const char* const account_name,
 void
 accounts_set_last_presence(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, "presence.last", value);
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "presence.last", value);
 }
 
 void
 accounts_set_last_status(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
-        if (value) {
-            g_key_file_set_string(accounts, account_name, "presence.laststatus", value);
-        }
-        _save_accounts();
-    }
+    _accounts_set_string_option(account_name, "presence.laststatus", value);
 }
 
 void
