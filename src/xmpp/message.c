@@ -548,6 +548,7 @@ message_send_chat_ox(const char* const barejid, const char* const msg, gboolean 
     xmpp_stanza_to_text(signcrypt, &c, &s);
     char* signcrypt_e = p_ox_gpg_signcrypt(account->jid, barejid, c);
     if (signcrypt_e == NULL) {
+        cons_show("Unable to send OX message. Check log file and profanity-ox-setup man page for details.");
         log_error("Message not signcrypted.");
         return NULL;
     }
