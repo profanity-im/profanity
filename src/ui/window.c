@@ -598,6 +598,10 @@ win_page_up(ProfWin* window)
     int page_space = rows - 4;
     int* page_start = &(window->layout->y_pos);
 
+    // dont need to scroll
+    if (*page_start == 0)
+        return;
+
     *page_start -= page_space;
 
     // went past beginning, show first page
