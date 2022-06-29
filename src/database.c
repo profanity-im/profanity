@@ -301,7 +301,9 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     if (message->timestamp) {
         date_fmt = g_date_time_format_iso8601(message->timestamp);
     } else {
-        date_fmt = g_date_time_format_iso8601(g_date_time_new_now_local());
+        GDateTime* dt = g_date_time_new_now_local();
+        date_fmt = g_date_time_format_iso8601(dt);
+        g_date_time_unref(dt);
     }
 
     const char* enc = _get_message_enc_str(message->enc);
