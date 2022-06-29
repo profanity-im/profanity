@@ -98,6 +98,7 @@
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
+#include "pgp/ox.h"
 #include "xmpp/ox.h"
 #endif
 

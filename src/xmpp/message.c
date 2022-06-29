@@ -46,6 +46,7 @@
 #include "config/preferences.h"
 #include "event/server_events.h"
 #include "pgp/gpg.h"
+#include "pgp/ox.h"
 #include "plugins/plugins.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"

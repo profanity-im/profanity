@@ -84,6 +84,7 @@ unittest_sources = \
 	src/ui/ui.h \
 	src/otr/otr.h \
 	src/pgp/gpg.h \
+	src/pgp/ox.h \
 	src/omemo/omemo.h \
 	src/omemo/crypto.h \
 	src/omemo/store.h \
@@ -188,10 +189,12 @@ c_sources = \
 git_include = src/gitversion.h
 
 pgp_sources = \
-	src/pgp/gpg.h src/pgp/gpg.c
+	src/pgp/gpg.h src/pgp/gpg.c \
+	src/pgp/ox.h src/pgp/ox.c
 
 pgp_unittest_sources = \
-	tests/unittests/pgp/stub_gpg.c
+	tests/unittests/pgp/stub_gpg.c \
+	tests/unittests/pgp/stub_ox.c
 
 otr4_sources = \
 	src/otr/otrlib.h src/otr/otrlibv4.c src/otr/otr.h src/otr/otr.c
