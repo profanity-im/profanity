@@ -54,6 +54,7 @@ static sqlite3* g_chatlog_database;
 static void _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Jid* const to_jid);
 static char* _get_db_filename(ProfAccount* account);
 static prof_msg_type_t _get_message_type_type(const char* const type);
+static prof_enc_t _get_message_enc_type(const char* const encstr);
 
 static char*
 _get_db_filename(ProfAccount* account)
@@ -199,7 +200,7 @@ log_database_get_previous_chat(const gchar* const contact_barejid)
     if (!myjid)
         return NULL;
 
-    query = sqlite3_mprintf("SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
+    query = sqlite3_mprintf("SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type`, `encryption` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
     if (!query) {
         log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
         return NULL;
@@ -221,13 +222,14 @@ log_database_get_previous_chat(const gchar* const contact_barejid)
         char* date = (char*)sqlite3_column_text(stmt, 1);
         char* from = (char*)sqlite3_column_text(stmt, 2);
         char* type = (char*)sqlite3_column_text(stmt, 3);
+        char* encryption = (char*)sqlite3_column_text(stmt, 3);
 
         ProfMessage* msg = message_init();
         msg->from_jid = jid_create(from);
         msg->plain = strdup(message);
         msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
         msg->type = _get_message_type_type(type);
-        // TODO: later we can get more fields like 'enc'. then we can display the history like regular chats with all info the user enabled.
+        msg->enc = _get_message_enc_type(encryption);
 
         history = g_slist_append(history, msg);
     }
@@ -283,7 +285,23 @@ _get_message_enc_str(prof_enc_t enc)
         return "none";
     }
 
-    return "none"; // do not return none - return NULL
+    return "none";
+}
+
+static prof_enc_t
+_get_message_enc_type(const char* const encstr)
+{
+    if (g_strcmp0(encstr, "ox") == 0) {
+        return PROF_MSG_ENC_OX;
+    } else if (g_strcmp0(encstr, "pgp") == 0) {
+        return PROF_MSG_ENC_PGP;
+    } else if (g_strcmp0(encstr, "otr") == 0) {
+        return PROF_MSG_ENC_OTR;
+    } else if (g_strcmp0(encstr, "omemo") == 0) {
+        return PROF_MSG_ENC_OMEMO;
+    }
+
+    return PROF_MSG_ENC_NONE;
 }
 
 static void
