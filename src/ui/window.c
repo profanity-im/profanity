@@ -602,8 +602,14 @@ win_page_up(ProfWin* window)
 
     if (*page_start == -page_space && prefs_get_boolean(PREF_MAM) && window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*) window;
-        chatwin_old_history(chatwin);
+        if (!chatwin_old_history(chatwin)) {
+            cons_show("Fetched mam");
+            iq_mam_request_older(chatwin);
+        } else {
+            cons_show("Showed history");
+        }
     }
+
     // went past beginning, show first page
     if (*page_start < 0)
         *page_start = 0;

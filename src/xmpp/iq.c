@@ -2575,6 +2575,49 @@ _iq_free_affiliation_list(ProfAffiliationList* affiliation_list)
     }
 }
 
+static int
+_mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    ProfChatWin* chatwin = (ProfChatWin*)userdata;
+    cons_show("Comitted history");
+    chatwin_old_history(chatwin);
+    return 0;
+}
+
+void
+iq_mam_request_older(ProfChatWin* win)
+{
+    if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
+        log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
+        cons_show_error("Server doesn't support MAM (%s).", XMPP_FEATURE_MAM2);
+        return;
+    }
+
+    ProfMessage* first_msg = log_database_get_limits_info(win->barejid, FALSE);
+    char* firstid = NULL;
+    char* enddate = NULL;
+
+    // If first message found
+    if (first_msg->timestamp) {
+        firstid = first_msg->stanzaid;
+        enddate = g_date_time_format(first_msg->timestamp, "%FT%T.%f%:z");
+    } else {
+        return;
+    }
+
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, NULL, enddate, firstid, NULL);
+    iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_buffer_commit_handler, NULL, win);
+
+    g_free(enddate);
+    message_free(first_msg);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+
+    return;
+}
+
 void
 iq_mam_request(ProfChatWin* win)
 {
