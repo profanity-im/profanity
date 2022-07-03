@@ -66,6 +66,7 @@
 #include "xmpp/roster_list.h"
 #include "xmpp/roster.h"
 #include "xmpp/muc.h"
+#include "src/database.h"
 
 #ifdef HAVE_OMEMO
 #include "omemo/omemo.h"
@@ -105,7 +106,8 @@ typedef struct command_config_data_t
 typedef struct mam_rsm_userdata
 {
     char* barejid;
-    char* datestr;
+    char* start_datestr;
+    char* end_datestr;
 } MamRsmUserdata;
 
 static int _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);

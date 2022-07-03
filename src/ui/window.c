@@ -600,6 +600,10 @@ win_page_up(ProfWin* window)
 
     *page_start -= page_space;
 
+    if (*page_start == -page_space && prefs_get_boolean(PREF_MAM) && window->type == WIN_CHAT) {
+        ProfChatWin* chatwin = (ProfChatWin*) window;
+        chatwin_old_history(chatwin);
+    }
     // went past beginning, show first page
     if (*page_start < 0)
         *page_start = 0;
@@ -1290,6 +1294,34 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
 }
 
 void
+win_print_old_history(ProfWin* window, const ProfMessage* const message)
+{
+    g_date_time_ref(message->timestamp);
+
+    char* display_name;
+    int flags = 0;
+    const char* jid = connection_get_fulljid();
+    Jid* jidp = jid_create(jid);
+
+    if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
+        display_name = strdup("me");
+    } else {
+        display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
+        flags = NO_ME;
+    }
+
+    jid_destroy(jidp);
+
+    buffer_prepend(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
+    _win_print_internal(window, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
+
+    free(display_name);
+
+    inp_nonblocking(TRUE);
+    g_date_time_unref(message->timestamp);
+}
+
+void
 win_print(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, ...)
 {
     GDateTime* timestamp = g_date_time_new_now_local();
@@ -1504,9 +1536,10 @@ _win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* t
     GString* fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, fmt_msg->str, NULL, message_id);
-
-    _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, fmt_msg->str, NULL);
+    if (buffer_size(window->layout->buffer) == 0 || g_date_time_compare(buffer_get_entry(window->layout->buffer, 0)->time, timestamp) != 1) {
+        buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, fmt_msg->str, NULL, message_id);
+        _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, fmt_msg->str, NULL);
+    }
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);

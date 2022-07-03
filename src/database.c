@@ -232,8 +232,9 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
     return msg;
 }
 
+// Query previous chat
 GSList*
-log_database_get_previous_chat(const gchar* const contact_barejid)
+log_database_get_previous_chat(const gchar* const contact_barejid, GDateTime* end_time, gboolean flip)
 {
     sqlite3_stmt* stmt = NULL;
     gchar* query;
@@ -242,12 +243,16 @@ log_database_get_previous_chat(const gchar* const contact_barejid)
     if (!myjid)
         return NULL;
 
-    query = sqlite3_mprintf("SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
+    // Flip order when querying older pages
+    char* sort = !flip ? "ASC" : "DESC";
+    gchar* date_fmt = g_date_time_format_iso8601(end_time ? end_time : g_date_time_new_now_local());
+    query = sqlite3_mprintf("SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE ((`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q')) AND `timestamp` < '%q' ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` %s;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, date_fmt, sort);
     if (!query) {
         log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
         return NULL;
     }
 
+    g_free(date_fmt);
     jid_destroy(myjid);
 
     int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);

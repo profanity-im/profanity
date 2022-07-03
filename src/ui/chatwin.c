@@ -66,7 +66,7 @@ chatwin_new(const char* const barejid)
     ProfWin* window = wins_new_chat(barejid);
     ProfChatWin* chatwin = (ProfChatWin*)window;
 
-    if (!prefs_get_boolean(PREF_MAM) && prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY)) {
+    if (prefs_get_boolean(PREF_MAM) || (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY))) {
         _chatwin_history(chatwin, barejid);
     }
 
@@ -518,7 +518,7 @@ static void
 _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 {
     if (!chatwin->history_shown) {
-        GSList* history = log_database_get_previous_chat(contact_barejid);
+        GSList* history = log_database_get_previous_chat(contact_barejid, NULL, FALSE);
         GSList* curr = history;
 
         while (curr) {
@@ -535,6 +535,32 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 
         g_slist_free_full(history, (GDestroyNotify)message_free);
     }
+}
+
+gboolean
+chatwin_old_history(ProfChatWin* chatwin)
+{
+    // TODO: not correct location but check whether notifications get screwed
+    GDateTime* time = buffer_size(((ProfWin*)chatwin)->layout->buffer) == 0 ? NULL : buffer_get_entry(((ProfWin*)chatwin)->layout->buffer, 0)->time;
+    GSList* history = log_database_get_previous_chat(chatwin->barejid, time, TRUE);
+    gboolean has_items = g_slist_length(history) != 0;
+    GSList* curr = history;
+
+    while (curr) {
+        ProfMessage* msg = curr->data;
+        char* msg_plain = msg->plain;
+        msg->plain = plugins_pre_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
+        // This is dirty workaround for memory leak. We reassign msg->plain above so have to free previous object
+        // TODO: Make a better solution, for example, pass msg object to the function and it will replace msg->plain properly if needed.
+        free(msg_plain);
+        win_print_old_history((ProfWin*)chatwin, msg);
+        curr = g_slist_next(curr);
+    }
+
+    g_slist_free_full(history, (GDestroyNotify)message_free);
+    win_redraw((ProfWin*)chatwin);
+
+    return has_items;
 }
 
 static void

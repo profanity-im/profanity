@@ -71,6 +71,7 @@ void win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, con
 void win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const ProfMessage* const message);
 void win_print_outgoing_muc_msg(ProfWin* window, char* show_char, const char* const me, const char* const id, const char* const replace_id, const char* const message);
 void win_print_history(ProfWin* window, const ProfMessage* const message);
+void win_print_old_history(ProfWin* window, const ProfMessage* const message);
 
 void win_print_http_transfer(ProfWin* window, const char* const message, char* url);
 

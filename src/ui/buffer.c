@@ -111,6 +111,34 @@ buffer_append(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime*
 }
 
 void
+buffer_prepend(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id)
+{
+    ProfBuffEntry* e = malloc(sizeof(struct prof_buff_entry_t));
+    e->show_char = strdup(show_char);
+    e->pad_indent = pad_indent;
+    e->flags = flags;
+    e->theme_item = theme_item;
+    e->time = g_date_time_ref(time);
+    e->display_from = display_from ? strdup(display_from) : NULL;
+    e->from_jid = from_jid ? strdup(from_jid) : NULL;
+    e->message = strdup(message);
+    e->receipt = receipt;
+    if (id) {
+        e->id = strdup(id);
+    } else {
+        e->id = NULL;
+    }
+
+    if (g_slist_length(buffer->entries) == BUFF_SIZE) {
+        GSList* last = g_slist_last(buffer->entries);
+        _free_entry(last->data);
+        buffer->entries = g_slist_delete_link(buffer->entries, last);
+    }
+
+    buffer->entries = g_slist_prepend(buffer->entries, e);
+}
+
+void
 buffer_remove_entry_by_id(ProfBuff buffer, const char* const id)
 {
     GSList* entries = buffer->entries;
