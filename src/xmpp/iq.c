@@ -2582,24 +2582,43 @@ iq_mam_request(ProfChatWin* win)
         return;
     }
 
-    xmpp_ctx_t* const ctx = connection_get_ctx();
+    ProfMessage* last_msg = log_database_get_limits_info(win->barejid, TRUE);
+    char* lastid = NULL;
+    char* firstid = NULL;
+    char* startdate = NULL;
+    char* enddate = NULL;
+    gboolean should_add_rsm_handler = TRUE;
 
-    GDateTime* now = g_date_time_new_now_utc();
-    GDateTime* timestamp = g_date_time_add_days(now, -7);
-    g_date_time_unref(now);
-    gchar* datestr = g_date_time_format(timestamp, "%FT%TZ");
-    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, datestr, NULL);
+    // If last message found
+    if (last_msg->timestamp) {
+        lastid = last_msg->stanzaid;
+        startdate = g_date_time_format(last_msg->timestamp, "%FT%T.%f%:z");
 
-    MamRsmUserdata* data = malloc(sizeof(MamRsmUserdata));
-    if (data) {
-        data->datestr = strdup(datestr);
-        data->barejid = strdup(win->barejid);
-
-        iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, data);
+    } else {
+        GDateTime* now = g_date_time_new_now_utc();
+        enddate = g_date_time_format(now, "%FT%T.%f%:z");
+        g_date_time_unref(now);
+        // To get last page we need to set before to empty string
+        firstid = "";
+        should_add_rsm_handler = FALSE;
     }
 
-    g_free(datestr);
-    g_date_time_unref(timestamp);
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+
+    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, startdate, enddate, firstid, lastid);
+
+    if (should_add_rsm_handler) {
+        MamRsmUserdata* data = malloc(sizeof(MamRsmUserdata));
+        if (data) {
+            data->start_datestr = startdate;
+            data->end_datestr = enddate;
+            data->barejid = strdup(win->barejid);
+
+            iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, data);
+        }
+    }
+
+    message_free(last_msg);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -2619,23 +2638,27 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
     } else if (g_strcmp0(type, "result") == 0) {
         xmpp_stanza_t* fin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
         if (fin) {
+            gboolean is_complete = g_strcmp0(xmpp_stanza_get_attribute(fin, "complete"), "true") == 0;
+
+            if (is_complete) {
+                return 0;
+            }
+
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {
                 char* lastid = NULL;
                 xmpp_stanza_t* last = xmpp_stanza_get_child_by_name(set, STANZA_NAME_LAST);
-                if (last) {
-                    lastid = xmpp_stanza_get_text(last);
-                }
+                lastid = xmpp_stanza_get_text(last);
 
                 // 4.3.2. send same stanza with set,max stanza
                 xmpp_ctx_t* const ctx = connection_get_ctx();
 
                 MamRsmUserdata* data = (MamRsmUserdata*)userdata;
-                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->datestr, lastid);
-                free(data->barejid);
-                free(data->datestr);
-                free(data);
+
+                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, data->end_datestr, NULL, lastid);
                 free(lastid);
+
+                iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, data);
 
                 iq_send_stanza(iq);
                 xmpp_stanza_release(iq);

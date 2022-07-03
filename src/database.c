@@ -187,6 +187,51 @@ log_database_add_outgoing_muc_pm(const char* const id, const char* const barejid
     _log_database_add_outgoing("mucpm", id, barejid, message, replace_id, enc);
 }
 
+// Get info (timestamp and stanza_id) of the first or last message in db
+ProfMessage*
+log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_last)
+{
+    sqlite3_stmt* stmt = NULL;
+    gchar* query;
+    const char* jid = connection_get_fulljid();
+    Jid* myjid = jid_create(jid);
+    if (!myjid)
+        return NULL;
+
+    if (is_last) {
+        query = sqlite3_mprintf("SELECT * FROM (SELECT `archive_id`, `timestamp` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` DESC LIMIT 1) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
+    } else {
+        query = sqlite3_mprintf("SELECT * FROM (SELECT `archive_id`, `timestamp` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` ASC LIMIT 1) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
+    }
+
+    if (!query) {
+        log_error("log_database_get_last_info(): SQL query. could not allocate memory");
+        return NULL;
+    }
+
+    jid_destroy(myjid);
+
+    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        log_error("log_database_get_last_info(): unknown SQLite error");
+        return NULL;
+    }
+
+    ProfMessage* msg = message_init();
+
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        char* archive_id = (char*)sqlite3_column_text(stmt, 0);
+        char* date = (char*)sqlite3_column_text(stmt, 1);
+
+        msg->stanzaid = strdup(archive_id);
+        msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
+    }
+    sqlite3_finalize(stmt);
+    sqlite3_free(query);
+
+    return msg;
+}
+
 GSList*
 log_database_get_previous_chat(const gchar* const contact_barejid)
 {
