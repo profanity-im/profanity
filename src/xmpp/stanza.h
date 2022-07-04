@@ -118,6 +118,7 @@
 #define STANZA_NAME_FIRST            "first"
 #define STANZA_NAME_AFTER            "after"
 #define STANZA_NAME_BEFORE           "before"
+#define STANZA_NAME_MAX              "max"
 #define STANZA_NAME_USERNAME         "username"
 #define STANZA_NAME_PROPOSE          "propose"
 #define STANZA_NAME_REPORT           "report"

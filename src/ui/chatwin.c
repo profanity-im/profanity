@@ -66,8 +66,11 @@ chatwin_new(const char* const barejid)
     ProfWin* window = wins_new_chat(barejid);
     ProfChatWin* chatwin = (ProfChatWin*)window;
 
-    if (prefs_get_boolean(PREF_MAM) || (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY))) {
+    if (!prefs_get_boolean(PREF_MAM) || (prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY))) {
+        if (0) {
+            
         _chatwin_history(chatwin, barejid);
+        }
     }
 
     // if the contact is offline, show a message
@@ -307,7 +310,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         // MUCPMs also get printed here. In their case we don't save any logs (because nick owners can change) and thus we shouldn't read logs
         // (and if we do we need to check the resourcepart)
         if (!prefs_get_boolean(PREF_MAM) && prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY) && message->type == PROF_MSG_TYPE_CHAT) {
-            _chatwin_history(chatwin, chatwin->barejid);
+            /* _chatwin_history(chatwin, chatwin->barejid); */
         }
 
         // show users status first, when receiving message via delayed delivery
@@ -518,7 +521,7 @@ static void
 _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 {
     if (!chatwin->history_shown) {
-        GSList* history = log_database_get_previous_chat(contact_barejid, NULL, FALSE);
+        GSList* history = log_database_get_previous_chat(contact_barejid, NULL, NULL, FALSE);
         GSList* curr = history;
 
         while (curr) {
@@ -538,11 +541,11 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 }
 
 gboolean
-chatwin_old_history(ProfChatWin* chatwin)
+chatwin_old_history(ProfChatWin* chatwin, char* start_time)
 {
     // TODO: not correct location but check whether notifications get screwed
-    GDateTime* time = buffer_size(((ProfWin*)chatwin)->layout->buffer) == 0 ? NULL : buffer_get_entry(((ProfWin*)chatwin)->layout->buffer, 0)->time;
-    GSList* history = log_database_get_previous_chat(chatwin->barejid, time, TRUE);
+    char* end_time = buffer_size(((ProfWin*)chatwin)->layout->buffer) == 0 ? NULL : g_date_time_format_iso8601(buffer_get_entry(((ProfWin*)chatwin)->layout->buffer, 0)->time);
+    GSList* history = log_database_get_previous_chat(chatwin->barejid, start_time, end_time, TRUE);
     gboolean has_items = g_slist_length(history) != 0;
     GSList* curr = history;
 

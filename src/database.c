@@ -46,6 +46,7 @@
 #include "log.h"
 #include "common.h"
 #include "config/files.h"
+#include "database.h"
 
 static sqlite3* g_chatlog_database;
 
@@ -234,7 +235,7 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
 
 // Query previous chat
 GSList*
-log_database_get_previous_chat(const gchar* const contact_barejid, GDateTime* end_time, gboolean flip)
+log_database_get_previous_chat(const gchar* const contact_barejid, char* start_time, char* end_time, gboolean flip)
 {
     sqlite3_stmt* stmt = NULL;
     gchar* query;
@@ -244,15 +245,17 @@ log_database_get_previous_chat(const gchar* const contact_barejid, GDateTime* en
         return NULL;
 
     // Flip order when querying older pages
-    char* sort = !flip ? "ASC" : "DESC";
-    gchar* date_fmt = g_date_time_format_iso8601(end_time ? end_time : g_date_time_new_now_local());
-    query = sqlite3_mprintf("SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE ((`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q')) AND `timestamp` < '%q' ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` %s;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, date_fmt, sort);
+    gchar* sort = !flip ? "ASC" : "DESC";
+    gchar* end_date_fmt = end_time ? end_time : g_date_time_format_iso8601(g_date_time_new_now_local());
+    gchar* start_date_fmt = start_time ? start_time : NULL;
+    query = sqlite3_mprintf("SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE ((`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q')) AND `timestamp` < '%q' AND (%Q IS NULL OR `timestamp` > %Q) ORDER BY `timestamp` DESC LIMIT %d) ORDER BY `timestamp` %s;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, end_date_fmt, start_date_fmt, start_date_fmt, MESSAGES_TO_RETRIEVE, sort);
     if (!query) {
         log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
         return NULL;
     }
 
-    g_free(date_fmt);
+    g_free(end_date_fmt);
+
     jid_destroy(myjid);
 
     int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);

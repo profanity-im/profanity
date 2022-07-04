@@ -61,6 +61,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/connection.h"
+#include "database.h"
 
 #define CONS_WIN_TITLE "Profanity. Type /help for help information."
 #define XML_WIN_TITLE  "XML Console"
@@ -607,7 +608,7 @@ win_page_up(ProfWin* window)
 
         // Don't do anything if still fetching mam messages
         if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, loading_text) == 0)) {
-            if (!chatwin_old_history(chatwin)) {
+            if (!chatwin_old_history(chatwin, NULL)) {
                 cons_show("Fetched mam");
                 buffer_prepend(window->layout->buffer, "-", 0, first_entry->time, NO_DATE, THEME_ROOMINFO, NULL, NULL, loading_text, NULL, NULL);
                 win_redraw(window);
@@ -1211,8 +1212,8 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
         if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
             _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->barejid);
         } else {
-            // Prevent duplicate messages when current client is sending a message
-            if (g_strcmp0(message->from_jid->fulljid, connection_get_fulljid()) != 0) {
+            // Prevent duplicate messages when current client is sending a message or if it's mam
+            if (g_strcmp0(message->from_jid->fulljid, connection_get_fulljid()) != 0 && !message->is_mam) {
                 _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
             }
         }
@@ -1550,10 +1551,8 @@ _win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* t
     GString* fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    if (buffer_size(window->layout->buffer) == 0 || g_date_time_compare(buffer_get_entry(window->layout->buffer, 0)->time, timestamp) != 1) {
-        buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, fmt_msg->str, NULL, message_id);
-        _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, fmt_msg->str, NULL);
-    }
+    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, fmt_msg->str, NULL, message_id);
+    _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, fmt_msg->str, NULL);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);

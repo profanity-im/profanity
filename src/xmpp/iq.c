@@ -108,6 +108,7 @@ typedef struct mam_rsm_userdata
     char* barejid;
     char* start_datestr;
     char* end_datestr;
+    ProfChatWin* win;
 } MamRsmUserdata;
 
 static int _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
@@ -2582,7 +2583,7 @@ _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
     cons_show("Comitted history");
     // Remove the "Loading messages ..." message
     buffer_remove_entry(((ProfWin*)chatwin)->layout->buffer, 0);
-    chatwin_old_history(chatwin);
+    chatwin_old_history(chatwin, NULL);
     return 0;
 }
 
@@ -2630,39 +2631,32 @@ iq_mam_request(ProfChatWin* win)
     }
 
     ProfMessage* last_msg = log_database_get_limits_info(win->barejid, TRUE);
-    char* lastid = NULL;
-    char* firstid = NULL;
+    // To get last page and have flipped paging set firstid to empty string
+    char* firstid = "";
     char* startdate = NULL;
     char* enddate = NULL;
-    gboolean should_add_rsm_handler = TRUE;
 
     // If last message found
     if (last_msg->timestamp) {
-        lastid = last_msg->stanzaid;
         startdate = g_date_time_format(last_msg->timestamp, "%FT%T.%f%:z");
-
     } else {
         GDateTime* now = g_date_time_new_now_utc();
         enddate = g_date_time_format(now, "%FT%T.%f%:z");
         g_date_time_unref(now);
-        // To get last page we need to set before to empty string
-        firstid = "";
-        should_add_rsm_handler = FALSE;
     }
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, startdate, enddate, firstid, lastid);
+    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, startdate, enddate, firstid, NULL);
 
-    if (should_add_rsm_handler) {
-        MamRsmUserdata* data = malloc(sizeof(MamRsmUserdata));
-        if (data) {
-            data->start_datestr = startdate;
-            data->end_datestr = enddate;
-            data->barejid = strdup(win->barejid);
+    MamRsmUserdata* data = malloc(sizeof(MamRsmUserdata));
+    if (data) {
+        data->start_datestr = startdate;
+        data->end_datestr = enddate;
+        data->barejid = strdup(win->barejid);
+        data->win = win;
 
-            iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, data);
-        }
+        iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, data);
     }
 
     message_free(last_msg);
@@ -2686,24 +2680,25 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         xmpp_stanza_t* fin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
         if (fin) {
             gboolean is_complete = g_strcmp0(xmpp_stanza_get_attribute(fin, "complete"), "true") == 0;
+            MamRsmUserdata* data = (MamRsmUserdata*)userdata;
 
-            if (is_complete) {
+            if (is_complete || data->end_datestr) {
+                chatwin_old_history(data->win, is_complete ? NULL : data->start_datestr);
                 return 0;
             }
+            chatwin_old_history(data->win, data->start_datestr);
 
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {
-                char* lastid = NULL;
-                xmpp_stanza_t* last = xmpp_stanza_get_child_by_name(set, STANZA_NAME_LAST);
-                lastid = xmpp_stanza_get_text(last);
+                char* firstid = NULL;
+                xmpp_stanza_t* first = xmpp_stanza_get_child_by_name(set, STANZA_NAME_FIRST);
+                firstid = xmpp_stanza_get_text(first);
 
                 // 4.3.2. send same stanza with set,max stanza
                 xmpp_ctx_t* const ctx = connection_get_ctx();
 
-                MamRsmUserdata* data = (MamRsmUserdata*)userdata;
-
-                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, data->end_datestr, NULL, lastid);
-                free(lastid);
+                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, data->end_datestr, firstid, NULL);
+                free(firstid);
 
                 iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, data);
 

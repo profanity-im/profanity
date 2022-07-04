@@ -58,6 +58,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/form.h"
 #include "xmpp/muc.h"
+#include "database.h"
 
 static void _stanza_add_unique_id(xmpp_stanza_t* stanza);
 static char* _stanza_create_sha1_hash(char* str);
@@ -2780,12 +2781,21 @@ stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const s
     }
 
     // 4.3.2 set/rsm
-    xmpp_stanza_t *set;
-    if (lastid || firstid) {
-        set = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(set, STANZA_TYPE_SET);
-        xmpp_stanza_set_ns(set, STANZA_NS_RSM);
-    }
+    xmpp_stanza_t *set, *max, *max_text;
+    set = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(set, STANZA_TYPE_SET);
+    xmpp_stanza_set_ns(set, STANZA_NS_RSM);
+
+    max = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(max, STANZA_NAME_MAX);
+
+    max_text = xmpp_stanza_new(ctx);
+    char* txt = g_strdup_printf("%d", MESSAGES_TO_RETRIEVE);
+    xmpp_stanza_set_text(max_text, txt);
+    g_free(txt);
+
+    xmpp_stanza_add_child(max, max_text);
+    xmpp_stanza_add_child(set, max);
 
     xmpp_stanza_t *after, *after_text;
     if (lastid) {
@@ -2831,10 +2841,10 @@ stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const s
         xmpp_stanza_release(end_date_text);
     }
 
-    if (firstid || lastid) {
-        xmpp_stanza_add_child(query, set);
-        xmpp_stanza_release(set);
-    }
+    xmpp_stanza_add_child(query, set);
+    xmpp_stanza_release(set);
+    xmpp_stanza_release(max_text);
+    xmpp_stanza_release(max);
 
     if (lastid) {
         xmpp_stanza_release(after_text);

@@ -145,7 +145,7 @@ void chatwin_set_incoming_char(ProfChatWin* chatwin, const char* const ch);
 void chatwin_unset_incoming_char(ProfChatWin* chatwin);
 void chatwin_set_outgoing_char(ProfChatWin* chatwin, const char* const ch);
 void chatwin_unset_outgoing_char(ProfChatWin* chatwin);
-gboolean chatwin_old_history(ProfChatWin* chatwin);
+gboolean chatwin_old_history(ProfChatWin* chatwin, char* start_date);
 
 // MUC window
 ProfMucWin* mucwin_new(const char* const barejid);
