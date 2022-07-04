@@ -39,6 +39,7 @@
 #include <glib.h>
 #include <stdlib.h>
 
+#include "log.h"
 #include "config/preferences.h"
 #include "ui/win_types.h"
 #include "ui/window.h"
@@ -49,6 +50,11 @@ void
 privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
 {
     assert(privatewin != NULL);
+
+    if (message->plain == NULL) {
+        log_error("privwin_incoming_msg: Message with no plain field from: %s", message->from_jid);
+        return;
+    }
 
     ProfWin* window = (ProfWin*)privatewin;
     int num = wins_get_num(window);

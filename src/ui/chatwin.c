@@ -310,6 +310,12 @@ void
 chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_created)
 {
     assert(chatwin != NULL);
+
+    if (message->plain == NULL) {
+        log_error("chatwin_incoming_msg: Message with no plain field from: %s", message->from_jid);
+        return;
+    }
+
     char* old_plain = message->plain;
 
     message->plain = plugins_pre_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);

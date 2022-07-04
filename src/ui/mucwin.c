@@ -551,6 +551,11 @@ mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList
     assert(mucwin != NULL);
     int flags = 0;
 
+    if (message->plain == NULL) {
+        log_error("mucwin_incoming_msg: Message with no plain field from: %s", message->from_jid);
+        return;
+    }
+
     if (filter_reflection && message_is_sent_by_us(message, TRUE)) {
         /* Ignore reflection messages */
         return;
