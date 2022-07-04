@@ -602,11 +602,19 @@ win_page_up(ProfWin* window)
 
     if (*page_start == -page_space && prefs_get_boolean(PREF_MAM) && window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*) window;
-        if (!chatwin_old_history(chatwin)) {
-            cons_show("Fetched mam");
-            iq_mam_request_older(chatwin);
-        } else {
-            cons_show("Showed history");
+        ProfBuffEntry* first_entry = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0) : NULL;
+        char* loading_text = "Loading older messages ...";
+
+        // Don't do anything if still fetching mam messages
+        if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, loading_text) == 0)) {
+            if (!chatwin_old_history(chatwin)) {
+                cons_show("Fetched mam");
+                buffer_prepend(window->layout->buffer, "-", 0, first_entry->time, NO_DATE, THEME_ROOMINFO, NULL, NULL, loading_text, NULL, NULL);
+                win_redraw(window);
+                iq_mam_request_older(chatwin);
+            } else {
+                cons_show("Showed history");
+            }
         }
     }
 

@@ -153,6 +153,14 @@ buffer_remove_entry_by_id(ProfBuff buffer, const char* const id)
     }
 }
 
+void
+buffer_remove_entry(ProfBuff buffer, int entry)
+{
+    GSList* node = g_slist_nth(buffer->entries, entry);
+    _free_entry(node->data);
+    buffer->entries = g_slist_delete_link(buffer->entries, node);
+}
+
 gboolean
 buffer_mark_received(ProfBuff buffer, const char* const id)
 {

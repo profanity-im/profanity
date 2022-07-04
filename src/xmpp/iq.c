@@ -2580,6 +2580,8 @@ _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
     ProfChatWin* chatwin = (ProfChatWin*)userdata;
     cons_show("Comitted history");
+    // Remove the "Loading messages ..." message
+    buffer_remove_entry(((ProfWin*)chatwin)->layout->buffer, 0);
     chatwin_old_history(chatwin);
     return 0;
 }
