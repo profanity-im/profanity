@@ -60,6 +60,8 @@ typedef struct prof_conn_t
 {
     xmpp_ctx_t* xmpp_ctx;
     xmpp_conn_t* xmpp_conn;
+    xmpp_sm_state_t* sm_state;
+    char** queued_messages;
     gboolean xmpp_in_event_loop;
     jabber_conn_status_t conn_status;
     xmpp_conn_event_t conn_last_event;
@@ -126,6 +128,8 @@ void
 connection_init(void)
 {
     xmpp_initialize();
+    conn.sm_state = NULL;
+    conn.queued_messages = NULL;
     conn.xmpp_in_event_loop = FALSE;
     conn.conn_status = JABBER_DISCONNECTED;
     conn.conn_last_event = XMPP_CONN_DISCONNECT;
@@ -225,6 +229,13 @@ _conn_apply_settings(const char* const jid, const char* const passwd, const char
     }
 
     xmpp_conn_set_certfail_handler(conn.xmpp_conn, _connection_certfail_cb);
+    if (conn.sm_state) {
+        if (xmpp_conn_set_sm_state(conn.xmpp_conn, conn.sm_state)) {
+            log_warning("Had Stream Management state, but libstrophe didn't accept it");
+            xmpp_free_sm_state(conn.sm_state);
+        }
+        conn.sm_state = NULL;
+    }
 
     return TRUE;
 }
@@ -955,6 +966,15 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
 
         session_login_success(connection_is_secured());
 
+        if (conn.queued_messages) {
+            for (size_t n = 0; conn.queued_messages[n] != NULL; ++n) {
+                xmpp_send_raw(conn.xmpp_conn, conn.queued_messages[n], strlen(conn.queued_messages[n]));
+                free(conn.queued_messages[n]);
+            }
+            free(conn.queued_messages);
+            conn.queued_messages = NULL;
+        }
+
         break;
 
     // raw connection success
@@ -981,6 +1001,11 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         // lost connection for unknown reason
         if (conn.conn_status == JABBER_CONNECTED) {
             log_debug("Connection handler: Lost connection for unknown reason");
+            conn.sm_state = xmpp_conn_get_sm_state(conn.xmpp_conn);
+            conn.queued_messages = calloc(xmpp_conn_send_queue_len(conn.xmpp_conn) + 1, sizeof(*conn.queued_messages));
+            for (int n = 0; n < xmpp_conn_send_queue_len(conn.xmpp_conn); ++n) {
+                conn.queued_messages[n] = xmpp_conn_send_queue_drop_element(conn.xmpp_conn, XMPP_QUEUE_OLDEST);
+            }
             session_lost_connection();
 
             // login attempt failed
