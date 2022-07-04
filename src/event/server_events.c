@@ -545,6 +545,14 @@ static void
 _sv_ev_incoming_ox(ProfChatWin* chatwin, gboolean new_win, ProfMessage* message, gboolean logit)
 {
 #ifdef HAVE_LIBGPGME
+    if (message->plain == NULL) {
+        if (message->body == NULL) {
+            log_error("Couldn't decrypt OX message and body was empty");
+            return;
+        }
+        message->plain = strdup(message->body);
+    }
+
     //_clean_incoming_message(message);
     chatwin_incoming_msg(chatwin, message, new_win);
     log_database_add_incoming(message);
