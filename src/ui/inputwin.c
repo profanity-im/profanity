@@ -200,7 +200,8 @@ inp_readline(void)
 
     if (inp_line) {
         if (!get_password && prefs_get_boolean(PREF_SLASH_GUARD)) {
-            if (strlen(inp_line) > 1) {
+            // ignore quoted messages
+            if (strlen(inp_line) > 1 && inp_line[0] != '>') {
                 char* res = (char*)memchr(inp_line + 1, '/', 3);
                 if (res) {
                     cons_show("Your text contains a slash in the first 4 characters");
