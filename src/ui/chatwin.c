@@ -102,6 +102,7 @@ chatwin_new(const char* const barejid)
 
     if (prefs_get_boolean(PREF_MAM)) {
         iq_mam_request(chatwin);
+        win_print_loading_history(window);
     }
 
     return chatwin;

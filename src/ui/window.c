@@ -610,8 +610,7 @@ win_page_up(ProfWin* window)
         if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, loading_text) == 0)) {
             if (!chatwin_old_history(chatwin, NULL)) {
                 cons_show("Fetched mam");
-                buffer_prepend(window->layout->buffer, "-", 0, first_entry->time, NO_DATE, THEME_ROOMINFO, NULL, NULL, loading_text, NULL, NULL);
-                win_redraw(window);
+                win_print_loading_history(window);
                 iq_mam_request_older(chatwin);
             } else {
                 cons_show("Showed history");
@@ -1853,6 +1852,15 @@ win_redraw(ProfWin* window)
             _win_print_internal(window, e->show_char, e->pad_indent, e->time, e->flags, e->theme_item, e->display_from, e->message, e->receipt);
         }
     }
+}
+
+void
+win_print_loading_history(ProfWin* window)
+{
+    char* loading_text = "Loading older messages ...";
+    GDateTime* timestamp = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0)->time : g_date_time_new_now_local();
+    buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE, THEME_ROOMINFO, NULL, NULL, loading_text, NULL, NULL);
+    win_redraw(window);
 }
 
 gboolean

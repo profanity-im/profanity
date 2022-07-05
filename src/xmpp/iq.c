@@ -67,6 +67,7 @@
 #include "xmpp/roster.h"
 #include "xmpp/muc.h"
 #include "src/database.h"
+#include "ui/window.h"
 
 #ifdef HAVE_OMEMO
 #include "omemo/omemo.h"
@@ -2681,7 +2682,9 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         if (fin) {
             gboolean is_complete = g_strcmp0(xmpp_stanza_get_attribute(fin, "complete"), "true") == 0;
             MamRsmUserdata* data = (MamRsmUserdata*)userdata;
+            ProfWin* window = (ProfWin*)data->win;
 
+            buffer_remove_entry(window->layout->buffer, 0);
             if (is_complete || data->end_datestr) {
                 chatwin_old_history(data->win, is_complete ? NULL : data->start_datestr);
                 return 0;
@@ -2690,6 +2693,8 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {
+                win_print_loading_history(window);
+
                 char* firstid = NULL;
                 xmpp_stanza_t* first = xmpp_stanza_get_child_by_name(set, STANZA_NAME_FIRST);
                 firstid = xmpp_stanza_get_text(first);
