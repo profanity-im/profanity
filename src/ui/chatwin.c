@@ -538,12 +538,16 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
     }
 }
 
+// Print history starting from start_time to end_time if end_time is null the
+// first entrie's timestamp in the buffer is used. Flip true to prepend to buffer.
 gboolean
-chatwin_old_history(ProfChatWin* chatwin, char* start_time)
+chatwin_db_history(ProfChatWin* chatwin, char* start_time, char* end_time, gboolean flip)
 {
-    // TODO: not correct location but check whether notifications get screwed
-    char* end_time = buffer_size(((ProfWin*)chatwin)->layout->buffer) == 0 ? NULL : g_date_time_format_iso8601(buffer_get_entry(((ProfWin*)chatwin)->layout->buffer, 0)->time);
-    GSList* history = log_database_get_previous_chat(chatwin->barejid, start_time, end_time, TRUE);
+    if (!end_time) {
+        end_time = buffer_size(((ProfWin*)chatwin)->layout->buffer) == 0 ? NULL : g_date_time_format_iso8601(buffer_get_entry(((ProfWin*)chatwin)->layout->buffer, 0)->time);
+    }
+
+    GSList* history = log_database_get_previous_chat(chatwin->barejid, start_time, end_time, flip);
     gboolean has_items = g_slist_length(history) != 0;
     GSList* curr = history;
 
@@ -554,7 +558,11 @@ chatwin_old_history(ProfChatWin* chatwin, char* start_time)
         // This is dirty workaround for memory leak. We reassign msg->plain above so have to free previous object
         // TODO: Make a better solution, for example, pass msg object to the function and it will replace msg->plain properly if needed.
         free(msg_plain);
-        win_print_old_history((ProfWin*)chatwin, msg);
+        if (flip) {
+            win_print_old_history((ProfWin*)chatwin, msg);
+        } else {
+            win_print_history((ProfWin*)chatwin, msg);
+        }
         curr = g_slist_next(curr);
     }
 

@@ -607,7 +607,7 @@ win_page_up(ProfWin* window)
 
         // Don't do anything if still fetching mam messages
         if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, LOADING_MESSAGE) == 0)) {
-            if (!chatwin_old_history(chatwin, NULL)) {
+            if (!chatwin_db_history(chatwin, NULL, NULL, TRUE)) {
                 win_print_loading_history(window);
                 iq_mam_request_older(chatwin);
             }
@@ -636,6 +636,20 @@ win_page_down(ProfWin* window)
     int* page_start = &(window->layout->y_pos);
 
     *page_start += page_space;
+
+    // Scrolled down after reaching the bottom of the page
+    if ((*page_start == y || (*page_start == page_space && *page_start >= y)) && prefs_get_boolean(PREF_MAM) && window->type == WIN_CHAT) {
+        int bf_size = buffer_size(window->layout->buffer);
+        if (bf_size > 0) {
+            char* start = g_date_time_format_iso8601(buffer_get_entry(window->layout->buffer, bf_size - 1)->time);
+            GDateTime* now = g_date_time_new_now_local();
+            char* end = g_date_time_format_iso8601(now);
+            chatwin_db_history((ProfChatWin*)window, start, end, FALSE);
+
+            g_free(start);
+            g_date_time_unref(now);
+        }
+    }
 
     // only got half a screen, show full screen
     if ((y - (*page_start)) < page_space)

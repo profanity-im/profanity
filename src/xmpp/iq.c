@@ -2583,7 +2583,7 @@ _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
     ProfChatWin* chatwin = (ProfChatWin*)userdata;
     // Remove the "Loading messages ..." message
     buffer_remove_entry(((ProfWin*)chatwin)->layout->buffer, 0);
-    chatwin_old_history(chatwin, NULL);
+    chatwin_db_history(chatwin, NULL, NULL, TRUE);
     return 0;
 }
 
@@ -2685,10 +2685,10 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
             buffer_remove_entry(window->layout->buffer, 0);
             if (is_complete || data->end_datestr) {
-                chatwin_old_history(data->win, is_complete ? NULL : data->start_datestr);
+                chatwin_db_history(data->win, is_complete ? NULL : data->start_datestr, NULL, TRUE);
                 return 0;
             }
-            chatwin_old_history(data->win, data->start_datestr);
+            chatwin_db_history(data->win, data->start_datestr, NULL, TRUE);
 
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {
