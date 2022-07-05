@@ -57,6 +57,7 @@
 #include "xmpp/muc.h"
 
 #define PAD_SIZE 1000
+#define LOADING_MESSAGE "Loading older messages ..."
 
 void win_move_to_end(ProfWin* window);
 void win_show_status_string(ProfWin* window, const char* const from,
