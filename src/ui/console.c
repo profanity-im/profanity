@@ -54,6 +54,7 @@
 
 #include "common.h"
 #include "log.h"
+#include "config/files.h"
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "command/cmd_defs.h"
@@ -391,6 +392,27 @@ cons_show_incoming_private_message(const char* const nick, const char* const roo
     free(priv_show);
 }
 
+static void
+_cons_welcome_first_start(void)
+{
+    gchar* prefs_loc = files_get_config_path(FILE_PROFANITY_IDENTIFIER);
+    if (!g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
+        ProfWin* console = wins_get_console();
+        win_println(console, THEME_DEFAULT, "-", "This seems to be your first time starting Profanity.");
+        win_println(console, THEME_DEFAULT, "-", "");
+        win_println(console, THEME_DEFAULT, "-", "You can connect to an existing XMPP account via /connect myjid@domain.org.");
+        win_println(console, THEME_DEFAULT, "-", "If you plan to connect to this XMPP account regularly we suggest you set up an account:");
+        win_println(console, THEME_DEFAULT, "-", "/account add myaccount");
+        win_println(console, THEME_DEFAULT, "-", "/account set myaccount jid myjid@domain.org");
+        win_println(console, THEME_DEFAULT, "-", "See /help account for more details.");
+        win_println(console, THEME_DEFAULT, "-", "");
+        win_println(console, THEME_DEFAULT, "-", "If you want to register a new XMPP account with a server use:");
+        win_println(console, THEME_DEFAULT, "-", "/register myjid myserver.org");
+        win_println(console, THEME_DEFAULT, "-", "");
+    }
+    g_free(prefs_loc);
+}
+
 void
 cons_about(void)
 {
@@ -426,6 +448,8 @@ cons_about(void)
     if (prefs_get_boolean(PREF_VERCHECK)) {
         cons_check_version(FALSE);
     }
+
+    _cons_welcome_first_start();
 
     pnoutrefresh(console->layout->win, 0, 0, 1, 0, rows - 3, cols - 1);
 

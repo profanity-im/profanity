@@ -265,7 +265,6 @@ prefs_reload(void)
 void
 prefs_load(char* config_file)
 {
-
     if (config_file == NULL) {
         prefs_loc = files_get_config_path(FILE_PROFRC);
     } else {
