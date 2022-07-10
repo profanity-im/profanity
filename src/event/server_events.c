@@ -54,6 +54,7 @@
 #include "event/common.h"
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
+#include "ui/window.h"
 #include "tools/bookmark_ignore.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/muc.h"
@@ -637,6 +638,11 @@ sv_ev_incoming_message(ProfMessage* message)
         ProfWin* window = wins_new_chat(looking_for_jid);
         chatwin = (ProfChatWin*)window;
         new_win = TRUE;
+
+        if (prefs_get_boolean(PREF_MAM)) {
+            iq_mam_request(chatwin);
+            win_print_loading_history(window);
+        }
 
 #ifdef HAVE_OMEMO
         if (!message->is_mam) {
