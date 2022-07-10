@@ -366,7 +366,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
         type = (char*)_get_message_type_str(message->type);
     }
 
-    query = sqlite3_mprintf("INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) SELECT '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q' WHERE NOT EXISTS (SELECT 1 FROM `ChatLogs` WHERE `archive_id` = '%q' AND `archive_id` != '')",
+    query = sqlite3_mprintf("INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) SELECT '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q' WHERE NOT EXISTS (SELECT 1 FROM `ChatLogs` WHERE (`archive_id` = '%q' AND `archive_id` != '') OR (`stanza_id` = '%q' AND `stanza_id` != ''))",
                             from_jid->barejid,
                             from_jid->resourcepart ? from_jid->resourcepart : "",
                             to_jid->barejid,
@@ -378,7 +378,8 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                             message->replace_id ? message->replace_id : "",
                             type ? type : "",
                             enc ? enc : "",
-                            message->stanzaid ? message->stanzaid : "");
+                            message->stanzaid ? message->stanzaid : "",
+                            message->id ? message->id : "");
     if (!query) {
         log_error("log_database_add(): SQL query. could not allocate memory");
         return;
