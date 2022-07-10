@@ -519,7 +519,7 @@ static void
 _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 {
     if (!chatwin->history_shown) {
-        GSList* history = log_database_get_previous_chat(contact_barejid, NULL, NULL, FALSE);
+        GSList* history = log_database_get_previous_chat(contact_barejid, NULL, NULL, FALSE, FALSE);
         GSList* curr = history;
 
         while (curr) {
@@ -547,7 +547,7 @@ chatwin_db_history(ProfChatWin* chatwin, char* start_time, char* end_time, gbool
         end_time = buffer_size(((ProfWin*)chatwin)->layout->buffer) == 0 ? NULL : g_date_time_format_iso8601(buffer_get_entry(((ProfWin*)chatwin)->layout->buffer, 0)->time);
     }
 
-    GSList* history = log_database_get_previous_chat(chatwin->barejid, start_time, end_time, flip);
+    GSList* history = log_database_get_previous_chat(chatwin->barejid, start_time, end_time, !flip, flip);
     gboolean has_items = g_slist_length(history) != 0;
     GSList* curr = history;
 

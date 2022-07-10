@@ -601,13 +601,13 @@ win_page_up(ProfWin* window)
 
     *page_start -= page_space;
 
-    if (*page_start == -page_space && prefs_get_boolean(PREF_MAM) && window->type == WIN_CHAT) {
+    if (*page_start == -page_space && window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*) window;
         ProfBuffEntry* first_entry = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0) : NULL;
 
         // Don't do anything if still fetching mam messages
         if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, LOADING_MESSAGE) == 0)) {
-            if (!chatwin_db_history(chatwin, NULL, NULL, TRUE)) {
+            if (!chatwin_db_history(chatwin, NULL, NULL, TRUE) && prefs_get_boolean(PREF_MAM)) {
                 win_print_loading_history(window);
                 iq_mam_request_older(chatwin);
             }
@@ -638,7 +638,7 @@ win_page_down(ProfWin* window)
     *page_start += page_space;
 
     // Scrolled down after reaching the bottom of the page
-    if ((*page_start == y || (*page_start == page_space && *page_start >= y)) && prefs_get_boolean(PREF_MAM) && window->type == WIN_CHAT) {
+    if ((*page_start == y || (*page_start == page_space && *page_start >= y)) && window->type == WIN_CHAT) {
         int bf_size = buffer_size(window->layout->buffer);
         if (bf_size > 0) {
             char* start = g_date_time_format_iso8601(buffer_get_entry(window->layout->buffer, bf_size - 1)->time);

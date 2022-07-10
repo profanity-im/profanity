@@ -233,9 +233,11 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
     return msg;
 }
 
-// Query previous chat
+// Query previous chats, constraints start_time and end_time. If end_time is
+// null the current time is used. from_start gets first few messages if true
+// otherwise the last ones. Flip flips the order of the results
 GSList*
-log_database_get_previous_chat(const gchar* const contact_barejid, char* start_time, char* end_time, gboolean flip)
+log_database_get_previous_chat(const gchar* const contact_barejid, char* start_time, char* end_time, gboolean from_start, gboolean flip)
 {
     sqlite3_stmt* stmt = NULL;
     gchar* query;
@@ -245,10 +247,11 @@ log_database_get_previous_chat(const gchar* const contact_barejid, char* start_t
         return NULL;
 
     // Flip order when querying older pages
-    gchar* sort = !flip ? "ASC" : "DESC";
+    gchar* sort1 = from_start ? "ASC" : "DESC";
+    gchar* sort2 = !flip ? "ASC" : "DESC";
     GDateTime* now = g_date_time_new_now_local();
     gchar* end_date_fmt = end_time ? end_time : g_date_time_format_iso8601(now);
-    query = sqlite3_mprintf("SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE ((`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q')) AND `timestamp` < '%q' AND (%Q IS NULL OR `timestamp` > %Q) ORDER BY `timestamp` %s LIMIT %d) ORDER BY `timestamp` %s;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, end_date_fmt, start_time, start_time, sort, MESSAGES_TO_RETRIEVE, sort);
+    query = sqlite3_mprintf("SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type` from `ChatLogs` WHERE ((`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q')) AND `timestamp` < '%q' AND (%Q IS NULL OR `timestamp` > %Q) ORDER BY `timestamp` %s LIMIT %d) ORDER BY `timestamp` %s;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, end_date_fmt, start_time, start_time, sort1, MESSAGES_TO_RETRIEVE, sort2);
 
     g_date_time_unref(now);
     g_free(end_date_fmt);
