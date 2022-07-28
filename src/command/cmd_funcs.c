@@ -6677,9 +6677,6 @@ cmd_autoaway(ProfWin* window, const char* const command, gchar** args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
-    } else {
-        cons_bad_cmd_usage(command);
-        return TRUE;
     }
 
     if (g_strcmp0(args[0], "message") == 0) {
@@ -6693,7 +6690,7 @@ cmd_autoaway(ProfWin* window, const char* const command, gchar** args)
             }
 
             return TRUE;
-        } else if (g_strcmp0(args[1], "xa") == 0) {
+        } else if (g_strcmp0(args[1], "xa") == 0 && args[2] != NULL) {
             if (g_strcmp0(args[2], "off") == 0) {
                 prefs_set_string(PREF_AUTOXA_MESSAGE, NULL);
                 cons_show("Auto xa message cleared.");
@@ -6714,6 +6711,7 @@ cmd_autoaway(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
+    cons_bad_cmd_usage(command);
     return TRUE;
 }
 
