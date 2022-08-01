@@ -465,7 +465,7 @@ call_external(gchar** argv, gchar** std_out, gchar** std_err)
     if (!spawn_result
         || !g_spawn_check_exit_status(exit_status, &spawn_error)) {
         gchar* cmd = g_strjoinv(" ", argv);
-        log_error("Spawning '%s' failed with '%s'.", cmd, spawn_error->message);
+        log_error("Spawning '%s' failed with '%s'.", cmd, (spawn_error && spawn_error->message) ? spawn_error->message : "No error given");
         g_free(cmd);
         g_error_free(spawn_error);
     }
