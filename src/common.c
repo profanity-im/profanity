@@ -445,15 +445,16 @@ get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const mes
 gboolean
 call_external(gchar** argv, gchar** std_out, gchar** std_err)
 {
+    GError *spawn_error, *status_error;
+    gboolean spawn_result;
+    gint exit_status;
+
     GSpawnFlags flags = G_SPAWN_SEARCH_PATH;
     if (std_out == NULL)
         flags |= G_SPAWN_STDOUT_TO_DEV_NULL;
     if (std_err == NULL)
         flags |= G_SPAWN_STDERR_TO_DEV_NULL;
 
-    gint exit_status;
-    gboolean spawn_result;
-    GError* spawn_error;
     spawn_result = g_spawn_sync(NULL, // Inherit the parent PWD.
                                 argv,
                                 NULL, // Inherit the parent environment.
@@ -462,12 +463,19 @@ call_external(gchar** argv, gchar** std_out, gchar** std_err)
                                 std_out, std_err,
                                 &exit_status, &spawn_error);
 
-    if (!spawn_result
-        || !g_spawn_check_exit_status(exit_status, &spawn_error)) {
+    if (!spawn_result || !g_spawn_check_exit_status(exit_status, &status_error)) {
         gchar* cmd = g_strjoinv(" ", argv);
-        log_error("Spawning '%s' failed with '%s'.", cmd, spawn_error->message);
+        if (spawn_error && spawn_error->message) {
+            log_error("Spawning '%s' failed with '%s'.", cmd, spawn_error->message);
+            g_error_free(spawn_error);
+        } else if (status_error && status_error->message) {
+            log_error("Spawning '%s' failed with '%s'.", cmd, status_error->message);
+            g_error_free(status_error);
+            spawn_result = FALSE;
+        } else {
+            log_error("Spawning '%s' failed with.", cmd);
+        }
         g_free(cmd);
-        g_error_free(spawn_error);
     }
 
     return spawn_result;
