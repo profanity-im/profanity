@@ -1000,11 +1000,14 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
 
         // lost connection for unknown reason
         if (conn.conn_status == JABBER_CONNECTED) {
+            int send_queue_len = xmpp_conn_send_queue_len(conn.xmpp_conn);
             log_debug("Connection handler: Lost connection for unknown reason");
             conn.sm_state = xmpp_conn_get_sm_state(conn.xmpp_conn);
-            conn.queued_messages = calloc(xmpp_conn_send_queue_len(conn.xmpp_conn) + 1, sizeof(*conn.queued_messages));
-            for (int n = 0; n < xmpp_conn_send_queue_len(conn.xmpp_conn); ++n) {
-                conn.queued_messages[n] = xmpp_conn_send_queue_drop_element(conn.xmpp_conn, XMPP_QUEUE_OLDEST);
+            if (send_queue_len > 0) {
+                conn.queued_messages = calloc(send_queue_len + 1, sizeof(*conn.queued_messages));
+                for (int n = 0; n < send_queue_len && conn.queued_messages[n]; ++n) {
+                    conn.queued_messages[n] = xmpp_conn_send_queue_drop_element(conn.xmpp_conn, XMPP_QUEUE_OLDEST);
+                }
             }
             session_lost_connection();
 
