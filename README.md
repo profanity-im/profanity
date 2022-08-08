@@ -26,8 +26,7 @@ An alternative way to support us would be to ask for our IBAN.
 Issues backed by a sponsor will be tagged with the [sponsored](https://github.com/profanity-im/profanity/issues?q=label%3Asponsored+) label.
 Feature requests that we consider out of scope, either because of interest or because of time needed to implement them, will be marked with the [unfunded](https://github.com/profanity-im/profanity/issues?q=label%3Aunfunded) label.
 
-Another way to sponsor us or get an issue solved is to create a [bug bounty](https://www.bountysource.com/teams/profanity/issues).
-Here one sets a bounty on a certain task and once the task is completed you send the money to the person who did the work.
+Another way to sponsor us or get an issue solved is to comment on an issue that you are willing to sponsor it. 
 
 Tasks from our [sponsors](SPONSORS.md) will be tackled first.
 
