@@ -22,18 +22,18 @@ jobs:
           docker build -f Dockerfile.${{ matrix.flavor }} -t profanity .
           docker run profanity ./ci-build.sh
 
-#  macos:
-#    runs-on: macos-latest
-#    name: macOS
-#    steps:
-#      - uses: actions/checkout@v2
-#      - name: Run brew bundle
-#        run: brew bundle
-#      - name: Run tests
-#        env:
-#          # Ensure that "keg-only" Homebrew versions are used.
-#          PKG_CONFIG_PATH: "/usr/local/opt/ncurses/lib/pkgconfig:/usr/local/opt/expat/lib/pkgconfig:/usr/local/opt/curl/lib/pkgconfig:/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/libffi/lib/pkgconfig:/usr/local/opt/sqlite/lib/pkgconfig:$PKG_CONFIG_PATH"
-#        run: ./ci-build.sh
+  macos:
+    runs-on: macos-latest
+    name: macOS
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run brew bundle
+        run: brew bundle
+      - name: Run tests
+        env:
+          # Ensure that "keg-only" Homebrew versions are used.
+          PKG_CONFIG_PATH: "/usr/local/opt/ncurses/lib/pkgconfig:/usr/local/opt/expat/lib/pkgconfig:/usr/local/opt/curl/lib/pkgconfig:/usr/local/opt/openssl/lib/pkgconfig:/usr/local/opt/libffi/lib/pkgconfig:/usr/local/opt/sqlite/lib/pkgconfig:$PKG_CONFIG_PATH"
+        run: ./ci-build.sh
 
   code-style:
     runs-on: ubuntu-20.04
