@@ -29,10 +29,8 @@ RUN zypper --non-interactive in --no-recommends \
   libuuid-devel \
   make \
   ncurses-devel \
-  python \
-  python-devel \
-  python38 \
-  python38-devel \
+  python310 \
+  python310-devel \
   readline-devel \
   sqlite3-devel \
   gdk-pixbuf-devel \
