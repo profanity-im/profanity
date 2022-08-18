@@ -28,8 +28,6 @@ RUN dnf install -y \
   libuuid-devel \
   make \
   ncurses-devel \
-  python \
-  python-devel \
   python3 \
   python3-devel \
   readline-devel \
