@@ -203,6 +203,11 @@ _init(char* log_level, char* config_file, char* log_file, char* theme_name)
     }
 
     ui_init();
+    if (prof_log_level == PROF_LEVEL_DEBUG) {
+        ProfWin* console = wins_get_console();
+        win_println(console, THEME_DEFAULT, "-", "Debug mode enabled! Logging to: ");
+        win_println(console, THEME_DEFAULT, "-", get_log_file_location());
+    }
     session_init();
     cmd_init();
     log_info("Initialising contact list");
