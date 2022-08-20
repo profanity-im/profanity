@@ -1869,6 +1869,7 @@ win_print_loading_history(ProfWin* window)
 {
     GDateTime* timestamp = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0)->time : g_date_time_new_now_local();
     buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE, THEME_ROOMINFO, NULL, NULL, LOADING_MESSAGE, NULL, NULL);
+    g_date_time_unref(timestamp);
     win_redraw(window);
 }
 

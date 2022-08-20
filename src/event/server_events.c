@@ -640,8 +640,8 @@ sv_ev_incoming_message(ProfMessage* message)
         new_win = TRUE;
 
         if (prefs_get_boolean(PREF_MAM)) {
-            iq_mam_request(chatwin);
             win_print_loading_history(window);
+            iq_mam_request(chatwin, g_date_time_add_seconds(message->timestamp, 0)); // copy timestamp
         }
 
 #ifdef HAVE_OMEMO

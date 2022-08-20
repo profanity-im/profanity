@@ -98,7 +98,7 @@ chatwin_new(const char* const barejid)
 #endif // HAVE_OMEMO
 
     if (prefs_get_boolean(PREF_MAM)) {
-        iq_mam_request(chatwin);
+        iq_mam_request(chatwin, NULL);
         win_print_loading_history(window);
     }
 
@@ -320,10 +320,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         }
 
         win_insert_last_read_position_marker((ProfWin*)chatwin, chatwin->barejid);
-
-        if (!win_created || !prefs_get_boolean(PREF_MAM)) {
-            win_print_incoming(window, display_name, message);
-        }
+        win_print_incoming(window, display_name, message);
     }
 
     wins_add_urls_ac(window, message);
@@ -542,7 +539,8 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 }
 
 // Print history starting from start_time to end_time if end_time is null the
-// first entrie's timestamp in the buffer is used. Flip true to prepend to buffer.
+// first entry's timestamp in the buffer is used. Flip true to prepend to buffer.
+// Timestamps should be in iso8601
 gboolean
 chatwin_db_history(ProfChatWin* chatwin, char* start_time, char* end_time, gboolean flip)
 {
