@@ -280,7 +280,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     free(mybarejid);
 
     gboolean is_current = wins_is_current(window);
-    gboolean notify = prefs_do_chat_notify(is_current);
+    gboolean notify = prefs_do_chat_notify(is_current) && !message->is_mam;
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
@@ -291,13 +291,16 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         // not currently viewing chat window with sender
     } else {
         status_bar_new(num, WIN_CHAT, chatwin->barejid);
-        cons_show_incoming_message(display_name, num, chatwin->unread, window);
 
-        if (prefs_get_boolean(PREF_FLASH)) {
-            flash();
+        if (!message->is_mam) {
+            cons_show_incoming_message(display_name, num, chatwin->unread, window);
+
+            if (prefs_get_boolean(PREF_FLASH)) {
+                flash();
+            }
+
+            chatwin->unread++;
         }
-
-        chatwin->unread++;
 
         // TODO: so far we don't ask for MAM when incoming message occurs.
         // Need to figure out:
@@ -326,7 +329,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     wins_add_urls_ac(window, message);
     wins_add_quotes_ac(window, message->plain);
 
-    if (prefs_get_boolean(PREF_BEEP)) {
+    if (prefs_get_boolean(PREF_BEEP) && !message->is_mam) {
         beep();
     }
 
