@@ -445,9 +445,10 @@ get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const mes
 gboolean
 call_external(gchar** argv, gchar** std_out, gchar** std_err)
 {
-    GError *spawn_error, *status_error;
-    gboolean spawn_result;
-    gint exit_status;
+    GError *spawn_error = NULL;
+    GError *exit_error = NULL;
+    gboolean is_successful;
+    gint wait_status;
 
     GSpawnFlags flags = G_SPAWN_SEARCH_PATH;
     if (std_out == NULL)
@@ -455,30 +456,34 @@ call_external(gchar** argv, gchar** std_out, gchar** std_err)
     if (std_err == NULL)
         flags |= G_SPAWN_STDERR_TO_DEV_NULL;
 
-    spawn_result = g_spawn_sync(NULL, // Inherit the parent PWD.
+    is_successful = g_spawn_sync(NULL, // Inherit the parent PWD.
                                 argv,
                                 NULL, // Inherit the parent environment.
                                 flags,
                                 NULL, NULL, // No func. before exec() in child.
                                 std_out, std_err,
-                                &exit_status, &spawn_error);
+                                &wait_status, &spawn_error);
 
-    if (!spawn_result || !g_spawn_check_exit_status(exit_status, &status_error)) {
+    if (!is_successful) {
         gchar* cmd = g_strjoinv(" ", argv);
-        if (spawn_error && spawn_error->message) {
-            log_error("Spawning '%s' failed with '%s'.", cmd, spawn_error->message);
-            g_error_free(spawn_error);
-        } else if (status_error && status_error->message) {
-            log_error("Spawning '%s' failed with '%s'.", cmd, status_error->message);
-            g_error_free(status_error);
-            spawn_result = FALSE;
-        } else {
-            log_error("Spawning '%s' failed with.", cmd);
-        }
+        log_error("could not spawn '%s' with error '%s'", cmd, spawn_error->message);
+
+        g_error_free(spawn_error);
         g_free(cmd);
     }
+    else {
+        is_successful = g_spawn_check_wait_status(wait_status, &exit_error);
 
-    return spawn_result;
+        if (!is_successful) {
+            gchar* cmd = g_strjoinv(" ", argv);
+            log_error("'%s' exited with error '%s'", cmd, exit_error->message);
+
+            g_error_free(exit_error);
+            g_free(cmd);
+        }
+    }
+
+    return is_successful;
 }
 
 gchar**
