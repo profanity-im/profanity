@@ -445,8 +445,8 @@ get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const mes
 gboolean
 call_external(gchar** argv, gchar** std_out, gchar** std_err)
 {
-    GError *spawn_error = NULL;
-    GError *exit_error = NULL;
+    GError* spawn_error = NULL;
+    GError* exit_error = NULL;
     gboolean is_successful;
     gint wait_status;
 
@@ -457,22 +457,22 @@ call_external(gchar** argv, gchar** std_out, gchar** std_err)
         flags |= G_SPAWN_STDERR_TO_DEV_NULL;
 
     is_successful = g_spawn_sync(NULL, // Inherit the parent PWD.
-                                argv,
-                                NULL, // Inherit the parent environment.
-                                flags,
-                                NULL, NULL, // No func. before exec() in child.
-                                std_out, std_err,
-                                &wait_status, &spawn_error);
+                                 argv,
+                                 NULL, // Inherit the parent environment.
+                                 flags,
+                                 NULL, NULL, // No func. before exec() in child.
+                                 std_out, std_err,
+                                 &wait_status, &spawn_error);
 
     if (!is_successful) {
         gchar* cmd = g_strjoinv(" ", argv);
-        log_error("could not spawn '%s' with error '%s'", cmd, spawn_error->message);
+        log_error("Spawning '%s' failed with with error '%s'", cmd, spawn_error ? spawn_error->message : "Unknown, spawn_error is NULL");
+        ;
 
         g_error_free(spawn_error);
         g_free(cmd);
-    }
-    else {
-        is_successful = g_spawn_check_wait_status(wait_status, &exit_error);
+    } else {
+        is_successful = g_spawn_check_exit_status(wait_status, &exit_error);
 
         if (!is_successful) {
             gchar* cmd = g_strjoinv(" ", argv);

@@ -339,10 +339,20 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
 
     // if we shall open it
     if (g_hash_table_contains(shall_open, from_attr)) {
-        gchar* argv[] = { prefs_get_string(PREF_AVATAR_CMD), filename->str, NULL };
-        if (!call_external(argv, NULL, NULL)) {
-            cons_show_error("Unable to display avatar: check the logs for more information.");
+        gchar* cmdtemplate = prefs_get_string(PREF_AVATAR_CMD);
+
+        if (cmdtemplate == NULL) {
+            cons_show_error("No default `avatar open` command found in executables preferences.");
+        } else {
+            gchar** argv = format_call_external_argv(cmdtemplate, NULL, filename->str);
+
+            if (!call_external(argv, NULL, NULL)) {
+                cons_show_error("Unable to display avatar: check the logs for more information.");
+            }
+
+            g_strfreev(argv);
         }
+
         g_hash_table_remove(shall_open, from_attr);
     }
 
