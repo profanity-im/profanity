@@ -711,6 +711,18 @@ wins_new_plugin(const char* const plugin_name, const char* const tag)
     return newwin;
 }
 
+ProfWin*
+wins_new_vcard(vCard* vcard)
+{
+    GList* keys = g_hash_table_get_keys(windows);
+    int result = _wins_get_next_available_num(keys);
+    g_list_free(keys);
+    ProfWin* newwin = win_create_vcard(vcard);
+    g_hash_table_insert(windows, GINT_TO_POINTER(result), newwin);
+
+    return newwin;
+}
+
 gboolean
 wins_do_notify_remind(void)
 {
@@ -797,6 +809,27 @@ wins_get_xmlconsole(void)
             assert(xmlwin->memcheck == PROFXMLWIN_MEMCHECK);
             g_list_free(values);
             return xmlwin;
+        }
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(values);
+    return NULL;
+}
+
+ProfVcardWin*
+wins_get_vcard(void)
+{
+    GList* values = g_hash_table_get_values(windows);
+    GList* curr = values;
+    
+    while (curr) {
+        ProfWin* window = curr->data;
+        if (window->type == WIN_VCARD) {
+            ProfVcardWin* vcardwin = (ProfVcardWin*)window;
+            assert(vcardwin->memcheck == PROFVCARDWIN_MEMCHECK);
+            g_list_free(values);
+            return vcardwin;
         }
         curr = g_list_next(curr);
     }

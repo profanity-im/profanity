@@ -246,6 +246,7 @@ gboolean cmd_executable_avatar(ProfWin* window, const char* const command, gchar
 gboolean cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_executable_urlsave(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_executable_editor(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_executable_vcard_photo(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_mam(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_editor(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_correct_editor(ProfWin* window, const char* const command, gchar** args);
@@ -253,5 +254,13 @@ gboolean cmd_silence(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_register(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_mood(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_stamp(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_vcard(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_vcard_add(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_vcard_remove(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_vcard_get(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_vcard_photo(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_vcard_refresh(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_vcard_set(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_vcard_save(ProfWin* window, const char* const command, gchar** args);
 
 #endif

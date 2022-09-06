@@ -281,6 +281,19 @@ win_create_plugin(const char* const plugin_name, const char* const tag)
     return &new_win->window;
 }
 
+ProfWin*
+win_create_vcard(vCard* vcard)
+{
+    ProfVcardWin* new_win = malloc(sizeof(ProfVcardWin));
+    new_win->window.type = WIN_VCARD;
+    new_win->window.layout = _win_create_simple_layout();
+
+    new_win->vcard = vcard;
+    new_win->memcheck = PROFVCARDWIN_MEMCHECK;
+
+    return &new_win->window;
+}
+
 char*
 win_get_title(ProfWin* window)
 {
@@ -351,7 +364,19 @@ win_get_title(ProfWin* window)
         assert(pluginwin->memcheck == PROFPLUGINWIN_MEMCHECK);
         return strdup(pluginwin->tag);
     }
+    if (window->type == WIN_VCARD) {
+        ProfVcardWin* vcardwin = (ProfVcardWin*)window;
+        assert(vcardwin->memcheck == PROFVCARDWIN_MEMCHECK);
 
+        GString* title = g_string_new("vCard ");
+        g_string_append(title, connection_get_barejid());
+
+        if (vcardwin->vcard->modified) {
+            g_string_append(title, " *");
+        }
+
+        return g_string_free(title, FALSE);
+    }
     return NULL;
 }
 
@@ -473,6 +498,11 @@ win_to_string(ProfWin* window)
         char* res = gstring->str;
         g_string_free(gstring, FALSE);
         return res;
+    }
+    case WIN_VCARD:
+    {
+        ProfVcardWin* vcardwin = (ProfVcardWin*)window;
+        return vcardwin_get_string(vcardwin);
     }
     default:
         return NULL;
@@ -1080,6 +1110,162 @@ win_show_info(ProfWin* window, PContact contact)
         curr = g_list_next(curr);
     }
     g_list_free(ordered_resources);
+}
+
+void
+win_show_vcard(ProfWin* window, vCard* vcard)
+{
+    GList* pointer;
+    int index = 0;
+
+    if (vcard->fullname) {
+        win_println(window, THEME_DEFAULT, "!", "Full name: %s", vcard->fullname);
+    }
+    if (vcard->name.family || vcard->name.given || vcard->name.middle || vcard->name.prefix || vcard->name.suffix) {
+        win_println(window, THEME_DEFAULT, "!", "Name: ");
+        if (vcard->name.family) {
+            win_println(window, THEME_DEFAULT, "!", "    Family: %s", vcard->name.family);
+        }
+        if (vcard->name.given) {
+            win_println(window, THEME_DEFAULT, "!", "    Given: %s", vcard->name.given);
+        }
+        if (vcard->name.middle) {
+            win_println(window, THEME_DEFAULT, "!", "    Middle: %s", vcard->name.middle);
+        }
+        if (vcard->name.prefix) {
+            win_println(window, THEME_DEFAULT, "!", "    Prefix: %s", vcard->name.prefix);
+        }
+        if (vcard->name.suffix) {
+            win_println(window, THEME_DEFAULT, "!", "    Suffix: %s", vcard->name.suffix);
+        }
+    }
+    index = 0;
+    for (pointer = g_queue_peek_head_link(vcard->elements); pointer != NULL; pointer = pointer->next, index++) {
+        assert(pointer->data != NULL);
+        vcard_element_t* element = (vcard_element_t*)pointer->data;
+
+        switch (element->type) {
+        case VCARD_NICKNAME:
+        {
+            win_println(window, THEME_DEFAULT, "!", "[%d] Nickname: %s", index, element->nickname);
+            break;
+        }
+        case VCARD_PHOTO:
+        {
+            if (element->photo.external) {
+                win_println(window, THEME_DEFAULT, "!", "[%d] Photo, External value: %s", index, element->photo.extval);
+            } else {
+                win_println(window, THEME_DEFAULT, "!", "[%d] Photo (%s), size: %zu", index, element->photo.type, element->photo.length);
+            }
+            break;
+        }
+        case VCARD_BIRTHDAY:
+        {
+            char* date_format = prefs_get_string(PREF_TIME_VCARD);
+            gchar* date = g_date_time_format(element->birthday, date_format);
+            g_free(date_format);
+
+            assert(date != NULL);
+            win_println(window, THEME_DEFAULT, "!", "[%d] Birthday: %s", index, date);
+            g_free(date);
+            break;
+        }
+        case VCARD_ADDRESS:
+        {
+            // Print the header with flags
+            win_println(window, THEME_DEFAULT, "!", "[%d] Address%s%s%s%s%s%s%s", index,
+                        (element->address.options & VCARD_HOME) ? " [home]" : "",
+                        (element->address.options & VCARD_WORK) == VCARD_WORK ? " [work]" : "",
+                        (element->address.options & VCARD_POSTAL) == VCARD_POSTAL ? " [postal]" : "",
+                        (element->address.options & VCARD_PARCEL) == VCARD_PARCEL ? " [parcel]" : "",
+                        (element->address.options & VCARD_INTL) == VCARD_INTL ? " [international]" : "",
+                        (element->address.options & VCARD_DOM) == VCARD_DOM ? " [domestic]" : "",
+                        (element->address.options & VCARD_PREF) == VCARD_PREF ? " [preferred]" : "");
+
+            if (element->address.pobox) {
+                win_println(window, THEME_DEFAULT, "!", "    P.O. Box: %s", element->address.pobox);
+            }
+            if (element->address.extaddr) {
+                win_println(window, THEME_DEFAULT, "!", "    Extended address: %s", element->address.extaddr);
+            }
+            if (element->address.street) {
+                win_println(window, THEME_DEFAULT, "!", "    Street: %s", element->address.street);
+            }
+            if (element->address.locality) {
+                win_println(window, THEME_DEFAULT, "!", "    Locality: %s", element->address.locality);
+            }
+            if (element->address.region) {
+                win_println(window, THEME_DEFAULT, "!", "    Region: %s", element->address.region);
+            }
+            if (element->address.pcode) {
+                win_println(window, THEME_DEFAULT, "!", "    Postal code: %s", element->address.pcode);
+            }
+            if (element->address.country) {
+                win_println(window, THEME_DEFAULT, "!", "    Country: %s", element->address.country);
+            }
+            break;
+        }
+        case VCARD_TELEPHONE:
+        {
+            // Print the header with flags
+            win_println(window, THEME_DEFAULT, "!", "[%d] Telephone%s%s%s%s%s%s%s%s%s%s%s%s%s", index,
+                        (element->telephone.options & VCARD_HOME) ? " [home]" : "",
+                        (element->telephone.options & VCARD_WORK) == VCARD_WORK ? " [work]" : "",
+                        (element->telephone.options & VCARD_TEL_VOICE) == VCARD_TEL_VOICE ? " [voice]" : "",
+                        (element->telephone.options & VCARD_TEL_FAX) == VCARD_TEL_FAX ? " [fax]" : "",
+                        (element->telephone.options & VCARD_TEL_PAGER) == VCARD_TEL_PAGER ? " [pager]" : "",
+                        (element->telephone.options & VCARD_TEL_MSG) == VCARD_TEL_MSG ? " [msg]" : "",
+                        (element->telephone.options & VCARD_TEL_CELL) == VCARD_TEL_CELL ? " [cell]" : "",
+                        (element->telephone.options & VCARD_TEL_VIDEO) == VCARD_TEL_VIDEO ? " [video]" : "",
+                        (element->telephone.options & VCARD_TEL_BBS) == VCARD_TEL_BBS ? " [bbs]" : "",
+                        (element->telephone.options & VCARD_TEL_MODEM) == VCARD_TEL_MODEM ? " [modem]" : "",
+                        (element->telephone.options & VCARD_TEL_ISDN) == VCARD_TEL_ISDN ? " [isdn]" : "",
+                        (element->telephone.options & VCARD_TEL_PCS) == VCARD_TEL_PCS ? " [pcs]" : "",
+                        (element->telephone.options & VCARD_PREF) == VCARD_PREF ? " [preferred]" : "");
+            if (element->telephone.number) {
+                win_println(window, THEME_DEFAULT, "!", "    Number: %s", element->telephone.number);
+            }
+            break;
+        }
+        case VCARD_EMAIL:
+        {
+            // Print the header with flags
+            win_println(window, THEME_DEFAULT, "!", "[%d] E-mail%s%s%s%s%s", index,
+                        (element->email.options & VCARD_HOME) ? " [home]" : "",
+                        (element->email.options & VCARD_WORK) == VCARD_WORK ? " [work]" : "",
+                        (element->email.options & VCARD_EMAIL_X400) == VCARD_EMAIL_X400 ? " [x400]" : "",
+                        (element->email.options & VCARD_EMAIL_INTERNET) == VCARD_EMAIL_INTERNET ? " [internet]" : "",
+                        (element->email.options & VCARD_PREF) == VCARD_PREF ? " [preferred]" : "");
+            if (element->email.userid) {
+                win_println(window, THEME_DEFAULT, "!", "    ID: %s", element->email.userid);
+            }
+            break;
+        }
+        case VCARD_JID:
+        {
+            win_println(window, THEME_DEFAULT, "!", "[%d] Jabber ID: %s", index, element->jid);
+            break;
+        }
+        case VCARD_TITLE:
+        {
+            win_println(window, THEME_DEFAULT, "!", "[%d] Title: %s", index, element->title);
+            break;
+        }
+        case VCARD_ROLE:
+        {
+            win_println(window, THEME_DEFAULT, "!", "[%d] Role: %s", index, element->role);
+            break;
+        }
+        case VCARD_NOTE:
+        {
+            win_println(window, THEME_DEFAULT, "!", "[%d] Note: %s", index, element->note);
+            break;
+        }
+        case VCARD_URL:
+            win_println(window, THEME_DEFAULT, "!", "[%d] URL: %s", index, element->url);
+            break;
+        }
+    }
 }
 
 void

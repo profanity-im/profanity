@@ -46,6 +46,7 @@ ProfWin* wins_new_muc(const char* const roomjid);
 ProfWin* wins_new_config(const char* const roomjid, DataForm* form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void* userdata);
 ProfWin* wins_new_private(const char* const fulljid);
 ProfWin* wins_new_plugin(const char* const plugin_name, const char* const tag);
+ProfWin* wins_new_vcard(vCard* vcard);
 
 gboolean wins_chat_exists(const char* const barejid);
 GList* wins_get_private_chats(const char* const roomjid);
@@ -61,6 +62,7 @@ ProfConfWin* wins_get_conf(const char* const roomjid);
 ProfPrivateWin* wins_get_private(const char* const fulljid);
 ProfPluginWin* wins_get_plugin(const char* const tag);
 ProfXMLWin* wins_get_xmlconsole(void);
+ProfVcardWin* wins_get_vcard(void);
 
 void wins_close_plugin(char* tag);
 

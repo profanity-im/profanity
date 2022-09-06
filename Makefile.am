@@ -20,6 +20,7 @@ core_sources = \
 	src/xmpp/form.c src/xmpp/form.h \
 	src/xmpp/avatar.c src/xmpp/avatar.h \
 	src/xmpp/ox.c src/xmpp/ox.h \
+	src/xmpp/vcard.c src/xmpp/vcard.h src/xmpp/vcard_funcs.h \
 	src/event/common.c src/event/common.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
@@ -37,6 +38,7 @@ core_sources = \
 	src/ui/privwin.c \
 	src/ui/confwin.c \
 	src/ui/xmlwin.c \
+	src/ui/vcardwin.c \
 	src/command/cmd_defs.h src/command/cmd_defs.c \
 	src/command/cmd_funcs.h src/command/cmd_funcs.c \
 	src/command/cmd_ac.h src/command/cmd_ac.c \
