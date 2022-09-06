@@ -1,8 +1,8 @@
 /*
- * common.c
+ * vcardwin.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2019 - 2022 Michael Vetter <jubalh@iodoru.org>
+ * Copyright (C) 2022 Marouane L. <techmetx11@disroot.org>
  *
  * This file is part of Profanity.
  *
@@ -33,76 +33,43 @@
  *
  */
 
-#include "config.h"
-
-#include "config/tlscerts.h"
 #include "ui/ui.h"
-#include "xmpp/chat_session.h"
-#include "xmpp/roster_list.h"
-#include "xmpp/muc.h"
-#include "xmpp/xmpp.h"
-#include "xmpp/vcard_funcs.h"
-#include "database.h"
-#include "tools/bookmark_ignore.h"
-
-#ifdef HAVE_LIBGPGME
-#include "pgp/gpg.h"
-#endif
-
-#ifdef HAVE_OMEMO
-#include "omemo/omemo.h"
-#endif
-
-static gint _success_connections_counter = 0;
+#include "ui/window_list.h"
+#include "xmpp/vcard.h"
 
 void
-ev_disconnect_cleanup(void)
+vcardwin_show_vcard_config(ProfVcardWin* vcardwin)
 {
-    ui_disconnected();
-    session_disconnect();
-    roster_destroy();
-    iq_autoping_timer_cancel();
-    muc_invites_clear();
-    muc_confserver_clear();
-    chat_sessions_clear();
-    tlscerts_clear_current();
-#ifdef HAVE_LIBGPGME
-    p_gpg_on_disconnect();
-#endif
-#ifdef HAVE_OMEMO
-    omemo_on_disconnect();
-#endif
-    log_database_close();
-    bookmark_ignore_on_disconnect();
-    vcard_user_free();
+    ProfWin* window = &vcardwin->window;
+
+    win_clear(window);
+    win_show_vcard(window, vcardwin->vcard);
+
+    win_println(window, THEME_DEFAULT, "-", "Use '/vcard save' to save changes.");
+    win_println(window, THEME_DEFAULT, "-", "Use '/help vcard' for more information.");
 }
 
-gboolean
-ev_was_connected_already(void)
+char*
+vcardwin_get_string(ProfVcardWin* vcardwin)
 {
-    if (_success_connections_counter > 0)
-        return TRUE;
-    else
-        return FALSE;
-}
+    GString* string = g_string_new("vCard: ");
+    char* jid = connection_get_barejid();
+    g_string_append(string, jid);
 
-gboolean
-ev_is_first_connect(void)
-{
-    if (_success_connections_counter == 1)
-        return TRUE;
-    else
-        return FALSE;
+    if (vcardwin->vcard && vcardwin->vcard->modified) {
+        g_string_append(string, " (modified)");
+    }
+
+    free(jid);
+    return g_string_free(string, FALSE);
 }
 
 void
-ev_inc_connection_counter(void)
+vcardwin_update(void)
 {
-    _success_connections_counter++;
-}
+    ProfVcardWin* win = wins_get_vcard();
 
-void
-ev_reset_connection_counter(void)
-{
-    _success_connections_counter = 0;
+    if (win) {
+        vcardwin_show_vcard_config(win);
+    }
 }

@@ -60,6 +60,7 @@
 #define DIR_DOWNLOADS "downloads"
 #define DIR_EDITOR    "editor"
 #define DIR_CERTS     "certs"
+#define DIR_PHOTOS    "photos"
 
 void files_create_directories(void);
 

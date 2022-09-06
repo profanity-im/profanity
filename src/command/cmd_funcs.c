@@ -91,6 +91,7 @@
 #include "xmpp/chat_session.h"
 #include "xmpp/avatar.h"
 #include "xmpp/stanza.h"
+#include "xmpp/vcard_funcs.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -5580,6 +5581,25 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+    } else if (g_strcmp0(args[0], "vcard") == 0) {
+        if (args[1] == NULL) {
+            char* format = prefs_get_string(PREF_TIME_VCARD);
+            cons_show("vCard time format: %s", format);
+            g_free(format);
+            return TRUE;
+        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
+            prefs_set_string(PREF_TIME_VCARD, args[2]);
+            cons_show("vCard time format set to '%s'.", args[2]);
+            ui_redraw();
+            return TRUE;
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            cons_show("vCard time cannot be disabled.");
+            ui_redraw();
+            return TRUE;
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
     } else {
         cons_bad_cmd_usage(command);
         return TRUE;
@@ -9639,6 +9659,23 @@ cmd_executable_editor(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_executable_vcard_photo(ProfWin* window, const char* const command, gchar** args)
+{
+    if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
+        prefs_set_string(PREF_VCARD_PHOTO_CMD, args[2]);
+        cons_show("`vcard photo open` command set to invoke '%s'", args[2]);
+    } else if (g_strcmp0(args[1], "default") == 0) {
+        prefs_set_string(PREF_VCARD_PHOTO_CMD, NULL);
+        char* cmd = prefs_get_string(PREF_VCARD_PHOTO_CMD);
+        cons_show("`vcard photo open` command set to invoke '%s' (default)", cmd);
+        g_free(cmd);
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+
+    return TRUE;
+}
+gboolean
 cmd_mam(ProfWin* window, const char* const command, gchar** args)
 {
     _cmd_set_boolean_preference(args[0], command, "Message Archive Management", PREF_MAM);
@@ -9816,5 +9853,958 @@ cmd_mood(ProfWin* window, const char* const command, gchar** args)
         publish_user_mood(NULL, NULL);
     }
 
+    return TRUE;
+}
+
+gboolean
+cmd_vcard(ProfWin* window, const char* const command, gchar** args)
+{
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    ProfVcardWin* vcardwin = wins_get_vcard();
+
+    if (vcardwin) {
+        ui_focus_win((ProfWin*)vcardwin);
+    } else {
+        vcardwin = (ProfVcardWin*)vcard_user_create_win();
+        ui_focus_win((ProfWin*)vcardwin);
+    }
+    vcardwin_update();
+    return TRUE;
+}
+
+gboolean
+cmd_vcard_add(ProfWin* window, const char* const command, gchar** args)
+{
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+    if (!element) {
+        cons_show_error("Memory allocation failed.");
+        return TRUE;
+    }
+
+    struct tm tm;
+    gchar* type = args[1];
+    gchar* value = args[2];
+
+    if (g_strcmp0(type, "nickname") == 0) {
+        element->type = VCARD_NICKNAME;
+
+        element->nickname = strdup(value);
+    } else if (g_strcmp0(type, "birthday") == 0) {
+        element->type = VCARD_BIRTHDAY;
+
+        memset(&tm, 0, sizeof(struct tm));
+        if (!strptime(value, "%Y-%m-%d", &tm)) {
+            cons_show_error("Error parsing ISO8601 date.");
+            free(element);
+            return TRUE;
+        }
+        element->birthday = g_date_time_new_local(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, 0, 0, 0);
+    } else if (g_strcmp0(type, "tel") == 0) {
+        element->type = VCARD_TELEPHONE;
+        if (value) {
+            element->telephone.number = strdup(value);
+        }
+    } else if (g_strcmp0(type, "address") == 0) {
+        element->type = VCARD_ADDRESS;
+    } else if (g_strcmp0(type, "email") == 0) {
+        element->type = VCARD_EMAIL;
+        if (value) {
+            element->email.userid = strdup(value);
+        }
+    } else if (g_strcmp0(type, "jid") == 0) {
+        element->type = VCARD_JID;
+        if (value) {
+            element->jid = strdup(value);
+        }
+    } else if (g_strcmp0(type, "title") == 0) {
+        element->type = VCARD_TITLE;
+        if (value) {
+            element->title = strdup(value);
+        }
+    } else if (g_strcmp0(type, "role") == 0) {
+        element->type = VCARD_ROLE;
+        if (value) {
+            element->role = strdup(value);
+        }
+    } else if (g_strcmp0(type, "note") == 0) {
+        element->type = VCARD_NOTE;
+        if (value) {
+            element->note = strdup(value);
+        }
+    } else if (g_strcmp0(type, "url") == 0) {
+        element->type = VCARD_URL;
+        if (value) {
+            element->url = strdup(value);
+        }
+    } else {
+        cons_bad_cmd_usage(command);
+        free(element);
+        return TRUE;
+    }
+
+    vcard_user_add_element(element);
+    vcardwin_update();
+    return TRUE;
+}
+
+gboolean
+cmd_vcard_remove(ProfWin* window, const char* const command, gchar** args)
+{
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    if (args[1]) {
+        vcard_user_remove_element(atoi(args[1]));
+        cons_show("Removed element at index %d", atoi(args[1]));
+        vcardwin_update();
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+    return TRUE;
+}
+
+gboolean
+cmd_vcard_get(ProfWin* window, const char* const command, gchar** args)
+{
+    char* user = args[1];
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    if (user) {
+        // get the JID when in MUC window
+        if (window->type == WIN_MUC) {
+            ProfMucWin* mucwin = (ProfMucWin*)window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+            if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
+                // non-anon muc: get the user's jid and send vcard request to them
+                Occupant* occupant = muc_roster_item(mucwin->roomjid, user);
+                Jid* jid_occupant = jid_create(occupant->jid);
+
+                vcard_print(ctx, window, jid_occupant->barejid);
+                jid_destroy(jid_occupant);
+            } else {
+                // anon muc: send the vcard request through the MUC's server
+                GString* full_jid = g_string_new(mucwin->roomjid);
+                g_string_append(full_jid, "/");
+                g_string_append(full_jid, user);
+
+                vcard_print(ctx, window, full_jid->str);
+
+                g_string_free(full_jid, TRUE);
+            }
+        } else {
+            char* jid = roster_barejid_from_name(user);
+            if (!jid) {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+
+            vcard_print(ctx, window, jid);
+        }
+    } else {
+        if (window->type == WIN_CHAT) {
+            ProfChatWin* chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+            vcard_print(ctx, window, chatwin->barejid);
+        } else {
+            vcard_print(ctx, window, NULL);
+        }
+    }
+
+    return TRUE;
+}
+
+gboolean
+cmd_vcard_photo(ProfWin* window, const char* const command, gchar** args)
+{
+    char* operation = args[1];
+    char* user = args[2];
+
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    gboolean jidless = (g_strcmp0(operation, "open-self") == 0 || g_strcmp0(operation, "save-self") == 0);
+
+    if (!operation || (!jidless && !user)) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    char* jid = NULL;
+    char* filepath = NULL;
+    int index = 0;
+
+    if (!jidless) {
+        if (window->type == WIN_MUC) {
+            ProfMucWin* mucwin = (ProfMucWin*)window;
+            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+
+            if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
+                // non-anon muc: get the user's jid and send vcard request to them
+                Occupant* occupant = muc_roster_item(mucwin->roomjid, user);
+                Jid* jid_occupant = jid_create(occupant->jid);
+
+                jid = g_strdup(jid_occupant->barejid);
+                jid_destroy(jid_occupant);
+            } else {
+                // anon muc: send the vcard request through the MUC's server
+                GString* full_jid = g_string_new(mucwin->roomjid);
+                g_string_append(full_jid, "/");
+                g_string_append(full_jid, user);
+
+                jid = full_jid->str;
+
+                g_string_free(full_jid, FALSE);
+            }
+        } else {
+            char* jid_temp = roster_barejid_from_name(user);
+            if (!jid_temp) {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            } else {
+                jid = g_strdup(jid_temp);
+            }
+        }
+    }
+    if (!g_strcmp0(operation, "open")) {
+        // if an index is provided
+        if (args[3]) {
+            vcard_photo(ctx, jid, NULL, atoi(args[3]), TRUE);
+        } else {
+            vcard_photo(ctx, jid, NULL, -1, TRUE);
+        }
+    } else if (!g_strcmp0(operation, "save")) {
+        // arguments
+        if (g_strv_length(args) > 2) {
+            gchar* opt_keys[] = { "output", "index", NULL };
+            gboolean parsed;
+
+            GHashTable* options = parse_options(&args[3], opt_keys, &parsed);
+            if (!parsed) {
+                cons_bad_cmd_usage(command);
+                options_destroy(options);
+                return TRUE;
+            }
+
+            filepath = g_hash_table_lookup(options, "output");
+            if (!filepath) {
+                filepath = NULL;
+            }
+
+            char* index_str = g_hash_table_lookup(options, "index");
+            if (!index_str) {
+                index = -1;
+            } else {
+                index = atoi(index_str);
+            }
+
+            options_destroy(options);
+        } else {
+            filepath = NULL;
+            index = -1;
+        }
+
+        vcard_photo(ctx, jid, filepath, index, FALSE);
+    } else if (!g_strcmp0(operation, "open-self")) {
+        // if an index is provided
+        if (args[2]) {
+            vcard_photo(ctx, NULL, NULL, atoi(args[2]), TRUE);
+        } else {
+            vcard_photo(ctx, NULL, NULL, -1, TRUE);
+        }
+    } else if (!g_strcmp0(operation, "save-self")) {
+        // arguments
+        if (g_strv_length(args) > 2) {
+            gchar* opt_keys[] = { "output", "index", NULL };
+            gboolean parsed;
+
+            GHashTable* options = parse_options(&args[2], opt_keys, &parsed);
+            if (!parsed) {
+                cons_bad_cmd_usage(command);
+                options_destroy(options);
+                return TRUE;
+            }
+
+            filepath = g_hash_table_lookup(options, "output");
+            if (!filepath) {
+                filepath = NULL;
+            }
+
+            char* index_str = g_hash_table_lookup(options, "index");
+            if (!index_str) {
+                index = -1;
+            } else {
+                index = atoi(index_str);
+            }
+
+            options_destroy(options);
+        } else {
+            filepath = NULL;
+            index = -1;
+        }
+
+        vcard_photo(ctx, NULL, filepath, index, FALSE);
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+
+    if (!jidless) {
+        g_free(jid);
+    }
+    return TRUE;
+}
+
+gboolean
+cmd_vcard_refresh(ProfWin* window, const char* const command, gchar** args)
+{
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    vcard_user_refresh();
+    vcardwin_update();
+    return TRUE;
+}
+
+gboolean
+cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
+{
+    char* key = args[1];
+    char* value = args[2];
+
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    if (!key) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    gboolean is_num = TRUE;
+    for (int i = 0; i < strlen(key); i++) {
+        if (!isdigit((int)key[i])) {
+            is_num = FALSE;
+            break;
+        }
+    }
+
+    if (g_strcmp0(key, "fullname") == 0 && value) {
+        vcard_user_set_fullname(value);
+        cons_show("User vCard's full name has been set");
+    } else if (g_strcmp0(key, "name") == 0 && value) {
+        char* value2 = args[3];
+
+        if (!value2) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        if (g_strcmp0(value, "family") == 0) {
+            vcard_user_set_name_family(value2);
+            cons_show("User vCard's family name has been set");
+        } else if (g_strcmp0(value, "given") == 0) {
+            vcard_user_set_name_given(value2);
+            cons_show("User vCard's given name has been set");
+        } else if (g_strcmp0(value, "middle") == 0) {
+            vcard_user_set_name_middle(value2);
+            cons_show("User vCard's middle name has been set");
+        } else if (g_strcmp0(value, "prefix") == 0) {
+            vcard_user_set_name_prefix(value2);
+            cons_show("User vCard's prefix name has been set");
+        } else if (g_strcmp0(value, "suffix") == 0) {
+            vcard_user_set_name_suffix(value2);
+            cons_show("User vCard's suffix name has been set");
+        }
+    } else if (is_num) {
+        char* value2 = args[3];
+        struct tm tm;
+
+        vcard_element_t* element = vcard_user_get_element_index(atoi(key));
+
+        if (!element) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        if (!value2 || !value) {
+            // Set the main field of element at index <key> to <value>, or from an editor
+
+            switch (element->type) {
+            case VCARD_NICKNAME:
+                if (!value) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->nickname, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->nickname) {
+                        free(element->nickname);
+                    }
+                    element->nickname = editor_value;
+                } else {
+                    if (element->nickname) {
+                        free(element->nickname);
+                    }
+                    element->nickname = strdup(value);
+                }
+                break;
+            case VCARD_BIRTHDAY:
+                memset(&tm, 0, sizeof(struct tm));
+                if (!strptime(value, "%Y-%m-%d", &tm)) {
+                    cons_show_error("Error parsing ISO8601 date.");
+                    return TRUE;
+                }
+
+                if (element->birthday) {
+                    g_date_time_unref(element->birthday);
+                }
+                element->birthday = g_date_time_new_local(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, 0, 0, 0);
+                break;
+            case VCARD_TELEPHONE:
+                if (!value) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->telephone.number, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->telephone.number) {
+                        free(element->telephone.number);
+                    }
+                    element->telephone.number = editor_value;
+                } else {
+                    if (element->telephone.number) {
+                        free(element->telephone.number);
+                    }
+                    element->telephone.number = strdup(value);
+                }
+
+                break;
+            case VCARD_EMAIL:
+                if (!value) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->email.userid, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->email.userid) {
+                        free(element->email.userid);
+                    }
+                    element->email.userid = editor_value;
+                } else {
+                    if (element->email.userid) {
+                        free(element->email.userid);
+                    }
+                    element->email.userid = strdup(value);
+                }
+                break;
+            case VCARD_JID:
+                if (!value) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->jid, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->jid) {
+                        free(element->jid);
+                    }
+                    element->jid = editor_value;
+                } else {
+                    if (element->jid) {
+                        free(element->jid);
+                    }
+                    element->jid = strdup(value);
+                }
+                break;
+            case VCARD_TITLE:
+                if (!value) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->title, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->title) {
+                        free(element->title);
+                    }
+                    element->title = editor_value;
+                } else {
+                    if (element->title) {
+                        free(element->title);
+                    }
+                    element->title = strdup(value);
+                }
+                break;
+            case VCARD_ROLE:
+                if (!value) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->role, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->role) {
+                        free(element->role);
+                    }
+                    element->role = editor_value;
+                } else {
+                    if (element->role) {
+                        free(element->role);
+                    }
+                    element->role = strdup(value);
+                }
+                break;
+            case VCARD_NOTE:
+                if (!value) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->note, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->note) {
+                        free(element->note);
+                    }
+                    element->note = editor_value;
+                } else {
+                    if (element->note) {
+                        free(element->note);
+                    }
+                    element->note = strdup(value);
+                }
+                break;
+            case VCARD_URL:
+                if (!value) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->url, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->url) {
+                        free(element->url);
+                    }
+                    element->url = editor_value;
+                } else {
+                    if (element->url) {
+                        free(element->url);
+                    }
+                    element->url = strdup(value);
+                }
+                break;
+            default:
+                cons_show_error("Element unsupported");
+            }
+        } else if (value) {
+            if (g_strcmp0(value, "pobox") == 0 && element->type == VCARD_ADDRESS) {
+                if (!value2) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->address.pobox, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->address.pobox) {
+                        free(element->address.pobox);
+                    }
+                    element->address.pobox = editor_value;
+                } else {
+                    if (element->address.pobox) {
+                        free(element->address.pobox);
+                    }
+                    element->address.pobox = strdup(value2);
+                }
+            } else if (g_strcmp0(value, "extaddr") == 0 && element->type == VCARD_ADDRESS) {
+                if (!value2) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->address.extaddr, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->address.extaddr) {
+                        free(element->address.extaddr);
+                    }
+                    element->address.extaddr = editor_value;
+                } else {
+                    if (element->address.extaddr) {
+                        free(element->address.extaddr);
+                    }
+                    element->address.extaddr = strdup(value2);
+                }
+            } else if (g_strcmp0(value, "street") == 0 && element->type == VCARD_ADDRESS) {
+                if (!value2) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->address.street, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->address.street) {
+                        free(element->address.street);
+                    }
+                    element->address.street = editor_value;
+                } else {
+                    if (element->address.street) {
+                        free(element->address.street);
+                    }
+                    element->address.street = strdup(value2);
+                }
+            } else if (g_strcmp0(value, "locality") == 0 && element->type == VCARD_ADDRESS) {
+                if (!value2) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->address.locality, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->address.locality) {
+                        free(element->address.locality);
+                    }
+                    element->address.locality = editor_value;
+                } else {
+                    if (element->address.locality) {
+                        free(element->address.locality);
+                    }
+                    element->address.locality = strdup(value2);
+                }
+            } else if (g_strcmp0(value, "region") == 0 && element->type == VCARD_ADDRESS) {
+                if (!value2) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->address.region, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->address.region) {
+                        free(element->address.region);
+                    }
+                    element->address.region = editor_value;
+                } else {
+                    if (element->address.region) {
+                        free(element->address.region);
+                    }
+                    element->address.region = strdup(value2);
+                }
+            } else if (g_strcmp0(value, "pocode") == 0 && element->type == VCARD_ADDRESS) {
+                if (!value2) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->address.pcode, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->address.pcode) {
+                        free(element->address.pcode);
+                    }
+                    element->address.pcode = editor_value;
+                } else {
+                    if (element->address.pcode) {
+                        free(element->address.pcode);
+                    }
+                    element->address.pcode = strdup(value2);
+                }
+            } else if (g_strcmp0(value, "country") == 0 && element->type == VCARD_ADDRESS) {
+                if (!value2) {
+                    gchar* editor_value;
+                    if (get_message_from_editor(element->address.country, &editor_value)) {
+                        return TRUE;
+                    }
+
+                    if (element->address.country) {
+                        free(element->address.country);
+                    }
+                    element->address.country = editor_value;
+                } else {
+                    if (element->address.country) {
+                        free(element->address.country);
+                    }
+                    element->address.country = strdup(value2);
+                }
+            } else if (g_strcmp0(value, "type") == 0 && element->type == VCARD_ADDRESS) {
+                if (g_strcmp0(value2, "domestic") == 0) {
+                    element->address.options &= ~VCARD_INTL;
+                    element->address.options |= VCARD_DOM;
+                } else if (g_strcmp0(value2, "international") == 0) {
+                    element->address.options &= ~VCARD_DOM;
+                    element->address.options |= VCARD_INTL;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "home") == 0) {
+                switch (element->type) {
+                case VCARD_ADDRESS:
+                    if (g_strcmp0(value2, "on") == 0) {
+                        element->address.options |= VCARD_HOME;
+                    } else if (g_strcmp0(value2, "off") == 0) {
+                        element->address.options &= ~VCARD_HOME;
+                    } else {
+                        cons_bad_cmd_usage(command);
+                        return TRUE;
+                    }
+                    break;
+                case VCARD_TELEPHONE:
+                    if (g_strcmp0(value2, "on") == 0) {
+                        element->telephone.options |= VCARD_HOME;
+                    } else if (g_strcmp0(value2, "off") == 0) {
+                        element->telephone.options &= ~VCARD_HOME;
+                    } else {
+                        cons_bad_cmd_usage(command);
+                        return TRUE;
+                    }
+                    break;
+                case VCARD_EMAIL:
+                    if (g_strcmp0(value2, "on") == 0) {
+                        element->email.options |= VCARD_HOME;
+                    } else if (g_strcmp0(value2, "off") == 0) {
+                        element->email.options &= ~VCARD_HOME;
+                    } else {
+                        cons_bad_cmd_usage(command);
+                        return TRUE;
+                    }
+                    break;
+                default:
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "work") == 0) {
+                switch (element->type) {
+                case VCARD_ADDRESS:
+                    if (g_strcmp0(value2, "on") == 0) {
+                        element->address.options |= VCARD_WORK;
+                    } else if (g_strcmp0(value2, "off") == 0) {
+                        element->address.options &= ~VCARD_WORK;
+                    } else {
+                        cons_bad_cmd_usage(command);
+                        return TRUE;
+                    }
+                    break;
+                case VCARD_TELEPHONE:
+                    if (g_strcmp0(value2, "on") == 0) {
+                        element->telephone.options |= VCARD_WORK;
+                    } else if (g_strcmp0(value2, "off") == 0) {
+                        element->telephone.options &= ~VCARD_WORK;
+                    } else {
+                        cons_bad_cmd_usage(command);
+                        return TRUE;
+                    }
+                    break;
+                case VCARD_EMAIL:
+                    if (g_strcmp0(value2, "on") == 0) {
+                        element->email.options |= VCARD_WORK;
+                    } else if (g_strcmp0(value2, "off") == 0) {
+                        element->email.options &= ~VCARD_WORK;
+                    } else {
+                        cons_bad_cmd_usage(command);
+                        return TRUE;
+                    }
+                    break;
+                default:
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "voice") == 0 && element->type == VCARD_TELEPHONE) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->telephone.options |= VCARD_TEL_VOICE;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->telephone.options &= ~VCARD_TEL_VOICE;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "fax") == 0 && element->type == VCARD_TELEPHONE) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->telephone.options |= VCARD_TEL_FAX;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->telephone.options &= ~VCARD_TEL_FAX;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "pager") == 0 && element->type == VCARD_TELEPHONE) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->telephone.options |= VCARD_TEL_PAGER;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->telephone.options &= ~VCARD_TEL_PAGER;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "msg") == 0 && element->type == VCARD_TELEPHONE) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->telephone.options |= VCARD_TEL_MSG;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->telephone.options &= ~VCARD_TEL_MSG;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "cell") == 0 && element->type == VCARD_TELEPHONE) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->telephone.options |= VCARD_TEL_CELL;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->telephone.options &= ~VCARD_TEL_CELL;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "video") == 0 && element->type == VCARD_TELEPHONE) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->telephone.options |= VCARD_TEL_VIDEO;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->telephone.options &= ~VCARD_TEL_VIDEO;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "bbs") == 0 && element->type == VCARD_TELEPHONE) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->telephone.options |= VCARD_TEL_BBS;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->telephone.options &= ~VCARD_TEL_BBS;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "modem") == 0 && element->type == VCARD_TELEPHONE) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->telephone.options |= VCARD_TEL_MODEM;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->telephone.options &= ~VCARD_TEL_MODEM;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "isdn") == 0 && element->type == VCARD_TELEPHONE) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->telephone.options |= VCARD_TEL_ISDN;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->telephone.options &= ~VCARD_TEL_ISDN;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "pcs") == 0 && element->type == VCARD_TELEPHONE) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->telephone.options |= VCARD_TEL_PCS;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->telephone.options &= ~VCARD_TEL_PCS;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "preferred") == 0) {
+                switch (element->type) {
+                case VCARD_ADDRESS:
+                    if (g_strcmp0(value2, "on") == 0) {
+                        element->address.options |= VCARD_PREF;
+                    } else if (g_strcmp0(value2, "off") == 0) {
+                        element->address.options &= ~VCARD_PREF;
+                    } else {
+                        cons_bad_cmd_usage(command);
+                        return TRUE;
+                    }
+                    break;
+                case VCARD_TELEPHONE:
+                    if (g_strcmp0(value2, "on") == 0) {
+                        element->telephone.options |= VCARD_PREF;
+                    } else if (g_strcmp0(value2, "off") == 0) {
+                        element->telephone.options &= ~VCARD_PREF;
+                    } else {
+                        cons_bad_cmd_usage(command);
+                        return TRUE;
+                    }
+                    break;
+                case VCARD_EMAIL:
+                    if (g_strcmp0(value2, "on") == 0) {
+                        element->email.options |= VCARD_PREF;
+                    } else if (g_strcmp0(value2, "off") == 0) {
+                        element->email.options &= ~VCARD_PREF;
+                    } else {
+                        cons_bad_cmd_usage(command);
+                        return TRUE;
+                    }
+                    break;
+                default:
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "parcel") == 0 && element->type == VCARD_ADDRESS) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->address.options |= VCARD_PARCEL;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->address.options &= ~VCARD_PARCEL;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "postal") == 0 && element->type == VCARD_ADDRESS) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->address.options |= VCARD_POSTAL;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->address.options &= ~VCARD_POSTAL;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "internet") == 0 && element->type == VCARD_EMAIL) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->email.options |= VCARD_EMAIL_INTERNET;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->email.options &= ~VCARD_EMAIL_INTERNET;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else if (g_strcmp0(value, "x400") == 0 && element->type == VCARD_EMAIL) {
+                if (g_strcmp0(value2, "on") == 0) {
+                    element->email.options |= VCARD_EMAIL_X400;
+                } else if (g_strcmp0(value2, "off") == 0) {
+                    element->email.options &= ~VCARD_EMAIL_X400;
+                } else {
+                    cons_bad_cmd_usage(command);
+                    return TRUE;
+                }
+            } else {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+    } else {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    vcardwin_update();
+    return TRUE;
+}
+
+gboolean
+cmd_vcard_save(ProfWin* window, const char* const command, gchar** args)
+{
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    vcard_user_save();
+    cons_show("User vCard uploaded");
     return TRUE;
 }

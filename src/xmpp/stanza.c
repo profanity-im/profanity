@@ -2688,6 +2688,25 @@ stanza_create_avatar_metadata_publish_iq(xmpp_ctx_t* ctx, const char* img_data, 
 }
 
 xmpp_stanza_t*
+stanza_create_vcard_request_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const stanza_id)
+{
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, stanza_id);
+    xmpp_stanza_set_from(iq, connection_get_fulljid());
+    if (jid) {
+        xmpp_stanza_set_to(iq, jid);
+    }
+
+    xmpp_stanza_t* vcard = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(vcard, STANZA_NAME_VCARD);
+    xmpp_stanza_set_ns(vcard, STANZA_NS_VCARD);
+
+    xmpp_stanza_add_child(iq, vcard);
+    xmpp_stanza_release(vcard);
+
+    return iq;
+}
+
+xmpp_stanza_t*
 stanza_attach_correction(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza, const char* const replace_id)
 {
     xmpp_stanza_t* replace_stanza = xmpp_stanza_new(ctx);

@@ -20,6 +20,7 @@ core_sources = \
 	src/xmpp/form.c src/xmpp/form.h \
 	src/xmpp/avatar.c src/xmpp/avatar.h \
 	src/xmpp/ox.c src/xmpp/ox.h \
+	src/xmpp/vcard.c src/xmpp/vcard.h src/xmpp/vcard_funcs.h \
 	src/event/common.c src/event/common.h \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
@@ -37,6 +38,7 @@ core_sources = \
 	src/ui/privwin.c \
 	src/ui/confwin.c \
 	src/ui/xmlwin.c \
+	src/ui/vcardwin.c \
 	src/command/cmd_defs.h src/command/cmd_defs.c \
 	src/command/cmd_funcs.h src/command/cmd_funcs.c \
 	src/command/cmd_ac.h src/command/cmd_ac.c \
@@ -88,6 +90,7 @@ unittest_sources = \
 	src/omemo/omemo.h \
 	src/omemo/crypto.h \
 	src/omemo/store.h \
+	src/xmpp/vcard.h src/xmpp/vcard_funcs.h \
 	src/command/cmd_defs.h src/command/cmd_defs.c \
 	src/command/cmd_funcs.h src/command/cmd_funcs.c \
 	src/command/cmd_ac.h src/command/cmd_ac.c \
@@ -119,11 +122,13 @@ unittest_sources = \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
 	src/ui/tray.h src/ui/tray.c \
+	tests/unittests/xmpp/stub_vcard.c \
 	tests/unittests/xmpp/stub_avatar.c \
 	tests/unittests/xmpp/stub_ox.c \
 	tests/unittests/xmpp/stub_xmpp.c \
 	tests/unittests/xmpp/stub_message.c \
 	tests/unittests/ui/stub_ui.c tests/unittests/ui/stub_ui.h \
+	tests/unittests/ui/stub_vcardwin.c \
 	tests/unittests/log/stub_log.c \
 	tests/unittests/chatlog/stub_chatlog.c \
 	tests/unittests/database/stub_database.c \

@@ -123,6 +123,7 @@
 #define STANZA_NAME_MOOD             "mood"
 #define STANZA_NAME_RECEIVED         "received"
 #define STANZA_NAME_SENT             "sent"
+#define STANZA_NAME_VCARD            "vCard"
 
 // error conditions
 #define STANZA_NAME_BAD_REQUEST             "bad-request"
@@ -249,6 +250,7 @@
 #define STANZA_NS_MOOD_NOTIFY             "http://jabber.org/protocol/mood+notify"
 #define STANZA_NS_STREAMS                 "http://etherx.jabber.org/streams"
 #define STANZA_NS_XMPP_STREAMS            "urn:ietf:params:xml:ns:xmpp-streams"
+#define STANZA_NS_VCARD                   "vcard-temp"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
@@ -413,6 +415,7 @@ void stanza_free_caps(XMPPCaps* caps);
 xmpp_stanza_t* stanza_create_avatar_retrieve_data_request(xmpp_ctx_t* ctx, const char* stanza_id, const char* const item_id, const char* const jid);
 xmpp_stanza_t* stanza_create_avatar_data_publish_iq(xmpp_ctx_t* ctx, const char* img_data, gsize len);
 xmpp_stanza_t* stanza_create_avatar_metadata_publish_iq(xmpp_ctx_t* ctx, const char* img_data, gsize len, int height, int width);
+xmpp_stanza_t* stanza_create_vcard_request_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const stanza_id);
 xmpp_stanza_t* stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const lastid);
 xmpp_stanza_t* stanza_change_password(xmpp_ctx_t* ctx, const char* const user, const char* const password);
 xmpp_stanza_t* stanza_register_new_account(xmpp_ctx_t* ctx, const char* const user, const char* const password);
