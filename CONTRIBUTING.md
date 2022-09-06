@@ -29,6 +29,13 @@ In case GitHub is down or you can't use it for any other reason, you can send a 
 We recommend that you follow the workflow mentioned above.
 And create your patch using the [`git-format-patch`](https://git-scm.com/docs/git-format-patch) tool: `git format-patch master --stdout > feature.patch`
 
+### Another git service
+We prefer if you create a pull request on GitHub.
+Then our team can easily request reviews. And we have the history of the review saved in one place.
+
+If using GitHub is out of the question but you are okay using another service (i.e.: GitLab, codeberg) then please message us in the MUC or send us an email.
+We will then pull from your repository and merge manually.
+
 ### Rules
 
 * When fixing a bug, describe it and how your patch fixes it.
