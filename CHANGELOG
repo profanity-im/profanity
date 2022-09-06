@@ -1,3 +1,62 @@
+0.13.0 (2022-09-)
+====
+
+11 people contributed to this release: @binex-dsk, @cockroach, @DebXWoody, @MarcoPolo-PasTonMolo, @mdosch, @nandesu-utils, @netboy3, @paulfertser, @sjaeckel, @Zash and @jubalh.
+
+Thanks a lot to our sponsors: @mdosch, @wstrm, @LeSpocky and @jamesponddotco
+If you want to support us too: https://profanity-im.github.io/donate.html
+
+This release depends on libstrophe >= 0.12.2.
+
+Changes:
+- Print OMEMO verification QR code (#1320, #1568, #1718, #1720)
+  `/omemo qrcode`
+- Add option to configure stamp (#1663)
+- Allow bold for default colors (#1674)
+- Add irssi theme (#1680)
+- Include useful aliases in profrc example (#1683)
+- Improve man pages (#1688, #1703)
+- Show return symbol for embedded newlines in multiline messages (#1690)
+- Fix xscreensaver detection (#1696)
+- Add support for offline MUC notifications (#1697)
+  `/notify room offline on|off`
+- Fix SIGABRT when using wrong argument order for receiving ox key (#1689, #1699)
+- Use 3 digits for rotated log files (#1701)
+- Fix autocomplete for /ox discover. (#1702)
+- Fix segfault on /ox discover (#1713, #1715)
+- Fix OX rpad generation (#1703)
+- Don't forget encryption status for OX and PGP. (#733, #1694, #1722)
+- Several OX improvements (#1703, #1705)
+- Fix room name not updating. (#1710, #1711)
+- Update capabilities of muc on available presence (#1347, #1712)
+- Add /avatar set command to publish avatar (#1687, #1714)
+- Respect silent nick change in mucs (#757, #1716)
+- Fix duplicate messages in chat with oneself. (#1595, #1717)
+- Improve cmd argument parser (#497, #1721)
+- Make display of user mood optional (#1725)
+- Switch log level while running (#1726)
+- Split chatlog and log functions in separate files (#1727)
+- Split pgp and ox into separate files (#1728)
+- Various cleanups (#1729)
+- Don't scroll if not needed (#1730)
+- Retrieve encryption type from db (#1731)
+- Be more resilient when receiving empty messages (#1734)
+- Display a welcome message upon first start of Profanity (#1735)
+  Explain for new users how to connect/set up a new account
+- Fix /autoaway command logic (#1736)
+- Fix segfault when requesting an avatar (#1738, #1740)
+- Integrate XEP-0198 Stream-Management (#698, #1745, #1746)
+- Fix avatar opening executable (#1742, #1748)
+- Let slashguard ignore quoted messages (#1732)
+- Update DOAP
+
+Behaviour changes:
+- Use ISO8601 as date format in chat logs and log files (#1700)
+- Increase default log file size to 10MB (#1701)
+- Name rotated log files profanity.001.log instead of profnaity.log.001 (#1701)
+- Log encrypted messages by default to chatlog (#1707)
+- Dont show presence status changes by default (59b9b44)
+
 0.12.1 (2022-04-04)
 =====
 
