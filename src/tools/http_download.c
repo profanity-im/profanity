@@ -190,8 +190,8 @@ http_file_get(void* userdata)
     } else {
         if (!download->cancel) {
             http_print_transfer_update(download->window, download->url,
-                                       "Downloading '%s': done",
-                                       download->url);
+                                       "Downloading '%s': done\nSaved to '%s'",
+                                       download->url, download->filename);
             win_mark_received(download->window, download->url);
         }
     }
