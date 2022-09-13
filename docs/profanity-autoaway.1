@@ -1,0 +1,93 @@
+.TH man 1 "2022-09-13" "0.13.0" "Profanity XMPP client"
+
+.SH NAME
+/autoaway
+
+.SH DESCRIPTION
+Manage autoaway settings for idle time.
+
+.SH SYNOPSIS
+/autoaway mode idle|away|off
+
+.LP
+/autoaway time away|xa <minutes>
+
+.LP
+/autoaway message away|xa <message>|off
+
+.LP
+/autoaway check on|off
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBmode idle\fR
+.RS 4
+Sends idle time, status remains online.
+.RE
+.PP
+\fBmode away\fR
+.RS 4
+Sends away and xa presence as well as idle time.
+.RE
+.PP
+\fBmode off\fR
+.RS 4
+Disabled (default).
+.RE
+.PP
+\fBtime away <minutes>\fR
+.RS 4
+Number of minutes before the away presence is sent, default: 15.
+.RE
+.PP
+\fBtime xa <minutes>\fR
+.RS 4
+Number of minutes before the xa presence is sent, default: 0 (disabled).
+.RE
+.PP
+\fBmessage away <message>\fR
+.RS 4
+Optional message to send with the away presence, default: off (disabled).
+.RE
+.PP
+\fBmessage xa <message>\fR
+.RS 4
+Optional message to send with the xa presence, default: off (disabled).
+.RE
+.PP
+\fBmessage away off\fR
+.RS 4
+Send no message with away presence.
+.RE
+.PP
+\fBmessage xa off\fR
+.RS 4
+Send no message with xa presence.
+.RE
+.PP
+\fBcheck on|off\fR
+.RS 4
+When enabled, checks for activity and sends online presence, default: on.
+.RE
+
+.SH EXAMPLES
+/autoaway mode away
+
+.LP
+/autoaway time away 30
+
+.LP
+/autoaway message away Away from computer for a while
+
+.LP
+/autoaway time xa 120
+
+.LP
+/autoaway message xa Away from computer for a very long time
+
+.LP
+/autoaway check off
+
+.LP

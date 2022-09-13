@@ -1,0 +1,48 @@
+.TH man 1 "2022-09-13" "0.13.0" "Profanity XMPP client"
+
+.SH NAME
+/status
+
+.SH DESCRIPTION
+/status get: Find out a contact, or room members presence information. /status set: set own status.
+
+.SH SYNOPSIS
+/status set <state> ["<message>"]
+
+.LP
+/status get <contact>|<nick>
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fB<state>\fR
+.RS 4
+Own status. Possible values: chat, online, away, dnd, xa
+.RE
+.PP
+\fB<message>\fR
+.RS 4
+Optional message to use with the status. Needs quotation marks if it's more than one word.
+.RE
+.PP
+\fB<contact>\fR
+.RS 4
+The contact who's presence you which to see.
+.RE
+.PP
+\fB<nick>\fR
+.RS 4
+If in a chat room, the occupant who's presence you wish to see.
+.RE
+
+.SH EXAMPLES
+/status get odin@valhalla.edda
+
+.LP
+/status get jon
+
+.LP
+/status set online
+
+.LP

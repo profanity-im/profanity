@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([profanity],[0.12.1],[jubalh@iodoru.org],[profanity],[https://profanity-im.github.io/])
+AC_INIT([profanity],[0.13.0],[jubalh@iodoru.org],[profanity],[https://profanity-im.github.io/])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([src/main.c])
@@ -24,7 +24,7 @@ AS_CASE([$target_os],
 
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 
-PACKAGE_STATUS="development"
+PACKAGE_STATUS="release"
 
 ## Get git branch and revision if in development
 if test "x$PACKAGE_STATUS" = xdevelopment; then
