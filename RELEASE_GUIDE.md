@@ -1,7 +1,5 @@
 # Release Guide
 
-Usually release candidates are tagged 0.6.0.rc1, 0.6.0.rc2 and tested for a week or so.
-
 * Release libstrophe and libmesode if required
 
 * Run Unit tests: `make check-unit`
@@ -10,7 +8,7 @@ Usually release candidates are tagged 0.6.0.rc1, 0.6.0.rc2 and tested for a week
 * Build and simple tests in Virtual machines ideally all dists including OSX and Windows (Cygwin)
 
 * Update Inline command help (./src/command/cmd_defs.c)
-* Check copyright dates in all files (Copywright 2012-2019)
+* Check copyright dates in all files
 
 * Generate HTML docs (the docgen argument only works when package status is development)
     `./profanity docgen`
@@ -41,7 +39,7 @@ PACKAGE_STATUS="release"
 * Add generated command manpages: `git add docs/profanity-*.1`
 
 * Commit
-* Tag (0.6.0)
+* Tag (0.1.2)
 * Push
 
 * Configure to generate fresh Makefile:
@@ -59,25 +57,25 @@ make dist-xz
 make dist-zip
 ```
 
-* Set version to next release:
-
-```
-AC_INIT([profanity], [0.7.0], [boothj5web@gmail.com])
-```
-
 * Set the package status back to dev:
 
 ```
 PACKAGE_STATUS="development"
 ```
 
-* Remove generated command manpages: `git rm docs/profanity-*.1`
+* Remove generated command manpages:
+  `git rm docs/profanity-*.1`
+  `git checkout HEAD -- docs/profanity-ox-setup.1`
+  docs/profanity.1 and docs/profanity-ox-setup.1 are handwritten.
 
-* Create a branch for patch releases (0.6.patch)
 * Push
 
 ## Updating website
   * Make changes to the git repo including uploading the new artefacts at:
         https://github.com/profanity-im/profanity-im.github.io
+  * Add .xz and .zip tarballs to `tarballs` directory
+  * Copy `guide/latest` to `guide/newversion`
+  * Update tarball location and name in index.html
+  * Update checksums in index.html
   * Update profanity_version.txt
   * Take results from profanity.doap and put them into xeps.html
