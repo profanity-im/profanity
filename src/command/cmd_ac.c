@@ -4450,7 +4450,7 @@ _vcard_autocomplete(ProfWin* window, const char* const input, gboolean previous)
             }
         } else {
             result = autocomplete_param_with_ac(input, "/vcard set name", vcard_name_ac, TRUE, previous);
-    
+
             if (result) {
                 return result;
             }

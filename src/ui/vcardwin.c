@@ -70,4 +70,3 @@ vcardwin_update(void)
         vcardwin_show_vcard_config(win);
     }
 }
-

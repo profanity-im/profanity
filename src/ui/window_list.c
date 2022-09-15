@@ -822,7 +822,7 @@ wins_get_vcard(void)
 {
     GList* values = g_hash_table_get_values(windows);
     GList* curr = values;
-    
+
     while (curr) {
         ProfWin* window = curr->data;
         if (window->type == WIN_VCARD) {

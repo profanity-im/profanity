@@ -414,8 +414,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             if (xmpp_stanza_get_child_by_name(child_pointer, "DOM")) {
                 element->address.options |= VCARD_DOM;
-            }
-            else if (xmpp_stanza_get_child_by_name(child_pointer, "INTL")) {
+            } else if (xmpp_stanza_get_child_by_name(child_pointer, "INTL")) {
                 element->address.options |= VCARD_INTL;
             }
 
@@ -631,7 +630,7 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
         // <FN> element
         xmpp_stanza_t* fn = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(fn, "FN");
-        
+
         xmpp_stanza_t* fn_text = xmpp_stanza_new(ctx);
         xmpp_stanza_set_text(fn_text, vcard->fullname);
         xmpp_stanza_add_child(fn, fn_text);
@@ -727,7 +726,7 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
             // <NICKNAME> element
             xmpp_stanza_t* nickname = xmpp_stanza_new(ctx);
             xmpp_stanza_set_name(nickname, "NICKNAME");
-            
+
             xmpp_stanza_t* nickname_text = xmpp_stanza_new(ctx);
             xmpp_stanza_set_text(nickname_text, element->nickname);
             xmpp_stanza_add_child(nickname, nickname_text);
@@ -746,7 +745,7 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
             if (element->photo.external) {
                 xmpp_stanza_t* extval = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(extval, "EXTVAL");
-                
+
                 xmpp_stanza_t* extval_text = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_text(extval_text, element->photo.extval);
                 xmpp_stanza_add_child(extval, extval_text);
@@ -767,7 +766,7 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
 
                 xmpp_stanza_add_child(photo, binval);
                 xmpp_stanza_release(binval);
-                
+
                 xmpp_stanza_t* type = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(type, "TYPE");
 
@@ -825,21 +824,21 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
             if ((element->address.options & VCARD_POSTAL) == VCARD_POSTAL) {
                 xmpp_stanza_t* postal = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(postal, "POSTAL");
-                
+
                 xmpp_stanza_add_child(address, postal);
                 xmpp_stanza_release(postal);
             }
             if ((element->address.options & VCARD_PARCEL) == VCARD_PARCEL) {
                 xmpp_stanza_t* parcel = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(parcel, "PARCEL");
-                
+
                 xmpp_stanza_add_child(address, parcel);
                 xmpp_stanza_release(parcel);
             }
             if ((element->address.options & VCARD_INTL) == VCARD_INTL) {
                 xmpp_stanza_t* intl = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(intl, "INTL");
-                
+
                 xmpp_stanza_add_child(address, intl);
                 xmpp_stanza_release(intl);
             }
@@ -897,7 +896,7 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
             if (element->address.locality) {
                 xmpp_stanza_t* locality = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(locality, "LOCALITY");
-                
+
                 xmpp_stanza_t* locality_text = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_text(locality_text, element->address.locality);
                 xmpp_stanza_add_child(locality, locality_text);
@@ -978,14 +977,14 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
             if ((element->telephone.options & VCARD_TEL_FAX) == VCARD_TEL_FAX) {
                 xmpp_stanza_t* fax = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(fax, "FAX");
-                
+
                 xmpp_stanza_add_child(tel, fax);
                 xmpp_stanza_release(fax);
             }
             if ((element->telephone.options & VCARD_TEL_PAGER) == VCARD_TEL_PAGER) {
                 xmpp_stanza_t* pager = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(pager, "PAGER");
-                
+
                 xmpp_stanza_add_child(tel, pager);
                 xmpp_stanza_release(pager);
             }
@@ -1084,7 +1083,7 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
             if ((element->email.options & VCARD_EMAIL_X400) == VCARD_EMAIL_X400) {
                 xmpp_stanza_t* x400 = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(x400, "X400");
-                
+
                 xmpp_stanza_add_child(email, x400);
                 xmpp_stanza_release(x400);
             }
@@ -1099,12 +1098,12 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
             if (element->email.userid) {
                 xmpp_stanza_t* userid = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(userid, "USERID");
-                
+
                 xmpp_stanza_t* userid_text = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_text(userid_text, element->email.userid);
                 xmpp_stanza_add_child(userid, userid_text);
                 xmpp_stanza_release(userid_text);
-                
+
                 xmpp_stanza_add_child(email, userid);
                 xmpp_stanza_release(userid);
             }
@@ -1117,7 +1116,7 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
         {
             xmpp_stanza_t* jid = xmpp_stanza_new(ctx);
             xmpp_stanza_set_name(jid, "JABBERID");
-            
+
             if (element->jid) {
                 xmpp_stanza_t* jid_text = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_text(jid_text, element->jid);
@@ -1466,7 +1465,7 @@ vcard_upload(xmpp_ctx_t* ctx, vCard* vcard)
 
     xmpp_stanza_add_child(iq, vcard_stanza);
     xmpp_stanza_release(vcard_stanza);
-   
+
     free(id);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -1479,7 +1478,7 @@ vcard_user_save(void)
     vcard_user->modified = FALSE;
     vcard_user->avatar_modified = FALSE;
 }
-    
+
 void
 vcard_user_set_fullname(char* fullname)
 {
@@ -1609,4 +1608,3 @@ vcard_user_free(void)
     }
     vcard_user = NULL;
 }
-

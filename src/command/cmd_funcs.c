@@ -10124,7 +10124,7 @@ cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
         cons_show("User vCard's full name has been set");
     } else if (g_strcmp0(key, "name") == 0 && value) {
         char* value2 = args[3];
-        
+
         if (!value2) {
             cons_bad_cmd_usage(command);
             return TRUE;
@@ -10151,7 +10151,7 @@ cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
         struct tm tm;
 
         vcard_element_t* element = vcard_user_get_element_index(atoi(key));
-        
+
         if (!element) {
             cons_bad_cmd_usage(command);
             return TRUE;
@@ -10159,7 +10159,7 @@ cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
 
         if (!value2 || !value) {
             // Set the main field of element at index <key> to <value>, or from an editor
-            
+
             switch (element->type) {
             case VCARD_NICKNAME:
                 if (!value) {
@@ -10179,7 +10179,7 @@ cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
                     element->nickname = strdup(value);
                 }
                 break;
-            case VCARD_BIRTHDAY:            
+            case VCARD_BIRTHDAY:
                 memset(&tm, 0, sizeof(struct tm));
                 if (!strptime(value, "%Y-%m-%d", &tm)) {
                     cons_show_error("Error parsing ISO8601 date.");
@@ -10345,7 +10345,7 @@ cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
                     if (get_message_from_editor(element->address.extaddr, &editor_value)) {
                         return TRUE;
                     }
-                    
+
                     if (element->address.extaddr) {
                         free(element->address.extaddr);
                     }
@@ -10379,7 +10379,7 @@ cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
                     if (get_message_from_editor(element->address.locality, &editor_value)) {
                         return TRUE;
                     }
-                    
+
                     if (element->address.locality) {
                         free(element->address.locality);
                     }
@@ -10604,7 +10604,7 @@ cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
                 } else {
                     cons_bad_cmd_usage(command);
                     return TRUE;
-                } 
+                }
             } else if (g_strcmp0(value, "pcs") == 0 && element->type == VCARD_TELEPHONE) {
                 if (g_strcmp0(value2, "on") == 0) {
                     element->telephone.options |= VCARD_TEL_PCS;

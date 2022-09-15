@@ -128,8 +128,7 @@ typedef struct _vcard_element_email
     vcard_element_options_t options;
 } vcard_element_email_t;
 
-typedef enum _vcard_element_type
-{
+typedef enum _vcard_element_type {
     VCARD_NICKNAME,
     VCARD_PHOTO,
     VCARD_BIRTHDAY,
