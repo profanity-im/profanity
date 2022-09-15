@@ -1256,6 +1256,11 @@ win_create_plugin(const char* const plugin_name, const char* const tag)
 {
     return NULL;
 }
+ProfWin*
+win_create_vcard(vCard* vcard)
+{
+    return NULL;
+}
 
 char*
 win_get_tab_identifier(ProfWin* window)
