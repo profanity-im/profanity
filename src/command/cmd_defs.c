@@ -2729,7 +2729,7 @@ static struct cmd_t command_defs[] = {
               "Set your mood (XEP-0107).")
       CMD_ARGS(
               { "on|off", "Enable or disable displaying the mood of other users. On by default."},
-              { "set <mood> [text]", "Set user mood to <mood> with an optional [text]. Use /mood set <tab> to toggle through predfined moods." },
+              { "set <mood> [text]", "Set user mood to <mood> with an optional [text]. Use /mood set <tab> to toggle through predefined moods." },
               { "clear", "Clear your user mood." })
       CMD_EXAMPLES(
               "/mood set happy \"So happy to use Profanity!\"",
