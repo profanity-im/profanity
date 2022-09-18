@@ -7117,7 +7117,8 @@ gboolean
 cmd_plugins_uninstall(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[1] == NULL) {
-        return FALSE;
+        cons_show("Please specify plugin name, see /help plugins");
+        return TRUE;
     }
 
     gboolean res = plugins_uninstall(args[1]);
