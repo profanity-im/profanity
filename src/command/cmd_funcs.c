@@ -7258,14 +7258,25 @@ cmd_plugins(ProfWin* window, const char* const command, gchar** args)
         }
     }
 
+    GSList* unloaded_plugins = plugins_unloaded_list();
+    if (unloaded_plugins) {
+        GSList* curr = unloaded_plugins;
+        cons_show("The following plugins already installed and can be loaded:");
+        while (curr) {
+            cons_show("  %s", curr->data);
+            curr = g_slist_next(curr);
+        }
+        g_slist_free_full(unloaded_plugins, g_free);
+    }
+
     GList* plugins = plugins_loaded_list();
     if (plugins == NULL) {
-        cons_show("No plugins installed.");
+        cons_show("No loaded plugins.");
         return TRUE;
     }
 
     GList* curr = plugins;
-    cons_show("Installed plugins:");
+    cons_show("Loaded plugins:");
     while (curr) {
         cons_show("  %s", curr->data);
         curr = g_list_next(curr);
