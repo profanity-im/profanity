@@ -6984,7 +6984,7 @@ cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
     char* path = NULL;
 
     if (args[1] == NULL) {
-        cons_show("Please provide a path to the plugin file or directory, see /help plugins");
+        cons_bad_cmd_usage(command);
         return TRUE;
     }
 
@@ -7068,7 +7068,7 @@ cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
     char* path;
 
     if (args[1] == NULL) {
-        cons_show("Please provide a path to the plugin file, see /help plugins");
+        cons_bad_cmd_usage(command);
         return TRUE;
     } else {
         path = get_expanded_path(args[1]);
@@ -7117,7 +7117,7 @@ gboolean
 cmd_plugins_uninstall(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[1] == NULL) {
-        cons_show("Please specify plugin name, see /help plugins");
+        cons_bad_cmd_usage(command);
         return TRUE;
     }
 
