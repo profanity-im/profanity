@@ -7247,14 +7247,16 @@ cmd_plugins(ProfWin* window, const char* const command, gchar** args)
         const gchar* filename;
         cons_show("The following Python plugins are available globally and can be installed:");
         while ((filename = g_dir_read_name(global_pyp_dir))) {
-            cons_show("  %s", filename);
+            if (g_str_has_suffix(filename, ".py"))
+                cons_show("  %s", filename);
         }
     }
     if (global_cp_dir) {
         const gchar* filename;
         cons_show("The following C plugins are available globally and can be installed:");
         while ((filename = g_dir_read_name(global_cp_dir))) {
-            cons_show("  %s", filename);
+            if (g_str_has_suffix(filename, ".so"))
+                cons_show("  %s", filename);
         }
     }
 
