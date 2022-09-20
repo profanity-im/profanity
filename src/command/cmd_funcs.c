@@ -7260,7 +7260,14 @@ cmd_plugins(ProfWin* window, const char* const command, gchar** args)
         }
     }
 
+    GList* plugins = plugins_loaded_list();
     GSList* unloaded_plugins = plugins_unloaded_list();
+
+    if (plugins == NULL && unloaded_plugins == NULL) {
+        cons_show("No plugins installed.");
+        return TRUE;
+    }
+
     if (unloaded_plugins) {
         GSList* curr = unloaded_plugins;
         cons_show("The following plugins already installed and can be loaded:");
@@ -7271,19 +7278,15 @@ cmd_plugins(ProfWin* window, const char* const command, gchar** args)
         g_slist_free_full(unloaded_plugins, g_free);
     }
 
-    GList* plugins = plugins_loaded_list();
-    if (plugins == NULL) {
-        cons_show("No loaded plugins.");
-        return TRUE;
+    if (plugins) {
+        GList* curr = plugins;
+        cons_show("Loaded plugins:");
+        while (curr) {
+            cons_show("  %s", curr->data);
+            curr = g_list_next(curr);
+        }
+        g_list_free(plugins);
     }
-
-    GList* curr = plugins;
-    cons_show("Loaded plugins:");
-    while (curr) {
-        cons_show("  %s", curr->data);
-        curr = g_list_next(curr);
-    }
-    g_list_free(plugins);
 
     return TRUE;
 }
