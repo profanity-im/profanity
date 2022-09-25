@@ -6984,7 +6984,7 @@ cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
     char* path = NULL;
 
     if (args[1] == NULL) {
-        cons_show("Please provide a path to the plugin file or directory, see /help plugins");
+        cons_bad_cmd_usage(command);
         return TRUE;
     }
 
@@ -7068,7 +7068,7 @@ cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
     char* path;
 
     if (args[1] == NULL) {
-        cons_show("Please provide a path to the plugin file, see /help plugins");
+        cons_bad_cmd_usage(command);
         return TRUE;
     } else {
         path = get_expanded_path(args[1]);
@@ -7117,7 +7117,8 @@ gboolean
 cmd_plugins_uninstall(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[1] == NULL) {
-        return FALSE;
+        cons_bad_cmd_usage(command);
+        return TRUE;
     }
 
     gboolean res = plugins_uninstall(args[1]);
@@ -7246,30 +7247,46 @@ cmd_plugins(ProfWin* window, const char* const command, gchar** args)
         const gchar* filename;
         cons_show("The following Python plugins are available globally and can be installed:");
         while ((filename = g_dir_read_name(global_pyp_dir))) {
-            cons_show("  %s", filename);
+            if (g_str_has_suffix(filename, ".py"))
+                cons_show("  %s", filename);
         }
     }
     if (global_cp_dir) {
         const gchar* filename;
         cons_show("The following C plugins are available globally and can be installed:");
         while ((filename = g_dir_read_name(global_cp_dir))) {
-            cons_show("  %s", filename);
+            if (g_str_has_suffix(filename, ".so"))
+                cons_show("  %s", filename);
         }
     }
 
     GList* plugins = plugins_loaded_list();
-    if (plugins == NULL) {
+    GSList* unloaded_plugins = plugins_unloaded_list();
+
+    if (plugins == NULL && unloaded_plugins == NULL) {
         cons_show("No plugins installed.");
         return TRUE;
     }
 
-    GList* curr = plugins;
-    cons_show("Installed plugins:");
-    while (curr) {
-        cons_show("  %s", curr->data);
-        curr = g_list_next(curr);
+    if (unloaded_plugins) {
+        GSList* curr = unloaded_plugins;
+        cons_show("The following plugins already installed and can be loaded:");
+        while (curr) {
+            cons_show("  %s", curr->data);
+            curr = g_slist_next(curr);
+        }
+        g_slist_free_full(unloaded_plugins, g_free);
     }
-    g_list_free(plugins);
+
+    if (plugins) {
+        GList* curr = plugins;
+        cons_show("Loaded plugins:");
+        while (curr) {
+            cons_show("  %s", curr->data);
+            curr = g_list_next(curr);
+        }
+        g_list_free(plugins);
+    }
 
     return TRUE;
 }

@@ -961,6 +961,8 @@ cmd_ac_init(void)
 
     plugins_ac = autocomplete_new();
     autocomplete_add(plugins_ac, "install");
+    autocomplete_add(plugins_ac, "update");
+    autocomplete_add(plugins_ac, "uninstall");
     autocomplete_add(plugins_ac, "load");
     autocomplete_add(plugins_ac, "unload");
     autocomplete_add(plugins_ac, "reload");
@@ -2752,6 +2754,10 @@ _plugins_autocomplete(ProfWin* window, const char* const input, gboolean previou
 
     if (strncmp(input, "/plugins install ", 17) == 0) {
         return cmd_ac_complete_filepath(input, "/plugins install", previous);
+    }
+
+    if (strncmp(input, "/plugins update ", 16) == 0) {
+        return cmd_ac_complete_filepath(input, "/plugins update", previous);
     }
 
     if (strncmp(input, "/plugins load ", 14) == 0) {
