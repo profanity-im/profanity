@@ -202,7 +202,7 @@ http_file_get(void* userdata)
                                                  download->filename);
 
         // TODO: Log the error.
-        if (!call_external(argv, NULL, NULL)) {
+        if (!call_external(argv)) {
             http_print_transfer_update(download->window, download->url,
                                        "Downloading '%s' failed: Unable to call "
                                        "command '%s' with file at '%s' (%s).",

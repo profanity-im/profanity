@@ -9424,7 +9424,7 @@ _url_external_method(const char* cmd_template, const char* url, const char* file
 {
     gchar** argv = format_call_external_argv(cmd_template, url, filename);
 
-    if (!call_external(argv, NULL, NULL)) {
+    if (!call_external(argv)) {
         cons_show_error("Unable to call external executable for url: check the logs for more information.");
     } else {
         cons_show("URL '%s' has been called with '%s'.", url, cmd_template);

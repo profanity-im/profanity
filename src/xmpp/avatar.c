@@ -346,7 +346,7 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
         } else {
             gchar** argv = format_call_external_argv(cmdtemplate, NULL, filename->str);
 
-            if (!call_external(argv, NULL, NULL)) {
+            if (!call_external(argv)) {
                 cons_show_error("Unable to display avatar: check the logs for more information.");
             }
 
