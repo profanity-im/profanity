@@ -2661,7 +2661,7 @@ stanza_create_avatar_metadata_publish_iq(xmpp_ctx_t* ctx, const char* img_data, 
     xmpp_stanza_set_name(info, STANZA_NAME_INFO);
     xmpp_stanza_set_attribute(info, "id", sha1);
     xmpp_free(ctx, sha1);
-    char* bytes = g_strdup_printf("%lu", len);
+    char* bytes = g_strdup_printf("%"G_GSIZE_FORMAT, len);
     char* h = g_strdup_printf("%d", height);
     char* w = g_strdup_printf("%d", width);
     xmpp_stanza_set_attribute(info, "bytes", bytes);
