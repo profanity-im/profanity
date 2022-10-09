@@ -22,6 +22,9 @@ packages:
   - libgcrypt
   - libsignal-protocol-c
   - sqlite3
+  - wget
+  - nohup
+  
 
 sources:
   - https://github.com/strophe/libstrophe.git#0.11.0
