@@ -16,6 +16,11 @@ When working on a new feature we usually use `git checkout -b feature/optionalis
 However this is not a rule just a recommendation to keep an overview of things.
 If your change isn't a bugfix or new feature you can also just use any branch name.
 
+## Commit messages
+Write commit messages that make sense. Explain what and *why* you change.
+Write in present tense.
+Please give [this guideline](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53) a read.
+
 ### GitHub
 We would like to encourage people to use GitHub to create pull requests.
 It makes it easy for us to review the patches, track WIP branches, organize branches with labels and milestones,
@@ -46,6 +51,7 @@ We will then pull from your repository and merge manually.
 * Each patch or pull request should only contain related modifications.
 * Run the tests and code formatters before submitting (c.f. Chapter 'Check everything' of this README).
 * When changing the UI it would be appreciated if you could add a before and after screenshot for comparison.
+* Squash fixup commits into one
 
 ### Hints and Pitfalls
 
