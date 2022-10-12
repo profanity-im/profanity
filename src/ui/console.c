@@ -395,8 +395,8 @@ cons_show_incoming_private_message(const char* const nick, const char* const roo
 static void
 _cons_welcome_first_start(void)
 {
-    gchar* prefs_loc = files_get_config_path(FILE_PROFANITY_IDENTIFIER);
-    if (!g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
+    gchar* ident_loc = files_get_data_path(FILE_PROFANITY_IDENTIFIER);
+    if (!g_file_test(ident_loc, G_FILE_TEST_EXISTS)) {
         ProfWin* console = wins_get_console();
         win_println(console, THEME_DEFAULT, "-", "This seems to be your first time starting Profanity.");
         win_println(console, THEME_DEFAULT, "-", "");
@@ -410,7 +410,7 @@ _cons_welcome_first_start(void)
         win_println(console, THEME_DEFAULT, "-", "/register myjid myserver.org");
         win_println(console, THEME_DEFAULT, "-", "");
     }
-    g_free(prefs_loc);
+    g_free(ident_loc);
 }
 
 void
