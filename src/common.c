@@ -443,44 +443,25 @@ get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const mes
 }
 
 gboolean
-call_external(gchar** argv, gchar** std_out, gchar** std_err)
+call_external(gchar** argv)
 {
-    GError* spawn_error = NULL;
-    GError* exit_error = NULL;
+    GError* spawn_error;
     gboolean is_successful;
-    gint wait_status;
 
-    GSpawnFlags flags = G_SPAWN_SEARCH_PATH;
-    if (std_out == NULL)
-        flags |= G_SPAWN_STDOUT_TO_DEV_NULL;
-    if (std_err == NULL)
-        flags |= G_SPAWN_STDERR_TO_DEV_NULL;
+    GSpawnFlags flags = G_SPAWN_SEARCH_PATH | G_SPAWN_STDOUT_TO_DEV_NULL | G_SPAWN_STDERR_TO_DEV_NULL;
 
-    is_successful = g_spawn_sync(NULL, // Inherit the parent PWD.
-                                 argv,
-                                 NULL, // Inherit the parent environment.
-                                 flags,
-                                 NULL, NULL, // No func. before exec() in child.
-                                 std_out, std_err,
-                                 &wait_status, &spawn_error);
-
+    is_successful = g_spawn_async(NULL, // Inherit the parent PWD
+                                  argv,
+                                  NULL, // Inherit the parent environment
+                                  flags,
+                                  NULL, NULL, NULL,
+                                  &spawn_error);
     if (!is_successful) {
         gchar* cmd = g_strjoinv(" ", argv);
-        log_error("Spawning '%s' failed with with error '%s'", cmd, spawn_error ? spawn_error->message : "Unknown, spawn_error is NULL");
-        ;
+        log_error("Spawning '%s' failed with error '%s'", cmd, spawn_error ? spawn_error->message : "Unknown, spawn_error is NULL");
 
         g_error_free(spawn_error);
         g_free(cmd);
-    } else {
-        is_successful = g_spawn_check_exit_status(wait_status, &exit_error);
-
-        if (!is_successful) {
-            gchar* cmd = g_strjoinv(" ", argv);
-            log_error("'%s' exited with error '%s'", cmd, exit_error->message);
-
-            g_error_free(exit_error);
-            g_free(cmd);
-        }
     }
 
     return is_successful;

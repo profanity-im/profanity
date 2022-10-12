@@ -103,7 +103,7 @@ void get_file_paths_recursive(const char* directory, GSList** contents);
 
 char* get_random_string(int length);
 
-gboolean call_external(gchar** argv, gchar** std_out, gchar** std_err);
+gboolean call_external(gchar** argv);
 gchar** format_call_external_argv(const char* template, const char* url, const char* filename);
 
 gchar* unique_filename_from_url(const char* url, const char* path);

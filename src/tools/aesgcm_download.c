@@ -155,7 +155,7 @@ aesgcm_file_get(void* userdata)
                                                  aesgcm_dl->filename);
 
         // TODO: Log the error.
-        if (!call_external(argv, NULL, NULL)) {
+        if (!call_external(argv)) {
             http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->url,
                                        "Downloading '%s' failed: Unable to call "
                                        "command '%s' with file at '%s' (%s).",
