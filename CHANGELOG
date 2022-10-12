@@ -1,3 +1,16 @@
+0.13.1 (2022-10-12)
+===================
+
+8 people contributed to this release: @omar-polo, @wahjava, @vinegret, @sgn, Max Wuttke, @tran-h-trung, @techmetx11 and @jubalh.
+
+Changes:
+- Fix configure parameter detection (#1752, #1753)
+- Improve plugins management (#1755)
+- Fix build with plugins enabled for Python >= 3.11 (#1756)
+- Add gruvbox_transparent theme optimized for enabled transparency (#1763)
+- Fix detection of first start used for welcome screen (#1767)
+- Improve opening of URLs by spawning external program asynchronously (#1759, #1760)
+
 0.13.0 (2022-09-13)
 ===================
 
