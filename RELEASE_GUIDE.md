@@ -1,6 +1,6 @@
 # Release Guide
 
-* Release libstrophe and libmesode if required
+* Release libstrophe if required
 
 * Run Unit tests: `make check-unit`
 * Run Functional tests - Currently disabled
