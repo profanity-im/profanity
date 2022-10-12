@@ -13,10 +13,6 @@
 * Generate HTML docs (the docgen argument only works when package status is development)
     `./profanity docgen`
 
-* Generate manpages for profanity commands (the mangen argument only works when package status is development)
-    `./profanity mangen`
-  These files should be added to the docs subfolder and added to git whenever a command changes.
-
 * Determine if libprofanitys version needs to be [increased](https://github.com/profanity-im/profanity/issues/973)
 * Update plugin API docs (./apidocs/c and ./apidocs/python) need to run the `gen.sh` and commit the results to the website git repo
 * Update CHANGELOG
@@ -31,6 +27,11 @@ AC_INIT([profanity], [0.6.0], [boothj5web@gmail.com])
 ```
 
 * Set the package status in configure.ac:
+
+* Update date and version in man pages
+* Generate manpages for profanity commands (the mangen argument only works when package status is development)
+    `./profanity mangen`
+  These files should be added to the docs subfolder and added to git whenever a command changes.
 
 ```
 PACKAGE_STATUS="release"
@@ -68,6 +69,7 @@ PACKAGE_STATUS="development"
   `git checkout HEAD -- docs/profanity-ox-setup.1`
   docs/profanity.1 and docs/profanity-ox-setup.1 are handwritten.
 
+* Commit `Start new cycle`
 * Push
 
 ## Updating website
