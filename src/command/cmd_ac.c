@@ -275,6 +275,7 @@ static Autocomplete intype_ac;
 static Autocomplete mood_ac;
 static Autocomplete mood_type_ac;
 static Autocomplete adhoc_cmd_ac;
+static Autocomplete lastactivity_ac;
 
 /*!
  * \brief Initialization of auto completion for commands.
@@ -1176,6 +1177,10 @@ cmd_ac_init(void)
     adhoc_cmd_ac = autocomplete_new();
     autocomplete_add(adhoc_cmd_ac, "list");
     autocomplete_add(adhoc_cmd_ac, "exec");
+
+    lastactivity_ac = autocomplete_new();
+    autocomplete_add(lastactivity_ac, "set");
+    autocomplete_add(lastactivity_ac, "get");
 }
 
 void
@@ -1497,8 +1502,9 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(mood_ac);
     autocomplete_reset(mood_type_ac);
     autocomplete_reset(adhoc_cmd_ac);
-
     autocomplete_reset(script_ac);
+    autocomplete_reset(lastactivity_ac);
+
     if (script_show_ac) {
         autocomplete_free(script_show_ac);
         script_show_ac = NULL;
@@ -1665,6 +1671,7 @@ cmd_ac_uninit(void)
     autocomplete_free(executable_ac);
     autocomplete_free(intype_ac);
     autocomplete_free(adhoc_cmd_ac);
+    autocomplete_free(lastactivity_ac);
 }
 
 static void
@@ -4251,8 +4258,8 @@ _lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean pr
 {
     char* result = NULL;
 
-    result = autocomplete_param_with_ac(input, "/lastactivity", status_ac, TRUE, previous);
-    if (!result) {
+    result = autocomplete_param_with_ac(input, "/lastactivity", lastactivity_ac, TRUE, previous);
+    if (result) {
         return result;
     }
 
@@ -4261,9 +4268,10 @@ _lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean pr
     if (conn_status == JABBER_CONNECTED) {
 
         result = autocomplete_param_with_func(input, "/lastactivity set", prefs_autocomplete_boolean_choice, previous, NULL);
-        if (!result) {
-            result = autocomplete_param_with_func(input, "/lastactivity get", roster_barejid_autocomplete, previous, NULL);
+        if (result) {
+            return result;
         }
+        result = autocomplete_param_with_func(input, "/lastactivity get", roster_barejid_autocomplete, previous, NULL);
     }
 
     return result;
