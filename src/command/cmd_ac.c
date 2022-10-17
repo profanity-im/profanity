@@ -1836,6 +1836,11 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
                 free(unquoted);
                 return result;
             }
+            result = autocomplete_param_with_func(unquoted, contact_choices[i], roster_barejid_autocomplete, previous, NULL);
+            if (result) {
+                free(unquoted);
+                return result;
+            }
         }
         free(unquoted);
 
@@ -3668,7 +3673,16 @@ _console_autocomplete(ProfWin* window, const char* const input, gboolean previou
 static char*
 _win_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
-    return autocomplete_param_with_func(input, "/win", win_autocomplete, previous, NULL);
+    char* result = autocomplete_param_with_func(input, "/win", win_autocomplete, previous, NULL);
+
+    if (result) {
+        return result;
+    }
+
+    char* unquoted = strip_arg_quotes(input);
+    result = autocomplete_param_with_func(unquoted, "/win", roster_contact_autocomplete, previous, NULL);
+    free(unquoted);
+    return result;
 }
 
 static char*
