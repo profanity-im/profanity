@@ -1770,6 +1770,7 @@ _get_group(preference_t pref)
     case PREF_TIME_XMLCONSOLE:
     case PREF_TIME_STATUSBAR:
     case PREF_TIME_LASTACTIVITY:
+    case PREF_TIME_VCARD:
     case PREF_ROSTER:
     case PREF_ROSTER_OFFLINE:
     case PREF_ROSTER_RESOURCE:
@@ -1850,6 +1851,7 @@ _get_group(preference_t pref)
     case PREF_AVATAR_CMD:
     case PREF_URL_OPEN_CMD:
     case PREF_URL_SAVE_CMD:
+    case PREF_VCARD_PHOTO_CMD:
         return PREF_GROUP_EXECUTABLES;
     case PREF_AUTOAWAY_CHECK:
     case PREF_AUTOAWAY_MODE:
@@ -2029,6 +2031,8 @@ _get_key(preference_t pref)
         return "time.statusbar";
     case PREF_TIME_LASTACTIVITY:
         return "time.lastactivity";
+    case PREF_TIME_VCARD:
+        return "time.vcard";
     case PREF_ROSTER:
         return "roster";
     case PREF_ROSTER_OFFLINE:
@@ -2159,6 +2163,8 @@ _get_key(preference_t pref)
         return "log";
     case PREF_MOOD:
         return "mood";
+    case PREF_VCARD_PHOTO_CMD:
+        return "vcard.photo.cmd";
     default:
         return NULL;
     }
@@ -2269,6 +2275,8 @@ _get_default_string(preference_t pref)
         return "%H:%M";
     case PREF_TIME_LASTACTIVITY:
         return "%d/%m/%y %H:%M:%S";
+    case PREF_TIME_VCARD:
+        return "%d/%m/%y";
     case PREF_PGP_LOG:
         return "on";
     case PREF_CONSOLE_MUC:
@@ -2293,6 +2301,8 @@ _get_default_string(preference_t pref)
         return "xdg-open";
     case PREF_URL_OPEN_CMD:
         return "xdg-open %u";
+    case PREF_VCARD_PHOTO_CMD:
+        return "xdg-open %p";
     case PREF_COMPOSE_EDITOR:
     {
         gchar* editor = getenv("EDITOR");

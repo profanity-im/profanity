@@ -105,6 +105,7 @@ typedef enum {
     PREF_TIME_XMLCONSOLE,
     PREF_TIME_STATUSBAR,
     PREF_TIME_LASTACTIVITY,
+    PREF_TIME_VCARD,
     PREF_STATUSES,
     PREF_STATUSES_CONSOLE,
     PREF_STATUSES_CHAT,
@@ -181,6 +182,7 @@ typedef enum {
     PREF_NOTIFY_ROOM_OFFLINE,
     PREF_OX_LOG,
     PREF_MOOD,
+    PREF_VCARD_PHOTO_CMD,
 } preference_t;
 
 typedef struct prof_alias_t

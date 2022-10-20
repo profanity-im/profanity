@@ -230,6 +230,11 @@ char* confwin_get_string(ProfConfWin* confwin);
 void xmlwin_show(ProfXMLWin* xmlwin, const char* const msg);
 char* xmlwin_get_string(ProfXMLWin* xmlwin);
 
+// vCard window
+void vcardwin_show_vcard_config(ProfVcardWin* vcardwin);
+char* vcardwin_get_string(ProfVcardWin* vcardwin);
+void vcardwin_update(void);
+
 // Input window
 char* inp_readline(void);
 void inp_nonblocking(gboolean reset);
@@ -371,6 +376,7 @@ ProfWin* win_create_muc(const char* const roomjid);
 ProfWin* win_create_config(const char* const title, DataForm* form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void* userdata);
 ProfWin* win_create_private(const char* const fulljid);
 ProfWin* win_create_plugin(const char* const plugin_name, const char* const tag);
+ProfWin* win_create_vcard(vCard* vcard);
 void win_update_virtual(ProfWin* window);
 void win_free(ProfWin* window);
 gboolean win_notify_remind(ProfWin* window);
@@ -396,6 +402,8 @@ void win_show_occupant(ProfWin* window, Occupant* occupant);
 void win_show_occupant_info(ProfWin* window, const char* const room, Occupant* occupant);
 void win_show_contact(ProfWin* window, PContact contact);
 void win_show_info(ProfWin* window, PContact contact);
+void win_show_vcard(ProfWin* window, vCard* vcard);
+
 void win_clear(ProfWin* window);
 char* win_get_tab_identifier(ProfWin* window);
 char* win_to_string(ProfWin* window);

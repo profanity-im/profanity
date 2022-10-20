@@ -52,6 +52,7 @@
 #include "tools/autocomplete.h"
 #include "ui/buffer.h"
 #include "xmpp/chat_state.h"
+#include "xmpp/vcard.h"
 
 #define LAYOUT_SPLIT_MEMCHECK   12345671
 #define PROFCHATWIN_MEMCHECK    22374522
@@ -60,6 +61,7 @@
 #define PROFCONFWIN_MEMCHECK    64334685
 #define PROFXMLWIN_MEMCHECK     87333463
 #define PROFPLUGINWIN_MEMCHECK  43434777
+#define PROFVCARDWIN_MEMCHECK   68947523
 
 typedef enum {
     FIELD_HIDDEN,
@@ -140,7 +142,8 @@ typedef enum {
     WIN_CONFIG,
     WIN_PRIVATE,
     WIN_XML,
-    WIN_PLUGIN
+    WIN_PLUGIN,
+    WIN_VCARD
 } win_type_t;
 
 typedef struct prof_win_t
@@ -238,5 +241,12 @@ typedef struct prof_plugin_win_t
     char* plugin_name;
     unsigned long memcheck;
 } ProfPluginWin;
+
+typedef struct prof_vcard_win_t
+{
+    ProfWin window;
+    vCard* vcard;
+    unsigned long memcheck;
+} ProfVcardWin;
 
 #endif

@@ -1517,6 +1517,10 @@ cons_time_setting(void)
     char* pref_time_lastactivity = prefs_get_string(PREF_TIME_LASTACTIVITY);
     cons_show("Time last activity (/time)          : %s", pref_time_lastactivity);
     g_free(pref_time_lastactivity);
+
+    char* pref_time_vcard = prefs_get_string(PREF_TIME_VCARD);
+    cons_show("Time vCard (/time)                  : %s", pref_time_vcard);
+    g_free(pref_time_vcard);
 }
 
 void
@@ -2262,6 +2266,10 @@ cons_executable_setting(void)
     gchar* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
     cons_show("Default '/editor' command (/executable editor)                           : %s", editor);
     g_free(editor);
+
+    gchar* vcard_cmd = prefs_get_string(PREF_VCARD_PHOTO_CMD);
+    cons_show("Default '/vcard photo open' command (/executable vcard_photo)            : %s", vcard_cmd);
+    g_free(vcard_cmd);
 }
 
 void
