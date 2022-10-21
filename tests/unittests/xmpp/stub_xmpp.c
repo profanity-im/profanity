@@ -427,6 +427,11 @@ iq_muc_register_nick(const char* const roomjid)
 }
 
 void
+iq_mam_request(ProfChatWin* win, GDateTime* enddate)
+{
+}
+
+void
 publish_user_mood(const char* const mood, const char* const text)
 {
 }

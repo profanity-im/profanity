@@ -491,6 +491,7 @@ mucwin_unset_message_char(ProfMucWin* mucwin)
 void win_update_entry_message(ProfWin* window, const char* const id, const char* const message){};
 void win_mark_received(ProfWin* window, const char* const id){};
 void win_print_http_transfer(ProfWin* window, const char* const message, char* url){};
+void win_print_loading_history(ProfWin* window){};
 
 void
 ui_show_roster(void)
