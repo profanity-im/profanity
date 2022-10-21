@@ -2767,7 +2767,7 @@ stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const s
     xmpp_stanza_add_child(field_with, value_with);
 
     // field 'start'
-    xmpp_stanza_t* field_start, *value_start, *start_date_text;
+    xmpp_stanza_t *field_start, *value_start, *start_date_text;
     if (startdate) {
         field_start = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(field_start, STANZA_NAME_FIELD);
@@ -2783,7 +2783,7 @@ stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const s
         xmpp_stanza_add_child(field_start, value_start);
     }
 
-    xmpp_stanza_t* field_end, *value_end, *end_date_text;
+    xmpp_stanza_t *field_end, *value_end, *end_date_text;
     if (enddate) {
         field_end = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(field_end, STANZA_NAME_FIELD);

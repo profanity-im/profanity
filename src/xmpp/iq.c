@@ -2707,7 +2707,6 @@ iq_mam_request(ProfChatWin* win, GDateTime* enddate)
         late_delivery_windows = g_slist_append(late_delivery_windows, cur_del_data);
     }
 
-
     _iq_mam_request(win, startdate, enddate);
 
     return;
@@ -2731,13 +2730,13 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
             buffer_remove_entry(window->layout->buffer, 0);
 
-            char *start_str = NULL;
+            char* start_str = NULL;
             if (data->start_datestr) {
                 start_str = strdup(data->start_datestr);
                 // Convert to iso8601
                 start_str[strlen(start_str) - 3] = '\0';
             }
-            char *end_str = NULL;
+            char* end_str = NULL;
             if (data->end_datestr) {
                 end_str = strdup(data->end_datestr);
                 // Convert to iso8601
@@ -2762,7 +2761,8 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             }
 
             chatwin_db_history(data->win, start_str, end_str, TRUE);
-            if (start_str) free(start_str);
+            if (start_str)
+                free(start_str);
 
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {

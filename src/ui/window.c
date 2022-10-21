@@ -635,7 +635,7 @@ win_page_up(ProfWin* window)
     *page_start -= page_space;
 
     if (*page_start == -page_space && window->type == WIN_CHAT) {
-        ProfChatWin* chatwin = (ProfChatWin*) window;
+        ProfChatWin* chatwin = (ProfChatWin*)window;
         ProfBuffEntry* first_entry = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0) : NULL;
 
         // Don't do anything if still fetching mam messages
