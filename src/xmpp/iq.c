@@ -269,8 +269,6 @@ iq_handlers_init(void)
 
     id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_iq_id_handler_free);
     rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)xmpp_stanza_release);
-    late_delivery_windows = malloc(sizeof(GSList *));
-    late_delivery_windows->data = NULL;
 }
 
 void
@@ -2541,12 +2539,12 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
         received_disco_items = TRUE;
         connection_set_disco_items(items);
 
-        while (late_delivery_windows->data) {
+        while (late_delivery_windows) {
             LateDeliveryUserdata* del_data = late_delivery_windows->data;
             _iq_mam_request(del_data->win, del_data->startdate, del_data->enddate);
-
-            late_delivery_windows = g_slist_next(late_delivery_windows);
             free(del_data);
+            late_delivery_windows = g_slist_delete_link(late_delivery_windows,
+                                                        late_delivery_windows);
         }
     }
 
@@ -2702,14 +2700,11 @@ iq_mam_request(ProfChatWin* win, GDateTime* enddate)
 
     // Save request for later if disco items haven't been received yet
     if (!received_disco_items) {
-        if (late_delivery_windows->data == NULL) {
-            LateDeliveryUserdata* cur_del_data = malloc(sizeof(LateDeliveryUserdata));
-            cur_del_data->win = win;
-            cur_del_data->enddate = enddate;
-            cur_del_data->startdate = startdate;
-            late_delivery_windows->data = cur_del_data;
-        }
-        late_delivery_windows = g_slist_append(late_delivery_windows, NULL);
+        LateDeliveryUserdata* cur_del_data = malloc(sizeof(LateDeliveryUserdata));
+        cur_del_data->win = win;
+        cur_del_data->enddate = enddate;
+        cur_del_data->startdate = startdate;
+        late_delivery_windows = g_slist_append(late_delivery_windows, cur_del_data);
     }
 
 
