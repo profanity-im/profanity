@@ -57,6 +57,7 @@
 #include "xmpp/muc.h"
 
 #define PAD_SIZE 1000
+#define LOADING_MESSAGE "Loading older messages ..."
 
 void win_move_to_end(ProfWin* window);
 void win_show_status_string(ProfWin* window, const char* const from,
@@ -71,11 +72,13 @@ void win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, con
 void win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const ProfMessage* const message);
 void win_print_outgoing_muc_msg(ProfWin* window, char* show_char, const char* const me, const char* const id, const char* const replace_id, const char* const message);
 void win_print_history(ProfWin* window, const ProfMessage* const message);
+void win_print_old_history(ProfWin* window, const ProfMessage* const message);
 
 void win_print_http_transfer(ProfWin* window, const char* const message, char* url);
 
 void win_newline(ProfWin* window);
 void win_redraw(ProfWin* window);
+void win_print_loading_history(ProfWin* window);
 int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_sub_print(WINDOW* win, char* msg, gboolean newline, gboolean wrap, int indent);

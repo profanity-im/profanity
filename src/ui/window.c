@@ -61,6 +61,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/connection.h"
+#include "database.h"
 
 #define CONS_WIN_TITLE "Profanity. Type /help for help information."
 #define XML_WIN_TITLE  "XML Console"
@@ -637,6 +638,19 @@ win_page_up(ProfWin* window)
 
     *page_start -= page_space;
 
+    if (*page_start == -page_space && window->type == WIN_CHAT) {
+        ProfChatWin* chatwin = (ProfChatWin*) window;
+        ProfBuffEntry* first_entry = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0) : NULL;
+
+        // Don't do anything if still fetching mam messages
+        if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, LOADING_MESSAGE) == 0)) {
+            if (!chatwin_db_history(chatwin, NULL, NULL, TRUE) && prefs_get_boolean(PREF_MAM)) {
+                win_print_loading_history(window);
+                iq_mam_request_older(chatwin);
+            }
+        }
+    }
+
     // went past beginning, show first page
     if (*page_start < 0)
         *page_start = 0;
@@ -659,6 +673,20 @@ win_page_down(ProfWin* window)
     int* page_start = &(window->layout->y_pos);
 
     *page_start += page_space;
+
+    // Scrolled down after reaching the bottom of the page
+    if ((*page_start == y || (*page_start == page_space && *page_start >= y)) && window->type == WIN_CHAT) {
+        int bf_size = buffer_size(window->layout->buffer);
+        if (bf_size > 0) {
+            char* start = g_date_time_format_iso8601(buffer_get_entry(window->layout->buffer, bf_size - 1)->time);
+            GDateTime* now = g_date_time_new_now_local();
+            char* end = g_date_time_format_iso8601(now);
+            chatwin_db_history((ProfChatWin*)window, start, end, FALSE);
+
+            g_free(start);
+            g_date_time_unref(now);
+        }
+    }
 
     // only got half a screen, show full screen
     if ((y - (*page_start)) < page_space)
@@ -1386,8 +1414,8 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
         if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
             _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->barejid);
         } else {
-            // Prevent duplicate messages when current client is sending a message
-            if (g_strcmp0(message->from_jid->fulljid, connection_get_fulljid()) != 0) {
+            // Prevent duplicate messages when current client is sending a message or if it's mam
+            if (g_strcmp0(message->from_jid->fulljid, connection_get_fulljid()) != 0 && !message->is_mam) {
                 _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
             }
         }
@@ -1474,6 +1502,34 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
     jid_destroy(jidp);
 
     buffer_append(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
+    _win_print_internal(window, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
+
+    free(display_name);
+
+    inp_nonblocking(TRUE);
+    g_date_time_unref(message->timestamp);
+}
+
+void
+win_print_old_history(ProfWin* window, const ProfMessage* const message)
+{
+    g_date_time_ref(message->timestamp);
+
+    char* display_name;
+    int flags = 0;
+    const char* jid = connection_get_fulljid();
+    Jid* jidp = jid_create(jid);
+
+    if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
+        display_name = strdup("me");
+    } else {
+        display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
+        flags = NO_ME;
+    }
+
+    jid_destroy(jidp);
+
+    buffer_prepend(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
     _win_print_internal(window, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
 
     free(display_name);
@@ -1698,7 +1754,6 @@ _win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* t
     g_string_vprintf(fmt_msg, message, arg);
 
     buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, fmt_msg->str, NULL, message_id);
-
     _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, fmt_msg->str, NULL);
 
     inp_nonblocking(TRUE);
@@ -2000,6 +2055,15 @@ win_redraw(ProfWin* window)
             _win_print_internal(window, e->show_char, e->pad_indent, e->time, e->flags, e->theme_item, e->display_from, e->message, e->receipt);
         }
     }
+}
+
+void
+win_print_loading_history(ProfWin* window)
+{
+    GDateTime* timestamp = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0)->time : g_date_time_new_now_local();
+    buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE, THEME_ROOMINFO, NULL, NULL, LOADING_MESSAGE, NULL, NULL);
+    g_date_time_unref(timestamp);
+    win_redraw(window);
 }
 
 gboolean

@@ -46,6 +46,7 @@
 #include "log.h"
 #include "common.h"
 #include "config/files.h"
+#include "database.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/message.h"
 
@@ -190,8 +191,9 @@ log_database_add_outgoing_muc_pm(const char* const id, const char* const barejid
     _log_database_add_outgoing("mucpm", id, barejid, message, replace_id, enc);
 }
 
-GSList*
-log_database_get_previous_chat(const gchar* const contact_barejid)
+// Get info (timestamp and stanza_id) of the first or last message in db
+ProfMessage*
+log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_last)
 {
     sqlite3_stmt* stmt = NULL;
     gchar* query;
@@ -200,7 +202,63 @@ log_database_get_previous_chat(const gchar* const contact_barejid)
     if (!myjid)
         return NULL;
 
-    query = sqlite3_mprintf("SELECT * FROM (SELECT `message`, `timestamp`, `from_jid`, `type`, `encryption` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` DESC LIMIT 10) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
+    if (is_last) {
+        query = sqlite3_mprintf("SELECT * FROM (SELECT `archive_id`, `timestamp` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` DESC LIMIT 1) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
+    } else {
+        query = sqlite3_mprintf("SELECT * FROM (SELECT `archive_id`, `timestamp` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` ASC LIMIT 1) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
+    }
+
+    if (!query) {
+        log_error("log_database_get_last_info(): SQL query. could not allocate memory");
+        return NULL;
+    }
+
+    jid_destroy(myjid);
+
+    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        log_error("log_database_get_last_info(): unknown SQLite error");
+        return NULL;
+    }
+
+    ProfMessage* msg = message_init();
+
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        char* archive_id = (char*)sqlite3_column_text(stmt, 0);
+        char* date = (char*)sqlite3_column_text(stmt, 1);
+
+        msg->stanzaid = strdup(archive_id);
+        msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
+    }
+    sqlite3_finalize(stmt);
+    sqlite3_free(query);
+
+    return msg;
+}
+
+// Query previous chats, constraints start_time and end_time. If end_time is
+// null the current time is used. from_start gets first few messages if true
+// otherwise the last ones. Flip flips the order of the results
+GSList*
+log_database_get_previous_chat(const gchar* const contact_barejid, char* start_time, char* end_time, gboolean from_start, gboolean flip)
+{
+    sqlite3_stmt* stmt = NULL;
+    gchar* query;
+    const char* jid = connection_get_fulljid();
+    Jid* myjid = jid_create(jid);
+    if (!myjid)
+        return NULL;
+
+    // Flip order when querying older pages
+    gchar* sort1 = from_start ? "ASC" : "DESC";
+    gchar* sort2 = !flip ? "ASC" : "DESC";
+    GDateTime* now = g_date_time_new_now_local();
+    gchar* end_date_fmt = end_time ? end_time : g_date_time_format_iso8601(now);
+    query = sqlite3_mprintf("SELECT * FROM (SELECT COALESCE(B.`message`, A.`message`) AS message, A.`timestamp`, A.`from_jid`, A.`type` A.`encryption` from `ChatLogs` AS A LEFT JOIN `ChatLogs` AS B ON A.`stanza_id` = B.`replace_id` WHERE A.`replace_id` = '' AND ((A.`from_jid` = '%q' AND A.`to_jid` = '%q') OR (A.`from_jid` = '%q' AND A.`to_jid` = '%q')) AND A.`timestamp` < '%q' AND (%Q IS NULL OR A.`timestamp` > %Q) ORDER BY A.`timestamp` %s LIMIT %d) ORDER BY `timestamp` %s;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, end_date_fmt, start_time, start_time, sort1, MESSAGES_TO_RETRIEVE, sort2);
+
+    g_date_time_unref(now);
+    g_free(end_date_fmt);
+
     if (!query) {
         log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
         return NULL;
@@ -330,7 +388,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
         type = (char*)_get_message_type_str(message->type);
     }
 
-    query = sqlite3_mprintf("INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) SELECT '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q' WHERE NOT EXISTS (SELECT 1 FROM `ChatLogs` WHERE `archive_id` = '%q' AND `archive_id` != '')",
+    query = sqlite3_mprintf("INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) SELECT '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q' WHERE NOT EXISTS (SELECT 1 FROM `ChatLogs` WHERE (`archive_id` = '%q' AND `archive_id` != '') OR (`stanza_id` = '%q' AND `stanza_id` != ''))",
                             from_jid->barejid,
                             from_jid->resourcepart ? from_jid->resourcepart : "",
                             to_jid->barejid,
@@ -342,7 +400,8 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                             message->replace_id ? message->replace_id : "",
                             type ? type : "",
                             enc ? enc : "",
-                            message->stanzaid ? message->stanzaid : "");
+                            message->stanzaid ? message->stanzaid : "",
+                            message->id ? message->id : "");
     if (!query) {
         log_error("log_database_add(): SQL query. could not allocate memory");
         return;

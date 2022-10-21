@@ -64,6 +64,7 @@
 #define XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY "urn:xmpp:avatar:metadata+notify"
 #define XMPP_FEATURE_LAST_MESSAGE_CORRECTION     "urn:xmpp:message-correct:0"
 #define XMPP_FEATURE_MAM2                        "urn:xmpp:mam:2"
+#define XMPP_FEATURE_MAM2_EXTENDED               "urn:xmpp:mam:2#extended"
 #define XMPP_FEATURE_SPAM_REPORTING              "urn:xmpp:reporting:1"
 
 typedef enum {
@@ -260,7 +261,8 @@ void iq_autoping_check(void);
 void iq_http_upload_request(HTTPUpload* upload);
 void iq_command_list(const char* const target);
 void iq_command_exec(const char* const target, const char* const command);
-void iq_mam_request(ProfChatWin* win);
+void iq_mam_request(ProfChatWin* win, GDateTime* enddate);
+void iq_mam_request_older(ProfChatWin* win);
 void iq_register_change_password(const char* const user, const char* const password);
 void iq_muc_register_nick(const char* const roomjid);
 
