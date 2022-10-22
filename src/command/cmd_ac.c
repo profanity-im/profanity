@@ -66,6 +66,8 @@
 #include "omemo/omemo.h"
 #endif
 
+
+// declarations for the character arrays
 static char* _sub_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _notify_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _theme_autocomplete(ProfWin* window, const char* const input, gboolean previous);
@@ -797,6 +799,7 @@ cmd_ac_init(void)
     autocomplete_add(role_ac, "visitor");
     autocomplete_add(role_ac, "none");
 
+    // adding auto completion for affilliation cmd
     affiliation_cmd_ac = autocomplete_new();
     autocomplete_add(affiliation_cmd_ac, "list");
     autocomplete_add(affiliation_cmd_ac, "request");
@@ -825,6 +828,7 @@ cmd_ac_init(void)
     autocomplete_add(form_field_multi_ac, "add");
     autocomplete_add(form_field_multi_ac, "remove");
 
+    // adding auto completion for occupants ac
     occupants_ac = autocomplete_new();
     autocomplete_add(occupants_ac, "show");
     autocomplete_add(occupants_ac, "hide");
@@ -867,7 +871,8 @@ cmd_ac_init(void)
     time_format_ac = autocomplete_new();
     autocomplete_add(time_format_ac, "set");
     autocomplete_add(time_format_ac, "off");
-
+    
+    // adding auto completion for resources ac
     resource_ac = autocomplete_new();
     autocomplete_add(resource_ac, "set");
     autocomplete_add(resource_ac, "off");
@@ -883,6 +888,7 @@ cmd_ac_init(void)
     autocomplete_add(receipts_ac, "request");
 
 #ifdef HAVE_LIBGPGME
+    // adding auto completion for pgp ac
     pgp_ac = autocomplete_new();
     autocomplete_add(pgp_ac, "keys");
     autocomplete_add(pgp_ac, "contacts");
