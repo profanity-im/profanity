@@ -59,7 +59,7 @@ static struct color_pair_cache
     struct
     {
         int16_t fg, bg;
-    }* pairs;
+    } * pairs;
     int size;
     int capacity;
 } cache = { 0 };
