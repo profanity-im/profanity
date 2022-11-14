@@ -170,15 +170,18 @@ static struct cmd_t command_defs[] = {
               CMD_TAG_CONNECTION)
       CMD_SYN(
               "/connect [<account>]",
-              "/connect <account> [server <server>] [port <port>] [tls force|allow|trust|legacy|disable] [auth default|legacy]")
+              "/connect <account> [server <server>] [port <port>] [tls force|allow|trust|legacy|disable] [auth default|legacy]",
+              "/connect <server>")
       CMD_DESC(
               "Login to a chat service. "
               "If no account is specified, the default is used if one is configured. "
-              "A local account is created with the JID as it's name if it doesn't already exist.")
+              "A local account is created with the JID as it's name if it doesn't already exist. "
+              "In case you want to connect to a server via SASL ANONYMOUS (c.f. XEP-0175) you can also do that.")
       CMD_ARGS(
               { "<account>", "The local account you wish to connect with, or a JID if connecting for the first time." },
               { "server <server>", "Supply a server if it is different to the domain part of your JID." },
               { "port <port>", "The port to use if different to the default (5222, or 5223 for SSL)." },
+              { "<server>", "Connect to said server in an anonymous way. (Be aware: There aren't many servers that support this.)" },
               { "tls force", "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
               { "tls allow", "Use TLS for the connection if it is available." },
               { "tls trust", "Force TLS connection and trust server's certificate." },
@@ -192,7 +195,8 @@ static struct cmd_t command_defs[] = {
               "/connect odin@valhalla.edda server talk.google.com",
               "/connect freyr@vanaheimr.edda port 5678",
               "/connect me@localhost.test.org server 127.0.0.1 tls disable",
-              "/connect me@chatty server chatty.com port 5443")
+              "/connect me@chatty server chatty.com port 5443",
+              "/connect server.supporting.sasl.anonymous.example")
     },
 
     { "/tls",
@@ -2013,7 +2017,7 @@ static struct cmd_t command_defs[] = {
               { "rotate on|off", "Rotate log, default on. Does not take effect if you specified a filename yourself when starting Profanity." },
               { "maxsize <bytes>", "With rotate enabled, specifies the max log size, defaults to 10485760 (10MB)." },
               { "shared on|off", "Share logs between all instances, default: on. When off, the process id will be included in the log filename. Does not take effect if you specified a filename yourself when starting Profanity." },
-              {"level INFO|DEBUG|WARN|EFFOR", "Set the log level. Default is INFO. Only works with default log file, not with user provided log file during startup via -f." })
+              {"level INFO|DEBUG|WARN|ERROR", "Set the log level. Default is INFO. Only works with default log file, not with user provided log file during startup via -f." })
       CMD_NOEXAMPLES
     },
 

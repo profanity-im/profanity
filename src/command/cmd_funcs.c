@@ -120,8 +120,8 @@
 
 static void _update_presence(const resource_presence_t presence,
                              const char* const show, gchar** args);
-static void _cmd_set_boolean_preference(gchar* arg, const char* const command,
-                                        const char* const display, preference_t pref);
+static gboolean _cmd_set_boolean_preference(gchar* arg, const char* const command,
+                                            const char* const display, preference_t pref);
 static void _who_room(ProfWin* window, const char* const command, gchar** args);
 static void _who_roster(ProfWin* window, const char* const command, gchar** args);
 static gboolean _cmd_execute(ProfWin* window, const char* const command, const char* const inp);
@@ -6517,9 +6517,8 @@ cmd_log(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (strcmp(subcmd, "level") == 0) {
-        if (g_strcmp0(value, "INFO") == 0 || g_strcmp0(value, "DEBUG") == 0 || g_strcmp0(value, "WARN") == 0 || g_strcmp0(value, "ERROR") == 0) {
-
-            log_level_t prof_log_level = log_level_from_string(value);
+        log_level_t prof_log_level;
+        if (log_level_from_string(value, &prof_log_level) == 0) {
             log_close();
             log_init(prof_log_level, NULL);
 
@@ -8580,31 +8579,24 @@ _update_presence(const resource_presence_t resource_presence,
 }
 
 // helper function for boolean preference commands
-static void
+static gboolean
 _cmd_set_boolean_preference(gchar* arg, const char* const command,
                             const char* const display, preference_t pref)
 {
     if (arg == NULL) {
         cons_bad_cmd_usage(command);
-    } else if (strcmp(arg, "on") == 0) {
-        GString* enabled = g_string_new(display);
-        g_string_append(enabled, " enabled.");
-
-        cons_show(enabled->str);
+        return FALSE;
+    } else if (g_strcmp0(arg, "on") == 0) {
+        cons_show("%s enabled.", display);
         prefs_set_boolean(pref, TRUE);
-
-        g_string_free(enabled, TRUE);
-    } else if (strcmp(arg, "off") == 0) {
-        GString* disabled = g_string_new(display);
-        g_string_append(disabled, " disabled.");
-
-        cons_show(disabled->str);
+    } else if (g_strcmp0(arg, "off") == 0) {
+        cons_show("%s disabled.", display);
         prefs_set_boolean(pref, FALSE);
-
-        g_string_free(disabled, TRUE);
     } else {
         cons_bad_cmd_usage(command);
+        return FALSE;
     }
+    return TRUE;
 }
 
 gboolean

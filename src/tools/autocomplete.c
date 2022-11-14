@@ -367,34 +367,20 @@ char*
 autocomplete_param_no_with_func(const char* const input, char* command, int arg_number, autocomplete_func func, gboolean previous, void* context)
 {
     if (strncmp(input, command, strlen(command)) == 0) {
-        GString* result_str = NULL;
-
         // count tokens properly
         int num_tokens = count_tokens(input);
 
         // if correct number of tokens, then candidate for autocompletion of last param
         if (num_tokens == arg_number) {
-            gchar* start_str = get_start(input, arg_number);
-            gchar* comp_str = g_strdup(&input[strlen(start_str)]);
+            auto_gchar gchar* start_str = get_start(input, arg_number);
+            auto_gchar gchar* comp_str = g_strdup(&input[strlen(start_str)]);
 
             // autocomplete param
             if (comp_str) {
-                char* found = func(comp_str, previous, context);
+                auto_gchar gchar* found = func(comp_str, previous, context);
                 if (found) {
-                    result_str = g_string_new("");
-                    g_string_append(result_str, start_str);
-                    g_string_append(result_str, found);
-
-                    free(start_str);
-                    free(comp_str);
-
-                    char* result = result_str->str;
-                    g_string_free(result_str, FALSE);
-
-                    return result;
+                    return g_strdup_printf("%s%s", start_str, found);
                 }
-            } else {
-                free(start_str);
             }
         }
     }
@@ -418,14 +404,12 @@ autocomplete_remove_older_than_max_reverse(Autocomplete ac, int maxsize)
 static gchar*
 _search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction)
 {
-    gchar* search_str_ascii = g_str_to_ascii(ac->search_str, NULL);
-    gchar* search_str_lower = g_ascii_strdown(search_str_ascii, -1);
-    g_free(search_str_ascii);
+    auto_gchar gchar* search_str_ascii = g_str_to_ascii(ac->search_str, NULL);
+    auto_gchar gchar* search_str_lower = g_ascii_strdown(search_str_ascii, -1);
 
     while (curr) {
-        gchar* curr_ascii = g_str_to_ascii(curr->data, NULL);
-        gchar* curr_lower = g_ascii_strdown(curr_ascii, -1);
-        g_free(curr_ascii);
+        auto_gchar gchar* curr_ascii = g_str_to_ascii(curr->data, NULL);
+        auto_gchar gchar* curr_lower = g_ascii_strdown(curr_ascii, -1);
 
         // match found
         if (strncmp(curr_lower, search_str_lower, strlen(search_str_lower)) == 0) {
@@ -435,26 +419,12 @@ _search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction
 
             // if contains space, quote before returning
             if (quote && g_strrstr(curr->data, " ")) {
-                GString* quoted = g_string_new("\"");
-                g_string_append(quoted, curr->data);
-                g_string_append(quoted, "\"");
-
-                gchar* result = quoted->str;
-                g_string_free(quoted, FALSE);
-
-                g_free(search_str_lower);
-                g_free(curr_lower);
-                return result;
-
+                return g_strdup_printf("\"%s\"", (gchar*)curr->data);
                 // otherwise just return the string
             } else {
-                g_free(search_str_lower);
-                g_free(curr_lower);
                 return strdup(curr->data);
             }
         }
-
-        g_free(curr_lower);
 
         if (direction == PREVIOUS) {
             curr = g_list_previous(curr);
@@ -463,6 +433,5 @@ _search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction
         }
     }
 
-    g_free(search_str_lower);
     return NULL;
 }

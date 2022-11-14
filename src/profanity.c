@@ -175,7 +175,8 @@ _init(char* log_level, char* config_file, char* log_file, char* theme_name)
 
     pthread_mutex_lock(&lock);
     files_create_directories();
-    log_level_t prof_log_level = log_level_from_string(log_level);
+    log_level_t prof_log_level;
+    log_level_from_string(log_level, &prof_log_level);
     prefs_load(config_file);
     log_init(prof_log_level, log_file);
     log_stderr_init(PROF_LEVEL_ERROR);
