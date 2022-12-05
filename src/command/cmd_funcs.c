@@ -9857,6 +9857,41 @@ cmd_mood(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_strophe(ProfWin* window, const char* const command, gchar** args)
+{
+    if (g_strcmp0(args[0], "verbosity") == 0) {
+        int verbosity;
+        auto_gchar gchar* err_msg = NULL;
+        if (string_to_verbosity(args[1], &verbosity, &err_msg)) {
+            xmpp_ctx_set_verbosity(connection_get_ctx(), verbosity);
+            prefs_set_string(PREF_STROPHE_VERBOSITY, args[1]);
+            return TRUE;
+        } else {
+            cons_show(err_msg);
+        }
+    } else if (g_strcmp0(args[0], "sm") == 0) {
+        if (g_strcmp0(args[1], "no-resend") == 0) {
+            cons_show("Stream Management set to 'no-resend'.");
+            prefs_set_boolean(PREF_STROPHE_SM_ENABLED, TRUE);
+            prefs_set_boolean(PREF_STROPHE_SM_RESEND, FALSE);
+            return TRUE;
+        } else if (g_strcmp0(args[1], "on") == 0) {
+            cons_show("Stream Management enabled.");
+            prefs_set_boolean(PREF_STROPHE_SM_ENABLED, TRUE);
+            prefs_set_boolean(PREF_STROPHE_SM_RESEND, TRUE);
+            return TRUE;
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            cons_show("Stream Management disabled.");
+            prefs_set_boolean(PREF_STROPHE_SM_ENABLED, FALSE);
+            prefs_set_boolean(PREF_STROPHE_SM_RESEND, FALSE);
+            return TRUE;
+        }
+    }
+    cons_bad_cmd_usage(command);
+    return FALSE;
+}
+
+gboolean
 cmd_vcard(ProfWin* window, const char* const command, gchar** args)
 {
     if (connection_get_status() != JABBER_CONNECTED) {

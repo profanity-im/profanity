@@ -131,6 +131,7 @@ static char* _executable_autocomplete(ProfWin* window, const char* const input, 
 static char* _lastactivity_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _intype_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _mood_autocomplete(ProfWin* window, const char* const input, gboolean previous);
+static char* _strophe_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _adhoc_cmd_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _vcard_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 
@@ -276,6 +277,9 @@ static Autocomplete executable_ac;
 static Autocomplete intype_ac;
 static Autocomplete mood_ac;
 static Autocomplete mood_type_ac;
+static Autocomplete strophe_ac;
+static Autocomplete strophe_sm_ac;
+static Autocomplete strophe_verbosity_ac;
 static Autocomplete adhoc_cmd_ac;
 static Autocomplete lastactivity_ac;
 static Autocomplete vcard_ac;
@@ -1098,6 +1102,19 @@ cmd_ac_init(void)
     autocomplete_add(intype_ac, "console");
     autocomplete_add(intype_ac, "titlebar");
 
+    strophe_ac = autocomplete_new();
+    autocomplete_add(strophe_ac, "sm");
+    autocomplete_add(strophe_ac, "verbosity");
+    strophe_sm_ac = autocomplete_new();
+    autocomplete_add(strophe_sm_ac, "on");
+    autocomplete_add(strophe_sm_ac, "no-resend");
+    autocomplete_add(strophe_sm_ac, "off");
+    strophe_verbosity_ac = autocomplete_new();
+    autocomplete_add(strophe_verbosity_ac, "0");
+    autocomplete_add(strophe_verbosity_ac, "1");
+    autocomplete_add(strophe_verbosity_ac, "2");
+    autocomplete_add(strophe_verbosity_ac, "3");
+
     mood_ac = autocomplete_new();
     autocomplete_add(mood_ac, "set");
     autocomplete_add(mood_ac, "clear");
@@ -1595,6 +1612,9 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(intype_ac);
     autocomplete_reset(mood_ac);
     autocomplete_reset(mood_type_ac);
+    autocomplete_reset(strophe_verbosity_ac);
+    autocomplete_reset(strophe_sm_ac);
+    autocomplete_reset(strophe_ac);
     autocomplete_reset(adhoc_cmd_ac);
 
     autocomplete_reset(vcard_ac);
@@ -2057,6 +2077,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/lastactivity", _lastactivity_autocomplete);
     g_hash_table_insert(ac_funcs, "/intype", _intype_autocomplete);
     g_hash_table_insert(ac_funcs, "/mood", _mood_autocomplete);
+    g_hash_table_insert(ac_funcs, "/strophe", _strophe_autocomplete);
     g_hash_table_insert(ac_funcs, "/cmd", _adhoc_cmd_autocomplete);
     g_hash_table_insert(ac_funcs, "/vcard", _vcard_autocomplete);
 
@@ -4440,6 +4461,24 @@ _mood_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     return result;
+}
+
+static char*
+_strophe_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+{
+    char* result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/strophe sm", strophe_sm_ac, FALSE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/strophe verbosity", strophe_verbosity_ac, FALSE, previous);
+    if (result) {
+        return result;
+    }
+
+    return autocomplete_param_with_ac(input, "/strophe", strophe_ac, FALSE, previous);
 }
 
 static char*

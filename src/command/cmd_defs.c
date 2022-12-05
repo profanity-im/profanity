@@ -2862,6 +2862,25 @@ static struct cmd_t command_defs[] = {
               "/mood set amazed",
               "/mood clear")
     },
+
+    { "/strophe",
+      parse_args, 2, 2, &cons_strophe_setting,
+      CMD_NOSUBFUNCS
+      CMD_MAINFUNC(cmd_strophe)
+      CMD_TAGS(
+              CMD_TAG_CONNECTION)
+      CMD_SYN(
+              "/strophe verbosity 0-3",
+              "/strophe sm on|no-resend|off")
+      CMD_DESC(
+              "Modify libstrophe settings.")
+      CMD_ARGS(
+              { "verbosity 0-3", "Set libstrophe verbosity level when log level is 'DEBUG'." },
+              { "sm on|no-resend|off", "Enable or disable Stream-Management (SM) as of XEP-0198. The 'no-resend' option enables SM, but won't re-send un-ACK'ed messages on re-connect." })
+      CMD_EXAMPLES(
+              "/strophe verbosity 3",
+              "/strophe sm no-resend")
+    },
     // NEXT-COMMAND (search helper)
 };
 

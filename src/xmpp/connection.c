@@ -140,6 +140,14 @@ connection_init(void)
     conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
 
     conn.xmpp_ctx = xmpp_ctx_new(&prof_mem, &prof_log);
+    auto_gchar gchar* v = prefs_get_string(PREF_STROPHE_VERBOSITY);
+    auto_gchar gchar* err_msg = NULL;
+    int verbosity;
+    if (string_to_verbosity(v, &verbosity, &err_msg)) {
+        xmpp_ctx_set_verbosity(conn.xmpp_ctx, verbosity);
+    } else {
+        cons_show(err_msg);
+    }
     conn.xmpp_conn = xmpp_conn_new(conn.xmpp_ctx);
 
     _random_bytes_init();
@@ -1000,13 +1008,15 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
 
         // lost connection for unknown reason
         if (conn.conn_status == JABBER_CONNECTED) {
-            int send_queue_len = xmpp_conn_send_queue_len(conn.xmpp_conn);
-            log_debug("Connection handler: Lost connection for unknown reason");
-            conn.sm_state = xmpp_conn_get_sm_state(conn.xmpp_conn);
-            if (send_queue_len > 0) {
-                conn.queued_messages = calloc(send_queue_len + 1, sizeof(*conn.queued_messages));
-                for (int n = 0; n < send_queue_len && conn.queued_messages[n]; ++n) {
-                    conn.queued_messages[n] = xmpp_conn_send_queue_drop_element(conn.xmpp_conn, XMPP_QUEUE_OLDEST);
+            if (prefs_get_boolean(PREF_STROPHE_SM_ENABLED)) {
+                int send_queue_len = xmpp_conn_send_queue_len(conn.xmpp_conn);
+                log_debug("Connection handler: Lost connection for unknown reason");
+                conn.sm_state = xmpp_conn_get_sm_state(conn.xmpp_conn);
+                if (send_queue_len > 0 && prefs_get_boolean(PREF_STROPHE_SM_RESEND)) {
+                    conn.queued_messages = calloc(send_queue_len + 1, sizeof(*conn.queued_messages));
+                    for (int n = 0; n < send_queue_len && conn.queued_messages[n]; ++n) {
+                        conn.queued_messages[n] = xmpp_conn_send_queue_drop_element(conn.xmpp_conn, XMPP_QUEUE_OLDEST);
+                    }
                 }
             }
             session_lost_connection();

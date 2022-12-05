@@ -253,6 +253,7 @@ gboolean cmd_correct_editor(ProfWin* window, const char* const command, gchar** 
 gboolean cmd_silence(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_register(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_mood(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_strophe(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_stamp(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_vcard(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_vcard_add(ProfWin* window, const char* const command, gchar** args);
