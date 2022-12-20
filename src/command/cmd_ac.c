@@ -1315,7 +1315,7 @@ cmd_ac_add_help(const char* const value)
 }
 
 void
-cmd_ac_add_cmd(Command* command)
+cmd_ac_add_cmd(const Command* command)
 {
     autocomplete_add(commands_ac, command->cmd);
     autocomplete_add(help_ac, command->cmd + 1);

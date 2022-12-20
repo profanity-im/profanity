@@ -8430,12 +8430,11 @@ _cmd_execute(ProfWin* window, const char* const command, const char* const inp)
             ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
             return TRUE;
         }
-        if (args[0] && cmd->sub_funcs[0][0]) {
+        if (args[0] && cmd->sub_funcs[0].cmd) {
             int i = 0;
-            while (cmd->sub_funcs[i][0]) {
-                if (g_strcmp0(args[0], (char*)cmd->sub_funcs[i][0]) == 0) {
-                    gboolean (*func)(ProfWin * window, const char* const command, gchar** args) = cmd->sub_funcs[i][1];
-                    gboolean result = func(window, command, args);
+            while (cmd->sub_funcs[i].cmd) {
+                if (g_strcmp0(args[0], (char*)cmd->sub_funcs[i].cmd) == 0) {
+                    gboolean result = cmd->sub_funcs[i].func(window, command, args);
                     g_strfreev(args);
                     return result;
                 }

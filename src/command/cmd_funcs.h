@@ -68,7 +68,11 @@ typedef struct cmd_t
     int min_args;
     int max_args;
     void (*setting_func)(void);
-    void* sub_funcs[50][2];
+    struct
+    {
+        const char* cmd;
+        gboolean (*func)(ProfWin* window, const char* const command, gchar** args);
+    } sub_funcs[50];
     gboolean (*func)(ProfWin* window, const char* const command, gchar** args);
     CommandHelp help;
 } Command;

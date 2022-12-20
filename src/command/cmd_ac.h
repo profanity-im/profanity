@@ -47,7 +47,7 @@ gboolean cmd_ac_exists(char* cmd);
 
 void cmd_ac_add(const char* const value);
 void cmd_ac_add_help(const char* const value);
-void cmd_ac_add_cmd(Command* command);
+void cmd_ac_add_cmd(const Command* command);
 void cmd_ac_add_alias(ProfAlias* alias);
 void cmd_ac_add_alias_value(char* value);
 
