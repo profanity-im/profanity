@@ -342,30 +342,13 @@ accounts_get_account(const char* const name)
 
         gchar* auth_policy = g_key_file_get_string(accounts, name, "auth.policy", NULL);
 
-        ProfAccount* new_account = account_new(name, jid, password, eval_password, enabled,
+        ProfAccount* new_account = account_new(g_strdup(name), jid, password, eval_password, enabled,
                                                server, port, resource, last_presence, login_presence,
                                                priority_online, priority_chat, priority_away, priority_xa,
                                                priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
                                                otr_opportunistic, otr_always, omemo_policy, omemo_enabled,
                                                omemo_disabled, ox_enabled, pgp_enabled, pgp_keyid,
                                                startscript, theme, tls_policy, auth_policy);
-
-        g_free(jid);
-        g_free(password);
-        g_free(eval_password);
-        g_free(server);
-        g_free(resource);
-        g_free(last_presence);
-        g_free(login_presence);
-        g_free(muc_service);
-        g_free(muc_nick);
-        g_free(otr_policy);
-        g_free(omemo_policy);
-        g_free(pgp_keyid);
-        g_free(startscript);
-        g_free(theme);
-        g_free(tls_policy);
-        g_free(auth_policy);
 
         return new_account;
     }
