@@ -83,7 +83,6 @@ static char* _omemo_fingerprint(ec_public_key* identity, gboolean formatted);
 static unsigned char* _omemo_fingerprint_decode(const char* const fingerprint, size_t* len);
 static char* _omemo_unformat_fingerprint(const char* const fingerprint_formatted);
 static void _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key* identity);
-static void _g_hash_table_free(GHashTable* hash_table);
 static void _acquire_sender_devices_list(void);
 
 typedef gboolean (*OmemoDeviceListHandler)(const char* const jid, GList* device_list);
@@ -221,7 +220,7 @@ omemo_on_connect(ProfAccount* account)
         .get_local_registration_id = get_local_registration_id,
         .save_identity = save_identity,
         .is_trusted_identity = is_trusted_identity,
-        .destroy_func = NULL,
+        .destroy_func = (void (*)(void*))identity_key_store_destroy,
         .user_data = &omemo_ctx.identity_key_store
     };
     signal_protocol_store_context_set_identity_key_store(omemo_ctx.store, &identity_key_store);
@@ -229,7 +228,7 @@ omemo_on_connect(ProfAccount* account)
     loaded = FALSE;
     omemo_ctx.device_list = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_list_free);
     omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-    omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_g_hash_table_free);
+    omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)glib_hash_table_free);
 
     gchar* omemo_dir = files_file_in_account_data_path(DIR_OMEMO, account->jid, NULL);
     if (!omemo_dir) {
@@ -306,9 +305,11 @@ omemo_on_disconnect(void)
         return;
     }
 
-    _g_hash_table_free(omemo_ctx.signed_pre_key_store);
-    _g_hash_table_free(omemo_ctx.pre_key_store);
-    _g_hash_table_free(omemo_ctx.device_list_handler);
+    glib_hash_table_free(omemo_ctx.signed_pre_key_store);
+    glib_hash_table_free(omemo_ctx.pre_key_store);
+    glib_hash_table_free(omemo_ctx.known_devices);
+    glib_hash_table_free(omemo_ctx.device_list_handler);
+    glib_hash_table_free(omemo_ctx.device_list);
 
     g_string_free(omemo_ctx.identity_filename, TRUE);
     g_key_file_free(omemo_ctx.identity_keyfile);
@@ -316,9 +317,18 @@ omemo_on_disconnect(void)
     g_key_file_free(omemo_ctx.trust_keyfile);
     g_string_free(omemo_ctx.sessions_filename, TRUE);
     g_key_file_free(omemo_ctx.sessions_keyfile);
-    _g_hash_table_free(omemo_ctx.session_store);
+    glib_hash_table_free(omemo_ctx.session_store);
     g_string_free(omemo_ctx.known_devices_filename, TRUE);
     g_key_file_free(omemo_ctx.known_devices_keyfile);
+
+    signal_protocol_store_context_destroy(omemo_ctx.store);
+    ec_public_key* pub = ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair);
+    ec_private_key* priv = ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair);
+    ratchet_identity_key_pair_destroy((signal_type_base*)omemo_ctx.identity_key_pair);
+    ec_private_key_destroy((signal_type_base*)priv);
+    ec_public_key_destroy((signal_type_base*)pub);
+
+    signal_context_destroy(omemo_ctx.signal);
 }
 
 void
@@ -564,7 +574,8 @@ omemo_set_device_list(const char* const from, GList* device_list)
     }
 
     // OMEMO trustmode ToFu
-    if (g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "firstusage") == 0) {
+    auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
+    if (g_strcmp0(trust_mode, "firstusage") == 0) {
         log_debug("[OMEMO] Checking firstusage state for %s", jid->barejid);
         GHashTable* trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid->barejid);
         if (trusted) {
@@ -660,20 +671,26 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
                            const unsigned char* const identity_key_raw, size_t identity_key_len)
 {
     log_debug("[OMEMO] Starting device session for %s with device %d", jid, device_id);
-    signal_protocol_address address = {
+    signal_protocol_address jid_address = {
         .name = jid,
         .name_len = strlen(jid),
         .device_id = device_id,
     };
 
+    signal_protocol_address* address = NULL;
+    session_pre_key_bundle* bundle = NULL;
+    ec_public_key* prekey_public = NULL;
+    ec_public_key* signed_prekey = NULL;
+    session_builder* builder = NULL;
     ec_public_key* identity_key;
     curve_decode_point(&identity_key, identity_key_raw, identity_key_len, omemo_ctx.signal);
     _cache_device_identity(jid, device_id, identity_key);
 
-    gboolean trusted = is_trusted_identity(&address, (uint8_t*)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
+    gboolean trusted = is_trusted_identity(&jid_address, (uint8_t*)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
     log_debug("[OMEMO] Trust %s (%d): %d", jid, device_id, trusted);
 
-    if ((g_strcmp0(prefs_get_string(PREF_OMEMO_TRUST_MODE), "blind") == 0) && !trusted) {
+    auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
+    if ((g_strcmp0(trust_mode, "blind") == 0) && !trusted) {
         char* fp = _omemo_fingerprint(identity_key, TRUE);
         cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
         omemo_trust(jid, fp);
@@ -686,18 +703,15 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
         goto out;
     }
 
-    if (!contains_session(&address, omemo_ctx.session_store)) {
-        log_debug("[OMEMO] There is no Session for %s ( %d) ,... building session.", address.name, address.device_id);
+    if (!contains_session(&jid_address, omemo_ctx.session_store)) {
+        log_debug("[OMEMO] There is no Session for %s ( %d) ,... building session.", jid_address.name, jid_address.device_id);
         int res;
-        session_pre_key_bundle* bundle;
-        signal_protocol_address* address;
 
         address = malloc(sizeof(signal_protocol_address));
         address->name = strdup(jid);
         address->name_len = strlen(jid);
         address->device_id = device_id;
 
-        session_builder* builder;
         res = session_builder_create(&builder, omemo_ctx.store, address, omemo_ctx.signal);
         if (res != 0) {
             log_error("[OMEMO] cannot create session builder for %s device %d", jid, device_id);
@@ -709,9 +723,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
         prekey_index %= g_list_length(prekeys);
         omemo_key_t* prekey = g_list_nth_data(prekeys, prekey_index);
 
-        ec_public_key* prekey_public;
         curve_decode_point(&prekey_public, prekey->data, prekey->length, omemo_ctx.signal);
-        ec_public_key* signed_prekey;
         curve_decode_point(&signed_prekey, signed_prekey_raw, signed_prekey_len, omemo_ctx.signal);
 
         res = session_pre_key_bundle_create(&bundle, 0, device_id, prekey->id, prekey_public, signed_prekey_id, signed_prekey, signature, signature_len, identity_key);
@@ -732,6 +744,16 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     }
 
 out:
+    if (bundle)
+        session_pre_key_bundle_destroy((signal_type_base*)bundle);
+    if (signed_prekey)
+        ec_public_key_destroy((signal_type_base*)signed_prekey);
+    if (prekey_public)
+        ec_public_key_destroy((signal_type_base*)prekey_public);
+    session_builder_free(builder);
+    if (address)
+        free((void*)address->name);
+    free(address);
     SIGNAL_UNREF(identity_key);
 }
 
@@ -1009,6 +1031,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         ec_public_key_serialize(&identity_buffer, their_identity_key);
         *trusted = is_trusted_identity(&address, signal_buffer_data(identity_buffer),
                                        signal_buffer_len(identity_buffer), &omemo_ctx.identity_key_store);
+        signal_buffer_free(identity_buffer);
 
         /* Replace used pre_key in bundle */
         uint32_t pre_key_id = pre_key_signal_message_get_pre_key_id(message);
@@ -1726,13 +1749,6 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
     autocomplete_add(ac, formatted_fingerprint);
     free(formatted_fingerprint);
     free(fingerprint);
-}
-
-static void
-_g_hash_table_free(GHashTable* hash_table)
-{
-    g_hash_table_remove_all(hash_table);
-    g_hash_table_unref(hash_table);
 }
 
 static void

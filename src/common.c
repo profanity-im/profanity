@@ -620,3 +620,10 @@ unique_filename_from_url(const char* url, const char* path)
 
     return unique_filename;
 }
+
+void
+glib_hash_table_free(GHashTable* hash_table)
+{
+    g_hash_table_remove_all(hash_table);
+    g_hash_table_unref(hash_table);
+}
