@@ -39,6 +39,10 @@ session_connect_with_account(const ProfAccount* const account)
 }
 
 void
+session_reconnect_now(void)
+{
+}
+void
 session_disconnect(void)
 {
 }

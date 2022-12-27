@@ -82,16 +82,17 @@
 #include "plugins/plugins.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
-#include "xmpp/xmpp.h"
+#include "xmpp/avatar.h"
+#include "xmpp/chat_session.h"
 #include "xmpp/connection.h"
 #include "xmpp/contact.h"
-#include "xmpp/roster_list.h"
 #include "xmpp/jid.h"
 #include "xmpp/muc.h"
-#include "xmpp/chat_session.h"
-#include "xmpp/avatar.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/session.h"
 #include "xmpp/stanza.h"
 #include "xmpp/vcard_funcs.h"
+#include "xmpp/xmpp.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -6539,8 +6540,9 @@ cmd_reconnect(ProfWin* window, const char* const command, gchar** args)
 
     int intval = 0;
     char* err_msg = NULL;
-    gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
-    if (res) {
+    if (g_strcmp0(value, "now") == 0) {
+        session_reconnect_now();
+    } else if (strtoi_range(value, &intval, 0, INT_MAX, &err_msg)) {
         prefs_set_reconnect(intval);
         if (intval == 0) {
             cons_show("Reconnect disabled.", intval);

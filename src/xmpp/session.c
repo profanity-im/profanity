@@ -96,8 +96,6 @@ static activity_state_t activity_state;
 static resource_presence_t saved_presence;
 static char* saved_status;
 
-static void _session_reconnect(void);
-
 static void _session_free_internals(void);
 static void _session_free_saved_details(void);
 
@@ -268,12 +266,12 @@ session_process_events(void)
         if ((reconnect_sec != 0) && reconnect_timer) {
             int elapsed_sec = g_timer_elapsed(reconnect_timer, NULL);
             if (elapsed_sec > reconnect_sec) {
-                _session_reconnect();
+                session_reconnect_now();
             }
         }
         break;
     case JABBER_RECONNECT:
-        _session_reconnect();
+        session_reconnect_now();
         break;
     default:
         break;
@@ -557,8 +555,8 @@ session_reconnect(gchar* altdomain, unsigned short altport)
     reconnect.altport = altport;
 }
 
-static void
-_session_reconnect(void)
+void
+session_reconnect_now(void)
 {
     // reconnect with account.
     ProfAccount* account = accounts_get_account(saved_account.name);

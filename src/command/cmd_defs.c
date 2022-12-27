@@ -1936,11 +1936,13 @@ static const struct cmd_t command_defs[] = {
       CMD_TAGS(
               CMD_TAG_CONNECTION)
       CMD_SYN(
-              "/reconnect <seconds>")
+              "/reconnect <seconds>",
+              "/reconnect now")
       CMD_DESC(
-              "Set the reconnect attempt interval for when the connection is lost.")
+              "Set the reconnect attempt interval for when the connection is lost or immediately trigger a reconnect.")
       CMD_ARGS(
-              { "<seconds>", "Number of seconds before attempting to reconnect, a value of 0 disables reconnect." })
+              { "<seconds>", "Number of seconds before attempting to reconnect, a value of 0 disables reconnect." },
+              { "now", "Immediately trigger a reconnect." })
     },
 
     { CMD_PREAMBLE("/autoping",
