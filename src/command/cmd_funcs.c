@@ -8436,18 +8436,19 @@ _cmd_execute(ProfWin* window, const char* const command, const char* const inp)
             int i = 0;
             while (cmd->sub_funcs[i].cmd) {
                 if (g_strcmp0(args[0], (char*)cmd->sub_funcs[i].cmd) == 0) {
-                    gboolean result = cmd->sub_funcs[i].func(window, command, args);
-                    g_strfreev(args);
-                    return result;
+                    result = cmd->sub_funcs[i].func(window, command, args);
+                    goto out;
                 }
                 i++;
             }
         }
         if (!cmd->func) {
             ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
-            return TRUE;
+            result = TRUE;
+            goto out;
         }
-        gboolean result = cmd->func(window, command, args);
+        result = cmd->func(window, command, args);
+out:
         g_strfreev(args);
         return result;
     } else if (plugins_run_command(inp)) {
@@ -8887,6 +8888,7 @@ cmd_omemo_fingerprint(ProfWin* window, const char* const command, gchar** args)
         free(formatted_fingerprint);
     }
 
+    jid_destroy(jid);
     g_list_free(fingerprints);
 
     win_println(window, THEME_DEFAULT, "-", "You can trust it with '/omemo trust <fingerprint>'");

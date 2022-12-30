@@ -2849,7 +2849,7 @@ _omemo_autocomplete(ProfWin* window, const char* const input, gboolean previous)
                 gboolean result;
                 gchar** args = parse_args(input, 2, 3, &result);
                 if (result) {
-                    gchar* jid = g_strdup(args[1]);
+                    auto_gchar gchar* jid = g_strdup(args[1]);
                     found = autocomplete_param_no_with_func(input, "/omemo trust", 4, omemo_fingerprint_autocomplete, previous, jid);
                     if (found) {
                         return found;
@@ -2876,7 +2876,7 @@ _omemo_autocomplete(ProfWin* window, const char* const input, gboolean previous)
                 gboolean result;
                 gchar** args = parse_args(input, 2, 3, &result);
                 if (result) {
-                    gchar* jid = g_strdup(args[1]);
+                    auto_gchar gchar* jid = g_strdup(args[1]);
                     found = autocomplete_param_no_with_func(input, "/omemo untrust", 4, omemo_fingerprint_autocomplete, previous, jid);
                     if (found) {
                         return found;

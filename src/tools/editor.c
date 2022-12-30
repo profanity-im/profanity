@@ -56,7 +56,7 @@ get_message_from_editor(gchar* message, gchar** returned_message)
 
     gchar* filename = NULL;
     GError* glib_error = NULL;
-    char* jid = connection_get_barejid();
+    auto_char char* jid = connection_get_barejid();
     if (jid) {
         filename = files_file_in_account_data_path(DIR_EDITOR, jid, "compose.md");
     } else {

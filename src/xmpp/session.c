@@ -305,7 +305,7 @@ _receive_mood(xmpp_stanza_t* const stanza, void* const userdata)
                         const char* m = xmpp_stanza_get_name(c);
                         xmpp_stanza_t* t = xmpp_stanza_get_child_by_name(mood, STANZA_NAME_TEXT);
                         if (t) {
-                            const char* text = xmpp_stanza_get_text(t);
+                            auto_char char* text = xmpp_stanza_get_text(t);
                             cons_show("Mood from %s %s (%s)", from, m, text);
                         } else {
                             cons_show("Mood from %s %s", from, m);
