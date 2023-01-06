@@ -553,7 +553,7 @@ omemo_prekeys(GList** prekeys, GList** ids, GList** lengths)
 void
 omemo_set_device_list(const char* const from, GList* device_list)
 {
-    log_debug("[OMEMO] Setting device list for %s", from);
+    log_debug("[OMEMO] Setting device list for %s", (from == NULL) ? "" : from);
     Jid* jid;
     if (from) {
         jid = jid_create(from);
