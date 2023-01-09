@@ -59,7 +59,7 @@ void chat_session_recipient_paused(const char* const barejid, const char* const 
 void chat_session_recipient_gone(const char* const barejid, const char* const resource);
 void chat_session_recipient_inactive(const char* const barejid, const char* const resource);
 char* chat_session_get_jid(const char* const barejid);
-char* chat_session_get_state(const char* const barejid);
+const char* chat_session_get_state(const char* const barejid);
 
 void chat_session_remove(const char* const barejid);
 

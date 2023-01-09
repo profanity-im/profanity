@@ -424,7 +424,7 @@ message_send_chat(const char* const barejid, const char* const msg, const char* 
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    char* state = chat_session_get_state(barejid);
+    const char* state = chat_session_get_state(barejid);
     char* jid = chat_session_get_jid(barejid);
     char* id = connection_create_stanza_id();
 
@@ -459,7 +459,7 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    char* state = chat_session_get_state(barejid);
+    const char* state = chat_session_get_state(barejid);
     char* jid = chat_session_get_jid(barejid);
     char* id = connection_create_stanza_id();
 
@@ -525,7 +525,7 @@ message_send_chat_ox(const char* const barejid, const char* const msg, gboolean 
 #ifdef HAVE_LIBGPGME
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    char* state = chat_session_get_state(barejid);
+    const char* state = chat_session_get_state(barejid);
     char* jid = chat_session_get_jid(barejid);
     char* id = connection_create_stanza_id();
 
@@ -589,7 +589,7 @@ message_send_chat_otr(const char* const barejid, const char* const msg, gboolean
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    char* state = chat_session_get_state(barejid);
+    const char* state = chat_session_get_state(barejid);
     char* jid = chat_session_get_jid(barejid);
     char* id = connection_create_stanza_id();
 
@@ -627,7 +627,7 @@ message_send_chat_omemo(const char* const jid, uint32_t sid, GList* keys,
                         const unsigned char* const ciphertext, size_t ciphertext_len,
                         gboolean request_receipt, gboolean muc, const char* const replace_id)
 {
-    char* state = chat_session_get_state(jid);
+    const char* state = chat_session_get_state(jid);
     xmpp_ctx_t* const ctx = connection_get_ctx();
     char* id;
     xmpp_stanza_t* message;

@@ -120,11 +120,11 @@ chat_session_get_jid(const char* const barejid)
     return jid;
 }
 
-char*
+const char*
 chat_session_get_state(const char* const barejid)
 {
     ChatSession* session = chat_session_get(barejid);
-    char* state = NULL;
+    const char* state = NULL;
     if (session) {
         if (prefs_get_boolean(PREF_STATES) && session->send_states) {
             state = STANZA_NAME_ACTIVE;
