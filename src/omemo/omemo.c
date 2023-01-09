@@ -553,7 +553,7 @@ omemo_prekeys(GList** prekeys, GList** ids, GList** lengths)
 void
 omemo_set_device_list(const char* const from, GList* device_list)
 {
-    log_debug("[OMEMO] Setting device list for %s", (from == NULL) ? "" : from);
+    log_debug("[OMEMO] Setting device list for %s", STR_MAYBE_NULL(from));
     Jid* jid;
     if (from) {
         jid = jid_create(from);
@@ -570,7 +570,7 @@ omemo_set_device_list(const char* const from, GList* device_list)
             g_hash_table_remove(omemo_ctx.device_list_handler, jid->barejid);
         }
     } else {
-        log_debug("[OMEMO] No Device List Handler for %s", from);
+        log_debug("[OMEMO] No Device List Handler for %s", STR_MAYBE_NULL(from));
     }
 
     // OMEMO trustmode ToFu
