@@ -468,7 +468,7 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
     char* account_name = session_get_account_name();
     ProfAccount* account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
-        Jid* jidp = jid_create(jid);
+        auto_jid Jid* jidp = jid_create(jid);
         char* encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
         if (encrypted) {
             message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
@@ -487,7 +487,6 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
             message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
             xmpp_message_set_body(message, msg);
         }
-        jid_destroy(jidp);
     } else {
         message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
         xmpp_message_set_body(message, msg);
@@ -526,11 +525,10 @@ message_send_chat_ox(const char* const barejid, const char* const msg, gboolean 
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
     const char* state = chat_session_get_state(barejid);
-    char* jid = chat_session_get_jid(barejid);
+    auto_char char* jid = chat_session_get_jid(barejid);
     char* id = connection_create_stanza_id();
 
     xmpp_stanza_t* message = NULL;
-    Jid* jidp = jid_create(jid);
 
     char* account_name = session_get_account_name();
     ProfAccount* account = accounts_get_account(account_name);
@@ -561,8 +559,6 @@ message_send_chat_ox(const char* const barejid, const char* const msg, gboolean 
     xmpp_stanza_to_text(message, &c, &s);
 
     account_free(account);
-    jid_destroy(jidp);
-    free(jid);
 
     if (state) {
         stanza_attach_state(ctx, message, state);
@@ -888,10 +884,9 @@ _handle_error(xmpp_stanza_t* const stanza)
         ui_handle_error(err_msg);
     } else {
         if (type && (strcmp(type, "cancel") == 0)) {
-            Jid* jidp = jid_create(jid);
+            auto_jid Jid* jidp = jid_create(jid);
             if (jidp) {
                 chat_session_remove(jidp->barejid);
-                jid_destroy(jidp);
             }
         }
         ui_handle_recipient_error(jid, err_msg);
@@ -928,7 +923,7 @@ _handle_muc_user(xmpp_stanza_t* const stanza)
         return;
     }
 
-    Jid* jidp = jid_create(invitor_jid);
+    auto_jid Jid* jidp = jid_create(invitor_jid);
     if (!jidp) {
         return;
     }
@@ -947,7 +942,6 @@ _handle_muc_user(xmpp_stanza_t* const stanza)
     }
 
     sv_ev_room_invite(INVITE_MEDIATED, invitor, room, reason, password);
-    jid_destroy(jidp);
     if (reason) {
         xmpp_free(ctx, reason);
     }
@@ -974,7 +968,7 @@ _handle_conference(xmpp_stanza_t* const stanza)
             return;
         }
 
-        Jid* jidp = jid_create(from);
+        auto_jid Jid* jidp = jid_create(from);
         if (!jidp) {
             return;
         }
@@ -984,7 +978,6 @@ _handle_conference(xmpp_stanza_t* const stanza)
         const char* password = xmpp_stanza_get_attribute(xns_conference, STANZA_ATTR_PASSWORD);
 
         sv_ev_room_invite(INVITE_DIRECT, jidp->barejid, room, reason, password);
-        jid_destroy(jidp);
     }
 }
 
@@ -1040,7 +1033,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
     if (!room_jid) {
         return;
     }
-    Jid* from_jid = jid_create(room_jid);
+    auto_jid Jid* from_jid = jid_create(room_jid);
     if (!from_jid) {
         return;
     }
@@ -1053,7 +1046,6 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
         sv_ev_room_subject(from_jid->barejid, from_jid->resourcepart, subject_text);
         xmpp_free(ctx, subject_text);
 
-        jid_destroy(from_jid);
         return;
     }
 
@@ -1084,31 +1076,28 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
                 }
             }
 
-            jid_destroy(from_jid);
             return;
         }
 
         sv_ev_room_broadcast(room_jid, broadcast);
         xmpp_free(ctx, broadcast);
 
-        jid_destroy(from_jid);
         return;
     }
 
     if (!jid_is_valid_room_form(from_jid)) {
         log_error("Invalid room JID: %s", from_jid->str);
-        jid_destroy(from_jid);
         return;
     }
 
     // room not active in profanity
     if (!muc_active(from_jid->barejid)) {
         log_error("Message received for inactive chat room: %s", from_jid->str);
-        jid_destroy(from_jid);
         return;
     }
 
     ProfMessage* message = message_init();
+    jid_ref(from_jid);
     message->from_jid = from_jid;
     message->type = PROF_MSG_TYPE_MUC;
 
@@ -1234,13 +1223,12 @@ _handle_receipt_received(xmpp_stanza_t* const stanza)
             return;
         }
 
-        Jid* jidp = jid_create(fulljid);
+        auto_jid Jid* jidp = jid_create(fulljid);
         if (!jidp) {
             return;
         }
 
         sv_ev_message_receipt(jidp->barejid, id);
-        jid_destroy(jidp);
     }
 }
 
@@ -1268,10 +1256,9 @@ _receipt_request_handler(xmpp_stanza_t* const stanza)
 
     const gchar* from = xmpp_stanza_get_from(stanza);
     if (from) {
-        Jid* jid = jid_create(from);
+        auto_jid Jid* jid = jid_create(from);
         if (jid) {
             _message_send_receipt(jid->fulljid, id);
-            jid_destroy(jid);
         }
     }
 }
@@ -1388,7 +1375,7 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
     if (!from) {
         return;
     }
-    Jid* jid = jid_create(from);
+    auto_jid Jid* jid = jid_create(from);
     if (!jid) {
         return;
     }
@@ -1396,13 +1383,13 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
     // private message from chat room use full jid (room/nick)
     if (muc_active(jid->barejid)) {
         _handle_muc_private_message(stanza);
-        jid_destroy(jid);
         return;
     }
 
     // standard chat message, use jid without resource
     ProfMessage* message = message_init();
     message->is_mam = is_mam;
+    jid_ref(jid);
     message->from_jid = jid;
     const gchar* to = xmpp_stanza_get_to(stanza);
     if (to) {
@@ -1761,9 +1748,8 @@ _should_ignore_based_on_silence(xmpp_stanza_t* const stanza)
 {
     if (prefs_get_boolean(PREF_SILENCE_NON_ROSTER)) {
         const char* const from = xmpp_stanza_get_from(stanza);
-        Jid* from_jid = jid_create(from);
+        auto_jid Jid* from_jid = jid_create(from);
         PContact contact = roster_get_contact(from_jid->barejid);
-        jid_destroy(from_jid);
         if (!contact) {
             log_debug("[Silence] Ignoring message from: %s", from);
             return TRUE;

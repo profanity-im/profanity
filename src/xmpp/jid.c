@@ -76,6 +76,7 @@ jid_create(const gchar* const str)
     result->resourcepart = NULL;
     result->barejid = NULL;
     result->fulljid = NULL;
+    result->refcnt = 1;
 
     gchar* atp = g_utf8_strchr(trimmed, -1, '@');
     gchar* slashp = g_utf8_strchr(trimmed, -1, '/');
@@ -120,9 +121,27 @@ jid_create_from_bare_and_resource(const char* const barejid, const char* const r
 }
 
 void
+jid_auto_destroy(Jid** jid)
+{
+    if (jid == NULL)
+        return;
+    jid_destroy(*jid);
+}
+
+void
+jid_ref(Jid* jid)
+{
+    jid->refcnt++;
+}
+
+void
 jid_destroy(Jid* jid)
 {
     if (jid == NULL) {
+        return;
+    }
+    if (jid->refcnt > 1) {
+        jid->refcnt--;
         return;
     }
 
