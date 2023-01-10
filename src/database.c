@@ -2,7 +2,7 @@
  * database.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2020 - 2022 Michael Vetter <jubalh@idoru.org>
+ * Copyright (C) 2020 - 2023 Michael Vetter <jubalh@idoru.org>
  *
  * This file is part of Profanity.
  *
