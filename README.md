@@ -12,7 +12,7 @@ See the [User Guide](https://profanity-im.github.io/userguide.html) for informat
 ## Project
 This project is about freedom, privacy and choice. We want to enable people to chat with one another in a safe way. Thus supporting encryption (OTR, PGP, OMEMO, OX) and being decentralized, meaning everyone can run their own server. We believe [XMPP](https://xmpp.org/) is a great proven protocol with an excellent community serving this purpose well.
 
-Feel free to follow us on [twitter](https://twitter.com/profanityim), join our [mailing list](https://lists.notraces.net/mailman/listinfo/profanity) and/or [MUC](xmpp:profanity@rooms.dismail.de?join).
+Feel free to follow us on [twitter](https://twitter.com/profanityim), join our [mailing list](https://lists.datenkollektiv.net/postorius/lists/profanity.lists.notraces.net) and/or [MUC](xmpp:profanity@rooms.dismail.de?join).
 
 ## Installation
 Our [user guide](https://profanity-im.github.io/userguide.html) contains an [install](https://profanity-im.github.io/guide/latest/install.html) section and a section for [building](https://profanity-im.github.io/guide/latest/build.html) from source yourself.
@@ -56,7 +56,7 @@ URL: https://profanity-im.github.io/blog
 Repo: https://github.com/profanity-im/blog
 
 ### Mailinglist
-Mailing List: https://lists.notraces.net/mailman/listinfo/profanity
+Mailing List: https://lists.datenkollektiv.net/postorius/lists/profanity.lists.notraces.net
 
 ### Chatroom
 MUC: profanity@rooms.dismail.de

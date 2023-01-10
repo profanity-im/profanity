@@ -29,7 +29,7 @@ and help others to see what's being worked on.
 Also see the blogpost [Contributing a Patch via GitHub](https://profanity-im.github.io/blog/post/contributing-a-patch-via-github/).
 
 ### E-Mail
-In case GitHub is down or you can't use it for any other reason, you can send a patch to our [mailing list](https://lists.notraces.net/mailman/listinfo/profanity).
+In case GitHub is down or you can't use it for any other reason, you can send a patch to our [mailing list](https://lists.datenkollektiv.net/postorius/lists/profanity.lists.notraces.net).
 
 We recommend that you follow the workflow mentioned above.
 And create your patch using the [`git-format-patch`](https://git-scm.com/docs/git-format-patch) tool: `git format-patch master --stdout > feature.patch`
