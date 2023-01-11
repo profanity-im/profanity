@@ -273,9 +273,10 @@ AS_IF([test "x$PLATFORM" = xosx],
 
 dnl feature: xscreensaver
 AS_IF([test "x$with_xscreensaver" != xno],
-    [PKG_CHECK_MODULES([xscrnsaver], [xscrnsaver],
+    [PKG_CHECK_MODULES([xscrnsaver], [xscrnsaver x11],
         [AC_MSG_NOTICE([xscreensaver support is enabled]);
-         LIBS="$xscrnsaver_LIBS $LIBS" CFLAGS="$CFLAGS $xscrnsaver_CFLAGS"],
+         LIBS="$xscrnsaver_LIBS $LIBS" CFLAGS="$CFLAGS $xscrnsaver_CFLAGS"
+         AC_DEFINE([HAVE_LIBXSS], [1], [xscreensaver support])],
         [AS_IF([test "x$with_xscreensaver" = xyes],
             [AC_MSG_ERROR([xscreensaver is required but does not exist])],
             [AC_MSG_NOTICE([xscreensaver support is disabled])])])])
