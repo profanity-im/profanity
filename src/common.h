@@ -49,6 +49,8 @@
 
 void auto_free_gchar(gchar** str);
 #define auto_gchar __attribute__((__cleanup__(auto_free_gchar)))
+void auto_free_gcharv(gchar*** args);
+#define auto_gcharv __attribute__((__cleanup__(auto_free_gcharv)))
 void auto_free_char(char** str);
 #define auto_char __attribute__((__cleanup__(auto_free_char)))
 

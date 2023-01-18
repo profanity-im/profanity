@@ -79,6 +79,14 @@ auto_free_gchar(gchar** str)
 }
 
 void
+auto_free_gcharv(gchar*** args)
+{
+    if (args == NULL)
+        return;
+    g_strfreev(*args);
+}
+
+void
 auto_free_char(char** str)
 {
     if (str == NULL)
