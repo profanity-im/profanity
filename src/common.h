@@ -55,7 +55,7 @@ void auto_free_char(char** str);
 #define auto_char __attribute__((__cleanup__(auto_free_char)))
 
 #if defined(__OpenBSD__)
-#define STR_MAYBE_NULL(p) (p) ? : "(null)"
+#define STR_MAYBE_NULL(p) (p) ?: "(null)"
 #else
 #define STR_MAYBE_NULL(p) (p)
 #endif
