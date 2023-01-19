@@ -49,71 +49,53 @@
 #include "xmpp/resource.h"
 
 ProfAccount*
-account_new(const gchar* const name, const gchar* const jid,
-            const gchar* const password, const gchar* eval_password, gboolean enabled, const gchar* const server,
-            int port, const gchar* const resource, const gchar* const last_presence,
-            const gchar* const login_presence, int priority_online, int priority_chat,
-            int priority_away, int priority_xa, int priority_dnd,
-            const gchar* const muc_service, const gchar* const muc_nick,
-            const gchar* const otr_policy, GList* otr_manual, GList* otr_opportunistic,
-            GList* otr_always, const gchar* const omemo_policy, GList* omemo_enabled,
-            GList* omemo_disabled, GList* ox_enabled, GList* pgp_enabled,
-            const gchar* const pgp_keyid, const char* const startscript, const char* const theme,
-            gchar* tls_policy, gchar* auth_policy)
+account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboolean enabled,
+            gchar* server, int port, gchar* resource, gchar* last_presence, gchar* login_presence,
+            int priority_online, int priority_chat, int priority_away, int priority_xa, int priority_dnd,
+            gchar* muc_service, gchar* muc_nick,
+            gchar* otr_policy, GList* otr_manual, GList* otr_opportunistic, GList* otr_always,
+            gchar* omemo_policy, GList* omemo_enabled, GList* omemo_disabled,
+            GList* ox_enabled, GList* pgp_enabled, gchar* pgp_keyid,
+            gchar* startscript, gchar* theme, gchar* tls_policy, gchar* auth_policy)
 {
-    ProfAccount* new_account = malloc(sizeof(ProfAccount));
-    memset(new_account, 0, sizeof(ProfAccount));
+    ProfAccount* new_account = calloc(1, sizeof(ProfAccount));
 
-    new_account->name = strdup(name);
+    new_account->name = name;
 
     if (jid) {
-        new_account->jid = strdup(jid);
+        new_account->jid = jid;
     } else {
         new_account->jid = strdup(name);
     }
 
-    if (password) {
-        new_account->password = strdup(password);
-    } else {
-        new_account->password = NULL;
-    }
+    new_account->password = password;
 
-    if (eval_password) {
-        new_account->eval_password = strdup(eval_password);
-    } else {
-        new_account->eval_password = NULL;
-    }
+    new_account->eval_password = eval_password;
 
     new_account->enabled = enabled;
 
-    if (server) {
-        new_account->server = strdup(server);
-    } else {
-        new_account->server = NULL;
-    }
+    new_account->server = server;
 
-    if (resource) {
-        new_account->resource = strdup(resource);
-    } else {
-        new_account->resource = NULL;
-    }
+    new_account->resource = resource;
 
     new_account->port = port;
 
     if (last_presence == NULL || !valid_resource_presence_string(last_presence)) {
         new_account->last_presence = strdup("online");
+        g_free(last_presence);
     } else {
-        new_account->last_presence = strdup(last_presence);
+        new_account->last_presence = last_presence;
     }
 
     if (login_presence == NULL) {
         new_account->login_presence = strdup("online");
     } else if (strcmp(login_presence, "last") == 0) {
-        new_account->login_presence = strdup(login_presence);
+        new_account->login_presence = login_presence;
     } else if (!valid_resource_presence_string(login_presence)) {
         new_account->login_presence = strdup("online");
+        g_free(login_presence);
     } else {
-        new_account->login_presence = strdup(login_presence);
+        new_account->login_presence = login_presence;
     }
 
     new_account->priority_online = priority_online;
@@ -122,72 +104,38 @@ account_new(const gchar* const name, const gchar* const jid,
     new_account->priority_xa = priority_xa;
     new_account->priority_dnd = priority_dnd;
 
-    if (muc_service) {
-        new_account->muc_service = strdup(muc_service);
-    } else {
-        new_account->muc_service = NULL;
-    }
+    new_account->muc_service = muc_service;
 
     if (muc_nick == NULL) {
         Jid* jidp = jid_create(new_account->jid);
         new_account->muc_nick = strdup(jidp->domainpart);
         jid_destroy(jidp);
     } else {
-        new_account->muc_nick = strdup(muc_nick);
+        new_account->muc_nick = muc_nick;
     }
 
-    if (otr_policy) {
-        new_account->otr_policy = strdup(otr_policy);
-    } else {
-        new_account->otr_policy = NULL;
-    }
+    new_account->otr_policy = otr_policy;
 
     new_account->otr_manual = otr_manual;
     new_account->otr_opportunistic = otr_opportunistic;
     new_account->otr_always = otr_always;
 
-    if (omemo_policy) {
-        new_account->omemo_policy = strdup(omemo_policy);
-    } else {
-        new_account->omemo_policy = NULL;
-    }
-
+    new_account->omemo_policy = omemo_policy;
     new_account->omemo_enabled = omemo_enabled;
     new_account->omemo_disabled = omemo_disabled;
 
     new_account->ox_enabled = ox_enabled;
 
     new_account->pgp_enabled = pgp_enabled;
+    new_account->pgp_keyid = pgp_keyid;
 
-    if (pgp_keyid != NULL) {
-        new_account->pgp_keyid = strdup(pgp_keyid);
-    } else {
-        new_account->pgp_keyid = NULL;
-    }
+    new_account->startscript = startscript;
 
-    if (startscript != NULL) {
-        new_account->startscript = strdup(startscript);
-    } else {
-        new_account->startscript = NULL;
-    }
+    new_account->theme = theme;
 
-    if (theme != NULL) {
-        new_account->theme = strdup(theme);
-    } else {
-        new_account->theme = NULL;
-    }
+    new_account->tls_policy = tls_policy;
 
-    if (tls_policy != NULL) {
-        new_account->tls_policy = strdup(tls_policy);
-    } else {
-        new_account->tls_policy = NULL;
-    }
-
-    if (auth_policy != NULL) {
-        new_account->auth_policy = strdup(auth_policy);
-    } else {
-        new_account->auth_policy = NULL;
-    }
+    new_account->auth_policy = auth_policy;
 
     return new_account;
 }

@@ -70,6 +70,36 @@ struct curl_data_t
 
 static size_t _data_callback(void* ptr, size_t size, size_t nmemb, void* data);
 
+void
+auto_free_gchar(gchar** str)
+{
+    if (str == NULL)
+        return;
+    g_free(*str);
+}
+
+void
+auto_free_gcharv(gchar*** args)
+{
+    if (args == NULL)
+        return;
+    g_strfreev(*args);
+}
+
+void
+auto_free_char(char** str)
+{
+    if (str == NULL)
+        return;
+    free(*str);
+}
+
+gboolean
+string_to_verbosity(const char* cmd, int* verbosity, gchar** err_msg)
+{
+    return strtoi_range(cmd, verbosity, 0, 3, err_msg);
+}
+
 gboolean
 create_dir(const char* name)
 {
@@ -136,24 +166,24 @@ str_replace(const char* string, const char* substr,
 }
 
 gboolean
-strtoi_range(char* str, int* saveptr, int min, int max, char** err_msg)
+strtoi_range(const char* str, int* saveptr, int min, int max, gchar** err_msg)
 {
     char* ptr;
     int val;
-
+    if (str == NULL) {
+        if (err_msg)
+            *err_msg = g_strdup_printf("'str' input pointer can not be NULL");
+        return FALSE;
+    }
     errno = 0;
     val = (int)strtol(str, &ptr, 0);
     if (errno != 0 || *str == '\0' || *ptr != '\0') {
-        GString* err_str = g_string_new("");
-        g_string_printf(err_str, "Could not convert \"%s\" to a number.", str);
-        *err_msg = err_str->str;
-        g_string_free(err_str, FALSE);
+        if (err_msg)
+            *err_msg = g_strdup_printf("Could not convert \"%s\" to a number.", str);
         return FALSE;
     } else if (val < min || val > max) {
-        GString* err_str = g_string_new("");
-        g_string_printf(err_str, "Value %s out of range. Must be in %d..%d.", str, min, max);
-        *err_msg = err_str->str;
-        g_string_free(err_str, FALSE);
+        if (err_msg)
+            *err_msg = g_strdup_printf("Value %s out of range. Must be in %d..%d.", str, min, max);
         return FALSE;
     }
 
@@ -597,4 +627,11 @@ unique_filename_from_url(const char* url, const char* path)
     g_free(realpath);
 
     return unique_filename;
+}
+
+void
+glib_hash_table_free(GHashTable* hash_table)
+{
+    g_hash_table_remove_all(hash_table);
+    g_hash_table_unref(hash_table);
 }

@@ -40,12 +40,10 @@
 #include "omemo/omemo.h"
 #include "omemo/store.h"
 
-static void _g_hash_table_free(GHashTable* hash_table);
-
 GHashTable*
 session_store_new(void)
 {
-    return g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_g_hash_table_free);
+    return g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)glib_hash_table_free);
 }
 
 GHashTable*
@@ -63,9 +61,17 @@ signed_pre_key_store_new(void)
 void
 identity_key_store_new(identity_key_store_t* identity_key_store)
 {
-    identity_key_store->trusted = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)signal_buffer_free);
+    identity_key_store->trusted = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)glib_hash_table_free);
     identity_key_store->private = NULL;
     identity_key_store->public = NULL;
+}
+
+void
+identity_key_store_destroy(identity_key_store_t* identity_key_store)
+{
+    signal_buffer_bzero_free(identity_key_store->private);
+    signal_buffer_bzero_free(identity_key_store->public);
+    glib_hash_table_free(identity_key_store->trusted);
 }
 
 int
@@ -449,11 +455,4 @@ load_sender_key(signal_buffer** record, signal_buffer** user_record,
                 void* user_data)
 {
     return SG_SUCCESS;
-}
-
-static void
-_g_hash_table_free(GHashTable* hash_table)
-{
-    g_hash_table_remove_all(hash_table);
-    g_hash_table_unref(hash_table);
 }

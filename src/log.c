@@ -233,21 +233,25 @@ log_msg(log_level_t level, const char* const area, const char* const msg)
     }
 }
 
-log_level_t
-log_level_from_string(char* log_level)
+int
+log_level_from_string(char* log_level, log_level_t* level)
 {
+    int ret = 0;
     assert(log_level != NULL);
+    assert(level != NULL);
     if (strcmp(log_level, "DEBUG") == 0) {
-        return PROF_LEVEL_DEBUG;
+        *level = PROF_LEVEL_DEBUG;
     } else if (strcmp(log_level, "INFO") == 0) {
-        return PROF_LEVEL_INFO;
+        *level = PROF_LEVEL_INFO;
     } else if (strcmp(log_level, "WARN") == 0) {
-        return PROF_LEVEL_WARN;
+        *level = PROF_LEVEL_WARN;
     } else if (strcmp(log_level, "ERROR") == 0) {
-        return PROF_LEVEL_ERROR;
+        *level = PROF_LEVEL_ERROR;
     } else { // default logging is warn
-        return PROF_LEVEL_WARN;
+        *level = PROF_LEVEL_WARN;
+        ret = -1;
     }
+    return ret;
 }
 
 const char*

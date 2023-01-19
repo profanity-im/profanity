@@ -533,7 +533,7 @@ prefs_set_boolean(preference_t pref, gboolean value)
     g_key_file_set_boolean(prefs, group, key, value);
 }
 
-char*
+gchar*
 prefs_get_string(preference_t pref)
 {
     const char* group = _get_group(pref);
@@ -553,14 +553,14 @@ prefs_get_string(preference_t pref)
     }
 }
 
-char*
+gchar*
 prefs_get_string_with_option(preference_t pref, gchar* option)
 {
     const char* group = _get_group(pref);
     const char* key = _get_key(pref);
     char* def = _get_default_string(pref);
 
-    char* result = g_key_file_get_locale_string(prefs, group, key, option, NULL);
+    gchar* result = g_key_file_get_locale_string(prefs, group, key, option, NULL);
 
     if (result == NULL) {
         // check for user set default
@@ -1869,6 +1869,9 @@ _get_group(preference_t pref)
     case PREF_CORRECTION_ALLOW:
     case PREF_MAM:
     case PREF_SILENCE_NON_ROSTER:
+    case PREF_STROPHE_VERBOSITY:
+    case PREF_STROPHE_SM_ENABLED:
+    case PREF_STROPHE_SM_RESEND:
         return PREF_GROUP_CONNECTION;
     case PREF_OTR_LOG:
     case PREF_OTR_POLICY:
@@ -2165,6 +2168,12 @@ _get_key(preference_t pref)
         return "mood";
     case PREF_VCARD_PHOTO_CMD:
         return "vcard.photo.cmd";
+    case PREF_STROPHE_VERBOSITY:
+        return "strophe.verbosity";
+    case PREF_STROPHE_SM_ENABLED:
+        return "strophe.sm.enabled";
+    case PREF_STROPHE_SM_RESEND:
+        return "strophe.sm.resend";
     default:
         return NULL;
     }
@@ -2217,6 +2226,8 @@ _get_default_boolean(preference_t pref)
     case PREF_INTYPE_CONSOLE:
     case PREF_NOTIFY_MENTION_WHOLE_WORD:
     case PREF_MOOD:
+    case PREF_STROPHE_SM_ENABLED:
+    case PREF_STROPHE_SM_RESEND:
         return TRUE;
     default:
         return FALSE;
@@ -2316,6 +2327,8 @@ _get_default_string(preference_t pref)
         return NULL; // Default to built-in method.
     case PREF_OX_LOG:
         return "on";
+    case PREF_STROPHE_VERBOSITY:
+        return "0";
     default:
         return NULL;
     }

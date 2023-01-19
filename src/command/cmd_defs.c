@@ -88,31 +88,14 @@
 #define CMD_TAG_UI         "ui"
 #define CMD_TAG_PLUGINS    "plugins"
 
-#define CMD_MAINFUNC(func) func,
-#define CMD_NOMAINFUNC     NULL,
-#define CMD_SUBFUNCS(...)  { __VA_ARGS__, { NULL, NULL } },
-#define CMD_NOSUBFUNCS     { { NULL, NULL } },
-
-#define CMD_NOTAGS \
-    {              \
-        { NULL },
-#define CMD_TAGS(...) \
-    {                 \
-        { __VA_ARGS__, NULL },
-#define CMD_SYN(...)   { __VA_ARGS__, NULL },
-#define CMD_DESC(desc) desc,
-#define CMD_NOARGS     { { NULL, NULL } },
-#define CMD_ARGS(...)  { __VA_ARGS__, { NULL, NULL } },
-#define CMD_NOEXAMPLES \
-    {                  \
-        NULL           \
-    }                  \
-    }
-#define CMD_EXAMPLES(...) \
-    {                     \
-        __VA_ARGS__, NULL \
-    }                     \
-    }
+#define CMD_PREAMBLE(c, p, min, max, set) .cmd = c, .parser = p, .min_args = min, .max_args = max, .setting_func = set,
+#define CMD_MAINFUNC(f)                   .func = f,
+#define CMD_SUBFUNCS(...)                 .sub_funcs = { __VA_ARGS__, { NULL, NULL } },
+#define CMD_TAGS(...)                     .help.tags = { __VA_ARGS__, NULL },
+#define CMD_SYN(...)                      .help.synopsis = { __VA_ARGS__, NULL },
+#define CMD_DESC(d)                       .help.desc = d,
+#define CMD_ARGS(...)                     .help.args = { __VA_ARGS__, { NULL, NULL } },
+#define CMD_EXAMPLES(...)                 .help.examples = { __VA_ARGS__, NULL }
 
 GHashTable* commands = NULL;
 
@@ -123,12 +106,10 @@ static gboolean _cmd_has_tag(Command* pcmd, const char* const tag);
  */
 
 // clang-format off
-static struct cmd_t command_defs[] = {
-    { "/help",
-      parse_args_with_freetext, 0, 2, NULL,
-      CMD_NOSUBFUNCS
+static const struct cmd_t command_defs[] = {
+    { CMD_PREAMBLE("/help",
+      parse_args_with_freetext, 0, 2, NULL)
       CMD_MAINFUNC(cmd_help)
-      CMD_NOTAGS
       CMD_SYN(
               "/help [<area>|<command>|search_all|search_any] [<search_terms>]")
       CMD_DESC(
@@ -149,36 +130,34 @@ static struct cmd_t command_defs[] = {
               "/help who")
     },
 
-    { "/about",
-      parse_args, 0, 0, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/about",
+                   parse_args, 0, 0, NULL)
       CMD_MAINFUNC(cmd_about)
-      CMD_NOTAGS
       CMD_SYN(
               "/about")
       CMD_DESC(
               "Show version and license information.")
-      CMD_NOARGS
-      CMD_NOEXAMPLES
     },
 
-    { "/connect",
-      parse_args, 0, 7, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/connect",
+                   parse_args, 0, 7, NULL)
       CMD_MAINFUNC(cmd_connect)
       CMD_TAGS(
               CMD_TAG_CONNECTION)
       CMD_SYN(
               "/connect [<account>]",
-              "/connect <account> [server <server>] [port <port>] [tls force|allow|trust|legacy|disable] [auth default|legacy]")
+              "/connect <account> [server <server>] [port <port>] [tls force|allow|trust|legacy|disable] [auth default|legacy]",
+              "/connect <server>")
       CMD_DESC(
               "Login to a chat service. "
               "If no account is specified, the default is used if one is configured. "
-              "A local account is created with the JID as it's name if it doesn't already exist.")
+              "A local account is created with the JID as it's name if it doesn't already exist. "
+              "In case you want to connect to a server via SASL ANONYMOUS (c.f. XEP-0175) you can also do that.")
       CMD_ARGS(
               { "<account>", "The local account you wish to connect with, or a JID if connecting for the first time." },
               { "server <server>", "Supply a server if it is different to the domain part of your JID." },
               { "port <port>", "The port to use if different to the default (5222, or 5223 for SSL)." },
+              { "<server>", "Connect to said server in an anonymous way. (Be aware: There aren't many servers that support this.)" },
               { "tls force", "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
               { "tls allow", "Use TLS for the connection if it is available." },
               { "tls trust", "Force TLS connection and trust server's certificate." },
@@ -192,54 +171,52 @@ static struct cmd_t command_defs[] = {
               "/connect odin@valhalla.edda server talk.google.com",
               "/connect freyr@vanaheimr.edda port 5678",
               "/connect me@localhost.test.org server 127.0.0.1 tls disable",
-              "/connect me@chatty server chatty.com port 5443")
+              "/connect me@chatty server chatty.com port 5443",
+              "/connect server.supporting.sasl.anonymous.example")
     },
 
-    { "/tls",
-      parse_args, 1, 3, NULL,
+    { CMD_PREAMBLE("/tls",
+                   parse_args, 1, 3, NULL)
       CMD_SUBFUNCS(
               { "certpath", cmd_tls_certpath },
               { "trust", cmd_tls_trust },
               { "trusted", cmd_tls_trusted },
               { "revoke", cmd_tls_revoke },
               { "cert", cmd_tls_cert })
-      CMD_NOMAINFUNC
-          CMD_TAGS(
-                  CMD_TAG_CONNECTION,
-                  CMD_TAG_UI)
-          CMD_SYN(
-                  "/tls allow",
-                  "/tls always",
-                  "/tls deny",
-                  "/tls cert [<fingerprint>]",
-                  "/tls trust",
-                  "/tls trusted",
-                  "/tls revoke <fingerprint>",
-                  "/tls certpath",
-                  "/tls certpath set <path>",
-                  "/tls certpath clear",
-                  "/tls certpath default")
-          CMD_DESC(
-                  "Handle TLS certificates. ")
-          CMD_ARGS(
-                  { "allow", "Allow connection to continue with TLS certificate." },
-                  { "always", "Always allow connections with TLS certificate." },
-                  { "deny", "Abort connection." },
-                  { "cert", "Show the current TLS certificate." },
-                  { "cert <fingerprint>", "Show details of trusted certificate." },
-                  { "trust", "Add the current TLS certificate to manually trusted certificates." },
-                  { "trusted", "List summary of manually trusted certificates (with '/tls always' or '/tls trust')." },
-                  { "revoke <fingerprint>", "Remove a manually trusted certificate." },
-                  { "certpath", "Show the trusted certificate path." },
-                  { "certpath set <path>", "Specify filesystem path containing trusted certificates." },
-                  { "certpath clear", "Clear the trusted certificate path." },
-                  { "certpath default", "Use default system certificate path, if it can be found." })
-      CMD_NOEXAMPLES
+      CMD_TAGS(
+              CMD_TAG_CONNECTION,
+              CMD_TAG_UI)
+      CMD_SYN(
+              "/tls allow",
+              "/tls always",
+              "/tls deny",
+              "/tls cert [<fingerprint>]",
+              "/tls trust",
+              "/tls trusted",
+              "/tls revoke <fingerprint>",
+              "/tls certpath",
+              "/tls certpath set <path>",
+              "/tls certpath clear",
+              "/tls certpath default")
+      CMD_DESC(
+              "Handle TLS certificates. ")
+      CMD_ARGS(
+              { "allow", "Allow connection to continue with TLS certificate." },
+              { "always", "Always allow connections with TLS certificate." },
+              { "deny", "Abort connection." },
+              { "cert", "Show the current TLS certificate." },
+              { "cert <fingerprint>", "Show details of trusted certificate." },
+              { "trust", "Add the current TLS certificate to manually trusted certificates." },
+              { "trusted", "List summary of manually trusted certificates (with '/tls always' or '/tls trust')." },
+              { "revoke <fingerprint>", "Remove a manually trusted certificate." },
+              { "certpath", "Show the trusted certificate path." },
+              { "certpath set <path>", "Specify filesystem path containing trusted certificates." },
+              { "certpath clear", "Clear the trusted certificate path." },
+              { "certpath default", "Use default system certificate path, if it can be found." })
     },
 
-    { "/disconnect",
-      parse_args, 0, 0, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/disconnect",
+                   parse_args, 0, 0, NULL)
       CMD_MAINFUNC(cmd_disconnect)
       CMD_TAGS(
               CMD_TAG_CONNECTION)
@@ -247,13 +224,10 @@ static struct cmd_t command_defs[] = {
               "/disconnect")
       CMD_DESC(
               "Disconnect from the current chat service.")
-      CMD_NOARGS
-      CMD_NOEXAMPLES
     },
 
-    { "/msg",
-      parse_args_with_freetext, 1, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/msg",
+                   parse_args_with_freetext, 1, 2, NULL)
       CMD_MAINFUNC(cmd_msg)
       CMD_TAGS(
               CMD_TAG_CHAT)
@@ -276,8 +250,8 @@ static struct cmd_t command_defs[] = {
               "/msg \"My Friend\" Hi, how are you?")
     },
 
-    { "/roster",
-      parse_args_with_freetext, 0, 4, NULL,
+    { CMD_PREAMBLE("/roster",
+                   parse_args_with_freetext, 0, 4, NULL)
       CMD_SUBFUNCS(
               { "group", cmd_group })
       CMD_MAINFUNC(cmd_roster)
@@ -419,9 +393,8 @@ static struct cmd_t command_defs[] = {
               "/roster group remove colleagues boss@work.com")
     },
 
-    { "/blocked",
-      parse_args_with_freetext, 0, 3, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/blocked",
+                   parse_args_with_freetext, 0, 3, NULL)
       CMD_MAINFUNC(cmd_blocked)
       CMD_TAGS(
               CMD_TAG_ROSTER,
@@ -447,9 +420,8 @@ static struct cmd_t command_defs[] = {
               "/blocked add profanity@rooms.dismail.de/spammy-user")
     },
 
-    { "/info",
-      parse_args, 0, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/info",
+                   parse_args, 0, 1, NULL)
       CMD_MAINFUNC(cmd_info)
       CMD_TAGS(
               CMD_TAG_ROSTER,
@@ -470,9 +442,8 @@ static struct cmd_t command_defs[] = {
               "/info heimdall")
     },
 
-    { "/caps",
-      parse_args, 0, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/caps",
+                   parse_args, 0, 1, NULL)
       CMD_MAINFUNC(cmd_caps)
       CMD_TAGS(
               CMD_TAG_DISCOVERY,
@@ -493,9 +464,8 @@ static struct cmd_t command_defs[] = {
               "/caps aegir")
     },
 
-    { "/software",
-      parse_args, 0, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/software",
+                   parse_args, 0, 1, NULL)
       CMD_MAINFUNC(cmd_software)
       CMD_TAGS(
               CMD_TAG_DISCOVERY,
@@ -517,12 +487,11 @@ static struct cmd_t command_defs[] = {
               "/software thor")
     },
 
-    { "/status",
-      parse_args, 2, 3, NULL,
+    { CMD_PREAMBLE("/status",
+                   parse_args, 2, 3, NULL)
       CMD_SUBFUNCS(
               { "get", cmd_status_get },
               { "set", cmd_status_set })
-      CMD_NOMAINFUNC
       CMD_TAGS(
               CMD_TAG_CHAT,
               CMD_TAG_GROUPCHAT)
@@ -543,9 +512,8 @@ static struct cmd_t command_defs[] = {
               "/status set online")
     },
 
-    { "/resource",
-      parse_args, 1, 2, &cons_resource_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/resource",
+                   parse_args, 1, 2, &cons_resource_setting)
       CMD_MAINFUNC(cmd_resource)
       CMD_TAGS(
               CMD_TAG_CHAT,
@@ -562,12 +530,10 @@ static struct cmd_t command_defs[] = {
               { "off", "Let the server choose which resource to route messages to." },
               { "title on|off", "Show or hide the current resource in the titlebar." },
               { "message on|off", "Show or hide the resource when showing an incoming message." })
-      CMD_NOEXAMPLES
     },
 
-    { "/join",
-      parse_args, 0, 5, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/join",
+                   parse_args, 0, 5, NULL)
       CMD_MAINFUNC(cmd_join)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT)
@@ -594,9 +560,8 @@ static struct cmd_t command_defs[] = {
               "/join mychannel")
     },
 
-    { "/invite",
-      parse_args_with_freetext, 1, 3, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/invite",
+                   parse_args_with_freetext, 1, 3, NULL)
       CMD_MAINFUNC(cmd_invite)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT)
@@ -619,9 +584,8 @@ static struct cmd_t command_defs[] = {
               "/invite list")
     },
 
-    { "/room",
-      parse_args, 1, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/room",
+                   parse_args, 1, 1, NULL)
       CMD_MAINFUNC(cmd_room)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT)
@@ -633,12 +597,10 @@ static struct cmd_t command_defs[] = {
               { "accept", "Accept default room configuration." },
               { "destroy", "Reject default room configuration, and destroy the room." },
               { "config", "Edit room configuration." })
-      CMD_NOEXAMPLES
     },
 
-    { "/kick",
-      parse_args_with_freetext, 1, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/kick",
+                   parse_args_with_freetext, 1, 2, NULL)
       CMD_MAINFUNC(cmd_kick)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT)
@@ -649,11 +611,10 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "<nick>", "Nickname of the occupant to kick from the room." },
               { "<reason>", "Optional reason for kicking the occupant." })
-      CMD_NOEXAMPLES },
+    },
 
-    { "/ban",
-      parse_args_with_freetext, 1, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/ban",
+                   parse_args_with_freetext, 1, 2, NULL)
       CMD_MAINFUNC(cmd_ban)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT)
@@ -664,12 +625,10 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "<jid>", "Bare JID of the user to ban from the room." },
               { "<reason>", "Optional reason for banning the user." })
-      CMD_NOEXAMPLES
     },
 
-    { "/subject",
-      parse_args_with_freetext, 0, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/subject",
+                   parse_args_with_freetext, 0, 2, NULL)
       CMD_MAINFUNC(cmd_subject)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT)
@@ -689,12 +648,10 @@ static struct cmd_t command_defs[] = {
               { "prepend <text>", "Prepend text to the current room subject, use double quotes if a trailing space is needed." },
               { "append <text>", "Append text to the current room subject, use double quotes if a preceding space is needed." },
               { "clear", "Clear the room subject." })
-      CMD_NOEXAMPLES
     },
 
-    { "/affiliation",
-      parse_args_with_freetext, 1, 4, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/affiliation",
+                   parse_args_with_freetext, 1, 4, NULL)
       CMD_MAINFUNC(cmd_affiliation)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT)
@@ -711,12 +668,10 @@ static struct cmd_t command_defs[] = {
               { "list [<affiliation>]", "List all users with the specified affiliation, or all if none specified." },
               { "request", "Request voice."},
               { "register", "Register your nickname with the MUC."})
-      CMD_NOEXAMPLES
     },
 
-    { "/role",
-      parse_args_with_freetext, 1, 4, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/role",
+                   parse_args_with_freetext, 1, 4, NULL)
       CMD_MAINFUNC(cmd_role)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT)
@@ -729,12 +684,10 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "set <role> <nick> [<reason>]", "Set the role of occupant with nick, with an optional reason." },
               { "list [<role>]", "List all occupants with the specified role, or all if none specified." })
-      CMD_NOEXAMPLES
     },
 
-    { "/occupants",
-      parse_args, 1, 3, cons_occupants_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/occupants",
+                   parse_args, 1, 3, cons_occupants_setting)
       CMD_MAINFUNC(cmd_occupants)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT,
@@ -769,12 +722,10 @@ static struct cmd_t command_defs[] = {
               { "header char <char>", "Prefix occupants headers with specified character." },
               { "header char none", "Remove occupants header character prefix." },
               { "wrap on|off", "Enable or disable line wrapping in occupants panel." })
-      CMD_NOEXAMPLES
     },
 
-    { "/form",
-      parse_args, 1, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/form",
+                   parse_args, 1, 2, NULL)
       CMD_MAINFUNC(cmd_form)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT)
@@ -790,12 +741,10 @@ static struct cmd_t command_defs[] = {
               { "submit", "Submit the current form." },
               { "cancel", "Cancel changes to the current form." },
               { "help [<tag>]", "Display help for form, or a specific field." })
-      CMD_NOEXAMPLES
     },
 
-    { "/rooms",
-      parse_args, 0, 4, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/rooms",
+                   parse_args, 0, 4, NULL)
       CMD_MAINFUNC(cmd_rooms)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT)
@@ -821,8 +770,8 @@ static struct cmd_t command_defs[] = {
               "/rooms service conference.jabber.org filter \"News Room\"")
     },
 
-    { "/bookmark",
-      parse_args, 0, 8, NULL,
+    { CMD_PREAMBLE("/bookmark",
+                   parse_args, 0, 8, NULL)
       CMD_SUBFUNCS(
               { "ignore", cmd_bookmark_ignore })
       CMD_MAINFUNC(cmd_bookmark)
@@ -866,9 +815,8 @@ static struct cmd_t command_defs[] = {
               "/bookmark remove room@example.com")
     },
 
-    { "/disco",
-      parse_args, 1, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/disco",
+                   parse_args, 1, 2, NULL)
       CMD_MAINFUNC(cmd_disco)
       CMD_TAGS(
               CMD_TAG_DISCOVERY)
@@ -889,9 +837,8 @@ static struct cmd_t command_defs[] = {
               "/disco info odin@valhalla.edda/laptop")
     },
 
-    { "/sendfile",
-      parse_args_with_freetext, 1, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/sendfile",
+                   parse_args_with_freetext, 1, 1, NULL)
       CMD_MAINFUNC(cmd_sendfile)
       CMD_TAGS(
               CMD_TAG_CHAT,
@@ -907,9 +854,8 @@ static struct cmd_t command_defs[] = {
               "/sendfile ~/images/sweet_cat.jpg")
     },
 
-    { "/lastactivity",
-      parse_args, 1, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/lastactivity",
+                   parse_args, 1, 2, NULL)
       CMD_MAINFUNC(cmd_lastactivity)
       CMD_TAGS(
               CMD_TAG_PRESENCE)
@@ -929,9 +875,8 @@ static struct cmd_t command_defs[] = {
               "/lastactivity get someserver.com")
     },
 
-    { "/nick",
-      parse_args_with_freetext, 1, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/nick",
+                   parse_args_with_freetext, 1, 1, NULL)
       CMD_MAINFUNC(cmd_nick)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT)
@@ -941,12 +886,10 @@ static struct cmd_t command_defs[] = {
               "Change your nickname in the current chat room.")
       CMD_ARGS(
               { "<nickname>", "Your new nickname." })
-      CMD_NOEXAMPLES
     },
 
-    { "/win",
-      parse_args, 1, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/win",
+                   parse_args, 1, 1, NULL)
       CMD_MAINFUNC(cmd_win)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -980,8 +923,8 @@ static struct cmd_t command_defs[] = {
               "/win wikipedia")
     },
 
-    { "/wins",
-      parse_args, 0, 3, NULL,
+    { CMD_PREAMBLE("/wins",
+                   parse_args, 0, 3, NULL)
       CMD_SUBFUNCS(
               { "unread", cmd_wins_unread },
               { "attention", cmd_wins_attention },
@@ -1004,12 +947,10 @@ static struct cmd_t command_defs[] = {
               { "attention", "List windows that have been marked with the attention flag (alt+v). You can toggle between marked windows with alt+m." },
               { "prune", "Close all windows with no unread messages." },
               { "swap <source> <target>", "Swap windows, target may be an empty position." })
-      CMD_NOEXAMPLES
     },
 
-    { "/sub",
-      parse_args, 1, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/sub",
+                   parse_args, 1, 2, NULL)
       CMD_MAINFUNC(cmd_sub)
       CMD_TAGS(
               CMD_TAG_ROSTER)
@@ -1037,9 +978,8 @@ static struct cmd_t command_defs[] = {
               "/sub sent")
     },
 
-    { "/who",
-      parse_args, 0, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/who",
+                   parse_args, 0, 2, NULL)
       CMD_MAINFUNC(cmd_who)
       CMD_TAGS(
               CMD_TAG_CHAT,
@@ -1070,9 +1010,8 @@ static struct cmd_t command_defs[] = {
               "/who admin")
     },
 
-    { "/close",
-      parse_args, 0, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/close",
+                   parse_args, 0, 1, NULL)
       CMD_MAINFUNC(cmd_close)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1097,12 +1036,10 @@ static struct cmd_t command_defs[] = {
               { "xmlconsole", "Close the XML Console window if open." },
               { "all", "Close all windows." },
               { "read", "Close all windows that have no unread messages." })
-      CMD_NOEXAMPLES
     },
 
-    { "/clear",
-      parse_args, 0, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/clear",
+                   parse_args, 0, 2, NULL)
       CMD_MAINFUNC(cmd_clear)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1120,22 +1057,17 @@ static struct cmd_t command_defs[] = {
               "/clear persist_history on")
     },
 
-    { "/quit",
-      parse_args, 0, 0, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/quit",
+                   parse_args, 0, 0, NULL)
        CMD_MAINFUNC(cmd_quit)
-       CMD_NOTAGS
-       CMD_SYN(
+        CMD_SYN(
                "/quit")
        CMD_DESC(
                "Logout of any current session, and quit Profanity.")
-       CMD_NOARGS
-       CMD_NOEXAMPLES
     },
 
-    { "/privileges",
-      parse_args, 1, 1, &cons_privileges_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/privileges",
+                   parse_args, 1, 1, &cons_privileges_setting)
       CMD_MAINFUNC(cmd_privileges)
       CMD_TAGS(
               CMD_TAG_GROUPCHAT,
@@ -1146,12 +1078,10 @@ static struct cmd_t command_defs[] = {
               "Group occupants panel by role, and show role information in chat rooms.")
       CMD_ARGS(
               { "on|off", "Enable or disable privilege information." })
-      CMD_NOEXAMPLES
     },
 
-    { "/charset",
-      parse_args, 0, 0, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/charset",
+                   parse_args, 0, 0, NULL)
       CMD_MAINFUNC(cmd_charset)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1159,13 +1089,10 @@ static struct cmd_t command_defs[] = {
               "/charset")
       CMD_DESC(
               "Display information about the current character set supported by the terminal. ")
-      CMD_NOARGS
-      CMD_NOEXAMPLES
     },
 
-    { "/beep",
-      parse_args, 1, 1, &cons_beep_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/beep",
+                   parse_args, 1, 1, &cons_beep_setting)
       CMD_MAINFUNC(cmd_beep)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1177,12 +1104,10 @@ static struct cmd_t command_defs[] = {
               "If the terminal does not support sounds, it may attempt to flash the screen instead.")
       CMD_ARGS(
               { "on|off", "Enable or disable terminal bell." })
-      CMD_NOEXAMPLES
     },
 
-    { "/console",
-      parse_args, 2, 2, &cons_console_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/console",
+                   parse_args, 2, 2, &cons_console_setting)
       CMD_MAINFUNC(cmd_console)
       CMD_TAGS(
               CMD_TAG_UI,
@@ -1206,12 +1131,10 @@ static struct cmd_t command_defs[] = {
               { "private all", "Indicate all new private room messages in the console." },
               { "private first", "Indicate only the first private room message in the console." },
               { "private none", "Do not show any new private room messages in the console window." })
-      CMD_NOEXAMPLES
     },
 
-    { "/presence",
-      parse_args, 2, 2, &cons_presence_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/presence",
+                   parse_args, 2, 2, &cons_presence_setting)
       CMD_MAINFUNC(cmd_presence)
       CMD_TAGS(
               CMD_TAG_UI,
@@ -1242,9 +1165,8 @@ static struct cmd_t command_defs[] = {
               "/presence room all")
     },
 
-    { "/wrap",
-      parse_args, 1, 1, &cons_wrap_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/wrap",
+                   parse_args, 1, 1, &cons_wrap_setting)
       CMD_MAINFUNC(cmd_wrap)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1254,12 +1176,10 @@ static struct cmd_t command_defs[] = {
               "Word wrapping.")
       CMD_ARGS(
               { "on|off", "Enable or disable word wrapping in the main window." })
-      CMD_NOEXAMPLES
     },
 
-    { "/time",
-      parse_args, 1, 3, &cons_time_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/time",
+                   parse_args, 1, 3, &cons_time_setting)
       CMD_MAINFUNC(cmd_time)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1304,9 +1224,8 @@ static struct cmd_t command_defs[] = {
               "/time all set \"%d-%m-%y %H:%M:%S\"")
     },
 
-    { "/inpblock",
-      parse_args, 2, 2, &cons_inpblock_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/inpblock",
+                   parse_args, 2, 2, &cons_inpblock_setting)
       CMD_MAINFUNC(cmd_inpblock)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1318,11 +1237,11 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "timeout <millis>", "Time to wait (1-1000) in milliseconds before reading input from the terminal buffer, default: 1000." },
               { "dynamic on|off", "Start with 0 millis and dynamically increase up to timeout when no activity, default: on." })
-      CMD_NOEXAMPLES },
+    },
 
 
-    { "/titlebar",
-      parse_args, 1, 2, &cons_titlebar_setting,
+    { CMD_PREAMBLE("/titlebar",
+                   parse_args, 1, 2, &cons_titlebar_setting)
       CMD_SUBFUNCS(
               { "show", cmd_titlebar_show_hide },
               { "hide", cmd_titlebar_show_hide })
@@ -1349,9 +1268,8 @@ static struct cmd_t command_defs[] = {
               "/titlebar hide encwarn")
     },
 
-    { "/mainwin",
-      parse_args, 1, 1, &cons_winpos_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/mainwin",
+                   parse_args, 1, 1, &cons_winpos_setting)
       CMD_MAINFUNC(cmd_mainwin)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1363,12 +1281,10 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "up", "Move the main window up the screen." },
               { "down", "Move the main window down the screen." })
-      CMD_NOEXAMPLES
     },
 
-    { "/statusbar",
-      parse_args, 1, 2, &cons_statusbar_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/statusbar",
+                   parse_args, 1, 2, &cons_statusbar_setting)
       CMD_MAINFUNC(cmd_statusbar)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1405,9 +1321,8 @@ static struct cmd_t command_defs[] = {
               "/statusbar hide name")
     },
 
-    { "/inputwin",
-      parse_args, 1, 1, &cons_winpos_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/inputwin",
+                   parse_args, 1, 1, &cons_winpos_setting)
       CMD_MAINFUNC(cmd_inputwin)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1419,12 +1334,10 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "up", "Move the input window up the screen." },
               { "down", "Move the input window down the screen." })
-      CMD_NOEXAMPLES
     },
 
-    { "/notify",
-      parse_args_with_freetext, 0, 4, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/notify",
+                   parse_args_with_freetext, 0, 4, NULL)
       CMD_MAINFUNC(cmd_notify)
       CMD_TAGS(
               CMD_TAG_UI,
@@ -1497,9 +1410,8 @@ static struct cmd_t command_defs[] = {
               "/notify invite on")
     },
 
-    { "/flash",
-      parse_args, 1, 1, &cons_flash_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/flash",
+                   parse_args, 1, 1, &cons_flash_setting)
       CMD_MAINFUNC(cmd_flash)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1510,12 +1422,10 @@ static struct cmd_t command_defs[] = {
               "If the terminal doesn't support flashing, it may attempt to beep.")
       CMD_ARGS(
               { "on|off", "Enable or disable terminal flash." })
-      CMD_NOEXAMPLES
     },
 
-    { "/tray",
-      parse_args, 1, 2, &cons_tray_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/tray",
+                   parse_args, 1, 2, &cons_tray_setting)
       CMD_MAINFUNC(cmd_tray)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1529,12 +1439,10 @@ static struct cmd_t command_defs[] = {
               { "on|off", "Show tray icon." },
               { "read on|off", "Show tray icon when no unread messages." },
               { "timer <seconds>", "Set tray icon timer, seconds must be between 1-10." })
-      CMD_NOEXAMPLES
     },
 
-    { "/intype",
-      parse_args, 2, 2, &cons_intype_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/intype",
+                   parse_args, 2, 2, &cons_intype_setting)
       CMD_MAINFUNC(cmd_intype)
       CMD_TAGS(
               CMD_TAG_UI,
@@ -1546,12 +1454,10 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "titlebar on|off", "Enable or disable contact typing messages notification in titlebar." },
               { "console on|off", "Enable or disable contact typing messages notification in console window." })
-      CMD_NOEXAMPLES
     },
 
-    { "/splash",
-      parse_args, 1, 1, &cons_splash_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/splash",
+                   parse_args, 1, 1, &cons_splash_setting)
       CMD_MAINFUNC(cmd_splash)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1561,12 +1467,10 @@ static struct cmd_t command_defs[] = {
               "Switch on or off the ascii logo on start up and when the /about command is called.")
       CMD_ARGS(
               { "on|off", "Enable or disable splash logo." })
-      CMD_NOEXAMPLES
     },
 
-    { "/autoconnect",
-      parse_args, 1, 2, &cons_autoconnect_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/autoconnect",
+                   parse_args, 1, 2, &cons_autoconnect_setting)
       CMD_MAINFUNC(cmd_autoconnect)
       CMD_TAGS(
               CMD_TAG_CONNECTION)
@@ -1584,8 +1488,8 @@ static struct cmd_t command_defs[] = {
               "/autoconnect off")
     },
 
-    { "/vcard",
-      parse_args, 0, 7, NULL,
+    { CMD_PREAMBLE("/vcard",
+                   parse_args, 0, 7, NULL)
       CMD_SUBFUNCS(
               {"add", cmd_vcard_add},
               {"remove", cmd_vcard_remove},
@@ -1699,12 +1603,10 @@ static struct cmd_t command_defs[] = {
               { "remove <index>", "Remove a element in your vCard by index" },
               { "refresh", "Refreshes the local copy of the current account's vCard (undoes all your unpublished modifications)" },
               { "save", "Save changes to the server" })
-      CMD_NOEXAMPLES
     },
 
-    { "/vercheck",
-      parse_args, 0, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/vercheck",
+                   parse_args, 0, 1, NULL)
       CMD_MAINFUNC(cmd_vercheck)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1714,12 +1616,10 @@ static struct cmd_t command_defs[] = {
               "Check for new versions when Profanity starts, and when the /about command is run.")
       CMD_ARGS(
               { "on|off", "Enable or disable the version check." })
-      CMD_NOEXAMPLES
     },
 
-    { "/wintitle",
-      parse_args, 2, 2, &cons_wintitle_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/wintitle",
+                   parse_args, 2, 2, &cons_wintitle_setting)
       CMD_MAINFUNC(cmd_wintitle)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1731,14 +1631,11 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "show on|off", "Show current logged in user, and unread messages as the window title." },
               { "goodbye on|off", "Show a message in the title when exiting profanity." })
-      CMD_NOEXAMPLES
     },
 
-    { "/alias",
-      parse_args_with_freetext, 1, 3, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/alias",
+                   parse_args_with_freetext, 1, 3, NULL)
       CMD_MAINFUNC(cmd_alias)
-      CMD_NOTAGS
       CMD_SYN(
               "/alias list",
               "/alias add <name> <value>",
@@ -1757,9 +1654,8 @@ static struct cmd_t command_defs[] = {
               "/alias list")
     },
 
-    { "/logging",
-      parse_args, 2, 3, &cons_logging_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/logging",
+                   parse_args, 2, 3, &cons_logging_setting)
       CMD_MAINFUNC(cmd_logging)
       CMD_TAGS(
               CMD_TAG_CHAT)
@@ -1778,9 +1674,8 @@ static struct cmd_t command_defs[] = {
               "/logging group off")
     },
 
-    { "/states",
-      parse_args, 1, 1, &cons_states_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/states",
+                   parse_args, 1, 1, &cons_states_setting)
       CMD_MAINFUNC(cmd_states)
       CMD_TAGS(
               CMD_TAG_CHAT)
@@ -1790,11 +1685,10 @@ static struct cmd_t command_defs[] = {
               "Send chat state notifications to recipient during chat sessions, such as typing, paused, active, gone.")
       CMD_ARGS(
               { "on|off", "Enable or disable sending of chat state notifications." })
-      CMD_NOEXAMPLES },
+    },
 
-    { "/pgp",
-      parse_args, 1, 3, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/pgp",
+                   parse_args, 1, 3, NULL)
       CMD_MAINFUNC(cmd_pgp)
       CMD_TAGS(
               CMD_TAG_CHAT,
@@ -1833,8 +1727,8 @@ static struct cmd_t command_defs[] = {
 
 // XEP-0373: OpenPGP for XMPP
 #ifdef HAVE_LIBGPGME
-    { "/ox",
-      parse_args, 1, 3, NULL,
+    { CMD_PREAMBLE("/ox",
+                   parse_args, 1, 3, NULL)
       CMD_SUBFUNCS(
               { "log", cmd_ox_log })
       CMD_MAINFUNC(cmd_ox)
@@ -1875,8 +1769,8 @@ static struct cmd_t command_defs[] = {
     },
 #endif // HAVE_LIBGPGME
 
-    { "/otr",
-      parse_args, 1, 3, NULL,
+    { CMD_PREAMBLE("/otr",
+                   parse_args, 1, 3, NULL)
       CMD_SUBFUNCS(
               { "char", cmd_otr_char },
               { "log", cmd_otr_log },
@@ -1893,7 +1787,6 @@ static struct cmd_t command_defs[] = {
               { "question", cmd_otr_question },
               { "answer", cmd_otr_answer },
               { "sendfile", cmd_otr_sendfile })
-      CMD_NOMAINFUNC
       CMD_TAGS(
               CMD_TAG_CHAT,
               CMD_TAG_UI)
@@ -1947,9 +1840,8 @@ static struct cmd_t command_defs[] = {
               "/otr char *")
     },
 
-    { "/outtype",
-      parse_args, 1, 1, &cons_outtype_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/outtype",
+                   parse_args, 1, 1, &cons_outtype_setting)
       CMD_MAINFUNC(cmd_outtype)
       CMD_TAGS(
               CMD_TAG_CHAT)
@@ -1959,12 +1851,10 @@ static struct cmd_t command_defs[] = {
               "Send typing notifications, chat states (/states) will be enabled if this setting is enabled.")
       CMD_ARGS(
               { "on|off", "Enable or disable sending typing notifications." })
-      CMD_NOEXAMPLES
     },
 
-    { "/gone",
-      parse_args, 1, 1, &cons_gone_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/gone",
+                   parse_args, 1, 1, &cons_gone_setting)
       CMD_MAINFUNC(cmd_gone)
       CMD_TAGS(
               CMD_TAG_CHAT)
@@ -1975,12 +1865,10 @@ static struct cmd_t command_defs[] = {
               "Chat states (/states) will be enabled if this setting is set.")
       CMD_ARGS(
               { "<minutes>", "Number of minutes of inactivity before sending the 'gone' state, a value of 0 will disable sending this state." })
-      CMD_NOEXAMPLES
     },
 
-    { "/history",
-      parse_args, 1, 1, &cons_history_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/history",
+                   parse_args, 1, 1, &cons_history_setting)
       CMD_MAINFUNC(cmd_history)
       CMD_TAGS(
               CMD_TAG_UI,
@@ -1992,14 +1880,11 @@ static struct cmd_t command_defs[] = {
               "When history is enabled, previous messages are shown in chat windows.")
       CMD_ARGS(
               { "on|off", "Enable or disable showing chat history." })
-      CMD_NOEXAMPLES
     },
 
-    { "/log",
-      parse_args, 1, 2, &cons_log_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/log",
+                   parse_args, 1, 2, &cons_log_setting)
       CMD_MAINFUNC(cmd_log)
-      CMD_NOTAGS
       CMD_SYN(
               "/log where",
               "/log rotate on|off",
@@ -2013,13 +1898,11 @@ static struct cmd_t command_defs[] = {
               { "rotate on|off", "Rotate log, default on. Does not take effect if you specified a filename yourself when starting Profanity." },
               { "maxsize <bytes>", "With rotate enabled, specifies the max log size, defaults to 10485760 (10MB)." },
               { "shared on|off", "Share logs between all instances, default: on. When off, the process id will be included in the log filename. Does not take effect if you specified a filename yourself when starting Profanity." },
-              {"level INFO|DEBUG|WARN|EFFOR", "Set the log level. Default is INFO. Only works with default log file, not with user provided log file during startup via -f." })
-      CMD_NOEXAMPLES
+              {"level INFO|DEBUG|WARN|ERROR", "Set the log level. Default is INFO. Only works with default log file, not with user provided log file during startup via -f." })
     },
 
-    { "/carbons",
-      parse_args, 1, 1, &cons_carbons_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/carbons",
+                   parse_args, 1, 1, &cons_carbons_setting)
       CMD_MAINFUNC(cmd_carbons)
       CMD_TAGS(
               CMD_TAG_CHAT)
@@ -2030,12 +1913,10 @@ static struct cmd_t command_defs[] = {
               "Message carbons ensure that both sides of all conversations are shared with all the user's clients that implement this protocol.")
       CMD_ARGS(
               { "on|off", "Enable or disable message carbons." })
-      CMD_NOEXAMPLES
     },
 
-    { "/receipts",
-      parse_args, 2, 2, &cons_receipts_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/receipts",
+                   parse_args, 2, 2, &cons_receipts_setting)
       CMD_MAINFUNC(cmd_receipts)
       CMD_TAGS(
               CMD_TAG_CHAT)
@@ -2047,27 +1928,25 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "request on|off", "Whether or not to request a receipt upon sending a message." },
               { "send on|off", "Whether or not to send a receipt if one has been requested with a received message." })
-      CMD_NOEXAMPLES
     },
 
-    { "/reconnect",
-      parse_args, 1, 1, &cons_reconnect_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/reconnect",
+                   parse_args, 1, 1, &cons_reconnect_setting)
       CMD_MAINFUNC(cmd_reconnect)
       CMD_TAGS(
               CMD_TAG_CONNECTION)
       CMD_SYN(
-              "/reconnect <seconds>")
+              "/reconnect <seconds>",
+              "/reconnect now")
       CMD_DESC(
-              "Set the reconnect attempt interval for when the connection is lost.")
+              "Set the reconnect attempt interval for when the connection is lost or immediately trigger a reconnect.")
       CMD_ARGS(
-              { "<seconds>", "Number of seconds before attempting to reconnect, a value of 0 disables reconnect." })
-      CMD_NOEXAMPLES
+              { "<seconds>", "Number of seconds before attempting to reconnect, a value of 0 disables reconnect." },
+              { "now", "Immediately trigger a reconnect." })
     },
 
-    { "/autoping",
-      parse_args, 2, 2, &cons_autoping_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/autoping",
+                   parse_args, 2, 2, &cons_autoping_setting)
       CMD_MAINFUNC(cmd_autoping)
       CMD_TAGS(
               CMD_TAG_CONNECTION)
@@ -2079,12 +1958,10 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "set <seconds>", "Number of seconds between sending pings, a value of 0 disables autoping." },
               { "timeout <seconds>", "Seconds to wait for autoping responses, after which the connection is considered broken." })
-      CMD_NOEXAMPLES
     },
 
-    { "/ping",
-      parse_args, 0, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/ping",
+                   parse_args, 0, 1, NULL)
       CMD_MAINFUNC(cmd_ping)
       CMD_TAGS(
               CMD_TAG_CONNECTION)
@@ -2095,12 +1972,10 @@ static struct cmd_t command_defs[] = {
               "If no JID is supplied, your chat server will be pinged.")
       CMD_ARGS(
               { "<jid>", "The Jabber ID to send the ping request to." })
-      CMD_NOEXAMPLES
     },
 
-    { "/autoaway",
-      parse_args_with_freetext, 2, 3, &cons_autoaway_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/autoaway",
+                   parse_args_with_freetext, 2, 3, &cons_autoaway_setting)
       CMD_MAINFUNC(cmd_autoaway)
       CMD_TAGS(
               CMD_TAG_PRESENCE)
@@ -2131,9 +2006,8 @@ static struct cmd_t command_defs[] = {
               "/autoaway check off")
     },
 
-    { "/priority",
-      parse_args, 1, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/priority",
+                   parse_args, 1, 1, NULL)
       CMD_MAINFUNC(cmd_priority)
       CMD_TAGS(
               CMD_TAG_PRESENCE)
@@ -2144,11 +2018,10 @@ static struct cmd_t command_defs[] = {
               "See the /account command for specific priority settings per presence status.")
       CMD_ARGS(
               { "<priority>", "Number between -128 and 127, default: 0." })
-      CMD_NOEXAMPLES
     },
 
-    { "/account",
-      parse_args, 0, 4, NULL,
+    { CMD_PREAMBLE("/account",
+                   parse_args, 0, 4, NULL)
       CMD_SUBFUNCS(
               { "list", cmd_account_list },
               { "show", cmd_account_show },
@@ -2260,8 +2133,8 @@ static struct cmd_t command_defs[] = {
               "/account clear me pgpkeyid")
     },
 
-    { "/plugins",
-      parse_args, 0, 3, NULL,
+    { CMD_PREAMBLE("/plugins",
+                   parse_args, 0, 3, NULL)
       CMD_SUBFUNCS(
               { "install", cmd_plugins_install },
               { "uninstall", cmd_plugins_uninstall },
@@ -2271,7 +2144,6 @@ static struct cmd_t command_defs[] = {
               { "reload", cmd_plugins_reload },
               { "python_version", cmd_plugins_python_version })
       CMD_MAINFUNC(cmd_plugins)
-      CMD_NOTAGS
       CMD_SYN(
               "/plugins",
               "/plugins install [<path>]",
@@ -2301,11 +2173,9 @@ static struct cmd_t command_defs[] = {
               "/plugins reload wikipedia.py")
     },
 
-    { "/prefs",
-      parse_args, 0, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/prefs",
+                   parse_args, 0, 1, NULL)
       CMD_MAINFUNC(cmd_prefs)
-      CMD_NOTAGS
       CMD_SYN(
               "/prefs [ui|desktop|chat|log|conn|presence|otr|pgp|omemo]")
       CMD_DESC(
@@ -2321,12 +2191,10 @@ static struct cmd_t command_defs[] = {
               { "otr", "Off The Record preferences." },
               { "pgp", "OpenPGP preferences." },
               { "omemo", "OMEMO preferences." })
-      CMD_NOEXAMPLES
     },
 
-    { "/theme",
-      parse_args, 1, 2, &cons_theme_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/theme",
+                   parse_args, 1, 2, &cons_theme_setting)
       CMD_MAINFUNC(cmd_theme)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -2349,9 +2217,8 @@ static struct cmd_t command_defs[] = {
               "/theme load forest")
     },
 
-    { "/xmlconsole",
-      parse_args, 0, 0, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/xmlconsole",
+                   parse_args, 0, 0, NULL)
       CMD_MAINFUNC(cmd_xmlconsole)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -2359,15 +2226,11 @@ static struct cmd_t command_defs[] = {
               "/xmlconsole")
       CMD_DESC(
               "Open the XML console to view incoming and outgoing XMPP traffic.")
-      CMD_NOARGS
-      CMD_NOEXAMPLES
     },
 
-    { "/script",
-      parse_args, 1, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/script",
+                   parse_args, 1, 2, NULL)
       CMD_MAINFUNC(cmd_script)
-      CMD_NOTAGS
       CMD_SYN(
               "/script run <script>",
               "/script list",
@@ -2385,11 +2248,9 @@ static struct cmd_t command_defs[] = {
               "/script show somescript")
     },
 
-    { "/export",
-      parse_args, 1, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/export",
+                   parse_args, 1, 1, NULL)
       CMD_MAINFUNC(cmd_export)
-      CMD_NOTAGS
       CMD_SYN(
               "/export <filepath>")
       CMD_DESC(
@@ -2401,13 +2262,11 @@ static struct cmd_t command_defs[] = {
               "/export ~/contacts.csv")
     },
 
-    { "/cmd",
-      parse_args, 1, 3, NULL,
+    { CMD_PREAMBLE("/cmd",
+                   parse_args, 1, 3, NULL)
       CMD_SUBFUNCS(
               { "list", cmd_command_list },
               { "exec", cmd_command_exec })
-      CMD_NOMAINFUNC
-      CMD_NOTAGS
       CMD_SYN(
               "/cmd list [<jid>]",
               "/cmd exec <command> [<jid>]")
@@ -2421,8 +2280,8 @@ static struct cmd_t command_defs[] = {
               "/cmd exec ping")
     },
 
-    { "/omemo",
-        parse_args, 1, 3, NULL,
+    { CMD_PREAMBLE("/omemo",
+                   parse_args, 1, 3, NULL)
         CMD_SUBFUNCS(
             { "gen", cmd_omemo_gen },
             { "log", cmd_omemo_log },
@@ -2436,7 +2295,6 @@ static struct cmd_t command_defs[] = {
             { "policy", cmd_omemo_policy },
             { "clear_device_list", cmd_omemo_clear_device_list },
             { "qrcode", cmd_omemo_qrcode })
-        CMD_NOMAINFUNC
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_UI)
@@ -2478,48 +2336,35 @@ static struct cmd_t command_defs[] = {
             "/omemo char *")
     },
 
-    { "/save",
-      parse_args, 0, 0, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/save",
+                   parse_args, 0, 0, NULL)
       CMD_MAINFUNC(cmd_save)
-      CMD_NOTAGS
       CMD_SYN(
               "/save")
       CMD_DESC(
               "Save preferences to configuration file.")
-      CMD_NOARGS
-      CMD_NOEXAMPLES
     },
 
-    { "/reload",
-      parse_args, 0, 0, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/reload",
+                   parse_args, 0, 0, NULL)
       CMD_MAINFUNC(cmd_reload)
-      CMD_NOTAGS
       CMD_SYN(
               "/reload")
       CMD_DESC(
               "Reload preferences from configuration file.")
-      CMD_NOARGS
-      CMD_NOEXAMPLES
     },
 
-    { "/paste",
-      parse_args, 0, 0, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/paste",
+                   parse_args, 0, 0, NULL)
       CMD_MAINFUNC(cmd_paste)
-      CMD_NOTAGS
       CMD_SYN(
               "/paste")
       CMD_DESC(
               "Paste clipboard.")
-      CMD_NOARGS
-      CMD_NOEXAMPLES
     },
 
-    { "/color",
-      parse_args, 1, 2, &cons_color_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/color",
+                   parse_args, 1, 2, &cons_color_setting)
       CMD_MAINFUNC(cmd_color)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -2539,9 +2384,8 @@ static struct cmd_t command_defs[] = {
               "/color own off")
     },
 
-    { "/stamp",
-      parse_args, 0, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/stamp",
+                   parse_args, 0, 2, NULL)
       CMD_MAINFUNC(cmd_stamp)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -2561,9 +2405,8 @@ static struct cmd_t command_defs[] = {
               "/stamp unset incoming")
     },
 
-    { "/avatar",
-      parse_args, 2, 2, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/avatar",
+                   parse_args, 2, 2, NULL)
       CMD_MAINFUNC(cmd_avatar)
       CMD_TAGS(
               CMD_TAG_CHAT)
@@ -2585,9 +2428,8 @@ static struct cmd_t command_defs[] = {
               "/avatar get thor@valhalla.edda",
               "/avatar open freyja@vanaheimr.edda") },
 
-    { "/os",
-      parse_args, 1, 1, &cons_os_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/os",
+                   parse_args, 1, 1, &cons_os_setting)
       CMD_MAINFUNC(cmd_os)
       CMD_TAGS(
               CMD_TAG_DISCOVERY)
@@ -2597,12 +2439,10 @@ static struct cmd_t command_defs[] = {
               "Choose whether to include the OS name if a user asks for software information (XEP-0092).")
       CMD_ARGS(
               { "on|off", "" })
-      CMD_NOEXAMPLES
     },
 
-    { "/correction",
-      parse_args, 1, 2, &cons_correction_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/correction",
+                   parse_args, 1, 2, &cons_correction_setting)
       CMD_MAINFUNC(cmd_correction)
       CMD_TAGS(
               CMD_TAG_UI,
@@ -2618,12 +2458,10 @@ static struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "on|off", "Enable/Disable support for last message correction." },
               { "char", "Set character that will prefix corrected messages. Default: '+'." })
-      CMD_NOEXAMPLES
     },
 
-    { "/correct",
-      parse_args_as_one, 1, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/correct",
+                   parse_args_as_one, 1, 1, NULL)
       CMD_MAINFUNC(cmd_correct)
       CMD_TAGS(
               CMD_TAG_CHAT,
@@ -2636,12 +2474,10 @@ static struct cmd_t command_defs[] = {
               "For more information on how to configure corrections, see: /help correction.")
       CMD_ARGS(
               { "message", "The corrected message." })
-      CMD_NOEXAMPLES
     },
 
-    { "/slashguard",
-      parse_args, 1, 1, &cons_slashguard_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/slashguard",
+                   parse_args, 1, 1, &cons_slashguard_setting)
       CMD_MAINFUNC(cmd_slashguard)
       CMD_TAGS(
               CMD_TAG_UI,
@@ -2653,12 +2489,10 @@ static struct cmd_t command_defs[] = {
               "It tries to protect you from typing ' /quit' and similar things in chats.")
       CMD_ARGS(
               { "on|off", "Enable or disable slashguard." })
-      CMD_NOEXAMPLES
     },
 
-    { "/serversoftware",
-      parse_args, 1, 1, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/serversoftware",
+                   parse_args, 1, 1, NULL)
       CMD_MAINFUNC(cmd_serversoftware)
       CMD_TAGS(
               CMD_TAG_DISCOVERY)
@@ -2673,15 +2507,14 @@ static struct cmd_t command_defs[] = {
               "/serversoftware xmpp.vanaheimr.edda")
     },
 
-    { "/executable",
-      parse_args, 2, 4, &cons_executable_setting,
+    { CMD_PREAMBLE("/executable",
+                   parse_args, 2, 4, &cons_executable_setting)
       CMD_SUBFUNCS(
               { "avatar",  cmd_executable_avatar },
               { "urlopen", cmd_executable_urlopen },
               { "urlsave", cmd_executable_urlsave },
               { "editor", cmd_executable_editor },
               { "vcard_photo", cmd_executable_vcard_photo })
-      CMD_NOMAINFUNC
       CMD_TAGS(
               CMD_TAG_DISCOVERY)
       CMD_SYN(
@@ -2715,12 +2548,11 @@ static struct cmd_t command_defs[] = {
               "/executable editor set vim")
     },
 
-    { "/url",
-      parse_args, 2, 3, NULL,
+    { CMD_PREAMBLE("/url",
+                   parse_args, 2, 3, NULL)
       CMD_SUBFUNCS(
               { "open", cmd_url_open },
               { "save", cmd_url_save })
-      CMD_NOMAINFUNC
       CMD_TAGS(
               CMD_TAG_CHAT,
               CMD_TAG_GROUPCHAT)
@@ -2737,9 +2569,8 @@ static struct cmd_t command_defs[] = {
               "/url save https://profanity-im.github.io/guide/latest/userguide.html /home/user/Download/")
     },
 
-    { "/mam",
-      parse_args, 1, 1, &cons_mam_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/mam",
+                   parse_args, 1, 1, &cons_mam_setting)
       CMD_MAINFUNC(cmd_mam)
       CMD_TAGS(
               CMD_TAG_CHAT)
@@ -2751,25 +2582,19 @@ static struct cmd_t command_defs[] = {
               "We are going to work on this in future releases. So far this setting is mostly here for developers.")
       CMD_ARGS(
               { "on|off", "Enable or disable MAM" })
-      CMD_NOEXAMPLES
     },
 
-    { "/changepassword",
-      parse_args, 0, 0, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/changepassword",
+                   parse_args, 0, 0, NULL)
       CMD_MAINFUNC(cmd_change_password)
-      CMD_NOTAGS
       CMD_SYN(
               "/changepassword")
       CMD_DESC(
               "Change password of logged in account")
-      CMD_NOARGS
-      CMD_NOEXAMPLES
     },
 
-    { "/editor",
-      parse_args, 0, 0, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/editor",
+                   parse_args, 0, 0, NULL)
       CMD_MAINFUNC(cmd_editor)
       CMD_TAGS(
               CMD_TAG_CHAT,
@@ -2780,13 +2605,10 @@ static struct cmd_t command_defs[] = {
               "Spawn external editor to edit message. "
               "After editing the inputline may appear empty. Press enter to send the text anyways. "
               "Use /executable to set your favourite editor." )
-      CMD_NOARGS
-      CMD_NOEXAMPLES
     },
 
-    { "/correct-editor",
-      parse_args, 0, 0, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/correct-editor",
+                   parse_args, 0, 0, NULL)
       CMD_MAINFUNC(cmd_correct_editor)
       CMD_TAGS(
               CMD_TAG_CHAT,
@@ -2797,13 +2619,10 @@ static struct cmd_t command_defs[] = {
               "Spawn external editor to correct and resend the last message (XEP-0308). "
               "For more information on how to configure corrections, see: /help correction. "
               "Use /executable to set your favourite editor.")
-      CMD_NOARGS
-      CMD_NOEXAMPLES
     },
 
-    { "/silence",
-      parse_args, 1, 1, &cons_silence_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/silence",
+                   parse_args, 1, 1, &cons_silence_setting)
       CMD_MAINFUNC(cmd_silence)
       CMD_TAGS(
               CMD_TAG_CHAT)
@@ -2811,13 +2630,10 @@ static struct cmd_t command_defs[] = {
               "/silence on|off")
       CMD_DESC(
               "Let's you silence all message attempts from people who are not in your roster.")
-      CMD_NOARGS
-      CMD_NOEXAMPLES
     },
 
-    { "/register",
-      parse_args, 2, 6, NULL,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/register",
+                   parse_args, 2, 6, NULL)
       CMD_MAINFUNC(cmd_register)
       CMD_TAGS(
               CMD_TAG_CONNECTION)
@@ -2841,9 +2657,8 @@ static struct cmd_t command_defs[] = {
               "/register someuser my.xmppserv.er port 5443 tls force")
     },
 
-    { "/mood",
-      parse_args, 1, 3, &cons_mood_setting,
-      CMD_NOSUBFUNCS
+    { CMD_PREAMBLE("/mood",
+                   parse_args, 1, 3, &cons_mood_setting)
       CMD_MAINFUNC(cmd_mood)
       CMD_TAGS(
               CMD_TAG_CHAT)
@@ -2862,6 +2677,24 @@ static struct cmd_t command_defs[] = {
               "/mood set amazed",
               "/mood clear")
     },
+
+    { CMD_PREAMBLE("/strophe",
+                   parse_args, 2, 2, &cons_strophe_setting)
+      CMD_MAINFUNC(cmd_strophe)
+      CMD_TAGS(
+              CMD_TAG_CONNECTION)
+      CMD_SYN(
+              "/strophe verbosity 0-3",
+              "/strophe sm on|no-resend|off")
+      CMD_DESC(
+              "Modify libstrophe settings.")
+      CMD_ARGS(
+              { "verbosity 0-3", "Set libstrophe verbosity level when log level is 'DEBUG'." },
+              { "sm on|no-resend|off", "Enable or disable Stream-Management (SM) as of XEP-0198. The 'no-resend' option enables SM, but won't re-send un-ACK'ed messages on re-connect." })
+      CMD_EXAMPLES(
+              "/strophe verbosity 3",
+              "/strophe sm no-resend")
+    },
     // NEXT-COMMAND (search helper)
 };
 
@@ -2869,8 +2702,8 @@ static struct cmd_t command_defs[] = {
 
 static GHashTable* search_index;
 
-char*
-_cmd_index(Command* cmd)
+static char*
+_cmd_index(const Command* cmd)
 {
     GString* index_source = g_string_new("");
     index_source = g_string_append(index_source, cmd->cmd);
@@ -2878,12 +2711,12 @@ _cmd_index(Command* cmd)
     index_source = g_string_append(index_source, cmd->help.desc);
     index_source = g_string_append(index_source, " ");
 
-    int len = g_strv_length(cmd->help.tags);
+    int len = g_strv_length((gchar**)cmd->help.tags);
     for (int i = 0; i < len; i++) {
         index_source = g_string_append(index_source, cmd->help.tags[i]);
         index_source = g_string_append(index_source, " ");
     }
-    len = g_strv_length(cmd->help.synopsis);
+    len = g_strv_length((gchar**)cmd->help.synopsis);
     for (int i = 0; i < len; i++) {
         index_source = g_string_append(index_source, cmd->help.synopsis[i]);
         index_source = g_string_append(index_source, " ");
@@ -2983,10 +2816,10 @@ cmd_init(void)
     // load command defs into hash table
     commands = g_hash_table_new(g_str_hash, g_str_equal);
     for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
-        Command* pcmd = command_defs + i;
+        const Command* pcmd = command_defs + i;
 
         // add to hash
-        g_hash_table_insert(commands, pcmd->cmd, pcmd);
+        g_hash_table_insert(commands, pcmd->cmd, (gpointer)pcmd);
 
         // add to search index
         g_hash_table_insert(search_index, strdup(pcmd->cmd), _cmd_index(pcmd));
@@ -3077,8 +2910,8 @@ command_docgen(void)
     GList* cmds = NULL;
 
     for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
-        Command* pcmd = command_defs + i;
-        cmds = g_list_insert_sorted(cmds, pcmd, (GCompareFunc)_cmp_command);
+        const Command* pcmd = command_defs + i;
+        cmds = g_list_insert_sorted(cmds, (gpointer)pcmd, (GCompareFunc)_cmp_command);
     }
 
     FILE* toc_fragment = fopen("toc_fragment.html", "w");
@@ -3162,8 +2995,8 @@ command_mangen(void)
     GList* cmds = NULL;
 
     for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
-        Command* pcmd = command_defs + i;
-        cmds = g_list_insert_sorted(cmds, pcmd, (GCompareFunc)_cmp_command);
+        const Command* pcmd = command_defs + i;
+        cmds = g_list_insert_sorted(cmds, (gpointer)pcmd, (GCompareFunc)_cmp_command);
     }
 
     create_dir("docs");

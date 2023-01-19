@@ -40,6 +40,7 @@
 
 struct jid_t
 {
+    unsigned int refcnt;
     char* str;
     char* localpart;
     char* domainpart;
@@ -53,6 +54,10 @@ typedef struct jid_t Jid;
 Jid* jid_create(const gchar* const str);
 Jid* jid_create_from_bare_and_resource(const char* const barejid, const char* const resource);
 void jid_destroy(Jid* jid);
+void jid_ref(Jid* jid);
+
+void jid_auto_destroy(Jid** str);
+#define auto_jid __attribute__((__cleanup__(jid_auto_destroy)))
 
 gboolean jid_is_valid_room_form(Jid* jid);
 char* create_fulljid(const char* const barejid, const char* const resource);

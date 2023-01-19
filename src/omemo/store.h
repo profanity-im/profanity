@@ -57,6 +57,7 @@ GHashTable* session_store_new(void);
 GHashTable* pre_key_store_new(void);
 GHashTable* signed_pre_key_store_new(void);
 void identity_key_store_new(identity_key_store_t* identity_key_store);
+void identity_key_store_destroy(identity_key_store_t* identity_key_store);
 
 /**
  * Returns a copy of the serialized session record corresponding to the

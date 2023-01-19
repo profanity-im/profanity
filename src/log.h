@@ -55,7 +55,7 @@ void log_info(const char* const msg, ...);
 void log_warning(const char* const msg, ...);
 void log_error(const char* const msg, ...);
 void log_msg(log_level_t level, const char* const area, const char* const msg);
-log_level_t log_level_from_string(char* log_level);
+int log_level_from_string(char* log_level, log_level_t* level);
 const char* log_string_from_level(log_level_t level);
 
 void log_stderr_init(log_level_t level);

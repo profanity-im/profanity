@@ -2187,6 +2187,7 @@ _room_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata
                             identity->name = strdup(name);
                             ProfMucWin* mucwin = wins_get_muc(cb_data->room);
                             if (mucwin) {
+                                free(mucwin->room_name);
                                 mucwin->room_name = strdup(name);
                             }
                         } else {
@@ -2607,6 +2608,8 @@ _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
     return 0;
 }
 
+static const gchar* mam_timestamp_format_string = "%FT%T.%f%:z";
+
 void
 iq_mam_request_older(ProfChatWin* win)
 {
@@ -2623,7 +2626,7 @@ iq_mam_request_older(ProfChatWin* win)
     // If first message found
     if (first_msg->timestamp) {
         firstid = first_msg->stanzaid;
-        enddate = g_date_time_format(first_msg->timestamp, "%FT%T.%f%:z");
+        enddate = g_date_time_format(first_msg->timestamp, mam_timestamp_format_string);
     } else {
         return;
     }
@@ -2647,6 +2650,8 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
         cons_show_error("Server doesn't support MAM (%s).", XMPP_FEATURE_MAM2);
+        g_date_time_unref(startdate);
+        g_date_time_unref(enddate);
         return;
     }
 
@@ -2656,18 +2661,18 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
     gboolean fetch_next = FALSE;
 
     if (startdate) {
-        startdate_str = g_date_time_format(startdate, "%FT%T.%f%:z");
+        startdate_str = g_date_time_format(startdate, mam_timestamp_format_string);
         fetch_next = TRUE;
         g_date_time_unref(startdate);
-    } else if (!enddate) {
-        GDateTime* now = g_date_time_new_now_utc();
-        enddate_str = g_date_time_format(now, "%FT%T.%f%:z");
-        g_date_time_unref(now);
     }
 
     if (enddate) {
-        enddate_str = g_date_time_format(enddate, "%FT%T.%f%:z");
+        enddate_str = g_date_time_format(enddate, mam_timestamp_format_string);
         g_date_time_unref(enddate);
+    } else {
+        GDateTime* now = g_date_time_new_now_utc();
+        enddate_str = g_date_time_format(now, mam_timestamp_format_string);
+        g_date_time_unref(now);
     }
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
@@ -2695,15 +2700,15 @@ void
 iq_mam_request(ProfChatWin* win, GDateTime* enddate)
 {
     ProfMessage* last_msg = log_database_get_limits_info(win->barejid, TRUE);
-    GDateTime* startdate = last_msg->timestamp ? g_date_time_add_seconds(last_msg->timestamp, 0) : NULL; // copy timestamp
+    GDateTime* startdate = g_date_time_add_seconds(last_msg->timestamp, 0);
     message_free(last_msg);
 
     // Save request for later if disco items haven't been received yet
     if (!received_disco_items) {
         LateDeliveryUserdata* cur_del_data = malloc(sizeof(LateDeliveryUserdata));
         cur_del_data->win = win;
-        cur_del_data->enddate = enddate;
-        cur_del_data->startdate = startdate;
+        cur_del_data->enddate = g_date_time_ref(enddate);
+        cur_del_data->startdate = g_date_time_ref(startdate);
         late_delivery_windows = g_slist_append(late_delivery_windows, cur_del_data);
     }
 

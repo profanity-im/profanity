@@ -1156,6 +1156,11 @@ cons_mood_setting(void)
 }
 
 void
+cons_strophe_setting(void)
+{
+}
+
+void
 cons_show_bookmarks_ignore(gchar** list, gsize len)
 {
 }

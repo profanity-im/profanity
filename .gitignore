@@ -55,6 +55,9 @@ tests/unittests/unittests.log
 tests/unittests/unittests.trs
 test-suite.log
 
+# valgrind output
+profval*
+
 # local scripts
 clean-test.sh
 gen_docs.sh

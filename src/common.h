@@ -47,6 +47,13 @@
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
+void auto_free_gchar(gchar** str);
+#define auto_gchar __attribute__((__cleanup__(auto_free_gchar)))
+void auto_free_gcharv(gchar*** args);
+#define auto_gcharv __attribute__((__cleanup__(auto_free_gcharv)))
+void auto_free_char(char** str);
+#define auto_char __attribute__((__cleanup__(auto_free_char)))
+
 // assume malloc stores at most 8 bytes for size of allocated memory
 // and page size is at least 4KB
 #define READ_BUF_SIZE 4088
@@ -80,10 +87,12 @@ typedef enum {
     RESOURCE_XA
 } resource_presence_t;
 
+gboolean string_to_verbosity(const char* cmd, int* verbosity, gchar** err_msg);
+
 gboolean create_dir(const char* name);
 gboolean copy_file(const char* const src, const char* const target, const gboolean overwrite_existing);
 char* str_replace(const char* string, const char* substr, const char* replacement);
-gboolean strtoi_range(char* str, int* saveptr, int min, int max, char** err_msg);
+gboolean strtoi_range(const char* str, int* saveptr, int min, int max, char** err_msg);
 int utf8_display_len(const char* const str);
 
 char* release_get_latest(void);
@@ -108,5 +117,7 @@ gchar** format_call_external_argv(const char* template, const char* url, const c
 
 gchar* unique_filename_from_url(const char* url, const char* path);
 gchar* get_expanded_path(const char* path);
+
+void glib_hash_table_free(GHashTable* hash_table);
 
 #endif

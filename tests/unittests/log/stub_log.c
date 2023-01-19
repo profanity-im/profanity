@@ -67,10 +67,10 @@ get_log_file_location(void)
     return mock_ptr_type(char*);
 }
 
-log_level_t
-log_level_from_string(char* log_level)
+int
+log_level_from_string(char* log_level, log_level_t* level)
 {
-    return mock_type(log_level_t);
+    return mock_type(int);
 }
 
 void

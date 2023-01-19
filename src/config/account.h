@@ -73,17 +73,14 @@ typedef struct prof_account_t
     gchar* auth_policy;
 } ProfAccount;
 
-ProfAccount* account_new(const gchar* const name, const gchar* const jid,
-                         const gchar* const passord, const gchar* eval_password, gboolean enabled, const gchar* const server,
-                         int port, const gchar* const resource, const gchar* const last_presence,
-                         const gchar* const login_presence, int priority_online, int priority_chat,
-                         int priority_away, int priority_xa, int priority_dnd,
-                         const gchar* const muc_service, const gchar* const muc_nick,
-                         const gchar* const otr_policy, GList* otr_manual, GList* otr_opportunistic,
-                         GList* otr_always, const gchar* const omemo_policy, GList* omemo_enabled,
-                         GList* omemo_disabled, GList* ox_enabled, GList* pgp_enabled, const gchar* const pgp_keyid,
-                         const char* const startscript, const char* const theme, gchar* tls_policy,
-                         gchar* auth_policy);
+ProfAccount* account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboolean enabled,
+                         gchar* server, int port, gchar* resource, gchar* last_presence, gchar* login_presence,
+                         int priority_online, int priority_chat, int priority_away, int priority_xa, int priority_dnd,
+                         gchar* muc_service, gchar* muc_nick,
+                         gchar* otr_policy, GList* otr_manual, GList* otr_opportunistic, GList* otr_always,
+                         gchar* omemo_policy, GList* omemo_enabled, GList* omemo_disabled,
+                         GList* ox_enabled, GList* pgp_enabled, gchar* pgp_keyid,
+                         gchar* startscript, gchar* theme, gchar* tls_policy, gchar* auth_policy);
 char* account_create_connect_jid(ProfAccount* account);
 gboolean account_eval_password(ProfAccount* account);
 void account_free(ProfAccount* account);

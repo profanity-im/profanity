@@ -2311,6 +2311,7 @@ cons_show_connection_prefs(void)
     cons_autoping_setting();
     cons_autoconnect_setting();
     cons_rooms_cache_setting();
+    cons_strophe_setting();
 
     cons_alert(NULL);
 }
@@ -2993,4 +2994,19 @@ cons_mood_setting(void)
     } else {
         cons_show("Display user mood (/mood)                 : OFF");
     }
+}
+
+void
+cons_strophe_setting(void)
+{
+    const char* sm_setting = "OFF";
+    if (prefs_get_boolean(PREF_STROPHE_SM_ENABLED)) {
+        if (prefs_get_boolean(PREF_STROPHE_SM_RESEND)) {
+            sm_setting = "ON";
+        } else {
+            sm_setting = "NO-RESEND";
+        }
+    }
+    cons_show("XEP-0198 Stream-Management                : %s", sm_setting);
+    cons_show("libstrophe Verbosity                      : %s", prefs_get_string(PREF_STROPHE_VERBOSITY));
 }

@@ -82,16 +82,17 @@
 #include "plugins/plugins.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
-#include "xmpp/xmpp.h"
+#include "xmpp/avatar.h"
+#include "xmpp/chat_session.h"
 #include "xmpp/connection.h"
 #include "xmpp/contact.h"
-#include "xmpp/roster_list.h"
 #include "xmpp/jid.h"
 #include "xmpp/muc.h"
-#include "xmpp/chat_session.h"
-#include "xmpp/avatar.h"
+#include "xmpp/roster_list.h"
+#include "xmpp/session.h"
 #include "xmpp/stanza.h"
 #include "xmpp/vcard_funcs.h"
+#include "xmpp/xmpp.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -120,8 +121,8 @@
 
 static void _update_presence(const resource_presence_t presence,
                              const char* const show, gchar** args);
-static void _cmd_set_boolean_preference(gchar* arg, const char* const command,
-                                        const char* const display, preference_t pref);
+static gboolean _cmd_set_boolean_preference(gchar* arg, const char* const command,
+                                            const char* const display, preference_t pref);
 static void _who_room(ProfWin* window, const char* const command, gchar** args);
 static void _who_roster(ProfWin* window, const char* const command, gchar** args);
 static gboolean _cmd_execute(ProfWin* window, const char* const command, const char* const inp);
@@ -6517,9 +6518,8 @@ cmd_log(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (strcmp(subcmd, "level") == 0) {
-        if (g_strcmp0(value, "INFO") == 0 || g_strcmp0(value, "DEBUG") == 0 || g_strcmp0(value, "WARN") == 0 || g_strcmp0(value, "ERROR") == 0) {
-
-            log_level_t prof_log_level = log_level_from_string(value);
+        log_level_t prof_log_level;
+        if (log_level_from_string(value, &prof_log_level) == 0) {
             log_close();
             log_init(prof_log_level, NULL);
 
@@ -6540,8 +6540,9 @@ cmd_reconnect(ProfWin* window, const char* const command, gchar** args)
 
     int intval = 0;
     char* err_msg = NULL;
-    gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
-    if (res) {
+    if (g_strcmp0(value, "now") == 0) {
+        session_reconnect_now();
+    } else if (strtoi_range(value, &intval, 0, INT_MAX, &err_msg)) {
         prefs_set_reconnect(intval);
         if (intval == 0) {
             cons_show("Reconnect disabled.", intval);
@@ -8431,23 +8432,23 @@ _cmd_execute(ProfWin* window, const char* const command, const char* const inp)
             ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
             return TRUE;
         }
-        if (args[0] && cmd->sub_funcs[0][0]) {
+        if (args[0] && cmd->sub_funcs[0].cmd) {
             int i = 0;
-            while (cmd->sub_funcs[i][0]) {
-                if (g_strcmp0(args[0], (char*)cmd->sub_funcs[i][0]) == 0) {
-                    gboolean (*func)(ProfWin * window, const char* const command, gchar** args) = cmd->sub_funcs[i][1];
-                    gboolean result = func(window, command, args);
-                    g_strfreev(args);
-                    return result;
+            while (cmd->sub_funcs[i].cmd) {
+                if (g_strcmp0(args[0], (char*)cmd->sub_funcs[i].cmd) == 0) {
+                    result = cmd->sub_funcs[i].func(window, command, args);
+                    goto out;
                 }
                 i++;
             }
         }
         if (!cmd->func) {
             ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
-            return TRUE;
+            result = TRUE;
+            goto out;
         }
-        gboolean result = cmd->func(window, command, args);
+        result = cmd->func(window, command, args);
+out:
         g_strfreev(args);
         return result;
     } else if (plugins_run_command(inp)) {
@@ -8580,31 +8581,24 @@ _update_presence(const resource_presence_t resource_presence,
 }
 
 // helper function for boolean preference commands
-static void
+static gboolean
 _cmd_set_boolean_preference(gchar* arg, const char* const command,
                             const char* const display, preference_t pref)
 {
     if (arg == NULL) {
         cons_bad_cmd_usage(command);
-    } else if (strcmp(arg, "on") == 0) {
-        GString* enabled = g_string_new(display);
-        g_string_append(enabled, " enabled.");
-
-        cons_show(enabled->str);
+        return FALSE;
+    } else if (g_strcmp0(arg, "on") == 0) {
+        cons_show("%s enabled.", display);
         prefs_set_boolean(pref, TRUE);
-
-        g_string_free(enabled, TRUE);
-    } else if (strcmp(arg, "off") == 0) {
-        GString* disabled = g_string_new(display);
-        g_string_append(disabled, " disabled.");
-
-        cons_show(disabled->str);
+    } else if (g_strcmp0(arg, "off") == 0) {
+        cons_show("%s disabled.", display);
         prefs_set_boolean(pref, FALSE);
-
-        g_string_free(disabled, TRUE);
     } else {
         cons_bad_cmd_usage(command);
+        return FALSE;
     }
+    return TRUE;
 }
 
 gboolean
@@ -8894,6 +8888,7 @@ cmd_omemo_fingerprint(ProfWin* window, const char* const command, gchar** args)
         free(formatted_fingerprint);
     }
 
+    jid_destroy(jid);
     g_list_free(fingerprints);
 
     win_println(window, THEME_DEFAULT, "-", "You can trust it with '/omemo trust <fingerprint>'");
@@ -9854,6 +9849,41 @@ cmd_mood(ProfWin* window, const char* const command, gchar** args)
     }
 
     return TRUE;
+}
+
+gboolean
+cmd_strophe(ProfWin* window, const char* const command, gchar** args)
+{
+    if (g_strcmp0(args[0], "verbosity") == 0) {
+        int verbosity;
+        auto_gchar gchar* err_msg = NULL;
+        if (string_to_verbosity(args[1], &verbosity, &err_msg)) {
+            xmpp_ctx_set_verbosity(connection_get_ctx(), verbosity);
+            prefs_set_string(PREF_STROPHE_VERBOSITY, args[1]);
+            return TRUE;
+        } else {
+            cons_show(err_msg);
+        }
+    } else if (g_strcmp0(args[0], "sm") == 0) {
+        if (g_strcmp0(args[1], "no-resend") == 0) {
+            cons_show("Stream Management set to 'no-resend'.");
+            prefs_set_boolean(PREF_STROPHE_SM_ENABLED, TRUE);
+            prefs_set_boolean(PREF_STROPHE_SM_RESEND, FALSE);
+            return TRUE;
+        } else if (g_strcmp0(args[1], "on") == 0) {
+            cons_show("Stream Management enabled.");
+            prefs_set_boolean(PREF_STROPHE_SM_ENABLED, TRUE);
+            prefs_set_boolean(PREF_STROPHE_SM_RESEND, TRUE);
+            return TRUE;
+        } else if (g_strcmp0(args[1], "off") == 0) {
+            cons_show("Stream Management disabled.");
+            prefs_set_boolean(PREF_STROPHE_SM_ENABLED, FALSE);
+            prefs_set_boolean(PREF_STROPHE_SM_RESEND, FALSE);
+            return TRUE;
+        }
+    }
+    cons_bad_cmd_usage(command);
+    return FALSE;
 }
 
 gboolean
