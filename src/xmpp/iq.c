@@ -1396,9 +1396,7 @@ _autoping_timed_send(xmpp_conn_t* const conn, void* const userdata)
         log_warning("Server doesn't advertise %s feature, disabling autoping.", XMPP_FEATURE_PING);
         prefs_set_autoping(0);
         cons_show_error("Server ping not supported (%s), autoping disabled.", XMPP_FEATURE_PING);
-        xmpp_conn_t* conn = connection_get_conn();
-        xmpp_timed_handler_delete(conn, _autoping_timed_send);
-        return 1;
+        return 0;
     }
 
     if (autoping_wait) {
