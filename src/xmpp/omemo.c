@@ -191,11 +191,11 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
     char* from = NULL;
 
     const char* from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
-    log_debug("[OMEMO] omemo_start_device_session_handle_bundle: %s", from_attr);
+    log_debug("[OMEMO] omemo_start_device_session_handle_bundle: %s", STR_MAYBE_NULL(from_attr));
 
     const char* type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, "error") == 0) {
-        log_error("[OMEMO] Error to get key for a device from : %s", from_attr);
+        log_error("[OMEMO] Error to get key for a device from : %s", STR_MAYBE_NULL(from_attr));
     }
 
     if (!from_attr) {

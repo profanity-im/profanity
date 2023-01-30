@@ -654,7 +654,7 @@ message_send_chat_omemo(const char* const jid, uint32_t sid, GList* keys,
         xmpp_stanza_t* key_stanza = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(key_stanza, "key");
         char* rid = g_strdup_printf("%d", key->device_id);
-        log_debug("[OMEMO] Sending to device rid %s", rid == NULL ? "NULL" : rid);
+        log_debug("[OMEMO] Sending to device rid %s", STR_MAYBE_NULL(rid));
         xmpp_stanza_set_attribute(key_stanza, "rid", rid);
         g_free(rid);
         if (key->prekey) {
