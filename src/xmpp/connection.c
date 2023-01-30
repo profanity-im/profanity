@@ -198,6 +198,10 @@ _conn_apply_settings(const char* const jid, const char* const passwd, const char
 
     long flags = xmpp_conn_get_flags(conn.xmpp_conn);
 
+    /* clear all TLS & auth related flags */
+    flags &= ~(XMPP_CONN_FLAG_DISABLE_TLS | XMPP_CONN_FLAG_MANDATORY_TLS
+               | XMPP_CONN_FLAG_LEGACY_SSL | XMPP_CONN_FLAG_TRUST_TLS
+               | XMPP_CONN_FLAG_LEGACY_AUTH);
     if (!tls_policy || (g_strcmp0(tls_policy, "force") == 0)) {
         flags |= XMPP_CONN_FLAG_MANDATORY_TLS;
     } else if (g_strcmp0(tls_policy, "trust") == 0) {
@@ -213,8 +217,6 @@ _conn_apply_settings(const char* const jid, const char* const passwd, const char
         flags |= XMPP_CONN_FLAG_LEGACY_AUTH;
     }
 
-    xmpp_conn_set_flags(conn.xmpp_conn, flags);
-
     /* Print debug logs that can help when users share the logs */
     if (flags != 0) {
         log_debug("Connecting with flags (0x%lx):", flags);
@@ -228,6 +230,12 @@ _conn_apply_settings(const char* const jid, const char* const passwd, const char
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_SSL);
         LOG_FLAG_IF_SET(XMPP_CONN_FLAG_LEGACY_AUTH);
 #undef LOG_FLAG_IF_SET
+    }
+
+    if (xmpp_conn_set_flags(conn.xmpp_conn, flags)) {
+        log_error("libstrophe doesn't accept this combination of flags: 0x%x", flags);
+        conn.conn_status = JABBER_DISCONNECTED;
+        return FALSE;
     }
 
     char* cert_path = prefs_get_tls_certpath();

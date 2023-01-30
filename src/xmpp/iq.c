@@ -1396,9 +1396,7 @@ _autoping_timed_send(xmpp_conn_t* const conn, void* const userdata)
         log_warning("Server doesn't advertise %s feature, disabling autoping.", XMPP_FEATURE_PING);
         prefs_set_autoping(0);
         cons_show_error("Server ping not supported (%s), autoping disabled.", XMPP_FEATURE_PING);
-        xmpp_conn_t* conn = connection_get_conn();
-        xmpp_timed_handler_delete(conn, _autoping_timed_send);
-        return 1;
+        return 0;
     }
 
     if (autoping_wait) {
@@ -1464,8 +1462,7 @@ _auto_pong_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         log_warning("Server ping (id=%s) error type 'cancel', disabling autoping.", id);
         prefs_set_autoping(0);
         cons_show_error("Server ping not supported, autoping disabled.");
-        xmpp_conn_t* conn = connection_get_conn();
-        xmpp_timed_handler_delete(conn, _autoping_timed_send);
+        xmpp_timed_handler_delete(connection_get_conn(), _autoping_timed_send);
     }
 
     return 0;
@@ -1533,8 +1530,7 @@ _version_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         log_warning("From attribute specified different JID, using original JID.");
     }
 
-    xmpp_conn_t* conn = connection_get_conn();
-    xmpp_ctx_t* ctx = xmpp_conn_get_context(conn);
+    xmpp_ctx_t* ctx = connection_get_ctx();
 
     Jid* jidp = jid_create((char*)userdata);
 
