@@ -141,7 +141,7 @@ autocomplete_update(Autocomplete ac, char** items)
 }
 
 void
-autocomplete_add_reverse(Autocomplete ac, const char* item)
+autocomplete_add_unsorted(Autocomplete ac, const char* item, const gboolean is_reversed)
 {
     if (ac) {
         char* item_cpy;
@@ -153,7 +153,12 @@ autocomplete_add_reverse(Autocomplete ac, const char* item)
         }
 
         item_cpy = strdup(item);
-        ac->items = g_list_prepend(ac->items, item_cpy);
+
+        if (is_reversed) {
+            ac->items = g_list_prepend(ac->items, item_cpy);
+        } else {
+            ac->items = g_list_append(ac->items, item_cpy);
+        }
     }
 }
 

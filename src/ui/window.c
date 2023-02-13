@@ -35,6 +35,7 @@
  */
 
 #include "config.h"
+#include "ui/window_list.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -1498,6 +1499,8 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
     jid_destroy(jidp);
 
     buffer_append(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
+    wins_add_urls_ac(window, message, FALSE);
+    wins_add_quotes_ac(window, message->plain, FALSE);
     _win_print_internal(window, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
 
     free(display_name);
@@ -1526,6 +1529,8 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
     jid_destroy(jidp);
 
     buffer_prepend(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
+    wins_add_urls_ac(window, message, TRUE);
+    wins_add_quotes_ac(window, message->plain, TRUE);
     _win_print_internal(window, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
 
     free(display_name);
