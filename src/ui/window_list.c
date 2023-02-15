@@ -1315,7 +1315,7 @@ wins_get_next_attention(void)
 }
 
 void
-wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message)
+wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message, const gboolean flip)
 {
     GRegex* regex;
     GMatchInfo* match_info;
@@ -1326,7 +1326,11 @@ wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message)
     while (g_match_info_matches(match_info)) {
         gchar* word = g_match_info_fetch(match_info, 0);
 
-        autocomplete_add_reverse(win->urls_ac, word);
+        if (flip) {
+            autocomplete_add_unsorted(win->urls_ac, word, FALSE);
+        } else {
+            autocomplete_add_unsorted(win->urls_ac, word, TRUE);
+        }
         // for people who run profanity a long time, we don't want to waste a lot of memory
         autocomplete_remove_older_than_max_reverse(win->urls_ac, 20);
 
@@ -1339,9 +1343,14 @@ wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message)
 }
 
 void
-wins_add_quotes_ac(const ProfWin* const win, const char* const message)
+wins_add_quotes_ac(const ProfWin* const win, const char* const message, const gboolean flip)
 {
-    autocomplete_add_reverse(win->quotes_ac, message);
+    if (flip) {
+        autocomplete_add_unsorted(win->quotes_ac, message, FALSE);
+    } else {
+        autocomplete_add_unsorted(win->quotes_ac, message, TRUE);
+    }
+
     // for people who run profanity a long time, we don't want to waste a lot of memory
     autocomplete_remove_older_than_max_reverse(win->quotes_ac, 20);
 }

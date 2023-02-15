@@ -55,7 +55,7 @@ void autocomplete_add_all(Autocomplete ac, char** items);
 void autocomplete_update(Autocomplete ac, char** items);
 void autocomplete_remove(Autocomplete ac, const char* const item);
 void autocomplete_remove_all(Autocomplete ac, char** items);
-void autocomplete_add_reverse(Autocomplete ac, const char* item);
+void autocomplete_add_unsorted(Autocomplete ac, const char* item, const gboolean is_reversed);
 
 // find the next item prefixed with search string
 gchar* autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, gboolean previous);

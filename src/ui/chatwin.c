@@ -380,11 +380,13 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         win_print_incoming(window, display_name, message);
     }
 
-    wins_add_urls_ac(window, message);
-    wins_add_quotes_ac(window, message->plain);
+    if (!message->is_mam) {
+        wins_add_urls_ac(window, message, FALSE);
+        wins_add_quotes_ac(window, message->plain, FALSE);
 
-    if (prefs_get_boolean(PREF_BEEP) && !message->is_mam) {
-        beep();
+        if (prefs_get_boolean(PREF_BEEP)) {
+            beep();
+        }
     }
 
     if (notify) {
@@ -406,7 +408,7 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
     assert(chatwin != NULL);
 
     ProfWin* window = (ProfWin*)chatwin;
-    wins_add_quotes_ac(window, message);
+    wins_add_quotes_ac(window, message, FALSE);
 
     char* enc_char;
     if (chatwin->outgoing_char) {
