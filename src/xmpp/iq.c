@@ -2660,15 +2660,15 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
         startdate_str = g_date_time_format(startdate, mam_timestamp_format_string);
         fetch_next = TRUE;
         g_date_time_unref(startdate);
+    } else if (!enddate) {
+        GDateTime* now = g_date_time_new_now_utc();
+        enddate_str = g_date_time_format(now, mam_timestamp_format_string);
+        g_date_time_unref(now);
     }
 
     if (enddate) {
         enddate_str = g_date_time_format(enddate, mam_timestamp_format_string);
         g_date_time_unref(enddate);
-    } else {
-        GDateTime* now = g_date_time_new_now_utc();
-        enddate_str = g_date_time_format(now, mam_timestamp_format_string);
-        g_date_time_unref(now);
     }
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
