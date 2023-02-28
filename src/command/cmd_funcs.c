@@ -8891,8 +8891,8 @@ cmd_omemo_fingerprint(ProfWin* window, const char* const command, gchar** args)
     jid_destroy(jid);
     g_list_free(fingerprints);
 
-    win_println(window, THEME_DEFAULT, "-", "You can trust it with '/omemo trust <fingerprint>'");
-    win_println(window, THEME_DEFAULT, "-", "You can untrust it with '/omemo untrust <fingerprint>'");
+    win_println(window, THEME_DEFAULT, "-", "You can trust it with '/omemo trust myjid@myserver.tld <fingerprint>'");
+    win_println(window, THEME_DEFAULT, "-", "You can untrust it with '/omemo untrust myjid@myserver.tld <fingerprint>'");
 
     return TRUE;
 #else
