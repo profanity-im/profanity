@@ -3,8 +3,6 @@
 Thank you very much to all of our sponsors and donors (including those that want to stay private)!
 
 ## Sponsors
-[William Wennerström](https://github.com/wstrm/) since January 2020
-
 [Martin Dosch](https://github.com/mdosch) since January 2020
 
 [Alexander Dahl](https://github.com/LeSpocky) since January 2021
@@ -19,8 +17,6 @@ Thank you very much to all of our sponsors and donors (including those that want
 [Matteo Bini](https://github.com/matteobin)
 
 ## Services
-[William Wennerström](https://github.com/wstrm/) for sponsoring our use of [sourcehut CI](https://builds.sr.ht/~wstrm/profanity?)
-
-[toogley](toogley) for sponsoring our [mailing list](https://lists.datenkollektiv.net/postorius/lists/profanity.lists.notraces.net)
+[Stefan Kropp](https://github.com/StefanKropp) for sponsoring our [mailing list](https://lists.datenkollektiv.net/postorius/lists/profanity.lists.notraces.net)
 
 [dismail](https://dismail.de/) for hosting our [MUC](xmpp:profanity@rooms.dismail.de?join)
