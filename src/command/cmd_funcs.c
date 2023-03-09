@@ -9399,12 +9399,13 @@ cmd_slashguard(ProfWin* window, const char* const command, gchar** args)
 
 #ifdef HAVE_OMEMO
 void
-_url_aesgcm_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename)
+_url_aesgcm_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename, const char* id)
 {
     AESGCMDownload* download = malloc(sizeof(AESGCMDownload));
     download->window = window;
     download->url = strdup(url);
     download->filename = strdup(filename);
+    download->id = strdup(id);
     if (cmd_template != NULL) {
         download->cmd_template = strdup(cmd_template);
     } else {
@@ -9417,13 +9418,14 @@ _url_aesgcm_method(ProfWin* window, const char* cmd_template, const char* url, c
 #endif
 
 void
-_url_http_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename)
+_url_http_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename, const char* id)
 {
 
     HTTPDownload* download = malloc(sizeof(HTTPDownload));
     download->window = window;
     download->url = strdup(url);
     download->filename = strdup(filename);
+    download->id = strdup(id);
     if (cmd_template != NULL) {
         download->cmd_template = strdup(cmd_template);
     } else {
@@ -9499,7 +9501,9 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
 
         // Download, decrypt and open the cleartext version of the AESGCM
         // encrypted file.
-        _url_aesgcm_method(window, cmd_template, url, filename);
+        gchar* id = get_random_string(4);
+        _url_aesgcm_method(window, cmd_template, url, filename, id);
+        g_free(id);
         goto out;
     }
 #endif
@@ -9553,10 +9557,14 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
 
     cmd_template = prefs_get_string(PREF_URL_SAVE_CMD);
     if (cmd_template == NULL && (g_strcmp0(scheme, "http") == 0 || g_strcmp0(scheme, "https") == 0)) {
-        _url_http_method(window, cmd_template, url, filename);
+        gchar* id = get_random_string(4);
+        _url_http_method(window, cmd_template, url, filename, id);
+        g_free(id);
 #ifdef HAVE_OMEMO
     } else if (g_strcmp0(scheme, "aesgcm") == 0) {
-        _url_aesgcm_method(window, cmd_template, url, filename);
+        gchar* id = get_random_string(4);
+        _url_aesgcm_method(window, cmd_template, url, filename, id);
+        g_free(id);
 #endif
     } else if (cmd_template != NULL) {
         _url_external_method(cmd_template, url, filename);

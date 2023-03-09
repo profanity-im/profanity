@@ -45,7 +45,7 @@
 #define FALLBACK_MSG ""
 
 void
-http_print_transfer_update(ProfWin* window, char* url, const char* fmt, ...)
+http_print_transfer_update(ProfWin* window, char* id, const char* fmt, ...)
 {
     va_list args;
 
@@ -54,13 +54,13 @@ http_print_transfer_update(ProfWin* window, char* url, const char* fmt, ...)
     g_string_vprintf(msg, fmt, args);
     va_end(args);
 
-    win_update_entry_message(window, url, msg->str);
+    win_update_entry_message(window, id, msg->str);
 
     g_string_free(msg, TRUE);
 }
 
 void
-http_print_transfer(ProfWin* window, char* url, const char* fmt, ...)
+http_print_transfer(ProfWin* window, char* id, const char* fmt, ...)
 {
     va_list args;
 
@@ -69,7 +69,7 @@ http_print_transfer(ProfWin* window, char* url, const char* fmt, ...)
     g_string_vprintf(msg, fmt, args);
     va_end(args);
 
-    win_print_http_transfer(window, msg->str, url);
+    win_print_http_transfer(window, msg->str, id);
 
     g_string_free(msg, TRUE);
 }

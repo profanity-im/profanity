@@ -8,6 +8,7 @@ typedef struct http_download_t HTTPDownload;
 
 typedef struct aesgcm_download_t
 {
+    char* id;
     char* url;
     char* filename;
     ProfWin* window;

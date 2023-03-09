@@ -112,12 +112,12 @@ http_file_get(void* userdata)
     download->bytes_received = 0;
 
     pthread_mutex_lock(&lock);
-    http_print_transfer(download->window, download->url,
+    http_print_transfer(download->window, download->id,
                         "Downloading '%s': 0%%", download->url);
 
     FILE* outfh = fopen(download->filename, "wb");
     if (outfh == NULL) {
-        http_print_transfer_update(download->window, download->url,
+        http_print_transfer_update(download->window, download->id,
                                    "Downloading '%s' failed: Unable to open "
                                    "output file at '%s' for writing (%s).",
                                    download->url, download->filename,
@@ -177,22 +177,22 @@ http_file_get(void* userdata)
     g_free(cert_path);
     if (err) {
         if (download->cancel) {
-            http_print_transfer_update(download->window, download->url,
+            http_print_transfer_update(download->window, download->id,
                                        "Downloading '%s' failed: "
                                        "Download was canceled",
                                        download->url);
         } else {
-            http_print_transfer_update(download->window, download->url,
+            http_print_transfer_update(download->window, download->id,
                                        "Downloading '%s' failed: %s",
                                        download->url, err);
         }
         free(err);
     } else {
         if (!download->cancel) {
-            http_print_transfer_update(download->window, download->url,
+            http_print_transfer_update(download->window, download->id,
                                        "Downloading '%s': done\nSaved to '%s'",
                                        download->url, download->filename);
-            win_mark_received(download->window, download->url);
+            win_mark_received(download->window, download->id);
         }
     }
 
@@ -203,7 +203,7 @@ http_file_get(void* userdata)
 
         // TODO: Log the error.
         if (!call_external(argv)) {
-            http_print_transfer_update(download->window, download->url,
+            http_print_transfer_update(download->window, download->id,
                                        "Downloading '%s' failed: Unable to call "
                                        "command '%s' with file at '%s' (%s).",
                                        download->url,
@@ -221,6 +221,7 @@ out:
     download_processes = g_slist_remove(download_processes, download);
     pthread_mutex_unlock(&lock);
 
+    free(download->id);
     free(download->url);
     free(download->filename);
     free(download);

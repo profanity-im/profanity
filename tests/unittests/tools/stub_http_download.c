@@ -8,6 +8,7 @@ typedef struct prof_win_t ProfWin;
 
 typedef struct http_download_t
 {
+    char* id;
     char* url;
     char* filename;
     char* directory;
