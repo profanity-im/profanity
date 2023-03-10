@@ -17,6 +17,6 @@ Thank you very much to all of our sponsors and donors (including those that want
 [Matteo Bini](https://github.com/matteobin)
 
 ## Services
-[Stefan Kropp](https://github.com/StefanKropp) for sponsoring our [mailing list](https://lists.datenkollektiv.net/postorius/lists/profanity.lists.notraces.net)
+[Stefan Kropp](https://github.com/StefanKropp) for sponsoring our [mailing list](https://lists.posteo.de/listinfo/profanity)
 
 [dismail](https://dismail.de/) for hosting our [MUC](xmpp:profanity@rooms.dismail.de?join)
