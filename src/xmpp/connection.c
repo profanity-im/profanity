@@ -847,8 +847,6 @@ connection_set_priority(const int priority)
     conn.priority = priority;
 }
 
-#if defined(LIBXMPP_VERSION_MAJOR) && defined(LIBXMPP_VERSION_MINOR) \
-    && ((LIBXMPP_VERSION_MAJOR > 0) || (LIBXMPP_VERSION_MINOR >= 12))
 static xmpp_stanza_t*
 _get_soh_error(xmpp_stanza_t* error_stanza)
 {
@@ -857,19 +855,6 @@ _get_soh_error(xmpp_stanza_t* error_stanza)
                                          XMPP_STANZA_NAME_IN_NS("see-other-host", STANZA_NS_XMPP_STREAMS),
                                          NULL);
 }
-#else
-static xmpp_stanza_t*
-_get_soh_error(xmpp_stanza_t* error_stanza)
-{
-    const char* name = xmpp_stanza_get_name(error_stanza);
-    const char* ns = xmpp_stanza_get_ns(error_stanza);
-    if (!name || !ns || strcmp(name, "error") || strcmp(ns, STANZA_NS_STREAMS)) {
-        log_debug("_get_soh_error: could not find error stanza");
-        return NULL;
-    }
-    return xmpp_stanza_get_child_by_name_and_ns(error_stanza, "see-other-host", STANZA_NS_XMPP_STREAMS);
-}
-#endif
 
 #if GLIB_CHECK_VERSION(2, 66, 0)
 static gboolean
