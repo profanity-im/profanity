@@ -355,33 +355,32 @@ prof_occurrences(const char* const needle, const char* const haystack, int offse
         return *result;
     }
 
-    gchar* haystack_curr = g_utf8_offset_to_pointer(haystack, offset);
-    if (g_str_has_prefix(haystack_curr, needle)) {
-        if (whole_word) {
-            gunichar before = 0;
-            gchar* haystack_before_ch = g_utf8_find_prev_char(haystack, haystack_curr);
-            if (haystack_before_ch) {
-                before = g_utf8_get_char(haystack_before_ch);
-            }
+    do {
+        gchar* haystack_curr = g_utf8_offset_to_pointer(haystack, offset);
+        if (g_str_has_prefix(haystack_curr, needle)) {
+            if (whole_word) {
+                gunichar before = 0;
+                gchar* haystack_before_ch = g_utf8_find_prev_char(haystack, haystack_curr);
+                if (haystack_before_ch) {
+                    before = g_utf8_get_char(haystack_before_ch);
+                }
 
-            gunichar after = 0;
-            gchar* haystack_after_ch = haystack_curr + strlen(needle);
-            if (haystack_after_ch[0] != '\0') {
-                after = g_utf8_get_char(haystack_after_ch);
-            }
+                gunichar after = 0;
+                gchar* haystack_after_ch = haystack_curr + strlen(needle);
+                if (haystack_after_ch[0] != '\0') {
+                    after = g_utf8_get_char(haystack_after_ch);
+                }
 
-            if (!g_unichar_isalnum(before) && !g_unichar_isalnum(after)) {
+                if (!g_unichar_isalnum(before) && !g_unichar_isalnum(after)) {
+                    *result = g_slist_append(*result, GINT_TO_POINTER(offset));
+                }
+            } else {
                 *result = g_slist_append(*result, GINT_TO_POINTER(offset));
             }
-        } else {
-            *result = g_slist_append(*result, GINT_TO_POINTER(offset));
         }
-    }
 
-    offset++;
-    if (g_strcmp0(g_utf8_offset_to_pointer(haystack, offset), "\0") != 0) {
-        *result = prof_occurrences(needle, haystack, offset, whole_word, result);
-    }
+        offset++;
+    } while (g_strcmp0(g_utf8_offset_to_pointer(haystack, offset), "\0") != 0);
 
     return *result;
 }
