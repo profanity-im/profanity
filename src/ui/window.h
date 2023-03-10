@@ -74,7 +74,7 @@ void win_print_outgoing_muc_msg(ProfWin* window, char* show_char, const char* co
 void win_print_history(ProfWin* window, const ProfMessage* const message);
 void win_print_old_history(ProfWin* window, const ProfMessage* const message);
 
-void win_print_http_transfer(ProfWin* window, const char* const message, char* url);
+void win_print_http_transfer(ProfWin* window, const char* const message, char* id);
 
 void win_newline(ProfWin* window);
 void win_redraw(ProfWin* window);

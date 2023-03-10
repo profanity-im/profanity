@@ -1680,9 +1680,9 @@ win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* con
 }
 
 void
-win_print_http_transfer(ProfWin* window, const char* const message, char* url)
+win_print_http_transfer(ProfWin* window, const char* const message, char* id)
 {
-    win_print_outgoing_with_receipt(window, "!", NULL, message, url, NULL);
+    win_print_outgoing_with_receipt(window, "!", NULL, message, id, NULL);
 }
 
 void

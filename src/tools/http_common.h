@@ -38,7 +38,7 @@
 
 #include "ui/window.h"
 
-void http_print_transfer(ProfWin* window, char* url, const char* fmt, ...);
-void http_print_transfer_update(ProfWin* window, char* url, const char* fmt, ...);
+void http_print_transfer(ProfWin* window, char* id, const char* fmt, ...);
+void http_print_transfer_update(ProfWin* window, char* id, const char* fmt, ...);
 
 #endif
