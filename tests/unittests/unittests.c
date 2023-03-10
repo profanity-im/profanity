@@ -620,6 +620,7 @@ main(int argc, char* argv[])
 
         unit_test(prof_partial_occurrences_tests),
         unit_test(prof_whole_occurrences_tests),
+        unit_test(prof_occurrences_of_large_message_tests),
 
         unit_test(returns_no_commands),
         unit_test(returns_commands),
