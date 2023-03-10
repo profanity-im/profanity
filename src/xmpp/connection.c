@@ -863,12 +863,8 @@ _split_url(const char* alturi, gchar** host, gint* port)
     /* Construct a valid URI with `schema://` as `g_uri_split_network()`
      * requires this to be there.
      */
-    const char* xmpp = "xmpp://";
-    char* xmpp_uri = _xmalloc(strlen(xmpp) + strlen(alturi) + 1, NULL);
-    memcpy(xmpp_uri, xmpp, strlen(xmpp));
-    memcpy(xmpp_uri + strlen(xmpp), alturi, strlen(alturi) + 1);
+    auto_gchar gchar* xmpp_uri = g_strdup_printf("xmpp://%s", alturi);
     gboolean ret = g_uri_split_network(xmpp_uri, 0, NULL, host, port, NULL);
-    free(xmpp_uri);
     /* fix-up `port` as g_uri_split_network() sets port to `-1` if it's missing
      * in the passed-in URI, but libstrophe expects a "missing port"
      * to be passed as `0` (which then results in connecting to the standard port).
