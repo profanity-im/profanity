@@ -915,10 +915,12 @@ cons_show_qrcode(const char* const text)
         strcat(pad, "\u2588\u2588");
     }
 
-    win_println(console, THEME_DEFAULT, "", pad);
+    win_println(console, THEME_DEFAULT, "", "");
+    win_println(console, THEME_DEFAULT, "", "");
+    win_println(console, THEME_DEFAULT, "", "%s", pad);
     for (size_t y = 0; y < width; y += ZOOM_SIZE) {
         for (size_t x = 0; x < width; x += ZOOM_SIZE) {
-            strcat(buf, !(*data & 1) ? "\u2588\u2588" : "\u2800\u2800");
+            strcat(buf, !(*data & 1) ? "\u2588\u2588" : "  ");
 
             data++;
         }
@@ -929,6 +931,8 @@ cons_show_qrcode(const char* const text)
         buf[0] = '\0';
     }
     win_println(console, THEME_DEFAULT, "", "%s", pad);
+    win_println(console, THEME_DEFAULT, "", "");
+    win_println(console, THEME_DEFAULT, "", "");
 
     free(pad);
     free(buf);
