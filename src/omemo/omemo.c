@@ -1920,7 +1920,7 @@ char*
 omemo_qrcode_str()
 {
     char* mybarejid = connection_get_barejid();
-    char* fingerprint = omemo_own_fingerprint(TRUE);
+    char* fingerprint = omemo_own_fingerprint(FALSE);
     uint32_t sid = omemo_device_id();
 
     char* qrstr = g_strdup_printf("xmpp:%s?omemo-sid-%d=%s", mybarejid, sid, fingerprint);

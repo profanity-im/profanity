@@ -536,6 +536,28 @@ _lists_equal(GSList* a, GSList* b)
 }
 
 void
+prof_occurrences_of_large_message_tests(void** state)
+{
+    GSList* actual = NULL;
+    GSList* expected = NULL;
+    /* use this with the old implementation to create a segfault
+     *     const size_t haystack_sz = 1024 * 1024;
+     */
+    const size_t haystack_sz = 1024;
+    size_t haystack_cur = 0;
+    char* haystack = malloc(haystack_sz);
+    const char needle[] = "needle ";
+    while (haystack_sz - haystack_cur > sizeof(needle)) {
+        memcpy(&haystack[haystack_cur], needle, sizeof(needle) - 1);
+        expected = g_slist_append(expected, GINT_TO_POINTER(haystack_cur));
+        haystack_cur += sizeof(needle) - 1;
+    }
+    assert_true(_lists_equal(prof_occurrences("needle", haystack, 0, FALSE, &actual), expected));
+    g_slist_free(actual);
+    g_slist_free(expected);
+}
+
+void
 prof_partial_occurrences_tests(void** state)
 {
     GSList* actual = NULL;

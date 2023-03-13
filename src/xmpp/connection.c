@@ -847,8 +847,6 @@ connection_set_priority(const int priority)
     conn.priority = priority;
 }
 
-#if defined(LIBXMPP_VERSION_MAJOR) && defined(LIBXMPP_VERSION_MINOR) \
-    && ((LIBXMPP_VERSION_MAJOR > 0) || (LIBXMPP_VERSION_MINOR >= 12))
 static xmpp_stanza_t*
 _get_soh_error(xmpp_stanza_t* error_stanza)
 {
@@ -857,19 +855,6 @@ _get_soh_error(xmpp_stanza_t* error_stanza)
                                          XMPP_STANZA_NAME_IN_NS("see-other-host", STANZA_NS_XMPP_STREAMS),
                                          NULL);
 }
-#else
-static xmpp_stanza_t*
-_get_soh_error(xmpp_stanza_t* error_stanza)
-{
-    const char* name = xmpp_stanza_get_name(error_stanza);
-    const char* ns = xmpp_stanza_get_ns(error_stanza);
-    if (!name || !ns || strcmp(name, "error") || strcmp(ns, STANZA_NS_STREAMS)) {
-        log_debug("_get_soh_error: could not find error stanza");
-        return NULL;
-    }
-    return xmpp_stanza_get_child_by_name_and_ns(error_stanza, "see-other-host", STANZA_NS_XMPP_STREAMS);
-}
-#endif
 
 #if GLIB_CHECK_VERSION(2, 66, 0)
 static gboolean
@@ -878,12 +863,8 @@ _split_url(const char* alturi, gchar** host, gint* port)
     /* Construct a valid URI with `schema://` as `g_uri_split_network()`
      * requires this to be there.
      */
-    const char* xmpp = "xmpp://";
-    char* xmpp_uri = _xmalloc(strlen(xmpp) + strlen(alturi) + 1, NULL);
-    memcpy(xmpp_uri, xmpp, strlen(xmpp));
-    memcpy(xmpp_uri + strlen(xmpp), alturi, strlen(alturi) + 1);
+    auto_gchar gchar* xmpp_uri = g_strdup_printf("xmpp://%s", alturi);
     gboolean ret = g_uri_split_network(xmpp_uri, 0, NULL, host, port, NULL);
-    free(xmpp_uri);
     /* fix-up `port` as g_uri_split_network() sets port to `-1` if it's missing
      * in the passed-in URI, but libstrophe expects a "missing port"
      * to be passed as `0` (which then results in connecting to the standard port).
