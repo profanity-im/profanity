@@ -3817,12 +3817,7 @@ _subject_autocomplete(ProfWin* window, const char* const input, gboolean previou
 
             char* subject = muc_subject(mucwin->roomjid);
             if (subject) {
-                GString* result_str = g_string_new("/subject edit \"");
-                g_string_append(result_str, subject);
-                g_string_append(result_str, "\"");
-
-                result = result_str->str;
-                g_string_free(result_str, FALSE);
+                result = g_strdup_printf("/subject edit \"%s\"", subject);
             }
         }
     }
@@ -4260,10 +4255,7 @@ _correction_autocomplete(ProfWin* window, const char* const input, gboolean prev
 static char*
 _correct_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
-    GString* result_str = g_string_new("/correct ");
-    g_string_append(result_str, win_get_last_sent_message(window));
-    char* result = result_str->str;
-    g_string_free(result_str, FALSE);
+    char* result = g_strdup_printf("/correct %s", win_get_last_sent_message(window));
 
     return result;
 }

@@ -100,8 +100,7 @@ _p_gpg_passphrase_cb(void* hook, const char* uid_hint, const char* passphrase_in
         if (passphrase_attempt) {
             free(passphrase_attempt);
         }
-        passphrase_attempt = pass_term->str;
-        g_string_free(pass_term, FALSE);
+        passphrase_attempt = g_string_free(pass_term, FALSE);
 
         gpgme_io_write(fd, passphrase_attempt, strlen(passphrase_attempt));
     }
@@ -768,10 +767,7 @@ p_gpg_format_fp_str(char* fp)
         }
     }
 
-    char* result = format->str;
-    g_string_free(format, FALSE);
-
-    return result;
+    return g_string_free(format, FALSE);
 }
 
 static char*
@@ -801,18 +797,7 @@ _remove_header_footer(char* str, const char* const footer)
 static char*
 _add_header_footer(const char* const str, const char* const header, const char* const footer)
 {
-    GString* result_str = g_string_new("");
-
-    g_string_append(result_str, header);
-    g_string_append(result_str, "\n\n");
-    g_string_append(result_str, str);
-    g_string_append(result_str, "\n");
-    g_string_append(result_str, footer);
-
-    char* result = result_str->str;
-    g_string_free(result_str, FALSE);
-
-    return result;
+    return g_strdup_printf("%s\n\n%s\n%s", header, str, footer);
 }
 
 static void

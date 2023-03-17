@@ -314,7 +314,6 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
 static char*
 _autocomplete_param_common(const char* const input, char* command, autocomplete_func func, Autocomplete ac, gboolean quote, gboolean previous, void* context)
 {
-    GString* auto_msg;
     char* command_cpy;
     char* result = NULL;
     int len;
@@ -344,11 +343,7 @@ _autocomplete_param_common(const char* const input, char* command, autocomplete_
         }
 
         if (found) {
-            auto_msg = g_string_new(command_cpy);
-            g_string_append(auto_msg, found);
-            free(found);
-            result = auto_msg->str;
-            g_string_free(auto_msg, FALSE);
+            result = g_strdup_printf("%s%s", command_cpy, found);
         }
     }
     free(command_cpy);

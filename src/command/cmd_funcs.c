@@ -3635,12 +3635,7 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
 
         // server not supplied (room), use account preference
     } else if (account->muc_service) {
-        GString* room_str = g_string_new("");
-        g_string_append(room_str, args[0]);
-        g_string_append(room_str, "@");
-        g_string_append(room_str, account->muc_service);
-        room = room_str->str;
-        g_string_free(room_str, FALSE);
+        room = g_strdup_printf("%s@%s", args[0], account->muc_service);
 
         // no account preference
     } else {
@@ -10107,13 +10102,7 @@ cmd_vcard_photo(ProfWin* window, const char* const command, gchar** args)
                 jid_destroy(jid_occupant);
             } else {
                 // anon muc: send the vcard request through the MUC's server
-                GString* full_jid = g_string_new(mucwin->roomjid);
-                g_string_append(full_jid, "/");
-                g_string_append(full_jid, user);
-
-                jid = full_jid->str;
-
-                g_string_free(full_jid, FALSE);
+                jid = g_strdup_printf("%s/%s", mucwin->roomjid, user);
             }
         } else {
             char* jid_temp = roster_barejid_from_name(user);

@@ -457,13 +457,7 @@ otr_key_loaded(void)
 char*
 otr_tag_message(const char* const msg)
 {
-    GString* otr_message = g_string_new(msg);
-    g_string_append(otr_message, OTRL_MESSAGE_TAG_BASE);
-    g_string_append(otr_message, OTRL_MESSAGE_TAG_V2);
-    char* result = otr_message->str;
-    g_string_free(otr_message, FALSE);
-
-    return result;
+    return g_strdup_printf("%s%s%s", msg, OTRL_MESSAGE_TAG_BASE, OTRL_MESSAGE_TAG_V2);
 }
 
 gboolean

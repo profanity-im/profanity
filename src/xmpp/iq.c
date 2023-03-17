@@ -572,12 +572,10 @@ iq_send_caps_request_legacy(const char* const to, const char* const id,
         return;
     }
 
-    GString* node_str = g_string_new("");
-    g_string_printf(node_str, "%s#%s", node, ver);
-    xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, id, to, node_str->str);
+    gchar* node_str = g_strdup_printf("%s#%s", node, ver);
+    xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, id, to, node_str);
 
-    iq_id_handler_add(id, _caps_response_legacy_id_handler, g_free, node_str->str);
-    g_string_free(node_str, FALSE);
+    iq_id_handler_add(id, _caps_response_legacy_id_handler, g_free, node_str);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);

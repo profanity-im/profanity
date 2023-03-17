@@ -214,21 +214,17 @@ p_contact_name_or_jid(const PContact contact)
 char*
 p_contact_create_display_string(const PContact contact, const char* const resource)
 {
-    GString* result_str = g_string_new("");
+    gchar* result;
 
     // use nickname if exists
     const char* display_name = p_contact_name_or_jid(contact);
-    g_string_append(result_str, display_name);
 
     // add resource if not default provided by profanity
     if (strcmp(resource, "__prof_default") != 0) {
-        g_string_append(result_str, " (");
-        g_string_append(result_str, resource);
-        g_string_append(result_str, ")");
+        result = g_strdup_printf("%s (%s)", display_name, resource);
+    } else {
+        result = g_strdup_printf("%s", display_name);
     }
-
-    char* result = result_str->str;
-    g_string_free(result_str, FALSE);
 
     return result;
 }

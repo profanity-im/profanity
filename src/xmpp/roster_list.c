@@ -188,10 +188,7 @@ roster_get_display_name(const char* const barejid)
         g_string_append(result, barejid);
     }
 
-    char* result_str = result->str;
-    g_string_free(result, FALSE);
-
-    return result_str;
+    return g_string_free(result, FALSE);
 }
 
 char*
@@ -223,10 +220,7 @@ roster_get_msg_display_name(const char* const barejid, const char* const resourc
         g_string_append(result, resource);
     }
 
-    char* result_str = result->str;
-    g_string_free(result, FALSE);
-
-    return result_str;
+    return g_string_free(result, FALSE);
 }
 
 gboolean

@@ -2738,10 +2738,7 @@ _cmd_index(const Command* cmd)
     }
     g_strfreev(tokens);
 
-    char* res = index->str;
-    g_string_free(index, FALSE);
-
-    return res;
+    return g_string_free(index, FALSE);
 }
 
 GList*
