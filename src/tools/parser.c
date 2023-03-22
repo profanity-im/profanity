@@ -295,7 +295,6 @@ get_start(const char* const string, int tokens)
     GString* result = g_string_new("");
     int length = g_utf8_strlen(string, -1);
     gboolean in_quotes = FALSE;
-    char* result_str = NULL;
     int num_tokens = 0;
 
     // include first token
@@ -325,10 +324,7 @@ get_start(const char* const string, int tokens)
         }
     }
 
-    result_str = result->str;
-    g_string_free(result, FALSE);
-
-    return result_str;
+    return g_string_free(result, FALSE);
 }
 
 GHashTable*

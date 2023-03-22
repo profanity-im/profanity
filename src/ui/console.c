@@ -310,9 +310,7 @@ _room_triggers_to_string(GList* triggers)
         }
     }
 
-    char* result = triggers_str->str;
-    g_string_free(triggers_str, FALSE);
-    return result;
+    return g_string_free(triggers_str, FALSE);
 }
 
 void

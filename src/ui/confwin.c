@@ -340,14 +340,5 @@ confwin_get_string(ProfConfWin* confwin)
 {
     assert(confwin != NULL);
 
-    GString* res = g_string_new("");
-
-    char* title = win_get_title((ProfWin*)confwin);
-    g_string_append(res, title);
-    free(title);
-
-    char* resstr = res->str;
-    g_string_free(res, FALSE);
-
-    return resstr;
+    return win_get_title((ProfWin*)confwin);
 }

@@ -293,12 +293,9 @@ get_file_or_linked(char* loc, char* basedir)
 
         // if relative, add basedir
         if (!g_str_has_prefix(true_loc, "/") && !g_str_has_prefix(true_loc, "~")) {
-            GString* base_str = g_string_new(basedir);
-            g_string_append(base_str, "/");
-            g_string_append(base_str, true_loc);
+            char* tmp = g_strdup_printf("%s/%s", basedir, true_loc);
             free(true_loc);
-            true_loc = base_str->str;
-            g_string_free(base_str, FALSE);
+            true_loc = tmp;
         }
         // use given location
     } else {
@@ -418,20 +415,20 @@ get_file_paths_recursive(const char* path, GSList** contents)
 
     GDir* directory = g_dir_open(path, 0, NULL);
     const gchar* entry = g_dir_read_name(directory);
+    gchar* full;
     while (entry) {
-        GString* full = g_string_new(path);
-        if (!g_str_has_suffix(full->str, "/")) {
-            g_string_append(full, "/");
-        }
-        g_string_append(full, entry);
-
-        if (is_dir(full->str)) {
-            get_file_paths_recursive(full->str, contents);
-        } else if (is_regular_file(full->str)) {
-            *contents = g_slist_append(*contents, full->str);
+        if (g_str_has_suffix(path, "/")) {
+            full = g_strdup_printf("%s%s", path, entry);
+        } else {
+            full = g_strdup_printf("%s/%s", path, entry);
         }
 
-        g_string_free(full, FALSE);
+        if (is_dir(full)) {
+            get_file_paths_recursive(full, contents);
+        } else if (is_regular_file(full)) {
+            *contents = g_slist_append(*contents, full);
+        }
+
         entry = g_dir_read_name(directory);
     }
 }
@@ -569,22 +566,14 @@ _basename_from_url(const char* url)
 gchar*
 get_expanded_path(const char* path)
 {
-    GString* exp_path = g_string_new("");
-    gchar* result;
-
     if (g_str_has_prefix(path, "file://")) {
         path += strlen("file://");
     }
     if (strlen(path) >= 2 && path[0] == '~' && path[1] == '/') {
-        g_string_printf(exp_path, "%s/%s", getenv("HOME"), path + 2);
+        return g_strdup_printf("%s/%s", getenv("HOME"), path + 2);
     } else {
-        g_string_printf(exp_path, "%s", path);
+        return g_strdup_printf("%s", path);
     }
-
-    result = exp_path->str;
-    g_string_free(exp_path, FALSE);
-
-    return result;
 }
 
 gchar*

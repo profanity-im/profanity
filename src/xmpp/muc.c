@@ -749,9 +749,7 @@ muc_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         g_string_append(replace_with, ": ");
     }
     g_free(result);
-    result = replace_with->str;
-    g_string_free(replace_with, FALSE);
-    return result;
+    return g_string_free(replace_with, FALSE);
 }
 
 void

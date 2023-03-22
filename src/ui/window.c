@@ -337,9 +337,7 @@ win_get_title(ProfWin* window)
             g_string_append(title, mucwin->roomjid);
         }
 
-        char* title_str = title->str;
-        g_string_free(title, FALSE);
-        return title_str;
+        return g_string_free(title, FALSE);
     }
     if (window->type == WIN_CONFIG) {
         ProfConfWin* confwin = (ProfConfWin*)window;
@@ -349,9 +347,7 @@ win_get_title(ProfWin* window)
         if (confwin->form->modified) {
             g_string_append(title, " *");
         }
-        char* title_str = title->str;
-        g_string_free(title, FALSE);
-        return title_str;
+        return g_string_free(title, FALSE);
     }
     if (window->type == WIN_PRIVATE) {
         ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
@@ -500,9 +496,7 @@ win_to_string(ProfWin* window)
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
         GString* gstring = g_string_new("");
         g_string_append_printf(gstring, "Plugin: %s", pluginwin->tag);
-        char* res = gstring->str;
-        g_string_free(gstring, FALSE);
-        return res;
+        return g_string_free(gstring, FALSE);
     }
     case WIN_VCARD:
     {
@@ -2320,7 +2314,5 @@ win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previo
     g_free(quoted_result);
     g_strfreev(parts);
 
-    result = replace_with->str;
-    g_string_free(replace_with, FALSE);
-    return result;
+    return g_string_free(replace_with, FALSE);
 }
