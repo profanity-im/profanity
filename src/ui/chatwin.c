@@ -514,10 +514,7 @@ chatwin_get_string(ProfChatWin* chatwin)
         g_string_append_printf(res, ", %d unread", chatwin->unread);
     }
 
-    char* resstr = res->str;
-    g_string_free(res, FALSE);
-
-    return resstr;
+    return g_string_free(res, FALSE);
 }
 
 void
