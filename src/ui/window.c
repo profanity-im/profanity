@@ -302,10 +302,14 @@ win_get_title(ProfWin* window)
     if (window == NULL) {
         return strdup(CONS_WIN_TITLE);
     }
-    if (window->type == WIN_CONSOLE) {
+
+    switch (window->type) {
+    case WIN_CONSOLE:
+    {
         return strdup(CONS_WIN_TITLE);
     }
-    if (window->type == WIN_CHAT) {
+    case WIN_CHAT:
+    {
         ProfChatWin* chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         jabber_conn_status_t conn_status = connection_get_status();
@@ -321,7 +325,8 @@ win_get_title(ProfWin* window)
             return strdup(chatwin->barejid);
         }
     }
-    if (window->type == WIN_MUC) {
+    case WIN_MUC:
+    {
         ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
@@ -339,30 +344,37 @@ win_get_title(ProfWin* window)
 
         return g_string_free(title, FALSE);
     }
-    if (window->type == WIN_CONFIG) {
-        ProfConfWin* confwin = (ProfConfWin*)window;
-        assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
-        GString* title = g_string_new(confwin->roomjid);
-        g_string_append(title, " config");
-        if (confwin->form->modified) {
-            g_string_append(title, " *");
+    case WIN_CONFIG:
+    {
+        if (window->type == WIN_CONFIG) {
+            ProfConfWin* confwin = (ProfConfWin*)window;
+            assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+            GString* title = g_string_new(confwin->roomjid);
+            g_string_append(title, " config");
+            if (confwin->form->modified) {
+                g_string_append(title, " *");
+            }
+            return g_string_free(title, FALSE);
         }
-        return g_string_free(title, FALSE);
     }
-    if (window->type == WIN_PRIVATE) {
+    case WIN_PRIVATE:
+    {
         ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
         return strdup(privatewin->fulljid);
     }
-    if (window->type == WIN_XML) {
+    case WIN_XML:
+    {
         return strdup(XML_WIN_TITLE);
     }
-    if (window->type == WIN_PLUGIN) {
+    case WIN_PLUGIN:
+    {
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
         assert(pluginwin->memcheck == PROFPLUGINWIN_MEMCHECK);
         return strdup(pluginwin->tag);
     }
-    if (window->type == WIN_VCARD) {
+    case WIN_VCARD:
+    {
         ProfVcardWin* vcardwin = (ProfVcardWin*)window;
         assert(vcardwin->memcheck == PROFVCARDWIN_MEMCHECK);
 
@@ -378,7 +390,8 @@ win_get_title(ProfWin* window)
         free(jid);
         return g_string_free(title, FALSE);
     }
-    return NULL;
+    }
+    assert(FALSE);
 }
 
 char*
@@ -420,9 +433,8 @@ win_get_tab_identifier(ProfWin* window)
     {
         return strdup("xmlconsole");
     }
-    default:
-        return strdup("UNKNOWN");
     }
+    assert(FALSE);
 }
 
 char*
@@ -503,9 +515,8 @@ win_to_string(ProfWin* window)
         ProfVcardWin* vcardwin = (ProfVcardWin*)window;
         return vcardwin_get_string(vcardwin);
     }
-    default:
-        return NULL;
     }
+    assert(FALSE);
 }
 
 void
