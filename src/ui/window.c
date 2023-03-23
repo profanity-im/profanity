@@ -433,6 +433,10 @@ win_get_tab_identifier(ProfWin* window)
     {
         return strdup("xmlconsole");
     }
+    case WIN_VCARD:
+    {
+        return strdup("vcard");
+    }
     }
     assert(FALSE);
 }
