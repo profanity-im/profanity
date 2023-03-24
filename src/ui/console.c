@@ -2272,6 +2272,8 @@ cons_executable_setting(void)
     gchar* vcard_cmd = prefs_get_string(PREF_VCARD_PHOTO_CMD);
     cons_show("Default '/vcard photo open' command (/executable vcard_photo)            : %s", vcard_cmd);
     g_free(vcard_cmd);
+
+    cons_show("Run executables asynchronously (/executable async)                       : %s", prefs_get_boolean(PREF_EXECUTABLE_ASYNC) ? "ON" : "OFF");
 }
 
 void

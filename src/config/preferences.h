@@ -186,6 +186,7 @@ typedef enum {
     PREF_STROPHE_SM_ENABLED,
     PREF_STROPHE_SM_RESEND,
     PREF_VCARD_PHOTO_CMD,
+    PREF_EXECUTABLE_ASYNC,
 } preference_t;
 
 typedef struct prof_alias_t

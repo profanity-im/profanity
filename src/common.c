@@ -46,6 +46,13 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+// fork / exec
+#include <sys/wait.h>
+#include <readline/readline.h>
+#include "ui/ui.h"
+
+#include "config/preferences.h"
+
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <glib.h>
@@ -469,7 +476,7 @@ get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const mes
 }
 
 gboolean
-call_external(gchar** argv)
+call_external_async(gchar** argv)
 {
     GError* spawn_error;
     gboolean is_successful;
@@ -491,6 +498,38 @@ call_external(gchar** argv)
     }
 
     return is_successful;
+}
+
+gboolean
+call_external_fork(gchar** argv)
+{
+    // Fork / exec external executable
+    pid_t pid = fork();
+    if (pid == 0) {
+        int x = execvp(argv[0], argv);
+        if (x == -1) {
+            auto_gchar gchar* cmd = g_strjoinv(" ", argv);
+            log_error("Unable to call external executable '%s'", cmd);
+        }
+        _exit(EXIT_FAILURE);
+    } else {
+        if (pid == -1) {
+            return TRUE;
+        }
+        waitpid(pid, NULL, 0);
+
+        // refresh display
+        ui_resize();
+        rl_forced_update_display();
+    }
+
+    return TRUE;
+}
+
+gboolean
+call_external(gchar** argv)
+{
+    return prefs_get_boolean(PREF_EXECUTABLE_ASYNC) ? call_external_async(argv) : call_external_fork(argv);
 }
 
 gchar**

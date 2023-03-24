@@ -1104,6 +1104,7 @@ cmd_ac_init(void)
     autocomplete_add(executable_ac, "urlopen");
     autocomplete_add(executable_ac, "urlsave");
     autocomplete_add(executable_ac, "editor");
+    autocomplete_add(executable_ac, "async");
 
     intype_ac = autocomplete_new();
     autocomplete_add(intype_ac, "console");

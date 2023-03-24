@@ -1852,6 +1852,7 @@ _get_group(preference_t pref)
     case PREF_URL_OPEN_CMD:
     case PREF_URL_SAVE_CMD:
     case PREF_VCARD_PHOTO_CMD:
+    case PREF_EXECUTABLE_ASYNC:
         return PREF_GROUP_EXECUTABLES;
     case PREF_AUTOAWAY_CHECK:
     case PREF_AUTOAWAY_MODE:
@@ -2154,6 +2155,8 @@ _get_key(preference_t pref)
         return "url.open.cmd";
     case PREF_URL_SAVE_CMD:
         return "url.save.cmd";
+    case PREF_EXECUTABLE_ASYNC:
+        return "run.async";
     case PREF_COMPOSE_EDITOR:
         return "compose.editor";
     case PREF_SILENCE_NON_ROSTER:
@@ -2228,6 +2231,7 @@ _get_default_boolean(preference_t pref)
     case PREF_MOOD:
     case PREF_STROPHE_SM_ENABLED:
     case PREF_STROPHE_SM_RESEND:
+    case PREF_EXECUTABLE_ASYNC:
         return TRUE;
     default:
         return FALSE;

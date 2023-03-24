@@ -2514,7 +2514,8 @@ static const struct cmd_t command_defs[] = {
               { "urlopen", cmd_executable_urlopen },
               { "urlsave", cmd_executable_urlsave },
               { "editor", cmd_executable_editor },
-              { "vcard_photo", cmd_executable_vcard_photo })
+              { "vcard_photo", cmd_executable_vcard_photo },
+              { "async", cmd_executable_async })
       CMD_TAGS(
               CMD_TAG_DISCOVERY)
       CMD_SYN(
@@ -2525,7 +2526,8 @@ static const struct cmd_t command_defs[] = {
               "/executable urlsave default",
               "/executable editor set <cmdtemplate>",
               "/executable vcard_photo set <cmdtemplate>",
-              "/executable vcard_photo default")
+              "/executable vcard_photo default",
+              "/executable async on|off")
       CMD_DESC(
               "Configure executable that should be called upon a certain command.")
       CMD_ARGS(
@@ -2536,7 +2538,8 @@ static const struct cmd_t command_defs[] = {
               { "urlsave default", "Use the built-in download method for saving." },
               { "editor set", "Set editor to be used with /editor. Needs a terminal editor or a script to run a graphical editor." },
               { "vcard_photo set", "Set executable that is run by /vcard photo open. Takes a command template that replaces %p with the path" },
-              { "vcard_photo default", "Restore to default settings." })
+              { "vcard_photo default", "Restore to default settings." },
+              { "async on|off", "Enable or disable async call of executables. Disable async if all executables run inside the TTY." })
       CMD_EXAMPLES(
               "/executable avatar xdg-open",
               "/executable urlopen set \"xdg-open %u\"",
@@ -2545,8 +2548,9 @@ static const struct cmd_t command_defs[] = {
               "/executable urlsave set \"wget %u -O %p\"",
               "/executable urlsave set \"curl %u -o %p\"",
               "/executable urlsave default",
+              "/executable editor set \"emacsclient -t\"",
               "/executable vcard_photo set \"feh %p\"",
-              "/executable editor set \"emacsclient -t\"")
+              "/executable async off")
     },
 
     { CMD_PREAMBLE("/url",

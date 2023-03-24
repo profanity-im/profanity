@@ -10835,3 +10835,16 @@ cmd_vcard_save(ProfWin* window, const char* const command, gchar** args)
     cons_show("User vCard uploaded");
     return TRUE;
 }
+
+gboolean
+cmd_executable_async(ProfWin* window, const char* const command, gchar** args)
+{
+    if (args[1] == NULL) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    _cmd_set_boolean_preference(args[1], command, "Run executables asynchronously", PREF_EXECUTABLE_ASYNC);
+
+    return TRUE;
+}
