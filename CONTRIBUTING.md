@@ -16,7 +16,7 @@ When working on a new feature we usually use `git checkout -b feature/optionalis
 However this is not a rule just a recommendation to keep an overview of things.
 If your change isn't a bugfix or new feature you can also just use any branch name.
 
-## Commit messages
+### Commit messages
 Write commit messages that make sense. Explain what and *why* you change.
 Write in present tense.
 Please give [this guideline](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53) a read.
@@ -53,7 +53,7 @@ We will then pull from your repository and merge manually.
 * When changing the UI it would be appreciated if you could add a before and after screenshot for comparison.
 * Squash fixup commits into one
 
-### Hints and Pitfalls
+## Hints and Pitfalls
 
 * When adding a new hotkey/shortcut make sure it's not registered in Profanity already. And also that it's not a default shortcut of readline.
 
