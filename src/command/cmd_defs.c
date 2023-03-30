@@ -2545,7 +2545,7 @@ static const struct cmd_t command_defs[] = {
               "/executable urlsave set \"curl %u -o %p\"",
               "/executable urlsave default",
               "/executable vcard_photo set \"feh %p\"",
-              "/executable editor set vim")
+              "/executable editor set \"emacsclient -t\"")
     },
 
     { CMD_PREAMBLE("/url",

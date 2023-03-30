@@ -88,11 +88,16 @@ get_message_from_editor(gchar* message, gchar** returned_message)
     }
 
     char* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
+    gchar* editor_with_filename = g_strdup_printf("%s %s", editor, filename);
+    gchar** editor_argv = g_strsplit(editor_with_filename, " ", 0);
+
+    g_free(editor_with_filename);
 
     // Fork / exec
     pid_t pid = fork();
     if (pid == 0) {
-        int x = execlp(editor, editor, filename, (char*)NULL);
+        int x = execvp(editor_argv[0], editor_argv);
+        g_strfreev(editor_argv);
         if (x == -1) {
             log_error("[Editor] Failed to exec %s", editor);
         }
