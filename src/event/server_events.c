@@ -645,8 +645,8 @@ sv_ev_incoming_message(ProfMessage* message)
     chatwin = wins_get_chat(looking_for_jid);
 
     if (!chatwin) {
-        ProfWin* window = wins_new_chat(looking_for_jid);
-        chatwin = (ProfChatWin*)window;
+        chatwin = chatwin_new(looking_for_jid);
+        ProfWin* window = (ProfWin*)chatwin;
         new_win = TRUE;
 
         if (prefs_get_boolean(PREF_MAM)) {
@@ -689,8 +689,7 @@ sv_ev_incoming_carbon(ProfMessage* message)
     gboolean new_win = FALSE;
     ProfChatWin* chatwin = wins_get_chat(message->from_jid->barejid);
     if (!chatwin) {
-        ProfWin* window = wins_new_chat(message->from_jid->barejid);
-        chatwin = (ProfChatWin*)window;
+        chatwin = chatwin_new(message->from_jid->barejid);
         new_win = TRUE;
 
 #ifdef HAVE_OMEMO

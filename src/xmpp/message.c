@@ -598,10 +598,6 @@ message_send_chat_otr(const char* const barejid, const char* const msg, gboolean
         stanza_attach_state(ctx, message, state);
     }
 
-    stanza_attach_carbons_private(ctx, message);
-    stanza_attach_hints_no_copy(ctx, message);
-    stanza_attach_hints_no_store(ctx, message);
-
     if (request_receipt) {
         stanza_attach_receipt_request(ctx, message);
     }
