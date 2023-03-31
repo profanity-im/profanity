@@ -2523,6 +2523,7 @@ static const struct cmd_t command_defs[] = {
               "/executable urlopen default",
               "/executable urlsave set <cmdtemplate>",
               "/executable urlsave default",
+              "/executable editor set <cmdtemplate>",
               "/executable vcard_photo set <cmdtemplate>",
               "/executable vcard_photo default")
       CMD_DESC(
