@@ -314,11 +314,8 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
 static char*
 _autocomplete_param_common(const char* const input, char* command, autocomplete_func func, Autocomplete ac, gboolean quote, gboolean previous, void* context)
 {
-    char* command_cpy;
-    char* result = NULL;
     int len;
-
-    command_cpy = g_strdup_printf("%s ", command);
+    auto_char char* command_cpy = g_strdup_printf("%s ", command);
     if (!command_cpy) {
         return NULL;
     }
@@ -327,8 +324,11 @@ _autocomplete_param_common(const char* const input, char* command, autocomplete_
 
     if (strncmp(input, command_cpy, len) == 0) {
         int inp_len = strlen(input);
-        char prefix[inp_len];
-        char* found;
+        auto_char char* found = NULL;
+        auto_char char* prefix = malloc(inp_len + 1);
+        if (!prefix) {
+            return NULL;
+        }
 
         for (int i = len; i < inp_len; i++) {
             prefix[i - len] = input[i];
@@ -343,12 +343,11 @@ _autocomplete_param_common(const char* const input, char* command, autocomplete_
         }
 
         if (found) {
-            result = g_strdup_printf("%s%s", command_cpy, found);
+            return g_strdup_printf("%s%s", command_cpy, found);
         }
     }
-    free(command_cpy);
 
-    return result;
+    return NULL;
 }
 
 char*
