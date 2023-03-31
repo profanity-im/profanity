@@ -151,7 +151,7 @@ cb_gone_secure(void* opdata, ConnContext* context)
 {
     ProfChatWin* chatwin = wins_get_chat(context->username);
     if (!chatwin) {
-        chatwin = (ProfChatWin*)wins_new_chat(context->username);
+        chatwin = chatwin_new(context->username);
     }
 
     chatwin_otr_secured(chatwin, otr_is_trusted(context->username));

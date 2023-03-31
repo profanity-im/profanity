@@ -768,20 +768,18 @@ ui_print_system_msg_from_recipient(const char* const barejid, const char* messag
         return;
 
     ProfChatWin* chatwin = wins_get_chat(barejid);
-    ProfWin* window = (ProfWin*)chatwin;
-    if (window == NULL) {
-        window = wins_new_chat(barejid);
-        if (window) {
-            chatwin = (ProfChatWin*)window;
-            int num = wins_get_num(window);
+    if (chatwin == NULL) {
+        chatwin = chatwin_new(barejid);
+        if (chatwin) {
+            int num = wins_get_num((ProfWin*)chatwin);
             status_bar_active(num, WIN_CHAT, chatwin->barejid);
         } else {
-            window = wins_get_console();
+            chatwin = (ProfChatWin*)wins_get_console();
             status_bar_active(1, WIN_CONSOLE, "console");
         }
     }
 
-    win_println(window, THEME_DEFAULT, "-", "*%s %s", barejid, message);
+    win_println((ProfWin*)chatwin, THEME_DEFAULT, "-", "*%s %s", barejid, message);
 }
 
 void
