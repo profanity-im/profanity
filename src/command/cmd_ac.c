@@ -2083,11 +2083,21 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
         }
     }
 
-    gchar* cmds[] = { "/prefs", "/disco", "/room", "/autoping", "/mainwin", "/inputwin" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, room_ac, autoping_ac, winpos_ac, winpos_ac };
+    struct
+    {
+        gchar* cmd;
+        Autocomplete completer;
+    } ac_cmds[] = {
+        { "/prefs", prefs_ac },
+        { "/disco", disco_ac },
+        { "/room", room_ac },
+        { "/autoping", autoping_ac },
+        { "/mainwin", winpos_ac },
+        { "/inputwin", winpos_ac },
+    };
 
-    for (int i = 0; i < ARRAY_SIZE(cmds); i++) {
-        result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE, previous);
+    for (int i = 0; i < ARRAY_SIZE(ac_cmds); i++) {
+        result = autocomplete_param_with_ac(input, ac_cmds[i].cmd, ac_cmds[i].completer, TRUE, previous);
         if (result) {
             return result;
         }
