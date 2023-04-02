@@ -105,7 +105,7 @@ _rotate_log_file(void)
     log_info("Log has been rotated");
 }
 
-// abbreviation string is the prefix thats used in the log file
+// abbreviation string is the prefix that's used in the log file
 static char*
 _log_abbreviation_string_from_level(log_level_t level)
 {

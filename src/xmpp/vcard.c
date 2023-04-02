@@ -297,7 +297,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
             element->nickname = stanza_text_strdup(child_pointer);
 
             if (!element->nickname) {
-                // Invaild element, free and do not push
+                // Invalid element, free and do not push
                 free(element);
                 continue;
             }
