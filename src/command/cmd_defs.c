@@ -2063,6 +2063,7 @@ static const struct cmd_t command_defs[] = {
               "/account set <account> otr <policy>",
               "/account set <account> pgpkeyid <pgpkeyid>",
               "/account set <account> startscript <script>",
+              "/account set <account> clientid \"<name> <version>\"",
               "/account set <account> tls force|allow|trust|legacy|disable",
               "/account set <account> auth default|legacy",
               "/account set <account> theme <theme>",
@@ -2073,6 +2074,7 @@ static const struct cmd_t command_defs[] = {
               "/account clear <account> otr",
               "/account clear <account> pgpkeyid",
               "/account clear <account> startscript",
+              "/account clear <account> clientid",
               "/account clear <account> muc",
               "/account clear <account> resource")
       CMD_DESC(
@@ -2102,6 +2104,7 @@ static const struct cmd_t command_defs[] = {
               { "set <account> otr <policy>", "Override global OTR policy for this account, see /otr." },
               { "set <account> pgpkeyid <pgpkeyid>", "Set the ID of the PGP key for this account, see /pgp." },
               { "set <account> startscript <script>", "Set the script to execute after connecting." },
+              { "set <account> clientid \"<name> <version>\"", "[EXPERIMENTAL] Set XMPP client name according for discovery according to XEP-0092. Use with caution." },
               { "set <account> tls force", "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
               { "set <account> tls allow", "Use TLS for the connection if it is available." },
               { "set <account> tls trust", "Force TLS connection and trust server's certificate." },
@@ -2117,6 +2120,7 @@ static const struct cmd_t command_defs[] = {
               { "clear <account> otr", "Remove the OTR policy setting for this account." },
               { "clear <account> pgpkeyid", "Remove pgpkeyid associated with this account." },
               { "clear <account> startscript", "Remove startscript associated with this account." },
+              { "clear <account> clientid", "Reset client's name to default." },
               { "clear <account> theme", "Clear the theme setting for the account, the global theme will be used." },
               { "clear <account> resource", "Remove the resource setting for this account." },
               { "clear <account> muc", "Remove the default MUC service setting." })
@@ -2129,6 +2133,7 @@ static const struct cmd_t command_defs[] = {
               "/account set me nick dennis",
               "/account set me status dnd",
               "/account set me dnd -1",
+              "/account set me clientid \"Profanity 0.42 (Dev)\"",
               "/account rename me chattyme",
               "/account clear me pgpkeyid")
     },

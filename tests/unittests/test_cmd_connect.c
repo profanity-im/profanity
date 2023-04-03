@@ -124,7 +124,7 @@ cmd_connect_lowercases_argument_with_account(void** state)
 {
     gchar* args[] = { "Jabber_org", NULL };
     ProfAccount* account = account_new(g_strdup("Jabber_org"), g_strdup("me@jabber.org"), g_strdup("password"), NULL,
-                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -145,7 +145,7 @@ cmd_connect_asks_password_when_not_in_account(void** state)
 {
     gchar* args[] = { "jabber_org", NULL };
     ProfAccount* account = account_new(g_strdup("jabber_org"), g_strdup("me@jabber.org"), NULL, NULL,
-                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -408,7 +408,7 @@ cmd_connect_shows_message_when_connecting_with_account(void** state)
 {
     gchar* args[] = { "jabber_org", NULL };
     ProfAccount* account = account_new(g_strdup("jabber_org"), g_strdup("user@jabber.org"), g_strdup("password"), NULL,
-                                       TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 
@@ -429,7 +429,7 @@ cmd_connect_connects_with_account(void** state)
 {
     gchar* args[] = { "jabber_org", NULL };
     ProfAccount* account = account_new(g_strdup("jabber_org"), g_strdup("me@jabber.org"), g_strdup("password"), NULL,
-                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
     will_return(connection_get_status, JABBER_DISCONNECTED);
 

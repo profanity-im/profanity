@@ -1612,6 +1612,17 @@ _version_get_handler(xmpp_stanza_t* const stanza)
     xmpp_ctx_t* const ctx = connection_get_ctx();
     const char* id = xmpp_stanza_get_id(stanza);
     const char* from = xmpp_stanza_get_from(stanza);
+    ProfAccount* account = accounts_get_account(session_get_account_name());
+    auto_char char* client = account->client != NULL ? strdup(account->client) : NULL;
+    bool is_custom_client = client != NULL;
+    gchar* custom_version_str = NULL;
+    if (is_custom_client) {
+        custom_version_str = strstr(client, " ");
+        if (custom_version_str != NULL) {
+            *custom_version_str = '\0'; // Split string on name and version
+            custom_version_str++;
+        }
+    }
 
     if (id) {
         log_debug("IQ version get handler fired, id: %s.", id);
@@ -1619,28 +1630,35 @@ _version_get_handler(xmpp_stanza_t* const stanza)
         log_debug("IQ version get handler fired.");
     }
 
-    if (from) {
-        if (prefs_get_boolean(PREF_ADV_NOTIFY_DISCO_OR_VERSION)) {
-            cons_show("Received IQ version request (XEP-0092) from %s", from);
-        }
+    if (!from)
+        return;
 
-        xmpp_stanza_t* response = xmpp_iq_new(ctx, STANZA_TYPE_RESULT, id);
-        xmpp_stanza_set_to(response, from);
+    if (prefs_get_boolean(PREF_ADV_NOTIFY_DISCO_OR_VERSION)) {
+        cons_show("Received IQ version request (XEP-0092) from %s", from);
+    }
 
-        xmpp_stanza_t* query = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
-        xmpp_stanza_set_ns(query, STANZA_NS_VERSION);
+    xmpp_stanza_t* response = xmpp_iq_new(ctx, STANZA_TYPE_RESULT, id);
+    xmpp_stanza_set_to(response, from);
 
-        xmpp_stanza_t* name = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(name, "name");
-        xmpp_stanza_t* name_txt = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_text(name_txt, "Profanity");
-        xmpp_stanza_add_child(name, name_txt);
+    xmpp_stanza_t* query = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(query, STANZA_NAME_QUERY);
+    xmpp_stanza_set_ns(query, STANZA_NS_VERSION);
 
-        xmpp_stanza_t* version = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(version, "version");
-        xmpp_stanza_t* version_txt = xmpp_stanza_new(ctx);
-        GString* version_str = g_string_new(PACKAGE_VERSION);
+    xmpp_stanza_t* name = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(name, "name");
+    xmpp_stanza_t* name_txt = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(name_txt, is_custom_client ? client : "Profanity");
+    xmpp_stanza_add_child(name, name_txt);
+    xmpp_stanza_add_child(query, name);
+    bool include_os = prefs_get_boolean(PREF_REVEAL_OS) && !is_custom_client;
+    xmpp_stanza_t* os;
+    xmpp_stanza_t* os_txt;
+    xmpp_stanza_t* version = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(version, "version");
+    xmpp_stanza_t* version_txt = xmpp_stanza_new(ctx);
+    GString* version_str = g_string_new(PACKAGE_VERSION);
+
+    if (!is_custom_client) {
         if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
             g_string_append(version_str, "dev.");
@@ -1653,11 +1671,8 @@ _version_get_handler(xmpp_stanza_t* const stanza)
         }
         xmpp_stanza_set_text(version_txt, version_str->str);
         xmpp_stanza_add_child(version, version_txt);
+        xmpp_stanza_add_child(query, version);
 
-        xmpp_stanza_t* os;
-        xmpp_stanza_t* os_txt;
-
-        bool include_os = prefs_get_boolean(PREF_REVEAL_OS);
         if (include_os) {
             os = xmpp_stanza_new(ctx);
             xmpp_stanza_set_name(os, "os");
@@ -1680,31 +1695,30 @@ _version_get_handler(xmpp_stanza_t* const stanza)
             xmpp_stanza_set_text(os_txt, "Unknown");
 #endif
             xmpp_stanza_add_child(os, os_txt);
-        }
-
-        xmpp_stanza_add_child(query, name);
-        xmpp_stanza_add_child(query, version);
-        if (include_os) {
             xmpp_stanza_add_child(query, os);
         }
-        xmpp_stanza_add_child(response, query);
-
-        iq_send_stanza(response);
-
-        g_string_free(version_str, TRUE);
-        xmpp_stanza_release(name_txt);
-        xmpp_stanza_release(version_txt);
-        if (include_os) {
-            xmpp_stanza_release(os_txt);
-        }
-        xmpp_stanza_release(name);
-        xmpp_stanza_release(version);
-        if (include_os) {
-            xmpp_stanza_release(os);
-        }
-        xmpp_stanza_release(query);
-        xmpp_stanza_release(response);
     }
+    if (is_custom_client && custom_version_str != NULL) {
+        xmpp_stanza_set_text(version_txt, custom_version_str);
+        xmpp_stanza_add_child(version, version_txt);
+        xmpp_stanza_add_child(query, version);
+    }
+
+    xmpp_stanza_add_child(response, query);
+    iq_send_stanza(response);
+
+    // Cleanup
+    g_string_free(version_str, TRUE);
+    xmpp_stanza_release(version_txt);
+    xmpp_stanza_release(name_txt);
+    if (include_os) {
+        xmpp_stanza_release(os_txt);
+        xmpp_stanza_release(os);
+    }
+    xmpp_stanza_release(name);
+    xmpp_stanza_release(version);
+    xmpp_stanza_release(query);
+    xmpp_stanza_release(response);
 }
 
 static void

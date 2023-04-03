@@ -1064,6 +1064,9 @@ cons_show_account(ProfAccount* account)
     if (account->startscript) {
         cons_show("Start script      : %s", account->startscript);
     }
+    if (account->client) {
+        cons_show("Client name       : %s", account->client);
+    }
     if (account->theme) {
         cons_show("Theme             : %s", account->theme);
     }

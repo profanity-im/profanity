@@ -478,6 +478,7 @@ cmd_ac_init(void)
     autocomplete_add(account_set_ac, "otr");
     autocomplete_add(account_set_ac, "pgpkeyid");
     autocomplete_add(account_set_ac, "startscript");
+    autocomplete_add(account_set_ac, "clientid");
     autocomplete_add(account_set_ac, "tls");
     autocomplete_add(account_set_ac, "auth");
     autocomplete_add(account_set_ac, "theme");
@@ -490,6 +491,7 @@ cmd_ac_init(void)
     autocomplete_add(account_clear_ac, "otr");
     autocomplete_add(account_clear_ac, "pgpkeyid");
     autocomplete_add(account_clear_ac, "startscript");
+    autocomplete_add(account_clear_ac, "clientid");
     autocomplete_add(account_clear_ac, "theme");
     autocomplete_add(account_clear_ac, "muc");
     autocomplete_add(account_clear_ac, "resource");
