@@ -1126,7 +1126,7 @@ static const struct cmd_t command_defs[] = {
               { "chat none", "Do not show any new chat messages in the console window." },
               { "muc all", "Indicate all new chat room messages in the console." },
               { "muc first", "Indicate only the first new message in each room in the console." },
-              { "muc mention", "Indicate only messages in which you have beeen mentioned in the console." },
+              { "muc mention", "Indicate only messages in which you have been mentioned in the console." },
               { "muc none", "Do not show any new chat room messages in the console window." },
               { "private all", "Indicate all new private room messages in the console." },
               { "private first", "Indicate only the first private room message in the console." },

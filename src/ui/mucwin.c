@@ -196,7 +196,7 @@ mucwin_room_disco_info(ProfMucWin* mucwin, GSList* identities, GSList* features)
             win_println(window, THEME_DEFAULT, "!", "Identities:");
         }
         while (identities) {
-            DiscoIdentity* identity = identities->data; // anme trpe, cat
+            DiscoIdentity* identity = identities->data; // name, type, category
             GString* identity_str = g_string_new("  ");
             if (identity->name) {
                 identity_str = g_string_append(identity_str, identity->name);

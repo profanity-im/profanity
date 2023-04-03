@@ -810,7 +810,7 @@ cons_show_disco_info(const char* jid, GSList* identities, GSList* features)
             cons_show("  Identities");
         }
         while (identities) {
-            DiscoIdentity* identity = identities->data; // anme trpe, cat
+            DiscoIdentity* identity = identities->data; // name type, category
             GString* identity_str = g_string_new("    ");
             if (identity->name) {
                 identity_str = g_string_append(identity_str, identity->name);

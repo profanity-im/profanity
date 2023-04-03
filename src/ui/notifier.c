@@ -291,7 +291,7 @@ notify(const char* const message, int timeout, const char* const category)
 
     int res = system(notify_command->str);
     if (res == -1) {
-        log_error("Could not send desktop notificaion.");
+        log_error("Could not send desktop notification.");
     }
 
     g_string_free(notify_command, TRUE);
