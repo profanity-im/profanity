@@ -312,18 +312,26 @@ win_get_title(ProfWin* window)
     {
         ProfChatWin* chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+        gboolean show_titlebar_jid = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_JID);
+        gboolean show_titlebar_name = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_NAME);
         jabber_conn_status_t conn_status = connection_get_status();
-        if (conn_status == JABBER_CONNECTED) {
-            PContact contact = roster_get_contact(chatwin->barejid);
-            if (contact) {
-                const char* name = p_contact_name_or_jid(contact);
-                return strdup(name);
-            } else {
-                return strdup(chatwin->barejid);
-            }
-        } else {
+
+        if (conn_status != JABBER_CONNECTED || !show_titlebar_name) {
             return strdup(chatwin->barejid);
         }
+        PContact contact = roster_get_contact(chatwin->barejid);
+        if (!contact) {
+            return strdup(chatwin->barejid);
+        }
+        const char* name = p_contact_name(contact);
+        if (name == NULL) {
+            return strdup(chatwin->barejid);
+        }
+        if(show_titlebar_jid){
+            return g_strdup_printf("%s <%s>", name, chatwin->barejid);
+        }
+        return g_strdup_printf("%s", name);
     }
     case WIN_MUC:
     {
