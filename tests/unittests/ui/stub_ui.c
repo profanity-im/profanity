@@ -1367,6 +1367,10 @@ void
 win_clear(ProfWin* window)
 {
 }
+void
+win_redraw(ProfWin* window)
+{
+}
 char*
 win_to_string(ProfWin* window)
 {
