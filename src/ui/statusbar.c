@@ -79,14 +79,15 @@ static StatusBar* statusbar;
 static WINDOW* statusbar_win;
 
 static int _status_bar_draw_time(int pos);
-static void _status_bar_draw_maintext(int pos);
-static int _status_bar_draw_bracket(gboolean current, int pos, char* ch);
+static int _status_bar_draw_maintext(int pos);
+static int _status_bar_draw_bracket(gboolean current, int pos, const char* ch);
 static int _status_bar_draw_extended_tabs(int pos);
 static int _status_bar_draw_tab(StatusBarTab* tab, int pos, int num);
 static void _destroy_tab(StatusBarTab* tab);
 static int _tabs_width(void);
 static char* _display_name(StatusBarTab* tab);
 static gboolean _extended_new(void);
+static gboolean _tabmode_is_actlist(void);
 
 void
 status_bar_init(void)
@@ -289,21 +290,59 @@ status_bar_draw(void)
 
     pos = _status_bar_draw_time(pos);
 
-    _status_bar_draw_maintext(pos);
+    pos = _status_bar_draw_maintext(pos);
 
-    pos = getmaxx(stdscr) - _tabs_width();
-    if (pos < 0) {
-        pos = 0;
-    }
-    gint max_tabs = prefs_get_statusbartabs();
-    for (int i = 1; i <= max_tabs; i++) {
-        StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
-        if (tab) {
-            pos = _status_bar_draw_tab(tab, pos, i);
+    if (!_tabmode_is_actlist()) {
+        pos = getmaxx(stdscr) - _tabs_width();
+        if (pos < 0) {
+            pos = 0;
+        }
+        gint max_tabs = prefs_get_statusbartabs();
+        for (int i = 1; i <= max_tabs; i++) {
+            StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
+            if (tab) {
+                pos = _status_bar_draw_tab(tab, pos, i);
+            }
+        }
+
+        _status_bar_draw_extended_tabs(pos);
+    } else {
+        pos++;
+        guint print_act = 0;
+        guint tabnum = g_hash_table_size(statusbar->tabs);
+        for (guint i = 1; i <= tabnum; ++i) {
+            StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
+            if (tab && tab->highlight) {
+                print_act++;
+            }
+        }
+        if (print_act) {
+            pos = _status_bar_draw_bracket(FALSE, pos, "[");
+            mvwprintw(statusbar_win, 0, pos, "Act: ");
+            pos += 5;
+            int status_attrs = theme_attrs(THEME_STATUS_NEW);
+
+            wattron(statusbar_win, status_attrs);
+            for (guint i = 1; i <= tabnum && print_act; ++i) {
+                StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
+                if (tab && tab->highlight) {
+                    if (print_act == 1) {
+                        mvwprintw(statusbar_win, 0, pos, "%d", i);
+                        pos++;
+                    } else {
+                        mvwprintw(statusbar_win, 0, pos, "%d,", i);
+                        pos += 2;
+                    }
+                    for (guint limit = 10; i >= limit; limit *= 10) {
+                        pos++;
+                    }
+                    print_act--;
+                }
+            }
+            wattroff(statusbar_win, status_attrs);
+            pos = _status_bar_draw_bracket(FALSE, pos, "]");
         }
     }
-
-    _status_bar_draw_extended_tabs(pos);
 
     wnoutrefresh(statusbar_win);
     inp_put_back();
@@ -410,7 +449,7 @@ _status_bar_draw_tab(StatusBarTab* tab, int pos, int num)
 }
 
 static int
-_status_bar_draw_bracket(gboolean current, int pos, char* ch)
+_status_bar_draw_bracket(gboolean current, int pos, const char* ch)
 {
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
     wattron(statusbar_win, bracket_attrs);
@@ -466,39 +505,52 @@ _status_bar_draw_time(int pos)
     return pos;
 }
 
-static void
+static gboolean
+_tabmode_is_actlist(void)
+{
+    auto_char char* tabmode = prefs_get_string(PREF_STATUSBAR_TABMODE);
+    return g_strcmp0(tabmode, "actlist") == 0;
+}
+
+static int
 _status_bar_draw_maintext(int pos)
 {
+    const char* maintext = NULL;
+    auto_jid Jid* jidp = NULL;
+    auto_char char* self = prefs_get_string(PREF_STATUSBAR_SELF);
     if (statusbar->prompt) {
         mvwprintw(statusbar_win, 0, pos, "%s", statusbar->prompt);
-        return;
+        return utf8_display_len(statusbar->prompt);
+    } else if (g_strcmp0(self, "off") == 0) {
+        return pos;
+    } else if (statusbar->fulljid) {
+        jidp = jid_create(statusbar->fulljid);
+        if (g_strcmp0(self, "user") == 0) {
+            maintext = jidp->localpart;
+        } else if (g_strcmp0(self, "barejid") == 0) {
+            maintext = jidp->barejid;
+        } else {
+            maintext = statusbar->fulljid;
+        }
     }
 
-    gboolean stop = FALSE;
-
-    if (statusbar->fulljid) {
-        char* pref = prefs_get_string(PREF_STATUSBAR_SELF);
-
-        if (g_strcmp0(pref, "off") == 0) {
-            stop = true;
-        } else if (g_strcmp0(pref, "user") == 0) {
-            Jid* jidp = jid_create(statusbar->fulljid);
-            mvwprintw(statusbar_win, 0, pos, "%s", jidp->localpart);
-            jid_destroy(jidp);
-            stop = true;
-        } else if (g_strcmp0(pref, "barejid") == 0) {
-            Jid* jidp = jid_create(statusbar->fulljid);
-            mvwprintw(statusbar_win, 0, pos, "%s", jidp->barejid);
-            jid_destroy(jidp);
-            stop = true;
-        }
-
-        g_free(pref);
-        if (stop) {
-            return;
-        }
-        mvwprintw(statusbar_win, 0, pos, "%s", statusbar->fulljid);
+    if (maintext == NULL) {
+        return pos;
     }
+
+    gboolean actlist_tabmode = _tabmode_is_actlist();
+    auto_gchar gchar* maintext_ = NULL;
+    if (actlist_tabmode) {
+        pos = _status_bar_draw_bracket(FALSE, pos, "[");
+        maintext_ = g_strdup_printf("%d:%s", statusbar->current_tab, maintext);
+        maintext = maintext_;
+    }
+    mvwprintw(statusbar_win, 0, pos, "%s", maintext);
+    pos += utf8_display_len(maintext);
+    if (actlist_tabmode) {
+        pos = _status_bar_draw_bracket(FALSE, pos, "]");
+    }
+    return pos;
 }
 
 static void

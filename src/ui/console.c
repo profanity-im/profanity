@@ -2005,21 +2005,21 @@ cons_statusbar_setting(void)
         cons_show("Max tab length (/statusbar)                 : %d", pref_len);
     }
 
-    char* pref_self = prefs_get_string(PREF_STATUSBAR_SELF);
+    auto_gchar gchar* pref_self = prefs_get_string(PREF_STATUSBAR_SELF);
     if (g_strcmp0(pref_self, "off") == 0) {
         cons_show("Self statusbar display (/statusbar)         : OFF");
     } else {
         cons_show("Self statusbar display (/statusbar)         : %s", pref_self);
     }
-    g_free(pref_self);
 
-    char* pref_chat = prefs_get_string(PREF_STATUSBAR_CHAT);
+    auto_gchar gchar* pref_chat = prefs_get_string(PREF_STATUSBAR_CHAT);
     cons_show("Chat tab display (/statusbar)               : %s", pref_chat);
-    g_free(pref_chat);
 
-    char* pref_room = prefs_get_string(PREF_STATUSBAR_ROOM);
+    auto_gchar gchar* pref_room = prefs_get_string(PREF_STATUSBAR_ROOM);
     cons_show("Room tab display (/statusbar)               : %s", pref_room);
-    g_free(pref_room);
+
+    auto_gchar gchar* pref_tabmode = prefs_get_string(PREF_STATUSBAR_TABMODE);
+    cons_show("Tab mode (/statusbar)                       : %s", pref_tabmode);
 }
 
 void

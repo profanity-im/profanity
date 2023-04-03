@@ -6341,6 +6341,21 @@ cmd_statusbar(ProfWin* window, const char* const command, gchar** args)
         }
     }
 
+    if (g_strcmp0(args[0], "tabmode") == 0) {
+        char* tabmode = NULL;
+        if ((g_strcmp0(args[1], "default") == 0) || (g_strcmp0(args[1], "actlist") == 0)) {
+            tabmode = args[1];
+        }
+        if (tabmode == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+        prefs_set_string(PREF_STATUSBAR_TABMODE, tabmode);
+        cons_show("Using \"%s\" tabmode for statusbar.", tabmode);
+        ui_resize();
+        return TRUE;
+    }
+
     if (g_strcmp0(args[0], "self") == 0) {
         if (g_strcmp0(args[1], "barejid") == 0) {
             prefs_set_string(PREF_STATUSBAR_SELF, "barejid");

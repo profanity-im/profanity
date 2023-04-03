@@ -1293,6 +1293,7 @@ static const struct cmd_t command_defs[] = {
               "/statusbar hide name|number|read",
               "/statusbar maxtabs <value>",
               "/statusbar tablen <value>",
+              "/statusbar tabmode default|actlist",
               "/statusbar self user|barejid|fulljid|off",
               "/statusbar chat user|jid",
               "/statusbar room room|jid",
@@ -1303,6 +1304,7 @@ static const struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "maxtabs <value>", "Set the maximum number of tabs to display, <value> must be between 0 and 10." },
               { "tablen <value>", "Set the maximum number of characters to show as the tab name, 0 sets to unlimited." },
+              { "tabmode default|actlist", "Set the mode how the 'active tabs' are shown." },
               { "show|hide name", "Show or hide names in tabs." },
               { "show|hide number", "Show or hide numbers in tabs." },
               { "show|hide read", "Show or hide inactive tabs." },
@@ -1315,6 +1317,7 @@ static const struct cmd_t command_defs[] = {
       CMD_EXAMPLES(
               "/statusbar maxtabs 8",
               "/statusbar tablen 5",
+              "/statusbar tabmode actlist",
               "/statusbar self user",
               "/statusbar chat jid",
               "/statusbar hide read",
