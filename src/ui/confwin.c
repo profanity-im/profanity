@@ -215,8 +215,8 @@ _confwin_form_field(ProfWin* window, char* tag, FormField* field)
         win_append(window, THEME_DEFAULT, ": ");
     }
 
-    GSList* values = field->values;
-    GSList* curr_value = values;
+    GSList* curr_value = field->values;
+    GSList* curr_option;
 
     switch (field->type_t) {
     case FIELD_HIDDEN:
@@ -272,36 +272,30 @@ _confwin_form_field(ProfWin* window, char* tag, FormField* field)
         }
         break;
     case FIELD_LIST_SINGLE:
-        if (curr_value) {
-            win_newline(window);
-            char* value = curr_value->data;
-            GSList* options = field->options;
-            GSList* curr_option = options;
-            while (curr_option) {
-                FormOption* option = curr_option->data;
-                if (g_strcmp0(option->value, value) == 0) {
-                    win_println(window, THEME_ONLINE, "-", "  [%s] %s", option->value, option->label);
-                } else {
-                    win_println(window, THEME_OFFLINE, "-", "  [%s] %s", option->value, option->label);
-                }
-                curr_option = g_slist_next(curr_option);
+        win_newline(window);
+        char* value = curr_value ? curr_value->data : NULL;
+        curr_option = field->options;
+        while (curr_option) {
+            FormOption* option = curr_option->data;
+            if (g_strcmp0(option->value, value) == 0) {
+                win_println(window, THEME_ONLINE, "-", "  [%s] %s", option->value, option->label);
+            } else {
+                win_println(window, THEME_OFFLINE, "-", "  [%s] %s", option->value, option->label);
             }
+            curr_option = g_slist_next(curr_option);
         }
         break;
     case FIELD_LIST_MULTI:
-        if (curr_value) {
-            win_newline(window);
-            GSList* options = field->options;
-            GSList* curr_option = options;
-            while (curr_option) {
-                FormOption* option = curr_option->data;
-                if (g_slist_find_custom(curr_value, option->value, (GCompareFunc)g_strcmp0)) {
-                    win_println(window, THEME_ONLINE, "-", "  [%s] %s", option->value, option->label);
-                } else {
-                    win_println(window, THEME_OFFLINE, "-", "  [%s] %s", option->value, option->label);
-                }
-                curr_option = g_slist_next(curr_option);
+        win_newline(window);
+        curr_option = field->options;
+        while (curr_option) {
+            FormOption* option = curr_option->data;
+            if (g_slist_find_custom(curr_value, option->value, (GCompareFunc)g_strcmp0)) {
+                win_println(window, THEME_ONLINE, "-", "  [%s] %s", option->value, option->label);
+            } else {
+                win_println(window, THEME_OFFLINE, "-", "  [%s] %s", option->value, option->label);
             }
+            curr_option = g_slist_next(curr_option);
         }
         break;
     case FIELD_JID_SINGLE:
