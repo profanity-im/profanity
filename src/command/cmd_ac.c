@@ -101,6 +101,7 @@ static char* _wintitle_autocomplete(ProfWin* window, const char* const input, gb
 static char* _inpblock_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _time_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _receipts_autocomplete(ProfWin* window, const char* const input, gboolean previous);
+static char* _reconnect_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _help_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _wins_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _tls_autocomplete(ProfWin* window, const char* const input, gboolean previous);
@@ -232,6 +233,7 @@ static Autocomplete time_format_ac;
 static Autocomplete resource_ac;
 static Autocomplete inpblock_ac;
 static Autocomplete receipts_ac;
+static Autocomplete reconnect_ac;
 #ifdef HAVE_LIBGPGME
 static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
@@ -885,6 +887,9 @@ cmd_ac_init(void)
     receipts_ac = autocomplete_new();
     autocomplete_add(receipts_ac, "send");
     autocomplete_add(receipts_ac, "request");
+
+    reconnect_ac = autocomplete_new();
+    autocomplete_add(reconnect_ac, "now");
 
 #ifdef HAVE_LIBGPGME
     pgp_ac = autocomplete_new();
@@ -1573,6 +1578,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(resource_ac);
     autocomplete_reset(inpblock_ac);
     autocomplete_reset(receipts_ac);
+    autocomplete_reset(reconnect_ac);
 #ifdef HAVE_LIBGPGME
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
@@ -1752,6 +1758,7 @@ cmd_ac_uninit(void)
     autocomplete_free(resource_ac);
     autocomplete_free(inpblock_ac);
     autocomplete_free(receipts_ac);
+    autocomplete_free(reconnect_ac);
 #ifdef HAVE_LIBGPGME
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
@@ -2048,6 +2055,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     g_hash_table_insert(ac_funcs, "/inpblock", _inpblock_autocomplete);
     g_hash_table_insert(ac_funcs, "/time", _time_autocomplete);
     g_hash_table_insert(ac_funcs, "/receipts", _receipts_autocomplete);
+    g_hash_table_insert(ac_funcs, "/reconnect", _reconnect_autocomplete);
     g_hash_table_insert(ac_funcs, "/wins", _wins_autocomplete);
     g_hash_table_insert(ac_funcs, "/tls", _tls_autocomplete);
     g_hash_table_insert(ac_funcs, "/titlebar", _titlebar_autocomplete);
@@ -3547,6 +3555,14 @@ _receipts_autocomplete(ProfWin* window, const char* const input, gboolean previo
 
     result = autocomplete_param_with_ac(input, "/receipts", receipts_ac, TRUE, previous);
 
+    return result;
+}
+
+static char*
+_reconnect_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+{
+    char* result = NULL;
+    result = autocomplete_param_with_ac(input, "/reconnect", reconnect_ac, TRUE, previous);
     return result;
 }
 
