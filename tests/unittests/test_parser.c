@@ -274,7 +274,7 @@ parse_cmd_with_many_quoted_and_many_spaces(void** state)
 void
 parse_cmd_freetext_with_quoted(void** state)
 {
-    char* inp = "/cmd \"arg1\" arg2 hello there whats up";
+    char* inp = "/cmd \"arg1\" arg2 hello there what's up";
     gboolean result = FALSE;
     gchar** args = parse_args_with_freetext(inp, 3, 3, &result);
 
@@ -282,7 +282,7 @@ parse_cmd_freetext_with_quoted(void** state)
     assert_int_equal(3, g_strv_length(args));
     assert_string_equal("arg1", args[0]);
     assert_string_equal("arg2", args[1]);
-    assert_string_equal("hello there whats up", args[2]);
+    assert_string_equal("hello there what's up", args[2]);
     g_strfreev(args);
 }
 

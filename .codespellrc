@@ -1,2 +1,5 @@
 [codespell]
-skip = libtool,./autom4te.cache/*,*.html,./build-aux/*,./.git/*,aclocal*,./m4/*,./config.status,./configure,./config.log,todo
+skip = libtool,./autom4te.cache/*,*.html,./build-aux/*,./.git/*,aclocal*,./m4/*,./config.status,./configure,./config.log,todo,jquery.js,*~
+ignore-words-list = iterm
+ignore-regex = \"Hel\"|ist ein|\->fpr
+uri-ignore-words-list = *
