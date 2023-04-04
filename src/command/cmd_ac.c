@@ -294,6 +294,8 @@ static Autocomplete vcard_togglable_param_ac;
 static Autocomplete vcard_toggle_ac;
 static Autocomplete vcard_address_type_ac;
 
+static GHashTable* ac_funcs = NULL;
+
 /*!
  * \brief Initialization of auto completion for commands.
  *
@@ -1297,6 +1299,78 @@ cmd_ac_init(void)
     vcard_address_type_ac = autocomplete_new();
     autocomplete_add(vcard_address_type_ac, "domestic");
     autocomplete_add(vcard_address_type_ac, "international");
+
+    if (ac_funcs != NULL)
+        g_hash_table_destroy(ac_funcs);
+    ac_funcs = g_hash_table_new(g_str_hash, g_str_equal);
+    g_hash_table_insert(ac_funcs, "/account", _account_autocomplete);
+    g_hash_table_insert(ac_funcs, "/affiliation", _affiliation_autocomplete);
+    g_hash_table_insert(ac_funcs, "/alias", _alias_autocomplete);
+    g_hash_table_insert(ac_funcs, "/autoaway", _autoaway_autocomplete);
+    g_hash_table_insert(ac_funcs, "/autoconnect", _autoconnect_autocomplete);
+    g_hash_table_insert(ac_funcs, "/avatar", _avatar_autocomplete);
+    g_hash_table_insert(ac_funcs, "/ban", _ban_autocomplete);
+    g_hash_table_insert(ac_funcs, "/blocked", _blocked_autocomplete);
+    g_hash_table_insert(ac_funcs, "/bookmark", _bookmark_autocomplete);
+    g_hash_table_insert(ac_funcs, "/clear", _clear_autocomplete);
+    g_hash_table_insert(ac_funcs, "/close", _close_autocomplete);
+    g_hash_table_insert(ac_funcs, "/cmd", _adhoc_cmd_autocomplete);
+    g_hash_table_insert(ac_funcs, "/color", _color_autocomplete);
+    g_hash_table_insert(ac_funcs, "/connect", _connect_autocomplete);
+    g_hash_table_insert(ac_funcs, "/console", _console_autocomplete);
+    g_hash_table_insert(ac_funcs, "/correct", _correct_autocomplete);
+    g_hash_table_insert(ac_funcs, "/correction", _correction_autocomplete);
+    g_hash_table_insert(ac_funcs, "/executable", _executable_autocomplete);
+    g_hash_table_insert(ac_funcs, "/form", _form_autocomplete);
+    g_hash_table_insert(ac_funcs, "/help", _help_autocomplete);
+    g_hash_table_insert(ac_funcs, "/inpblock", _inpblock_autocomplete);
+    g_hash_table_insert(ac_funcs, "/intype", _intype_autocomplete);
+    g_hash_table_insert(ac_funcs, "/invite", _invite_autocomplete);
+    g_hash_table_insert(ac_funcs, "/join", _join_autocomplete);
+    g_hash_table_insert(ac_funcs, "/kick", _kick_autocomplete);
+    g_hash_table_insert(ac_funcs, "/lastactivity", _lastactivity_autocomplete);
+    g_hash_table_insert(ac_funcs, "/log", _log_autocomplete);
+    g_hash_table_insert(ac_funcs, "/logging", _logging_autocomplete);
+    g_hash_table_insert(ac_funcs, "/mood", _mood_autocomplete);
+    g_hash_table_insert(ac_funcs, "/notify", _notify_autocomplete);
+    g_hash_table_insert(ac_funcs, "/occupants", _occupants_autocomplete);
+#ifdef HAVE_OMEMO
+    g_hash_table_insert(ac_funcs, "/omemo", _omemo_autocomplete);
+#endif
+#ifdef HAVE_LIBOTR
+    g_hash_table_insert(ac_funcs, "/otr", _otr_autocomplete);
+#endif
+#ifdef HAVE_LIBGPGME
+    g_hash_table_insert(ac_funcs, "/ox", _ox_autocomplete);
+    g_hash_table_insert(ac_funcs, "/pgp", _pgp_autocomplete);
+#endif
+    g_hash_table_insert(ac_funcs, "/plugins", _plugins_autocomplete);
+    g_hash_table_insert(ac_funcs, "/presence", _presence_autocomplete);
+    g_hash_table_insert(ac_funcs, "/receipts", _receipts_autocomplete);
+    g_hash_table_insert(ac_funcs, "/reconnect", _reconnect_autocomplete);
+    g_hash_table_insert(ac_funcs, "/resource", _resource_autocomplete);
+    g_hash_table_insert(ac_funcs, "/role", _role_autocomplete);
+    g_hash_table_insert(ac_funcs, "/rooms", _rooms_autocomplete);
+    g_hash_table_insert(ac_funcs, "/roster", _roster_autocomplete);
+    g_hash_table_insert(ac_funcs, "/script", _script_autocomplete);
+    g_hash_table_insert(ac_funcs, "/sendfile", _sendfile_autocomplete);
+    g_hash_table_insert(ac_funcs, "/software", _software_autocomplete);
+    g_hash_table_insert(ac_funcs, "/status", _status_autocomplete);
+    g_hash_table_insert(ac_funcs, "/statusbar", _statusbar_autocomplete);
+    g_hash_table_insert(ac_funcs, "/strophe", _strophe_autocomplete);
+    g_hash_table_insert(ac_funcs, "/sub", _sub_autocomplete);
+    g_hash_table_insert(ac_funcs, "/subject", _subject_autocomplete);
+    g_hash_table_insert(ac_funcs, "/theme", _theme_autocomplete);
+    g_hash_table_insert(ac_funcs, "/time", _time_autocomplete);
+    g_hash_table_insert(ac_funcs, "/titlebar", _titlebar_autocomplete);
+    g_hash_table_insert(ac_funcs, "/tls", _tls_autocomplete);
+    g_hash_table_insert(ac_funcs, "/tray", _tray_autocomplete);
+    g_hash_table_insert(ac_funcs, "/url", _url_autocomplete);
+    g_hash_table_insert(ac_funcs, "/vcard", _vcard_autocomplete);
+    g_hash_table_insert(ac_funcs, "/who", _who_autocomplete);
+    g_hash_table_insert(ac_funcs, "/win", _win_autocomplete);
+    g_hash_table_insert(ac_funcs, "/wins", _wins_autocomplete);
+    g_hash_table_insert(ac_funcs, "/wintitle", _wintitle_autocomplete);
 }
 
 void
@@ -2009,85 +2083,25 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
         }
     }
 
-    gchar* cmds[] = { "/prefs", "/disco", "/room", "/autoping", "/mainwin", "/inputwin" };
-    Autocomplete completers[] = { prefs_ac, disco_ac, room_ac, autoping_ac, winpos_ac, winpos_ac };
+    struct
+    {
+        gchar* cmd;
+        Autocomplete completer;
+    } ac_cmds[] = {
+        { "/prefs", prefs_ac },
+        { "/disco", disco_ac },
+        { "/room", room_ac },
+        { "/autoping", autoping_ac },
+        { "/mainwin", winpos_ac },
+        { "/inputwin", winpos_ac },
+    };
 
-    for (int i = 0; i < ARRAY_SIZE(cmds); i++) {
-        result = autocomplete_param_with_ac(input, cmds[i], completers[i], TRUE, previous);
+    for (int i = 0; i < ARRAY_SIZE(ac_cmds); i++) {
+        result = autocomplete_param_with_ac(input, ac_cmds[i].cmd, ac_cmds[i].completer, TRUE, previous);
         if (result) {
             return result;
         }
     }
-
-    GHashTable* ac_funcs = g_hash_table_new(g_str_hash, g_str_equal);
-    g_hash_table_insert(ac_funcs, "/help", _help_autocomplete);
-    g_hash_table_insert(ac_funcs, "/who", _who_autocomplete);
-    g_hash_table_insert(ac_funcs, "/sub", _sub_autocomplete);
-    g_hash_table_insert(ac_funcs, "/notify", _notify_autocomplete);
-    g_hash_table_insert(ac_funcs, "/autoaway", _autoaway_autocomplete);
-    g_hash_table_insert(ac_funcs, "/theme", _theme_autocomplete);
-    g_hash_table_insert(ac_funcs, "/log", _log_autocomplete);
-    g_hash_table_insert(ac_funcs, "/account", _account_autocomplete);
-    g_hash_table_insert(ac_funcs, "/roster", _roster_autocomplete);
-    g_hash_table_insert(ac_funcs, "/bookmark", _bookmark_autocomplete);
-    g_hash_table_insert(ac_funcs, "/autoconnect", _autoconnect_autocomplete);
-#ifdef HAVE_LIBOTR
-    g_hash_table_insert(ac_funcs, "/otr", _otr_autocomplete);
-#endif
-#ifdef HAVE_LIBGPGME
-    g_hash_table_insert(ac_funcs, "/pgp", _pgp_autocomplete);
-    g_hash_table_insert(ac_funcs, "/ox", _ox_autocomplete);
-#endif
-#ifdef HAVE_OMEMO
-    g_hash_table_insert(ac_funcs, "/omemo", _omemo_autocomplete);
-#endif
-    g_hash_table_insert(ac_funcs, "/connect", _connect_autocomplete);
-    g_hash_table_insert(ac_funcs, "/alias", _alias_autocomplete);
-    g_hash_table_insert(ac_funcs, "/join", _join_autocomplete);
-    g_hash_table_insert(ac_funcs, "/form", _form_autocomplete);
-    g_hash_table_insert(ac_funcs, "/occupants", _occupants_autocomplete);
-    g_hash_table_insert(ac_funcs, "/kick", _kick_autocomplete);
-    g_hash_table_insert(ac_funcs, "/ban", _ban_autocomplete);
-    g_hash_table_insert(ac_funcs, "/affiliation", _affiliation_autocomplete);
-    g_hash_table_insert(ac_funcs, "/role", _role_autocomplete);
-    g_hash_table_insert(ac_funcs, "/resource", _resource_autocomplete);
-    g_hash_table_insert(ac_funcs, "/wintitle", _wintitle_autocomplete);
-    g_hash_table_insert(ac_funcs, "/inpblock", _inpblock_autocomplete);
-    g_hash_table_insert(ac_funcs, "/time", _time_autocomplete);
-    g_hash_table_insert(ac_funcs, "/receipts", _receipts_autocomplete);
-    g_hash_table_insert(ac_funcs, "/reconnect", _reconnect_autocomplete);
-    g_hash_table_insert(ac_funcs, "/wins", _wins_autocomplete);
-    g_hash_table_insert(ac_funcs, "/tls", _tls_autocomplete);
-    g_hash_table_insert(ac_funcs, "/titlebar", _titlebar_autocomplete);
-    g_hash_table_insert(ac_funcs, "/script", _script_autocomplete);
-    g_hash_table_insert(ac_funcs, "/subject", _subject_autocomplete);
-    g_hash_table_insert(ac_funcs, "/console", _console_autocomplete);
-    g_hash_table_insert(ac_funcs, "/win", _win_autocomplete);
-    g_hash_table_insert(ac_funcs, "/close", _close_autocomplete);
-    g_hash_table_insert(ac_funcs, "/plugins", _plugins_autocomplete);
-    g_hash_table_insert(ac_funcs, "/sendfile", _sendfile_autocomplete);
-    g_hash_table_insert(ac_funcs, "/blocked", _blocked_autocomplete);
-    g_hash_table_insert(ac_funcs, "/tray", _tray_autocomplete);
-    g_hash_table_insert(ac_funcs, "/presence", _presence_autocomplete);
-    g_hash_table_insert(ac_funcs, "/rooms", _rooms_autocomplete);
-    g_hash_table_insert(ac_funcs, "/statusbar", _statusbar_autocomplete);
-    g_hash_table_insert(ac_funcs, "/clear", _clear_autocomplete);
-    g_hash_table_insert(ac_funcs, "/invite", _invite_autocomplete);
-    g_hash_table_insert(ac_funcs, "/status", _status_autocomplete);
-    g_hash_table_insert(ac_funcs, "/logging", _logging_autocomplete);
-    g_hash_table_insert(ac_funcs, "/color", _color_autocomplete);
-    g_hash_table_insert(ac_funcs, "/avatar", _avatar_autocomplete);
-    g_hash_table_insert(ac_funcs, "/correction", _correction_autocomplete);
-    g_hash_table_insert(ac_funcs, "/correct", _correct_autocomplete);
-    g_hash_table_insert(ac_funcs, "/software", _software_autocomplete);
-    g_hash_table_insert(ac_funcs, "/url", _url_autocomplete);
-    g_hash_table_insert(ac_funcs, "/executable", _executable_autocomplete);
-    g_hash_table_insert(ac_funcs, "/lastactivity", _lastactivity_autocomplete);
-    g_hash_table_insert(ac_funcs, "/intype", _intype_autocomplete);
-    g_hash_table_insert(ac_funcs, "/mood", _mood_autocomplete);
-    g_hash_table_insert(ac_funcs, "/strophe", _strophe_autocomplete);
-    g_hash_table_insert(ac_funcs, "/cmd", _adhoc_cmd_autocomplete);
-    g_hash_table_insert(ac_funcs, "/vcard", _vcard_autocomplete);
 
     int len = strlen(input);
     char parsed[len + 1];
@@ -2106,11 +2120,9 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     if (ac_func) {
         result = ac_func(window, input, previous);
         if (result) {
-            g_hash_table_destroy(ac_funcs);
             return result;
         }
     }
-    g_hash_table_destroy(ac_funcs);
 
     result = plugins_autocomplete(input, previous);
     if (result) {
