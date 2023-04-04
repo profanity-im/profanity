@@ -182,10 +182,7 @@ status_bar_inactive(const int win)
 void
 _create_tab(const int win, win_type_t wintype, char* identifier, gboolean highlight)
 {
-    int true_win = win;
-    if (true_win == 0) {
-        true_win = 10;
-    }
+    int true_win = win == 0 ? 10 : win;
 
     StatusBarTab* tab = malloc(sizeof(StatusBarTab));
     tab->identifier = strdup(identifier);
@@ -198,11 +195,12 @@ _create_tab(const int win, win_type_t wintype, char* identifier, gboolean highli
         if (roster_exists()) {
             contact = roster_get_contact(tab->identifier);
         }
-        if (contact && p_contact_name(contact)) {
-            tab->display_name = strdup(p_contact_name(contact));
-        } else {
-            char* pref = prefs_get_string(PREF_STATUSBAR_CHAT);
-            if (g_strcmp0("user", pref) == 0) {
+        const char* pcontact_name = contact ? p_contact_name(contact) : NULL;
+        auto_char char* pref = prefs_get_string(PREF_STATUSBAR_CHAT);
+        if (g_strcmp0("user", pref) == 0) {
+            if (pcontact_name) {
+                tab->display_name = strdup(pcontact_name);
+            } else {
                 Jid* jidp = jid_create(tab->identifier);
                 if (jidp) {
                     tab->display_name = jidp->localpart != NULL ? strdup(jidp->localpart) : strdup(jidp->barejid);
@@ -210,10 +208,9 @@ _create_tab(const int win, win_type_t wintype, char* identifier, gboolean highli
                 } else {
                     tab->display_name = strdup(tab->identifier);
                 }
-            } else {
-                tab->display_name = strdup(tab->identifier);
             }
-            g_free(pref);
+        } else {
+            tab->display_name = strdup(tab->identifier);
         }
     }
 
@@ -518,12 +515,17 @@ _status_bar_draw_maintext(int pos)
     const char* maintext = NULL;
     auto_jid Jid* jidp = NULL;
     auto_char char* self = prefs_get_string(PREF_STATUSBAR_SELF);
+
     if (statusbar->prompt) {
         mvwprintw(statusbar_win, 0, pos, "%s", statusbar->prompt);
         return utf8_display_len(statusbar->prompt);
-    } else if (g_strcmp0(self, "off") == 0) {
+    }
+
+    if (g_strcmp0(self, "off") == 0) {
         return pos;
-    } else if (statusbar->fulljid) {
+    }
+
+    if (statusbar->fulljid) {
         jidp = jid_create(statusbar->fulljid);
         if (g_strcmp0(self, "user") == 0) {
             maintext = jidp->localpart;
@@ -536,6 +538,28 @@ _status_bar_draw_maintext(int pos)
 
     if (maintext == NULL) {
         return pos;
+    }
+
+    if (statusbar->fulljid) {
+        auto_char char* pref = prefs_get_string(PREF_STATUSBAR_SELF);
+
+        if (g_strcmp0(pref, "off") == 0) {
+            return pos;
+        }
+        if (g_strcmp0(pref, "user") == 0) {
+            Jid* jidp = jid_create(statusbar->fulljid);
+            mvwprintw(statusbar_win, 0, pos, "%s", jidp->localpart);
+            jid_destroy(jidp);
+            return pos;
+        }
+        if (g_strcmp0(pref, "barejid") == 0) {
+            Jid* jidp = jid_create(statusbar->fulljid);
+            mvwprintw(statusbar_win, 0, pos, "%s", jidp->barejid);
+            jid_destroy(jidp);
+            return pos;
+        }
+
+        mvwprintw(statusbar_win, 0, pos, "%s", statusbar->fulljid);
     }
 
     gboolean actlist_tabmode = _tabmode_is_actlist();

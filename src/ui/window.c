@@ -328,7 +328,7 @@ win_get_title(ProfWin* window)
         if (name == NULL) {
             return strdup(chatwin->barejid);
         }
-        if(show_titlebar_jid){
+        if (show_titlebar_jid) {
             return g_strdup_printf("%s <%s>", name, chatwin->barejid);
         }
         return g_strdup_printf("%s", name);
