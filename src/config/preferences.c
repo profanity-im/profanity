@@ -1813,6 +1813,7 @@ _get_group(preference_t pref)
     case PREF_STATUSBAR_SELF:
     case PREF_STATUSBAR_CHAT:
     case PREF_STATUSBAR_ROOM:
+    case PREF_STATUSBAR_TABMODE:
     case PREF_TITLEBAR_MUC_TITLE_JID:
     case PREF_TITLEBAR_MUC_TITLE_NAME:
     case PREF_SLASH_GUARD:
@@ -2136,6 +2137,8 @@ _get_key(preference_t pref)
         return "statusbar.chat";
     case PREF_STATUSBAR_ROOM:
         return "statusbar.room";
+    case PREF_STATUSBAR_TABMODE:
+        return "statusbar.tabmode";
     case PREF_OMEMO_LOG:
         return "log";
     case PREF_OMEMO_POLICY:
@@ -2300,6 +2303,8 @@ _get_default_string(preference_t pref)
         return "user";
     case PREF_STATUSBAR_ROOM:
         return "room";
+    case PREF_STATUSBAR_TABMODE:
+        return "default";
     case PREF_OMEMO_LOG:
         return "on";
     case PREF_OMEMO_POLICY:

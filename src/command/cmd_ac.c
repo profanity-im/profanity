@@ -265,6 +265,7 @@ static Autocomplete statusbar_self_ac;
 static Autocomplete statusbar_chat_ac;
 static Autocomplete statusbar_room_ac;
 static Autocomplete statusbar_show_ac;
+static Autocomplete statusbar_tabmode_ac;
 static Autocomplete clear_ac;
 static Autocomplete invite_ac;
 static Autocomplete status_ac;
@@ -1030,6 +1031,7 @@ cmd_ac_init(void)
     autocomplete_add(statusbar_ac, "hide");
     autocomplete_add(statusbar_ac, "maxtabs");
     autocomplete_add(statusbar_ac, "tablen");
+    autocomplete_add(statusbar_ac, "tabmode");
     autocomplete_add(statusbar_ac, "self");
     autocomplete_add(statusbar_ac, "chat");
     autocomplete_add(statusbar_ac, "room");
@@ -1057,6 +1059,10 @@ cmd_ac_init(void)
     autocomplete_add(statusbar_show_ac, "name");
     autocomplete_add(statusbar_show_ac, "number");
     autocomplete_add(statusbar_show_ac, "read");
+
+    statusbar_tabmode_ac = autocomplete_new();
+    autocomplete_add(statusbar_tabmode_ac, "actlist");
+    autocomplete_add(statusbar_tabmode_ac, "default");
 
     status_ac = autocomplete_new();
     autocomplete_add(status_ac, "set");
@@ -1678,6 +1684,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(statusbar_chat_ac);
     autocomplete_reset(statusbar_room_ac);
     autocomplete_reset(statusbar_show_ac);
+    autocomplete_reset(statusbar_tabmode_ac);
     autocomplete_reset(clear_ac);
     autocomplete_reset(invite_ac);
     autocomplete_reset(status_ac);
@@ -1864,6 +1871,7 @@ cmd_ac_uninit(void)
     autocomplete_free(statusbar_chat_ac);
     autocomplete_free(statusbar_room_ac);
     autocomplete_free(statusbar_show_ac);
+    autocomplete_free(statusbar_tabmode_ac);
     autocomplete_free(clear_ac);
     autocomplete_free(invite_ac);
     autocomplete_free(status_ac);
@@ -4106,6 +4114,11 @@ _statusbar_autocomplete(ProfWin* window, const char* const input, gboolean previ
     }
 
     found = autocomplete_param_with_ac(input, "/statusbar chat", statusbar_chat_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/statusbar tabmode", statusbar_tabmode_ac, TRUE, previous);
     if (found) {
         return found;
     }
