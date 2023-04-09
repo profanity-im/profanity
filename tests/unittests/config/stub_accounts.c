@@ -175,6 +175,10 @@ accounts_set_script_start(const char* const account_name, const char* const valu
 {
 }
 void
+accounts_set_client(const char* const account_name, const char* const value)
+{
+}
+void
 accounts_set_theme(const char* const account_name, const char* const value)
 {
 }
@@ -291,6 +295,10 @@ accounts_clear_pgp_keyid(const char* const account_name)
 }
 void
 accounts_clear_script_start(const char* const account_name)
+{
+}
+void
+accounts_clear_client(const char* const account_name)
 {
 }
 void

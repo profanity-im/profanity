@@ -87,6 +87,7 @@ gint accounts_get_priority_for_presence_type(const char* const account_name,
                                              resource_presence_t presence_type);
 void accounts_set_pgp_keyid(const char* const account_name, const char* const value);
 void accounts_set_script_start(const char* const account_name, const char* const value);
+void accounts_set_client(const char* const account_name, const char* const value);
 void accounts_set_theme(const char* const account_name, const char* const value);
 void accounts_clear_password(const char* const account_name);
 void accounts_clear_eval_password(const char* const account_name);
@@ -95,6 +96,7 @@ void accounts_clear_port(const char* const account_name);
 void accounts_clear_otr(const char* const account_name);
 void accounts_clear_pgp_keyid(const char* const account_name);
 void accounts_clear_script_start(const char* const account_name);
+void accounts_clear_client(const char* const account_name);
 void accounts_clear_theme(const char* const account_name);
 void accounts_clear_muc(const char* const account_name);
 void accounts_clear_resource(const char* const account_name);

@@ -56,7 +56,8 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
             gchar* otr_policy, GList* otr_manual, GList* otr_opportunistic, GList* otr_always,
             gchar* omemo_policy, GList* omemo_enabled, GList* omemo_disabled,
             GList* ox_enabled, GList* pgp_enabled, gchar* pgp_keyid,
-            gchar* startscript, gchar* theme, gchar* tls_policy, gchar* auth_policy)
+            gchar* startscript, gchar* theme, gchar* tls_policy, gchar* auth_policy,
+            gchar* client)
 {
     ProfAccount* new_account = calloc(1, sizeof(ProfAccount));
 
@@ -130,6 +131,8 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
     new_account->pgp_keyid = pgp_keyid;
 
     new_account->startscript = startscript;
+
+    new_account->client = client;
 
     new_account->theme = theme;
 
@@ -226,6 +229,7 @@ account_free(ProfAccount* account)
     free(account->omemo_policy);
     free(account->pgp_keyid);
     free(account->startscript);
+    free(account->client);
     free(account->theme);
     free(account->tls_policy);
     free(account->auth_policy);

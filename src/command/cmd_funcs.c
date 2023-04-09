@@ -841,6 +841,14 @@ _account_set_startscript(char* account_name, char* script)
 }
 
 gboolean
+_account_set_client(char* account_name, char* new_client)
+{
+    accounts_set_client(account_name, new_client);
+    cons_show("Client name for account %s has been set to %s", account_name, new_client);
+    return TRUE;
+}
+
+gboolean
 _account_set_theme(char* account_name, char* theme)
 {
     if (!theme_exists(theme)) {
@@ -981,6 +989,8 @@ cmd_account_set(ProfWin* window, const char* const command, gchar** args)
         return _account_set_pgpkeyid(account_name, value);
     if (strcmp(property, "startscript") == 0)
         return _account_set_startscript(account_name, value);
+    if (strcmp(property, "clientid") == 0)
+        return _account_set_client(account_name, value);
     if (strcmp(property, "theme") == 0)
         return _account_set_theme(account_name, value);
     if (strcmp(property, "tls") == 0)
@@ -1017,48 +1027,40 @@ cmd_account_clear(ProfWin* window, const char* const command, gchar** args)
     if (strcmp(property, "password") == 0) {
         accounts_clear_password(account_name);
         cons_show("Removed password for account %s", account_name);
-        cons_show("");
     } else if (strcmp(property, "eval_password") == 0) {
         accounts_clear_eval_password(account_name);
         cons_show("Removed eval password for account %s", account_name);
-        cons_show("");
     } else if (strcmp(property, "server") == 0) {
         accounts_clear_server(account_name);
         cons_show("Removed server for account %s", account_name);
-        cons_show("");
     } else if (strcmp(property, "port") == 0) {
         accounts_clear_port(account_name);
         cons_show("Removed port for account %s", account_name);
-        cons_show("");
     } else if (strcmp(property, "otr") == 0) {
         accounts_clear_otr(account_name);
         cons_show("OTR policy removed for account %s", account_name);
-        cons_show("");
     } else if (strcmp(property, "pgpkeyid") == 0) {
         accounts_clear_pgp_keyid(account_name);
         cons_show("Removed PGP key ID for account %s", account_name);
-        cons_show("");
     } else if (strcmp(property, "startscript") == 0) {
         accounts_clear_script_start(account_name);
         cons_show("Removed start script for account %s", account_name);
-        cons_show("");
+    } else if (strcmp(property, "clientid") == 0) {
+        accounts_clear_client(account_name);
+        cons_show("Reset client name for account %s", account_name);
     } else if (strcmp(property, "theme") == 0) {
         accounts_clear_theme(account_name);
         cons_show("Removed theme for account %s", account_name);
-        cons_show("");
     } else if (strcmp(property, "muc") == 0) {
         accounts_clear_muc(account_name);
         cons_show("Removed MUC service for account %s", account_name);
-        cons_show("");
     } else if (strcmp(property, "resource") == 0) {
         accounts_clear_resource(account_name);
         cons_show("Removed resource for account %s", account_name);
-        cons_show("");
     } else {
         cons_show("Invalid property: %s", property);
-        cons_show("");
     }
-
+    cons_show("");
     return TRUE;
 }
 

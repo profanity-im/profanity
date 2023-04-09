@@ -975,19 +975,25 @@ stanza_create_caps_query_element(xmpp_ctx_t* ctx)
     xmpp_stanza_t* identity = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(identity, "identity");
     xmpp_stanza_set_attribute(identity, "category", "client");
-    xmpp_stanza_set_type(identity, "console");
 
-    GString* name_str = g_string_new("Profanity ");
-    g_string_append(name_str, PACKAGE_VERSION);
-    if (g_strcmp0(PACKAGE_STATUS, "development") == 0) {
+    ProfAccount* account = accounts_get_account(session_get_account_name());
+    gchar* client = account->client;
+    bool is_custom_client = client != NULL;
+
+    GString* name_str = g_string_new(is_custom_client ? client : "Profanity ");
+    if (!is_custom_client) {
+        xmpp_stanza_set_type(identity, "console");
+        g_string_append(name_str, PACKAGE_VERSION);
+        if (g_strcmp0(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
-        g_string_append(name_str, "dev.");
-        g_string_append(name_str, PROF_GIT_BRANCH);
-        g_string_append(name_str, ".");
-        g_string_append(name_str, PROF_GIT_REVISION);
+            g_string_append(name_str, "dev.");
+            g_string_append(name_str, PROF_GIT_BRANCH);
+            g_string_append(name_str, ".");
+            g_string_append(name_str, PROF_GIT_REVISION);
 #else
-        g_string_append(name_str, "dev");
+            g_string_append(name_str, "dev");
 #endif
+        }
     }
     xmpp_stanza_set_attribute(identity, "name", name_str->str);
     g_string_free(name_str, TRUE);

@@ -329,6 +329,11 @@ accounts_get_account(const char* const name)
             startscript = g_key_file_get_string(accounts, name, "script.start", NULL);
         }
 
+        gchar* client = NULL;
+        if (g_key_file_has_key(accounts, name, "client.name", NULL)) {
+            client = g_key_file_get_string(accounts, name, "client.name", NULL);
+        }
+
         gchar* theme = NULL;
         if (g_key_file_has_key(accounts, name, "theme", NULL)) {
             theme = g_key_file_get_string(accounts, name, "theme", NULL);
@@ -348,7 +353,7 @@ accounts_get_account(const char* const name)
                                                priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
                                                otr_opportunistic, otr_always, omemo_policy, omemo_enabled,
                                                omemo_disabled, ox_enabled, pgp_enabled, pgp_keyid,
-                                               startscript, theme, tls_policy, auth_policy);
+                                               startscript, theme, tls_policy, auth_policy, client);
 
         return new_account;
     }
@@ -552,6 +557,12 @@ accounts_set_script_start(const char* const account_name, const char* const valu
 }
 
 void
+accounts_set_client(const char* const account_name, const char* const value)
+{
+    _accounts_set_string_option(account_name, "client.name", value);
+}
+
+void
 accounts_set_theme(const char* const account_name, const char* const value)
 {
     _accounts_set_string_option(account_name, "theme", value);
@@ -591,6 +602,12 @@ void
 accounts_clear_script_start(const char* const account_name)
 {
     _accounts_clear_string_option(account_name, "script.start");
+}
+
+void
+accounts_clear_client(const char* const account_name)
+{
+    _accounts_clear_string_option(account_name, "client.name");
 }
 
 void
