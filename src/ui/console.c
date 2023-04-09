@@ -293,7 +293,7 @@ cons_show_typing(const char* const barejid)
         display_usr = barejid;
     }
 
-    win_println(console, THEME_TYPING, "-", "!! %s is typing a message...", display_usr);
+    win_println(console, THEME_TYPING, "-", "!! %s is typing a message…", display_usr);
     cons_alert(NULL);
 }
 

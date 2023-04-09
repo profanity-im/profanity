@@ -183,12 +183,12 @@ _init(char* log_level, char* config_file, char* log_file, char* theme_name)
 
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
 #ifdef HAVE_GIT_VERSION
-        log_info("Starting Profanity (%sdev.%s.%s)...", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+        log_info("Starting Profanity (%sdev.%s.%s)…", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-        log_info("Starting Profanity (%sdev)...", PACKAGE_VERSION);
+        log_info("Starting Profanity (%sdev)…", PACKAGE_VERSION);
 #endif
     } else {
-        log_info("Starting Profanity (%s)...", PACKAGE_VERSION);
+        log_info("Starting Profanity (%s)…", PACKAGE_VERSION);
     }
 
     chat_log_init();

@@ -414,7 +414,7 @@ _register_handle_features(xmpp_conn_t* xmpp_conn, xmpp_stanza_t* stanza, void* u
     /* secure connection if possible */
     child = xmpp_stanza_get_child_by_name(stanza, "starttls");
     if (child && (strcmp(xmpp_stanza_get_ns(child), XMPP_NS_TLS) == 0)) {
-        log_debug("Server supports TLS. Attempting to establish...");
+        log_debug("Server supports TLS. Attempting to establish…");
         child = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(child, "starttls");
         xmpp_stanza_set_ns(child, XMPP_NS_TLS);

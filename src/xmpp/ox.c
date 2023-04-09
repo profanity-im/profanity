@@ -91,7 +91,7 @@ ox_announce_public_key(const char* const filename)
 {
     assert(filename);
 
-    cons_show("Announce OpenPGP Key for OX %s ...", filename);
+    cons_show("Announce OpenPGP Key for OX %s …", filename);
     log_info("[OX] Announce OpenPGP Key of OX: %s", filename);
 
     // key the key and the fingerprint via GnuPG from file
