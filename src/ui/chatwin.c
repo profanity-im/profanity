@@ -246,10 +246,10 @@ chatwin_otr_smp_event(ProfChatWin* chatwin, prof_otr_smp_event_t event, void* da
         win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "%s failed to authenticate you.", chatwin->barejid);
         break;
     case PROF_OTR_SMP_AUTH:
-        win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "Authenticating %s...", chatwin->barejid);
+        win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "Authenticating %s…", chatwin->barejid);
         break;
     case PROF_OTR_SMP_AUTH_WAIT:
-        win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "Awaiting authentication from %s...", chatwin->barejid);
+        win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "Awaiting authentication from %s…", chatwin->barejid);
         break;
     default:
         break;

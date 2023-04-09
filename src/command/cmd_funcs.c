@@ -1312,7 +1312,7 @@ cmd_disconnect(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_quit(ProfWin* window, const char* const command, gchar** args)
 {
-    log_info("Profanity is shutting down...");
+    log_info("Profanity is shutting down…");
     exit(0);
     return FALSE;
 }
@@ -3765,11 +3765,11 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             value = args[0];
             if (g_strcmp0(value, "on") == 0) {
                 form_set_value(form, tag, "1");
-                win_println(window, THEME_DEFAULT, "-", "Field updated...");
+                win_println(window, THEME_DEFAULT, "-", "Field updated…");
                 confwin_show_form_field(confwin, form, tag);
             } else if (g_strcmp0(value, "off") == 0) {
                 form_set_value(form, tag, "0");
-                win_println(window, THEME_DEFAULT, "-", "Field updated...");
+                win_println(window, THEME_DEFAULT, "-", "Field updated…");
                 confwin_show_form_field(confwin, form, tag);
             } else {
                 win_println(window, THEME_DEFAULT, "-", "Invalid command, usage:");
@@ -3788,7 +3788,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
                 win_println(window, THEME_DEFAULT, "-", "");
             } else {
                 form_set_value(form, tag, value);
-                win_println(window, THEME_DEFAULT, "-", "Field updated...");
+                win_println(window, THEME_DEFAULT, "-", "Field updated…");
                 confwin_show_form_field(confwin, form, tag);
             }
             break;
@@ -3800,7 +3800,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
                 win_println(window, THEME_DEFAULT, "-", "");
             } else {
                 form_set_value(form, tag, value);
-                win_println(window, THEME_DEFAULT, "-", "Field updated...");
+                win_println(window, THEME_DEFAULT, "-", "Field updated…");
                 confwin_show_form_field(confwin, form, tag);
             }
             break;
@@ -3824,7 +3824,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             }
             if (g_strcmp0(cmd, "add") == 0) {
                 form_add_value(form, tag, value);
-                win_println(window, THEME_DEFAULT, "-", "Field updated...");
+                win_println(window, THEME_DEFAULT, "-", "Field updated…");
                 confwin_show_form_field(confwin, form, tag);
                 break;
             }
@@ -3852,7 +3852,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
 
                 removed = form_remove_text_multi_value(form, tag, index);
                 if (removed) {
-                    win_println(window, THEME_DEFAULT, "-", "Field updated...");
+                    win_println(window, THEME_DEFAULT, "-", "Field updated…");
                     confwin_show_form_field(confwin, form, tag);
                 } else {
                     win_println(window, THEME_DEFAULT, "-", "Could not remove %s from %s", value, tag);
@@ -3881,7 +3881,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
                 if (valid) {
                     added = form_add_unique_value(form, tag, value);
                     if (added) {
-                        win_println(window, THEME_DEFAULT, "-", "Field updated...");
+                        win_println(window, THEME_DEFAULT, "-", "Field updated…");
                         confwin_show_form_field(confwin, form, tag);
                     } else {
                         win_println(window, THEME_DEFAULT, "-", "Value %s already selected for %s", value, tag);
@@ -3898,7 +3898,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
                 if (valid == TRUE) {
                     removed = form_remove_value(form, tag, value);
                     if (removed) {
-                        win_println(window, THEME_DEFAULT, "-", "Field updated...");
+                        win_println(window, THEME_DEFAULT, "-", "Field updated…");
                         confwin_show_form_field(confwin, form, tag);
                     } else {
                         win_println(window, THEME_DEFAULT, "-", "Value %s is not currently set for %s", value, tag);
@@ -3930,7 +3930,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             if (g_strcmp0(args[0], "add") == 0) {
                 added = form_add_unique_value(form, tag, value);
                 if (added) {
-                    win_println(window, THEME_DEFAULT, "-", "Field updated...");
+                    win_println(window, THEME_DEFAULT, "-", "Field updated…");
                     confwin_show_form_field(confwin, form, tag);
                 } else {
                     win_println(window, THEME_DEFAULT, "-", "JID %s already exists in %s", value, tag);
@@ -3940,7 +3940,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             if (g_strcmp0(args[0], "remove") == 0) {
                 removed = form_remove_value(form, tag, value);
                 if (removed) {
-                    win_println(window, THEME_DEFAULT, "-", "Field updated...");
+                    win_println(window, THEME_DEFAULT, "-", "Field updated…");
                     confwin_show_form_field(confwin, form, tag);
                 } else {
                     win_println(window, THEME_DEFAULT, "-", "Field %s does not contain %s", tag, value);
@@ -6639,9 +6639,9 @@ cmd_ping(ProfWin* window, const char* const command, gchar** args)
     iq_send_ping(args[0]);
 
     if (args[0] == NULL) {
-        cons_show("Pinged server...");
+        cons_show("Pinged server…");
     } else {
-        cons_show("Pinged %s...", args[0]);
+        cons_show("Pinged %s…", args[0]);
     }
     return TRUE;
 }
@@ -8409,7 +8409,7 @@ cmd_command_exec(ProfWin* window, const char* const command, gchar** args)
 
     iq_command_exec(jid, args[1]);
 
-    cons_show("Execute %s...", args[1]);
+    cons_show("Execute %s…", args[1]);
     return TRUE;
 }
 
@@ -8625,7 +8625,7 @@ cmd_omemo_gen(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    cons_show("Generating OMEMO crytographic materials, it may take a while...");
+    cons_show("Generating OMEMO crytographic materials, it may take a while…");
     ui_update();
     ProfAccount* account = accounts_get_account(session_get_account_name());
     omemo_generate_crypto_materials(account);

@@ -704,7 +704,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     }
 
     if (!contains_session(&jid_address, omemo_ctx.session_store)) {
-        log_debug("[OMEMO] There is no Session for %s ( %d) ,... building session.", jid_address.name, jid_address.device_id);
+        log_debug("[OMEMO] There is no Session for %s ( %d) ,… building session.", jid_address.name, jid_address.device_id);
         int res;
 
         address = malloc(sizeof(signal_protocol_address));

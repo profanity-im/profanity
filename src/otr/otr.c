@@ -304,7 +304,7 @@ otr_on_message_recv(const char* const barejid, const char* const resource, const
                 }
                 memmove(whitespace_base, whitespace_base + tag_length, tag_length);
                 char* otr_query_message = otr_start_query();
-                cons_show("OTR Whitespace pattern detected. Attempting to start OTR session...");
+                cons_show("OTR Whitespace pattern detected. Attempting to start OTR session…");
                 char* id = message_send_chat_otr(barejid, otr_query_message, FALSE, NULL);
                 free(id);
             }
@@ -318,7 +318,7 @@ otr_on_message_recv(const char* const barejid, const char* const resource, const
 
     if (policy == PROF_OTRPOLICY_ALWAYS && *decrypted == FALSE && !whitespace_base) {
         char* otr_query_message = otr_start_query();
-        cons_show("Attempting to start OTR session...");
+        cons_show("Attempting to start OTR session…");
         char* id = message_send_chat_otr(barejid, otr_query_message, FALSE, NULL);
         free(id);
     }
