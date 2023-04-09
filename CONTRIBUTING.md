@@ -52,6 +52,7 @@ We will then pull from your repository and merge manually.
 * Run the tests and code formatters before submitting (c.f. Chapter 'Check everything' of this README).
 * When changing the UI it would be appreciated if you could add a before and after screenshot for comparison.
 * Squash fixup commits into one
+* If applicable, document how to test the functionality
 
 ## Hints and Pitfalls
 
