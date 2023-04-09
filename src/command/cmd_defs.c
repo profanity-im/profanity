@@ -2107,7 +2107,7 @@ static const struct cmd_t command_defs[] = {
               { "set <account> otr <policy>", "Override global OTR policy for this account, see /otr." },
               { "set <account> pgpkeyid <pgpkeyid>", "Set the ID of the PGP key for this account, see /pgp." },
               { "set <account> startscript <script>", "Set the script to execute after connecting." },
-              { "set <account> clientid \"<name> <version>\"", "[EXPERIMENTAL] Set XMPP client name according for discovery according to XEP-0092. Use with caution." },
+              { "set <account> clientid \"<name> <version>\"", "Set XMPP client name for discovery according to XEP-0092. For privacy geeks. Recommendation to leave as is." },
               { "set <account> tls force", "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
               { "set <account> tls allow", "Use TLS for the connection if it is available." },
               { "set <account> tls trust", "Force TLS connection and trust server's certificate." },
