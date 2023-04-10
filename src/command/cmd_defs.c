@@ -1260,8 +1260,8 @@ static const struct cmd_t command_defs[] = {
               { "show tls", "Show or hide TLS indicator in the titlebar." },
               { "show encwarn", "Enable or disable the unencrypted warning message in the titlebar." },
               { "show resource", "Show or hide the current resource in the titlebar." },
-              { "show name", "In case of a MUC. Show the MUC name in the titlebar." },
-              { "show jid", "In case of a MUC. Show the JID in the titlebar." })
+              { "show name", "Show the nickname or MUC name in the titlebar." },
+              { "show jid", "Show the JID in the titlebar." })
       CMD_EXAMPLES(
               "/titlebar up",
               "/titlebar show tls",
