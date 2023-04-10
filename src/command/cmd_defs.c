@@ -1310,7 +1310,7 @@ static const struct cmd_t command_defs[] = {
               { "show|hide read", "Show or hide inactive tabs." },
               { "self user|barejid|fulljid", "Show account user name, barejid, fulljid as status bar title." },
               { "self off", "Disable showing self as status bar title." },
-              { "chat user|jid", "Show users name, or the fulljid if no nick is present for chat tabs." },
+              { "chat user|jid", "Show users name, or fulljid. Change needs a redraw/restart to take effect." },
               { "room room|jid", "Show room name, or the fulljid for room tabs." },
               { "up", "Move the status bar up the screen." },
               { "down", "Move the status bar down the screen." })
