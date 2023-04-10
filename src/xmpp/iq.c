@@ -1697,8 +1697,7 @@ _version_get_handler(xmpp_stanza_t* const stanza)
             xmpp_stanza_add_child(os, os_txt);
             xmpp_stanza_add_child(query, os);
         }
-    }
-    if (is_custom_client && custom_version_str != NULL) {
+    } else if (custom_version_str != NULL) {
         xmpp_stanza_set_text(version_txt, custom_version_str);
         xmpp_stanza_add_child(version, version_txt);
         xmpp_stanza_add_child(query, version);
@@ -1711,7 +1710,7 @@ _version_get_handler(xmpp_stanza_t* const stanza)
     g_string_free(version_str, TRUE);
     xmpp_stanza_release(version_txt);
     xmpp_stanza_release(name_txt);
-    if (include_os) {
+    if (!is_custom_client && include_os) {
         xmpp_stanza_release(os_txt);
         xmpp_stanza_release(os);
     }
