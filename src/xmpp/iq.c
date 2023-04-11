@@ -1651,8 +1651,8 @@ _version_get_handler(xmpp_stanza_t* const stanza)
     xmpp_stanza_add_child(name, name_txt);
     xmpp_stanza_add_child(query, name);
     bool include_os = prefs_get_boolean(PREF_REVEAL_OS) && !is_custom_client;
-    xmpp_stanza_t* os;
-    xmpp_stanza_t* os_txt;
+    xmpp_stanza_t* os = NULL;
+    xmpp_stanza_t* os_txt = NULL;
     xmpp_stanza_t* version = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(version, "version");
     xmpp_stanza_t* version_txt = xmpp_stanza_new(ctx);
