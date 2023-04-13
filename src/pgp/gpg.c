@@ -721,10 +721,9 @@ p_gpg_decrypt(const char* const cipher)
     char* plain_str = gpgme_data_release_and_get_mem(plain_data, &len);
     char* result = NULL;
     if (plain_str) {
-        plain_str[len] = 0;
-        result = g_strdup(plain_str);
+        result = strndup(plain_str, len);
+        gpgme_free(plain_str);
     }
-    gpgme_free(plain_str);
 
     if (passphrase_attempt) {
         passphrase = strdup(passphrase_attempt);
