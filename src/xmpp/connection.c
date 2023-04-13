@@ -776,6 +776,12 @@ connection_get_available_resources(void)
     return g_hash_table_get_values(conn.available_resources);
 }
 
+int
+connection_count_available_resources(void)
+{
+    return g_hash_table_size(conn.available_resources);
+}
+
 void
 connection_add_available_resource(Resource* resource)
 {

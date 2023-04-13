@@ -34,7 +34,7 @@ void
 cmd_account_shows_account_when_connected_and_no_args(void** state)
 {
     ProfAccount* account = account_new(g_strdup("jabber_org"), g_strdup("me@jabber.org"), NULL, NULL,
-                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
     gchar* args[] = { NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
@@ -98,7 +98,7 @@ cmd_account_show_shows_account_when_exists(void** state)
 {
     gchar* args[] = { "show", "account_name", NULL };
     ProfAccount* account = account_new(g_strdup("jabber_org"), g_strdup("me@jabber.org"), NULL, NULL,
-                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
@@ -437,7 +437,7 @@ cmd_account_set_password_sets_password(void** state)
 {
     gchar* args[] = { "set", "a_account", "password", "a_password", NULL };
     ProfAccount* account = account_new(g_strdup("a_account"), NULL, NULL, NULL,
-                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -460,7 +460,7 @@ cmd_account_set_eval_password_sets_eval_password(void** state)
 {
     gchar* args[] = { "set", "a_account", "eval_password", "a_password", NULL };
     ProfAccount* account = account_new(g_strdup("a_account"), NULL, NULL, NULL,
-                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -483,7 +483,7 @@ cmd_account_set_password_when_eval_password_set(void** state)
 {
     gchar* args[] = { "set", "a_account", "password", "a_password", NULL };
     ProfAccount* account = account_new(g_strdup("a_account"), NULL, NULL, g_strdup("a_password"),
-                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -502,7 +502,7 @@ cmd_account_set_eval_password_when_password_set(void** state)
 {
     gchar* args[] = { "set", "a_account", "eval_password", "a_password", NULL };
     ProfAccount* account = account_new(g_strdup("a_account"), NULL, g_strdup("a_password"), NULL,
-                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 
     expect_any(accounts_account_exists, account_name);
     will_return(accounts_account_exists, TRUE);
@@ -853,7 +853,7 @@ cmd_account_set_priority_updates_presence_when_account_connected_with_presence(v
 
 #ifdef HAVE_LIBGPGME
     ProfAccount* account = account_new(g_strdup("a_account"), g_strdup("a_jid"), NULL, NULL, TRUE, NULL, 5222, g_strdup("a_resource"),
-                                       NULL, NULL, 10, 10, 10, 10, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+                                       NULL, NULL, 10, 10, 10, 10, 10, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 
     will_return(session_get_account_name, "a_account");
     expect_any(accounts_get_account, name);

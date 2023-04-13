@@ -485,6 +485,7 @@ cmd_ac_init(void)
     autocomplete_add(account_set_ac, "tls");
     autocomplete_add(account_set_ac, "auth");
     autocomplete_add(account_set_ac, "theme");
+    autocomplete_add(account_set_ac, "session_alarm");
 
     account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
@@ -498,6 +499,7 @@ cmd_ac_init(void)
     autocomplete_add(account_clear_ac, "theme");
     autocomplete_add(account_clear_ac, "muc");
     autocomplete_add(account_clear_ac, "resource");
+    autocomplete_add(account_clear_ac, "session_alarm");
 
     account_default_ac = autocomplete_new();
     autocomplete_add(account_default_ac, "set");
