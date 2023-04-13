@@ -7,6 +7,7 @@ void cmd_roster_add_shows_message_when_no_jid(void** state);
 void cmd_roster_add_sends_roster_add_request(void** state);
 void cmd_roster_remove_shows_message_when_no_jid(void** state);
 void cmd_roster_remove_sends_roster_remove_request(void** state);
+void cmd_roster_remove_nickname_sends_roster_remove_request(void** state);
 void cmd_roster_nick_shows_message_when_no_jid(void** state);
 void cmd_roster_nick_shows_message_when_no_nick(void** state);
 void cmd_roster_nick_shows_message_when_no_contact_exists(void** state);

@@ -2292,7 +2292,7 @@ _roster_autocomplete(ProfWin* window, const char* const input, gboolean previous
         if (result) {
             return result;
         }
-        result = autocomplete_param_with_func(input, "/roster remove", roster_barejid_autocomplete, previous, NULL);
+        result = autocomplete_param_with_func(input, "/roster remove", roster_contact_autocomplete, previous, NULL);
         if (result) {
             return result;
         }

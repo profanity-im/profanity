@@ -83,6 +83,7 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(sends_new_item),
         PROF_FUNC_TEST(sends_new_item_nick),
         PROF_FUNC_TEST(sends_remove_item),
+        PROF_FUNC_TEST(sends_remove_item_nick),
         PROF_FUNC_TEST(sends_nick_change),
 
         PROF_FUNC_TEST(send_software_version_request),
