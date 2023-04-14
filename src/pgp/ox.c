@@ -419,10 +419,12 @@ p_ox_gpg_decrypt(char* base64)
 
     size_t len;
     char* plain_str = gpgme_data_release_and_get_mem(plain, &len);
-    char* result = malloc(len + 1);
-    memcpy(result, plain_str, len);
-    result[len] = '\0';
-    gpgme_free(plain_str);
+    char* result = NULL;
+    if (plain_str) {
+        result = strndup(plain_str, len);
+        gpgme_free(plain_str);
+    }
+
     return result;
 }
 
