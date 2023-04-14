@@ -455,7 +455,7 @@ void
 c_command_callback(PluginCommand* command, gchar** args)
 {
     CommandWrapper* wrapper = command->callback;
-    void (*f)(gchar * *args) = wrapper->func;
+    void (*f)(gchar** args) = wrapper->func;
     f(args);
 }
 
