@@ -46,3 +46,17 @@ jobs:
         with:
           clang-format-version: '16'
           check-path: 'src'
+
+  spell-check:
+    runs-on: ubuntu-22.04
+    name: Check spelling
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y --no-install-recommends codespell
+      - name: Check spelling
+        run: |
+          codespell
