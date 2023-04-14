@@ -36,24 +36,13 @@ jobs:
         run: ./ci-build.sh
 
   code-style:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     name: Check coding style
     continue-on-error: true
     steps:
       - uses: actions/checkout@v2
-      - name: install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y --no-install-recommends autoconf autoconf-archive automake expect gcc git libcmocka-dev libcurl3-dev libgcrypt-dev libglib2.0-dev libgpgme11-dev libgtk2.0-dev libmicrohttpd-dev libncursesw5-dev libnotify-dev libotr5-dev libreadline-dev libsignal-protocol-c-dev libssl-dev libtool libxss-dev make pkg-config python3-dev python-dev-is-python3 libsqlite3-dev
-      - name: Install libstrophe
-        run: |
-          git clone https://github.com/strophe/libstrophe ../libstrophe
-          cd ../libstrophe && ./bootstrap.sh && ./configure && make -j$(nproc) && sudo make install
-      - name: Configure
-        run: |
-          ./bootstrap.sh
-          ./configure
-      - name: Check style
-        run: |
-          make format
-          git diff --exit-code
+      - name: Run clang-format
+        uses: jidicula/clang-format-action@v4.11.0
+        with:
+          clang-format-version: '16'
+          check-path: 'src'
