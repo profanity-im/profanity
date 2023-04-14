@@ -114,12 +114,34 @@ cmd_roster_remove_sends_roster_remove_request(void** state)
     char* jid = "bob@server.org";
     gchar* args[] = { "remove", jid, NULL };
 
+    roster_create();
+    roster_add("bob@server.org", "bob", NULL, "both", FALSE);
+
     will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(roster_send_remove, barejid, jid);
 
     gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
     assert_true(result);
+    roster_destroy();
+}
+
+void
+cmd_roster_remove_nickname_sends_roster_remove_request(void** state)
+{
+    char* jid = "bob@server.org";
+    gchar* args[] = { "remove", "bob", NULL };
+
+    roster_create();
+    roster_add("bob@server.org", "bob", NULL, "both", FALSE);
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+
+    expect_string(roster_send_remove, barejid, jid);
+
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
+    assert_true(result);
+    roster_destroy();
 }
 
 void

@@ -93,6 +93,35 @@ sends_remove_item(void **state)
 }
 
 void
+sends_remove_item_nick(void **state)
+{
+    prof_connect_with_roster(
+        "<item jid='buddy1@localhost' name='Bobby' subscription='both'/>"
+        "<item jid='buddy2@localhost' subscription='both'/>"
+    );
+
+    stbbr_for_query("jabber:iq:roster",
+        "<iq id='*' type='set'>"
+            "<query xmlns='jabber:iq:roster'>"
+                "<item jid='buddy1@localhost' subscription='remove'/>"
+            "</query>"
+        "</iq>"
+    );
+
+    prof_input("/roster remove Bobby");
+
+    assert_true(stbbr_received(
+        "<iq type='set' id='*'>"
+            "<query xmlns='jabber:iq:roster'>"
+                "<item jid='buddy1@localhost' subscription='remove'/>"
+            "</query>"
+        "</iq>"
+    ));
+
+    assert_true(prof_output_exact("Roster item removed: buddy1@localhost"));
+}
+
+void
 sends_nick_change(void **state)
 {
     prof_connect_with_roster(

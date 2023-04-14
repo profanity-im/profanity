@@ -2922,14 +2922,17 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
             cons_show("You are not currently connected.");
             return TRUE;
         }
-        char* jid = args[1];
-        if (jid == NULL) {
+        char* usr = args[1];
+        if (usr == NULL) {
             cons_bad_cmd_usage(command);
-        } else {
-            roster_send_remove(jid);
+            return TRUE;
         }
+        char* barejid = roster_barejid_from_name(usr);
+        if (barejid == NULL) {
+            barejid = usr;
+        }
+        roster_send_remove(barejid);
         return TRUE;
-
     } else if (strcmp(args[0], "remove_all") == 0) {
         if (g_strcmp0(args[1], "contacts") != 0) {
             cons_bad_cmd_usage(command);

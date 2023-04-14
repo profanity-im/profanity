@@ -584,6 +584,7 @@ main(int argc, char* argv[])
         unit_test(cmd_roster_add_sends_roster_add_request),
         unit_test(cmd_roster_remove_shows_message_when_no_jid),
         unit_test(cmd_roster_remove_sends_roster_remove_request),
+        unit_test(cmd_roster_remove_nickname_sends_roster_remove_request),
         unit_test(cmd_roster_nick_shows_message_when_no_jid),
         unit_test(cmd_roster_nick_shows_message_when_no_nick),
         unit_test(cmd_roster_nick_shows_message_when_no_contact_exists),

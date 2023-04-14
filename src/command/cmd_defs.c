@@ -290,7 +290,7 @@ static const struct cmd_t command_defs[] = {
               "/roster size <percent>",
               "/roster wrap on|off",
               "/roster add <jid> [<nick>]",
-              "/roster remove <jid>",
+              "/roster remove <contact>",
               "/roster remove_all contacts",
               "/roster nick <jid> <nick>",
               "/roster clearnick <jid>",
