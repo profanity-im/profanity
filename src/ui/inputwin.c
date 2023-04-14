@@ -568,12 +568,15 @@ _inp_rl_startup_hook(void)
 static void
 _inp_rl_linehandler(char* line)
 {
-    if (line && *line) {
-        if (!get_password) {
-            add_history(line);
-        }
-    }
     inp_line = line;
+    if (!line || !*line || get_password) {
+        return;
+    }
+    HISTORY_STATE* history = history_get_history_state();
+    HIST_ENTRY* last = history->length > 0 ? history->entries[history->length - 1] : NULL;
+    if (last == NULL || strcmp(last->line, line) != 0) {
+        add_history(line);
+    }
 }
 
 static gboolean shift_tab = FALSE;
