@@ -106,6 +106,27 @@ for interactive history search and
 for reloading inputrc without restart.
 .SH USING PROFANITY
 The user guide can be found at <https://profanity-im.github.io/userguide.html>.
+.SH ENCRYPTION
+Profanity supports various kinds of encryption: OMEMO, OTR, PGP, OX.
+You can only enable one of them per correspondent at a time.
+.TP
+.BR OMEMO
+OMEMO (/omemo) is defined in XEP-0384. It uses an implementation of the Signal protocol for key management and to synchronize messages among different clients. It works even when other clients are offline. And offers Perfect Forward Secrecy and Plausible deniability. Servers need to support PEP (XEP-0163).
+We implement the "siacs" version of OMEMO. Version 0.3.0, which is currently the widest adopted option.
+OMEMO is the only encryption option in Profanity that also supports encryption for MUCs (XEP-0045) and file transfer via HTTP upload (XEP-0363).
+.TP
+.BR OTR
+OTR (/otr) is defined in XEP-0364. It uses a combination of the AES symmetric-key algorithm, the Diffie–Hellman key exchange, and the SHA-1 hash function. It offers deniable authentication and Perfect Forward Secrecy. To initialize a session both clients need to be online at the same time. A session is between two clients, so multiclient chats are not working. Which is a feature not a bug. OTR does by design not work for MUCs.
+.TP
+.BR OpenPGP
+OpenPGP (/pgp) is defined in XEP-0027. Is uses a public and secret key. It is also known as Legacy OpenPGP and has been deprecated. It doesn't provide protection against replay attacks. MUCs and file transfer via HTTP upload are not specified and thus not supported.
+.TP
+.BR OX
+OX (/ox) is defined in XEP-0373 and XEP-0374. It's a more modern way to use OpenPGP on XMPP and tries to fix the shortcomings of legacy XEP-0027. Servers need to support PEP (XEP-0163). MUCs and file transfer via HTTP upload are not specified and thus not supported.
+
+.TP
+.BR DETAILS
+For more details read the relevant XEPs and look at the overview at <https://wiki.xmpp.org/web/XMPP_E2E_Security>
 .SH SEE ALSO
 .B Profanity
 itself has a lot of built\-in help. Check the
