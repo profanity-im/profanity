@@ -95,6 +95,8 @@ what may have been staged/committed.
 If you're in a hurry you can add the `--no-verify` flag when issuing `git push`
 and the `pre-push` hook will be skipped.
 
+*Note:* We provide a config file that describes our coding style for clang. But due to a mistake on their side it might happen that you can get a different result that what we expect. See [here](https://github.com/profanity-im/profanity/pull/1774) and [here](https://github.com/profanity-im/profanity/pull/1828) for details. We will try to always run latest clang-format.
+
 ## Finding mistakes
 Test your changes with the following tools to find mistakes.
 
