@@ -123,10 +123,22 @@ OpenPGP (/pgp) is defined in XEP-0027. Is uses a public and secret key. It is al
 .TP
 .BR OX
 OX (/ox) is defined in XEP-0373 and XEP-0374. It's a more modern way to use OpenPGP on XMPP and tries to fix the shortcomings of legacy XEP-0027. Servers need to support PEP (XEP-0163). MUCs and file transfer via HTTP upload are not specified and thus not supported.
-
 .TP
 .BR DETAILS
 For more details read the relevant XEPs and look at the overview at <https://wiki.xmpp.org/web/XMPP_E2E_Security>
+.SH TERMINOLOGY
+There is some XMPP specific terminology that might be unknown for fresh users. We will try to describe them here since they are often references in the help and man pages.
+.TP
+.BR JID
+Stands for Jabber ID. It refers to an XMPP address. Historically XMPP was also known as Jabber.
+.BR MAM
+Stands for Message Archive Management (XEP-0313) and describes the ability to store messages on the server and retrieve them later.
+.BR MUC
+Stands for Mutli-User Chats (XEP-0045) and are also called, groups, group chats, chatrooms or conferences.
+.BR Roster
+The roster is your contact list. By default displayed at the right side on the console window. See RFC6121.
+.BR XEP
+XMPP is aa extendable protocol. There are core features and optional features described in XMPP Extension Protocols, short XEPs.
 .SH SEE ALSO
 .B Profanity
 itself has a lot of built\-in help. Check the
