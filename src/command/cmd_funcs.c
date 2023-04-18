@@ -8925,8 +8925,8 @@ cmd_omemo_fingerprint(ProfWin* window, const char* const command, gchar** args)
     jid_destroy(jid);
     g_list_free(fingerprints);
 
-    win_println(window, THEME_DEFAULT, "-", "You can trust it with '/omemo trust <fingerprint>'");
-    win_println(window, THEME_DEFAULT, "-", "You can untrust it with '/omemo untrust <fingerprint>'");
+    win_println(window, THEME_DEFAULT, "-", "You can trust it with '/omemo trust [<contact>] <fingerprint>'");
+    win_println(window, THEME_DEFAULT, "-", "You can untrust it with '/omemo untrust [<contact>] <fingerprint>'");
 
     return TRUE;
 #else
@@ -8962,7 +8962,7 @@ cmd_omemo_trust(ProfWin* window, const char* const command, gchar** args)
         fingerprint = args[1];
 
         if (window->type != WIN_CHAT) {
-            win_println(window, THEME_DEFAULT, "-", "You must be in a regular chat window to trust a device without providing the contact.");
+            win_println(window, THEME_DEFAULT, "-", "You must be in a regular chat window to trust a device without providing the contact. To trust your own JID, use /omemo trust %s %s", connection_get_barejid(), fingerprint);
             return TRUE;
         }
 
