@@ -6516,12 +6516,17 @@ cmd_log(ProfWin* window, const char* const command, gchar** args)
     char* subcmd = args[0];
     char* value = args[1];
 
-    if (strcmp(subcmd, "maxsize") == 0) {
-        if (value == NULL) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
+    if (strcmp(subcmd, "where") == 0) {
+        cons_show("Log file: %s", get_log_file_location());
+        return TRUE;
+    }
 
+    if (value == NULL) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (strcmp(subcmd, "maxsize") == 0) {
         int intval = 0;
         char* err_msg = NULL;
         gboolean res = strtoi_range(value, &intval, PREFS_MIN_LOG_SIZE, INT_MAX, &err_msg);
@@ -6536,26 +6541,13 @@ cmd_log(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (strcmp(subcmd, "rotate") == 0) {
-        if (value == NULL) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
         _cmd_set_boolean_preference(value, command, "Log rotate", PREF_LOG_ROTATE);
         return TRUE;
     }
 
     if (strcmp(subcmd, "shared") == 0) {
-        if (value == NULL) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
         _cmd_set_boolean_preference(value, command, "Shared log", PREF_LOG_SHARED);
         cons_show("Setting only takes effect after saving and restarting Profanity.");
-        return TRUE;
-    }
-
-    if (strcmp(subcmd, "where") == 0) {
-        cons_show("Log file: %s", get_log_file_location());
         return TRUE;
     }
 

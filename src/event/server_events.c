@@ -433,7 +433,7 @@ sv_ev_incoming_private_message(ProfMessage* message)
 
     _clean_incoming_message(message);
     privwin_incoming_msg(privatewin, message);
-    log_database_add_incoming(message);
+    // Intentionally skipping log to DB because we can't authenticate the sender
     chat_log_msg_in(message);
 
     plugins_post_priv_message_display(message->from_jid->fulljid, message->plain);
@@ -457,6 +457,7 @@ sv_ev_delayed_private_message(ProfMessage* message)
 
     _clean_incoming_message(message);
     privwin_incoming_msg(privatewin, message);
+    // Intentionally skipping log to DB because we can't authenticate the sender
     chat_log_msg_in(message);
 
     plugins_post_priv_message_display(message->from_jid->fulljid, message->plain);
