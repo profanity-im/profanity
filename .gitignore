@@ -16,6 +16,7 @@ compile_commands.json
 .cproject
 .project
 .settings/
+.vscode/
 
 # autotools
 .libs/

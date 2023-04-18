@@ -2070,6 +2070,7 @@ static const struct cmd_t command_defs[] = {
               "/account set <account> tls force|allow|trust|legacy|disable",
               "/account set <account> auth default|legacy",
               "/account set <account> theme <theme>",
+              "/account set <account> session_alarm <max_sessions>",
               "/account clear <account> password",
               "/account clear <account> eval_password",
               "/account clear <account> server",
@@ -2079,7 +2080,8 @@ static const struct cmd_t command_defs[] = {
               "/account clear <account> startscript",
               "/account clear <account> clientid",
               "/account clear <account> muc",
-              "/account clear <account> resource")
+              "/account clear <account> resource",
+              "/account clear <account> session_alarm")
       CMD_DESC(
               "Commands for creating and managing accounts. "
               "Calling with no arguments will display information for the current account.")
@@ -2116,6 +2118,7 @@ static const struct cmd_t command_defs[] = {
               { "set <account> auth default", "Use default authentication process." },
               { "set <account> auth legacy", "Allow legacy authentication." },
               { "set <account> theme <theme>", "Set the UI theme for the account." },
+              { "set <account> session_alarm <max_sessions>", "Alarm about suspicious activity if sessions count exceeds max_sessions." },
               { "clear <account> server", "Remove the server setting for this account." },
               { "clear <account> port", "Remove the port setting for this account." },
               { "clear <account> password", "Remove the password setting for this account." },
@@ -2126,7 +2129,8 @@ static const struct cmd_t command_defs[] = {
               { "clear <account> clientid", "Reset client's name to default." },
               { "clear <account> theme", "Clear the theme setting for the account, the global theme will be used." },
               { "clear <account> resource", "Remove the resource setting for this account." },
-              { "clear <account> muc", "Remove the default MUC service setting." })
+              { "clear <account> muc", "Remove the default MUC service setting." },
+              { "clear <account> session_alarm", "Disable the session alarm." })
       CMD_EXAMPLES(
               "/account add me",
               "/account set me jid ulfhednar@valhalla.edda",

@@ -57,7 +57,7 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
             gchar* omemo_policy, GList* omemo_enabled, GList* omemo_disabled,
             GList* ox_enabled, GList* pgp_enabled, gchar* pgp_keyid,
             gchar* startscript, gchar* theme, gchar* tls_policy, gchar* auth_policy,
-            gchar* client)
+            gchar* client, int max_sessions)
 {
     ProfAccount* new_account = calloc(1, sizeof(ProfAccount));
 
@@ -139,6 +139,8 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
     new_account->tls_policy = tls_policy;
 
     new_account->auth_policy = auth_policy;
+
+    new_account->max_sessions = max_sessions;
 
     return new_account;
 }

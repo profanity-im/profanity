@@ -51,6 +51,8 @@
 #include "event/server_events.h"
 #include "plugins/plugins.h"
 #include "ui/ui.h"
+#include "ui/window.h"
+#include "ui/window_list.h"
 #include "xmpp/connection.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/session.h"
@@ -656,6 +658,68 @@ _available_handler(xmpp_stanza_t* const stanza)
 
     if (g_strcmp0(xmpp_presence->jid->barejid, my_jid->barejid) == 0) {
         connection_add_available_resource(resource);
+        const char* account_name = session_get_account_name();
+        int max_sessions = accounts_get_max_sessions(account_name);
+        if (max_sessions > 0) {
+            const char* cur_resource = accounts_get_resource(account_name);
+            int res_count = connection_count_available_resources();
+            if (res_count > max_sessions && g_strcmp0(cur_resource, resource->name)) {
+                ProfWin* console = wins_get_console();
+                ProfWin* current_window = wins_get_current();
+                auto_gchar gchar* message = g_strdup_printf("Max sessions alarm! (%d/%d devices in use)", res_count, max_sessions);
+                win_println(console, THEME_RED, "|", "%s", message);
+                if (console != current_window) {
+                    win_println(current_window, THEME_RED, "|", "%s - check the console for more details!", message);
+                }
+                notify(message, 10000, "Security alert");
+
+                const char* resource_presence = string_from_resource_presence(resource->presence);
+                win_print(console, THEME_DEFAULT, "|", "New device info: \n    %s (%d), %s", resource->name, resource->priority, resource_presence);
+
+                if (resource->status) {
+                    win_append(console, THEME_DEFAULT, ", \"%s\"", resource->status);
+                }
+                win_appendln(console, THEME_DEFAULT, "");
+                auto_jid Jid* jidp = jid_create_from_bare_and_resource(my_jid->barejid, resource->name);
+                EntityCapabilities* caps = caps_lookup(jidp->fulljid);
+
+                if (caps) {
+                    if (caps->identity) {
+                        DiscoIdentity* identity = caps->identity;
+                        win_print(console, THEME_DEFAULT, "|", "    %s %s %s", identity->name, identity->type, identity->category);
+                        win_newline(console);
+                    }
+
+                    if (caps->software_version) {
+                        SoftwareVersion* software_version = caps->software_version;
+                        if (software_version->software) {
+                            win_print(console, THEME_DEFAULT, "|", "    Software: %s", software_version->software);
+                        }
+                        if (software_version->software_version) {
+                            win_append(console, THEME_DEFAULT, ", %s", software_version->software_version);
+                        }
+                        if (software_version->software || software_version->software_version) {
+                            win_newline(console);
+                        }
+                        if (software_version->os) {
+                            win_print(console, THEME_DEFAULT, "|", "    OS: %s", software_version->os);
+                        }
+                        if (software_version->os_version) {
+                            win_append(console, THEME_DEFAULT, ", %s", software_version->os_version);
+                        }
+                        if (software_version->os || software_version->os_version) {
+                            win_newline(console);
+                        }
+                    }
+
+                    caps_destroy(caps);
+                }
+
+                win_println(console, THEME_RED_BOLD, "|", "If it wasn't you, change your password. Use: /changepassword");
+                win_println(console, THEME_GREEN, "|", "If it was you, update the `session_alarm` limit that determines when to trigger this alarm, use: /account set %s session_alarm %d", account_name, res_count);
+                cons_alert(NULL);
+            }
+        }
     } else {
         char* pgpsig = NULL;
         xmpp_stanza_t* x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_SIGNED);

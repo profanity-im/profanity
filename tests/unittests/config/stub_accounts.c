@@ -183,6 +183,10 @@ accounts_set_theme(const char* const account_name, const char* const value)
 {
 }
 void
+accounts_set_max_sessions(const char* const account_name, const int value)
+{
+}
+void
 accounts_set_tls_policy(const char* const account_name, const char* const value)
 {
 }
@@ -311,6 +315,10 @@ accounts_clear_muc(const char* const account_name)
 }
 void
 accounts_clear_resource(const char* const account_name)
+{
+}
+void
+accounts_clear_max_sessions(const char* const account_name)
 {
 }
 void

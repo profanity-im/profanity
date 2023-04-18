@@ -1067,6 +1067,9 @@ cons_show_account(ProfAccount* account)
     if (account->client) {
         cons_show("Client name       : %s", account->client);
     }
+    if (account->max_sessions > 0) {
+        cons_show("Max sessions alarm: %d", account->max_sessions);
+    }
     if (account->theme) {
         cons_show("Theme             : %s", account->theme);
     }
@@ -1123,11 +1126,12 @@ cons_show_account(ProfAccount* account)
 
     if ((connection_get_status() == JABBER_CONNECTED) && (g_strcmp0(session_get_account_name(), account->name) == 0)) {
         GList* resources = connection_get_available_resources();
+        int resources_count = connection_count_available_resources();
         GList* ordered_resources = NULL;
 
         GList* curr = resources;
         if (curr) {
-            win_println(console, THEME_DEFAULT, "-", "Resources:");
+            win_println(console, THEME_DEFAULT, "-", "Resources (%u):", resources_count);
 
             // sort in order of availability
             while (curr) {

@@ -347,13 +347,15 @@ accounts_get_account(const char* const name)
 
         gchar* auth_policy = g_key_file_get_string(accounts, name, "auth.policy", NULL);
 
+        int max_sessions = g_key_file_get_integer(accounts, name, "max.sessions", 0);
+
         ProfAccount* new_account = account_new(g_strdup(name), jid, password, eval_password, enabled,
                                                server, port, resource, last_presence, login_presence,
                                                priority_online, priority_chat, priority_away, priority_xa,
                                                priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
                                                otr_opportunistic, otr_always, omemo_policy, omemo_enabled,
                                                omemo_disabled, ox_enabled, pgp_enabled, pgp_keyid,
-                                               startscript, theme, tls_policy, auth_policy, client);
+                                               startscript, theme, tls_policy, auth_policy, client, max_sessions);
 
         return new_account;
     }
@@ -569,6 +571,12 @@ accounts_set_theme(const char* const account_name, const char* const value)
 }
 
 void
+accounts_set_max_sessions(const char* const account_name, const int value)
+{
+    _accounts_set_int_option(account_name, "max.sessions", value);
+}
+
+void
 accounts_clear_password(const char* const account_name)
 {
     _accounts_clear_string_option(account_name, "password");
@@ -632,6 +640,12 @@ void
 accounts_clear_otr(const char* const account_name)
 {
     _accounts_clear_string_option(account_name, "otr.policy");
+}
+
+void
+accounts_clear_max_sessions(const char* const account_name)
+{
+    _accounts_clear_string_option(account_name, "max.sessions");
 }
 
 void
@@ -863,6 +877,24 @@ accounts_get_last_activity(const char* const account_name)
     } else {
         return NULL;
     }
+}
+
+char*
+accounts_get_resource(const char* const account_name)
+{
+    if (!accounts_account_exists(account_name)) {
+        return NULL;
+    }
+    return g_key_file_get_string(accounts, account_name, "resource", NULL);
+}
+
+int
+accounts_get_max_sessions(const char* const account_name)
+{
+    if (!accounts_account_exists(account_name)) {
+        return 0;
+    }
+    return g_key_file_get_integer(accounts, account_name, "max.sessions", 0);
 }
 
 void

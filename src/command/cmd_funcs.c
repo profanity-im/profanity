@@ -905,6 +905,28 @@ _account_set_auth(char* account_name, char* policy)
 }
 
 gboolean
+_account_set_max_sessions(char* account_name, char* max_sessions_raw)
+{
+    int max_sessions;
+    char* err_msg = NULL;
+    gboolean res = strtoi_range(max_sessions_raw, &max_sessions, 0, INT_MAX, &err_msg);
+    if (!res) {
+        cons_show(err_msg);
+        cons_show("");
+        free(err_msg);
+        return TRUE;
+    }
+    accounts_set_max_sessions(account_name, max_sessions);
+    if (max_sessions < 1) {
+        cons_show("Max sessions alarm for account %s has been disabled.", account_name);
+    } else {
+        cons_show("Max sessions alarm for account %s has been set to %d", account_name, max_sessions);
+    }
+    cons_show("");
+    return TRUE;
+}
+
+gboolean
 _account_set_presence_priority(char* account_name, char* presence, char* priority)
 {
     int intval;
@@ -997,6 +1019,8 @@ cmd_account_set(ProfWin* window, const char* const command, gchar** args)
         return _account_set_tls(account_name, value);
     if (strcmp(property, "auth") == 0)
         return _account_set_auth(account_name, value);
+    if (strcmp(property, "session_alarm") == 0)
+        return _account_set_max_sessions(account_name, value);
 
     if (valid_resource_presence_string(property)) {
         return _account_set_presence_priority(account_name, property, value);
@@ -1057,6 +1081,9 @@ cmd_account_clear(ProfWin* window, const char* const command, gchar** args)
     } else if (strcmp(property, "resource") == 0) {
         accounts_clear_resource(account_name);
         cons_show("Removed resource for account %s", account_name);
+    } else if (strcmp(property, "session_alarm") == 0) {
+        accounts_clear_max_sessions(account_name);
+        cons_show("Disabled session alarm for account %s", account_name);
     } else {
         cons_show("Invalid property: %s", property);
     }

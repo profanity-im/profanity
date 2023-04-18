@@ -199,6 +199,7 @@ TLSCertificate* connection_get_tls_peer_cert(void);
 gboolean connection_is_secured(void);
 gboolean connection_send_stanza(const char* const stanza);
 GList* connection_get_available_resources(void);
+int connection_count_available_resources(void);
 gboolean connection_supports(const char* const feature);
 char* connection_jid_for_feature(const char* const feature);
 
