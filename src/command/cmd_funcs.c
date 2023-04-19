@@ -9431,10 +9431,31 @@ cmd_slashguard(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
+gchar*
+_prepare_filename(gchar* url, gchar* path)
+{
+    // Ensure that the downloads directory exists for saving cleartexts.
+    auto_gchar gchar* downloads_dir = path ? get_expanded_path(path) : files_get_data_path(DIR_DOWNLOADS);
+    if (g_mkdir_with_parents(downloads_dir, S_IRWXU) != 0) {
+        cons_show_error("Failed to create download directory "
+                        "at '%s' with error '%s'",
+                        downloads_dir, strerror(errno));
+        return NULL;
+    }
+
+    // Generate an unique filename from the URL that should be stored in the
+    // downloads directory.
+    return unique_filename_from_url(url, downloads_dir);
+}
+
 #ifdef HAVE_OMEMO
 void
-_url_aesgcm_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename, const char* id)
+_url_aesgcm_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* path)
 {
+    auto_gchar gchar* filename = _prepare_filename(url, path);
+    if (!filename)
+        return;
+    auto_char char* id = get_random_string(4);
     AESGCMDownload* download = malloc(sizeof(AESGCMDownload));
     download->window = window;
     download->url = strdup(url);
@@ -9452,26 +9473,25 @@ _url_aesgcm_method(ProfWin* window, const char* cmd_template, const char* url, c
 #endif
 
 void
-_url_http_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename, const char* id)
+_url_http_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* path)
 {
-
+    auto_gchar gchar* filename = _prepare_filename(url, path);
+    if (!filename)
+        return;
+    auto_char char* id = get_random_string(4);
     HTTPDownload* download = malloc(sizeof(HTTPDownload));
     download->window = window;
     download->url = strdup(url);
     download->filename = strdup(filename);
     download->id = strdup(id);
-    if (cmd_template != NULL) {
-        download->cmd_template = strdup(cmd_template);
-    } else {
-        download->cmd_template = NULL;
-    }
+    download->cmd_template = cmd_template ? strdup(cmd_template) : NULL;
 
     pthread_create(&(download->worker), NULL, &http_file_get, download);
     http_download_add_download(download);
 }
 
 void
-_url_external_method(const char* cmd_template, const char* url, const char* filename)
+_url_external_method(const char* cmd_template, const char* url, gchar* filename)
 {
     gchar** argv = format_call_external_argv(cmd_template, url, filename);
 
@@ -9498,61 +9518,32 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    gchar* scheme = NULL;
-    char* cmd_template = NULL;
-    char* filename = NULL;
+    // reset autocompletion to start from latest url and not where we left of
+    autocomplete_reset(window->urls_ac);
 
-    scheme = g_uri_parse_scheme(url);
+    auto_gchar gchar* scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
         cons_show_error("URL '%s' is not valid.", args[1]);
-        goto out;
+        return TRUE;
     }
 
-    cmd_template = prefs_get_string(PREF_URL_OPEN_CMD);
+    auto_gchar gchar* cmd_template = prefs_get_string(PREF_URL_OPEN_CMD);
     if (cmd_template == NULL) {
         cons_show_error("No default `url open` command found in executables preferences.");
-        goto out;
+        return TRUE;
     }
 
 #ifdef HAVE_OMEMO
     // OMEMO URLs (aesgcm://) must be saved and decrypted before being opened.
     if (g_strcmp0(scheme, "aesgcm") == 0) {
-
-        // Ensure that the downloads directory exists for saving cleartexts.
-        gchar* downloads_dir = files_get_data_path(DIR_DOWNLOADS);
-        if (g_mkdir_with_parents(downloads_dir, S_IRWXU) != 0) {
-            cons_show_error("Failed to create download directory "
-                            "at '%s' with error '%s'",
-                            downloads_dir, strerror(errno));
-            g_free(downloads_dir);
-            goto out;
-        }
-
-        // Generate an unique filename from the URL that should be stored in the
-        // downloads directory.
-        filename = unique_filename_from_url(url, downloads_dir);
-        g_free(downloads_dir);
-
         // Download, decrypt and open the cleartext version of the AESGCM
         // encrypted file.
-        gchar* id = get_random_string(4);
-        _url_aesgcm_method(window, cmd_template, url, filename, id);
-        g_free(id);
-        goto out;
+        _url_aesgcm_method(window, cmd_template, url, NULL);
+        return TRUE;
     }
 #endif
 
     _url_external_method(cmd_template, url, NULL);
-
-out:
-    // reset autocompletion to start from latest url and not where we left of
-    autocomplete_reset(window->urls_ac);
-
-    free(cmd_template);
-    free(filename);
-
-    g_free(scheme);
-
     return TRUE;
 }
 
@@ -9570,51 +9561,32 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
     }
 
     gchar* url = args[1];
-    gchar* path = g_strdup(args[2]);
-    gchar* scheme = NULL;
-    char* filename = NULL;
-    char* cmd_template = NULL;
+    gchar* path = args[2]; // might be NULL, intentionally skip NULL check
 
-    scheme = g_uri_parse_scheme(url);
+    // reset autocompletion to start from latest url and not where we left of
+    autocomplete_reset(window->urls_ac);
+
+    auto_gchar gchar* scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
-        cons_show_error("URL '%s' is not valid.", args[1]);
-        goto out;
+        cons_show_error("URL '%s' is not valid.", url);
+        return TRUE;
     }
 
-    filename = unique_filename_from_url(url, path);
-    if (filename == NULL) {
-        cons_show_error("Failed to generate unique filename"
-                        "from URL '%s' for path '%s'",
-                        url, path);
-        goto out;
-    }
-
-    cmd_template = prefs_get_string(PREF_URL_SAVE_CMD);
+    auto_gchar gchar* cmd_template = prefs_get_string(PREF_URL_SAVE_CMD);
     if (cmd_template == NULL && (g_strcmp0(scheme, "http") == 0 || g_strcmp0(scheme, "https") == 0)) {
-        gchar* id = get_random_string(4);
-        _url_http_method(window, cmd_template, url, filename, id);
-        g_free(id);
+        _url_http_method(window, cmd_template, url, path);
 #ifdef HAVE_OMEMO
     } else if (g_strcmp0(scheme, "aesgcm") == 0) {
-        gchar* id = get_random_string(4);
-        _url_aesgcm_method(window, cmd_template, url, filename, id);
-        g_free(id);
+        _url_aesgcm_method(window, cmd_template, url, path);
 #endif
     } else if (cmd_template != NULL) {
+        auto_gchar gchar* filename = _prepare_filename(url, NULL);
+        if (!filename)
+            return TRUE;
         _url_external_method(cmd_template, url, filename);
     } else {
         cons_show_error("No download method defined for the scheme '%s'.", scheme);
     }
-
-out:
-    // reset autocompletion to start from latest url and not where we left of
-    autocomplete_reset(window->urls_ac);
-
-    free(filename);
-    free(cmd_template);
-
-    g_free(scheme);
-    g_free(path);
 
     return TRUE;
 }

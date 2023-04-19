@@ -219,10 +219,9 @@ jid_fulljid_or_barejid(Jid* jid)
 char*
 jid_random_resource(void)
 {
-    char* rand = get_random_string(4);
+    auto_char char* rand = get_random_string(4);
 
     gchar* result = g_strdup_printf("profanity.%s", rand);
-    free(rand);
 
     return result;
 }
