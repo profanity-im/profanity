@@ -1727,6 +1727,8 @@ win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const ch
 void
 win_mark_received(ProfWin* window, const char* const id)
 {
+    if (window->type == WIN_CONSOLE)
+        return;
     gboolean received = buffer_mark_received(window->layout->buffer, id);
     if (received) {
         win_redraw(window);
@@ -1736,6 +1738,8 @@ win_mark_received(ProfWin* window, const char* const id)
 void
 win_update_entry_message(ProfWin* window, const char* const id, const char* const message)
 {
+    if (window->type == WIN_CONSOLE)
+        return;
     ProfBuffEntry* entry = buffer_get_entry_by_id(window->layout->buffer, id);
     if (entry) {
         free(entry->message);
@@ -2289,8 +2293,7 @@ win_handle_command_exec_result_note(ProfWin* window, const char* const type, con
 void
 win_insert_last_read_position_marker(ProfWin* window, char* id)
 {
-    int size;
-    size = buffer_size(window->layout->buffer);
+    int size = buffer_size(window->layout->buffer);
 
     // TODO: this is somewhat costly. We should improve this later.
     // check if we already have a separator present

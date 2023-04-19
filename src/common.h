@@ -125,5 +125,6 @@ gchar* unique_filename_from_url(const char* url, const char* path);
 gchar* get_expanded_path(const char* path);
 
 void glib_hash_table_free(GHashTable* hash_table);
+char* basename_from_url(const char* url);
 
 #endif

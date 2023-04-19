@@ -57,6 +57,7 @@ typedef struct http_download_t
     ProfWin* window;
     pthread_t worker;
     int cancel;
+    gboolean silent;
 } HTTPDownload;
 
 void* http_file_get(void* userdata);

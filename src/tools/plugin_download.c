@@ -1,8 +1,9 @@
 /*
- * http_common.c
+ * plugin_download.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2020 William Wennerström <william@wstrm.dev>
+ * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 - 2023 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -38,42 +39,58 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <curl/curl.h>
 #include <gio/gio.h>
+#include <pthread.h>
+#include <assert.h>
+#include <errno.h>
 
+#include "profanity.h"
+#include "event/client_events.h"
 #include "tools/http_common.h"
+#include "tools/plugin_download.h"
+#include "config/preferences.h"
+#include "plugins/plugins.h"
+#include "ui/ui.h"
+#include "ui/window.h"
+#include "common.h"
 
 #define FALLBACK_MSG ""
 
-void
-http_print_transfer_update(ProfWin* window, char* id, const char* fmt, ...)
+void*
+plugin_download_install(void* userdata)
 {
-    va_list args;
+    HTTPDownload* plugin_dl = (HTTPDownload*)userdata;
 
-    va_start(args, fmt);
-    GString* msg = g_string_new(FALLBACK_MSG);
-    g_string_vprintf(msg, fmt, args);
-    va_end(args);
+    auto_char char* path = strdup(plugin_dl->filename);
+    auto_char char* https_url = strdup(plugin_dl->url);
+    plugin_dl->silent = TRUE;
 
-    if (window->type != WIN_CONSOLE) {
-        win_update_entry_message(window, id, msg->str);
+    http_file_get(plugin_dl);
+
+    if (is_regular_file(path)) {
+        GString* error_message = g_string_new(NULL);
+        auto_char char* plugin_name = basename_from_url(https_url);
+        gboolean result = plugins_install(plugin_name, path, error_message);
+        if (result) {
+            cons_show("Plugin installed and loaded: %s", plugin_name);
+        } else {
+            cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
+        }
+        g_string_free(error_message, TRUE);
     } else {
-        cons_show("%s", msg->str);
+        cons_show_error("Downloaded file is not a file (?)");
     }
 
-    g_string_free(msg, TRUE);
+    remove(path);
+
+    return NULL;
 }
 
 void
-http_print_transfer(ProfWin* window, char* id, const char* fmt, ...)
+plugin_download_add_download(HTTPDownload* plugin_dl)
 {
-    va_list args;
-
-    va_start(args, fmt);
-    GString* msg = g_string_new(FALLBACK_MSG);
-    g_string_vprintf(msg, fmt, args);
-    va_end(args);
-
-    win_print_http_transfer(window, msg->str, id);
-
-    g_string_free(msg, TRUE);
+    http_download_add_download(plugin_dl);
 }

@@ -546,7 +546,7 @@ _has_directory_suffix(const char* path)
 }
 
 char*
-_basename_from_url(const char* url)
+basename_from_url(const char* url)
 {
     const char* default_name = "index";
 
@@ -595,7 +595,7 @@ unique_filename_from_url(const char* url, const char* path)
     if (_has_directory_suffix(realpath) || g_file_test(realpath, G_FILE_TEST_IS_DIR)) {
         // The target should be used as a directory. Assume that the basename
         // should be derived from the URL.
-        char* basename = _basename_from_url(url);
+        char* basename = basename_from_url(url);
         filename = g_build_filename(g_file_peek_path(target), basename, NULL);
         g_free(basename);
     } else {
