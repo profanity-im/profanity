@@ -577,6 +577,7 @@ _inp_rl_linehandler(char* line)
     if (last == NULL || strcmp(last->line, line) != 0) {
         add_history(line);
     }
+    free(history);
 }
 
 static gboolean shift_tab = FALSE;

@@ -995,6 +995,9 @@ stanza_create_caps_query_element(xmpp_ctx_t* ctx)
 #endif
         }
     }
+
+    account_free(account);
+
     xmpp_stanza_set_attribute(identity, "name", name_str->str);
     g_string_free(name_str, TRUE);
     xmpp_stanza_add_child(query, identity);
