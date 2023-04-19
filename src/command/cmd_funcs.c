@@ -7120,51 +7120,42 @@ cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
 {
-    char* path;
-
     if (args[1] == NULL) {
         cons_bad_cmd_usage(command);
         return TRUE;
-    } else {
-        path = get_expanded_path(args[1]);
     }
+
+    auto_gchar gchar* path = get_expanded_path(args[1]);
 
     if (access(path, R_OK) != 0) {
         cons_show("File not found: %s", path);
-        free(path);
         return TRUE;
     }
 
-    if (is_regular_file(path)) {
-        if (!g_str_has_suffix(path, ".py") && !g_str_has_suffix(path, ".so")) {
-            cons_show("Plugins must have one of the following extensions: '.py' '.so'");
-            free(path);
-            return TRUE;
-        }
-
-        GString* error_message = g_string_new(NULL);
-        gchar* plugin_name = g_path_get_basename(path);
-        if (plugins_unload(plugin_name)) {
-            if (plugins_uninstall(plugin_name)) {
-                if (plugins_install(plugin_name, path, error_message)) {
-                    cons_show("Plugin installed: %s", plugin_name);
-                } else {
-                    cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
-                }
-            } else {
-                cons_show("Failed to uninstall plugin: %s.", plugin_name);
-            }
-        } else {
-            cons_show("Failed to unload plugin: %s.", plugin_name);
-        }
-        g_free(plugin_name);
-        g_string_free(error_message, TRUE);
-        free(path);
+    if (!is_regular_file(path)) {
+        cons_show("Argument must be a file.");
         return TRUE;
     }
 
-    free(path);
-    cons_show("Argument must be a file.");
+    if (!g_str_has_suffix(path, ".py") && !g_str_has_suffix(path, ".so")) {
+        cons_show("Plugins must have one of the following extensions: '.py' or '.so'");
+        return TRUE;
+    }
+
+    auto_gchar gchar* plugin_name = g_path_get_basename(path);
+    if (!plugins_uninstall(plugin_name)) {
+        cons_show("Failed to uninstall plugin: %s.", plugin_name);
+        return TRUE;
+    }
+
+    GString* error_message = g_string_new(NULL);
+    if (plugins_install(plugin_name, path, error_message)) {
+        cons_show("Plugin installed: %s", plugin_name);
+    } else {
+        cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
+    }
+
+    g_string_free(error_message, TRUE);
     return TRUE;
 }
 
