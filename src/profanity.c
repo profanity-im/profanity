@@ -151,10 +151,9 @@ _connect_default(const char* const account)
     if (account) {
         cmd_execute_connect(window, account);
     } else {
-        char* pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
+        auto_gchar gchar* pref_connect_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
         if (pref_connect_account) {
             cmd_execute_connect(window, pref_connect_account);
-            g_free(pref_connect_account);
         }
     }
 }
@@ -198,9 +197,8 @@ _init(char* log_level, char* config_file, char* log_file, char* theme_name)
     if (theme_name) {
         theme_init(theme_name);
     } else {
-        char* theme = prefs_get_string(PREF_THEME);
+        auto_gchar gchar* theme = prefs_get_string(PREF_THEME);
         theme_init(theme);
-        g_free(theme);
     }
 
     ui_init();

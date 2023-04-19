@@ -457,13 +457,10 @@ GSList*
 get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const message, const char* const nick)
 {
     GSList* mentions = NULL;
-    gchar* message_search = case_sensitive ? g_strdup(message) : g_utf8_strdown(message, -1);
-    gchar* mynick_search = case_sensitive ? g_strdup(nick) : g_utf8_strdown(nick, -1);
+    auto_gchar gchar* message_search = case_sensitive ? g_strdup(message) : g_utf8_strdown(message, -1);
+    auto_gchar gchar* mynick_search = case_sensitive ? g_strdup(nick) : g_utf8_strdown(nick, -1);
 
     mentions = prof_occurrences(mynick_search, message_search, 0, whole_word, &mentions);
-
-    g_free(message_search);
-    g_free(mynick_search);
 
     return mentions;
 }
@@ -483,11 +480,10 @@ call_external(gchar** argv)
                                   NULL, NULL, NULL,
                                   &spawn_error);
     if (!is_successful) {
-        gchar* cmd = g_strjoinv(" ", argv);
+        auto_gchar gchar* cmd = g_strjoinv(" ", argv);
         log_error("Spawning '%s' failed with error '%s'", cmd, spawn_error ? spawn_error->message : "Unknown, spawn_error is NULL");
 
         g_error_free(spawn_error);
-        g_free(cmd);
     }
 
     return is_successful;
@@ -579,7 +575,7 @@ get_expanded_path(const char* path)
 gchar*
 unique_filename_from_url(const char* url, const char* path)
 {
-    gchar* realpath;
+    auto_gchar gchar* realpath = NULL;
 
     // Default to './' as path when none has been provided.
     if (path == NULL) {
@@ -590,7 +586,7 @@ unique_filename_from_url(const char* url, const char* path)
 
     // Resolves paths such as './../.' for path.
     GFile* target = g_file_new_for_commandline_arg(realpath);
-    gchar* filename = NULL;
+    auto_gchar gchar* filename = NULL;
 
     if (_has_directory_suffix(realpath) || g_file_test(realpath, G_FILE_TEST_IS_DIR)) {
         // The target should be used as a directory. Assume that the basename
@@ -605,14 +601,10 @@ unique_filename_from_url(const char* url, const char* path)
 
     gchar* unique_filename = _unique_filename(filename);
     if (unique_filename == NULL) {
-        g_free(filename);
-        g_free(realpath);
         return NULL;
     }
 
     g_object_unref(target);
-    g_free(filename);
-    g_free(realpath);
 
     return unique_filename;
 }

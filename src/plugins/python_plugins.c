@@ -874,9 +874,8 @@ static void
 _python_undefined_error(ProfPlugin* plugin, char* hook, char* type)
 {
     GString* err_msg = g_string_new("Plugin error - ");
-    char* module_name = g_strndup(plugin->name, strlen(plugin->name) - 2);
+    auto_gchar gchar* module_name = g_strndup(plugin->name, strlen(plugin->name) - 2);
     g_string_append(err_msg, module_name);
-    free(module_name);
     g_string_append(err_msg, hook);
     g_string_append(err_msg, "(): return value undefined, expected ");
     g_string_append(err_msg, type);
@@ -889,9 +888,8 @@ static void
 _python_type_error(ProfPlugin* plugin, char* hook, char* type)
 {
     GString* err_msg = g_string_new("Plugin error - ");
-    char* module_name = g_strndup(plugin->name, strlen(plugin->name) - 2);
+    auto_gchar gchar* module_name = g_strndup(plugin->name, strlen(plugin->name) - 2);
     g_string_append(err_msg, module_name);
-    free(module_name);
     g_string_append(err_msg, hook);
     g_string_append(err_msg, "(): incorrect return type, expected ");
     g_string_append(err_msg, type);

@@ -2329,9 +2329,8 @@ stanza_create_omemo_devicelist_publish(xmpp_ctx_t* ctx, GList* const ids)
     for (GList* i = ids; i != NULL; i = i->next) {
         xmpp_stanza_t* device = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(device, "device");
-        char* id = g_strdup_printf("%d", GPOINTER_TO_INT(i->data));
+        auto_gchar gchar* id = g_strdup_printf("%d", GPOINTER_TO_INT(i->data));
         xmpp_stanza_set_attribute(device, "id", id);
-        g_free(id);
 
         xmpp_stanza_add_child(list, device);
         xmpp_stanza_release(device);
@@ -2366,9 +2365,8 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t* ctx, const char* const id,
 
     xmpp_stanza_t* publish = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
-    char* node = g_strdup_printf("%s:%d", "eu.siacs.conversations.axolotl.bundles", device_id);
+    auto_gchar gchar* node = g_strdup_printf("%s:%d", "eu.siacs.conversations.axolotl.bundles", device_id);
     xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, node);
-    g_free(node);
 
     xmpp_stanza_t* item = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
@@ -2416,9 +2414,8 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t* ctx, const char* const id,
     for (p = prekeys, i = prekeys_id, l = prekeys_length; p != NULL; p = p->next, i = i->next, l = l->next) {
         xmpp_stanza_t* prekey = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(prekey, "preKeyPublic");
-        char* id = g_strdup_printf("%d", GPOINTER_TO_INT(i->data));
+        auto_gchar gchar* id = g_strdup_printf("%d", GPOINTER_TO_INT(i->data));
         xmpp_stanza_set_attribute(prekey, "preKeyId", id);
-        g_free(id);
 
         xmpp_stanza_t* prekey_text = xmpp_stanza_new(ctx);
         char* prekey_b64 = g_base64_encode(p->data, GPOINTER_TO_INT(l->data));
@@ -2464,9 +2461,8 @@ stanza_create_omemo_bundle_request(xmpp_ctx_t* ctx, const char* const id, const 
 
     xmpp_stanza_t* items = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(items, "items");
-    char* node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, device_id);
+    auto_gchar gchar* node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, device_id);
     xmpp_stanza_set_attribute(items, STANZA_ATTR_NODE, node);
-    g_free(node);
 
     xmpp_stanza_add_child(pubsub, items);
     xmpp_stanza_add_child(iq, pubsub);
@@ -2577,9 +2573,8 @@ stanza_create_avatar_retrieve_data_request(xmpp_ctx_t* ctx, const char* stanza_i
 
     xmpp_stanza_t* items = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(items, "items");
-    char* node = g_strdup_printf("%s", STANZA_NS_USER_AVATAR_DATA);
+    auto_gchar gchar* node = g_strdup_printf("%s", STANZA_NS_USER_AVATAR_DATA);
     xmpp_stanza_set_attribute(items, STANZA_ATTR_NODE, node);
-    g_free(node);
 
     xmpp_stanza_t* item = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
@@ -2671,16 +2666,13 @@ stanza_create_avatar_metadata_publish_iq(xmpp_ctx_t* ctx, const char* img_data, 
     xmpp_stanza_set_name(info, STANZA_NAME_INFO);
     xmpp_stanza_set_attribute(info, "id", sha1);
     xmpp_free(ctx, sha1);
-    char* bytes = g_strdup_printf("%" G_GSIZE_FORMAT, len);
-    char* h = g_strdup_printf("%d", height);
-    char* w = g_strdup_printf("%d", width);
+    auto_gchar gchar* bytes = g_strdup_printf("%" G_GSIZE_FORMAT, len);
+    auto_gchar gchar* h = g_strdup_printf("%d", height);
+    auto_gchar gchar* w = g_strdup_printf("%d", width);
     xmpp_stanza_set_attribute(info, "bytes", bytes);
     xmpp_stanza_set_attribute(info, "type", "img/png");
     xmpp_stanza_set_attribute(info, "height", h);
     xmpp_stanza_set_attribute(info, "width", w);
-    g_free(bytes);
-    g_free(h);
-    g_free(w);
 
     xmpp_stanza_add_child(metadata, info);
     xmpp_stanza_add_child(item, metadata);
@@ -2854,9 +2846,8 @@ stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const s
     xmpp_stanza_set_name(max, STANZA_NAME_MAX);
 
     max_text = xmpp_stanza_new(ctx);
-    char* txt = g_strdup_printf("%d", MESSAGES_TO_RETRIEVE);
+    auto_gchar gchar* txt = g_strdup_printf("%d", MESSAGES_TO_RETRIEVE);
     xmpp_stanza_set_text(max_text, txt);
-    g_free(txt);
 
     xmpp_stanza_add_child(max, max_text);
     xmpp_stanza_add_child(set, max);

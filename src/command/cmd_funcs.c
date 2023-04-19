@@ -9703,9 +9703,8 @@ cmd_executable_vcard_photo(ProfWin* window, const char* const command, gchar** a
         cons_show("`vcard photo open` command set to invoke '%s'", args[2]);
     } else if (g_strcmp0(args[1], "default") == 0) {
         prefs_set_string(PREF_VCARD_PHOTO_CMD, NULL);
-        char* cmd = prefs_get_string(PREF_VCARD_PHOTO_CMD);
+        auto_gchar gchar* cmd = prefs_get_string(PREF_VCARD_PHOTO_CMD);
         cons_show("`vcard photo open` command set to invoke '%s' (default)", cmd);
-        g_free(cmd);
     } else {
         cons_bad_cmd_usage(command);
     }

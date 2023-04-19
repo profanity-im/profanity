@@ -96,13 +96,12 @@ chat_log_otr_msg_out(const char* const barejid, const char* const msg, const cha
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         char* mybarejid = connection_get_barejid();
-        char* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+        auto_gchar gchar* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (strcmp(pref_otr_log, "on") == 0) {
             _chat_log_chat(mybarejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
         } else if (strcmp(pref_otr_log, "redact") == 0) {
             _chat_log_chat(mybarejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
         }
-        g_free(pref_otr_log);
         free(mybarejid);
     }
 }
@@ -112,13 +111,12 @@ chat_log_pgp_msg_out(const char* const barejid, const char* const msg, const cha
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         char* mybarejid = connection_get_barejid();
-        char* pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
+        auto_gchar gchar* pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
             _chat_log_chat(mybarejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
         } else if (strcmp(pref_pgp_log, "redact") == 0) {
             _chat_log_chat(mybarejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
         }
-        g_free(pref_pgp_log);
         free(mybarejid);
     }
 }
@@ -128,13 +126,12 @@ chat_log_omemo_msg_out(const char* const barejid, const char* const msg, const c
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         char* mybarejid = connection_get_barejid();
-        char* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
+        auto_gchar gchar* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         if (strcmp(pref_omemo_log, "on") == 0) {
             _chat_log_chat(mybarejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
             _chat_log_chat(mybarejid, barejid, "[redacted]", PROF_OUT_LOG, NULL, resource);
         }
-        g_free(pref_omemo_log);
         free(mybarejid);
     }
 }
@@ -144,7 +141,7 @@ chat_log_otr_msg_in(ProfMessage* message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         char* mybarejid = connection_get_barejid();
-        char* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+        auto_gchar gchar* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (message->enc == PROF_MSG_ENC_NONE || (strcmp(pref_otr_log, "on") == 0)) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
@@ -158,7 +155,6 @@ chat_log_otr_msg_in(ProfMessage* message)
                 _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
             }
         }
-        g_free(pref_otr_log);
         free(mybarejid);
     }
 }
@@ -168,7 +164,7 @@ chat_log_pgp_msg_in(ProfMessage* message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         char* mybarejid = connection_get_barejid();
-        char* pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
+        auto_gchar gchar* pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
@@ -182,7 +178,6 @@ chat_log_pgp_msg_in(ProfMessage* message)
                 _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
             }
         }
-        g_free(pref_pgp_log);
         free(mybarejid);
     }
 }
@@ -192,7 +187,7 @@ chat_log_omemo_msg_in(ProfMessage* message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         char* mybarejid = connection_get_barejid();
-        char* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
+        auto_gchar gchar* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         if (strcmp(pref_omemo_log, "on") == 0) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
@@ -206,7 +201,6 @@ chat_log_omemo_msg_in(ProfMessage* message)
                 _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
             }
         }
-        g_free(pref_omemo_log);
         free(mybarejid);
     }
 }
@@ -272,7 +266,7 @@ _chat_log_chat(const char* const login, const char* const other, const char* con
         g_date_time_ref(timestamp);
     }
 
-    gchar* date_fmt = g_date_time_format_iso8601(timestamp);
+    auto_gchar gchar* date_fmt = g_date_time_format_iso8601(timestamp);
     FILE* chatlogp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
     if (chatlogp) {
@@ -304,7 +298,6 @@ _chat_log_chat(const char* const login, const char* const other, const char* con
         }
     }
 
-    g_free(date_fmt);
     g_date_time_unref(timestamp);
 }
 
@@ -342,7 +335,7 @@ groupchat_log_omemo_msg_out(const gchar* const room, const gchar* const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
         char* mybarejid = connection_get_barejid();
-        char* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
+        auto_gchar gchar* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         char* mynick = muc_nick(room);
 
         if (strcmp(pref_omemo_log, "on") == 0) {
@@ -351,7 +344,6 @@ groupchat_log_omemo_msg_out(const gchar* const room, const gchar* const msg)
             _groupchat_log_chat(mybarejid, room, mynick, "[redacted]");
         }
 
-        g_free(pref_omemo_log);
         free(mybarejid);
     }
 }
@@ -360,17 +352,14 @@ void
 groupchat_log_omemo_msg_in(const gchar* const room, const gchar* const nick, const gchar* const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        char* mybarejid = connection_get_barejid();
-        char* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
+        auto_char char* mybarejid = connection_get_barejid();
+        auto_gchar gchar* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
 
         if (strcmp(pref_omemo_log, "on") == 0) {
             _groupchat_log_chat(mybarejid, room, nick, msg);
         } else if (strcmp(pref_omemo_log, "redact") == 0) {
             _groupchat_log_chat(mybarejid, room, nick, "[redacted]");
         }
-
-        g_free(pref_omemo_log);
-        free(mybarejid);
     }
 }
 
@@ -393,7 +382,7 @@ _groupchat_log_chat(const gchar* const login, const gchar* const room, const gch
 
     GDateTime* dt_tmp = g_date_time_new_now_local();
 
-    gchar* date_fmt = g_date_time_format_iso8601(dt_tmp);
+    auto_gchar gchar* date_fmt = g_date_time_format_iso8601(dt_tmp);
 
     FILE* grpchatlogp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
@@ -411,7 +400,6 @@ _groupchat_log_chat(const gchar* const login, const gchar* const room, const gch
         }
     }
 
-    g_free(date_fmt);
     g_date_time_unref(dt_tmp);
 }
 
@@ -425,20 +413,15 @@ chat_log_close(void)
 static char*
 _get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean is_room)
 {
-    gchar* chatlogs_dir = files_file_in_account_data_path(DIR_CHATLOGS, login, is_room ? "rooms" : NULL);
-    gchar* logfile_name = g_date_time_format(dt, "%Y_%m_%d.log");
-    gchar* other_ = str_replace(other, "@", "_at_");
-    gchar* logs_path = g_strdup_printf("%s/%s", chatlogs_dir, other_);
+    auto_gchar gchar* chatlogs_dir = files_file_in_account_data_path(DIR_CHATLOGS, login, is_room ? "rooms" : NULL);
+    auto_gchar gchar* logfile_name = g_date_time_format(dt, "%Y_%m_%d.log");
+    auto_gchar gchar* other_ = str_replace(other, "@", "_at_");
+    auto_gchar gchar* logs_path = g_strdup_printf("%s/%s", chatlogs_dir, other_);
     gchar* logfile_path = NULL;
 
     if (create_dir(logs_path)) {
         logfile_path = g_strdup_printf("%s/%s", logs_path, logfile_name);
     }
-
-    g_free(logs_path);
-    g_free(other_);
-    g_free(logfile_name);
-    g_free(chatlogs_dir);
 
     return logfile_path;
 }

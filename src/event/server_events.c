@@ -1346,7 +1346,7 @@ static void
 _cut(ProfMessage* message, const char* cut)
 {
     if (strstr(message->plain, cut)) {
-        char** split = g_strsplit(message->plain, cut, -1);
+        gchar** split = g_strsplit(message->plain, cut, -1);
         free(message->plain);
         message->plain = g_strjoinv("", split);
         g_strfreev(split);

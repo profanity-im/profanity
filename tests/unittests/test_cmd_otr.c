@@ -194,7 +194,7 @@ void
 cmd_otr_gen_generates_key_for_connected_account(void** state)
 {
     gchar* args[] = { "gen", NULL };
-    char* account_name = g_strdup("myaccount");
+    gchar* account_name = g_strdup("myaccount");
     ProfAccount* account = account_new(account_name, g_strdup("me@jabber.org"), NULL, NULL,
                                        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 

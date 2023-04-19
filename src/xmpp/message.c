@@ -638,10 +638,9 @@ message_send_chat_omemo(const char* const jid, uint32_t sid, GList* keys,
 
     xmpp_stanza_t* header = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(header, "header");
-    char* sid_text = g_strdup_printf("%d", sid);
+    auto_gchar gchar* sid_text = g_strdup_printf("%d", sid);
     log_debug("[OMEMO] Sending from device sid %s", sid_text);
     xmpp_stanza_set_attribute(header, "sid", sid_text);
-    g_free(sid_text);
 
     GList* key_iter;
     for (key_iter = keys; key_iter != NULL; key_iter = key_iter->next) {
@@ -649,10 +648,9 @@ message_send_chat_omemo(const char* const jid, uint32_t sid, GList* keys,
 
         xmpp_stanza_t* key_stanza = xmpp_stanza_new(ctx);
         xmpp_stanza_set_name(key_stanza, "key");
-        char* rid = g_strdup_printf("%d", key->device_id);
+        auto_gchar gchar* rid = g_strdup_printf("%d", key->device_id);
         log_debug("[OMEMO] Sending to device rid %s", STR_MAYBE_NULL(rid));
         xmpp_stanza_set_attribute(key_stanza, "rid", rid);
-        g_free(rid);
         if (key->prekey) {
             xmpp_stanza_set_attribute(key_stanza, "prekey", "true");
         }
@@ -1625,19 +1623,16 @@ message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
 
             // our client sents at CON_RAND_ID_LEN + identifier
             if (tmp_len > CON_RAND_ID_LEN) {
-                char* uuid = g_strndup(tmp_id, CON_RAND_ID_LEN);
+                auto_gchar gchar* uuid = g_strndup(tmp_id, CON_RAND_ID_LEN);
                 const char* prof_identifier = connection_get_profanity_identifier();
 
-                gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA1,
-                                                        (guchar*)prof_identifier, strlen(prof_identifier),
-                                                        uuid, strlen(uuid));
+                auto_gchar gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA1,
+                                                                   (guchar*)prof_identifier, strlen(prof_identifier),
+                                                                   uuid, strlen(uuid));
 
                 if (g_strcmp0(&tmp_id[CON_RAND_ID_LEN], hmac) == 0) {
                     ret = TRUE;
                 }
-
-                g_free(uuid);
-                g_free(hmac);
             }
         }
     }

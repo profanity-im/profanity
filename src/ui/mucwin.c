@@ -391,7 +391,7 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
     while (curr) {
         pos = GPOINTER_TO_INT(curr->data);
 
-        char* before_str = g_utf8_substring(message, last_pos, pos);
+        auto_gchar gchar* before_str = g_utf8_substring(message, last_pos, pos);
 
         if (last_pos == 0 && strncmp(before_str, "/me ", 4) == 0) {
             win_print_them(window, THEME_ROOMMENTION, ch, flags, "");
@@ -404,11 +404,9 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
             }
             win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str);
         }
-        g_free(before_str);
 
-        char* mynick_str = g_utf8_substring(message, pos, pos + mynick_len);
+        auto_gchar gchar* mynick_str = g_utf8_substring(message, pos, pos + mynick_len);
         win_append_highlight(window, THEME_ROOMMENTION_TERM, "%s", mynick_str);
-        g_free(mynick_str);
 
         last_pos = pos + mynick_len;
 
@@ -418,7 +416,7 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
     glong message_len = g_utf8_strlen(message, -1);
     if (last_pos < message_len) {
         // get tail without allocating a new string
-        char* rest = g_utf8_offset_to_pointer(message, last_pos);
+        gchar* rest = g_utf8_offset_to_pointer(message, last_pos);
         win_appendln_highlight(window, THEME_ROOMMENTION, "%s", rest);
     } else {
         win_appendln_highlight(window, THEME_ROOMMENTION, "");
@@ -449,15 +447,15 @@ _mucwin_print_triggers(ProfWin* window, const char* const message, GList* trigge
         curr = g_list_next(curr);
     }
 
-    char* message_lower = g_utf8_strdown(message, -1);
+    auto_gchar gchar* message_lower = g_utf8_strdown(message, -1);
 
     // find earliest trigger in message
     int first_trigger_pos = -1;
     int first_trigger_len = -1;
     curr = weighted_triggers;
     while (curr) {
-        char* trigger_lower = g_utf8_strdown(curr->data, -1);
-        char* trigger_ptr = g_strstr_len(message_lower, -1, trigger_lower);
+        auto_gchar gchar* trigger_lower = g_utf8_strdown(curr->data, -1);
+        gchar* trigger_ptr = g_strstr_len(message_lower, -1, trigger_lower);
 
         // not found, try next
         if (trigger_ptr == NULL) {
@@ -472,11 +470,9 @@ _mucwin_print_triggers(ProfWin* window, const char* const message, GList* trigge
             first_trigger_len = strlen(trigger_lower);
         }
 
-        g_free(trigger_lower);
         curr = g_list_next(curr);
     }
 
-    g_free(message_lower);
     g_list_free(weighted_triggers);
 
     // no triggers found

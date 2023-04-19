@@ -160,9 +160,8 @@ main(int argc, char** argv)
 #endif
 
 #ifdef HAVE_PYTHON
-        gchar* python_version = python_get_version_number();
+        auto_gchar gchar* python_version = python_get_version_number();
         g_print("Python plugins: Enabled (%s)\n", python_version);
-        g_free(python_version);
 #else
         g_print("Python plugins: Disabled\n");
 #endif

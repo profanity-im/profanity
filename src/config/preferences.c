@@ -101,21 +101,15 @@ _prefs_load(void)
 
     // move pre 0.5.0 autoaway.message to autoaway.awaymessage
     if (g_key_file_has_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL)) {
-        char* message = g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
+        auto_gchar gchar* message = g_key_file_get_string(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
         g_key_file_set_string(prefs, PREF_GROUP_PRESENCE, "autoaway.awaymessage", message);
         g_key_file_remove_key(prefs, PREF_GROUP_PRESENCE, "autoaway.message", NULL);
-        g_free(message);
     }
 
     // migrate pre 0.5.0 time settings
     if (g_key_file_has_key(prefs, PREF_GROUP_UI, "time", NULL)) {
-        char* time = g_key_file_get_string(prefs, PREF_GROUP_UI, "time", NULL);
-        char* val = NULL;
-        if (time) {
-            val = time;
-        } else {
-            val = "off";
-        }
+        auto_gchar gchar* time = g_key_file_get_string(prefs, PREF_GROUP_UI, "time", NULL);
+        char* val = time ? time : "off";
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.console", val);
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.chat", val);
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.muc", val);
@@ -123,12 +117,11 @@ _prefs_load(void)
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.private", val);
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.xmlconsole", val);
         g_key_file_remove_key(prefs, PREF_GROUP_UI, "time", NULL);
-        g_free(time);
     }
 
     // move pre 0.5.0 notify settings
     if (g_key_file_has_key(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL)) {
-        char* value = g_key_file_get_string(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL);
+        auto_gchar gchar* value = g_key_file_get_string(prefs, PREF_GROUP_NOTIFICATIONS, "room", NULL);
         if (g_strcmp0(value, "on") == 0) {
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", TRUE);
         } else if (g_strcmp0(value, "off") == 0) {
@@ -137,7 +130,6 @@ _prefs_load(void)
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room", FALSE);
             g_key_file_set_boolean(prefs, PREF_GROUP_NOTIFICATIONS, "room.mention", TRUE);
         }
-        g_free(value);
     }
 
     // move pre 0.6.0 titlebar settings to wintitle
@@ -154,7 +146,7 @@ _prefs_load(void)
 
     // after 0.8.1: titlebar use jid|name -> titlebar show|hide jid|name
     if (g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.muc.title", NULL)) {
-        char* value = g_key_file_get_string(prefs, PREF_GROUP_UI, "titlebar.muc.title", NULL);
+        auto_gchar gchar* value = g_key_file_get_string(prefs, PREF_GROUP_UI, "titlebar.muc.title", NULL);
         if (g_strcmp0(value, "name") == 0) {
             g_key_file_set_boolean(prefs, PREF_GROUP_UI, "titlebar.muc.title.name", TRUE);
         } else if (g_strcmp0(value, "jid") == 0) {
@@ -164,7 +156,7 @@ _prefs_load(void)
 
     // 0.9.0 introduced /urlopen. It was saved under "logging" section. Now we have a new "executables" section.
     if (g_key_file_has_key(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL)) {
-        char* val = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
+        auto_gchar gchar* val = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
 
         GString* value = g_string_new("false;");
         value = g_string_append(value, val);
@@ -178,7 +170,7 @@ _prefs_load(void)
 
     // 0.9.0 introduced configurable /avatar. It was saved under "logging" section. Now we have a new "executables" section.
     if (g_key_file_has_key(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL)) {
-        char* value = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL);
+        auto_gchar gchar* value = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL);
         g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "avatar.cmd", value);
         g_key_file_remove_key(prefs, PREF_GROUP_LOGGING, "avatar.cmd", NULL);
     }
@@ -192,7 +184,7 @@ _prefs_load(void)
     // file type or scheme matching. Move value saved under 'DEF' locale to a
     // simple key-value string not under any locale.
     {
-        char** values = g_key_file_get_locale_string_list(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", "DEF", NULL, NULL);
+        auto_gcharv gchar** values = g_key_file_get_locale_string_list(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", "DEF", NULL, NULL);
         if (values && !g_key_file_has_key(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", NULL)) {
             // First value in array is `require_save` option -- we ignore that
             // one as there is no such option anymore.
@@ -201,16 +193,13 @@ _prefs_load(void)
             g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", executable);
             g_key_file_set_comment(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", " Migrated from url.open.cmd[DEF]. `require_save` option has been removed in v0.10 and was discarded.", NULL);
             g_key_file_remove_key(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd[DEF]", NULL);
-
-            g_strfreev(values);
         }
 
-        char* value = g_key_file_get_locale_string(prefs, PREF_GROUP_EXECUTABLES, "url.save.cmd", "DEF", NULL);
+        auto_gchar gchar* value = g_key_file_get_locale_string(prefs, PREF_GROUP_EXECUTABLES, "url.save.cmd", "DEF", NULL);
         if (value && !g_key_file_has_key(prefs, PREF_GROUP_EXECUTABLES, "url.save.cmd", NULL)) {
             g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "url.save.cmd", value);
             g_key_file_set_comment(prefs, PREF_GROUP_EXECUTABLES, "url.save.cmd", " Migrated from url.save.cmd[DEF].", NULL);
             g_key_file_remove_key(prefs, PREF_GROUP_EXECUTABLES, "url.save.cmd[DEF]", NULL);
-            g_free(value);
         }
     }
 
@@ -342,20 +331,18 @@ prefs_message_get_triggers(const char* const message)
 {
     GList* result = NULL;
 
-    char* message_lower = g_utf8_strdown(message, -1);
+    auto_gchar gchar* message_lower = g_utf8_strdown(message, -1);
     gsize len = 0;
     gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
     for (int i = 0; i < len; i++) {
-        char* trigger_lower = g_utf8_strdown(triggers[i], -1);
+        auto_gchar gchar* trigger_lower = g_utf8_strdown(triggers[i], -1);
         if (g_strrstr(message_lower, trigger_lower)) {
             result = g_list_append(result, strdup(triggers[i]));
         }
-        g_free(trigger_lower);
     }
 
     g_strfreev(triggers);
-    g_free(message_lower);
 
     return result;
 }
@@ -540,7 +527,7 @@ prefs_get_string(preference_t pref)
     const char* key = _get_key(pref);
     char* def = _get_default_string(pref);
 
-    char* result = g_key_file_get_string(prefs, group, key, NULL);
+    gchar* result = g_key_file_get_string(prefs, group, key, NULL);
 
     if (result == NULL) {
         if (def) {
@@ -632,10 +619,9 @@ prefs_get_tls_certpath(void)
     const char* group = _get_group(PREF_TLS_CERTPATH);
     const char* key = _get_key(PREF_TLS_CERTPATH);
 
-    char* setting = g_key_file_get_string(prefs, group, key, NULL);
+    auto_gchar gchar* setting = g_key_file_get_string(prefs, group, key, NULL);
 
     if (g_strcmp0(setting, "none") == 0) {
-        g_free(setting);
         return NULL;
     }
 
@@ -660,7 +646,6 @@ prefs_get_tls_certpath(void)
     }
 
     char* result = strdup(setting);
-    g_free(setting);
 
     return result;
 }
@@ -1684,14 +1669,12 @@ prefs_get_aliases(void)
 
         for (int i = 0; i < len; i++) {
             char* name = keys[i];
-            char* value = g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
+            auto_gchar gchar* value = g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
 
             if (value) {
                 ProfAlias* alias = malloc(sizeof(struct prof_alias_t));
                 alias->name = strdup(name);
                 alias->value = strdup(value);
-
-                free(value);
 
                 result = g_list_insert_sorted(result, alias, (GCompareFunc)_alias_cmp);
             }
