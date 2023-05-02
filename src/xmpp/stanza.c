@@ -2698,6 +2698,42 @@ stanza_create_avatar_metadata_publish_iq(xmpp_ctx_t* ctx, const char* img_data, 
 }
 
 xmpp_stanza_t*
+stanza_disable_avatar_publish_iq(xmpp_ctx_t* ctx)
+{
+    char* id = connection_create_stanza_id();
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
+    free(id);
+    xmpp_stanza_set_attribute(iq, STANZA_ATTR_FROM, connection_get_fulljid());
+
+    xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t* publish = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(publish, STANZA_NAME_PUBLISH);
+    xmpp_stanza_set_attribute(publish, STANZA_ATTR_NODE, STANZA_NS_USER_AVATAR_METADATA);
+
+    xmpp_stanza_t* item = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
+
+    xmpp_stanza_t* metadata = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(metadata, STANZA_NAME_METADATA);
+    xmpp_stanza_set_ns(metadata, STANZA_NS_USER_AVATAR_METADATA);
+
+    xmpp_stanza_add_child(item, metadata);
+    xmpp_stanza_add_child(publish, item);
+    xmpp_stanza_add_child(pubsub, publish);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(metadata);
+    xmpp_stanza_release(item);
+    xmpp_stanza_release(publish);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
 stanza_create_vcard_request_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const stanza_id)
 {
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, stanza_id);

@@ -9287,25 +9287,34 @@ gboolean
 cmd_avatar(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[1] == NULL) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[0], "set") == 0) {
-#ifdef HAVE_PIXBUF
-        if (avatar_set(args[1])) {
-            cons_show("Avatar updated successfully");
+        if (g_strcmp0(args[0], "disable") == 0) {
+            if (avatar_publishing_disable()) {
+                cons_show("Avatar publishing disabled. To enable avatar publishing, use '/avatar set <path>'.");
+            } else {
+                cons_show("Failed to disable avatar publishing.");
+            }
+        } else {
+            cons_bad_cmd_usage(command);
         }
+    } else {
+        if (g_strcmp0(args[0], "set") == 0) {
+#ifdef HAVE_PIXBUF
+            if (avatar_set(args[1])) {
+                cons_show("Avatar updated successfully");
+            }
 #else
-        cons_show("Profanity has not been built with GDK Pixbuf support enabled which is needed to scale the avatar when uploading.");
+            cons_show("Profanity has not been built with GDK Pixbuf support enabled which is needed to scale the avatar when uploading.");
 #endif
-    } else if (g_strcmp0(args[0], "get") == 0) {
-        avatar_get_by_nick(args[1], false);
-    } else if (g_strcmp0(args[0], "open") == 0) {
-        avatar_get_by_nick(args[1], true);
-    } else if (g_strcmp0(args[0], "cmd") == 0) {
-        prefs_set_string(PREF_AVATAR_CMD, args[1]);
-        cons_show("Avatar cmd set to: %s", args[1]);
+        } else if (g_strcmp0(args[0], "get") == 0) {
+            avatar_get_by_nick(args[1], false);
+        } else if (g_strcmp0(args[0], "open") == 0) {
+            avatar_get_by_nick(args[1], true);
+        } else if (g_strcmp0(args[0], "cmd") == 0) {
+            prefs_set_string(PREF_AVATAR_CMD, args[1]);
+            cons_show("Avatar cmd set to: %s", args[1]);
+        } else {
+            cons_bad_cmd_usage(command);
+        }
     }
 
     return TRUE;

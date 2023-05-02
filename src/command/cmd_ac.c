@@ -1102,6 +1102,7 @@ cmd_ac_init(void)
 
     avatar_ac = autocomplete_new();
     autocomplete_add(avatar_ac, "set");
+    autocomplete_add(avatar_ac, "disable");
     autocomplete_add(avatar_ac, "get");
     autocomplete_add(avatar_ac, "open");
 
