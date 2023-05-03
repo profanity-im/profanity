@@ -45,3 +45,4 @@ gboolean avatar_set(const char* path);
 #endif
 
 #endif
+gboolean avatar_publishing_disable();

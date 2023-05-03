@@ -14,3 +14,9 @@ avatar_set(const char* path)
 {
     return TRUE;
 }
+
+gboolean
+avatar_publishing_disable()
+{
+    return TRUE;
+}

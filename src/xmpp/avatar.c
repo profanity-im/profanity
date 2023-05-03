@@ -151,6 +151,17 @@ avatar_set(const char* path)
 #endif
 
 gboolean
+avatar_publishing_disable()
+{
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    xmpp_stanza_t* iq = stanza_disable_avatar_publish_iq(ctx);
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
+
+    return TRUE;
+}
+
+gboolean
 avatar_get_by_nick(const char* nick, gboolean open)
 {
     // in case we set the feature, remove it
@@ -224,6 +235,9 @@ _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
                         _avatar_request_item_by_id(from, data);
                     }
                 }
+            } else {
+                cons_show("We couldn't get the user's avatar, possibly because they haven't set one or have disabled avatar publishing. "
+                          "During this Profanity session, you will receive future changes to this user's avatar.");
             }
         }
     }

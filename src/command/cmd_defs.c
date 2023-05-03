@@ -2418,25 +2418,29 @@ static const struct cmd_t command_defs[] = {
     },
 
     { CMD_PREAMBLE("/avatar",
-                   parse_args, 2, 2, NULL)
+                   parse_args, 1, 2, NULL)
       CMD_MAINFUNC(cmd_avatar)
       CMD_TAGS(
               CMD_TAG_CHAT)
       CMD_SYN(
               "/avatar set <path>",
+              "/avatar disable",
               "/avatar get <barejid>",
               "/avatar open <barejid>")
       CMD_DESC(
-              "Upload avatar for oneself (XEP-0084). "
-              "Download avatar (XEP-0084) for a certain contact. "
-              "If nothing happens after using this command the user either doesn't have an avatar set at all "
+              "Upload an avatar for yourself, "
+              "disable your avatar, "
+              "or download a contact's avatar (XEP-0084). "
+              "If nothing happens after using this command, the user either doesn't have an avatar set "
               "or doesn't use XEP-0084 to publish it.")
       CMD_ARGS(
               { "set <path>", "Set avatar to the image at <path>." },
+              { "disable", "Disable avatar publishing; your avatar will not display to others." },
               { "get <barejid>", "Download the avatar. barejid is the JID to download avatar from." },
               { "open <barejid>", "Download avatar and open it with command." })
       CMD_EXAMPLES(
               "/avatar set ~/images/avatar.png",
+              "/avatar disable",
               "/avatar get thor@valhalla.edda",
               "/avatar open freyja@vanaheimr.edda") },
 
