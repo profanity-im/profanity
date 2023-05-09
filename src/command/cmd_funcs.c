@@ -9688,6 +9688,9 @@ cmd_executable_editor(ProfWin* window, const char* const command, gchar** args)
     if (g_strcmp0(args[1], "set") == 0 && num_args >= 3) {
         prefs_set_string(PREF_COMPOSE_EDITOR, args[2]);
         cons_show("`editor` command set to invoke '%s'", args[2]);
+    } else if (g_strcmp0(args[1], "default") == 0) {
+        prefs_set_string(PREF_COMPOSE_EDITOR, NULL);
+        cons_show("`editor` will use built-in download method (default)");
     } else {
         cons_bad_cmd_usage(command);
     }

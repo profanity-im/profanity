@@ -2541,6 +2541,7 @@ static const struct cmd_t command_defs[] = {
               "/executable urlsave set <cmdtemplate>",
               "/executable urlsave default",
               "/executable editor set <cmdtemplate>",
+              "/executable editor default",
               "/executable vcard_photo set <cmdtemplate>",
               "/executable vcard_photo default")
       CMD_DESC(
@@ -2553,6 +2554,7 @@ static const struct cmd_t command_defs[] = {
               { "urlsave set", "Set executable that is run by /url save. Takes a command template that replaces %u and %p with the URL and path respectively." },
               { "urlsave default", "Use the built-in download method for saving." },
               { "editor set", "Set editor to be used with /editor. Needs a terminal editor or a script to run a graphical editor." },
+              { "editor default", "Restore to default settings." },
               { "vcard_photo set", "Set executable that is run by /vcard photo open. Takes a command template that replaces %p with the path" },
               { "vcard_photo default", "Restore to default settings." })
       CMD_EXAMPLES(
