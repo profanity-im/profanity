@@ -9309,9 +9309,6 @@ cmd_avatar(ProfWin* window, const char* const command, gchar** args)
             avatar_get_by_nick(args[1], false);
         } else if (g_strcmp0(args[0], "open") == 0) {
             avatar_get_by_nick(args[1], true);
-        } else if (g_strcmp0(args[0], "cmd") == 0) {
-            prefs_set_string(PREF_AVATAR_CMD, args[1]);
-            cons_show("Avatar cmd set to: %s", args[1]);
         } else {
             cons_bad_cmd_usage(command);
         }
