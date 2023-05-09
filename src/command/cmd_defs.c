@@ -2437,7 +2437,7 @@ static const struct cmd_t command_defs[] = {
               { "set <path>", "Set avatar to the image at <path>." },
               { "disable", "Disable avatar publishing; your avatar will not display to others." },
               { "get <barejid>", "Download the avatar. barejid is the JID to download avatar from." },
-              { "open <barejid>", "Download avatar and open it with command." })
+              { "open <barejid>", "Download avatar and open it with command. See /executable." })
       CMD_EXAMPLES(
               "/avatar set ~/images/avatar.png",
               "/avatar disable",
@@ -2534,7 +2534,8 @@ static const struct cmd_t command_defs[] = {
       CMD_TAGS(
               CMD_TAG_DISCOVERY)
       CMD_SYN(
-              "/executable avatar <cmd>",
+              "/executable avatar set <cmdtemplate>",
+              "/executable avatar default",
               "/executable urlopen set <cmdtemplate>",
               "/executable urlopen default",
               "/executable urlsave set <cmdtemplate>",
@@ -2545,7 +2546,8 @@ static const struct cmd_t command_defs[] = {
       CMD_DESC(
               "Configure executable that should be called upon a certain command.")
       CMD_ARGS(
-              { "avatar", "Set executable that is run by /avatar open. Use your favorite image viewer." },
+              { "avatar set", "Set executable that is run by /avatar open. Use your favorite image viewer." },
+              { "avatar default", "Restore to default settings." },
               { "urlopen set", "Set executable that is run by /url open. Takes a command template that replaces %u and %p with the URL and path respectively." },
               { "urlopen default", "Restore to default settings." },
               { "urlsave set", "Set executable that is run by /url save. Takes a command template that replaces %u and %p with the URL and path respectively." },

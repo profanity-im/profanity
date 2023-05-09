@@ -9617,15 +9617,7 @@ out:
 }
 
 gboolean
-cmd_executable_avatar(ProfWin* window, const char* const command, gchar** args)
-{
-    prefs_set_string(PREF_AVATAR_CMD, args[1]);
-    cons_show("`avatar` command set to invoke '%s'", args[1]);
-    return TRUE;
-}
-
-gboolean
-cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args)
+_cmd_executable_template(const preference_t setting, const char* command, gchar** args)
 {
     guint num_args = g_strv_length(args);
     if (num_args < 2) {
@@ -9635,14 +9627,14 @@ cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args)
 
     if (g_strcmp0(args[1], "set") == 0 && num_args >= 3) {
         gchar* str = g_strjoinv(" ", &args[2]);
-        prefs_set_string(PREF_URL_OPEN_CMD, str);
-        cons_show("`url open` command set to invoke '%s'", str);
+        prefs_set_string(setting, str);
+        cons_show("`%s` command set to invoke '%s'", command, str);
         g_free(str);
 
     } else if (g_strcmp0(args[1], "default") == 0) {
-        prefs_set_string(PREF_URL_OPEN_CMD, NULL);
-        gchar* def = prefs_get_string(PREF_URL_OPEN_CMD);
-        cons_show("`url open` command set to invoke %s (default)", def);
+        prefs_set_string(setting, NULL);
+        gchar* def = prefs_get_string(setting);
+        cons_show("`%s` command set to invoke %s (default)", command, def);
         g_free(def);
     } else {
         cons_bad_cmd_usage(command);
@@ -9652,9 +9644,20 @@ cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_executable_avatar(ProfWin* window, const char* const command, gchar** args)
+{
+    return _cmd_executable_template(PREF_AVATAR_CMD, args[0], args);
+}
+
+gboolean
+cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args)
+{
+    return _cmd_executable_template(PREF_URL_OPEN_CMD, args[0], args);
+}
+
+gboolean
 cmd_executable_urlsave(ProfWin* window, const char* const command, gchar** args)
 {
-
     guint num_args = g_strv_length(args);
     if (num_args < 2) {
         cons_bad_cmd_usage(command);
