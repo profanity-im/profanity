@@ -48,7 +48,6 @@ jabber_conn_status_t connection_connect(const char* const fulljid, const char* c
                                         const char* const tls_policy, const char* const auth_policy);
 jabber_conn_status_t connection_register(const char* const altdomain, int port, const char* const tls_policy,
                                          const char* const username, const char* const password);
-void connection_disconnect(void);
 void connection_set_disconnected(void);
 
 void connection_set_priority(const int priority);

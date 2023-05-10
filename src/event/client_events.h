@@ -42,6 +42,7 @@ jabber_conn_status_t cl_ev_connect_jid(const char* const jid, const char* const 
 jabber_conn_status_t cl_ev_connect_account(ProfAccount* account);
 
 void cl_ev_disconnect(void);
+void cl_ev_reconnect(void);
 
 void cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs);
 

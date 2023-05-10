@@ -47,6 +47,7 @@
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
 #include "xmpp/chat_session.h"
+#include "xmpp/session.h"
 #include "xmpp/xmpp.h"
 
 #ifdef HAVE_LIBOTR
@@ -92,6 +93,18 @@ cl_ev_disconnect(void)
     ev_disconnect_cleanup();
     // on intentional disconnect reset the counter
     ev_reset_connection_counter();
+}
+
+void
+cl_ev_reconnect(void)
+{
+    if (connection_get_status() != JABBER_DISCONNECTED) {
+        connection_disconnect();
+        ev_disconnect_cleanup();
+        // on intentional disconnect reset the counter
+        ev_reset_connection_counter();
+    }
+    session_reconnect_now();
 }
 
 void
