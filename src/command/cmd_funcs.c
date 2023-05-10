@@ -9634,6 +9634,9 @@ _cmd_executable_template(const preference_t setting, const char* command, gchar*
     } else if (g_strcmp0(args[1], "default") == 0) {
         prefs_set_string(setting, NULL);
         gchar* def = prefs_get_string(setting);
+        if (def == NULL) {
+            def = g_strdup("built-in method");
+        }
         cons_show("`%s` command set to invoke %s (default)", command, def);
         g_free(def);
     } else {
@@ -9658,63 +9661,21 @@ cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_executable_urlsave(ProfWin* window, const char* const command, gchar** args)
 {
-    guint num_args = g_strv_length(args);
-    if (num_args < 2) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
-    if (g_strcmp0(args[1], "set") == 0 && num_args >= 3) {
-        gchar* str = g_strjoinv(" ", &args[2]);
-        prefs_set_string(PREF_URL_SAVE_CMD, str);
-        cons_show("`url save` command set to invoke '%s'", str);
-        g_free(str);
-
-    } else if (g_strcmp0(args[1], "default") == 0) {
-        prefs_set_string(PREF_URL_SAVE_CMD, NULL);
-        cons_show("`url save` will use built-in download method (default)");
-    } else {
-        cons_bad_cmd_usage(command);
-    }
-
-    return TRUE;
+    return _cmd_executable_template(PREF_URL_SAVE_CMD, args[0], args);
 }
 
 gboolean
 cmd_executable_editor(ProfWin* window, const char* const command, gchar** args)
 {
-    guint num_args = g_strv_length(args);
-
-    if (g_strcmp0(args[1], "set") == 0 && num_args >= 3) {
-        prefs_set_string(PREF_COMPOSE_EDITOR, args[2]);
-        cons_show("`editor` command set to invoke '%s'", args[2]);
-    } else if (g_strcmp0(args[1], "default") == 0) {
-        prefs_set_string(PREF_COMPOSE_EDITOR, NULL);
-        cons_show("`editor` will use built-in download method (default)");
-    } else {
-        cons_bad_cmd_usage(command);
-    }
-
-    return TRUE;
+    return _cmd_executable_template(PREF_COMPOSE_EDITOR, args[0], args);
 }
 
 gboolean
 cmd_executable_vcard_photo(ProfWin* window, const char* const command, gchar** args)
 {
-    if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-        prefs_set_string(PREF_VCARD_PHOTO_CMD, args[2]);
-        cons_show("`vcard photo open` command set to invoke '%s'", args[2]);
-    } else if (g_strcmp0(args[1], "default") == 0) {
-        prefs_set_string(PREF_VCARD_PHOTO_CMD, NULL);
-        char* cmd = prefs_get_string(PREF_VCARD_PHOTO_CMD);
-        cons_show("`vcard photo open` command set to invoke '%s' (default)", cmd);
-        g_free(cmd);
-    } else {
-        cons_bad_cmd_usage(command);
-    }
-
-    return TRUE;
+    return _cmd_executable_template(PREF_VCARD_PHOTO_CMD, args[0], args);
 }
+
 gboolean
 cmd_mam(ProfWin* window, const char* const command, gchar** args)
 {
