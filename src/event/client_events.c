@@ -85,9 +85,8 @@ cl_ev_connect_account(ProfAccount* account)
 void
 cl_ev_disconnect(void)
 {
-    char* mybarejid = connection_get_barejid();
+    auto_char char* mybarejid = connection_get_barejid();
     cons_show("%s logged out successfully.", mybarejid);
-    free(mybarejid);
 
     ui_close_all_wins();
     ev_disconnect_cleanup();
