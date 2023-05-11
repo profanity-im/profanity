@@ -2297,7 +2297,7 @@ _get_default_string(preference_t pref)
     case PREF_COLOR_NICK:
         return "false";
     case PREF_AVATAR_CMD:
-        return "xdg-open";
+        return "xdg-open %p";
     case PREF_URL_OPEN_CMD:
         return "xdg-open %u";
     case PREF_VCARD_PHOTO_CMD:

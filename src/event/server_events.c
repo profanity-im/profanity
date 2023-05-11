@@ -1332,8 +1332,8 @@ sv_ev_bookmark_autojoin(Bookmark* bookmark)
 
     log_debug("Autojoin %s with nick=%s", bookmark->barejid, nick);
     if (!muc_active(bookmark->barejid)) {
-        presence_join_room(bookmark->barejid, nick, bookmark->password);
         muc_join(bookmark->barejid, nick, bookmark->password, TRUE);
+        presence_join_room(bookmark->barejid, nick, bookmark->password);
         iq_room_affiliation_list(bookmark->barejid, "member", false);
         iq_room_affiliation_list(bookmark->barejid, "admin", false);
         iq_room_affiliation_list(bookmark->barejid, "owner", false);
