@@ -54,19 +54,18 @@ get_message_from_editor(gchar* message, gchar** returned_message)
     /* Make sure that there's no junk in the return-pointer in error cases */
     *returned_message = NULL;
 
-    gchar* filename = NULL;
+    auto_gchar gchar* filename = NULL;
     GError* glib_error = NULL;
     auto_char char* jid = connection_get_barejid();
     if (jid) {
         filename = files_file_in_account_data_path(DIR_EDITOR, jid, "compose.md");
     } else {
         log_debug("[Editor] could not get JID");
-        gchar* data_dir = files_get_data_path(DIR_EDITOR);
+        auto_gchar gchar* data_dir = files_get_data_path(DIR_EDITOR);
         if (!create_dir(data_dir)) {
             return TRUE;
         }
         filename = g_strdup_printf("%s/compose.md", data_dir);
-        g_free(data_dir);
     }
     if (!filename) {
         log_error("[Editor] something went wrong while creating compose file");
@@ -83,21 +82,17 @@ get_message_from_editor(gchar* message, gchar** returned_message)
         if (glib_error) {
             g_error_free(glib_error);
         }
-        g_free(filename);
         return TRUE;
     }
 
-    char* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
-    gchar* editor_with_filename = g_strdup_printf("%s %s", editor, filename);
-    gchar** editor_argv = g_strsplit(editor_with_filename, " ", 0);
-
-    g_free(editor_with_filename);
+    auto_gchar gchar* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
+    auto_gchar gchar* editor_with_filename = g_strdup_printf("%s %s", editor, filename);
+    auto_gcharv gchar** editor_argv = g_strsplit(editor_with_filename, " ", 0);
 
     // Fork / exec
     pid_t pid = fork();
     if (pid == 0) {
         int x = execvp(editor_argv[0], editor_argv);
-        g_strfreev(editor_argv);
         if (x == -1) {
             log_error("[Editor] Failed to exec %s", editor);
         }
@@ -115,8 +110,6 @@ get_message_from_editor(gchar* message, gchar** returned_message)
             if (glib_error) {
                 g_error_free(glib_error);
             }
-            g_free(filename);
-            g_free(editor);
             return TRUE;
         }
         /* Remove all trailing new-line characters */
@@ -127,10 +120,7 @@ get_message_from_editor(gchar* message, gchar** returned_message)
         } else {
             log_debug("[Editor] deleted file: %s", filename);
         }
-        g_free(filename);
     }
-
-    g_free(editor);
 
     return FALSE;
 }
