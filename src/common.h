@@ -47,6 +47,9 @@
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
+#define PROF_STRINGIFY_(n) #n
+#define PROF_STRINGIFY(n)  PROF_STRINGIFY_(n)
+
 void auto_free_gchar(gchar** str);
 #define auto_gchar __attribute__((__cleanup__(auto_free_gchar)))
 void auto_free_gcharv(gchar*** args);

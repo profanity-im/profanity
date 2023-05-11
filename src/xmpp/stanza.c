@@ -2757,6 +2757,19 @@ stanza_attach_correction(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza, const char* con
     return stanza;
 }
 
+static xmpp_stanza_t*
+_text_stanza(xmpp_ctx_t* ctx, const char* name, const char* text)
+{
+    xmpp_stanza_t* res = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(res, name);
+
+    xmpp_stanza_t* t = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(t, text);
+    xmpp_stanza_add_child_ex(res, t, 0);
+
+    return res;
+}
+
 xmpp_stanza_t*
 stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const enddate, const char* const firstid, const char* const lastid)
 {
@@ -2780,145 +2793,67 @@ stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const s
     xmpp_stanza_set_attribute(field_form_type, STANZA_ATTR_VAR, "FORM_TYPE");
     xmpp_stanza_set_type(field_form_type, "hidden");
 
-    xmpp_stanza_t* value_mam = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(value_mam, STANZA_NAME_VALUE);
+    xmpp_stanza_t* value_mam = _text_stanza(ctx, STANZA_NAME_VALUE, STANZA_NS_MAM2);
 
-    xmpp_stanza_t* mam_text = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(mam_text, STANZA_NS_MAM2);
-    xmpp_stanza_add_child(value_mam, mam_text);
-
-    xmpp_stanza_add_child(field_form_type, value_mam);
+    xmpp_stanza_add_child_ex(field_form_type, value_mam, 0);
 
     // field 'with'
     xmpp_stanza_t* field_with = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(field_with, STANZA_NAME_FIELD);
     xmpp_stanza_set_attribute(field_with, STANZA_ATTR_VAR, "with");
 
-    xmpp_stanza_t* value_with = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(value_with, STANZA_NAME_VALUE);
+    xmpp_stanza_t* value_with = _text_stanza(ctx, STANZA_NAME_VALUE, jid);
 
-    xmpp_stanza_t* with_text = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_text(with_text, jid);
-    xmpp_stanza_add_child(value_with, with_text);
-
-    xmpp_stanza_add_child(field_with, value_with);
-
-    // field 'start'
-    xmpp_stanza_t *field_start, *value_start, *start_date_text;
-    if (startdate) {
-        field_start = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(field_start, STANZA_NAME_FIELD);
-        xmpp_stanza_set_attribute(field_start, STANZA_ATTR_VAR, "start");
-
-        value_start = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(value_start, STANZA_NAME_VALUE);
-
-        start_date_text = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_text(start_date_text, startdate);
-        xmpp_stanza_add_child(value_start, start_date_text);
-
-        xmpp_stanza_add_child(field_start, value_start);
-    }
-
-    xmpp_stanza_t *field_end, *value_end, *end_date_text;
-    if (enddate) {
-        field_end = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(field_end, STANZA_NAME_FIELD);
-        xmpp_stanza_set_attribute(field_end, STANZA_ATTR_VAR, "end");
-
-        value_end = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(value_end, STANZA_NAME_VALUE);
-
-        end_date_text = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_text(end_date_text, enddate);
-        xmpp_stanza_add_child(value_end, end_date_text);
-
-        xmpp_stanza_add_child(field_end, value_end);
-    }
+    xmpp_stanza_add_child_ex(field_with, value_with, 0);
 
     // 4.3.2 set/rsm
-    xmpp_stanza_t *set, *max, *max_text;
-    set = xmpp_stanza_new(ctx);
+    xmpp_stanza_t* set = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(set, STANZA_TYPE_SET);
     xmpp_stanza_set_ns(set, STANZA_NS_RSM);
 
-    max = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(max, STANZA_NAME_MAX);
+    xmpp_stanza_t* max = _text_stanza(ctx, STANZA_NAME_MAX, PROF_STRINGIFY(MESSAGES_TO_RETRIEVE));
+    xmpp_stanza_add_child_ex(set, max, 0);
 
-    max_text = xmpp_stanza_new(ctx);
-    auto_gchar gchar* txt = g_strdup_printf("%d", MESSAGES_TO_RETRIEVE);
-    xmpp_stanza_set_text(max_text, txt);
-
-    xmpp_stanza_add_child(max, max_text);
-    xmpp_stanza_add_child(set, max);
-
-    xmpp_stanza_t *after, *after_text;
     if (lastid) {
-        after = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(after, STANZA_NAME_AFTER);
-
-        after_text = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_text(after_text, lastid);
-
-        xmpp_stanza_add_child(after, after_text);
-        xmpp_stanza_add_child(set, after);
+        xmpp_stanza_t* after = _text_stanza(ctx, STANZA_NAME_AFTER, lastid);
+        xmpp_stanza_add_child_ex(set, after, 0);
     }
 
-    xmpp_stanza_t *before, *before_text;
     if (firstid) {
-        before = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_name(before, STANZA_NAME_BEFORE);
-
-        before_text = xmpp_stanza_new(ctx);
-        xmpp_stanza_set_text(before_text, firstid);
-
-        xmpp_stanza_add_child(before, before_text);
-        xmpp_stanza_add_child(set, before);
+        xmpp_stanza_t* before = _text_stanza(ctx, STANZA_NAME_BEFORE, firstid);
+        xmpp_stanza_add_child_ex(set, before, 0);
     }
 
     // add and release
-    xmpp_stanza_add_child(iq, query);
-    xmpp_stanza_add_child(query, x);
-    xmpp_stanza_add_child(x, field_form_type);
-    xmpp_stanza_add_child(x, field_with);
+    xmpp_stanza_add_child_ex(iq, query, 0);
+    xmpp_stanza_add_child_ex(query, x, 0);
+    xmpp_stanza_add_child_ex(x, field_form_type, 0);
+    xmpp_stanza_add_child_ex(x, field_with, 0);
 
+    // field 'start'
     if (startdate) {
-        xmpp_stanza_add_child(x, field_start);
-        xmpp_stanza_release(field_start);
-        xmpp_stanza_release(value_start);
-        xmpp_stanza_release(start_date_text);
+        xmpp_stanza_t* field_start = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(field_start, STANZA_NAME_FIELD);
+        xmpp_stanza_set_attribute(field_start, STANZA_ATTR_VAR, "start");
+
+        xmpp_stanza_t* value_start = _text_stanza(ctx, STANZA_NAME_VALUE, startdate);
+
+        xmpp_stanza_add_child_ex(field_start, value_start, 0);
+        xmpp_stanza_add_child_ex(x, field_start, 0);
     }
 
     if (enddate) {
-        xmpp_stanza_add_child(x, field_end);
-        xmpp_stanza_release(field_end);
-        xmpp_stanza_release(value_end);
-        xmpp_stanza_release(end_date_text);
+        xmpp_stanza_t* field_end = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(field_end, STANZA_NAME_FIELD);
+        xmpp_stanza_set_attribute(field_end, STANZA_ATTR_VAR, "end");
+
+        xmpp_stanza_t* value_end = _text_stanza(ctx, STANZA_NAME_VALUE, enddate);
+
+        xmpp_stanza_add_child_ex(field_end, value_end, 0);
+        xmpp_stanza_add_child_ex(x, field_end, 0);
     }
 
-    xmpp_stanza_add_child(query, set);
-    xmpp_stanza_release(set);
-    xmpp_stanza_release(max_text);
-    xmpp_stanza_release(max);
-
-    if (lastid) {
-        xmpp_stanza_release(after_text);
-        xmpp_stanza_release(after);
-    }
-
-    if (firstid) {
-        xmpp_stanza_release(before_text);
-        xmpp_stanza_release(before);
-    }
-
-    xmpp_stanza_release(mam_text);
-    xmpp_stanza_release(with_text);
-    xmpp_stanza_release(value_mam);
-    xmpp_stanza_release(value_with);
-    xmpp_stanza_release(field_form_type);
-    xmpp_stanza_release(field_with);
-    xmpp_stanza_release(x);
-    xmpp_stanza_release(query);
+    xmpp_stanza_add_child_ex(query, set, 0);
 
     return iq;
 }
