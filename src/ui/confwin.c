@@ -70,7 +70,7 @@ confwin_show_form(ProfConfWin* confwin)
                 win_println(window, THEME_DEFAULT, "-", "%s", value);
             }
         } else if (g_strcmp0(field->type, "hidden") != 0 && field->var) {
-            char* tag = g_hash_table_lookup(confwin->form->var_to_tag, field->var);
+            gchar* tag = g_hash_table_lookup(confwin->form->var_to_tag, field->var);
             _confwin_form_field(window, tag, field);
         }
 

@@ -368,14 +368,14 @@ _caps_by_ver(const char* const ver)
         return NULL;
     }
 
-    char* category = g_key_file_get_string(cache, ver, "category", NULL);
-    char* type = g_key_file_get_string(cache, ver, "type", NULL);
-    char* name = g_key_file_get_string(cache, ver, "name", NULL);
+    auto_gchar gchar* category = g_key_file_get_string(cache, ver, "category", NULL);
+    auto_gchar gchar* type = g_key_file_get_string(cache, ver, "type", NULL);
+    auto_gchar gchar* name = g_key_file_get_string(cache, ver, "name", NULL);
 
-    char* software = g_key_file_get_string(cache, ver, "software", NULL);
-    char* software_version = g_key_file_get_string(cache, ver, "software_version", NULL);
-    char* os = g_key_file_get_string(cache, ver, "os", NULL);
-    char* os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
+    auto_gchar gchar* software = g_key_file_get_string(cache, ver, "software", NULL);
+    auto_gchar gchar* software_version = g_key_file_get_string(cache, ver, "software_version", NULL);
+    auto_gchar gchar* os = g_key_file_get_string(cache, ver, "os", NULL);
+    auto_gchar gchar* os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
 
     gsize features_len = 0;
     gchar** features_list = g_key_file_get_string_list(cache, ver, "features", &features_len, NULL);
@@ -391,13 +391,6 @@ _caps_by_ver(const char* const ver)
         software, software_version, os, os_version,
         features);
 
-    g_free(category);
-    g_free(type);
-    g_free(name);
-    g_free(software);
-    g_free(software_version);
-    g_free(os);
-    g_free(os_version);
     if (features_list) {
         g_strfreev(features_list);
     }

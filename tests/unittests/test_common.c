@@ -400,7 +400,7 @@ unique_filename_from_url_td(void** state)
 {
 
     enum table { num_tests = 15 };
-    char* pwd = g_get_current_dir();
+    auto_gchar gchar* pwd = g_get_current_dir();
 
     unique_filename_from_url_t tests[num_tests] = {
         (unique_filename_from_url_t){
@@ -506,8 +506,6 @@ unique_filename_from_url_td(void** state)
         free(got_filename);
         free(exp_filename);
     }
-
-    g_free(pwd);
 }
 
 gboolean

@@ -399,15 +399,13 @@ file_mime_type(const char* const filename)
     size_t file_header_size = fread(file_header, 1, FILE_HEADER_BYTES, fh);
     fclose(fh);
 
-    char* content_type = g_content_type_guess(filename, (unsigned char*)file_header, file_header_size, NULL);
+    auto_gchar gchar* content_type = g_content_type_guess(filename, (unsigned char*)file_header, file_header_size, NULL);
     if (content_type != NULL) {
-        char* mime_type = g_content_type_get_mime_type(content_type);
+        auto_gchar gchar* mime_type = g_content_type_get_mime_type(content_type);
         out_mime_type = strdup(mime_type);
-        g_free(mime_type);
     } else {
         return strdup(FALLBACK_MIMETYPE);
     }
-    g_free(content_type);
     return out_mime_type;
 }
 

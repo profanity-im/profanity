@@ -125,7 +125,7 @@ static char* _logging_autocomplete(ProfWin* window, const char* const input, gbo
 static char* _color_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _avatar_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _correction_autocomplete(ProfWin* window, const char* const input, gboolean previous);
-static char* _correct_autocomplete(ProfWin* window, const char* const input, gboolean previous);
+static gchar* _correct_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _software_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _url_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _executable_autocomplete(ProfWin* window, const char* const input, gboolean previous);
@@ -4299,17 +4299,15 @@ _avatar_autocomplete(ProfWin* window, const char* const input, gboolean previous
 static char*
 _correction_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
-    char* result = NULL;
-
-    result = autocomplete_param_with_ac(input, "/correction", correction_ac, TRUE, previous);
+    char* result = autocomplete_param_with_ac(input, "/correction", correction_ac, TRUE, previous);
 
     return result;
 }
 
-static char*
+static gchar*
 _correct_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
-    char* result = g_strdup_printf("/correct %s", win_get_last_sent_message(window));
+    gchar* result = g_strdup_printf("/correct %s", win_get_last_sent_message(window));
 
     return result;
 }

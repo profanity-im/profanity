@@ -315,7 +315,7 @@ static char*
 _autocomplete_param_common(const char* const input, char* command, autocomplete_func func, Autocomplete ac, gboolean quote, gboolean previous, void* context)
 {
     int len;
-    auto_char char* command_cpy = g_strdup_printf("%s ", command);
+    auto_gchar gchar* command_cpy = g_strdup_printf("%s ", command);
     if (!command_cpy) {
         return NULL;
     }

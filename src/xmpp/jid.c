@@ -90,10 +90,9 @@ jid_create(const gchar* const str)
     if (slashp) {
         result->resourcepart = g_strdup(slashp + 1);
         result->domainpart = g_utf8_substring(domain_start, 0, g_utf8_pointer_to_offset(domain_start, slashp));
-        char* barejidraw = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, slashp));
+        auto_gchar gchar* barejidraw = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, slashp));
         result->barejid = g_utf8_strdown(barejidraw, -1);
         result->fulljid = g_strdup(trimmed);
-        g_free(barejidraw);
     } else {
         result->domainpart = g_strdup(domain_start);
         result->barejid = g_utf8_strdown(trimmed, -1);
@@ -189,15 +188,13 @@ create_fulljid(const char* const barejid, const char* const resource)
 char*
 get_nick_from_full_jid(const char* const full_room_jid)
 {
-    char** tokens = g_strsplit(full_room_jid, "/", 0);
+    auto_gcharv gchar** tokens = g_strsplit(full_room_jid, "/", 0);
     char* nick_part = NULL;
 
     if (tokens) {
         if (tokens[0] && tokens[1]) {
             nick_part = strdup(tokens[1]);
         }
-
-        g_strfreev(tokens);
     }
 
     return nick_part;

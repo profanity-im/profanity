@@ -114,7 +114,7 @@ files_get_inputrc_file(void)
     return NULL;
 }
 
-char*
+gchar*
 files_get_log_file(const char* const log_file)
 {
     gchar* xdg_data = _files_get_xdg_data_home();
@@ -139,7 +139,7 @@ files_get_log_file(const char* const log_file)
         g_string_append(logfile, ".log");
     }
 
-    char* result = g_strdup(logfile->str);
+    gchar* result = g_strdup(logfile->str);
 
     free(xdg_data);
     g_string_free(logfile, TRUE);
