@@ -2761,7 +2761,7 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                 // Convert to iso8601
                 start_str[strlen(start_str) - 3] = '\0';
             }
-            auto_char char* end_str = NULL;
+            char* end_str = NULL;
             if (data->end_datestr) {
                 end_str = strdup(data->end_datestr);
                 // Convert to iso8601
