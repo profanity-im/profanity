@@ -54,6 +54,10 @@ void
 session_process_events(void)
 {
 }
+void
+connection_disconnect(void)
+{
+}
 const char*
 connection_get_fulljid(void)
 {

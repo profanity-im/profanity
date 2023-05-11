@@ -964,6 +964,7 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         conn.domain = strdup(my_jid->domainpart);
         jid_destroy(my_jid);
 
+        connection_clear_data();
         conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
         g_hash_table_insert(conn.features_by_jid, strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
 
@@ -990,6 +991,7 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         conn.domain = strdup(my_raw_jid->domainpart);
         jid_destroy(my_raw_jid);
 
+        connection_clear_data();
         conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
         g_hash_table_insert(conn.features_by_jid, strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
 

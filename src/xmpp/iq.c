@@ -265,6 +265,7 @@ iq_handlers_init(void)
         xmpp_timed_handler_add(conn, _autoping_timed_send, millis, ctx);
     }
 
+    iq_rooms_cache_clear();
     iq_handlers_clear();
 
     id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_iq_id_handler_free);
@@ -2651,6 +2652,18 @@ iq_mam_request_older(ProfChatWin* win)
     return;
 }
 
+static void
+_mam_userdata_free(MamRsmUserdata* data)
+{
+    free(data->end_datestr);
+    data->end_datestr = NULL;
+    free(data->start_datestr);
+    data->start_datestr = NULL;
+    free(data->barejid);
+    data->barejid = NULL;
+    free(data);
+}
+
 void
 _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
 {
@@ -2694,7 +2707,7 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
         data->fetch_next = fetch_next;
         data->win = win;
 
-        iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, data);
+        iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, data);
     }
 
     iq_send_stanza(iq);
@@ -2742,13 +2755,13 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
             buffer_remove_entry(window->layout->buffer, 0);
 
-            char* start_str = NULL;
+            auto_char char* start_str = NULL;
             if (data->start_datestr) {
                 start_str = strdup(data->start_datestr);
                 // Convert to iso8601
                 start_str[strlen(start_str) - 3] = '\0';
             }
-            char* end_str = NULL;
+            auto_char char* end_str = NULL;
             if (data->end_datestr) {
                 end_str = strdup(data->end_datestr);
                 // Convert to iso8601
@@ -2757,24 +2770,10 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
             if (is_complete || !data->fetch_next) {
                 chatwin_db_history(data->win, is_complete ? NULL : start_str, end_str, TRUE);
-                // TODO free memory
-                if (start_str) {
-                    free(start_str);
-                    free(data->start_datestr);
-                }
-
-                if (end_str) {
-                    free(data->end_datestr);
-                }
-
-                free(data->barejid);
-                free(data);
                 return 0;
             }
 
             chatwin_db_history(data->win, start_str, end_str, TRUE);
-            if (start_str)
-                free(start_str);
 
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {
@@ -2787,14 +2786,14 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                 // 4.3.2. send same stanza with set,max stanza
                 xmpp_ctx_t* const ctx = connection_get_ctx();
 
-                if (end_str) {
+                if (data->end_datestr) {
                     free(data->end_datestr);
+                    data->end_datestr = NULL;
                 }
-                data->end_datestr = NULL;
-                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, data->end_datestr, firstid, NULL);
+                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
                 free(firstid);
 
-                iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, NULL, data);
+                iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, data);
 
                 iq_send_stanza(iq);
                 xmpp_stanza_release(iq);

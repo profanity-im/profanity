@@ -47,6 +47,5 @@ void session_init_activity(void);
 void session_check_autoaway(void);
 
 void session_reconnect(gchar* altdomain, unsigned short altport);
-void session_reconnect_now(void);
 
 #endif

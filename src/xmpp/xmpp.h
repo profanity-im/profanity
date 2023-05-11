@@ -186,7 +186,9 @@ void session_disconnect(void);
 void session_shutdown(void);
 void session_process_events(void);
 char* session_get_account_name(void);
+void session_reconnect_now(void);
 
+void connection_disconnect(void);
 jabber_conn_status_t connection_get_status(void);
 char* connection_get_presence_msg(void);
 void connection_set_presence_msg(const char* const message);
