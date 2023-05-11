@@ -277,6 +277,7 @@ static Autocomplete correction_ac;
 static Autocomplete avatar_ac;
 static Autocomplete url_ac;
 static Autocomplete executable_ac;
+static Autocomplete executable_param_ac;
 static Autocomplete intype_ac;
 static Autocomplete mood_ac;
 static Autocomplete mood_type_ac;
@@ -1115,6 +1116,11 @@ cmd_ac_init(void)
     autocomplete_add(executable_ac, "urlopen");
     autocomplete_add(executable_ac, "urlsave");
     autocomplete_add(executable_ac, "editor");
+    autocomplete_add(executable_ac, "vcard_photo");
+
+    executable_param_ac = autocomplete_new();
+    autocomplete_add(executable_param_ac, "set");
+    autocomplete_add(executable_param_ac, "default");
 
     intype_ac = autocomplete_new();
     autocomplete_add(intype_ac, "console");
@@ -1701,6 +1707,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(avatar_ac);
     autocomplete_reset(url_ac);
     autocomplete_reset(executable_ac);
+    autocomplete_reset(executable_param_ac);
     autocomplete_reset(intype_ac);
     autocomplete_reset(mood_ac);
     autocomplete_reset(mood_type_ac);
@@ -1888,6 +1895,7 @@ cmd_ac_uninit(void)
     autocomplete_free(avatar_ac);
     autocomplete_free(url_ac);
     autocomplete_free(executable_ac);
+    autocomplete_free(executable_param_ac);
     autocomplete_free(intype_ac);
     autocomplete_free(adhoc_cmd_ac);
     autocomplete_free(lastactivity_ac);
@@ -4380,6 +4388,31 @@ static char*
 _executable_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 {
     char* result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/executable avatar", executable_param_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/executable urlopen", executable_param_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/executable urlsave", executable_param_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/executable vcard_photo", executable_param_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/executable editor", executable_param_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
 
     result = autocomplete_param_with_ac(input, "/executable", executable_ac, TRUE, previous);
 
