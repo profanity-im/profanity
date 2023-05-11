@@ -60,6 +60,9 @@ void auto_free_char(char** str);
 #define STR_MAYBE_NULL(p) (p)
 #endif
 
+/* Our own define of MB_CUR_MAX but this time at compile time */
+#define PROF_MB_CUR_MAX 8
+
 // assume malloc stores at most 8 bytes for size of allocated memory
 // and page size is at least 4KB
 #define READ_BUF_SIZE 4088
