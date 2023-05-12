@@ -598,7 +598,7 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 // first entry's timestamp in the buffer is used. Flip true to prepend to buffer.
 // Timestamps should be in iso8601
 gboolean
-chatwin_db_history(ProfChatWin* chatwin, char* start_time, char* end_time, gboolean flip)
+chatwin_db_history(ProfChatWin* chatwin, const char* start_time, char* end_time, gboolean flip)
 {
     if (!end_time) {
         end_time = buffer_size(((ProfWin*)chatwin)->layout->buffer) == 0 ? NULL : g_date_time_format_iso8601(buffer_get_entry(((ProfWin*)chatwin)->layout->buffer, 0)->time);

@@ -47,6 +47,9 @@
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
+#define PROF_STRINGIFY_(n) #n
+#define PROF_STRINGIFY(n)  PROF_STRINGIFY_(n)
+
 void auto_free_gchar(gchar** str);
 #define auto_gchar __attribute__((__cleanup__(auto_free_gchar)))
 void auto_free_gcharv(gchar*** args);
@@ -59,6 +62,9 @@ void auto_free_char(char** str);
 #else
 #define STR_MAYBE_NULL(p) (p)
 #endif
+
+/* Our own define of MB_CUR_MAX but this time at compile time */
+#define PROF_MB_CUR_MAX 8
 
 // assume malloc stores at most 8 bytes for size of allocated memory
 // and page size is at least 4KB

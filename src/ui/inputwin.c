@@ -36,6 +36,7 @@
 #define _XOPEN_SOURCE_EXTENDED
 #include "config.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <sys/select.h>
 #include <stdlib.h>
@@ -140,6 +141,11 @@ static int _inp_rl_send_to_editor(int count, int key);
 void
 create_input_window(void)
 {
+    /* MB_CUR_MAX is evaluated at runtime depending on the current
+     * locale, therefore we check that our own version is big enough
+     * and bail out if it isn't.
+     */
+    assert(MB_CUR_MAX <= PROF_MB_CUR_MAX);
 #ifdef NCURSES_REENTRANT
     set_escdelay(25);
 #else
@@ -331,7 +337,7 @@ _inp_write(char* line, int offset)
 
     for (size_t i = 0; line[i] != '\0'; i++) {
         char* c = &line[i];
-        char retc[MB_CUR_MAX];
+        char retc[PROF_MB_CUR_MAX] = { 0 };
 
         size_t ch_len = mbrlen(c, MB_CUR_MAX, NULL);
         if ((ch_len == (size_t)-2) || (ch_len == (size_t)-1)) {

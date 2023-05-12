@@ -250,7 +250,7 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
 // null the current time is used. from_start gets first few messages if true
 // otherwise the last ones. Flip flips the order of the results
 GSList*
-log_database_get_previous_chat(const gchar* const contact_barejid, char* start_time, char* end_time, gboolean from_start, gboolean flip)
+log_database_get_previous_chat(const gchar* const contact_barejid, const char* start_time, char* end_time, gboolean from_start, gboolean flip)
 {
     sqlite3_stmt* stmt = NULL;
     const char* jid = connection_get_fulljid();
