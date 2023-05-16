@@ -150,7 +150,6 @@ static Autocomplete notify_chat_ac;
 static Autocomplete notify_room_ac;
 static Autocomplete notify_typing_ac;
 static Autocomplete notify_mention_ac;
-static Autocomplete notify_offline_ac;
 static Autocomplete notify_trigger_ac;
 static Autocomplete prefs_ac;
 static Autocomplete sub_ac;
@@ -197,7 +196,6 @@ static Autocomplete bookmark_ignore_ac;
 static Autocomplete otr_ac;
 static Autocomplete otr_log_ac;
 static Autocomplete otr_policy_ac;
-static Autocomplete otr_sendfile_ac;
 #endif
 #ifdef HAVE_OMEMO
 static Autocomplete omemo_ac;
@@ -237,8 +235,6 @@ static Autocomplete reconnect_ac;
 #ifdef HAVE_LIBGPGME
 static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
-static Autocomplete pgp_sendfile_ac;
-static Autocomplete pgp_autoimport_ac;
 static Autocomplete ox_ac;
 static Autocomplete ox_log_ac;
 #endif
@@ -294,7 +290,6 @@ static Autocomplete vcard_set_ac;
 static Autocomplete vcard_name_ac;
 static Autocomplete vcard_set_param_ac;
 static Autocomplete vcard_togglable_param_ac;
-static Autocomplete vcard_toggle_ac;
 static Autocomplete vcard_address_type_ac;
 
 static GHashTable* ac_funcs = NULL;
@@ -386,10 +381,6 @@ cmd_ac_init(void)
     autocomplete_add(notify_mention_ac, "case_insensitive");
     autocomplete_add(notify_mention_ac, "word_whole");
     autocomplete_add(notify_mention_ac, "word_part");
-
-    notify_offline_ac = autocomplete_new();
-    autocomplete_add(notify_offline_ac, "on");
-    autocomplete_add(notify_offline_ac, "off");
 
     notify_trigger_ac = autocomplete_new();
     autocomplete_add(notify_trigger_ac, "add");
@@ -716,10 +707,6 @@ cmd_ac_init(void)
     autocomplete_add(otr_policy_ac, "manual");
     autocomplete_add(otr_policy_ac, "opportunistic");
     autocomplete_add(otr_policy_ac, "always");
-
-    otr_sendfile_ac = autocomplete_new();
-    autocomplete_add(otr_sendfile_ac, "on");
-    autocomplete_add(otr_sendfile_ac, "off");
 #endif
 
 #ifdef HAVE_OMEMO
@@ -918,14 +905,6 @@ cmd_ac_init(void)
     autocomplete_add(pgp_log_ac, "on");
     autocomplete_add(pgp_log_ac, "off");
     autocomplete_add(pgp_log_ac, "redact");
-
-    pgp_sendfile_ac = autocomplete_new();
-    autocomplete_add(pgp_sendfile_ac, "on");
-    autocomplete_add(pgp_sendfile_ac, "off");
-
-    pgp_autoimport_ac = autocomplete_new();
-    autocomplete_add(pgp_autoimport_ac, "on");
-    autocomplete_add(pgp_autoimport_ac, "off");
 
     ox_ac = autocomplete_new();
     autocomplete_add(ox_ac, "keys");
@@ -1316,10 +1295,6 @@ cmd_ac_init(void)
     autocomplete_add(vcard_togglable_param_ac, "preferred");
     autocomplete_add(vcard_togglable_param_ac, "x400");
 
-    vcard_toggle_ac = autocomplete_new();
-    autocomplete_add(vcard_toggle_ac, "on");
-    autocomplete_add(vcard_toggle_ac, "off");
-
     vcard_address_type_ac = autocomplete_new();
     autocomplete_add(vcard_address_type_ac, "domestic");
     autocomplete_add(vcard_address_type_ac, "international");
@@ -1640,7 +1615,6 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(otr_ac);
     autocomplete_reset(otr_log_ac);
     autocomplete_reset(otr_policy_ac);
-    autocomplete_reset(otr_sendfile_ac);
 #endif
 #ifdef HAVE_OMEMO
     autocomplete_reset(omemo_ac);
@@ -1680,8 +1654,6 @@ cmd_ac_reset(ProfWin* window)
 #ifdef HAVE_LIBGPGME
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
-    autocomplete_reset(pgp_sendfile_ac);
-    autocomplete_reset(pgp_autoimport_ac);
     autocomplete_reset(ox_ac);
     autocomplete_reset(ox_log_ac);
 #endif
@@ -1731,7 +1703,6 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(vcard_name_ac);
     autocomplete_reset(vcard_set_param_ac);
     autocomplete_reset(vcard_togglable_param_ac);
-    autocomplete_reset(vcard_toggle_ac);
     autocomplete_reset(vcard_address_type_ac);
 
     autocomplete_reset(script_ac);
@@ -1824,7 +1795,6 @@ cmd_ac_uninit(void)
     autocomplete_free(otr_ac);
     autocomplete_free(otr_log_ac);
     autocomplete_free(otr_policy_ac);
-    autocomplete_free(otr_sendfile_ac);
 #endif
 #ifdef HAVE_OMEMO
     autocomplete_free(omemo_ac);
@@ -1863,8 +1833,6 @@ cmd_ac_uninit(void)
 #ifdef HAVE_LIBGPGME
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
-    autocomplete_free(pgp_sendfile_ac);
-    autocomplete_free(pgp_autoimport_ac);
     autocomplete_free(ox_ac);
     autocomplete_free(ox_log_ac);
 #endif
@@ -1915,7 +1883,6 @@ cmd_ac_uninit(void)
     autocomplete_free(vcard_name_ac);
     autocomplete_free(vcard_set_param_ac);
     autocomplete_free(vcard_togglable_param_ac);
-    autocomplete_free(vcard_toggle_ac);
     autocomplete_free(vcard_address_type_ac);
 }
 
@@ -2544,7 +2511,7 @@ _notify_autocomplete(ProfWin* window, const char* const input, gboolean previous
     }
 
     gchar* boolean_choices1[] = { "/notify room current", "/notify chat current", "/notify typing current",
-                                  "/notify room text", "/notify chat text" };
+                                  "/notify room text", "/notify chat text", "/notify room offline" };
     for (int i = 0; i < ARRAY_SIZE(boolean_choices1); i++) {
         result = autocomplete_param_with_func(input, boolean_choices1[i], prefs_autocomplete_boolean_choice, previous, NULL);
         if (result) {
@@ -2553,11 +2520,6 @@ _notify_autocomplete(ProfWin* window, const char* const input, gboolean previous
     }
 
     result = autocomplete_param_with_ac(input, "/notify room mention", notify_mention_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-
-    result = autocomplete_param_with_ac(input, "/notify room offline", notify_offline_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -2718,7 +2680,7 @@ _otr_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/otr sendfile", otr_sendfile_ac, TRUE, previous);
+    found = autocomplete_param_with_func(input, "/otr sendfile", prefs_autocomplete_boolean_choice, previous, NULL);
     if (found) {
         return found;
     }
@@ -2757,12 +2719,12 @@ _pgp_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/pgp sendfile", pgp_sendfile_ac, TRUE, previous);
+    found = autocomplete_param_with_func(input, "/pgp sendfile", prefs_autocomplete_boolean_choice, previous, NULL);
     if (found) {
         return found;
     }
 
-    found = autocomplete_param_with_ac(input, "/pgp autoimport", pgp_autoimport_ac, TRUE, previous);
+    found = autocomplete_param_with_func(input, "/pgp autoimport", prefs_autocomplete_boolean_choice, previous, NULL);
     if (found) {
         return found;
     }
@@ -4565,7 +4527,7 @@ _vcard_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         } else if ((num_args == 3 && space_at_end && is_num && autocomplete_contains(vcard_togglable_param_ac, args[2])) || (num_args == 4 && !space_at_end && is_num && autocomplete_contains(vcard_togglable_param_ac, args[2]))) {
             GString* beginning = g_string_new("/vcard");
             g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            result = autocomplete_param_with_ac(input, beginning->str, vcard_toggle_ac, TRUE, previous);
+            result = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice, previous, NULL);
             g_string_free(beginning, TRUE);
             if (result) {
                 return result;
