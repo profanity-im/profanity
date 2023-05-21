@@ -1615,6 +1615,7 @@ _version_get_handler(xmpp_stanza_t* const stanza)
     const char* from = xmpp_stanza_get_from(stanza);
     ProfAccount* account = accounts_get_account(session_get_account_name());
     auto_char char* client = account->client != NULL ? strdup(account->client) : NULL;
+    account_free(account);
     bool is_custom_client = client != NULL;
     gchar* custom_version_str = NULL;
     if (is_custom_client) {
