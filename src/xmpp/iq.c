@@ -2728,9 +2728,11 @@ iq_mam_request(ProfChatWin* win, GDateTime* enddate)
     if (!received_disco_items) {
         LateDeliveryUserdata* cur_del_data = malloc(sizeof(LateDeliveryUserdata));
         cur_del_data->win = win;
-        cur_del_data->enddate = g_date_time_ref(enddate);
-        cur_del_data->startdate = g_date_time_ref(startdate);
+        cur_del_data->enddate = enddate;
+        cur_del_data->startdate = startdate;
         late_delivery_windows = g_slist_append(late_delivery_windows, cur_del_data);
+        log_debug("Save MAM request of %s for later", win->barejid);
+        return;
     }
 
     _iq_mam_request(win, startdate, enddate);
