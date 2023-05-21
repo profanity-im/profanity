@@ -2796,7 +2796,9 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                 xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
                 free(firstid);
 
-                iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, data);
+                MamRsmUserdata* ndata = malloc(sizeof(*ndata));
+                *ndata = *data;
+                iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, ndata);
 
                 iq_send_stanza(iq);
                 xmpp_stanza_release(iq);
