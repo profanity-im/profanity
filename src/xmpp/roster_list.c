@@ -104,6 +104,17 @@ roster_create(void)
     roster_pending_presence = NULL;
 }
 
+static void
+_pendingPresence_free(ProfPendingPresence* presence)
+{
+    if (!presence)
+        return;
+    if (presence->last_activity)
+        g_date_time_unref(presence->last_activity);
+    free(presence->barejid);
+    free(presence);
+}
+
 void
 roster_destroy(void)
 {
@@ -119,6 +130,10 @@ roster_destroy(void)
 
     free(roster);
     roster = NULL;
+
+    if (roster_pending_presence)
+        g_slist_free_full(roster_pending_presence, (GDestroyNotify)_pendingPresence_free);
+    roster_pending_presence = NULL;
 }
 
 gboolean
@@ -716,15 +731,6 @@ roster_compare_presence(PContact a, PContact b)
     }
 }
 
-static void
-_pendingPresence_free(ProfPendingPresence* presence)
-{
-    if (!presence)
-        return;
-    free(presence->barejid);
-    free(presence);
-}
-
 void
 roster_process_pending_presence(void)
 {
@@ -734,10 +740,6 @@ roster_process_pending_presence(void)
     for (iter = roster_pending_presence; iter != NULL; iter = iter->next) {
         ProfPendingPresence* presence = iter->data;
         roster_update_presence(presence->barejid, presence->resource, presence->last_activity);
-        /* seems like resource isn't free on the calling side */
-        if (presence->last_activity) {
-            g_date_time_unref(presence->last_activity);
-        }
     }
 
     g_slist_free_full(roster_pending_presence, (GDestroyNotify)_pendingPresence_free);
