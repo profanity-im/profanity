@@ -269,6 +269,8 @@ void iq_mam_request_older(ProfChatWin* win);
 void iq_register_change_password(const char* const user, const char* const password);
 void iq_muc_register_nick(const char* const roomjid);
 
+void autoping_timer_extend(void);
+
 EntityCapabilities* caps_lookup(const char* const jid);
 void caps_close(void);
 void caps_destroy(EntityCapabilities* caps);

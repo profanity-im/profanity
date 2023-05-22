@@ -176,8 +176,7 @@ static int
 _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
 {
     log_debug("iq stanza handler fired");
-
-    iq_autoping_timer_cancel(); // reset the autoping timer
+    autoping_timer_extend();
 
     char* text;
     size_t text_size;
@@ -1389,6 +1388,13 @@ _autoping_timed_send(xmpp_conn_t* const conn, void* const userdata)
     autoping_time = g_timer_new();
 
     return 1;
+}
+
+void
+autoping_timer_extend(void)
+{
+    if (autoping_time)
+        g_timer_start(autoping_time);
 }
 
 static int
