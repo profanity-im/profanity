@@ -1615,6 +1615,7 @@ _version_get_handler(xmpp_stanza_t* const stanza)
     const char* from = xmpp_stanza_get_from(stanza);
     ProfAccount* account = accounts_get_account(session_get_account_name());
     auto_char char* client = account->client != NULL ? strdup(account->client) : NULL;
+    account_free(account);
     bool is_custom_client = client != NULL;
     gchar* custom_version_str = NULL;
     if (is_custom_client) {
@@ -2727,9 +2728,11 @@ iq_mam_request(ProfChatWin* win, GDateTime* enddate)
     if (!received_disco_items) {
         LateDeliveryUserdata* cur_del_data = malloc(sizeof(LateDeliveryUserdata));
         cur_del_data->win = win;
-        cur_del_data->enddate = g_date_time_ref(enddate);
-        cur_del_data->startdate = g_date_time_ref(startdate);
+        cur_del_data->enddate = enddate;
+        cur_del_data->startdate = startdate;
         late_delivery_windows = g_slist_append(late_delivery_windows, cur_del_data);
+        log_debug("Save MAM request of %s for later", win->barejid);
+        return;
     }
 
     _iq_mam_request(win, startdate, enddate);
@@ -2793,7 +2796,9 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                 xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
                 free(firstid);
 
-                iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, data);
+                MamRsmUserdata* ndata = malloc(sizeof(*ndata));
+                *ndata = *data;
+                iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, ndata);
 
                 iq_send_stanza(iq);
                 xmpp_stanza_release(iq);
