@@ -2798,6 +2798,12 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
                 MamRsmUserdata* ndata = malloc(sizeof(*ndata));
                 *ndata = *data;
+                if (data->end_datestr)
+                    ndata->end_datestr = strdup(data->end_datestr);
+                if (data->start_datestr)
+                    ndata->start_datestr = strdup(data->start_datestr);
+                if (data->barejid)
+                    ndata->barejid = strdup(data->barejid);
                 iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, ndata);
 
                 iq_send_stanza(iq);
