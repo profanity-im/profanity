@@ -1,8 +1,9 @@
 /*
- * http_common.c
+ * plugin_download.h
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2020 William Wennerström <william@wstrm.dev>
+ * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 - 2023 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -33,47 +34,22 @@
  *
  */
 
-#include "config.h"
+#ifndef TOOLS_PLUGIN_DOWNLOAD_H
+#define TOOLS_PLUGIN_DOWNLOAD_H
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <gio/gio.h>
+#ifdef PLATFORM_CYGWIN
+#define SOCKET int
+#endif
 
+#include <sys/select.h>
+#include <curl/curl.h>
 #include "tools/http_common.h"
+#include "tools/http_download.h"
 
-#define FALLBACK_MSG ""
+#include "ui/win_types.h"
 
-void
-http_print_transfer_update(ProfWin* window, char* id, const char* fmt, ...)
-{
-    va_list args;
+void* plugin_download_install(void* userdata);
 
-    va_start(args, fmt);
-    GString* msg = g_string_new(FALLBACK_MSG);
-    g_string_vprintf(msg, fmt, args);
-    va_end(args);
+void plugin_download_add_download(HTTPDownload* download);
 
-    if (window->type != WIN_CONSOLE) {
-        win_update_entry_message(window, id, msg->str);
-    } else {
-        cons_show("%s", msg->str);
-    }
-
-    g_string_free(msg, TRUE);
-}
-
-void
-http_print_transfer(ProfWin* window, char* id, const char* fmt, ...)
-{
-    va_list args;
-
-    va_start(args, fmt);
-    GString* msg = g_string_new(FALLBACK_MSG);
-    g_string_vprintf(msg, fmt, args);
-    va_end(args);
-
-    win_print_http_transfer(window, msg->str, id);
-
-    g_string_free(msg, TRUE);
-}
+#endif

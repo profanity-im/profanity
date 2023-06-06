@@ -2158,9 +2158,9 @@ static const struct cmd_t command_defs[] = {
       CMD_MAINFUNC(cmd_plugins)
       CMD_SYN(
               "/plugins",
-              "/plugins install [<path>]",
+              "/plugins install [<path or URL>]",
+              "/plugins update [<path or URL>]",
               "/plugins uninstall [<plugin>]",
-              "/plugins update [<path>]",
               "/plugins unload [<plugin>]",
               "/plugins load [<plugin>]",
               "/plugins reload [<plugin>]",
@@ -2168,17 +2168,18 @@ static const struct cmd_t command_defs[] = {
       CMD_DESC(
               "Manage plugins. Passing no arguments lists installed plugins and global plugins which are available for local installation. Global directory for Python plugins is " GLOBAL_PYTHON_PLUGINS_PATH " and for C Plugins is " GLOBAL_C_PLUGINS_PATH ".")
       CMD_ARGS(
-              { "install [<path>]", "Install a plugin, or all plugins found in a directory (recursive). And loads it/them." },
+              { "install [<path or URL>]", "Install a plugin, or all plugins found in a directory (recursive), or download and install plugin (plugin name is based on basename). And loads it/them." },
+              { "update [<path or URL>]", "Uninstall and then install the plugin. Plugin name to update is basename." },
               { "uninstall [<plugin>]", "Uninstall a plugin." },
-              { "update [<path>]", "Updates an installed plugin" },
               { "load [<plugin>]", "Load a plugin that already exists in the plugin directory, passing no argument loads all found plugins. It will be loaded upon next start too unless unloaded." },
               { "unload [<plugin>]", "Unload a loaded plugin, passing no argument will unload all plugins." },
               { "reload [<plugin>]", "Reload a plugin, passing no argument will reload all plugins." },
               { "python_version", "Show the Python interpreter version." })
       CMD_EXAMPLES(
-              "/plugins install",
               "/plugins install /home/steveharris/Downloads/metal.py",
+              "/plugins install https://raw.githubusercontent.com/profanity-im/profanity-plugins/master/stable/sounds.py",
               "/plugins update /home/steveharris/Downloads/metal.py",
+              "/plugins update https://raw.githubusercontent.com/profanity-im/profanity-plugins/master/stable/sounds.py",
               "/plugins uninstall browser.py",
               "/plugins load browser.py",
               "/plugins unload say.py",

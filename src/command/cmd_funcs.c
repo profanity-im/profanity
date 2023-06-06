@@ -77,6 +77,7 @@
 #include "tools/http_download.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
+#include "tools/plugin_download.h"
 #include "tools/bookmark_ignore.h"
 #include "tools/editor.h"
 #include "plugins/plugins.h"
@@ -130,6 +131,8 @@ static gboolean _cmd_execute_default(ProfWin* window, const char* inp);
 static gboolean _cmd_execute_alias(ProfWin* window, const char* const inp, gboolean* ran);
 static gboolean
 _string_matches_one_of(const char* what, const char* is, bool is_can_be_null, const char* first, ...) __attribute__((sentinel));
+static gboolean
+_download_install_plugin(ProfWin* window, gchar* url, gchar* path);
 
 static gboolean
 _string_matches_one_of(const char* what, const char* is, bool is_can_be_null, const char* first, ...)
@@ -7034,17 +7037,38 @@ cmd_receipts(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
+static gboolean
+_is_correct_plugin_extension(gchar* plugin)
+{
+    return g_str_has_suffix(plugin, ".py") || g_str_has_suffix(plugin, ".so");
+}
+
+static gboolean
+_http_based_uri_scheme(const char* scheme)
+{
+    return scheme != NULL && (g_strcmp0(scheme, "http") == 0 || g_strcmp0(scheme, "https") == 0);
+}
+
 gboolean
 cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
 {
-    char* path = NULL;
+    auto_gchar gchar* path = NULL;
 
     if (args[1] == NULL) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
 
-    // take whole path or build it in case it's just the plugin name
+    auto_gchar gchar* scheme = g_uri_parse_scheme(args[1]);
+    if (_http_based_uri_scheme(scheme)) {
+        if (!_is_correct_plugin_extension(args[1])) {
+            cons_show("Please, use url ending with correct file name. Plugins must have one of the following extensions: \".py\" or \".so\".");
+            return TRUE;
+        }
+        _download_install_plugin(window, args[1], NULL);
+        return TRUE;
+    }
+
     if (strchr(args[1], '/')) {
         path = get_expanded_path(args[1]);
     } else {
@@ -7053,52 +7077,47 @@ cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
         } else if (g_str_has_suffix(args[1], ".so")) {
             path = g_strdup_printf("%s/%s", GLOBAL_C_PLUGINS_PATH, args[1]);
         } else {
-            cons_show("Plugins must have one of the following extensions: '.py' '.so'");
+            cons_show("Plugins must have one of the following extensions: \".py\" or \".so\".");
             return TRUE;
         }
     }
 
     if (access(path, R_OK) != 0) {
         cons_show("Cannot access: %s", path);
-        free(path);
         return TRUE;
     }
 
     if (is_regular_file(path)) {
-        if (!g_str_has_suffix(path, ".py") && !g_str_has_suffix(path, ".so")) {
-            cons_show("Plugins must have one of the following extensions: '.py' '.so'");
-            free(path);
+        if (!_is_correct_plugin_extension(args[1])) {
+            cons_show("Plugins must have one of the following extensions: \".py\" or \".so\".");
             return TRUE;
         }
-
         GString* error_message = g_string_new(NULL);
-        gchar* plugin_name = g_path_get_basename(path);
+        auto_gchar gchar* plugin_name = g_path_get_basename(path);
         gboolean result = plugins_install(plugin_name, path, error_message);
         if (result) {
             cons_show("Plugin installed and loaded: %s", plugin_name);
         } else {
             cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
         }
-        g_free(plugin_name);
         g_string_free(error_message, TRUE);
-        free(path);
         return TRUE;
     } else if (is_dir(path)) {
         PluginsInstallResult* result = plugins_install_all(path);
         if (result->installed || result->failed) {
             if (result->installed) {
-                cons_show("");
-                cons_show("Installed and loaded plugins:");
                 GSList* curr = result->installed;
+                cons_show("");
+                cons_show("Installed and loaded plugins (%u):", g_slist_length(curr));
                 while (curr) {
                     cons_show("  %s", curr->data);
                     curr = g_slist_next(curr);
                 }
             }
             if (result->failed) {
-                cons_show("");
-                cons_show("Failed installs:");
                 GSList* curr = result->failed;
+                cons_show("");
+                cons_show("Failed installs (%u):", g_slist_length(curr));
                 while (curr) {
                     cons_show("  %s", curr->data);
                     curr = g_slist_next(curr);
@@ -7107,14 +7126,12 @@ cmd_plugins_install(ProfWin* window, const char* const command, gchar** args)
         } else {
             cons_show("No plugins found in: %s", path);
         }
-        free(path);
         plugins_free_install_result(result);
         return TRUE;
     } else {
         cons_show("Argument must be a file or directory.");
     }
 
-    free(path);
     return TRUE;
 }
 
@@ -7123,6 +7140,23 @@ cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[1] == NULL) {
         cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    auto_gchar gchar* scheme = g_uri_parse_scheme(args[1]);
+    if (_http_based_uri_scheme(scheme)) {
+        auto_char char* plugin_name = basename_from_url(args[1]);
+        if (!_is_correct_plugin_extension(plugin_name)) {
+            cons_show("Please, use url ending with correct file name. Plugins must have one of the following extensions: \".py\" or \".so\".");
+            return TRUE;
+        }
+
+        if (!plugins_uninstall(plugin_name)) {
+            cons_show("Failed to uninstall plugin: %s.", plugin_name);
+            return TRUE;
+        }
+
+        _download_install_plugin(window, args[1], NULL);
         return TRUE;
     }
 
@@ -9429,10 +9463,31 @@ cmd_slashguard(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
+gchar*
+_prepare_filename(gchar* url, gchar* path)
+{
+    // Ensure that the downloads directory exists for saving cleartexts.
+    auto_gchar gchar* downloads_dir = path ? get_expanded_path(path) : files_get_data_path(DIR_DOWNLOADS);
+    if (g_mkdir_with_parents(downloads_dir, S_IRWXU) != 0) {
+        cons_show_error("Failed to create download directory "
+                        "at '%s' with error '%s'",
+                        downloads_dir, strerror(errno));
+        return NULL;
+    }
+
+    // Generate an unique filename from the URL that should be stored in the
+    // downloads directory.
+    return unique_filename_from_url(url, downloads_dir);
+}
+
 #ifdef HAVE_OMEMO
 void
-_url_aesgcm_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename, const char* id)
+_url_aesgcm_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* path)
 {
+    auto_gchar gchar* filename = _prepare_filename(url, path);
+    if (!filename)
+        return;
+    auto_char char* id = get_random_string(4);
     AESGCMDownload* download = malloc(sizeof(AESGCMDownload));
     download->window = window;
     download->url = strdup(url);
@@ -9449,27 +9504,45 @@ _url_aesgcm_method(ProfWin* window, const char* cmd_template, const char* url, c
 }
 #endif
 
-void
-_url_http_method(ProfWin* window, const char* cmd_template, const char* url, const char* filename, const char* id)
+static gboolean
+_download_install_plugin(ProfWin* window, gchar* url, gchar* path)
 {
+    auto_gchar gchar* filename = _prepare_filename(url, path);
+    if (!filename)
+        return FALSE;
+    HTTPDownload* download = malloc(sizeof(HTTPDownload));
+    download->window = window;
+    download->url = strdup(url);
+    download->filename = strdup(filename);
+    download->id = get_random_string(4);
+    download->cmd_template = NULL;
 
+    pthread_create(&(download->worker), NULL, &plugin_download_install, download);
+    plugin_download_add_download(download);
+    return TRUE;
+}
+
+static gchar*
+_url_http_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* path)
+{
+    auto_gchar gchar* filename = _prepare_filename(url, path);
+    if (!filename)
+        return NULL;
+    auto_char char* id = get_random_string(4);
     HTTPDownload* download = malloc(sizeof(HTTPDownload));
     download->window = window;
     download->url = strdup(url);
     download->filename = strdup(filename);
     download->id = strdup(id);
-    if (cmd_template != NULL) {
-        download->cmd_template = strdup(cmd_template);
-    } else {
-        download->cmd_template = NULL;
-    }
+    download->cmd_template = cmd_template ? strdup(cmd_template) : NULL;
 
     pthread_create(&(download->worker), NULL, &http_file_get, download);
     http_download_add_download(download);
+    return g_strdup(filename);
 }
 
 void
-_url_external_method(const char* cmd_template, const char* url, const char* filename)
+_url_external_method(const char* cmd_template, const char* url, gchar* filename)
 {
     gchar** argv = format_call_external_argv(cmd_template, url, filename);
 
@@ -9496,61 +9569,32 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    gchar* scheme = NULL;
-    char* cmd_template = NULL;
-    char* filename = NULL;
+    // reset autocompletion to start from latest url and not where we left of
+    autocomplete_reset(window->urls_ac);
 
-    scheme = g_uri_parse_scheme(url);
+    auto_gchar gchar* scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
         cons_show_error("URL '%s' is not valid.", args[1]);
-        goto out;
+        return TRUE;
     }
 
-    cmd_template = prefs_get_string(PREF_URL_OPEN_CMD);
+    auto_gchar gchar* cmd_template = prefs_get_string(PREF_URL_OPEN_CMD);
     if (cmd_template == NULL) {
         cons_show_error("No default `url open` command found in executables preferences.");
-        goto out;
+        return TRUE;
     }
 
 #ifdef HAVE_OMEMO
     // OMEMO URLs (aesgcm://) must be saved and decrypted before being opened.
     if (g_strcmp0(scheme, "aesgcm") == 0) {
-
-        // Ensure that the downloads directory exists for saving cleartexts.
-        gchar* downloads_dir = files_get_data_path(DIR_DOWNLOADS);
-        if (g_mkdir_with_parents(downloads_dir, S_IRWXU) != 0) {
-            cons_show_error("Failed to create download directory "
-                            "at '%s' with error '%s'",
-                            downloads_dir, strerror(errno));
-            g_free(downloads_dir);
-            goto out;
-        }
-
-        // Generate an unique filename from the URL that should be stored in the
-        // downloads directory.
-        filename = unique_filename_from_url(url, downloads_dir);
-        g_free(downloads_dir);
-
         // Download, decrypt and open the cleartext version of the AESGCM
         // encrypted file.
-        gchar* id = get_random_string(4);
-        _url_aesgcm_method(window, cmd_template, url, filename, id);
-        g_free(id);
-        goto out;
+        _url_aesgcm_method(window, cmd_template, url, NULL);
+        return TRUE;
     }
 #endif
 
     _url_external_method(cmd_template, url, NULL);
-
-out:
-    // reset autocompletion to start from latest url and not where we left of
-    autocomplete_reset(window->urls_ac);
-
-    free(cmd_template);
-    free(filename);
-
-    g_free(scheme);
-
     return TRUE;
 }
 
@@ -9568,51 +9612,32 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
     }
 
     gchar* url = args[1];
-    gchar* path = g_strdup(args[2]);
-    gchar* scheme = NULL;
-    char* filename = NULL;
-    char* cmd_template = NULL;
+    gchar* path = args[2]; // might be NULL, intentionally skip NULL check
 
-    scheme = g_uri_parse_scheme(url);
+    // reset autocompletion to start from latest url and not where we left of
+    autocomplete_reset(window->urls_ac);
+
+    auto_gchar gchar* scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
-        cons_show_error("URL '%s' is not valid.", args[1]);
-        goto out;
+        cons_show_error("URL '%s' is not valid.", url);
+        return TRUE;
     }
 
-    filename = unique_filename_from_url(url, path);
-    if (filename == NULL) {
-        cons_show_error("Failed to generate unique filename"
-                        "from URL '%s' for path '%s'",
-                        url, path);
-        goto out;
-    }
-
-    cmd_template = prefs_get_string(PREF_URL_SAVE_CMD);
+    auto_gchar gchar* cmd_template = prefs_get_string(PREF_URL_SAVE_CMD);
     if (cmd_template == NULL && (g_strcmp0(scheme, "http") == 0 || g_strcmp0(scheme, "https") == 0)) {
-        gchar* id = get_random_string(4);
-        _url_http_method(window, cmd_template, url, filename, id);
-        g_free(id);
+        g_free(_url_http_method(window, cmd_template, url, path));
 #ifdef HAVE_OMEMO
     } else if (g_strcmp0(scheme, "aesgcm") == 0) {
-        gchar* id = get_random_string(4);
-        _url_aesgcm_method(window, cmd_template, url, filename, id);
-        g_free(id);
+        _url_aesgcm_method(window, cmd_template, url, path);
 #endif
     } else if (cmd_template != NULL) {
+        auto_gchar gchar* filename = _prepare_filename(url, NULL);
+        if (!filename)
+            return TRUE;
         _url_external_method(cmd_template, url, filename);
     } else {
         cons_show_error("No download method defined for the scheme '%s'.", scheme);
     }
-
-out:
-    // reset autocompletion to start from latest url and not where we left of
-    autocomplete_reset(window->urls_ac);
-
-    free(filename);
-    free(cmd_template);
-
-    g_free(scheme);
-    g_free(path);
 
     return TRUE;
 }

@@ -3,6 +3,7 @@
 
 #include <curl/curl.h>
 #include <pthread.h>
+#include "common.h"
 
 typedef struct prof_win_t ProfWin;
 
@@ -17,6 +18,7 @@ typedef struct http_download_t
     ProfWin* window;
     pthread_t worker;
     int cancel;
+    gboolean silent;
 } HTTPDownload;
 
 void*

@@ -4,6 +4,7 @@
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
  * Copyright (C) 2020 William Wennerström <william@wstrm.dev>
+ * Copyright (C) 2019 - 2023 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -57,6 +58,7 @@
 #include "common.h"
 
 GSList* download_processes = NULL;
+gboolean silent = FALSE;
 
 static int
 _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
@@ -82,8 +84,9 @@ _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
         dlperc = (100 * dlnow) / dltotal;
     }
 
-    http_print_transfer_update(download->window, download->url,
-                               "Downloading '%s': %d%%", download->url, dlperc);
+    if (!silent)
+        http_print_transfer_update(download->window, download->url,
+                                   "Downloading '%s': %d%%", download->url, dlperc);
 
     pthread_mutex_unlock(&lock);
 
@@ -107,13 +110,16 @@ http_file_get(void* userdata)
 
     CURL* curl;
     CURLcode res;
+    silent = download->silent;
 
     download->cancel = 0;
     download->bytes_received = 0;
 
     pthread_mutex_lock(&lock);
-    http_print_transfer(download->window, download->id,
-                        "Downloading '%s': 0%%", download->url);
+    if (!silent) {
+        http_print_transfer(download->window, download->id,
+                            "Downloading '%s': 0%%", download->url);
+    }
 
     FILE* outfh = fopen(download->filename, "wb");
     if (outfh == NULL) {
@@ -188,7 +194,7 @@ http_file_get(void* userdata)
         }
         free(err);
     } else {
-        if (!download->cancel) {
+        if (!download->cancel && !silent) {
             http_print_transfer_update(download->window, download->id,
                                        "Downloading '%s': done\nSaved to '%s'",
                                        download->url, download->filename);

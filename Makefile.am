@@ -50,6 +50,8 @@ core_sources = \
 	src/tools/http_upload.h \
 	src/tools/http_download.c \
 	src/tools/http_download.h \
+	src/tools/plugin_download.c \
+	src/tools/plugin_download.h \
 	src/tools/bookmark_ignore.c \
 	src/tools/bookmark_ignore.h \
 	src/tools/autocomplete.c src/tools/autocomplete.h \
@@ -137,6 +139,7 @@ unittest_sources = \
 	tests/unittests/tools/stub_http_upload.c \
 	tests/unittests/tools/stub_http_download.c \
 	tests/unittests/tools/stub_aesgcm_download.c \
+	tests/unittests/tools/stub_plugin_download.c \
 	tests/unittests/helpers.c tests/unittests/helpers.h \
 	tests/unittests/test_form.c tests/unittests/test_form.h \
 	tests/unittests/test_common.c tests/unittests/test_common.h \
