@@ -416,7 +416,7 @@ session_check_autoaway(void)
         return;
     }
 
-    char* mode = prefs_get_string(PREF_AUTOAWAY_MODE);
+    auto_gchar gchar* mode = prefs_get_string(PREF_AUTOAWAY_MODE);
     gboolean check = prefs_get_boolean(PREF_AUTOAWAY_CHECK);
     gint away_time = prefs_get_autoaway_time();
     gint xa_time = prefs_get_autoxa_time();
@@ -425,7 +425,7 @@ session_check_autoaway(void)
 
     char* account = session_get_account_name();
     resource_presence_t curr_presence = accounts_get_last_presence(account);
-    char* curr_status = accounts_get_last_status(account);
+    auto_char char* curr_status = accounts_get_last_status(account);
 
     unsigned long idle_ms = ui_get_idle_time();
 
@@ -448,7 +448,7 @@ session_check_autoaway(void)
                     }
 
                     // send away presence with last activity
-                    char* message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
+                    auto_gchar gchar* message = prefs_get_string(PREF_AUTOAWAY_MESSAGE);
                     connection_set_presence_msg(message);
                     if (prefs_get_boolean(PREF_LASTACTIVITY)) {
                         cl_ev_presence_send(RESOURCE_AWAY, idle_ms / 1000);
@@ -462,7 +462,6 @@ session_check_autoaway(void)
                     } else {
                         cons_show("Idle for %d minutes, status set to away (priority %d).", away_time, pri);
                     }
-                    g_free(message);
 
                     title_bar_set_presence(CONTACT_AWAY);
                 }
@@ -491,7 +490,7 @@ session_check_autoaway(void)
             activity_state = ACTIVITY_ST_XA;
 
             // send extended away presence with last activity
-            char* message = prefs_get_string(PREF_AUTOXA_MESSAGE);
+            auto_gchar gchar* message = prefs_get_string(PREF_AUTOXA_MESSAGE);
             connection_set_presence_msg(message);
             if (prefs_get_boolean(PREF_LASTACTIVITY)) {
                 cl_ev_presence_send(RESOURCE_XA, idle_ms / 1000);
@@ -505,7 +504,6 @@ session_check_autoaway(void)
             } else {
                 cons_show("Idle for %d minutes, status set to xa (priority %d).", xa_time, pri);
             }
-            g_free(message);
 
             title_bar_set_presence(CONTACT_XA);
         } else if (check && (idle_ms < away_time_ms)) {
@@ -534,9 +532,6 @@ session_check_autoaway(void)
         }
         break;
     }
-
-    free(curr_status);
-    g_free(mode);
 }
 
 static struct

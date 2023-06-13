@@ -191,12 +191,12 @@ roster_get_display_name(const char* const barejid)
     return g_string_free(result, FALSE);
 }
 
-char*
+gchar*
 roster_get_msg_display_name(const char* const barejid, const char* const resource)
 {
     assert(roster != NULL);
 
-    char* incoming_str = prefs_get_string(PREF_INCOMING_STAMP);
+    gchar* incoming_str = prefs_get_string(PREF_INCOMING_STAMP);
 
     if (incoming_str) {
         return incoming_str;

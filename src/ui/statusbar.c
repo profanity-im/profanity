@@ -196,7 +196,7 @@ _create_tab(const int win, win_type_t wintype, char* identifier, gboolean highli
             contact = roster_get_contact(tab->identifier);
         }
         const char* pcontact_name = contact ? p_contact_name(contact) : NULL;
-        auto_char char* pref = prefs_get_string(PREF_STATUSBAR_CHAT);
+        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_CHAT);
         if (g_strcmp0("user", pref) == 0) {
             if (pcontact_name) {
                 tab->display_name = strdup(pcontact_name);
@@ -464,9 +464,8 @@ _status_bar_draw_bracket(gboolean current, int pos, const char* ch)
 static int
 _status_bar_draw_time(int pos)
 {
-    char* time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
+    auto_gchar gchar* time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
     if (g_strcmp0(time_pref, "off") == 0) {
-        g_free(time_pref);
         return pos;
     }
 
@@ -497,15 +496,13 @@ _status_bar_draw_time(int pos)
     wattroff(statusbar_win, bracket_attrs);
     pos += 2;
 
-    g_free(time_pref);
-
     return pos;
 }
 
 static gboolean
 _tabmode_is_actlist(void)
 {
-    auto_char char* tabmode = prefs_get_string(PREF_STATUSBAR_TABMODE);
+    auto_gchar gchar* tabmode = prefs_get_string(PREF_STATUSBAR_TABMODE);
     return g_strcmp0(tabmode, "actlist") == 0;
 }
 
@@ -514,7 +511,7 @@ _status_bar_draw_maintext(int pos)
 {
     const char* maintext = NULL;
     auto_jid Jid* jidp = NULL;
-    auto_char char* self = prefs_get_string(PREF_STATUSBAR_SELF);
+    auto_gchar gchar* self = prefs_get_string(PREF_STATUSBAR_SELF);
 
     if (statusbar->prompt) {
         mvwprintw(statusbar_win, 0, pos, "%s", statusbar->prompt);
@@ -541,7 +538,7 @@ _status_bar_draw_maintext(int pos)
     }
 
     if (statusbar->fulljid) {
-        auto_char char* pref = prefs_get_string(PREF_STATUSBAR_SELF);
+        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_SELF);
 
         if (g_strcmp0(pref, "off") == 0) {
             return pos;
@@ -659,7 +656,7 @@ _display_name(StatusBarTab* tab)
             fullname = strdup(tab->display_name);
         }
     } else if (tab->window_type == WIN_MUC) {
-        char* pref = prefs_get_string(PREF_STATUSBAR_ROOM);
+        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_ROOM);
         if (g_strcmp0("room", pref) == 0) {
             Jid* jidp = jid_create(tab->identifier);
             char* room = strdup(jidp->localpart);
@@ -668,9 +665,8 @@ _display_name(StatusBarTab* tab)
         } else {
             fullname = strdup(tab->identifier);
         }
-        g_free(pref);
     } else if (tab->window_type == WIN_CONFIG) {
-        char* pref = prefs_get_string(PREF_STATUSBAR_ROOM);
+        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_ROOM);
         GString* display_str = g_string_new("");
 
         if (g_strcmp0("room", pref) == 0) {
@@ -681,13 +677,12 @@ _display_name(StatusBarTab* tab)
             g_string_append(display_str, tab->identifier);
         }
 
-        g_free(pref);
         g_string_append(display_str, " conf");
         char* result = strdup(display_str->str);
         g_string_free(display_str, TRUE);
         fullname = result;
     } else if (tab->window_type == WIN_PRIVATE) {
-        char* pref = prefs_get_string(PREF_STATUSBAR_ROOM);
+        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_ROOM);
         if (g_strcmp0("room", pref) == 0) {
             GString* display_str = g_string_new("");
             Jid* jidp = jid_create(tab->identifier);
@@ -701,7 +696,6 @@ _display_name(StatusBarTab* tab)
         } else {
             fullname = strdup(tab->identifier);
         }
-        g_free(pref);
     } else {
         fullname = strdup("window");
     }

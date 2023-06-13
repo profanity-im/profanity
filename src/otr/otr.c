@@ -684,7 +684,7 @@ otr_get_policy(const char* const recipient)
     account_free(account);
 
     // check global setting
-    char* pref_otr_policy = prefs_get_string(PREF_OTR_POLICY);
+    auto_gchar gchar* pref_otr_policy = prefs_get_string(PREF_OTR_POLICY);
 
     // pref defaults to manual
     prof_otrpolicy_t result = PROF_OTRPOLICY_MANUAL;
@@ -694,8 +694,6 @@ otr_get_policy(const char* const recipient)
     } else if (strcmp(pref_otr_policy, "always") == 0) {
         result = PROF_OTRPOLICY_ALWAYS;
     }
-
-    g_free(pref_otr_policy);
 
     return result;
 }

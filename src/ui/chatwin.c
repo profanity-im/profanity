@@ -328,7 +328,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     ProfWin* window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
 
-    char* display_name;
+    auto_gchar gchar* display_name;
     char* mybarejid = connection_get_barejid();
     if (g_strcmp0(mybarejid, message->from_jid->barejid) == 0) {
         display_name = strdup("me");
@@ -415,8 +415,6 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     if (notify) {
         notify_message(display_name, num, message->plain);
     }
-
-    free(display_name);
 
     plugins_post_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
 

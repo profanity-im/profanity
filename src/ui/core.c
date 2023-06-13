@@ -228,8 +228,8 @@ ui_load_colours(void)
 void
 ui_contact_online(char* barejid, Resource* resource, GDateTime* last_activity)
 {
-    char* show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
-    char* show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
+    auto_gchar gchar* show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
+    auto_gchar gchar* show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
     PContact contact = roster_get_contact(barejid);
 
     // show nothing
@@ -262,9 +262,6 @@ ui_contact_online(char* barejid, Resource* resource, GDateTime* last_activity)
             chatwin_contact_online(chatwin, resource, last_activity);
         }
     }
-
-    free(show_console);
-    free(show_chat_win);
 }
 
 void
@@ -1049,8 +1046,8 @@ ui_ask_pgp_passphrase(const char* hint, int prev_fail)
 void
 ui_contact_offline(char* barejid, char* resource, char* status)
 {
-    char* show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
-    char* show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
+    auto_gchar gchar* show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
+    auto_gchar gchar* show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
     Jid* jid = jid_create_from_bare_and_resource(barejid, resource);
     PContact contact = roster_get_contact(barejid);
     if (p_contact_subscription(contact)) {
@@ -1087,8 +1084,6 @@ ui_contact_offline(char* barejid, char* resource, char* status)
         FREE_SET_NULL(chatwin->resource_override);
     }
 
-    g_free(show_console);
-    g_free(show_chat_win);
     jid_destroy(jid);
 }
 

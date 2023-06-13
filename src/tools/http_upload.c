@@ -184,7 +184,7 @@ http_file_put(void* userdata)
     win_print_http_transfer(upload->window, msg, upload->put_url);
     g_free(msg);
 
-    char* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
+    auto_gchar gchar* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     gchar* cafile = cafile_get_name();
     ProfAccount* account = accounts_get_account(session_get_account_name());
     gboolean insecure = account->tls_policy && strcmp(account->tls_policy, "trust") == 0;
@@ -301,7 +301,6 @@ http_file_put(void* userdata)
 
     pthread_mutex_lock(&lock);
     g_free(cafile);
-    g_free(cert_path);
 
     if (err) {
         gchar* msg;
