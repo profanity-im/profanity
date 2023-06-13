@@ -895,7 +895,7 @@ _rosterwin_private_chats(ProfLayoutSplit* layout, GList* orphaned_privchats)
 {
     GList* privs = NULL;
 
-    char* privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
+    auto_gchar gchar* privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
     if (g_strcmp0(privpref, "group") == 0) {
         privs = wins_get_private_chats(NULL);
     } else {
