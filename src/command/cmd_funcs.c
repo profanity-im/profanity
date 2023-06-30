@@ -7489,12 +7489,12 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
     if (g_strcmp0(args[0], "start") == 0) {
         jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You must be connected to start PGP encrpytion.");
+            cons_show("You must be connected to start PGP encryption.");
             return TRUE;
         }
 
         if (window->type != WIN_CHAT && args[1] == NULL) {
-            cons_show("You must be in a regular chat window to start PGP encrpytion.");
+            cons_show("You must be in a regular chat window to start PGP encryption.");
             return TRUE;
         }
 
@@ -7533,14 +7533,17 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
         }
 
         ProfAccount* account = accounts_get_account(session_get_account_name());
-        char* err_str = NULL;
-        if (!p_gpg_valid_key(account->pgp_keyid, &err_str)) {
-            win_println(window, THEME_DEFAULT, "!", "Invalid PGP key ID %s: %s, cannot start PGP encryption.", account->pgp_keyid, err_str);
-            free(err_str);
+        if (account->pgp_keyid == NULL) {
+            win_println(window, THEME_DEFAULT, "!", "Couldn't start PGP session. Please, set your PGP key using /account set %s pgpkeyid <pgpkeyid>. To list pgp keys, use /pgp keys.", account->name);
             account_free(account);
             return TRUE;
         }
-        free(err_str);
+        auto_char char* err_str = NULL;
+        if (!p_gpg_valid_key(account->pgp_keyid, &err_str)) {
+            win_println(window, THEME_DEFAULT, "!", "Invalid PGP key ID %s: %s, cannot start PGP encryption.", account->pgp_keyid, err_str);
+            account_free(account);
+            return TRUE;
+        }
         account_free(account);
 
         if (!p_gpg_available(chatwin->barejid)) {
@@ -7562,7 +7565,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
         }
 
         if (window->type != WIN_CHAT) {
-            cons_show("You must be in a regular chat window to end PGP encrpytion.");
+            cons_show("You must be in a regular chat window to end PGP encryption.");
             return TRUE;
         }
 
@@ -7580,6 +7583,31 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
 
     if (g_strcmp0(args[0], "sendfile") == 0) {
         _cmd_set_boolean_preference(args[1], command, "Sending unencrypted files using /sendfile while otherwise using PGP", PREF_PGP_SENDFILE);
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "sendpub") == 0) {
+        if (window->type != WIN_CHAT) {
+            cons_show_error("Please, use this command only in chat windows.");
+            return TRUE;
+        }
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+        ProfAccount* account = accounts_get_account(session_get_account_name());
+
+        if (account->pgp_keyid == NULL) {
+            cons_show_error("Please, set the PGP key first using /account set %s pgpkeyid <pgpkeyid>. To list pgp keys, use /pgp keys.", account->name);
+            account_free(account);
+            return TRUE;
+        }
+        auto_char char* pubkey = p_gpg_get_pubkey(account->pgp_keyid);
+        if (pubkey == NULL) {
+            cons_show_error("Couldn't get your PGP public key. Please, check error logs.");
+            account_free(account);
+            return TRUE;
+        }
+        cl_ev_send_msg(chatwin, pubkey, NULL);
+        cons_show("PGP key has been shared with %s.", chatwin->barejid);
+        account_free(account);
         return TRUE;
     }
 
@@ -7691,12 +7719,12 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
     } else if (g_strcmp0(args[0], "start") == 0) {
         jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status != JABBER_CONNECTED) {
-            cons_show("You must be connected to start OX encrpytion.");
+            cons_show("You must be connected to start OX encryption.");
             return TRUE;
         }
 
         if (window->type != WIN_CHAT && args[1] == NULL) {
-            cons_show("You must be in a regular chat window to start OX encrpytion.");
+            cons_show("You must be in a regular chat window to start OX encryption.");
             return TRUE;
         }
 

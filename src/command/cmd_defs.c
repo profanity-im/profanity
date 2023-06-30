@@ -1705,7 +1705,8 @@ static const struct cmd_t command_defs[] = {
               "/pgp end",
               "/pgp log on|off|redact",
               "/pgp char <char>",
-              "/pgp sendfile on|off")
+              "/pgp sendfile on|off",
+              "/pgp sendpub")
       CMD_DESC(
               "Open PGP commands to manage keys, and perform PGP encryption during chat sessions. "
               "See the /account command to set your own PGP key.")
@@ -1719,7 +1720,8 @@ static const struct cmd_t command_defs[] = {
               { "log on|off", "Enable or disable plaintext logging of PGP encrypted messages." },
               { "log redact", "Log PGP encrypted messages, but replace the contents with [redacted]. This is the default." },
               { "char <char>", "Set the character to be displayed next to PGP encrypted messages." },
-              { "sendfile on|off", "Allow /sendfile to send unencrypted files while otherwise using PGP." })
+              { "sendfile on|off", "Allow /sendfile to send unencrypted files while otherwise using PGP." },
+              { "sendpub", "Used in chat. Sends a message to the current recipient with your PGP public key." })
       CMD_EXAMPLES(
               "/pgp log off",
               "/pgp setkey odin@valhalla.edda BA19CACE5A9592C5",

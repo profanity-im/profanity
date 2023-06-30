@@ -910,6 +910,7 @@ cmd_ac_init(void)
     autocomplete_add(pgp_ac, "log");
     autocomplete_add(pgp_ac, "char");
     autocomplete_add(pgp_ac, "sendfile");
+    autocomplete_add(pgp_ac, "sendpub");
 
     pgp_log_ac = autocomplete_new();
     autocomplete_add(pgp_log_ac, "on");

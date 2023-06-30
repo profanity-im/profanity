@@ -73,6 +73,7 @@ void p_gpg_free_decrypted(char* decrypted);
 char* p_gpg_autocomplete_key(const char* const search_str, gboolean previous, void* context);
 void p_gpg_autocomplete_key_reset(void);
 char* p_gpg_format_fp_str(char* fp);
+char* p_gpg_get_pubkey(const char* const keyid);
 
 ProfPGPKey* p_gpg_key_new(void);
 void p_gpg_free_key(ProfPGPKey* key);

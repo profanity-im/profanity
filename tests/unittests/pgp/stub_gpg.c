@@ -98,3 +98,9 @@ p_gpg_format_fp_str(char* fp)
 {
     return NULL;
 }
+
+char*
+p_gpg_get_pubkey(const char* const keyid)
+{
+    return NULL;
+}

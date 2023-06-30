@@ -71,6 +71,7 @@ static Autocomplete key_ac;
 
 static char* _remove_header_footer(char* str, const char* const footer);
 static char* _add_header_footer(const char* const str, const char* const header, const char* const footer);
+static char* _gpgme_data_to_char(gpgme_data_t data);
 static void _save_pubkeys(void);
 
 void
@@ -422,7 +423,9 @@ p_gpg_valid_key(const char* const keyid, char** err_str)
     gpgme_error_t error = gpgme_new(&ctx);
     if (error) {
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
-        *err_str = strdup(gpgme_strerror(error));
+        if (err_str) {
+            *err_str = strdup(gpgme_strerror(error));
+        }
         return FALSE;
     }
 
@@ -431,13 +434,9 @@ p_gpg_valid_key(const char* const keyid, char** err_str)
 
     if (error || key == NULL) {
         log_error("GPG: Failed to get key. %s %s", gpgme_strsource(error), gpgme_strerror(error));
-        *err_str = strdup(gpgme_strerror(error));
-        gpgme_release(ctx);
-        return FALSE;
-    }
-
-    if (key == NULL) {
-        *err_str = strdup("Unknown error");
+        if (err_str) {
+            *err_str = strdup(error ? gpgme_strerror(error) : "gpgme didn't return any error, but it didn't return a key");
+        }
         gpgme_release(ctx);
         return FALSE;
     }
@@ -717,19 +716,11 @@ p_gpg_decrypt(const char* const cipher)
     }
     gpgme_release(ctx);
 
-    size_t len = 0;
-    char* plain_str = gpgme_data_release_and_get_mem(plain_data, &len);
-    char* result = NULL;
-    if (plain_str) {
-        result = strndup(plain_str, len);
-        gpgme_free(plain_str);
-    }
-
     if (passphrase_attempt) {
         passphrase = strdup(passphrase_attempt);
     }
 
-    return result;
+    return _gpgme_data_to_char(plain_data);
 }
 
 void
@@ -767,6 +758,72 @@ p_gpg_format_fp_str(char* fp)
     }
 
     return g_string_free(format, FALSE);
+}
+
+/**
+ * \brief Function to extract specific public key from PGP
+ * \param keyid Key ID that will be used to search key in the current PGP context, if NULL returns null
+ * \returns null-terminated char* string with the the public key in armored format, that must be free'd to avoid memory leaks
+ *          or NULL on error
+ */
+char*
+p_gpg_get_pubkey(const char* keyid)
+{
+    if (!keyid || *keyid == '\0') {
+        return NULL;
+    }
+
+    gpgme_ctx_t context = NULL;
+    gpgme_error_t error = GPG_ERR_NO_ERROR;
+    gpgme_data_t data = NULL;
+
+    error = gpgme_new(&context);
+    if (error != GPG_ERR_NO_ERROR) {
+        log_error("GPG: Failed to create gpgme context. %s", gpgme_strerror(error));
+        goto cleanup;
+    }
+
+    error = gpgme_data_new(&data);
+    if (error != GPG_ERR_NO_ERROR || data == NULL) {
+        log_error("GPG: Failed to create new gpgme data. %s", gpgme_strerror(error));
+        goto cleanup;
+    }
+
+    gpgme_set_armor(context, 1);
+
+    error = gpgme_op_export(context, keyid, GPGME_EXPORT_MODE_MINIMAL, data);
+    if (error != GPG_ERR_NO_ERROR) {
+        log_error("GPG: Failed to export public key. %s", gpgme_strerror(error));
+        goto cleanup;
+    }
+
+cleanup:
+    gpgme_release(context);
+    return _gpgme_data_to_char(data);
+}
+
+/**
+ * Convert a gpgme_data_t object to a null-terminated char* string.
+ * The returned string is allocated using malloc and should be freed by the caller.
+ * If an error occurs or the data is empty, NULL is returned and errors written to the error log.
+ */
+static char*
+_gpgme_data_to_char(gpgme_data_t data)
+{
+    size_t buffer_size = 0;
+    char* gpgme_buffer = gpgme_data_release_and_get_mem(data, &buffer_size);
+
+    if (!gpgme_buffer) {
+        log_error("GPG: Unable to extract gpgmedata.");
+        return NULL;
+    }
+
+    char* buffer = malloc(buffer_size + 1);
+    memcpy(buffer, gpgme_buffer, buffer_size);
+    buffer[buffer_size] = '\0';
+    gpgme_free(gpgme_buffer);
+
+    return buffer;
 }
 
 static char*
