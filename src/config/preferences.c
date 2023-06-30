@@ -1863,6 +1863,7 @@ _get_group(preference_t pref)
         return PREF_GROUP_OTR;
     case PREF_PGP_LOG:
     case PREF_PGP_SENDFILE:
+    case PREF_PGP_PUBKEY_AUTOIMPORT:
         return PREF_GROUP_PGP;
     case PREF_BOOKMARK_INVITE:
     case PREF_ROOM_LIST_CACHE:
@@ -2084,6 +2085,8 @@ _get_key(preference_t pref)
         return "log";
     case PREF_PGP_SENDFILE:
         return "sendfile";
+    case PREF_PGP_PUBKEY_AUTOIMPORT:
+        return "pgp.pubkey.autoimport";
     case PREF_TLS_CERTPATH:
         return "tls.certpath";
     case PREF_TLS_SHOW:
@@ -2215,6 +2218,7 @@ _get_default_boolean(preference_t pref)
     case PREF_STROPHE_SM_ENABLED:
     case PREF_STROPHE_SM_RESEND:
         return TRUE;
+    case PREF_PGP_PUBKEY_AUTOIMPORT:
     default:
         return FALSE;
     }

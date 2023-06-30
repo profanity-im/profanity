@@ -53,6 +53,9 @@
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
+#ifdef HAVE_LIBGPGME
+#include "pgp/gpg.h"
+#endif
 #ifdef HAVE_OMEMO
 #include "omemo/omemo.h"
 #endif
@@ -320,6 +323,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     char* old_plain = message->plain;
 
     message->plain = plugins_pre_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
+    gboolean show_message = true;
 
     ProfWin* window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
@@ -333,12 +337,29 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     }
     free(mybarejid);
 
+#ifdef HAVE_LIBGPGME
+    if (prefs_get_boolean(PREF_PGP_PUBKEY_AUTOIMPORT)) {
+        if (p_gpg_is_public_key_format(message->plain)) {
+            ProfPGPKey* key = p_gpg_import_pubkey(message->plain);
+            if (key != NULL) {
+                show_message = false;
+                win_println(window, THEME_DEFAULT, "-", "Received and imported PGP key %s: \"%s\". To assign it to the correspondent using /pgp setkey %s %s", key->fp, key->name, display_name, key->id);
+                p_gpg_free_key(key);
+            } else {
+                win_println(window, THEME_DEFAULT, "-", "Received PGP key, but couldn't import PGP key above.");
+            }
+        }
+    }
+#endif
+
     gboolean is_current = wins_is_current(window);
     gboolean notify = prefs_do_chat_notify(is_current) && !message->is_mam;
 
     // currently viewing chat window with sender
     if (wins_is_current(window)) {
-        win_print_incoming(window, display_name, message);
+        if (show_message) {
+            win_print_incoming(window, display_name, message);
+        }
         title_bar_set_typing(FALSE);
         status_bar_active(num, WIN_CHAT, chatwin->barejid);
 
@@ -377,7 +398,9 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         }
 
         win_insert_last_read_position_marker((ProfWin*)chatwin, chatwin->barejid);
-        win_print_incoming(window, display_name, message);
+        if (show_message) {
+            win_print_incoming(window, display_name, message);
+        }
     }
 
     if (!message->is_mam) {

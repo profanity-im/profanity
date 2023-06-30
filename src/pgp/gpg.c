@@ -53,10 +53,12 @@
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
 
-#define PGP_SIGNATURE_HEADER "-----BEGIN PGP SIGNATURE-----"
-#define PGP_SIGNATURE_FOOTER "-----END PGP SIGNATURE-----"
-#define PGP_MESSAGE_HEADER   "-----BEGIN PGP MESSAGE-----"
-#define PGP_MESSAGE_FOOTER   "-----END PGP MESSAGE-----"
+#define PGP_SIGNATURE_HEADER  "-----BEGIN PGP SIGNATURE-----"
+#define PGP_SIGNATURE_FOOTER  "-----END PGP SIGNATURE-----"
+#define PGP_MESSAGE_HEADER    "-----BEGIN PGP MESSAGE-----"
+#define PGP_MESSAGE_FOOTER    "-----END PGP MESSAGE-----"
+#define PGP_PUBLIC_KEY_HEADER "-----BEGIN PGP PUBLIC KEY BLOCK-----"
+#define PGP_PUBLIC_KEY_FOOTER "-----END PGP PUBLIC KEY BLOCK-----"
 
 static const char* libversion = NULL;
 static GHashTable* pubkeys;
@@ -73,6 +75,7 @@ static char* _remove_header_footer(char* str, const char* const footer);
 static char* _add_header_footer(const char* const str, const char* const header, const char* const footer);
 static char* _gpgme_data_to_char(gpgme_data_t data);
 static void _save_pubkeys(void);
+static ProfPGPKey* _gpgme_key_to_ProfPGPKey(gpgme_key_t key);
 
 void
 _p_gpg_free_pubkeyid(ProfPGPPubKeyId* pubkeyid)
@@ -304,6 +307,21 @@ p_gpg_free_key(ProfPGPKey* key)
     }
 }
 
+/**
+ * Retrieve a list of GPG keys and create a hash table of ProfPGPKey objects.
+ *
+ * This function utilizes the GPGME library to retrieve both public and secret keys.
+ * It iterates over the keys and their subkeys to populate a hash table with ProfPGPKey objects.
+ * The key name is used as the key in the hash table, and the ProfPGPKey object is the corresponding value.
+ *
+ * @return A newly created GHashTable* containing ProfPGPKey objects, with the key name as the key.
+ *         Returns NULL if an error occurs during key retrieval or if memory allocation fails.
+ *
+ * @note The returned hash table should be released using p_gpg_free_keys()
+ *       when they are no longer needed to avoid memory leaks.
+ *
+ * @note This function may perform additional operations, such as autocomplete, related to the retrieved keys.
+ */
 GHashTable*
 p_gpg_list_keys(void)
 {
@@ -312,47 +330,22 @@ p_gpg_list_keys(void)
 
     gpgme_ctx_t ctx;
     error = gpgme_new(&ctx);
-
     if (error) {
-        log_error("GPG: Could not list keys. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        log_error("GPG: Could not create GPGME context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
+        g_hash_table_destroy(result);
         return NULL;
     }
 
     error = gpgme_op_keylist_start(ctx, NULL, 0);
     if (error == GPG_ERR_NO_ERROR) {
         gpgme_key_t key;
+
         error = gpgme_op_keylist_next(ctx, &key);
         while (!error) {
-            gpgme_subkey_t sub = key->subkeys;
-
-            ProfPGPKey* p_pgpkey = p_gpg_key_new();
-            p_pgpkey->id = strdup(sub->keyid);
-            p_pgpkey->name = strdup(key->uids->uid);
-            p_pgpkey->fp = strdup(sub->fpr);
-            if (sub->can_encrypt)
-                p_pgpkey->encrypt = TRUE;
-            if (sub->can_authenticate)
-                p_pgpkey->authenticate = TRUE;
-            if (sub->can_certify)
-                p_pgpkey->certify = TRUE;
-            if (sub->can_sign)
-                p_pgpkey->sign = TRUE;
-
-            sub = sub->next;
-            while (sub) {
-                if (sub->can_encrypt)
-                    p_pgpkey->encrypt = TRUE;
-                if (sub->can_authenticate)
-                    p_pgpkey->authenticate = TRUE;
-                if (sub->can_certify)
-                    p_pgpkey->certify = TRUE;
-                if (sub->can_sign)
-                    p_pgpkey->sign = TRUE;
-
-                sub = sub->next;
+            ProfPGPKey* p_pgpkey = _gpgme_key_to_ProfPGPKey(key);
+            if (p_pgpkey != NULL) {
+                g_hash_table_insert(result, strdup(p_pgpkey->name), p_pgpkey);
             }
-
-            g_hash_table_insert(result, strdup(p_pgpkey->name), p_pgpkey);
 
             gpgme_key_unref(key);
             error = gpgme_op_keylist_next(ctx, &key);
@@ -382,6 +375,7 @@ p_gpg_list_keys(void)
 
     gpgme_release(ctx);
 
+    // TODO: move autocomplete in other place
     autocomplete_clear(key_ac);
     GList* ids = g_hash_table_get_keys(result);
     GList* curr = ids;
@@ -761,10 +755,13 @@ p_gpg_format_fp_str(char* fp)
 }
 
 /**
- * \brief Function to extract specific public key from PGP
- * \param keyid Key ID that will be used to search key in the current PGP context, if NULL returns null
- * \returns null-terminated char* string with the the public key in armored format, that must be free'd to avoid memory leaks
- *          or NULL on error
+ * Returns the public key data for the given key ID.
+ *
+ * @param keyid The key ID for which to retrieve the public key data.
+ *              If the key ID is empty or NULL, returns NULL.
+ * @return The public key data as a null-terminated char* string allocated using malloc.
+ *         The returned string should be freed by the caller.
+ *         Returns NULL on error, and errors are written to the error log.
  */
 char*
 p_gpg_get_pubkey(const char* keyid)
@@ -803,9 +800,134 @@ cleanup:
 }
 
 /**
+ * Validate that the provided buffer has the format of an armored public key.
+ *
+ * This function only briefly checks for presence of armored header and footer.
+ *
+ * @param buffer The buffer containing the key data.
+ * @return TRUE if the buffer has the expected header and footer of an armored public key, FALSE otherwise.
+ */
+gboolean
+p_gpg_is_public_key_format(const char* buffer)
+{
+    if (buffer == NULL || buffer[0] == '\0') {
+        return false;
+    }
+
+    const char* headerPos = strstr(buffer, PGP_PUBLIC_KEY_HEADER);
+    if (headerPos == NULL) {
+        return false;
+    }
+
+    const char* footerPos = strstr(buffer, PGP_PUBLIC_KEY_FOOTER);
+
+    return (footerPos != NULL && footerPos > headerPos);
+}
+
+/**
+ * Imports a PGP public key(s) from a buffer.
+ *
+ * @param buffer The buffer containing the PGP key data.
+ * @return A pointer to the first imported ProfPGPKey structure, or NULL if an error occurs.
+ *
+ * @note The caller is responsible for freeing the memory of the returned ProfPGPKey structure
+ *       by calling p_gpg_free_key() to avoid resource leaks.
+ */
+ProfPGPKey*
+p_gpg_import_pubkey(const char* buffer)
+{
+    gpgme_ctx_t ctx;
+    ProfPGPKey* result = NULL;
+    gpgme_error_t error = gpgme_new(&ctx);
+    if (error != GPG_ERR_NO_ERROR) {
+        log_error("GPG: Error creating GPGME context");
+        goto out;
+    }
+
+    gpgme_data_t key_data;
+    error = gpgme_data_new_from_mem(&key_data, buffer, strlen(buffer), 1);
+    if (error != GPG_ERR_NO_ERROR) {
+        log_error("GPG: Error creating GPGME data from buffer");
+        goto out;
+    }
+
+    error = gpgme_op_import(ctx, key_data);
+
+    gpgme_data_release(key_data);
+
+    if (error != GPG_ERR_NO_ERROR) {
+        log_error("GPG: Error importing key data");
+        goto out;
+    }
+
+    gpgme_import_result_t import_result = gpgme_op_import_result(ctx);
+    gpgme_import_status_t status = import_result->imports;
+    gboolean is_valid = (status && status->result == GPG_ERR_NO_ERROR);
+
+    if (!is_valid) {
+        log_error("GPG: Error importing PGP key (%s).", status ? gpgme_strerror(status->result) : "Invalid import status.");
+        goto out;
+    }
+
+    gpgme_key_t key = NULL;
+    error = gpgme_get_key(ctx, status->fpr, &key, 0);
+    if (error != GPG_ERR_NO_ERROR) {
+        log_error("GPG: Unable to find imported PGP key (%s).", gpgme_strerror(error));
+        goto out;
+    }
+
+    result = _gpgme_key_to_ProfPGPKey(key);
+    gpgme_key_release(key);
+
+out:
+    gpgme_release(ctx);
+    return result;
+}
+
+/**
+ * Converts a GPGME key struct to a ProfPGPKey struct.
+ *
+ * @param key The GPGME key struct to convert.
+ * @return A newly allocated ProfPGPKey struct populated with the converted data,
+ *         or NULL if an error occurs.
+ *
+ * @note The caller is responsible for freeing the memory of the returned ProfPGPKey structure
+ *       by calling p_gpg_free_key() to avoid resource leaks.
+ */
+static ProfPGPKey*
+_gpgme_key_to_ProfPGPKey(gpgme_key_t key)
+{
+    if (key == NULL) {
+        return NULL;
+    }
+
+    ProfPGPKey* p_pgpkey = p_gpg_key_new();
+    gpgme_subkey_t sub = key->subkeys;
+    p_pgpkey->id = strdup(sub->keyid);
+    p_pgpkey->name = strdup(key->uids->uid);
+    p_pgpkey->fp = strdup(sub->fpr);
+
+    while (sub) {
+        if (sub->can_encrypt)
+            p_pgpkey->encrypt = TRUE;
+        if (sub->can_authenticate)
+            p_pgpkey->authenticate = TRUE;
+        if (sub->can_certify)
+            p_pgpkey->certify = TRUE;
+        if (sub->can_sign)
+            p_pgpkey->sign = TRUE;
+
+        sub = sub->next;
+    }
+    return p_pgpkey;
+}
+
+/**
  * Convert a gpgme_data_t object to a null-terminated char* string.
- * The returned string is allocated using malloc and should be freed by the caller.
- * If an error occurs or the data is empty, NULL is returned and errors written to the error log.
+ *
+ * @param data The gpgme_data_t object to convert.
+ * @return The converted string allocated using malloc, which should be freed by the caller.
+ *         If an error occurs or the data is empty, NULL is returned and errors are written to the error log.
  */
 static char*
 _gpgme_data_to_char(gpgme_data_t data)

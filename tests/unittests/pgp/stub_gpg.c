@@ -104,3 +104,15 @@ p_gpg_get_pubkey(const char* const keyid)
 {
     return NULL;
 }
+
+gboolean
+p_gpg_is_public_key_format(const char* buffer)
+{
+    return TRUE;
+}
+
+ProfPGPKey*
+p_gpg_import_pubkey(const char* buffer)
+{
+    return NULL;
+}

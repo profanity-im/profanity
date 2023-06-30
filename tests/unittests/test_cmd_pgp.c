@@ -69,7 +69,7 @@ cmd_pgp_start_shows_message_when_no_arg_in_wintype(win_type_t wintype)
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
-    expect_cons_show("You must be in a regular chat window to start PGP encryption.");
+    expect_cons_show("You must set recipient in an argument or be in a regular chat window to start PGP encryption.");
 
     gboolean result = cmd_pgp(&window, CMD_PGP, args);
     assert_true(result);

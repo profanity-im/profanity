@@ -7361,7 +7361,9 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
         }
         cons_bad_cmd_usage(command);
         return TRUE;
-    } else if (g_strcmp0(args[0], "log") == 0) {
+    }
+
+    if (g_strcmp0(args[0], "log") == 0) {
         char* choice = args[1];
         if (g_strcmp0(choice, "on") == 0) {
             prefs_set_string(PREF_PGP_LOG, "on");
@@ -7381,6 +7383,11 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
         } else {
             cons_bad_cmd_usage(command);
         }
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "autoimport") == 0) {
+        _cmd_set_boolean_preference(args[1], "PGP keys autoimport from messages", PREF_PGP_PUBKEY_AUTOIMPORT);
         return TRUE;
     }
 
@@ -7494,7 +7501,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
         }
 
         if (window->type != WIN_CHAT && args[1] == NULL) {
-            cons_show("You must be in a regular chat window to start PGP encryption.");
+            cons_show("You must set recipient in an argument or be in a regular chat window to start PGP encryption.");
             return TRUE;
         }
 
@@ -7587,11 +7594,17 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (g_strcmp0(args[0], "sendpub") == 0) {
-        if (window->type != WIN_CHAT) {
-            cons_show_error("Please, use this command only in chat windows.");
+        jabber_conn_status_t conn_status = connection_get_status();
+        if (conn_status != JABBER_CONNECTED) {
+            cons_show("You must be connected to share your PGP public key.");
             return TRUE;
         }
-        ProfChatWin* chatwin = (ProfChatWin*)window;
+
+        if (window->type != WIN_CHAT && args[1] == NULL) {
+            cons_show("You must set recipient in an argument or use this command in a regular chat window to share your PGP key.");
+            return TRUE;
+        }
+
         ProfAccount* account = accounts_get_account(session_get_account_name());
 
         if (account->pgp_keyid == NULL) {
@@ -7605,7 +7618,28 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
             account_free(account);
             return TRUE;
         }
+
+        ProfChatWin* chatwin = NULL;
+
+        if (args[1]) {
+            char* contact = args[1];
+            char* barejid = roster_barejid_from_name(contact);
+            if (barejid == NULL) {
+                barejid = contact;
+            }
+
+            chatwin = wins_get_chat(barejid);
+            if (!chatwin) {
+                chatwin = chatwin_new(barejid);
+            }
+            ui_focus_win((ProfWin*)chatwin);
+        } else {
+            chatwin = (ProfChatWin*)window;
+            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        }
+
         cl_ev_send_msg(chatwin, pubkey, NULL);
+        win_update_entry_message((ProfWin*)chatwin, chatwin->last_msg_id, "[you shared your PGP key]");
         cons_show("PGP key has been shared with %s.", chatwin->barejid);
         account_free(account);
         return TRUE;

@@ -238,6 +238,7 @@ static Autocomplete reconnect_ac;
 static Autocomplete pgp_ac;
 static Autocomplete pgp_log_ac;
 static Autocomplete pgp_sendfile_ac;
+static Autocomplete pgp_autoimport_ac;
 static Autocomplete ox_ac;
 static Autocomplete ox_log_ac;
 #endif
@@ -911,6 +912,7 @@ cmd_ac_init(void)
     autocomplete_add(pgp_ac, "char");
     autocomplete_add(pgp_ac, "sendfile");
     autocomplete_add(pgp_ac, "sendpub");
+    autocomplete_add(pgp_ac, "autoimport");
 
     pgp_log_ac = autocomplete_new();
     autocomplete_add(pgp_log_ac, "on");
@@ -920,6 +922,10 @@ cmd_ac_init(void)
     pgp_sendfile_ac = autocomplete_new();
     autocomplete_add(pgp_sendfile_ac, "on");
     autocomplete_add(pgp_sendfile_ac, "off");
+
+    pgp_autoimport_ac = autocomplete_new();
+    autocomplete_add(pgp_autoimport_ac, "on");
+    autocomplete_add(pgp_autoimport_ac, "off");
 
     ox_ac = autocomplete_new();
     autocomplete_add(ox_ac, "keys");
@@ -1675,6 +1681,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(pgp_ac);
     autocomplete_reset(pgp_log_ac);
     autocomplete_reset(pgp_sendfile_ac);
+    autocomplete_reset(pgp_autoimport_ac);
     autocomplete_reset(ox_ac);
     autocomplete_reset(ox_log_ac);
 #endif
@@ -1857,6 +1864,7 @@ cmd_ac_uninit(void)
     autocomplete_free(pgp_ac);
     autocomplete_free(pgp_log_ac);
     autocomplete_free(pgp_sendfile_ac);
+    autocomplete_free(pgp_autoimport_ac);
     autocomplete_free(ox_ac);
     autocomplete_free(ox_log_ac);
 #endif
@@ -2737,6 +2745,11 @@ _pgp_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         if (found) {
             return found;
         }
+
+        found = autocomplete_param_with_func(input, "/pgp sendpub", roster_contact_autocomplete, previous, NULL);
+        if (found) {
+            return found;
+        }
     }
 
     found = autocomplete_param_with_ac(input, "/pgp log", pgp_log_ac, TRUE, previous);
@@ -2745,6 +2758,11 @@ _pgp_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     found = autocomplete_param_with_ac(input, "/pgp sendfile", pgp_sendfile_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/pgp autoimport", pgp_autoimport_ac, TRUE, previous);
     if (found) {
         return found;
     }
