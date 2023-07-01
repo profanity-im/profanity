@@ -273,9 +273,21 @@ sv_ev_room_subject(const char* const room, const char* const nick, const char* c
     }
 }
 
+static void
+_log_muc(ProfMessage* message)
+{
+    if (message->enc == PROF_MSG_ENC_OMEMO) {
+        groupchat_log_omemo_msg_in(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
+    } else {
+        groupchat_log_msg_in(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
+    }
+    log_database_add_incoming(message);
+}
+
 void
 sv_ev_room_history(ProfMessage* message)
 {
+    _log_muc(message);
     if (prefs_get_boolean(PREF_NOTIFY_ROOM_OFFLINE)) {
         // check if this message was sent while we were offline.
         // if so, treat it as a new message rather than a history event.
@@ -314,23 +326,7 @@ sv_ev_room_history(ProfMessage* message)
             }
             mucwin->last_msg_timestamp = g_date_time_new_now_local();
         }
-
-        gboolean younger = g_date_time_compare(mucwin->last_msg_timestamp, message->timestamp) < 0 ? TRUE : FALSE;
-        if (ev_is_first_connect() || younger) {
-            mucwin_history(mucwin, message);
-        }
     }
-}
-
-static void
-_log_muc(ProfMessage* message)
-{
-    if (message->enc == PROF_MSG_ENC_OMEMO) {
-        groupchat_log_omemo_msg_in(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
-    } else {
-        groupchat_log_msg_in(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
-    }
-    log_database_add_incoming(message);
 }
 
 void
@@ -357,7 +353,9 @@ sv_ev_room_message(ProfMessage* message)
     GList* triggers = prefs_message_get_triggers(message->plain);
 
     _clean_incoming_message(message);
-    mucwin_incoming_msg(mucwin, message, mentions, triggers, TRUE);
+    if (!message->is_mam) {
+        mucwin_incoming_msg(mucwin, message, mentions, triggers, TRUE, FALSE);
+    }
 
     g_slist_free(mentions);
 
@@ -375,7 +373,7 @@ sv_ev_room_message(ProfMessage* message)
         }
 
         // not currently on groupchat window
-    } else {
+    } else if (!message->is_mam) {
         status_bar_new(num, WIN_MUC, mucwin->roomjid);
 
         if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_FLASH))) {
@@ -400,7 +398,7 @@ sv_ev_room_message(ProfMessage* message)
     }
     mucwin->last_msg_timestamp = g_date_time_new_now_local();
 
-    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL)) {
+    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL) && !message->is_mam) {
         Jid* jidp = jid_create(mucwin->roomjid);
         if (jidp) {
             notify_room_message(message->from_jid->resourcepart, jidp->localpart, num, message->plain);
@@ -652,7 +650,7 @@ sv_ev_incoming_message(ProfMessage* message)
 
         if (prefs_get_boolean(PREF_MAM)) {
             win_print_loading_history(window);
-            iq_mam_request(chatwin, g_date_time_add_seconds(message->timestamp, 0)); // copy timestamp
+            iq_mam_request(window, g_date_time_add_seconds(message->timestamp, 0)); // copy timestamp
         }
 
 #ifdef HAVE_OMEMO

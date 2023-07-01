@@ -363,11 +363,11 @@ mucwin_roster(ProfMucWin* mucwin, GList* occupants, const char* const presence)
 {
 }
 void
-mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message)
+mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message, gboolean flip)
 {
 }
 void
-mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList* mentions, GList* triggers, gboolean filter_reflection)
+mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList* mentions, GList* triggers, gboolean filter_reflection, gboolean flip)
 {
 }
 void

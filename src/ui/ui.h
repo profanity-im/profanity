@@ -161,9 +161,10 @@ void mucwin_occupant_affiliation_change(ProfMucWin* mucwin, const char* const ni
 void mucwin_occupant_role_and_affiliation_change(ProfMucWin* mucwin, const char* const nick,
                                                  const char* const role, const char* const affiliation, const char* const actor, const char* const reason);
 void mucwin_roster(ProfMucWin* mucwin, GList* occupants, const char* const presence);
-void mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message);
+void mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message, gboolean flip);
+gboolean mucwin_db_history(ProfMucWin* mucwin, char* start_time, char* end_time, gboolean flip);
 void mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* const id, prof_enc_t enc_mode, const char* const replace_id);
-void mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList* mentions, GList* triggers, gboolean filter_reflection);
+void mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList* mentions, GList* triggers, gboolean filter_reflection, gboolean flip);
 void mucwin_subject(ProfMucWin* mucwin, const char* const nick, const char* const subject);
 void mucwin_requires_config(ProfMucWin* mucwin);
 void mucwin_info(ProfMucWin* mucwin);
@@ -396,8 +397,8 @@ void win_println_indent(ProfWin* window, int pad, const char* const message, ...
 void win_append(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
 void win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
 
-void win_append_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
-void win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
+void win_append_highlight(ProfWin* window, theme_item_t theme_item, const gboolean flip, const char* const message, ...);
+void win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const gboolean flip, const char* const message, ...);
 
 char* win_get_title(ProfWin* window);
 void win_show_occupant(ProfWin* window, Occupant* occupant);

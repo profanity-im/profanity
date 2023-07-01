@@ -35,6 +35,7 @@
  */
 
 #include "config.h"
+#include "ui/win_types.h"
 #include "ui/window_list.h"
 
 #include <stdlib.h>
@@ -70,7 +71,7 @@
 #define CEILING(X) (X - (int)(X) > 0 ? (int)(X + 1) : (int)(X))
 
 static void
-_win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* timestamp, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message_id, const char* const message, ...);
+_win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* timestamp, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message_id, const gboolean flip, const char* const message,  ...);
 static void _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDateTime* time,
                                 int flags, theme_item_t theme_item, const char* const from, const char* const message, DeliveryReceipt* receipt);
 static void _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pad_indent);
@@ -652,15 +653,29 @@ win_page_up(ProfWin* window)
 
     *page_start -= page_space;
 
-    if (*page_start == -page_space && window->type == WIN_CHAT) {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
+    if (*page_start == -page_space) {
         ProfBuffEntry* first_entry = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0) : NULL;
+        gboolean is_not_fetching = first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, LOADING_MESSAGE) == 0);
 
-        // Don't do anything if still fetching mam messages
-        if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, LOADING_MESSAGE) == 0)) {
-            if (!chatwin_db_history(chatwin, NULL, NULL, TRUE) && prefs_get_boolean(PREF_MAM)) {
-                win_print_loading_history(window);
-                iq_mam_request_older(chatwin);
+        if (window->type == WIN_CHAT) {
+            ProfChatWin* chatwin = (ProfChatWin*)window;
+
+            // Don't do anything if still fetching mam messages
+            if (is_not_fetching) {
+                if (!chatwin_db_history(chatwin, NULL, NULL, TRUE) && prefs_get_boolean(PREF_MAM)) {
+                    win_print_loading_history(window);
+                    iq_mam_request_older(window);
+                }
+            }
+        } else if (window->type == WIN_MUC) {
+            ProfMucWin* mucwin = (ProfMucWin*)window;
+
+            // Don't do anything if still fetching mam messages
+            if (is_not_fetching) {
+                if (!mucwin_db_history(mucwin, NULL, NULL, TRUE) && prefs_get_boolean(PREF_MAM)) {
+                    win_print_loading_history(window);
+                    iq_mam_request_older(window);
+                }
             }
         }
     }
@@ -1430,7 +1445,7 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
         } else {
             // Prevent duplicate messages when current client is sending a message or if it's mam
             if (g_strcmp0(message->from_jid->fulljid, connection_get_fulljid()) != 0 && !message->is_mam) {
-                _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
+                _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, FALSE, "%s", message->plain);
             }
         }
 
@@ -1438,7 +1453,7 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
         break;
     }
     case WIN_PRIVATE:
-        _win_printf(window, "-", 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
+        _win_printf(window, "-", 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, FALSE, "%s", message->plain);
         break;
     default:
         assert(FALSE);
@@ -1447,18 +1462,18 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
 }
 
 void
-win_print_them(ProfWin* window, theme_item_t theme_item, const char* const show_char, int flags, const char* const them)
+win_print_them(ProfWin* window, theme_item_t theme_item, const char* const show_char, int flags, const char* const them, gboolean flip)
 {
-    _win_printf(window, show_char, 0, NULL, flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, "");
+    _win_printf(window, show_char, 0, NULL, flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, flip, "", NULL);
 }
 
 void
-win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const ProfMessage* const message)
+win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const ProfMessage* const message, const gboolean flip)
 {
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
         _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->fulljid);
     } else {
-        _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->from_jid->resourcepart, message->from_jid->fulljid, message->id, "%s", message->plain);
+        _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->from_jid->resourcepart, message->from_jid->fulljid, message->id, flip, "%s", message->plain);
     }
 
     inp_nonblocking(TRUE);
@@ -1472,7 +1487,7 @@ win_print_outgoing_muc_msg(ProfWin* window, char* show_char, const char* const m
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && replace_id) {
         _win_correct(window, message, id, replace_id, me);
     } else {
-        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, me, me, id, "%s", message);
+        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, me, me, id, FALSE, "%s", message);
     }
 
     inp_nonblocking(TRUE);
@@ -1489,7 +1504,7 @@ win_print_outgoing(ProfWin* window, const char* show_char, const char* const id,
         _win_correct(window, message, id, replace_id, myjid);
     } else {
         auto_char gchar* outgoing_str = prefs_get_string(PREF_OUTGOING_STAMP);
-        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, outgoing_str, myjid, id, "%s", message);
+        _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, outgoing_str, myjid, id, FALSE, "%s", message);
     }
 
     inp_nonblocking(TRUE);
@@ -1657,7 +1672,7 @@ win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message
 }
 
 void
-win_append_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_append_highlight(ProfWin* window, theme_item_t theme_item, const gboolean flip, const char* const message, ...)
 {
     GDateTime* timestamp = g_date_time_new_now_local();
 
@@ -1666,8 +1681,13 @@ win_append_highlight(ProfWin* window, theme_item_t theme_item, const char* const
     GString* fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, "-", 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", fmt_msg->str, NULL);
+    if (flip) {
+        buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
+        win_redraw(window);
+    } else {
+        buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
+        _win_print_internal(window, "-", 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", fmt_msg->str, NULL);
+    }
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
@@ -1677,7 +1697,7 @@ win_append_highlight(ProfWin* window, theme_item_t theme_item, const char* const
 }
 
 void
-win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const gboolean flip, const char* const message, ...)
 {
     GDateTime* timestamp = g_date_time_new_now_local();
 
@@ -1686,8 +1706,14 @@ win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* con
     GString* fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_ME, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, "-", 0, timestamp, NO_DATE | NO_ME, theme_item, "", fmt_msg->str, NULL);
+    if (flip) {
+        buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_ME, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
+        win_redraw(window);
+    } else {
+        buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_ME, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
+        _win_print_internal(window, "-", 0, timestamp, NO_DATE | NO_ME, theme_item, "", fmt_msg->str, NULL);
+    }
+
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
@@ -1762,7 +1788,7 @@ win_newline(ProfWin* window)
 }
 
 static void
-_win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* timestamp, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message_id, const char* const message, ...)
+_win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* timestamp, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message_id, const gboolean flip, const char* const message, ...)
 {
     if (timestamp == NULL) {
         timestamp = g_date_time_new_now_local();
@@ -1775,8 +1801,13 @@ _win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* t
     GString* fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, fmt_msg->str, NULL, message_id);
-    _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, fmt_msg->str, NULL);
+    if (flip) {
+        buffer_prepend(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, fmt_msg->str, NULL, message_id);
+        win_redraw(window);
+    } else {
+        buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, fmt_msg->str, NULL, message_id);
+        _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, fmt_msg->str, NULL);
+    }
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
