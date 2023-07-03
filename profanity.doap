@@ -157,6 +157,17 @@
       </xmpp:SupportedXep>
     </implements>
 
+    <!-- XEP-0084: User Avatar --> 
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0084.html'/>
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:version>1.1.4</xmpp:version>
+        <xmpp:since>0.8.0</xmpp:since>
+        <xmpp:note xml:lang='en'>Since 0.8.0 download support. Since 0.13.0 publish support. Since DEV support to to disable publishing.</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+
     <!-- XEP-0085: Chat State Notifications --> 
     <implements>
       <xmpp:SupportedXep>
