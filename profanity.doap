@@ -322,6 +322,17 @@
       </xmpp:SupportedXep>
     </implements>
 
+   <!-- XEP-0313: Message Archive Management -->
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0313.html'/>
+        <xmpp:status>partial</xmpp:status>
+        <xmpp:version>1.1.0</xmpp:version>
+        <xmpp:since>DEV</xmpp:since>
+        <xmpp:note xml:lang='en'>No MUC MAM</xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+
    <!-- XEP-0308: Last Message Correction --> 
     <implements>
       <xmpp:SupportedXep>
