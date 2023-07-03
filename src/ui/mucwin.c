@@ -36,6 +36,7 @@
 
 #include "config.h"
 
+#include "database.h"
 #include "ui.h"
 
 #include <string.h>
@@ -68,6 +69,11 @@ mucwin_new(const char* const barejid)
         mucwin->is_omemo = TRUE;
     }
 #endif
+
+    if (prefs_get_boolean(PREF_MAM)) {
+        iq_mam_request(window, NULL);
+        win_print_loading_history(window);
+    }
 
     // Force redraw here to show correct offline users; before this point muc_members returns a wrong list
     ui_redraw_all_room_rosters();
@@ -363,7 +369,7 @@ mucwin_nick_change(ProfMucWin* mucwin, const char* const nick)
 }
 
 void
-mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message)
+mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message, gboolean flip)
 {
     assert(mucwin != NULL);
 
@@ -372,7 +378,7 @@ mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message)
     GSList* mentions = get_mentions(prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD), prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE), message->plain, mynick);
     GList* triggers = prefs_message_get_triggers(message->plain);
 
-    mucwin_incoming_msg(mucwin, message, mentions, triggers, FALSE);
+    mucwin_incoming_msg(mucwin, message, mentions, triggers, FALSE, flip);
 
     g_slist_free(mentions);
     g_list_free_full(triggers, free);
@@ -380,46 +386,108 @@ mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message)
     plugins_on_room_history_message(mucwin->roomjid, nick, message->plain, message->timestamp);
 }
 
-static void
-_mucwin_print_mention(ProfWin* window, const char* const message, const char* const from, const char* const mynick, GSList* mentions, const char* const ch, int flags)
+gboolean
+mucwin_db_history(ProfMucWin* mucwin, char* start_time, char* end_time, gboolean flip)
 {
-    int last_pos = 0;
-    int pos;
-    GSList* curr = mentions;
-    glong mynick_len = g_utf8_strlen(mynick, -1);
+    if (!end_time) {
+        end_time = buffer_size(((ProfWin*)mucwin)->layout->buffer) == 0 ? NULL : g_date_time_format_iso8601(buffer_get_entry(((ProfWin*)mucwin)->layout->buffer, 0)->time);
+    }
+
+    GSList* history = log_database_get_previous_chat(mucwin->roomjid, start_time, end_time, !flip, flip);
+    gboolean has_items = g_slist_length(history) != 0;
+    GSList* curr = history;
 
     while (curr) {
-        pos = GPOINTER_TO_INT(curr->data);
-
-        auto_gchar gchar* before_str = g_utf8_substring(message, last_pos, pos);
-
-        if (last_pos == 0 && strncmp(before_str, "/me ", 4) == 0) {
-            win_print_them(window, THEME_ROOMMENTION, ch, flags, "");
-            win_append_highlight(window, THEME_ROOMMENTION, "*%s ", from);
-            win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str + 4);
-        } else {
-            // print time and nick only once at beginning of the line
-            if (last_pos == 0) {
-                win_print_them(window, THEME_ROOMMENTION, ch, flags, from);
-            }
-            win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str);
-        }
-
-        auto_gchar gchar* mynick_str = g_utf8_substring(message, pos, pos + mynick_len);
-        win_append_highlight(window, THEME_ROOMMENTION_TERM, "%s", mynick_str);
-
-        last_pos = pos + mynick_len;
-
+        ProfMessage* msg = curr->data;
+        mucwin_history(mucwin, msg, flip);
         curr = g_slist_next(curr);
     }
 
-    glong message_len = g_utf8_strlen(message, -1);
-    if (last_pos < message_len) {
-        // get tail without allocating a new string
-        gchar* rest = g_utf8_offset_to_pointer(message, last_pos);
-        win_appendln_highlight(window, THEME_ROOMMENTION, "%s", rest);
+    g_slist_free_full(history, (GDestroyNotify)message_free);
+    win_redraw((ProfWin*)mucwin);
+
+    return has_items;
+}
+
+static void
+_mucwin_print_mention(ProfWin* window, const char* const message, const char* const from, const char* const mynick, GSList* mentions, const char* const ch, int flags, gboolean flip)
+{
+    if (flip) {
+        int pos;
+        GSList* curr = g_slist_last(mentions);
+        glong mynick_len = g_utf8_strlen(mynick, -1);
+        int last_pos = GPOINTER_TO_INT(curr->data) + mynick_len;
+
+        glong message_len = g_utf8_strlen(message, -1);
+        if (last_pos < message_len) {
+            // get tail without allocating a new string
+            gchar* rest = g_utf8_offset_to_pointer(message, last_pos);
+            win_appendln_highlight(window, THEME_ROOMMENTION, flip, "%s", rest);
+        } else {
+            win_appendln_highlight(window, THEME_ROOMMENTION, flip, "");
+        }
+
+        for (int i = g_slist_length(mentions) - 1; i >= 0; i --){
+            curr = g_slist_nth(mentions, i);
+            pos = GPOINTER_TO_INT(curr->data);
+            last_pos = i == 0 ? 0 : pos + mynick_len;
+
+            auto_gchar gchar* mynick_str = g_utf8_substring(message, pos, pos + mynick_len);
+            win_append_highlight(window, THEME_ROOMMENTION_TERM, flip, "%s", mynick_str);
+
+            auto_gchar gchar* before_str = g_utf8_substring(message, last_pos, pos);
+
+            if (last_pos == 0 && strncmp(before_str, "/me ", 4) == 0) {
+                win_append_highlight(window, THEME_ROOMMENTION, flip, "%s", before_str + 4);
+                win_append_highlight(window, THEME_ROOMMENTION, flip, "*%s ", from);
+                win_print_them(window, THEME_ROOMMENTION, ch, flags, "", flip);
+            } else {
+                win_append_highlight(window, THEME_ROOMMENTION, flip, "%s", before_str);
+                // print time and nick only once at beginning of the line
+                if (last_pos == 0) {
+                    win_print_them(window, THEME_ROOMMENTION, ch, flags, from, flip);
+                }
+            }
+        }
     } else {
-        win_appendln_highlight(window, THEME_ROOMMENTION, "");
+        int last_pos = 0;
+        int pos;
+        GSList* curr = mentions;
+        glong mynick_len = g_utf8_strlen(mynick, -1);
+
+        while (curr) {
+            pos = GPOINTER_TO_INT(curr->data);
+
+            auto_gchar gchar* before_str = g_utf8_substring(message, last_pos, pos);
+
+            if (last_pos == 0 && strncmp(before_str, "/me ", 4) == 0) {
+                win_print_them(window, THEME_ROOMMENTION, ch, flags, "", flip);
+                win_append_highlight(window, THEME_ROOMMENTION, flip, "*%s ", from);
+                win_append_highlight(window, THEME_ROOMMENTION, flip, "%s", before_str + 4);
+            } else {
+                // print time and nick only once at beginning of the line
+                if (last_pos == 0) {
+                    win_print_them(window, THEME_ROOMMENTION, ch, flags, from, flip);
+                }
+                win_append_highlight(window, THEME_ROOMMENTION, flip, "%s", before_str);
+            }
+
+            auto_gchar gchar* mynick_str = g_utf8_substring(message, pos, pos + mynick_len);
+            win_append_highlight(window, THEME_ROOMMENTION_TERM, flip, "%s", mynick_str);
+
+            last_pos = pos + mynick_len;
+
+            curr = g_slist_next(curr);
+        }
+
+        glong message_len = g_utf8_strlen(message, -1);
+        if (last_pos < message_len) {
+            // get tail without allocating a new string
+            gchar* rest = g_utf8_offset_to_pointer(message, last_pos);
+            win_appendln_highlight(window, THEME_ROOMMENTION, flip, "%s", rest);
+        } else {
+            win_appendln_highlight(window, THEME_ROOMMENTION, flip, "");
+        }
     }
 }
 
@@ -438,7 +506,7 @@ _cmp_trigger_weight(gconstpointer a, gconstpointer b)
 }
 
 static void
-_mucwin_print_triggers(ProfWin* window, const char* const message, GList* triggers)
+_mucwin_print_triggers(ProfWin* window, const char* const message, GList* triggers, const gboolean flip)
 {
     GList* weighted_triggers = NULL;
     GList* curr = triggers;
@@ -477,7 +545,7 @@ _mucwin_print_triggers(ProfWin* window, const char* const message, GList* trigge
 
     // no triggers found
     if (first_trigger_pos == -1) {
-        win_appendln_highlight(window, THEME_ROOMTRIGGER, "%s", message);
+        win_appendln_highlight(window, THEME_ROOMTRIGGER, flip, "%s", message);
     } else {
         if (first_trigger_pos > 0) {
             char message_section[strlen(message) + 1];
@@ -487,7 +555,7 @@ _mucwin_print_triggers(ProfWin* window, const char* const message, GList* trigge
                 i++;
             }
             message_section[i] = '\0';
-            win_append_highlight(window, THEME_ROOMTRIGGER, "%s", message_section);
+            win_append_highlight(window, THEME_ROOMTRIGGER, flip, "%s", message_section);
         }
         char trigger_section[first_trigger_len + 1];
         int i = 0;
@@ -498,10 +566,10 @@ _mucwin_print_triggers(ProfWin* window, const char* const message, GList* trigge
         trigger_section[i] = '\0';
 
         if (first_trigger_pos + first_trigger_len < strlen(message)) {
-            win_append_highlight(window, THEME_ROOMTRIGGER_TERM, "%s", trigger_section);
-            _mucwin_print_triggers(window, &message[first_trigger_pos + first_trigger_len], triggers);
+            win_append_highlight(window, THEME_ROOMTRIGGER_TERM, flip, "%s", trigger_section);
+            _mucwin_print_triggers(window, &message[first_trigger_pos + first_trigger_len], triggers, flip);
         } else {
-            win_appendln_highlight(window, THEME_ROOMTRIGGER_TERM, "%s", trigger_section);
+            win_appendln_highlight(window, THEME_ROOMTRIGGER_TERM, flip, "%s", trigger_section);
         }
     }
 }
@@ -542,7 +610,7 @@ mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* c
 }
 
 void
-mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList* mentions, GList* triggers, gboolean filter_reflection)
+mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList* mentions, GList* triggers, gboolean filter_reflection, gboolean flip)
 {
     assert(mucwin != NULL);
     int flags = 0;
@@ -577,17 +645,19 @@ mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList
         ch = strdup("-");
     }
 
-    win_insert_last_read_position_marker((ProfWin*)mucwin, mucwin->roomjid);
-    wins_add_urls_ac(window, message, FALSE);
-    wins_add_quotes_ac(window, message->plain, FALSE);
+    if (!flip) {
+        win_insert_last_read_position_marker((ProfWin*)mucwin, mucwin->roomjid);
+    }
+    wins_add_urls_ac(window, message, flip);
+    wins_add_quotes_ac(window, message->plain, flip);
 
     if (g_slist_length(mentions) > 0) {
-        _mucwin_print_mention(window, message->plain, message->from_jid->resourcepart, mynick, mentions, ch, flags);
+        _mucwin_print_mention(window, message->plain, message->from_jid->resourcepart, mynick, mentions, ch, flags, flip);
     } else if (triggers) {
-        win_print_them(window, THEME_ROOMTRIGGER, ch, flags, message->from_jid->resourcepart);
-        _mucwin_print_triggers(window, message->plain, triggers);
+        win_print_them(window, THEME_ROOMTRIGGER, ch, flags, message->from_jid->resourcepart, flip);
+        _mucwin_print_triggers(window, message->plain, triggers, flip);
     } else {
-        win_println_incoming_muc_msg(window, ch, flags, message);
+        win_println_incoming_muc_msg(window, ch, flags, message, flip);
     }
 
     free(ch);

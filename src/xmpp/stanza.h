@@ -420,7 +420,7 @@ xmpp_stanza_t* stanza_create_avatar_data_publish_iq(xmpp_ctx_t* ctx, const char*
 xmpp_stanza_t* stanza_create_avatar_metadata_publish_iq(xmpp_ctx_t* ctx, const char* img_data, gsize len, int height, int width);
 xmpp_stanza_t* stanza_disable_avatar_publish_iq(xmpp_ctx_t* ctx);
 xmpp_stanza_t* stanza_create_vcard_request_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const stanza_id);
-xmpp_stanza_t* stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const enddate, const char* const firstid, const char* const lastid);
+xmpp_stanza_t* stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const enddate, const char* const firstid, const char* const lastid, const gboolean is_muc);
 xmpp_stanza_t* stanza_change_password(xmpp_ctx_t* ctx, const char* const user, const char* const password);
 xmpp_stanza_t* stanza_register_new_account(xmpp_ctx_t* ctx, const char* const user, const char* const password);
 xmpp_stanza_t* stanza_request_voice(xmpp_ctx_t* ctx, const char* const room);

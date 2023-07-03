@@ -2771,7 +2771,7 @@ _text_stanza(xmpp_ctx_t* ctx, const char* name, const char* text)
 }
 
 xmpp_stanza_t*
-stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const enddate, const char* const firstid, const char* const lastid)
+stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const enddate, const char* const firstid, const char* const lastid, const gboolean is_muc)
 {
     char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
@@ -2797,14 +2797,19 @@ stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const s
 
     xmpp_stanza_add_child_ex(field_form_type, value_mam, 0);
 
-    // field 'with'
-    xmpp_stanza_t* field_with = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(field_with, STANZA_NAME_FIELD);
-    xmpp_stanza_set_attribute(field_with, STANZA_ATTR_VAR, "with");
+    xmpp_stanza_t* field_with;
+    if (is_muc) {
+        xmpp_stanza_set_to(iq, jid);
+    } else {
+        // field 'with'
+        field_with = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(field_with, STANZA_NAME_FIELD);
+        xmpp_stanza_set_attribute(field_with, STANZA_ATTR_VAR, "with");
 
-    xmpp_stanza_t* value_with = _text_stanza(ctx, STANZA_NAME_VALUE, jid);
+        xmpp_stanza_t* value_with = _text_stanza(ctx, STANZA_NAME_VALUE, jid);
 
-    xmpp_stanza_add_child_ex(field_with, value_with, 0);
+        xmpp_stanza_add_child_ex(field_with, value_with, 0);
+    }
 
     // 4.3.2 set/rsm
     xmpp_stanza_t* set = xmpp_stanza_new(ctx);
@@ -2828,7 +2833,10 @@ stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const s
     xmpp_stanza_add_child_ex(iq, query, 0);
     xmpp_stanza_add_child_ex(query, x, 0);
     xmpp_stanza_add_child_ex(x, field_form_type, 0);
-    xmpp_stanza_add_child_ex(x, field_with, 0);
+
+    if (!is_muc) {
+        xmpp_stanza_add_child_ex(x, field_with, 0);
+    }
 
     // field 'start'
     if (startdate) {

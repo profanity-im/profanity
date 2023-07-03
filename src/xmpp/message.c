@@ -76,7 +76,7 @@ typedef struct p_message_handle_t
 
 static int _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
 static void _handle_error(xmpp_stanza_t* const stanza);
-static void _handle_groupchat(xmpp_stanza_t* const stanza);
+static void _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, GDateTime* timestamp);
 static void _handle_muc_user(xmpp_stanza_t* const stanza);
 static void _handle_muc_private_message(xmpp_stanza_t* const stanza);
 static void _handle_conference(xmpp_stanza_t* const stanza);
@@ -162,7 +162,7 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
         _handle_error(stanza);
     } else if (type && g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0) {
         // XEP-0045: Multi-User Chat
-        _handle_groupchat(stanza);
+        _handle_groupchat(stanza, FALSE, NULL);
 
     } else if (type && g_strcmp0(type, STANZA_TYPE_HEADLINE) == 0) {
         xmpp_stanza_t* event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
@@ -1019,7 +1019,7 @@ _room_config_handler(xmpp_stanza_t* const stanza, void* const userdata)
 }
 
 static void
-_handle_groupchat(xmpp_stanza_t* const stanza)
+_handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, GDateTime* timestamp)
 {
     xmpp_ctx_t* ctx = connection_get_ctx();
 
@@ -1093,6 +1093,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
     ProfMessage* message = message_init();
     jid_ref(from_jid);
     message->from_jid = from_jid;
+    message->is_mam = is_mam;
     message->type = PROF_MSG_TYPE_MUC;
 
     const char* id = xmpp_stanza_get_id(stanza);
@@ -1156,8 +1157,11 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
         message->timestamp = NULL;
     }
 
-    // we want to display the oldest delay
-    message->timestamp = stanza_get_oldest_delay(stanza);
+    message->timestamp = timestamp;
+    if (!timestamp) {
+        // we want to display the oldest delay
+        message->timestamp = stanza_get_oldest_delay(stanza);
+    }
 
     // now this has nothing to do with MUC history
     // it's just setting the time to the received time so upon displaying we can use this time
@@ -1375,7 +1379,7 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
     }
 
     // private message from chat room use full jid (room/nick)
-    if (muc_active(jid->barejid)) {
+    if (muc_active(jid->barejid) && !is_mam) {
         _handle_muc_private_message(stanza);
         return;
     }
@@ -1557,9 +1561,14 @@ _handle_mam(xmpp_stanza_t* const stanza)
     GDateTime* timestamp = stanza_get_delay_from(forwarded, NULL);
 
     xmpp_stanza_t* message_stanza = xmpp_stanza_get_child_by_ns(forwarded, "jabber:client");
+    const char* type = xmpp_stanza_get_type(message_stanza);
+
+    if (type && g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0) {
+        _handle_groupchat(message_stanza, TRUE, timestamp);
+        return TRUE;
+    }
 
     _handle_chat(message_stanza, TRUE, FALSE, result_id, timestamp);
-
     return TRUE;
 }
 

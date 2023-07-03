@@ -435,7 +435,7 @@ iq_muc_register_nick(const char* const roomjid)
 }
 
 void
-iq_mam_request(ProfChatWin* win, GDateTime* enddate)
+iq_mam_request(ProfWin* win, GDateTime* enddate)
 {
 }
 
