@@ -47,6 +47,7 @@
 #include "common.h"
 #include "config/files.h"
 #include "database.h"
+#include "config/preferences.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/message.h"
 
@@ -373,6 +374,17 @@ _get_message_enc_type(const char* const encstr)
 static void
 _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Jid* const to_jid)
 {
+    auto_gchar gchar* pref_dblog = prefs_get_string(PREF_DBLOG);
+
+    if (g_strcmp0(pref_dblog, "off") == 0) {
+        return;
+    } else if (g_strcmp0(pref_dblog, "redact") == 0) {
+        if (message->plain) {
+            free(message->plain);
+        }
+        message->plain = strdup("[REDACTED]");
+    }
+
     if (!g_chatlog_database) {
         log_debug("log_database_add() called but db is not initialized");
         return;

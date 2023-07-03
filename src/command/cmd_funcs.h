@@ -112,6 +112,7 @@ gboolean cmd_msg(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_nick(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_notify(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_pgp(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_privacy(ProfWin* window, const char* const command, gchar** args);
 #ifdef HAVE_LIBGPGME
 gboolean cmd_ox(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_ox_log(ProfWin* window, const char* const command, gchar** args);

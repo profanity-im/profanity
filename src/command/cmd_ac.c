@@ -122,6 +122,7 @@ static char* _clear_autocomplete(ProfWin* window, const char* const input, gbool
 static char* _invite_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _status_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _logging_autocomplete(ProfWin* window, const char* const input, gboolean previous);
+static char* _privacy_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _color_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _avatar_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _correction_autocomplete(ProfWin* window, const char* const input, gboolean previous);
@@ -269,6 +270,8 @@ static Autocomplete status_ac;
 static Autocomplete status_state_ac;
 static Autocomplete logging_ac;
 static Autocomplete logging_group_ac;
+static Autocomplete privacy_ac;
+static Autocomplete privacy_log_ac;
 static Autocomplete color_ac;
 static Autocomplete correction_ac;
 static Autocomplete avatar_ac;
@@ -1070,6 +1073,14 @@ cmd_ac_init(void)
     autocomplete_add(logging_ac, "chat");
     autocomplete_add(logging_ac, "group");
 
+    privacy_ac = autocomplete_new();
+    autocomplete_add(privacy_ac, "logging");
+
+    privacy_log_ac = autocomplete_new();
+    autocomplete_add(privacy_log_ac, "on");
+    autocomplete_add(privacy_log_ac, "off");
+    autocomplete_add(privacy_log_ac, "redact");
+
     logging_group_ac = autocomplete_new();
     autocomplete_add(logging_group_ac, "on");
     autocomplete_add(logging_group_ac, "off");
@@ -1330,6 +1341,7 @@ cmd_ac_init(void)
     g_hash_table_insert(ac_funcs, "/lastactivity", _lastactivity_autocomplete);
     g_hash_table_insert(ac_funcs, "/log", _log_autocomplete);
     g_hash_table_insert(ac_funcs, "/logging", _logging_autocomplete);
+    g_hash_table_insert(ac_funcs, "/privacy", _privacy_autocomplete);
     g_hash_table_insert(ac_funcs, "/mood", _mood_autocomplete);
     g_hash_table_insert(ac_funcs, "/notify", _notify_autocomplete);
     g_hash_table_insert(ac_funcs, "/occupants", _occupants_autocomplete);
@@ -1682,6 +1694,8 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(status_state_ac);
     autocomplete_reset(logging_ac);
     autocomplete_reset(logging_group_ac);
+    autocomplete_reset(privacy_ac);
+    autocomplete_reset(privacy_log_ac);
     autocomplete_reset(color_ac);
     autocomplete_reset(correction_ac);
     autocomplete_reset(avatar_ac);
@@ -1867,6 +1881,8 @@ cmd_ac_uninit(void)
     autocomplete_free(status_state_ac);
     autocomplete_free(logging_ac);
     autocomplete_free(logging_group_ac);
+    autocomplete_free(privacy_ac);
+    autocomplete_free(privacy_log_ac);
     autocomplete_free(color_ac);
     autocomplete_free(correction_ac);
     autocomplete_free(avatar_ac);
@@ -4211,6 +4227,24 @@ _status_autocomplete(ProfWin* window, const char* const input, gboolean previous
     }
 
     return NULL;
+}
+
+static char*
+_privacy_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+{
+    char* found = NULL;
+
+    found = autocomplete_param_with_ac(input, "/privacy", privacy_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/privacy logging", privacy_log_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    return found;
 }
 
 static char*

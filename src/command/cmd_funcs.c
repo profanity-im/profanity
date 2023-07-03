@@ -6950,6 +6950,44 @@ cmd_autoconnect(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_privacy(ProfWin* window, const char* const command, gchar** args)
+{
+    if (args[0] == NULL) {
+        cons_bad_cmd_usage(command);
+        return FALSE;
+    }
+
+    if (g_strcmp0(args[0], "logging") == 0) {
+        gchar* arg = args[1];
+        if (arg == NULL) {
+            cons_bad_cmd_usage(command);
+            return FALSE;
+        }
+
+        if (g_strcmp0(arg, "on") == 0) {
+            cons_show("Logging enabled.");
+            prefs_set_string(PREF_DBLOG, arg);
+            prefs_set_boolean(PREF_CHLOG, TRUE);
+            prefs_set_boolean(PREF_HISTORY, TRUE);
+        } else if (g_strcmp0(arg, "off") == 0) {
+            cons_show("Logging disabled.");
+            prefs_set_string(PREF_DBLOG, arg);
+            prefs_set_boolean(PREF_CHLOG, FALSE);
+            prefs_set_boolean(PREF_HISTORY, FALSE);
+        } else if (g_strcmp0(arg, "redact") == 0) {
+            cons_show("Messages are going to be redacted.");
+            prefs_set_string(PREF_DBLOG, arg);
+        } else {
+            cons_bad_cmd_usage(command);
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    return TRUE;
+}
+
+gboolean
 cmd_logging(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[0] == NULL) {
@@ -6967,10 +7005,7 @@ cmd_logging(ProfWin* window, const char* const command, gchar** args)
 
         return TRUE;
     } else if (g_strcmp0(args[0], "group") == 0 && args[1] != NULL) {
-        if (g_strcmp0(args[1], "on") == 0 || g_strcmp0(args[1], "off") == 0) {
-            _cmd_set_boolean_preference(args[1], "Groupchat logging", PREF_GRLOG);
-            return TRUE;
-        }
+        return _cmd_set_boolean_preference(args[1], "Groupchat logging", PREF_GRLOG);
     }
 
     cons_bad_cmd_usage(command);

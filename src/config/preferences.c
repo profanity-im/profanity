@@ -1827,6 +1827,7 @@ _get_group(preference_t pref)
     case PREF_TRAY_READ:
     case PREF_ADV_NOTIFY_DISCO_OR_VERSION:
         return PREF_GROUP_NOTIFICATIONS;
+    case PREF_DBLOG:
     case PREF_CHLOG:
     case PREF_GRLOG:
     case PREF_LOG_ROTATE:
@@ -1975,6 +1976,8 @@ _get_key(preference_t pref)
         return "room.mention.wholeword";
     case PREF_CHLOG:
         return "chlog";
+    case PREF_DBLOG:
+        return "dblog";
     case PREF_GRLOG:
         return "grlog";
     case PREF_AUTOAWAY_CHECK:
@@ -2321,6 +2324,8 @@ _get_default_string(preference_t pref)
         return "on";
     case PREF_STROPHE_VERBOSITY:
         return "0";
+    case PREF_DBLOG:
+        return "on";
     default:
         return NULL;
     }
