@@ -222,9 +222,13 @@ chat_log_msg_in(ProfMessage* message)
 }
 
 static void
-_chat_log_chat(const char* const login, const char* const other, const char* const msg,
+_chat_log_chat(const char* const login, const char* const other, const char* msg,
                chat_log_direction_t direction, GDateTime* timestamp, const char* const resourcepart)
 {
+    auto_gchar gchar* pref_dblog = prefs_get_string(PREF_DBLOG);
+    if (g_strcmp0(pref_dblog, "redact") == 0) {
+        msg = "[REDACTED]";
+    }
     char* other_name;
     GString* other_str = NULL;
 

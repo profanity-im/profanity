@@ -1206,9 +1206,8 @@ win_show_vcard(ProfWin* window, vCard* vcard)
         }
         case VCARD_BIRTHDAY:
         {
-            char* date_format = prefs_get_string(PREF_TIME_VCARD);
+            auto_gchar gchar* date_format = prefs_get_string(PREF_TIME_VCARD);
             gchar* date = g_date_time_format(element->birthday, date_format);
-            g_free(date_format);
 
             assert(date != NULL);
             win_println(window, THEME_DEFAULT, "!", "[%d] Birthday: %s", index, date);
@@ -1338,9 +1337,8 @@ win_show_status_string(ProfWin* window, const char* const from,
 
     if (last_activity) {
         gchar* date_fmt = NULL;
-        char* time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
+        auto_gchar gchar* time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
         date_fmt = g_date_time_format(last_activity, time_pref);
-        g_free(time_pref);
         assert(date_fmt != NULL);
 
         win_append(window, presence_colour, ", last activity: %s", date_fmt);
@@ -1488,7 +1486,7 @@ win_print_outgoing(ProfWin* window, const char* show_char, const char* const id,
     if (replace_id) {
         _win_correct(window, message, id, replace_id, myjid);
     } else {
-        auto_char gchar* outgoing_str = prefs_get_string(PREF_OUTGOING_STAMP);
+        auto_gchar gchar* outgoing_str = prefs_get_string(PREF_OUTGOING_STAMP);
         _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, outgoing_str, myjid, id, "%s", message);
     }
 
@@ -1501,7 +1499,7 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
 {
     g_date_time_ref(message->timestamp);
 
-    char* display_name;
+    auto_gchar gchar* display_name;
     int flags = 0;
     const char* jid = connection_get_fulljid();
     Jid* jidp = jid_create(jid);
@@ -1520,8 +1518,6 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
     wins_add_quotes_ac(window, message->plain, FALSE);
     _win_print_internal(window, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
 
-    free(display_name);
-
     inp_nonblocking(TRUE);
     g_date_time_unref(message->timestamp);
 }
@@ -1531,7 +1527,7 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
 {
     g_date_time_ref(message->timestamp);
 
-    char* display_name;
+    auto_gchar gchar* display_name;
     int flags = 0;
     const char* jid = connection_get_fulljid();
     Jid* jidp = jid_create(jid);
@@ -1549,8 +1545,6 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
     wins_add_urls_ac(window, message, TRUE);
     wins_add_quotes_ac(window, message->plain, TRUE);
     _win_print_internal(window, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
-
-    free(display_name);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(message->timestamp);
@@ -1853,13 +1847,12 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
             colour = theme_attrs(THEME_THEM);
         }
 
-        char* color_pref = prefs_get_string(PREF_COLOR_NICK);
+        auto_gchar gchar* color_pref = prefs_get_string(PREF_COLOR_NICK);
         if (color_pref != NULL && (strcmp(color_pref, "false") != 0)) {
             if ((flags & NO_ME) || (!(flags & NO_ME) && prefs_get_boolean(PREF_COLOR_NICK_OWN))) {
                 colour = theme_hash_attrs(from);
             }
         }
-        g_free(color_pref);
 
         if (flags & NO_COLOUR_FROM) {
             colour = 0;

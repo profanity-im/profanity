@@ -1469,7 +1469,7 @@ omemo_automatic_start(const char* const recipient)
         }
     } else {
         // check global setting
-        char* pref_omemo_policy = prefs_get_string(PREF_OMEMO_POLICY);
+        auto_gchar gchar* pref_omemo_policy = prefs_get_string(PREF_OMEMO_POLICY);
 
         // pref defaults to manual
         policy = PROF_OMEMOPOLICY_AUTOMATIC;
@@ -1479,8 +1479,6 @@ omemo_automatic_start(const char* const recipient)
         } else if (strcmp(pref_omemo_policy, "always") == 0) {
             policy = PROF_OMEMOPOLICY_ALWAYS;
         }
-
-        g_free(pref_omemo_policy);
     }
 
     switch (policy) {

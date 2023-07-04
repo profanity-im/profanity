@@ -71,7 +71,7 @@ char* roster_group_autocomplete(const char* const search_str, gboolean previous,
 char* roster_barejid_autocomplete(const char* const search_str, gboolean previous, void* context);
 GSList* roster_get_contacts_by_presence(const char* const presence);
 char* roster_get_display_name(const char* const barejid);
-char* roster_get_msg_display_name(const char* const barejid, const char* const resource);
+gchar* roster_get_msg_display_name(const char* const barejid, const char* const resource);
 gint roster_compare_name(PContact a, PContact b);
 gint roster_compare_presence(PContact a, PContact b);
 void roster_process_pending_presence(void);

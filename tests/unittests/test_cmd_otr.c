@@ -58,11 +58,10 @@ cmd_otr_log_on_enables_logging(void** state)
     expect_cons_show("OTR messages will be logged as plaintext.");
 
     gboolean result = cmd_otr_log(NULL, CMD_OTR, args);
-    char* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+    auto_gchar gchar* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
 
     assert_true(result);
     assert_string_equal("on", pref_otr_log);
-    g_free(pref_otr_log);
 }
 
 void
@@ -89,11 +88,10 @@ cmd_otr_log_off_disables_logging(void** state)
     expect_cons_show("OTR message logging disabled.");
 
     gboolean result = cmd_otr_log(NULL, CMD_OTR, args);
-    char* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+    auto_gchar gchar* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
 
     assert_true(result);
     assert_string_equal("off", pref_otr_log);
-    g_free(pref_otr_log);
 }
 
 void
@@ -106,11 +104,10 @@ cmd_otr_redact_redacts_logging(void** state)
     expect_cons_show("OTR messages will be logged as '[redacted]'.");
 
     gboolean result = cmd_otr_log(NULL, CMD_OTR, args);
-    char* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
+    auto_gchar gchar* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
 
     assert_true(result);
     assert_string_equal("redact", pref_otr_log);
-    g_free(pref_otr_log);
 }
 
 void

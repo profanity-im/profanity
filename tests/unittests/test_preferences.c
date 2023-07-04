@@ -11,7 +11,7 @@
 void
 statuses_console_defaults_to_all(void** state)
 {
-    char* setting = prefs_get_string(PREF_STATUSES_CONSOLE);
+    gchar* setting = prefs_get_string(PREF_STATUSES_CONSOLE);
 
     assert_non_null(setting);
     assert_string_equal("all", setting);
@@ -21,7 +21,7 @@ statuses_console_defaults_to_all(void** state)
 void
 statuses_chat_defaults_to_all(void** state)
 {
-    char* setting = prefs_get_string(PREF_STATUSES_CHAT);
+    gchar* setting = prefs_get_string(PREF_STATUSES_CHAT);
 
     assert_non_null(setting);
     assert_string_equal("none", setting);
@@ -31,7 +31,7 @@ statuses_chat_defaults_to_all(void** state)
 void
 statuses_muc_defaults_to_all(void** state)
 {
-    char* setting = prefs_get_string(PREF_STATUSES_MUC);
+    gchar* setting = prefs_get_string(PREF_STATUSES_MUC);
 
     assert_non_null(setting);
     assert_string_equal("none", setting);

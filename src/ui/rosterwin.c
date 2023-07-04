@@ -102,7 +102,7 @@ rosterwin_roster(void)
         werase(layout->subwin);
     }
 
-    char* roomspos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
+    auto_gchar gchar* roomspos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
     if (prefs_get_boolean(PREF_ROSTER_ROOMS) && (g_strcmp0(roomspos, "first") == 0)) {
         _rosterwin_print_rooms(layout);
 
@@ -119,16 +119,15 @@ rosterwin_roster(void)
             curr = g_list_next(curr);
         }
 
-        char* privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
+        auto_gchar gchar* privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
         if (g_strcmp0(privpref, "group") == 0 || orphaned_privchats) {
             _rosterwin_private_chats(layout, orphaned_privchats);
         }
-        g_free(privpref);
         g_list_free(orphaned_privchats);
     }
 
     if (prefs_get_boolean(PREF_ROSTER_CONTACTS)) {
-        char* by = prefs_get_string(PREF_ROSTER_BY);
+        auto_gchar gchar* by = prefs_get_string(PREF_ROSTER_BY);
         if (g_strcmp0(by, "presence") == 0) {
             _rosterwin_contacts_by_presence(layout, "chat", "Available for chat");
             _rosterwin_contacts_by_presence(layout, "online", "Online");
@@ -152,7 +151,6 @@ rosterwin_roster(void)
         if (prefs_get_boolean(PREF_ROSTER_UNSUBSCRIBED)) {
             _rosteriwin_unsubscribed(layout);
         }
-        g_free(by);
     }
 
     if (prefs_get_boolean(PREF_ROSTER_ROOMS) && (g_strcmp0(roomspos, "last") == 0)) {
@@ -171,16 +169,13 @@ rosterwin_roster(void)
             curr = g_list_next(curr);
         }
 
-        char* privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
+        auto_gchar gchar* privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
         if (g_strcmp0(privpref, "group") == 0 || orphaned_privchats) {
             _rosterwin_private_chats(layout, orphaned_privchats);
         }
-        g_free(privpref);
         g_list_free(privchats);
         g_list_free(orphaned_privchats);
     }
-
-    g_free(roomspos);
 }
 
 static void
@@ -188,13 +183,12 @@ _rosterwin_contacts_all(ProfLayoutSplit* layout)
 {
     GSList* contacts = NULL;
 
-    char* order = prefs_get_string(PREF_ROSTER_ORDER);
+    auto_gchar gchar* order = prefs_get_string(PREF_ROSTER_ORDER);
     if (g_strcmp0(order, "presence") == 0) {
         contacts = roster_get_contacts(ROSTER_ORD_PRESENCE);
     } else {
         contacts = roster_get_contacts(ROSTER_ORD_NAME);
     }
-    g_free(order);
 
     GSList* filtered_contacts = _filter_contacts(contacts);
     g_slist_free(contacts);
@@ -258,13 +252,12 @@ _rosterwin_contacts_by_group(ProfLayoutSplit* layout, char* group)
 {
     GSList* contacts = NULL;
 
-    char* order = prefs_get_string(PREF_ROSTER_ORDER);
+    auto_gchar gchar* order = prefs_get_string(PREF_ROSTER_ORDER);
     if (g_strcmp0(order, "presence") == 0) {
         contacts = roster_get_group(group, ROSTER_ORD_PRESENCE);
     } else {
         contacts = roster_get_group(group, ROSTER_ORD_NAME);
     }
-    g_free(order);
 
     GSList* filtered_contacts = _filter_contacts(contacts);
     g_slist_free(contacts);
@@ -320,7 +313,7 @@ _rosterwin_unsubscribed_item(ProfLayoutSplit* layout, ProfChatWin* chatwin)
         free(ch);
     }
 
-    char* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+    auto_gchar gchar* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
     if ((g_strcmp0(unreadpos, "before") == 0) && unread > 0) {
         g_string_append_printf(msg, "(%d) ", unread);
         unread = 0;
@@ -329,7 +322,6 @@ _rosterwin_unsubscribed_item(ProfLayoutSplit* layout, ProfChatWin* chatwin)
     if ((g_strcmp0(unreadpos, "after") == 0) && unread > 0) {
         g_string_append_printf(msg, " (%d)", unread);
     }
-    g_free(unreadpos);
 
     win_sub_newline_lazy(layout->subwin);
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
@@ -383,7 +375,7 @@ _rosterwin_contact(ProfLayoutSplit* layout, PContact contact)
         free(ch);
     }
 
-    char* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+    auto_gchar gchar* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
     if ((g_strcmp0(unreadpos, "before") == 0) && unread > 0) {
         g_string_append_printf(msg, "(%d) ", unread);
         unread = 0;
@@ -397,7 +389,6 @@ _rosterwin_contact(ProfLayoutSplit* layout, PContact contact)
             unread = 0;
         }
     }
-    g_free(unreadpos);
 
     win_sub_newline_lazy(layout->subwin);
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
@@ -437,9 +428,8 @@ _rosterwin_presence(ProfLayoutSplit* layout, const char* presence, const char* s
         return;
     }
 
-    char* by = prefs_get_string(PREF_ROSTER_BY);
+    auto_gchar gchar* by = prefs_get_string(PREF_ROSTER_BY);
     gboolean by_presence = g_strcmp0(by, "presence") == 0;
-    g_free(by);
 
     int presence_indent = prefs_get_roster_presence_indent();
     if (presence_indent > 0) {
@@ -541,11 +531,10 @@ _rosterwin_resources(ProfLayoutSplit* layout, PContact contact, int current_inde
                 g_string_append_printf(msg, " %d", resource->priority);
             }
 
-            char* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+            auto_gchar gchar* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
             if ((g_strcmp0(unreadpos, "after") == 0) && unread > 0) {
                 g_string_append_printf(msg, " (%d)", unread);
             }
-            g_free(unreadpos);
 
             gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
             win_sub_print(layout->subwin, msg->str, FALSE, wrap, 0);
@@ -560,7 +549,7 @@ _rosterwin_resources(ProfLayoutSplit* layout, PContact contact, int current_inde
         } else {
             gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
 
-            char* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+            auto_gchar gchar* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
             if ((g_strcmp0(unreadpos, "after") == 0) && unread > 0) {
                 GString* unreadmsg = g_string_new("");
                 g_string_append_printf(unreadmsg, " (%d)", unread);
@@ -573,7 +562,6 @@ _rosterwin_resources(ProfLayoutSplit* layout, PContact contact, int current_inde
                 g_string_free(unreadmsg, TRUE);
                 wattroff(layout->subwin, theme_attrs(presence_colour));
             }
-            g_free(unreadpos);
 
             int resource_indent = prefs_get_roster_resource_indent();
             if (resource_indent > 0) {
@@ -620,7 +608,7 @@ _rosterwin_resources(ProfLayoutSplit* layout, PContact contact, int current_inde
         theme_item_t presence_colour = _get_roster_theme(theme_type, presence);
         gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
 
-        char* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+        auto_gchar gchar* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
         if ((g_strcmp0(unreadpos, "after") == 0) && unread > 0) {
             GString* unreadmsg = g_string_new("");
             g_string_append_printf(unreadmsg, " (%d)", unread);
@@ -630,12 +618,11 @@ _rosterwin_resources(ProfLayoutSplit* layout, PContact contact, int current_inde
             g_string_free(unreadmsg, TRUE);
             wattroff(layout->subwin, theme_attrs(presence_colour));
         }
-        g_free(unreadpos);
         _rosterwin_presence(layout, presence, status, current_indent);
     } else {
         gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
 
-        char* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
+        auto_gchar gchar* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
         if ((g_strcmp0(unreadpos, "after") == 0) && unread > 0) {
             GString* unreadmsg = g_string_new("");
             g_string_append_printf(unreadmsg, " (%d)", unread);
@@ -647,7 +634,6 @@ _rosterwin_resources(ProfLayoutSplit* layout, PContact contact, int current_inde
             g_string_free(unreadmsg, TRUE);
             wattroff(layout->subwin, theme_attrs(presence_colour));
         }
-        g_free(unreadpos);
     }
 
     g_list_free(resources);
@@ -661,13 +647,12 @@ _rosterwin_rooms(ProfLayoutSplit* layout, char* title, GList* rooms)
     while (curr_room) {
         ProfMucWin* mucwin = wins_get_muc(curr_room->data);
         if (mucwin) {
-            char* order = prefs_get_string(PREF_ROSTER_ROOMS_ORDER);
+            auto_gchar gchar* order = prefs_get_string(PREF_ROSTER_ROOMS_ORDER);
             if (g_strcmp0(order, "unread") == 0) {
                 rooms_sorted = g_list_insert_sorted(rooms_sorted, mucwin, (GCompareFunc)_compare_rooms_unread);
             } else {
                 rooms_sorted = g_list_insert_sorted(rooms_sorted, mucwin, (GCompareFunc)_compare_rooms_name);
             }
-            g_free(order);
         }
         curr_room = g_list_next(curr_room);
     }
@@ -762,13 +747,13 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
         free(ch);
     }
 
-    char* unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
+    auto_gchar gchar* unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
     if ((g_strcmp0(unreadpos, "before") == 0) && mucwin->unread > 0) {
         g_string_append_printf(msg, "(%d) ", mucwin->unread);
     }
 
-    char* use_as_name = prefs_get_string(PREF_ROSTER_ROOMS_USE_AS_NAME);
-    char* roombypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
+    auto_gchar gchar* use_as_name = prefs_get_string(PREF_ROSTER_ROOMS_USE_AS_NAME);
+    auto_gchar gchar* roombypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
 
     if (g_strcmp0(roombypref, "service") == 0) {
         if (mucwin->room_name == NULL || (g_strcmp0(use_as_name, "jid") == 0)) {
@@ -800,13 +785,9 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
         }
     }
 
-    g_free(use_as_name);
-    g_free(roombypref);
-
     if ((g_strcmp0(unreadpos, "after") == 0) && mucwin->unread > 0) {
         g_string_append_printf(msg, " (%d)", mucwin->unread);
     }
-    g_free(unreadpos);
 
     win_sub_newline_lazy(layout->subwin);
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
@@ -823,7 +804,7 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
         wattroff(layout->subwin, theme_attrs(THEME_ROSTER_ROOM));
     }
 
-    char* privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
+    auto_gchar gchar* privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
     if (g_strcmp0(privpref, "room") == 0) {
         GList* privs = wins_get_private_chats(mucwin->roomjid);
         GList* curr = privs;
@@ -869,7 +850,6 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
             if ((g_strcmp0(unreadpos, "after") == 0) && privwin->unread > 0) {
                 g_string_append_printf(privmsg, " (%d)", privwin->unread);
             }
-            g_free(unreadpos);
 
             const char* presence = "offline";
 
@@ -895,14 +875,12 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
 
         g_list_free(privs);
     }
-
-    g_free(privpref);
 }
 
 static void
 _rosterwin_print_rooms(ProfLayoutSplit* layout)
 {
-    char* roomsbypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
+    auto_gchar gchar* roomsbypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
     if (g_strcmp0(roomsbypref, "service") == 0) {
         _rosterwin_rooms_by_service(layout);
     } else {
@@ -910,7 +888,6 @@ _rosterwin_print_rooms(ProfLayoutSplit* layout)
         _rosterwin_rooms(layout, "Rooms", rooms);
         g_list_free(rooms);
     }
-    g_free(roomsbypref);
 }
 
 static void
@@ -918,7 +895,7 @@ _rosterwin_private_chats(ProfLayoutSplit* layout, GList* orphaned_privchats)
 {
     GList* privs = NULL;
 
-    char* privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
+    auto_gchar gchar* privpref = prefs_get_string(PREF_ROSTER_PRIVATE);
     if (g_strcmp0(privpref, "group") == 0) {
         privs = wins_get_private_chats(NULL);
     } else {
@@ -948,7 +925,7 @@ _rosterwin_private_chats(ProfLayoutSplit* layout, GList* orphaned_privchats)
                 }
             }
 
-            char* unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
+            auto_gchar gchar* unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
             if ((g_strcmp0(unreadpos, "before") == 0) && privwin->unread > 0) {
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
@@ -964,7 +941,6 @@ _rosterwin_private_chats(ProfLayoutSplit* layout, GList* orphaned_privchats)
             if ((g_strcmp0(unreadpos, "after") == 0) && privwin->unread > 0) {
                 g_string_append_printf(privmsg, " (%d)", privwin->unread);
             }
-            g_free(unreadpos);
 
             Jid* jidp = jid_create(privwin->fulljid);
             Occupant* occupant = muc_roster_item(jidp->barejid, jidp->resourcepart);
@@ -1043,7 +1019,7 @@ _rosterwin_unsubscribed_header(ProfLayoutSplit* layout, GList* wins)
 
     g_string_append(header, "Unsubscribed");
 
-    char* countpref = prefs_get_string(PREF_ROSTER_COUNT);
+    auto_gchar gchar* countpref = prefs_get_string(PREF_ROSTER_COUNT);
     if (g_strcmp0(countpref, "items") == 0) {
         int itemcount = g_list_length(wins);
         if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
@@ -1065,7 +1041,6 @@ _rosterwin_unsubscribed_header(ProfLayoutSplit* layout, GList* wins)
             g_string_append_printf(header, " (%d)", unreadcount);
         }
     }
-    g_free(countpref);
 
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
 
@@ -1090,7 +1065,7 @@ _rosterwin_contacts_header(ProfLayoutSplit* layout, const char* const title, GSL
 
     g_string_append(header, title);
 
-    char* countpref = prefs_get_string(PREF_ROSTER_COUNT);
+    auto_gchar gchar* countpref = prefs_get_string(PREF_ROSTER_COUNT);
     if (g_strcmp0(countpref, "items") == 0) {
         int itemcount = g_slist_length(contacts);
         if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
@@ -1116,7 +1091,6 @@ _rosterwin_contacts_header(ProfLayoutSplit* layout, const char* const title, GSL
             g_string_append_printf(header, " (%d)", unreadcount);
         }
     }
-    g_free(countpref);
 
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
 
@@ -1141,7 +1115,7 @@ _rosterwin_rooms_header(ProfLayoutSplit* layout, GList* rooms, char* title)
     }
     g_string_append(header, title);
 
-    char* countpref = prefs_get_string(PREF_ROSTER_COUNT);
+    auto_gchar gchar* countpref = prefs_get_string(PREF_ROSTER_COUNT);
     if (g_strcmp0(countpref, "items") == 0) {
         int count = g_list_length(rooms);
         if (count == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
@@ -1157,7 +1131,7 @@ _rosterwin_rooms_header(ProfLayoutSplit* layout, GList* rooms, char* title)
             unread += mucwin->unread;
 
             // include private chats
-            char* prefpriv = prefs_get_string(PREF_ROSTER_PRIVATE);
+            auto_gchar gchar* prefpriv = prefs_get_string(PREF_ROSTER_PRIVATE);
             if (g_strcmp0(prefpriv, "room") == 0) {
                 GList* privwins = wins_get_private_chats(mucwin->roomjid);
                 GList* curr_priv = privwins;
@@ -1168,7 +1142,6 @@ _rosterwin_rooms_header(ProfLayoutSplit* layout, GList* rooms, char* title)
                 }
                 g_list_free(privwins);
             }
-            g_free(prefpriv);
 
             curr = g_list_next(curr);
         }
@@ -1179,7 +1152,6 @@ _rosterwin_rooms_header(ProfLayoutSplit* layout, GList* rooms, char* title)
             g_string_append_printf(header, " (%d)", unread);
         }
     }
-    g_free(countpref);
 
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
 
@@ -1205,7 +1177,7 @@ _rosterwin_private_header(ProfLayoutSplit* layout, GList* privs)
     }
     g_string_append(title_str, "Private chats");
 
-    char* countpref = prefs_get_string(PREF_ROSTER_COUNT);
+    auto_gchar gchar* countpref = prefs_get_string(PREF_ROSTER_COUNT);
     if (g_strcmp0(countpref, "items") == 0) {
         int itemcount = g_list_length(privs);
         if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
@@ -1227,7 +1199,6 @@ _rosterwin_private_header(ProfLayoutSplit* layout, GList* privs)
             g_string_append_printf(title_str, " (%d)", unreadcount);
         }
     }
-    g_free(countpref);
 
     gboolean wrap = prefs_get_boolean(PREF_ROSTER_WRAP);
 

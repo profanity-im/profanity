@@ -159,10 +159,9 @@ sv_ev_roster_received(void)
 
         // Redraw the screen after entry of the PGP secret key, but not init
         ProfWin* win = wins_get_current();
-        char* theme = prefs_get_string(PREF_THEME);
+        auto_gchar gchar* theme = prefs_get_string(PREF_THEME);
         win_redraw(win);
         theme_init(theme);
-        g_free(theme);
         ui_resize();
         ui_show_roster();
     }
@@ -903,12 +902,11 @@ sv_ev_room_occupant_offline(const char* const room, const char* const nick,
 {
     muc_roster_remove(room, nick);
 
-    char* muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
+    auto_gchar gchar* muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
     ProfMucWin* mucwin = wins_get_muc(room);
     if (mucwin && (g_strcmp0(muc_status_pref, "none") != 0)) {
         mucwin_occupant_offline(mucwin, nick);
     }
-    g_free(muc_status_pref);
 
     Jid* jidp = jid_create_from_bare_and_resource(room, nick);
     ProfPrivateWin* privwin = wins_get_private(jidp->fulljid);
@@ -1124,12 +1122,11 @@ sv_ev_muc_occupant_online(const char* const room, const char* const nick, const 
 
     // joined room
     if (!occupant) {
-        char* muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
+        auto_gchar gchar* muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
         ProfMucWin* mucwin = wins_get_muc(room);
         if (mucwin && g_strcmp0(muc_status_pref, "none") != 0) {
             mucwin_occupant_online(mucwin, nick, role, affiliation, show, status);
         }
-        g_free(muc_status_pref);
 
         if (mucwin) {
             Jid* jidp = jid_create_from_bare_and_resource(mucwin->roomjid, nick);
@@ -1147,12 +1144,11 @@ sv_ev_muc_occupant_online(const char* const room, const char* const nick, const 
 
     // presence updated
     if (updated) {
-        char* muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
+        auto_gchar gchar* muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
         ProfMucWin* mucwin = wins_get_muc(room);
         if (mucwin && (g_strcmp0(muc_status_pref, "all") == 0)) {
             mucwin_occupant_presence(mucwin, nick, show, status);
         }
-        g_free(muc_status_pref);
         occupantswin_occupants(room);
 
         // presence unchanged, check for role/affiliation change
@@ -1254,10 +1250,9 @@ sv_ev_lastactivity_response(const char* const from, const int seconds, const cha
     GDateTime* now = g_date_time_new_now_local();
     GDateTime* active = g_date_time_add_seconds(now, 0 - seconds);
 
-    gchar* date_fmt = NULL;
-    char* time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
+    auto_gchar gchar* date_fmt = NULL;
+    auto_gchar gchar* time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
     date_fmt = g_date_time_format(active, time_pref);
-    g_free(time_pref);
     assert(date_fmt != NULL);
 
     // full jid - last activity
@@ -1308,7 +1303,6 @@ sv_ev_lastactivity_response(const char* const from, const int seconds, const cha
 
     g_date_time_unref(now);
     g_date_time_unref(active);
-    g_free(date_fmt);
     jid_destroy(jidp);
 }
 

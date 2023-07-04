@@ -2720,6 +2720,21 @@ static const struct cmd_t command_defs[] = {
               "/strophe verbosity 3",
               "/strophe sm no-resend")
     },
+
+    { CMD_PREAMBLE("/privacy",
+                   parse_args, 2, 3, NULL)
+      CMD_MAINFUNC(cmd_privacy)
+      CMD_TAGS(
+              CMD_TAG_CHAT)
+      CMD_SYN(
+              "/privacy logging on|redact|off")
+      CMD_DESC(
+              "Configure privacy settings.")
+      CMD_ARGS(
+              { "logging on|redact|off", "Switch chat logging. This will also disable logging in the internally used SQL database. Your messages will not be saved anywhere locally. This might have unintended consequences, such as not being able to decrypt OMEMO encrypted messages received later via MAM, and should be used with caution." })
+      CMD_EXAMPLES(
+              "/privacy logging off")
+    },
     // NEXT-COMMAND (search helper)
 };
 

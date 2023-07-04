@@ -433,7 +433,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* user = args[0];
-    char* def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
+    auto_gchar gchar* def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
     if (!user) {
         if (def) {
             user = def;
@@ -447,7 +447,6 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
 
     char* jid;
     user = strdup(user);
-    g_free(def);
 
     // connect with account
     ProfAccount* account = accounts_get_account(user);
@@ -568,7 +567,7 @@ cmd_account_remove(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    char* def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
+    auto_gchar gchar* def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
     if (accounts_remove(account_name)) {
         cons_show("Account %s removed.", account_name);
         if (def && strcmp(def, account_name) == 0) {
@@ -580,7 +579,6 @@ cmd_account_remove(ProfWin* window, const char* const command, gchar** args)
         cons_show("Either the account does not exist, or an unknown error occurred.");
     }
     cons_show("");
-    g_free(def);
 
     return TRUE;
 }
@@ -650,10 +648,9 @@ gboolean
 cmd_account_default(ProfWin* window, const char* const command, gchar** args)
 {
     if (g_strv_length(args) == 1) {
-        char* def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
+        auto_gchar gchar* def = prefs_get_string(PREF_DEFAULT_ACCOUNT);
         if (def) {
             cons_show("The default account is %s.", def);
-            free(def);
         } else {
             cons_show("No default account.");
         }
@@ -5417,9 +5414,8 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
 {
     if (g_strcmp0(args[0], "lastactivity") == 0) {
         if (args[1] == NULL) {
-            char* format = prefs_get_string(PREF_TIME_LASTACTIVITY);
+            auto_gchar gchar* format = prefs_get_string(PREF_TIME_LASTACTIVITY);
             cons_show("Last activity time format: '%s'.", format);
-            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_LASTACTIVITY, args[2]);
@@ -5436,9 +5432,8 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
         }
     } else if (g_strcmp0(args[0], "statusbar") == 0) {
         if (args[1] == NULL) {
-            char* format = prefs_get_string(PREF_TIME_STATUSBAR);
+            auto_gchar gchar* format = prefs_get_string(PREF_TIME_STATUSBAR);
             cons_show("Status bar time format: '%s'.", format);
-            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_STATUSBAR, args[2]);
@@ -5456,9 +5451,8 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
         }
     } else if (g_strcmp0(args[0], "console") == 0) {
         if (args[1] == NULL) {
-            char* format = prefs_get_string(PREF_TIME_CONSOLE);
+            auto_gchar gchar* format = prefs_get_string(PREF_TIME_CONSOLE);
             cons_show("Console time format: '%s'.", format);
-            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_CONSOLE, args[2]);
@@ -5476,9 +5470,8 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
         }
     } else if (g_strcmp0(args[0], "chat") == 0) {
         if (args[1] == NULL) {
-            char* format = prefs_get_string(PREF_TIME_CHAT);
+            auto_gchar gchar* format = prefs_get_string(PREF_TIME_CHAT);
             cons_show("Chat time format: '%s'.", format);
-            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_CHAT, args[2]);
@@ -5496,9 +5489,8 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
         }
     } else if (g_strcmp0(args[0], "muc") == 0) {
         if (args[1] == NULL) {
-            char* format = prefs_get_string(PREF_TIME_MUC);
+            auto_gchar gchar* format = prefs_get_string(PREF_TIME_MUC);
             cons_show("MUC time format: '%s'.", format);
-            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_MUC, args[2]);
@@ -5516,9 +5508,8 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
         }
     } else if (g_strcmp0(args[0], "config") == 0) {
         if (args[1] == NULL) {
-            char* format = prefs_get_string(PREF_TIME_CONFIG);
+            auto_gchar gchar* format = prefs_get_string(PREF_TIME_CONFIG);
             cons_show("config time format: '%s'.", format);
-            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_CONFIG, args[2]);
@@ -5536,9 +5527,8 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
         }
     } else if (g_strcmp0(args[0], "private") == 0) {
         if (args[1] == NULL) {
-            char* format = prefs_get_string(PREF_TIME_PRIVATE);
+            auto_gchar gchar* format = prefs_get_string(PREF_TIME_PRIVATE);
             cons_show("Private chat time format: '%s'.", format);
-            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_PRIVATE, args[2]);
@@ -5556,9 +5546,8 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
         }
     } else if (g_strcmp0(args[0], "xml") == 0) {
         if (args[1] == NULL) {
-            char* format = prefs_get_string(PREF_TIME_XMLCONSOLE);
+            auto_gchar gchar* format = prefs_get_string(PREF_TIME_XMLCONSOLE);
             cons_show("XML Console time format: '%s'.", format);
-            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_XMLCONSOLE, args[2]);
@@ -5614,9 +5603,8 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
         }
     } else if (g_strcmp0(args[0], "vcard") == 0) {
         if (args[1] == NULL) {
-            char* format = prefs_get_string(PREF_TIME_VCARD);
+            auto_gchar gchar* format = prefs_get_string(PREF_TIME_VCARD);
             cons_show("vCard time format: %s", format);
-            g_free(format);
             return TRUE;
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
             prefs_set_string(PREF_TIME_VCARD, args[2]);
@@ -6950,6 +6938,44 @@ cmd_autoconnect(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_privacy(ProfWin* window, const char* const command, gchar** args)
+{
+    if (args[0] == NULL) {
+        cons_bad_cmd_usage(command);
+        return FALSE;
+    }
+
+    if (g_strcmp0(args[0], "logging") == 0) {
+        gchar* arg = args[1];
+        if (arg == NULL) {
+            cons_bad_cmd_usage(command);
+            return FALSE;
+        }
+
+        if (g_strcmp0(arg, "on") == 0) {
+            cons_show("Logging enabled.");
+            prefs_set_string(PREF_DBLOG, arg);
+            prefs_set_boolean(PREF_CHLOG, TRUE);
+            prefs_set_boolean(PREF_HISTORY, TRUE);
+        } else if (g_strcmp0(arg, "off") == 0) {
+            cons_show("Logging disabled.");
+            prefs_set_string(PREF_DBLOG, arg);
+            prefs_set_boolean(PREF_CHLOG, FALSE);
+            prefs_set_boolean(PREF_HISTORY, FALSE);
+        } else if (g_strcmp0(arg, "redact") == 0) {
+            cons_show("Messages are going to be redacted.");
+            prefs_set_string(PREF_DBLOG, arg);
+        } else {
+            cons_bad_cmd_usage(command);
+            return FALSE;
+        }
+        return TRUE;
+    }
+
+    return TRUE;
+}
+
+gboolean
 cmd_logging(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[0] == NULL) {
@@ -6967,10 +6993,7 @@ cmd_logging(ProfWin* window, const char* const command, gchar** args)
 
         return TRUE;
     } else if (g_strcmp0(args[0], "group") == 0 && args[1] != NULL) {
-        if (g_strcmp0(args[1], "on") == 0 || g_strcmp0(args[1], "off") == 0) {
-            _cmd_set_boolean_preference(args[1], "Groupchat logging", PREF_GRLOG);
-            return TRUE;
-        }
+        return _cmd_set_boolean_preference(args[1], "Groupchat logging", PREF_GRLOG);
     }
 
     cons_bad_cmd_usage(command);
@@ -8000,9 +8023,8 @@ cmd_otr_policy(ProfWin* window, const char* const command, gchar** args)
 {
 #ifdef HAVE_LIBOTR
     if (args[1] == NULL) {
-        char* policy = prefs_get_string(PREF_OTR_POLICY);
+        auto_gchar gchar* policy = prefs_get_string(PREF_OTR_POLICY);
         cons_show("OTR policy is now set to: %s", policy);
-        g_free(policy);
         return TRUE;
     }
 
@@ -9194,9 +9216,8 @@ cmd_omemo_policy(ProfWin* window, const char* const command, gchar** args)
 {
 #ifdef HAVE_OMEMO
     if (args[1] == NULL) {
-        char* policy = prefs_get_string(PREF_OMEMO_POLICY);
+        auto_gchar gchar* policy = prefs_get_string(PREF_OMEMO_POLICY);
         cons_show("OMEMO policy is now set to: %s", policy);
-        g_free(policy);
         return TRUE;
     }
 
@@ -9306,17 +9327,15 @@ gboolean
 cmd_stamp(ProfWin* window, const char* const command, gchar** args)
 {
     if (g_strv_length(args) == 0) {
-        char* def = prefs_get_string(PREF_OUTGOING_STAMP);
+        auto_gchar gchar* def = prefs_get_string(PREF_OUTGOING_STAMP);
         if (def) {
             cons_show("The outgoing stamp is: %s", def);
-            free(def);
         } else {
             cons_show("The default outgoing stamp is used.");
         }
         def = prefs_get_string(PREF_INCOMING_STAMP);
         if (def) {
             cons_show("The incoming stamp is: %s", def);
-            free(def);
         } else {
             cons_show("The default incoming stamp is used.");
         }
@@ -9375,7 +9394,7 @@ cmd_color(ProfWin* window, const char* const command, gchar** args)
 
     cons_show("Consistent color generation for nicks set to: %s", args[0]);
 
-    char* theme = prefs_get_string(PREF_THEME);
+    auto_gchar gchar* theme = prefs_get_string(PREF_THEME);
     if (theme) {
         gboolean res = theme_load(theme, false);
 
@@ -9384,8 +9403,6 @@ cmd_color(ProfWin* window, const char* const command, gchar** args)
         } else {
             theme_load("default", false);
         }
-
-        g_free(theme);
     }
 
     return TRUE;
