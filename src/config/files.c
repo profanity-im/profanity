@@ -155,11 +155,20 @@ files_get_config_path(const char* const config_base)
     return result;
 }
 
+/**
+ * Get the full path by appending the given location to the project base path.
+ *
+ * @param location The location (directory or file) to append to the project base path.
+ * @return The full path obtained by appending the location to the project base path.
+ *
+ * @note The returned value must be freed using g_free when it is no longer needed
+ *       to prevent memory leaks.
+ */
 gchar*
-files_get_data_path(const char* const data_base)
+files_get_data_path(const char* const location)
 {
     auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
-    gchar* result = g_strdup_printf("%s/profanity/%s", xdg_data, date_base);
+    gchar* result = g_strdup_printf("%s/profanity/%s", xdg_data, location);
     return result;
 }
 

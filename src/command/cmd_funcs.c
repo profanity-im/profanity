@@ -188,6 +188,13 @@ _string_matches_one_of(const char* what, const char* is, bool is_can_be_null, co
     return ret;
 }
 
+/**
+ * @brief Processes a line of input and determines if profanity should continue.
+ *
+ * @param window
+ * @param inp The input string to process.
+ * @return Returns TRUE if profanity is to continue, FALSE otherwise.
+ */
 gboolean
 cmd_process_input(ProfWin* window, char* inp)
 {
