@@ -1462,9 +1462,9 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
 }
 
 void
-win_print_them(ProfWin* window, theme_item_t theme_item, const char* const show_char, int flags, const char* const them, gboolean flip)
+win_print_them(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const show_char, int flags, const char* const them, gboolean flip)
 {
-    _win_printf(window, show_char, 0, NULL, flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, flip, "", NULL);
+    _win_printf(window, show_char, 0, timestamp , flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, flip, "", NULL);
 }
 
 void
@@ -1672,9 +1672,14 @@ win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message
 }
 
 void
-win_append_highlight(ProfWin* window, theme_item_t theme_item, const gboolean flip, const char* const message, ...)
+win_append_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const gboolean flip, const char* const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    gboolean hadTimestamp = TRUE;
+
+    if (!timestamp) {
+        timestamp = g_date_time_new_now_local();
+        hadTimestamp = FALSE;
+    }
 
     va_list arg;
     va_start(arg, message);
@@ -1690,16 +1695,24 @@ win_append_highlight(ProfWin* window, theme_item_t theme_item, const gboolean fl
     }
 
     inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
+
+    if (!hadTimestamp) {
+        g_date_time_unref(timestamp);
+    }
 
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
 
 void
-win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const gboolean flip, const char* const message, ...)
+win_appendln_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const gboolean flip, const char* const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    gboolean hadTimestamp = TRUE;
+
+    if (!timestamp) {
+        timestamp = g_date_time_new_now_local();
+        hadTimestamp = FALSE;
+    }
 
     va_list arg;
     va_start(arg, message);
@@ -1716,7 +1729,10 @@ win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const gboolean 
 
 
     inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
+
+    if (!hadTimestamp) {
+        g_date_time_unref(timestamp);
+    }
 
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
