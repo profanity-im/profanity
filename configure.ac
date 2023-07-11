@@ -323,19 +323,20 @@ AS_IF([test "x$enable_gdk_pixbuf" != xno],
 dnl feature: omemo
 AM_CONDITIONAL([BUILD_OMEMO], [false])
 if test "x$enable_omemo" != xno; then
-   AM_CONDITIONAL([BUILD_OMEMO], [true])
+    OMEMO_LIBS=""
     PKG_CHECK_MODULES([libsignal], [libsignal-protocol-c >= 2.3.2],
-        [LIBS="-lsignal-protocol-c $LIBS"],
+        [OMEMO_LIBS="-lsignal-protocol-c"
+         AC_CHECK_LIB([gcrypt], [gcry_md_extract],
+             [OMEMO_LIBS="-lgcrypt $OMEMO_LIBS"
+              AM_CONDITIONAL([BUILD_OMEMO], [true])],
+             [AC_MSG_NOTICE([gcrypt >= 1.7.0 not found, OMEMO support not enabled])])],
         [AC_MSG_NOTICE([libsignal-protocol-c >= 2.3.2 not found, OMEMO support not enabled])])
 
-    AC_CHECK_LIB([gcrypt], [gcry_md_extract],
-        [LIBS="-lgcrypt $LIBS"],
-        [AM_CONDITIONAL([BUILD_OMEMO], [false])
-         AS_IF([test "x$enable_omemo" = xyes],
-               [AC_MSG_ERROR([gcrypt >= 1.7.0 is required for OMEMO support])],
-               [AC_MSG_NOTICE([gcrypt >= 1.7.0 not found, OMEMO support not enabled])])])
-
-   AM_COND_IF([BUILD_OMEMO], [AC_DEFINE([HAVE_OMEMO], [1], [Have OMEMO])])
+    AM_COND_IF([BUILD_OMEMO],
+        [AC_DEFINE([HAVE_OMEMO], [1], [Have OMEMO])
+         LIBS="$OMEMO_LIBS $LIBS"],
+        [AS_IF([test "x$enable_omemo" = xyes],
+             [AC_MSG_ERROR([OMEMO support requires a library which is missed])])])
 fi
 
 dnl feature: themes
