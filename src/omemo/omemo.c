@@ -392,12 +392,10 @@ omemo_publish_crypto_materials(void)
 static void
 _acquire_sender_devices_list(void)
 {
-    char* barejid = connection_get_barejid();
+    auto_char char* barejid = connection_get_barejid();
 
     g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_own_device_list);
     omemo_devicelist_request(barejid);
-
-    free(barejid);
 }
 
 void
@@ -430,11 +428,10 @@ omemo_start_session(const char* const barejid)
             log_debug("[OMEMO] missing device list for %s", barejid);
             // Own devices are handled by _handle_own_device_list
             // We won't add _handle_device_list_start_session for ourself
-            char* mybarejid = connection_get_barejid();
+            auto_char char* mybarejid = connection_get_barejid();
             if (g_strcmp0(mybarejid, barejid) != 0) {
                 g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
             }
-            free(mybarejid);
             omemo_devicelist_request(barejid);
             return;
         }
@@ -689,10 +686,9 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
 
     auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
     if ((g_strcmp0(trust_mode, "blind") == 0) && !trusted) {
-        char* fp = _omemo_fingerprint(identity_key, TRUE);
+        auto_char char* fp = _omemo_fingerprint(identity_key, TRUE);
         cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
         omemo_trust(jid, fp);
-        free(fp);
         trusted = TRUE;
     }
 

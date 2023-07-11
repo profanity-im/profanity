@@ -58,7 +58,7 @@
 #include "xmpp/form.h"
 #include "xmpp/capabilities.h"
 
-static char* cache_loc;
+static gchar* cache_loc;
 static GKeyFile* cache;
 
 static GHashTable* jid_to_ver;
@@ -355,7 +355,7 @@ caps_close(void)
     cache = NULL;
     g_hash_table_destroy(jid_to_ver);
     g_hash_table_destroy(jid_to_caps);
-    free(cache_loc);
+    g_free(cache_loc);
     cache_loc = NULL;
     g_hash_table_destroy(prof_features);
     prof_features = NULL;

@@ -91,72 +91,60 @@ c_api_register_command(const char* filename, const char* command_name, int min_a
                        char** synopsis, const char* description, char* arguments[][2], char** examples,
                        void (*callback)(char** args))
 {
-    char* plugin_name = _c_plugin_name(filename);
+    auto_char char* plugin_name = _c_plugin_name(filename);
     log_debug("Register command %s for %s", command_name, plugin_name);
 
     CommandWrapper* wrapper = malloc(sizeof(CommandWrapper));
     wrapper->func = callback;
     api_register_command(plugin_name, command_name, min_args, max_args, synopsis,
                          description, arguments, examples, wrapper, c_command_callback, free);
-
-    free(plugin_name);
 }
 
 static void
 c_api_register_timed(const char* filename, void (*callback)(void), int interval_seconds)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    auto_char char* plugin_name = _c_plugin_name(filename);
     log_debug("Register timed for %s", plugin_name);
 
     TimedWrapper* wrapper = malloc(sizeof(TimedWrapper));
     wrapper->func = callback;
     api_register_timed(plugin_name, wrapper, interval_seconds, c_timed_callback, free);
-
-    free(plugin_name);
 }
 
 static void
 c_api_completer_add(const char* filename, const char* key, char** items)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    auto_char char* plugin_name = _c_plugin_name(filename);
     log_debug("Autocomplete add %s for %s", key, plugin_name);
 
     api_completer_add(plugin_name, key, items);
-
-    free(plugin_name);
 }
 
 static void
 c_api_completer_remove(const char* filename, const char* key, char** items)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    auto_char char* plugin_name = _c_plugin_name(filename);
     log_debug("Autocomplete remove %s for %s", key, plugin_name);
 
     api_completer_remove(plugin_name, key, items);
-
-    free(plugin_name);
 }
 
 static void
 c_api_completer_clear(const char* filename, const char* key)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    auto_char char* plugin_name = _c_plugin_name(filename);
     log_debug("Autocomplete clear %s for %s", key, plugin_name);
 
     api_completer_clear(plugin_name, key);
-
-    free(plugin_name);
 }
 
 static void
 c_api_filepath_completer_add(const char* filename, const char* prefix)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    auto_char char* plugin_name = _c_plugin_name(filename);
     log_debug("Filepath autocomplete added '%s' for %s", prefix, plugin_name);
 
     api_filepath_completer_add(plugin_name, prefix);
-
-    free(plugin_name);
 }
 
 static void
@@ -252,13 +240,11 @@ c_api_win_exists(char* tag)
 static void
 c_api_win_create(const char* filename, char* tag, void (*callback)(char* tag, char* line))
 {
-    char* plugin_name = _c_plugin_name(filename);
+    auto_char char* plugin_name = _c_plugin_name(filename);
 
     WindowWrapper* wrapper = malloc(sizeof(WindowWrapper));
     wrapper->func = callback;
     api_win_create(plugin_name, tag, wrapper, c_window_callback, free);
-
-    free(plugin_name);
 }
 
 static int
@@ -354,9 +340,8 @@ c_api_incoming_message(char* barejid, char* resource, char* message)
 static void
 c_api_disco_add_feature(const char* filename, char* feature)
 {
-    char* plugin_name = _c_plugin_name(filename);
+    auto_char char* plugin_name = _c_plugin_name(filename);
     api_disco_add_feature(plugin_name, feature);
-    free(plugin_name);
 }
 
 static void

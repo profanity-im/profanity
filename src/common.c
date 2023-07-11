@@ -143,11 +143,10 @@ str_replace(const char* string, const char* substr,
     head = newstr;
 
     while ((tok = strstr(head, substr))) {
-        char* oldstr = newstr;
+        auto_char char* oldstr = newstr;
         newstr = malloc(strlen(oldstr) - strlen(substr) + strlen(replacement) + 1);
 
         if (newstr == NULL) {
-            free(oldstr);
             return NULL;
         }
 
@@ -159,7 +158,6 @@ str_replace(const char* string, const char* substr,
         memset(newstr + strlen(oldstr) - strlen(substr) + strlen(replacement), 0, 1);
 
         head = newstr + (tok - oldstr) + strlen(replacement);
-        free(oldstr);
     }
 
     return newstr;
@@ -282,10 +280,10 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
     return realsize;
 }
 
-char*
-get_file_or_linked(char* loc, char* basedir)
+gchar*
+get_file_or_linked(gchar* loc, gchar* basedir)
 {
-    char* true_loc = NULL;
+    gchar* true_loc = NULL;
 
     // check for symlink
     if (g_file_test(loc, G_FILE_TEST_IS_SYMLINK)) {
@@ -293,13 +291,13 @@ get_file_or_linked(char* loc, char* basedir)
 
         // if relative, add basedir
         if (!g_str_has_prefix(true_loc, "/") && !g_str_has_prefix(true_loc, "~")) {
-            char* tmp = g_strdup_printf("%s/%s", basedir, true_loc);
-            free(true_loc);
+            gchar* tmp = g_strdup_printf("%s/%s", basedir, true_loc);
+            g_free(true_loc);
             true_loc = tmp;
         }
         // use given location
     } else {
-        true_loc = strdup(loc);
+        true_loc = g_strdup(loc);
     }
 
     return true_loc;

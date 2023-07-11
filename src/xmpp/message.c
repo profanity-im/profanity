@@ -243,7 +243,7 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
         if (carbons) {
 
             // carbon must come from ourselves
-            char* mybarejid = connection_get_barejid();
+            auto_char char* mybarejid = connection_get_barejid();
             const char* const stanza_from = xmpp_stanza_get_from(stanza);
 
             if (stanza_from) {
@@ -256,8 +256,6 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
                     msg_stanza = _handle_carbons(carbons);
                 }
             }
-
-            free(mybarejid);
         }
 
         if (msg_stanza) {
@@ -425,12 +423,11 @@ message_send_chat(const char* const barejid, const char* const msg, const char* 
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
     const char* state = chat_session_get_state(barejid);
-    char* jid = chat_session_get_jid(barejid);
+    auto_char char* jid = chat_session_get_jid(barejid);
     char* id = connection_create_stanza_id();
 
     xmpp_stanza_t* message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
     xmpp_message_set_body(message, msg);
-    free(jid);
 
     if (state) {
         stanza_attach_state(ctx, message, state);
@@ -460,7 +457,7 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
     const char* state = chat_session_get_state(barejid);
-    char* jid = chat_session_get_jid(barejid);
+    auto_char char* jid = chat_session_get_jid(barejid);
     char* id = connection_create_stanza_id();
 
     xmpp_stanza_t* message = NULL;
@@ -469,7 +466,7 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
     ProfAccount* account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
         auto_jid Jid* jidp = jid_create(jid);
-        char* encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
+        auto_char char* encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
         if (encrypted) {
             message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
             xmpp_message_set_body(message, "This message is encrypted (XEP-0027).");
@@ -482,7 +479,6 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
             xmpp_stanza_release(enc_st);
             xmpp_stanza_add_child(message, x);
             xmpp_stanza_release(x);
-            free(encrypted);
         } else {
             message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
             xmpp_message_set_body(message, msg);
@@ -497,7 +493,6 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
     message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
     xmpp_message_set_body(message, msg);
 #endif
-    free(jid);
 
     if (state) {
         stanza_attach_state(ctx, message, state);
@@ -586,13 +581,10 @@ message_send_chat_otr(const char* const barejid, const char* const msg, gboolean
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
     const char* state = chat_session_get_state(barejid);
-    char* jid = chat_session_get_jid(barejid);
     char* id = connection_create_stanza_id();
 
     xmpp_stanza_t* message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, barejid, id);
     xmpp_message_set_body(message, msg);
-
-    free(jid);
 
     if (state) {
         stanza_attach_state(ctx, message, state);
@@ -852,7 +844,7 @@ _handle_error(xmpp_stanza_t* const stanza)
     }
 
     // stanza_get_error never returns NULL
-    char* err_msg = stanza_get_error_message(stanza);
+    auto_char char* err_msg = stanza_get_error_message(stanza);
 
     GString* log_msg = g_string_new("message stanza error received");
     if (id) {
@@ -885,8 +877,6 @@ _handle_error(xmpp_stanza_t* const stanza)
         }
         ui_handle_recipient_error(jid, err_msg);
     }
-
-    free(err_msg);
 }
 
 static void
@@ -1058,10 +1048,9 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
 
                     if (code) {
                         // If configuration change notification send disco info to get updated info of the muc
-                        char* disqo_info_id = connection_create_stanza_id();
+                        auto_char char* disqo_info_id = connection_create_stanza_id();
                         xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, disqo_info_id, room_jid, NULL);
                         iq_id_handler_add(disqo_info_id, _room_config_handler, NULL, NULL);
-                        free(disqo_info_id);
                         iq_send_stanza(iq);
                         xmpp_stanza_release(iq);
 
@@ -1181,9 +1170,8 @@ _message_send_receipt(const char* const fulljid, const char* const message_id)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    char* id = connection_create_stanza_id();
+    auto_char char* id = connection_create_stanza_id();
     xmpp_stanza_t* message = xmpp_message_new(ctx, NULL, fulljid, id);
-    free(id);
 
     xmpp_stanza_t* receipt = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(receipt, "received");
@@ -1343,12 +1331,10 @@ _handle_carbons(xmpp_stanza_t* const stanza)
     }
 
     // Eliminate duplicate messages in chat with oneself when another client is sending a message
-    char* bare_from = xmpp_jid_bare(connection_get_ctx(), xmpp_stanza_get_from(message_stanza));
+    auto_char char* bare_from = xmpp_jid_bare(connection_get_ctx(), xmpp_stanza_get_from(message_stanza));
     if (g_strcmp0(bare_from, xmpp_stanza_get_to(message_stanza)) == 0) {
-        free(bare_from);
         return NULL;
     }
-    free(bare_from);
 
     return message_stanza;
 }
@@ -1469,7 +1455,7 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
 
     if (message->plain || message->body || message->encrypted) {
         if (is_carbon) {
-            char* mybarejid = connection_get_barejid();
+            auto_char char* mybarejid = connection_get_barejid();
 
             // if we are the recipient, treat as standard incoming message
             if (g_strcmp0(mybarejid, message->to_jid->barejid) == 0) {
@@ -1478,8 +1464,6 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
             } else {
                 sv_ev_outgoing_carbon(message);
             }
-
-            free(mybarejid);
         } else {
             sv_ev_incoming_message(message);
             _receipt_request_handler(stanza);
@@ -1589,10 +1573,9 @@ _send_message_stanza(xmpp_stanza_t* const stanza)
     xmpp_stanza_to_text(stanza, &text, &text_size);
 
     xmpp_conn_t* conn = connection_get_conn();
-    char* plugin_text = plugins_on_message_stanza_send(text);
+    auto_char char* plugin_text = plugins_on_message_stanza_send(text);
     if (plugin_text) {
         xmpp_send_raw_string(conn, "%s", plugin_text);
-        free(plugin_text);
     } else {
         xmpp_send_raw_string(conn, "%s", text);
     }

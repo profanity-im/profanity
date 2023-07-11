@@ -99,7 +99,7 @@ python_env_init(void)
 
     python_init_prof();
 
-    char* plugins_dir = files_get_data_path(DIR_PLUGINS);
+    auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
     GString* path = g_string_new("import sys\n");
     g_string_append(path, "sys.path.append(\"");
     g_string_append(path, plugins_dir);
@@ -109,7 +109,6 @@ python_env_init(void)
     python_check_error();
 
     g_string_free(path, TRUE);
-    g_free(plugins_dir);
 
     allow_python_threads();
 }

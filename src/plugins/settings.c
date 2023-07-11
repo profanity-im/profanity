@@ -53,7 +53,7 @@ static void _save_settings(void);
 void
 plugin_settings_init(void)
 {
-    char* settings_file = files_get_data_path(FILE_PLUGIN_SETTINGS);
+    auto_gchar gchar* settings_file = files_get_data_path(FILE_PLUGIN_SETTINGS);
 
     if (g_file_test(settings_file, G_FILE_TEST_EXISTS)) {
         g_chmod(settings_file, S_IRUSR | S_IWUSR);
@@ -63,11 +63,9 @@ plugin_settings_init(void)
     g_key_file_load_from_file(settings, settings_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
     gsize g_data_size;
-    gchar* g_data = g_key_file_to_data(settings, &g_data_size, NULL);
+    auto_gchar gchar* g_data = g_key_file_to_data(settings, &g_data_size, NULL);
     g_file_set_contents(settings_file, g_data, g_data_size, NULL);
     g_chmod(settings_file, S_IRUSR | S_IWUSR);
-    g_free(g_data);
-    free(settings_file);
 }
 
 void
@@ -175,15 +173,11 @@ static void
 _save_settings(void)
 {
     gsize g_data_size;
-    gchar* g_data = g_key_file_to_data(settings, &g_data_size, NULL);
+    auto_gchar gchar* g_data = g_key_file_to_data(settings, &g_data_size, NULL);
 
-    char* fileloc = files_get_data_path(FILE_PLUGIN_SETTINGS);
-    gchar* base = g_path_get_dirname(fileloc);
-    gchar* true_loc = get_file_or_linked(fileloc, base);
-    g_free(base);
+    auto_gchar gchar* fileloc = files_get_data_path(FILE_PLUGIN_SETTINGS);
+    auto_gchar gchar* base = g_path_get_dirname(fileloc);
+    auto_gchar gchar* true_loc = get_file_or_linked(fileloc, base);
     g_file_set_contents(true_loc, g_data, g_data_size, NULL);
-    free(true_loc);
-    g_free(g_data);
     g_chmod(fileloc, S_IRUSR | S_IWUSR);
-    free(fileloc);
 }

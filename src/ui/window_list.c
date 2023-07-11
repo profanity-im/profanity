@@ -949,13 +949,12 @@ wins_swap(int source_win, int target_win)
             g_hash_table_steal(windows, GINT_TO_POINTER(source_win));
             g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
             status_bar_inactive(source_win);
-            char* identifier = win_get_tab_identifier(source);
+            auto_char char* identifier = win_get_tab_identifier(source);
             if (win_unread(source) > 0) {
                 status_bar_new(target_win, source->type, identifier);
             } else {
                 status_bar_active(target_win, source->type, identifier);
             }
-            free(identifier);
             if (wins_get_current_num() == source_win) {
                 wins_set_current_by_num(target_win);
                 ui_focus_win(console);
@@ -967,8 +966,8 @@ wins_swap(int source_win, int target_win)
             g_hash_table_steal(windows, GINT_TO_POINTER(target_win));
             g_hash_table_insert(windows, GINT_TO_POINTER(source_win), target);
             g_hash_table_insert(windows, GINT_TO_POINTER(target_win), source);
-            char* source_identifier = win_get_tab_identifier(source);
-            char* target_identifier = win_get_tab_identifier(target);
+            auto_char char* source_identifier = win_get_tab_identifier(source);
+            auto_char char* target_identifier = win_get_tab_identifier(target);
             if (win_unread(source) > 0) {
                 status_bar_new(target_win, source->type, source_identifier);
             } else {
@@ -979,8 +978,6 @@ wins_swap(int source_win, int target_win)
             } else {
                 status_bar_active(source_win, target->type, target_identifier);
             }
-            free(source_identifier);
-            free(target_identifier);
             if ((wins_get_current_num() == source_win) || (wins_get_current_num() == target_win)) {
                 ui_focus_win(console);
             }
@@ -1088,7 +1085,7 @@ wins_tidy(void)
         GList* curr = keys;
         while (curr) {
             ProfWin* window = g_hash_table_lookup(windows, curr->data);
-            char* identifier = win_get_tab_identifier(window);
+            auto_char char* identifier = win_get_tab_identifier(window);
             g_hash_table_steal(windows, curr->data);
             if (num == 10) {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(0), window);
@@ -1105,7 +1102,6 @@ wins_tidy(void)
                     status_bar_active(num, window->type, identifier);
                 }
             }
-            free(identifier);
             num++;
             curr = g_list_next(curr);
         }
@@ -1142,14 +1138,13 @@ wins_create_summary(gboolean unread)
             GString* line = g_string_new("");
 
             int ui_index = GPOINTER_TO_INT(curr->data);
-            char* winstring = win_to_string(window);
+            auto_char char* winstring = win_to_string(window);
             if (!winstring) {
                 g_string_free(line, TRUE);
                 continue;
             }
 
             g_string_append_printf(line, "%d: %s", ui_index, winstring);
-            free(winstring);
 
             result = g_slist_append(result, strdup(line->str));
             g_string_free(line, TRUE);
@@ -1188,14 +1183,13 @@ wins_create_summary_attention()
             GString* line = g_string_new("");
 
             int ui_index = GPOINTER_TO_INT(curr->data);
-            char* winstring = win_to_string(window);
+            auto_char char* winstring = win_to_string(window);
             if (!winstring) {
                 g_string_free(line, TRUE);
                 continue;
             }
 
             g_string_append_printf(line, "%d: %s", ui_index, winstring);
-            free(winstring);
 
             result = g_slist_append(result, strdup(line->str));
             g_string_free(line, TRUE);

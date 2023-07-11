@@ -255,7 +255,7 @@ notify(const char* const message, int timeout, const char* const category)
 #ifdef HAVE_OSXNOTIFY
     GString* notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message '");
 
-    char* escaped_single = str_replace(message, "'", "'\\''");
+    auto_char char* escaped_single = str_replace(message, "'", "'\\''");
 
     if (escaped_single[0] == '<') {
         g_string_append(notify_command, "\\<");
@@ -274,7 +274,6 @@ notify(const char* const message, int timeout, const char* const category)
     }
 
     g_string_append(notify_command, "'");
-    free(escaped_single);
 
     char* term_name = getenv("TERM_PROGRAM");
     char* app_id = NULL;

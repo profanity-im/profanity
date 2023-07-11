@@ -83,7 +83,7 @@ log_database_init(ProfAccount* account)
         return FALSE;
     }
 
-    char* filename = _get_db_filename(account);
+    auto_char char* filename = _get_db_filename(account);
     if (!filename) {
         return FALSE;
     }
@@ -92,7 +92,6 @@ log_database_init(ProfAccount* account)
     if (ret != SQLITE_OK) {
         const char* err_msg = sqlite3_errmsg(g_chatlog_database);
         log_error("Error opening SQLite database: %s", err_msg);
-        free(filename);
         return FALSE;
     }
 
@@ -126,7 +125,6 @@ log_database_init(ProfAccount* account)
     }
 
     log_debug("Initialized SQLite database: %s", filename);
-    free(filename);
     return TRUE;
 
 out:
@@ -136,7 +134,6 @@ out:
     } else {
         log_error("Unknown SQLite error");
     }
-    free(filename);
     return FALSE;
 }
 

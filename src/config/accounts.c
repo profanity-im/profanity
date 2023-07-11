@@ -53,7 +53,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/jid.h"
 
-static char* accounts_loc;
+static gchar* accounts_loc;
 static GKeyFile* accounts;
 
 static Autocomplete all_ac;
@@ -861,9 +861,8 @@ accounts_set_last_activity(const char* const account_name)
         g_date_time_unref(nowdt);
 
         if (res) {
-            char* timestr = g_time_val_to_iso8601(&nowtv);
+            auto_char char* timestr = g_time_val_to_iso8601(&nowtv);
             g_key_file_set_string(accounts, account_name, "last.activity", timestr);
-            free(timestr);
             _save_accounts();
         }
     }
@@ -942,7 +941,7 @@ resource_presence_t
 accounts_get_login_presence(const char* const account_name)
 {
     resource_presence_t result;
-    gchar* setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
+    auto_gchar gchar* setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
 
     if (setting == NULL || (strcmp(setting, "online") == 0)) {
         result = RESOURCE_ONLINE;
@@ -961,21 +960,19 @@ accounts_get_login_presence(const char* const account_name)
         result = RESOURCE_ONLINE;
     }
 
-    g_free(setting);
     return result;
 }
 
 char*
 accounts_get_login_status(const char* const account_name)
 {
-    gchar* setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
+    auto_gchar gchar* setting = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
     gchar* status = NULL;
 
     if (g_strcmp0(setting, "last") == 0) {
         status = accounts_get_last_status(account_name);
     }
 
-    g_free(setting);
     return status;
 }
 
@@ -983,14 +980,10 @@ static void
 _save_accounts(void)
 {
     gsize g_data_size;
-    gchar* g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
+    auto_gchar gchar* g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
 
-    gchar* base = g_path_get_dirname(accounts_loc);
-    gchar* true_loc = get_file_or_linked(accounts_loc, base);
+    auto_gchar gchar* base = g_path_get_dirname(accounts_loc);
+    auto_gchar gchar* true_loc = get_file_or_linked(accounts_loc, base);
     g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
     g_chmod(accounts_loc, S_IRUSR | S_IWUSR);
-
-    g_free(base);
-    free(true_loc);
-    g_free(g_accounts_data);
 }

@@ -124,9 +124,8 @@ ox_announce_public_key(const char* const filename)
 
     xmpp_stanza_t* item = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(item, STANZA_NAME_ITEM);
-    char* timestamp = _gettimestamp();
+    auto_char char* timestamp = _gettimestamp();
     xmpp_stanza_set_attribute(item, STANZA_ATTR_ID, timestamp);
-    free(timestamp);
 
     xmpp_stanza_t* pubkey = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(pubkey, STANZA_NAME_PUPKEY);
@@ -267,9 +266,8 @@ _ox_metadata_node__public_key(const char* const fingerprint)
     xmpp_stanza_t* pubkeymetadata = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(pubkeymetadata, STANZA_NAME_PUBKEY_METADATA);
     xmpp_stanza_set_attribute(pubkeymetadata, STANZA_ATTR_V4_FINGERPRINT, fingerprint);
-    char* timestamp = _gettimestamp();
+    auto_char char* timestamp = _gettimestamp();
     xmpp_stanza_set_attribute(pubkeymetadata, STANZA_ATTR_DATE, timestamp);
-    free(timestamp);
 
     xmpp_stanza_add_child(publickeyslist, pubkeymetadata);
     xmpp_stanza_add_child(item, publickeyslist);
@@ -467,7 +465,7 @@ _ox_public_key_result(xmpp_stanza_t* const stanza, void* const userdata)
         log_error("[OX] No data");
     }
 
-    char* base64_data = xmpp_stanza_get_text(data);
+    auto_char char* base64_data = xmpp_stanza_get_text(data);
     if (base64_data) {
         log_debug("Key data: %s", base64_data);
 
@@ -476,8 +474,6 @@ _ox_public_key_result(xmpp_stanza_t* const stanza, void* const userdata)
         } else {
             cons_show("Public Key import failed. Check log for details.");
         }
-
-        free(base64_data);
     }
 
     return FALSE;

@@ -35,6 +35,7 @@
  */
 
 #include "config.h"
+#include "common.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -508,10 +509,9 @@ color_pair_cache_hash_str(const char* str, color_profile profile)
     int fg = color_hash(str, profile);
     int bg = -1;
 
-    char* bkgnd = theme_get_bkgnd();
+    auto_char char* bkgnd = theme_get_bkgnd();
     if (bkgnd) {
         bg = find_col(bkgnd, strlen(bkgnd));
-        free(bkgnd);
     }
 
     return _color_pair_cache_get(fg, bg);

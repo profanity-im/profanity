@@ -49,7 +49,7 @@ static GKeyFile* themes;
 void
 plugin_themes_init(void)
 {
-    char* themes_file = files_get_data_path(FILE_PLUGIN_THEMES);
+    auto_gchar gchar* themes_file = files_get_data_path(FILE_PLUGIN_THEMES);
 
     if (g_file_test(themes_file, G_FILE_TEST_EXISTS)) {
         g_chmod(themes_file, S_IRUSR | S_IWUSR);
@@ -59,11 +59,9 @@ plugin_themes_init(void)
     g_key_file_load_from_file(themes, themes_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
 
     gsize g_data_size;
-    gchar* g_data = g_key_file_to_data(themes, &g_data_size, NULL);
+    auto_gchar gchar* g_data = g_key_file_to_data(themes, &g_data_size, NULL);
     g_file_set_contents(themes_file, g_data, g_data_size, NULL);
     g_chmod(themes_file, S_IRUSR | S_IWUSR);
-    g_free(g_data);
-    free(themes_file);
 }
 
 void

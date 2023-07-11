@@ -329,13 +329,12 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     int num = wins_get_num(window);
 
     auto_gchar gchar* display_name;
-    char* mybarejid = connection_get_barejid();
+    auto_char char* mybarejid = connection_get_barejid();
     if (g_strcmp0(mybarejid, message->from_jid->barejid) == 0) {
         display_name = strdup("me");
     } else {
         display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
     }
-    free(mybarejid);
 
 #ifdef HAVE_LIBGPGME
     if (prefs_get_boolean(PREF_PGP_PUBKEY_AUTOIMPORT)) {
@@ -431,7 +430,7 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
     ProfWin* window = (ProfWin*)chatwin;
     wins_add_quotes_ac(window, message, FALSE);
 
-    char* enc_char;
+    auto_char char* enc_char;
     if (chatwin->outgoing_char) {
         enc_char = chatwin->outgoing_char;
     } else if (enc_mode == PROF_MSG_ENC_OTR) {
@@ -452,8 +451,6 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
         win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, message);
     }
 
-    free(enc_char);
-
     // save last id and message for LMC
     if (id) {
         _chatwin_set_last_message(chatwin, id, message);
@@ -465,7 +462,7 @@ chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message)
 {
     assert(chatwin != NULL);
 
-    char* enc_char;
+    auto_char char* enc_char;
     if (message->enc == PROF_MSG_ENC_PGP) {
         enc_char = prefs_get_pgp_char();
     } else if (message->enc == PROF_MSG_ENC_OMEMO) {
@@ -479,8 +476,6 @@ chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message)
     win_print_outgoing(window, enc_char, message->id, message->replace_id, message->plain);
     int num = wins_get_num(window);
     status_bar_active(num, WIN_CHAT, chatwin->barejid);
-
-    free(enc_char);
 }
 
 void
@@ -490,11 +485,9 @@ chatwin_contact_online(ProfChatWin* chatwin, Resource* resource, GDateTime* last
 
     const char* show = string_from_resource_presence(resource->presence);
     PContact contact = roster_get_contact(chatwin->barejid);
-    char* display_str = p_contact_create_display_string(contact, resource->name);
+    auto_char char* display_str = p_contact_create_display_string(contact, resource->name);
 
     win_show_status_string((ProfWin*)chatwin, display_str, show, resource->status, last_activity, "++", "online");
-
-    free(display_str);
 }
 
 void
@@ -503,11 +496,9 @@ chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status)
     assert(chatwin != NULL);
 
     PContact contact = roster_get_contact(chatwin->barejid);
-    char* display_str = p_contact_create_display_string(contact, resource);
+    auto_char char* display_str = p_contact_create_display_string(contact, resource);
 
     win_show_status_string((ProfWin*)chatwin, display_str, "offline", status, NULL, "--", "offline");
-
-    free(display_str);
 }
 
 char*

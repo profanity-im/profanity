@@ -110,7 +110,7 @@ int utf8_display_len(const char* const str);
 char* release_get_latest(void);
 gboolean release_is_new(char* found_version);
 
-char* get_file_or_linked(char* loc, char* basedir);
+gchar* get_file_or_linked(gchar* loc, gchar* basedir);
 char* strip_arg_quotes(const char* const input);
 gboolean is_notify_enabled(void);
 

@@ -288,7 +288,7 @@ prefs_close(void)
     prefs_loc = NULL;
 }
 
-char*
+gchar*
 prefs_autocomplete_boolean_choice(const char* const prefix, gboolean previous, void* context)
 {
     return autocomplete_complete(boolean_choice_ac, prefix, TRUE, previous);
@@ -300,7 +300,7 @@ prefs_reset_boolean_choice(void)
     autocomplete_reset(boolean_choice_ac);
 }
 
-char*
+gchar*
 prefs_autocomplete_room_trigger(const char* const prefix, gboolean previous, void* context)
 {
     return autocomplete_complete(room_trigger_ac, prefix, TRUE, previous);
@@ -1631,7 +1631,7 @@ prefs_add_alias(const char* const name, const char* const value)
     }
 }
 
-char*
+gchar*
 prefs_get_alias(const char* const name)
 {
     return g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
@@ -1704,16 +1704,12 @@ static void
 _save_prefs(void)
 {
     gsize g_data_size;
-    gchar* g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    gchar* base = g_path_get_dirname(prefs_loc);
-    gchar* true_loc = get_file_or_linked(prefs_loc, base);
+    auto_gchar gchar* g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
+    auto_gchar gchar* base = g_path_get_dirname(prefs_loc);
+    auto_gchar gchar* true_loc = get_file_or_linked(prefs_loc, base);
 
     g_file_set_contents(true_loc, g_prefs_data, g_data_size, NULL);
     g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
-
-    g_free(base);
-    free(true_loc);
-    g_free(g_prefs_data);
 }
 
 // get the preference group for a specific preference

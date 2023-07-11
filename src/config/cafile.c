@@ -49,13 +49,11 @@
 static gchar*
 _cafile_name(void)
 {
-    gchar* certs_dir = files_get_data_path(DIR_CERTS);
+    auto_gchar gchar* certs_dir = files_get_data_path(DIR_CERTS);
     if (!create_dir(certs_dir)) {
-        g_free(certs_dir);
         return NULL;
     }
     gchar* filename = g_strdup_printf("%s/CAfile.pem", certs_dir);
-    g_free(certs_dir);
     return filename;
 }
 

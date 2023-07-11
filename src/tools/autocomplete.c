@@ -114,8 +114,8 @@ autocomplete_length(Autocomplete ac)
 void
 autocomplete_update(Autocomplete ac, char** items)
 {
-    gchar* last_found = NULL;
-    gchar* search_str = NULL;
+    auto_gchar gchar* last_found = NULL;
+    auto_gchar gchar* search_str = NULL;
 
     if (ac->last_found) {
         last_found = strdup(ac->last_found->data);
@@ -131,12 +131,10 @@ autocomplete_update(Autocomplete ac, char** items)
     if (last_found) {
         // NULL if last_found was removed on update.
         ac->last_found = g_list_find_custom(ac->items, last_found, (GCompareFunc)strcmp);
-        free(last_found);
     }
 
     if (search_str) {
         ac->search_str = strdup(search_str);
-        free(search_str);
     }
 }
 

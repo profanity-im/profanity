@@ -54,7 +54,7 @@
 void
 scripts_init(void)
 {
-    char* scriptsdir = files_get_data_path(DIR_SCRIPTS);
+    auto_gchar gchar* scriptsdir = files_get_data_path(DIR_SCRIPTS);
 
     // mkdir if doesn't exist
     errno = 0;
@@ -67,18 +67,15 @@ scripts_init(void)
             log_error("Error creating directory: %s", scriptsdir);
         }
     }
-
-    free(scriptsdir);
 }
 
 GSList*
 scripts_list(void)
 {
-    char* scriptsdir = files_get_data_path(DIR_SCRIPTS);
+    auto_gchar gchar* scriptsdir = files_get_data_path(DIR_SCRIPTS);
 
     GSList* result = NULL;
     GDir* scripts = g_dir_open(scriptsdir, 0, NULL);
-    free(scriptsdir);
 
     if (scripts) {
         const gchar* script = g_dir_read_name(scripts);
@@ -95,9 +92,8 @@ scripts_list(void)
 GSList*
 scripts_read(const char* const script)
 {
-    char* scriptsdir = files_get_data_path(DIR_SCRIPTS);
+    auto_gchar gchar* scriptsdir = files_get_data_path(DIR_SCRIPTS);
     GString* scriptpath = g_string_new(scriptsdir);
-    free(scriptsdir);
     g_string_append(scriptpath, "/");
     g_string_append(scriptpath, script);
 
@@ -110,7 +106,7 @@ scripts_read(const char* const script)
 
     g_string_free(scriptpath, TRUE);
 
-    char* line = NULL;
+    auto_char char* line = NULL;
     size_t len = 0;
     GSList* result = NULL;
 
@@ -123,8 +119,6 @@ scripts_read(const char* const script)
     }
 
     fclose(scriptfile);
-    if (line)
-        free(line);
 
     return result;
 }
@@ -132,9 +126,8 @@ scripts_read(const char* const script)
 gboolean
 scripts_exec(const char* const script)
 {
-    char* scriptsdir = files_get_data_path(DIR_SCRIPTS);
+    auto_gchar gchar* scriptsdir = files_get_data_path(DIR_SCRIPTS);
     GString* scriptpath = g_string_new(scriptsdir);
-    free(scriptsdir);
     g_string_append(scriptpath, "/");
     g_string_append(scriptpath, script);
 
@@ -147,7 +140,7 @@ scripts_exec(const char* const script)
 
     g_string_free(scriptpath, TRUE);
 
-    char* line = NULL;
+    auto_char char* line = NULL;
     size_t len = 0;
 
     while (getline(&line, &len, scriptfile) != -1) {
@@ -158,8 +151,6 @@ scripts_exec(const char* const script)
     }
 
     fclose(scriptfile);
-    if (line)
-        free(line);
 
     return TRUE;
 }

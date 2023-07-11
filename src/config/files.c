@@ -117,7 +117,7 @@ files_get_inputrc_file(void)
 gchar*
 files_get_log_file(const char* const log_file)
 {
-    gchar* xdg_data = _files_get_xdg_data_home();
+    auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
     GString* logfile;
 
     if (log_file) {
@@ -141,7 +141,6 @@ files_get_log_file(const char* const log_file)
 
     gchar* result = g_strdup(logfile->str);
 
-    free(xdg_data);
     g_string_free(logfile, TRUE);
 
     return result;
@@ -159,24 +158,18 @@ files_get_config_path(const char* const config_base)
 gchar*
 files_get_data_path(const char* const data_base)
 {
-    gchar* xdg_data = _files_get_xdg_data_home();
-    gchar* result = g_strdup_printf("%s/profanity/%s", xdg_data, data_base);
-    g_free(xdg_data);
+    auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
+    gchar* result = g_strdup_printf("%s/profanity/%s", xdg_data, date_base);
     return result;
 }
 
 gchar*
 files_get_account_data_path(const char* const specific_dir, const char* const jid)
 {
-    gchar* data_dir = files_get_data_path(specific_dir);
-    gchar* account_dir = str_replace(jid, "@", "_at_");
+    auto_gchar gchar* data_dir = files_get_data_path(specific_dir);
+    auto_gchar gchar* account_dir = str_replace(jid, "@", "_at_");
 
-    gchar* result = g_strdup_printf("%s/%s", data_dir, account_dir);
-
-    g_free(account_dir);
-    g_free(data_dir);
-
-    return result;
+    return g_strdup_printf("%s/%s", data_dir, account_dir);
 }
 
 gchar*

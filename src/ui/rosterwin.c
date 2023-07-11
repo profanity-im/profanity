@@ -307,10 +307,9 @@ _rosterwin_unsubscribed_item(ProfLayoutSplit* layout, ProfChatWin* chatwin)
             indent--;
         }
     }
-    char* ch = prefs_get_roster_contact_char();
+    auto_char char* ch = prefs_get_roster_contact_char();
     if (ch) {
         g_string_append_printf(msg, "%s", ch);
-        free(ch);
     }
 
     auto_gchar gchar* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
@@ -369,10 +368,9 @@ _rosterwin_contact(ProfLayoutSplit* layout, PContact contact)
             indent--;
         }
     }
-    char* ch = prefs_get_roster_contact_char();
+    auto_char char* ch = prefs_get_roster_contact_char();
     if (ch) {
         g_string_append_printf(msg, "%s", ch);
-        free(ch);
     }
 
     auto_gchar gchar* unreadpos = prefs_get_string(PREF_ROSTER_UNREAD);
@@ -519,10 +517,9 @@ _rosterwin_resources(ProfLayoutSplit* layout, PContact contact, int current_inde
 
             wattron(layout->subwin, theme_attrs(resource_presence_colour));
             GString* msg = g_string_new("");
-            char* ch = prefs_get_roster_resource_char();
+            auto_char char* ch = prefs_get_roster_resource_char();
             if (ch) {
                 g_string_append_printf(msg, "%s", ch);
-                free(ch);
             } else {
                 g_string_append(msg, " ");
             }
@@ -581,10 +578,9 @@ _rosterwin_resources(ProfLayoutSplit* layout, PContact contact, int current_inde
                     g_string_append(msg, " ");
                     this_indent--;
                 }
-                char* ch = prefs_get_roster_resource_char();
+                auto_char char* ch = prefs_get_roster_resource_char();
                 if (ch) {
                     g_string_append_printf(msg, "%s", ch);
-                    free(ch);
                 }
                 g_string_append(msg, resource->name);
                 if (prefs_get_boolean(PREF_ROSTER_PRIORITY)) {
@@ -741,10 +737,9 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
             indent--;
         }
     }
-    char* ch = prefs_get_roster_room_char();
+    auto_char char* ch = prefs_get_roster_room_char();
     if (ch) {
         g_string_append_printf(msg, "%s", ch);
-        free(ch);
     }
 
     auto_gchar gchar* unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
@@ -838,10 +833,9 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
 
-            ch = prefs_get_roster_room_private_char();
-            if (ch) {
-                g_string_append_printf(privmsg, "%s", ch);
-                free(ch);
+            auto_char char* ch2 = prefs_get_roster_room_private_char();
+            if (ch2) {
+                g_string_append_printf(privmsg, "%s", ch2);
             }
 
             char* nick = privwin->fulljid + strlen(mucwin->roomjid) + 1;
@@ -930,10 +924,9 @@ _rosterwin_private_chats(ProfLayoutSplit* layout, GList* orphaned_privchats)
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
 
-            char* ch = prefs_get_roster_private_char();
+            auto_char char* ch = prefs_get_roster_private_char();
             if (ch) {
                 g_string_append_printf(privmsg, "%s", ch);
-                free(ch);
             }
 
             g_string_append(privmsg, privwin->fulljid);
@@ -1011,10 +1004,9 @@ _rosterwin_unsubscribed_header(ProfLayoutSplit* layout, GList* wins)
     win_sub_newline_lazy(layout->subwin);
 
     GString* header = g_string_new(" ");
-    char* ch = prefs_get_roster_header_char();
+    auto_char char* ch = prefs_get_roster_header_char();
     if (ch) {
         g_string_append_printf(header, "%s", ch);
-        free(ch);
     }
 
     g_string_append(header, "Unsubscribed");
@@ -1057,10 +1049,9 @@ _rosterwin_contacts_header(ProfLayoutSplit* layout, const char* const title, GSL
     win_sub_newline_lazy(layout->subwin);
 
     GString* header = g_string_new(" ");
-    char* ch = prefs_get_roster_header_char();
+    auto_char char* ch = prefs_get_roster_header_char();
     if (ch) {
         g_string_append_printf(header, "%s", ch);
-        free(ch);
     }
 
     g_string_append(header, title);
@@ -1108,10 +1099,9 @@ _rosterwin_rooms_header(ProfLayoutSplit* layout, GList* rooms, char* title)
 {
     win_sub_newline_lazy(layout->subwin);
     GString* header = g_string_new(" ");
-    char* ch = prefs_get_roster_header_char();
+    auto_char char* ch = prefs_get_roster_header_char();
     if (ch) {
         g_string_append_printf(header, "%s", ch);
-        free(ch);
     }
     g_string_append(header, title);
 
@@ -1170,10 +1160,9 @@ _rosterwin_private_header(ProfLayoutSplit* layout, GList* privs)
     win_sub_newline_lazy(layout->subwin);
 
     GString* title_str = g_string_new(" ");
-    char* ch = prefs_get_roster_header_char();
+    auto_char char* ch = prefs_get_roster_header_char();
     if (ch) {
         g_string_append_printf(title_str, "%s", ch);
-        free(ch);
     }
     g_string_append(title_str, "Private chats");
 

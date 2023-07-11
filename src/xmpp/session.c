@@ -121,7 +121,7 @@ session_connect_with_account(const ProfAccount* const account)
     saved_account.name = strdup(account->name);
     saved_account.passwd = strdup(account->password);
 
-    char* jid = NULL;
+    auto_char char* jid = NULL;
     if (account->resource) {
         Jid* jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
         jid = strdup(jidp->fulljid);
@@ -137,7 +137,6 @@ session_connect_with_account(const ProfAccount* const account)
         account->port,
         account->tls_policy,
         account->auth_policy);
-    free(jid);
 
     return result;
 }
@@ -179,9 +178,8 @@ session_connect_with_details(const char* const jid, const char* const passwd, co
     Jid* jidp = jid_create(jid);
     if (jidp->resourcepart == NULL) {
         jid_destroy(jidp);
-        char* resource = jid_random_resource();
+        auto_char char* resource = jid_random_resource();
         jidp = jid_create_from_bare_and_resource(jid, resource);
-        free(resource);
         saved_details.jid = strdup(jidp->fulljid);
     } else {
         saved_details.jid = strdup(jid);
@@ -560,7 +558,7 @@ session_reconnect_now(void)
         return;
     }
 
-    char* jid = NULL;
+    auto_char char* jid = NULL;
     if (account->resource) {
         jid = create_fulljid(account->jid, account->resource);
     } else {
@@ -578,7 +576,6 @@ session_reconnect_now(void)
 
     log_debug("Attempting reconnect with account %s", account->name);
     connection_connect(jid, saved_account.passwd, server, port, account->tls_policy, account->auth_policy);
-    free(jid);
     account_free(account);
     if (reconnect_timer)
         g_timer_start(reconnect_timer);

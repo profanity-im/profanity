@@ -1242,12 +1242,11 @@ vcard_print(xmpp_ctx_t* ctx, ProfWin* window, char* jid)
 
     data->window = window;
 
-    char* id = connection_create_stanza_id();
+    auto_char char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_vcard_request_iq(ctx, jid, id);
 
     iq_id_handler_add(id, _vcard_print_result, (ProfIqFreeCallback)_free_userdata, data);
 
-    free(id);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -1306,9 +1305,8 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
     GString* filename;
 
     if (!data->filename) {
-        char* path = files_get_data_path(DIR_PHOTOS);
+        auto_gchar gchar* path = files_get_data_path(DIR_PHOTOS);
         filename = g_string_new(path);
-        free(path);
         g_string_append(filename, "/");
 
         errno = 0;
@@ -1405,12 +1403,11 @@ vcard_photo(xmpp_ctx_t* ctx, char* jid, char* filename, int index, gboolean open
         data->filename = strdup(filename);
     }
 
-    char* id = connection_create_stanza_id();
+    auto_char char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_vcard_request_iq(ctx, jid, id);
 
     iq_id_handler_add(id, _vcard_photo_result, (ProfIqFreeCallback)_free_userdata, data);
 
-    free(id);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -1441,12 +1438,11 @@ vcard_user_refresh(void)
         return;
     }
 
-    char* id = connection_create_stanza_id();
+    auto_char char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_vcard_request_iq(connection_get_ctx(), NULL, id);
 
     iq_id_handler_add(id, _vcard_refresh_result, NULL, NULL);
 
-    free(id);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -1455,7 +1451,7 @@ vcard_user_refresh(void)
 void
 vcard_upload(xmpp_ctx_t* ctx, vCard* vcard)
 {
-    char* id = connection_create_stanza_id();
+    auto_char char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
     xmpp_stanza_set_from(iq, connection_get_fulljid());
 
@@ -1463,14 +1459,12 @@ vcard_upload(xmpp_ctx_t* ctx, vCard* vcard)
 
     if (!vcard_stanza) {
         xmpp_stanza_release(iq);
-        free(id);
         return;
     }
 
     xmpp_stanza_add_child(iq, vcard_stanza);
     xmpp_stanza_release(vcard_stanza);
 
-    free(id);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }

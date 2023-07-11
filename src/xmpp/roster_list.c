@@ -264,7 +264,7 @@ roster_change_name(PContact contact, const char* const new_name)
     assert(roster != NULL);
     assert(contact != NULL);
 
-    char* current_name = NULL;
+    auto_char char* current_name = NULL;
     const char* barejid = p_contact_barejid(contact);
 
     if (p_contact_name(contact)) {
@@ -273,7 +273,6 @@ roster_change_name(PContact contact, const char* const new_name)
 
     p_contact_set_name(contact, new_name);
     _replace_name(current_name, new_name, barejid);
-    free(current_name);
 }
 
 void
@@ -415,6 +414,15 @@ roster_add(const char* const barejid, const char* const name, GSList* groups, co
     return TRUE;
 }
 
+/**
+ * Retrieve the bare JID from the roster based on the name.
+ *
+ * @param name The name associated with the bare JID.
+ * @return The corresponding bare JID if found, or NULL if not found.
+ *
+ * @note The returned value should not be freed explicitly. The memory
+ *       management is handled by the underlying hash table.
+ */
 char*
 roster_barejid_from_name(const char* const name)
 {

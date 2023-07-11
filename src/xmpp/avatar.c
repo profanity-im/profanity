@@ -100,7 +100,7 @@ avatar_pep_subscribe(void)
 gboolean
 avatar_set(const char* path)
 {
-    char* expanded_path = get_expanded_path(path);
+    auto_char char* expanded_path = get_expanded_path(path);
 
     GError* err = NULL;
     GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(expanded_path, &err);
@@ -109,7 +109,6 @@ avatar_set(const char* path)
         cons_show_error("An error occurred while opening %s: %s.", expanded_path, err ? err->message : "No error message given");
         return FALSE;
     }
-    free(expanded_path);
 
     // Scale img
     int w = gdk_pixbuf_get_width(pixbuf);
@@ -127,7 +126,7 @@ avatar_set(const char* path)
         pixbuf = new_pixbuf;
     }
 
-    gchar* img_data;
+    auto_gchar gchar* img_data;
     gsize len = -1;
 
     if (!gdk_pixbuf_save_to_buffer(pixbuf, &img_data, &len, "png", &err, NULL)) {
@@ -141,7 +140,6 @@ avatar_set(const char* path)
     xmpp_stanza_release(iq);
 
     iq = stanza_create_avatar_metadata_publish_iq(ctx, img_data, len, gdk_pixbuf_get_height(pixbuf), gdk_pixbuf_get_width(pixbuf));
-    free(img_data);
     g_object_unref(pixbuf);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -252,12 +250,10 @@ _avatar_request_item_by_id(const char* jid, avatar_metadata* data)
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    char* uid = connection_create_stanza_id();
+    auto_char char* uid = connection_create_stanza_id();
 
     xmpp_stanza_t* iq = stanza_create_avatar_retrieve_data_request(ctx, uid, data->id, jid);
     iq_id_handler_add(uid, _avatar_request_item_result_handler, (ProfIqFreeCallback)_free_avatar_data, data);
-
-    free(uid);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -297,18 +293,16 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
         return 1;
     }
 
-    char* buf = xmpp_stanza_get_text(st_data);
+    auto_char char* buf = xmpp_stanza_get_text(st_data);
     if (!buf) {
         return 1;
     }
 
     gsize size;
-    gchar* de = (gchar*)g_base64_decode(buf, &size);
-    free(buf);
+    auto_gchar gchar* de = (gchar*)g_base64_decode(buf, &size);
 
-    char* path = files_get_data_path("");
+    auto_gchar gchar* path = files_get_data_path("");
     GString* filename = g_string_new(path);
-    free(path);
 
     g_string_append(filename, "avatars/");
 
@@ -323,7 +317,7 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
         }
     }
 
-    gchar* from = str_replace(from_attr, "@", "_at_");
+    auto_gchar gchar* from = str_replace(from_attr, "@", "_at_");
     g_string_append(filename, from);
 
     avatar_metadata* data = (avatar_metadata*)userdata;
@@ -339,8 +333,6 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
     } else if (g_strcmp0(data->type, "image/webp") == 0) {
         g_string_append(filename, ".webp");
     }
-
-    free(from);
 
     GError* err = NULL;
     if (g_file_set_contents(filename->str, de, size, &err) == FALSE) {
@@ -371,7 +363,6 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
     }
 
     g_string_free(filename, TRUE);
-    free(de);
 
     return 1;
 }

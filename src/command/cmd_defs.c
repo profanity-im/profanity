@@ -3052,13 +3052,12 @@ command_mangen(void)
     while (curr) {
         Command* pcmd = curr->data;
 
-        gchar* filename = g_strdup_printf("docs/profanity-%s.1", &pcmd->cmd[1]);
+        auto_gchar gchar* filename = g_strdup_printf("docs/profanity-%s.1", &pcmd->cmd[1]);
         if (!filename) {
             log_error("command_mangen(): could not allocate memory");
             return;
         }
         FILE* manpage = fopen(filename, "w");
-        free(filename);
 
         fprintf(manpage, "%s\n", header);
         fputs(".SH NAME\n", manpage);

@@ -111,12 +111,8 @@ jid_create(const gchar* const str)
 Jid*
 jid_create_from_bare_and_resource(const char* const barejid, const char* const resource)
 {
-    Jid* result;
-    char* jid = create_fulljid(barejid, resource);
-    result = jid_create(jid);
-    free(jid);
-
-    return result;
+    auto_char char* jid = create_fulljid(barejid, resource);
+    return jid_create(jid);
 }
 
 void

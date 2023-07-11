@@ -515,7 +515,7 @@ mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* c
     char* mynick = muc_nick(mucwin->roomjid);
 
     // displayed message char
-    char* ch;
+    auto_char char* ch;
     if (mucwin->message_char) {
         ch = strdup(mucwin->message_char);
     } else if (enc_mode == PROF_MSG_ENC_OTR) {
@@ -531,7 +531,6 @@ mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* c
     }
 
     win_print_outgoing_muc_msg(window, ch, mynick, id, replace_id, message);
-    free(ch);
 
     // save last id and message for LMC
     if (id) {
@@ -564,7 +563,7 @@ mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList
     ProfWin* window = (ProfWin*)mucwin;
     char* mynick = muc_nick(mucwin->roomjid);
 
-    char* ch;
+    auto_char char* ch;
     if (mucwin->message_char) {
         ch = strdup(mucwin->message_char);
     } else if (message->enc == PROF_MSG_ENC_OTR) {
@@ -589,8 +588,6 @@ mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList
     } else {
         win_println_incoming_muc_msg(window, ch, flags, message);
     }
-
-    free(ch);
 }
 
 void
