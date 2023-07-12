@@ -541,13 +541,13 @@ prefs_get_string(preference_t pref)
 }
 
 gchar*
-prefs_get_string_with_option(preference_t pref, gchar* option)
+prefs_get_string_with_locale(preference_t pref, gchar* locale)
 {
     const char* group = _get_group(pref);
     const char* key = _get_key(pref);
     char* def = _get_default_string(pref);
 
-    gchar* result = g_key_file_get_locale_string(prefs, group, key, option, NULL);
+    gchar* result = g_key_file_get_locale_string(prefs, group, key, locale, NULL);
 
     if (result == NULL) {
         // check for user set default
@@ -566,14 +566,14 @@ prefs_get_string_with_option(preference_t pref, gchar* option)
 }
 
 void
-prefs_set_string(preference_t pref, char* value)
+prefs_set_string(preference_t pref, gchar* new_value)
 {
     const char* group = _get_group(pref);
     const char* key = _get_key(pref);
-    if (value == NULL) {
+    if (new_value == NULL) {
         g_key_file_remove_key(prefs, group, key, NULL);
     } else {
-        g_key_file_set_string(prefs, group, key, value);
+        g_key_file_set_string(prefs, group, key, new_value);
     }
 }
 

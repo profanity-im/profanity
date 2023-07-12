@@ -406,7 +406,7 @@ _get_log_filename(const char* const other, const char* const login, GDateTime* d
 {
     auto_gchar gchar* chatlogs_dir = files_file_in_account_data_path(DIR_CHATLOGS, login, is_room ? "rooms" : NULL);
     auto_gchar gchar* logfile_name = g_date_time_format(dt, "%Y_%m_%d.log");
-    auto_gchar gchar* other_ = str_replace(other, "@", "_at_");
+    auto_char char* other_ = str_replace(other, "@", "_at_");
     auto_gchar gchar* logs_path = g_strdup_printf("%s/%s", chatlogs_dir, other_);
     gchar* logfile_path = NULL;
 

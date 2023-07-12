@@ -830,8 +830,8 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
                 }
             }
 
-            unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
-            if ((g_strcmp0(unreadpos, "before") == 0) && privwin->unread > 0) {
+            auto_gchar gchar* unreadpos2 = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
+            if ((g_strcmp0(unreadpos2, "before") == 0) && privwin->unread > 0) {
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
 
@@ -843,7 +843,7 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
             char* nick = privwin->fulljid + strlen(mucwin->roomjid) + 1;
             g_string_append(privmsg, nick);
 
-            if ((g_strcmp0(unreadpos, "after") == 0) && privwin->unread > 0) {
+            if ((g_strcmp0(unreadpos2, "after") == 0) && privwin->unread > 0) {
                 g_string_append_printf(privmsg, " (%d)", privwin->unread);
             }
 

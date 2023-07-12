@@ -176,7 +176,7 @@ gchar*
 files_get_account_data_path(const char* const specific_dir, const char* const jid)
 {
     auto_gchar gchar* data_dir = files_get_data_path(specific_dir);
-    auto_gchar gchar* account_dir = str_replace(jid, "@", "_at_");
+    auto_char char* account_dir = str_replace(jid, "@", "_at_");
 
     return g_strdup_printf("%s/%s", data_dir, account_dir);
 }

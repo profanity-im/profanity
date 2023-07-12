@@ -9270,15 +9270,15 @@ gboolean
 cmd_stamp(ProfWin* window, const char* const command, gchar** args)
 {
     if (g_strv_length(args) == 0) {
-        auto_gchar gchar* def = prefs_get_string(PREF_OUTGOING_STAMP);
-        if (def) {
-            cons_show("The outgoing stamp is: %s", def);
+        auto_gchar gchar* def_incoming = prefs_get_string(PREF_OUTGOING_STAMP);
+        if (def_incoming) {
+            cons_show("The outgoing stamp is: %s", def_incoming);
         } else {
             cons_show("The default outgoing stamp is used.");
         }
-        def = prefs_get_string(PREF_INCOMING_STAMP);
-        if (def) {
-            cons_show("The incoming stamp is: %s", def);
+        auto_gchar gchar* def_outgoing = prefs_get_string(PREF_INCOMING_STAMP);
+        if (def_outgoing) {
+            cons_show("The incoming stamp is: %s", def_outgoing);
         } else {
             cons_show("The default incoming stamp is used.");
         }
@@ -9687,12 +9687,11 @@ _cmd_executable_template(const preference_t setting, const char* command, gchar*
 
     } else if (g_strcmp0(args[1], "default") == 0) {
         prefs_set_string(setting, NULL);
-        gchar* def = prefs_get_string(setting);
+        auto_gchar gchar* def = prefs_get_string(setting);
         if (def == NULL) {
             def = g_strdup("built-in method");
         }
         cons_show("`%s` command set to invoke %s (default)", command, def);
-        g_free(def);
     } else {
         cons_bad_cmd_usage(command);
     }
