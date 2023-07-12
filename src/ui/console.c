@@ -337,9 +337,8 @@ cons_show_incoming_room_message(const char* const nick, const char* const room, 
         if (mention) {
             win_println(console, THEME_MENTION, "-", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
         } else if (triggers) {
-            char* triggers_str = _room_triggers_to_string(triggers);
+            auto_char char* triggers_str = _room_triggers_to_string(triggers);
             win_println(console, THEME_TRIGGER, "-", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
-            free(triggers_str);
         } else {
             // 'all' or 'first' if its the first message
             if ((g_strcmp0(muc_show, "all") == 0) || ((g_strcmp0(muc_show, "first") == 0) && (unread == 0))) {
@@ -387,7 +386,7 @@ cons_show_incoming_private_message(const char* const nick, const char* const roo
 static void
 _cons_welcome_first_start(void)
 {
-    gchar* ident_loc = files_get_data_path(FILE_PROFANITY_IDENTIFIER);
+    auto_gchar gchar* ident_loc = files_get_data_path(FILE_PROFANITY_IDENTIFIER);
     if (!g_file_test(ident_loc, G_FILE_TEST_EXISTS)) {
         ProfWin* console = wins_get_console();
         win_println(console, THEME_DEFAULT, "-", "This seems to be your first time starting Profanity.");
@@ -402,7 +401,6 @@ _cons_welcome_first_start(void)
         win_println(console, THEME_DEFAULT, "-", "/register myjid myserver.org");
         win_println(console, THEME_DEFAULT, "-", "");
     }
-    g_free(ident_loc);
 }
 
 void
@@ -452,26 +450,27 @@ void
 cons_check_version(gboolean not_available_msg)
 {
     ProfWin* console = wins_get_console();
-    char* latest_release = release_get_latest();
+    auto_char char* latest_release = release_get_latest();
 
-    if (latest_release) {
-        gboolean relase_valid = g_regex_match_simple("^\\d+\\.\\d+\\.\\d+$", latest_release, 0, 0);
+    if (!latest_release) {
+        return;
+    }
 
-        if (relase_valid) {
-            if (release_is_new(latest_release)) {
-                win_println(console, THEME_DEFAULT, "-", "A new version of Profanity is available: %s", latest_release);
-                win_println(console, THEME_DEFAULT, "-", "Check <https://profanity-im.github.io> for details.");
+    gboolean relase_valid = g_regex_match_simple("^\\d+\\.\\d+\\.\\d+$", latest_release, 0, 0);
+
+    if (relase_valid) {
+        if (release_is_new(latest_release)) {
+            win_println(console, THEME_DEFAULT, "-", "A new version of Profanity is available: %s", latest_release);
+            win_println(console, THEME_DEFAULT, "-", "Check <https://profanity-im.github.io> for details.");
+            win_println(console, THEME_DEFAULT, "-", "");
+        } else {
+            if (not_available_msg) {
+                win_println(console, THEME_DEFAULT, "-", "No new version available.");
                 win_println(console, THEME_DEFAULT, "-", "");
-            } else {
-                if (not_available_msg) {
-                    win_println(console, THEME_DEFAULT, "-", "No new version available.");
-                    win_println(console, THEME_DEFAULT, "-", "");
-                }
             }
-
-            cons_alert(NULL);
         }
-        free(latest_release);
+
+        cons_alert(NULL);
     }
 }
 
@@ -894,12 +893,10 @@ cons_show_qrcode(const char* const text)
 
     ProfWin* console = wins_get_console();
 
-    char* buf = calloc((width * 4) + 1, 1);
-    char* pad = calloc((width * 4) + 5, 1);
+    auto_char char* buf = calloc((width * 4) + 1, 1);
+    auto_char char* pad = calloc((width * 4) + 5, 1);
 
     if (!buf || !pad) {
-        free(pad);
-        free(buf);
         return;
     }
 
@@ -926,9 +923,6 @@ cons_show_qrcode(const char* const text)
     win_println(console, THEME_DEFAULT, "", "");
     win_println(console, THEME_DEFAULT, "", "");
 
-    free(pad);
-    free(buf);
-
     QRcode_free(qrcode);
 #else
     cons_show("This version of Profanity has not been built with libqrencode");
@@ -953,7 +947,7 @@ cons_show_status(const char* const barejid)
 void
 cons_show_room_invite(const char* const invitor, const char* const room, const char* const reason)
 {
-    char* display_from = NULL;
+    auto_char char* display_from = NULL;
     PContact contact = roster_get_contact(invitor);
     if (contact) {
         if (p_contact_name(contact)) {
@@ -980,8 +974,6 @@ cons_show_room_invite(const char* const invitor, const char* const room, const c
     if (prefs_get_boolean(PREF_NOTIFY_INVITE)) {
         notify_invite(display_from, room, reason);
     }
-
-    free(display_from);
 
     cons_alert(NULL);
 }
@@ -1412,10 +1404,9 @@ cons_occupants_setting(void)
     else
         cons_show("Occupants wrap (/occupants)         : OFF");
 
-    char* occupants_ch = prefs_get_occupants_char();
+    auto_char char* occupants_ch = prefs_get_occupants_char();
     if (occupants_ch) {
         cons_show("Occupants char (/occupants)         : %s", occupants_ch);
-        free(occupants_ch);
     } else {
         cons_show("Occupants char (/occupants)         : none");
     }
@@ -1426,10 +1417,9 @@ cons_occupants_setting(void)
     int size = prefs_get_occupants_size();
     cons_show("Occupants size (/occupants)         : %d", size);
 
-    char* header_ch = prefs_get_occupants_header_char();
+    auto_char char* header_ch = prefs_get_occupants_header_char();
     if (header_ch) {
         cons_show("Occupants header char (/occupants)  : %s", header_ch);
-        free(header_ch);
     } else {
         cons_show("Occupants header char (/occupants)  : none");
     }
@@ -1544,50 +1534,44 @@ cons_roster_setting(void)
     else
         cons_show("Roster offline (/roster)            : hide");
 
-    char* header_ch = prefs_get_roster_header_char();
+    auto_char char* header_ch = prefs_get_roster_header_char();
     if (header_ch) {
         cons_show("Roster header char (/roster)        : %s", header_ch);
-        free(header_ch);
     } else {
         cons_show("Roster header char (/roster)        : none");
     }
 
-    char* contact_ch = prefs_get_roster_contact_char();
+    auto_char char* contact_ch = prefs_get_roster_contact_char();
     if (contact_ch) {
         cons_show("Roster contact char (/roster)       : %s", contact_ch);
-        free(contact_ch);
     } else {
         cons_show("Roster contact char (/roster)       : none");
     }
 
-    char* resource_ch = prefs_get_roster_resource_char();
+    auto_char char* resource_ch = prefs_get_roster_resource_char();
     if (resource_ch) {
         cons_show("Roster resource char (/roster)      : %s", resource_ch);
-        free(resource_ch);
     } else {
         cons_show("Roster resource char (/roster)      : none");
     }
 
-    char* room_ch = prefs_get_roster_room_char();
+    auto_char char* room_ch = prefs_get_roster_room_char();
     if (room_ch) {
         cons_show("Roster room char (/roster)          : %s", room_ch);
-        free(room_ch);
     } else {
         cons_show("Roster room char (/roster)          : none");
     }
 
-    char* room_priv_ch = prefs_get_roster_room_private_char();
+    auto_char char* room_priv_ch = prefs_get_roster_room_private_char();
     if (room_priv_ch) {
         cons_show("Roster room private char (/roster)  : %s", room_priv_ch);
-        free(room_priv_ch);
     } else {
         cons_show("Roster room private char (/roster)  : none");
     }
 
-    char* private_ch = prefs_get_roster_private_char();
+    auto_char char* private_ch = prefs_get_roster_private_char();
     if (private_ch) {
         cons_show("Roster private char (/roster)       : %s", private_ch);
-        free(private_ch);
     } else {
         cons_show("Roster private char (/roster)       : none");
     }
@@ -2207,9 +2191,8 @@ cons_correction_setting(void)
         cons_show("Last Message Correction (XEP-0308) (/correction)                   : OFF");
     }
 
-    char* cc = prefs_get_correction_char();
+    auto_char char* cc = prefs_get_correction_char();
     cons_show("LMC indication char (/correction char)                             : %s", cc);
-    free(cc);
 }
 
 void
@@ -2303,9 +2286,8 @@ cons_show_otr_prefs(void)
         cons_show("OTR logging (/otr log)   : Redacted");
     }
 
-    char* ch = prefs_get_otr_char();
+    auto_char char* ch = prefs_get_otr_char();
     cons_show("OTR char (/otr char)     : %s", ch);
-    free(ch);
 
     if (prefs_get_boolean(PREF_OTR_SENDFILE)) {
         cons_show("Allow sending unencrypted files in an OTR session via /sendfile (/otr sendfile): ON");
@@ -2331,9 +2313,8 @@ cons_show_pgp_prefs(void)
         cons_show("PGP logging (/pgp log)   : Redacted");
     }
 
-    char* ch = prefs_get_pgp_char();
+    auto_char char* ch = prefs_get_pgp_char();
     cons_show("PGP char (/pgp char)     : %s", ch);
-    free(ch);
 
     if (prefs_get_boolean(PREF_PGP_SENDFILE)) {
         cons_show("Allow sending unencrypted files via /sendfile while otherwise using PGP (/pgp sendfile): ON");
@@ -2362,9 +2343,8 @@ cons_show_omemo_prefs(void)
         cons_show("OMEMO logging (/omemo log)   : Redacted");
     }
 
-    char* ch = prefs_get_omemo_char();
+    auto_char char* ch = prefs_get_omemo_char();
     cons_show("OMEMO char (/omemo char)     : %s", ch);
-    free(ch);
 
     cons_alert(NULL);
 }
@@ -2384,9 +2364,8 @@ cons_show_ox_prefs(void)
         cons_show("OX logging (/ox log)   : Redacted");
     }
 
-    char* ch = prefs_get_ox_char();
+    auto_char char* ch = prefs_get_ox_char();
     cons_show("OX char (/ox char)     : %s", ch);
-    free(ch);
 
     cons_alert(NULL);
 }
@@ -2550,24 +2529,21 @@ void
 cons_show_contact_online(PContact contact, Resource* resource, GDateTime* last_activity)
 {
     const char* show = string_from_resource_presence(resource->presence);
-    char* display_str = p_contact_create_display_string(contact, resource->name);
+    auto_char char* display_str = p_contact_create_display_string(contact, resource->name);
 
     ProfWin* console = wins_get_console();
     win_show_status_string(console, display_str, show, resource->status, last_activity,
                            "++", "online");
-
-    free(display_str);
 }
 
 void
 cons_show_contact_offline(PContact contact, char* resource, char* status)
 {
-    char* display_str = p_contact_create_display_string(contact, resource);
+    auto_char char* display_str = p_contact_create_display_string(contact, resource);
 
     ProfWin* console = wins_get_console();
     win_show_status_string(console, display_str, "offline", status, NULL, "--",
                            "offline");
-    free(display_str);
 }
 
 void
@@ -2593,7 +2569,7 @@ cons_alert(ProfWin* alert_origin_window)
     if (current->type != WIN_CONSOLE) {
         status_bar_new(1, WIN_CONSOLE, "console");
 
-        char* win_name;
+        auto_char char* win_name;
         if (alert_origin_window) {
             win_name = win_to_string(alert_origin_window);
         } else {
@@ -2604,8 +2580,6 @@ cons_alert(ProfWin* alert_origin_window)
         if (!item) {
             alert_list = g_list_append(alert_list, g_strdup(win_name));
         }
-
-        free(win_name);
     }
 }
 
@@ -2942,11 +2916,10 @@ cons_clear_alerts(void)
 void
 cons_remove_alert(ProfWin* window)
 {
-    char* win_name = win_to_string(window);
+    auto_char char* win_name = win_to_string(window);
     GList* item = g_list_find_custom(alert_list, win_name, (GCompareFunc)g_strcmp0);
     alert_list = g_list_remove_link(alert_list, item);
     g_list_free_full(item, g_free);
-    free(win_name);
 }
 
 void

@@ -213,10 +213,10 @@ void prefs_reload(void);
 char* prefs_find_login(char* prefix);
 void prefs_reset_login_search(void);
 
-char* prefs_autocomplete_boolean_choice(const char* const prefix, gboolean previous, void* context);
+gchar* prefs_autocomplete_boolean_choice(const char* const prefix, gboolean previous, void* context);
 void prefs_reset_boolean_choice(void);
 
-char* prefs_autocomplete_room_trigger(const char* const prefix, gboolean previous, void* context);
+gchar* prefs_autocomplete_room_trigger(const char* const prefix, gboolean previous, void* context);
 void prefs_reset_room_trigger_ac(void);
 
 gint prefs_get_gone(void);
@@ -311,7 +311,7 @@ gint prefs_get_tray_timer(void);
 
 gboolean prefs_add_alias(const char* const name, const char* const value);
 gboolean prefs_remove_alias(const char* const name);
-char* prefs_get_alias(const char* const name);
+gchar* prefs_get_alias(const char* const name);
 GList* prefs_get_aliases(void);
 void prefs_free_aliases(GList* aliases);
 

@@ -195,12 +195,10 @@ _title_bar_draw(void)
         waddch(win, ' ');
     }
 
-    char* title = win_get_title(current);
+    auto_char char* title = win_get_title(current);
 
     mvwprintw(win, 0, 0, " %s", title);
     pos = strlen(title) + 1;
-
-    free(title);
 
     // presence is written from the right side
     // calculate it first so we have a maxposition

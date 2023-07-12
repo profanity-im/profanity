@@ -122,15 +122,14 @@ static void
 cb_inject_message(void* opdata, const char* accountname,
                   const char* protocol, const char* recipient, const char* message)
 {
-    char* id = message_send_chat_otr(recipient, message, FALSE, NULL);
-    free(id);
+    free(message_send_chat_otr(recipient, message, FALSE, NULL));
 }
 
 static void
 cb_write_fingerprints(void* opdata)
 {
     gcry_error_t err = 0;
-    gchar* fpsfilename = files_file_in_account_data_path(DIR_OTR, jid, "fingerprints.txt");
+    auto_gchar gchar* fpsfilename = files_file_in_account_data_path(DIR_OTR, jid, "fingerprints.txt");
     if (!fpsfilename) {
         log_error("Failed to create fingerprints file");
         cons_show_error("Failed to create fingerprints file");
@@ -142,8 +141,6 @@ cb_write_fingerprints(void* opdata)
         log_error("Failed to write fingerprints file");
         cons_show_error("Failed to write fingerprints file");
     }
-
-    g_free(fpsfilename);
 }
 
 static void
@@ -305,8 +302,7 @@ otr_on_message_recv(const char* const barejid, const char* const resource, const
                 memmove(whitespace_base, whitespace_base + tag_length, tag_length);
                 char* otr_query_message = otr_start_query();
                 cons_show("OTR Whitespace pattern detected. Attempting to start OTR session…");
-                char* id = message_send_chat_otr(barejid, otr_query_message, FALSE, NULL);
-                free(id);
+                free(message_send_chat_otr(barejid, otr_query_message, FALSE, NULL));
             }
         }
     }
@@ -319,8 +315,7 @@ otr_on_message_recv(const char* const barejid, const char* const resource, const
     if (policy == PROF_OTRPOLICY_ALWAYS && *decrypted == FALSE && !whitespace_base) {
         char* otr_query_message = otr_start_query();
         cons_show("Attempting to start OTR session…");
-        char* id = message_send_chat_otr(barejid, otr_query_message, FALSE, NULL);
-        free(id);
+        free(message_send_chat_otr(barejid, otr_query_message, FALSE, NULL));
     }
 
     return newmessage;
@@ -329,7 +324,7 @@ otr_on_message_recv(const char* const barejid, const char* const resource, const
 gboolean
 otr_on_message_send(ProfChatWin* chatwin, const char* const message, gboolean request_receipt, const char* const replace_id)
 {
-    char* id = NULL;
+    auto_char char* id = NULL;
     prof_otrpolicy_t policy = otr_get_policy(chatwin->barejid);
 
     // Send encrypted message
@@ -341,7 +336,6 @@ otr_on_message_send(ProfChatWin* chatwin, const char* const message, gboolean re
             log_database_add_outgoing_chat(id, chatwin->barejid, message, replace_id, PROF_MSG_ENC_OTR);
             chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_ENC_OTR, request_receipt, replace_id);
             otr_free_message(encrypted);
-            free(id);
             return TRUE;
         } else {
             win_println((ProfWin*)chatwin, THEME_ERROR, "-", "%s", "Failed to encrypt and send message.");
@@ -357,12 +351,10 @@ otr_on_message_send(ProfChatWin* chatwin, const char* const message, gboolean re
 
     // tag and send for policy opportunistic
     if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
-        char* otr_tagged_msg = otr_tag_message(message);
+        auto_char char* otr_tagged_msg = otr_tag_message(message);
         id = message_send_chat_otr(chatwin->barejid, otr_tagged_msg, request_receipt, replace_id);
         chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_ENC_NONE, request_receipt, replace_id);
         chat_log_msg_out(chatwin->barejid, message, NULL);
-        free(otr_tagged_msg);
-        free(id);
         return TRUE;
     }
 

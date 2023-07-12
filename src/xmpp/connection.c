@@ -238,10 +238,9 @@ _conn_apply_settings(const char* const jid, const char* const passwd, const char
         return FALSE;
     }
 
-    char* cert_path = prefs_get_tls_certpath();
+    auto_char char* cert_path = prefs_get_tls_certpath();
     if (cert_path) {
         xmpp_conn_set_capath(conn.xmpp_conn, cert_path);
-        free(cert_path);
     }
 
     xmpp_conn_set_certfail_handler(conn.xmpp_conn, _connection_certfail_cb);
@@ -734,9 +733,8 @@ connection_get_barejid(void)
     if (!jid)
         return NULL;
 
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
     char* result = strdup(jidp->barejid);
-    jid_destroy(jidp);
 
     return result;
 }
@@ -811,17 +809,14 @@ connection_free_uuid(char* uuid)
 char*
 connection_create_stanza_id(void)
 {
-    char* rndid = get_random_string(CON_RAND_ID_LEN);
+    auto_char char* rndid = get_random_string(CON_RAND_ID_LEN);
     assert(rndid != NULL);
 
-    gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA1,
-                                            (guchar*)prof_identifier, strlen(prof_identifier),
-                                            rndid, strlen(rndid));
+    auto_gchar gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA1,
+                                                       (guchar*)prof_identifier, strlen(prof_identifier),
+                                                       rndid, strlen(rndid));
 
     char* ret = g_strdup_printf("%s%s", rndid, hmac);
-
-    free(rndid);
-    g_free(hmac);
 
     return ret;
 }
@@ -1108,10 +1103,8 @@ _xmpp_file_logger(void* const userdata, const xmpp_log_level_t xmpp_level, const
 static void
 _random_bytes_init(void)
 {
-    char* rndbytes_loc;
+    auto_gchar gchar* rndbytes_loc = files_get_data_path(FILE_PROFANITY_IDENTIFIER);
     GKeyFile* rndbytes;
-
-    rndbytes_loc = files_get_data_path(FILE_PROFANITY_IDENTIFIER);
 
     if (g_file_test(rndbytes_loc, G_FILE_TEST_EXISTS)) {
         g_chmod(rndbytes_loc, S_IRUSR | S_IWUSR);
@@ -1127,18 +1120,13 @@ _random_bytes_init(void)
         g_key_file_set_string(rndbytes, "identifier", "random_bytes", profanity_instance_id);
 
         gsize g_data_size;
-        gchar* g_accounts_data = g_key_file_to_data(rndbytes, &g_data_size, NULL);
+        auto_gchar gchar* g_accounts_data = g_key_file_to_data(rndbytes, &g_data_size, NULL);
 
-        gchar* base = g_path_get_dirname(rndbytes_loc);
-        gchar* true_loc = get_file_or_linked(rndbytes_loc, base);
+        auto_gchar gchar* base = g_path_get_dirname(rndbytes_loc);
+        auto_gchar gchar* true_loc = get_file_or_linked(rndbytes_loc, base);
         g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
-
-        g_free(base);
-        free(true_loc);
-        g_free(g_accounts_data);
     }
 
-    free(rndbytes_loc);
     g_key_file_free(rndbytes);
 }
 

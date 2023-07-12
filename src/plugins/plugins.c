@@ -172,9 +172,8 @@ gboolean
 plugins_uninstall(const char* const plugin_name)
 {
     plugins_unload(plugin_name);
-    char* plugins_dir = files_get_data_path(DIR_PLUGINS);
+    auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
     GString* target_path = g_string_new(plugins_dir);
-    free(plugins_dir);
     g_string_append(target_path, "/");
     g_string_append(target_path, plugin_name);
     GFile* file = g_file_new_for_path(target_path->str);
@@ -189,9 +188,8 @@ plugins_uninstall(const char* const plugin_name)
 gboolean
 plugins_install(const char* const plugin_name, const char* const filename, GString* error_message)
 {
-    char* plugins_dir = files_get_data_path(DIR_PLUGINS);
+    auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
     GString* target_path = g_string_new(plugins_dir);
-    free(plugins_dir);
     g_string_append(target_path, "/");
     g_string_append(target_path, plugin_name);
 
@@ -387,9 +385,8 @@ GSList*
 plugins_unloaded_list(void)
 {
     GSList* result = NULL;
-    char* plugins_dir = files_get_data_path(DIR_PLUGINS);
+    auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
     _plugins_unloaded_list_dir(plugins_dir, &result);
-    free(plugins_dir);
 
     return result;
 }

@@ -86,8 +86,8 @@ void
 omemo_devicelist_configure(void)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = connection_create_stanza_id();
-    Jid* jid = jid_create(connection_get_fulljid());
+    auto_char char* id = connection_create_stanza_id();
+    auto_jid Jid* jid = jid_create(connection_get_fulljid());
 
     xmpp_stanza_t* iq = stanza_create_pubsub_configure_request(ctx, id, jid->barejid, STANZA_NS_OMEMO_DEVICELIST);
 
@@ -96,15 +96,13 @@ omemo_devicelist_configure(void)
     iq_send_stanza(iq);
 
     xmpp_stanza_release(iq);
-    free(id);
-    jid_destroy(jid);
 }
 
 void
 omemo_devicelist_request(const char* const jid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = connection_create_stanza_id();
+    auto_char char* id = connection_create_stanza_id();
 
     log_debug("[OMEMO] request device list for jid: %s", jid);
 
@@ -113,7 +111,6 @@ omemo_devicelist_request(const char* const jid)
 
     iq_send_stanza(iq);
 
-    free(id);
     xmpp_stanza_release(iq);
 }
 

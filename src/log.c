@@ -73,9 +73,9 @@ enum {
 static void
 _rotate_log_file(void)
 {
-    gchar* log_file = g_strdup(mainlogfile);
+    auto_gchar gchar* log_file = g_strdup(mainlogfile);
     size_t len = strlen(log_file);
-    gchar* log_file_new = malloc(len + 5);
+    auto_gchar gchar* log_file_new = malloc(len + 5);
 
     // the mainlog file should always end in '.log', lets remove this last part
     // so that we can have profanity.001.log later
@@ -100,8 +100,6 @@ _rotate_log_file(void)
 
     log_init(log_get_filter(), NULL);
 
-    free(log_file_new);
-    free(log_file);
     log_info("Log has been rotated");
 }
 

@@ -94,10 +94,9 @@ _p_gpg_passphrase_cb(void* hook, const char* uid_hint, const char* passphrase_in
     } else {
         GString* pass_term = g_string_new("");
 
-        char* password = ui_ask_pgp_passphrase(uid_hint, prev_was_bad);
+        auto_char char* password = ui_ask_pgp_passphrase(uid_hint, prev_was_bad);
         if (password) {
             g_string_append(pass_term, password);
-            free(password);
         }
 
         g_string_append(pass_term, "\n");
@@ -462,10 +461,9 @@ p_gpg_verify(const char* const barejid, const char* const sign)
         return;
     }
 
-    char* sign_with_header_footer = _add_header_footer(sign, PGP_SIGNATURE_HEADER, PGP_SIGNATURE_FOOTER);
+    auto_char char* sign_with_header_footer = _add_header_footer(sign, PGP_SIGNATURE_HEADER, PGP_SIGNATURE_FOOTER);
     gpgme_data_t sign_data;
     gpgme_data_new_from_mem(&sign_data, sign_with_header_footer, strlen(sign_with_header_footer), 1);
-    free(sign_with_header_footer);
 
     gpgme_data_t plain_data;
     gpgme_data_new(&plain_data);
@@ -533,7 +531,7 @@ p_gpg_sign(const char* const str, const char* const fp)
         return NULL;
     }
 
-    char* str_or_empty = NULL;
+    auto_char char* str_or_empty = NULL;
     if (str) {
         str_or_empty = strdup(str);
     } else {
@@ -541,7 +539,6 @@ p_gpg_sign(const char* const str, const char* const fp)
     }
     gpgme_data_t str_data;
     gpgme_data_new_from_mem(&str_data, str_or_empty, strlen(str_or_empty), 1);
-    free(str_or_empty);
 
     gpgme_data_t signed_data;
     gpgme_data_new(&signed_data);
@@ -664,10 +661,9 @@ p_gpg_decrypt(const char* const cipher)
 
     gpgme_set_passphrase_cb(ctx, (gpgme_passphrase_cb_t)_p_gpg_passphrase_cb, NULL);
 
-    char* cipher_with_headers = _add_header_footer(cipher, PGP_MESSAGE_HEADER, PGP_MESSAGE_FOOTER);
+    auto_char char* cipher_with_headers = _add_header_footer(cipher, PGP_MESSAGE_HEADER, PGP_MESSAGE_FOOTER);
     gpgme_data_t cipher_data;
     gpgme_data_new_from_mem(&cipher_data, cipher_with_headers, strlen(cipher_with_headers), 1);
-    free(cipher_with_headers);
 
     gpgme_data_t plain_data;
     gpgme_data_new(&plain_data);

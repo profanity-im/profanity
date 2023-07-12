@@ -71,9 +71,8 @@ api_cons_show(const char* const message)
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    auto_char char* parsed = str_replace(message, "\r\n", "\n");
     cons_show("%s", parsed);
-    free(parsed);
 
     return 1;
 }
@@ -86,12 +85,10 @@ api_cons_show_themed(const char* const group, const char* const key, const char*
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    auto_char char* parsed = str_replace(message, "\r\n", "\n");
     theme_item_t themeitem = plugin_themes_get(group, key, def);
     ProfWin* console = wins_get_console();
     win_println(console, themeitem, "-", "%s", parsed);
-
-    free(parsed);
 
     return 1;
 }
@@ -798,9 +795,8 @@ api_chat_show(const char* const barejid, const char* message)
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    auto_char char* parsed = str_replace(message, "\r\n", "\n");
     win_println((ProfWin*)chatwin, THEME_TEXT, "-", "%s", parsed);
-    free(parsed);
 
     return 1;
 }
@@ -835,11 +831,10 @@ api_chat_show_themed(const char* const barejid, const char* const group, const c
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    auto_char char* parsed = str_replace(message, "\r\n", "\n");
     theme_item_t themeitem = plugin_themes_get(group, key, def);
 
     win_println((ProfWin*)chatwin, themeitem, show_ch, "%s", parsed);
-    free(parsed);
 
     return 1;
 }
@@ -863,9 +858,8 @@ api_room_show(const char* const roomjid, const char* message)
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    auto_char char* parsed = str_replace(message, "\r\n", "\n");
     win_println((ProfWin*)mucwin, THEME_TEXT, "-", "%s", parsed);
-    free(parsed);
 
     return 1;
 }
@@ -900,11 +894,10 @@ api_room_show_themed(const char* const roomjid, const char* const group, const c
         return 0;
     }
 
-    char* parsed = str_replace(message, "\r\n", "\n");
+    auto_char char* parsed = str_replace(message, "\r\n", "\n");
     theme_item_t themeitem = plugin_themes_get(group, key, def);
 
     win_println((ProfWin*)mucwin, themeitem, show_ch, "%s", parsed);
-    free(parsed);
 
     return 1;
 }

@@ -433,10 +433,9 @@ _status_bar_draw_tab(StatusBarTab* tab, int pos, int num)
         pos++;
     }
     if (show_name) {
-        char* display_name = _display_name(tab);
+        auto_char char* display_name = _display_name(tab);
         mvwprintw(statusbar_win, 0, pos, "%s", display_name);
         pos += utf8_display_len(display_name);
-        free(display_name);
     }
     wattroff(statusbar_win, status_attrs);
 
@@ -606,10 +605,9 @@ _tabs_width(void)
                 if (!show_read && !is_current && !tab->highlight)
                     continue;
 
-                char* display_name = _display_name(tab);
+                auto_char char* display_name = _display_name(tab);
                 width += utf8_display_len(display_name);
                 width += 4;
-                free(display_name);
             }
         }
         return width;
@@ -625,10 +623,9 @@ _tabs_width(void)
                 if (!show_read && !is_current && !tab->highlight)
                     continue;
 
-                char* display_name = _display_name(tab);
+                auto_char char* display_name = _display_name(tab);
                 width += utf8_display_len(display_name);
                 width += 2;
-                free(display_name);
             }
         }
         return width;
@@ -710,10 +707,9 @@ _display_name(StatusBarTab* tab)
         return fullname;
     }
 
-    gchar* trimmed = g_utf8_substring(fullname, 0, tablen);
-    free(fullname);
+    auto_gchar gchar* trimmed = g_utf8_substring(fullname, 0, tablen);
     char* trimmedname = strdup(trimmed);
-    g_free(trimmed);
+    free(fullname);
 
     return trimmedname;
 }

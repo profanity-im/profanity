@@ -73,7 +73,7 @@ cmd_alias_add_adds_alias(void** state)
     gboolean result = cmd_alias(NULL, CMD_ALIAS, args);
     assert_true(result);
 
-    char* returned_val = prefs_get_alias("hc");
+    gchar* returned_val = prefs_get_alias("hc");
     assert_string_equal("/help commands", returned_val);
 
     free(returned_val);
@@ -106,7 +106,7 @@ cmd_alias_remove_removes_alias(void** state)
     gboolean result = cmd_alias(NULL, CMD_ALIAS, args);
     assert_true(result);
 
-    char* returned_val = prefs_get_alias("hn");
+    gchar* returned_val = prefs_get_alias("hn");
     assert_null(returned_val);
 
     free(returned_val);

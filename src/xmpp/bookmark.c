@@ -312,13 +312,12 @@ _bookmark_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         int minimize = 0;
         xmpp_stanza_t* minimize_st = xmpp_stanza_get_child_by_name_and_ns(child, STANZA_NAME_MINIMIZE, STANZA_NS_EXT_GAJIM_BOOKMARKS);
         if (minimize_st) {
-            char* min_str = xmpp_stanza_get_text(minimize_st);
+            auto_char char* min_str = xmpp_stanza_get_text(minimize_st);
             if (strcmp(min_str, "true") == 0) {
                 minimize = 1;
             } else if (strcmp(min_str, "false") == 0) {
                 minimize = 2;
             }
-            free(min_str);
         }
 
         autocomplete_add(bookmark_ac, barejid);
@@ -364,9 +363,8 @@ _send_bookmarks(void)
 {
     xmpp_ctx_t* ctx = connection_get_ctx();
 
-    char* id = connection_create_stanza_id();
+    auto_char char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
-    free(id);
 
     xmpp_stanza_t* query = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(query, STANZA_NAME_QUERY);

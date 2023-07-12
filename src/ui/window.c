@@ -387,7 +387,7 @@ win_get_title(ProfWin* window)
         assert(vcardwin->memcheck == PROFVCARDWIN_MEMCHECK);
 
         GString* title = g_string_new("vCard ");
-        char* jid = connection_get_barejid();
+        auto_char char* jid = connection_get_barejid();
 
         g_string_append(title, jid);
 
@@ -395,7 +395,6 @@ win_get_title(ProfWin* window)
             g_string_append(title, " *");
         }
 
-        free(jid);
         return g_string_free(title, FALSE);
     }
     }
@@ -1207,11 +1206,10 @@ win_show_vcard(ProfWin* window, vCard* vcard)
         case VCARD_BIRTHDAY:
         {
             auto_gchar gchar* date_format = prefs_get_string(PREF_TIME_VCARD);
-            gchar* date = g_date_time_format(element->birthday, date_format);
+            auto_gchar gchar* date = g_date_time_format(element->birthday, date_format);
 
             assert(date != NULL);
             win_println(window, THEME_DEFAULT, "!", "[%d] Birthday: %s", index, date);
-            g_free(date);
             break;
         }
         case VCARD_ADDRESS:
@@ -1336,14 +1334,12 @@ win_show_status_string(ProfWin* window, const char* const from,
         win_append(window, presence_colour, " is %s", default_show);
 
     if (last_activity) {
-        gchar* date_fmt = NULL;
+        auto_gchar gchar* date_fmt = NULL;
         auto_gchar gchar* time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
         date_fmt = g_date_time_format(last_activity, time_pref);
         assert(date_fmt != NULL);
 
         win_append(window, presence_colour, ", last activity: %s", date_fmt);
-
-        g_free(date_fmt);
     }
 
     if (status)
@@ -1406,7 +1402,7 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
     switch (window->type) {
     case WIN_CHAT:
     {
-        char* enc_char;
+        auto_char char* enc_char;
         ProfChatWin* chatwin = (ProfChatWin*)window;
 
         if (chatwin->incoming_char) {
@@ -1431,8 +1427,6 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
                 _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
             }
         }
-
-        free(enc_char);
         break;
     }
     case WIN_PRIVATE:
@@ -1926,7 +1920,7 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
 {
     int starty = getcury(win);
     int wordi = 0;
-    char* word = malloc(strlen(message) + 1);
+    auto_char char* word = malloc(strlen(message) + 1);
 
     gchar* curr_ch = g_utf8_offset_to_pointer(message, 0);
 
@@ -2033,8 +2027,6 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
             curr_ch = g_utf8_next_char(curr_ch);
         }
     }
-
-    free(word);
 }
 
 void

@@ -234,8 +234,6 @@ ui_contact_online(char* barejid, Resource* resource, GDateTime* last_activity)
 
     // show nothing
     if (g_strcmp0(p_contact_subscription(contact), "none") == 0) {
-        free(show_console);
-        free(show_chat_win);
         return;
     }
 
@@ -697,9 +695,8 @@ ui_focus_win(ProfWin* window)
     }
     status_bar_current(i);
 
-    char* identifier = win_get_tab_identifier(window);
+    auto_char char* identifier = win_get_tab_identifier(window);
     status_bar_active(i, window->type, identifier);
-    free(identifier);
 }
 
 void

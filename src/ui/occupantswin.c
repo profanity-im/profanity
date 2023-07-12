@@ -77,10 +77,9 @@ _occuptantswin_occupant(ProfLayoutSplit* layout, GList* item, gboolean showjid, 
 
     GString* msg = g_string_new(spaces->str);
 
-    char* ch = prefs_get_occupants_char();
+    auto_char char* ch = prefs_get_occupants_char();
     if (ch) {
         g_string_append_printf(msg, "%s", ch);
-        free(ch);
     }
 
     gboolean wrap = prefs_get_boolean(PREF_OCCUPANTS_WRAP);
@@ -131,10 +130,9 @@ occupantswin_occupants(const char* const roomjid)
 
             GString* prefix = g_string_new(" ");
 
-            char* ch = prefs_get_occupants_header_char();
+            auto_char char* ch = prefs_get_occupants_header_char();
             if (ch) {
                 g_string_append_printf(prefix, "%s", ch);
-                free(ch);
             }
 
             if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {

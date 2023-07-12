@@ -65,9 +65,8 @@ c_plugin_create(const char* const filename)
     ProfPlugin* plugin;
     void* handle = NULL;
 
-    char* plugins_dir = files_get_data_path(DIR_PLUGINS);
+    auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
     GString* path = g_string_new(plugins_dir);
-    free(plugins_dir);
     g_string_append(path, "/");
     g_string_append(path, filename);
 

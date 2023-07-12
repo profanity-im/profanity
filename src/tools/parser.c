@@ -51,7 +51,7 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
     }
 
     // copy and strip input of leading/trailing whitespace
-    char* copy = strdup(inp);
+    auto_char char* copy = strdup(inp);
     g_strstrip(copy);
 
     int inp_size = g_utf8_strlen(copy, -1);
@@ -134,8 +134,6 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
     if (in_token) {
         tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
     }
-
-    free(copy);
 
     int num = g_slist_length(tokens) - 1;
 

@@ -151,11 +151,10 @@ sv_ev_roster_received(void)
     // check pgp key valid if specified
     ProfAccount* account = accounts_get_account(account_name);
     if (account && account->pgp_keyid) {
-        char* err_str = NULL;
+        auto_char char* err_str = NULL;
         if (!p_gpg_valid_key(account->pgp_keyid, &err_str)) {
             cons_show_error("Invalid PGP key ID specified: %s, %s", account->pgp_keyid, err_str);
         }
-        free(err_str);
 
         // Redraw the screen after entry of the PGP secret key, but not init
         ProfWin* win = wins_get_current();
@@ -633,13 +632,12 @@ sv_ev_incoming_message(ProfMessage* message)
     char* looking_for_jid = message->from_jid->barejid;
 
     if (message->is_mam) {
-        char* mybarejid = connection_get_barejid();
+        auto_char char* mybarejid = connection_get_barejid();
         if (g_strcmp0(mybarejid, message->from_jid->barejid) == 0) {
             if (message->to_jid) {
                 looking_for_jid = message->to_jid->barejid;
             }
         }
-        free(mybarejid);
     }
 
     chatwin = wins_get_chat(looking_for_jid);
@@ -1106,14 +1104,13 @@ sv_ev_muc_occupant_online(const char* const room, const char* const nick, const 
     }
 
     // handle nickname change
-    char* old_nick = muc_roster_nick_change_complete(room, nick);
+    auto_char char* old_nick = muc_roster_nick_change_complete(room, nick);
     if (old_nick) {
         ProfMucWin* mucwin = wins_get_muc(room);
         if (mucwin) {
             mucwin_occupant_nick_change(mucwin, old_nick, nick);
             wins_private_nick_change(mucwin->roomjid, old_nick, nick);
         }
-        free(old_nick);
 
         occupantswin_occupants(room);
         rosterwin_roster();
@@ -1199,7 +1196,7 @@ sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert)
     cons_show("");
     ui_update();
 
-    char* cmd = ui_get_line();
+    auto_char char* cmd = ui_get_line();
 
     while ((g_strcmp0(cmd, "/tls allow") != 0)
            && (g_strcmp0(cmd, "/tls always") != 0)
@@ -1217,7 +1214,6 @@ sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert)
     if (g_strcmp0(cmd, "/tls allow") == 0) {
         cons_show("Continuing with connection.");
         tlscerts_set_current(cert->fingerprint);
-        free(cmd);
         return 1;
     } else if (g_strcmp0(cmd, "/tls always") == 0) {
         cons_show("Adding %s to trusted certificates.", cert->fingerprint);
@@ -1225,17 +1221,14 @@ sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert)
             tlscerts_add(cert);
             cafile_add(cert);
         }
-        free(cmd);
         return 1;
     } else if (g_strcmp0(cmd, "/quit") == 0) {
         prof_set_quit();
-        free(cmd);
-        return 0;
-    } else {
-        cons_show("Aborting connection.");
-        free(cmd);
         return 0;
     }
+
+    cons_show("Aborting connection.");
+    return 0;
 }
 
 void
@@ -1313,7 +1306,7 @@ sv_ev_bookmark_autojoin(Bookmark* bookmark)
         return;
     }
 
-    char* nick = NULL;
+    auto_char char* nick = NULL;
 
     if (bookmark->nick) {
         nick = strdup(bookmark->nick);
@@ -1332,8 +1325,6 @@ sv_ev_bookmark_autojoin(Bookmark* bookmark)
         iq_room_affiliation_list(bookmark->barejid, "admin", false);
         iq_room_affiliation_list(bookmark->barejid, "owner", false);
     }
-
-    free(nick);
 }
 
 static void

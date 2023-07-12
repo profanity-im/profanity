@@ -163,7 +163,7 @@ http_file_put(void* userdata)
 
     FILE* fh = NULL;
 
-    char* err = NULL;
+    auto_char char* err = NULL;
     gchar* content_type_header;
     // Optional headers
     gchar* auth_header = NULL;
@@ -318,7 +318,6 @@ http_file_put(void* userdata)
         }
         cons_show_error(msg);
         g_free(msg);
-        free(err);
     } else {
         if (!upload->cancel) {
             msg = g_strdup_printf("Uploading '%s': 100%%", upload->filename);
