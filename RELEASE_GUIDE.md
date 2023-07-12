@@ -17,7 +17,7 @@
 * Update plugin API docs (./apidocs/c and ./apidocs/python) need to run the `gen.sh` and commit the results to the website git repo
 * Update CHANGELOG
 * Update profrc.example
-* Update profanity.doap (new XEPs and latest version)
+* Update profanity.doap (new XEPs and latest version). Look for `DEV` which marks what is done on the development branch.
 
 ## Creating artefacts
 * Set the correct release version in configure.ac:

@@ -101,7 +101,7 @@ rosterwin_roster(void)
     if (layout->subwin == NULL) {
         return;
     }
-    
+
     werase(layout->subwin);
 
     auto_gchar gchar* roomspos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
