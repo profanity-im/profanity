@@ -98,9 +98,11 @@ rosterwin_roster(void)
     ProfLayoutSplit* layout = (ProfLayoutSplit*)console->layout;
     assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
 
-    if (layout->subwin != NULL) {
-        werase(layout->subwin);
+    if (layout->subwin == NULL) {
+        return;
     }
+    
+    werase(layout->subwin);
 
     auto_gchar gchar* roomspos = prefs_get_string(PREF_ROSTER_ROOMS_POS);
     if (prefs_get_boolean(PREF_ROSTER_ROOMS) && (g_strcmp0(roomspos, "first") == 0)) {
