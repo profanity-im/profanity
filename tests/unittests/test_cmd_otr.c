@@ -164,7 +164,7 @@ test_with_command_and_connection_status(char* command, void* cmd_func, jabber_co
 
     expect_cons_show("You must be connected with an account to load OTR information.");
 
-    gboolean (*func)(ProfWin * window, const char* const command, gchar** args) = cmd_func;
+    gboolean (*func)(ProfWin* window, const char* const command, gchar** args) = cmd_func;
     gboolean result = func(NULL, CMD_OTR, args);
     assert_true(result);
 }

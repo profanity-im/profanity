@@ -63,6 +63,7 @@
 #include "xmpp/roster_list.h"
 #include "xmpp/avatar.h"
 #include "xmpp/vcard_funcs.h"
+#include "xmpp/nickname.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -105,6 +106,7 @@ sv_ev_login_account_success(char* account_name, gboolean secured)
     log_database_init(account);
     vcard_user_refresh();
     avatar_pep_subscribe();
+    nickname_pep_subscribe();
 
     ui_handle_login_account_success(account, secured);
 

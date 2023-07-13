@@ -254,6 +254,7 @@
 #define STANZA_NS_STREAMS                 "http://etherx.jabber.org/streams"
 #define STANZA_NS_XMPP_STREAMS            "urn:ietf:params:xml:ns:xmpp-streams"
 #define STANZA_NS_VCARD                   "vcard-temp"
+#define STANZA_NS_NICK                    "http://jabber.org/protocol/nick"
 
 #define STANZA_DATAFORM_SOFTWARE "urn:xmpp:dataforms:softwareinfo"
 
