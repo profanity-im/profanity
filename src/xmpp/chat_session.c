@@ -110,9 +110,8 @@ chat_session_get_jid(const char* const barejid)
     ChatSession* session = chat_session_get(barejid);
     char* jid = NULL;
     if (session) {
-        Jid* jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
+        auto_jid Jid* jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
         jid = strdup(jidp->fulljid);
-        jid_destroy(jidp);
     } else {
         jid = strdup(barejid);
     }

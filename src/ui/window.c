@@ -976,9 +976,8 @@ win_show_occupant_info(ProfWin* window, const char* const room, Occupant* occupa
     win_println(window, THEME_DEFAULT, "!", "  Affiliation: %s", occupant_affiliation);
     win_println(window, THEME_DEFAULT, "!", "  Role: %s", occupant_role);
 
-    Jid* jidp = jid_create_from_bare_and_resource(room, occupant->nick);
+    auto_jid Jid* jidp = jid_create_from_bare_and_resource(room, occupant->nick);
     EntityCapabilities* caps = caps_lookup(jidp->fulljid);
-    jid_destroy(jidp);
 
     if (caps) {
         // show identity
@@ -1099,9 +1098,8 @@ win_show_info(ProfWin* window, PContact contact)
         }
         win_newline(window);
 
-        Jid* jidp = jid_create_from_bare_and_resource(barejid, resource->name);
+        auto_jid Jid* jidp = jid_create_from_bare_and_resource(barejid, resource->name);
         EntityCapabilities* caps = caps_lookup(jidp->fulljid);
-        jid_destroy(jidp);
 
         if (caps) {
             // show identity
@@ -1496,7 +1494,7 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
     auto_gchar gchar* display_name;
     int flags = 0;
     const char* jid = connection_get_fulljid();
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
 
     if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
         display_name = strdup("me");
@@ -1504,8 +1502,6 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
         display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
         flags = NO_ME;
     }
-
-    jid_destroy(jidp);
 
     buffer_append(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
     wins_add_urls_ac(window, message, FALSE);
@@ -1521,10 +1517,10 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
 {
     g_date_time_ref(message->timestamp);
 
-    auto_gchar gchar* display_name;
+    auto_char char* display_name;
     int flags = 0;
     const char* jid = connection_get_fulljid();
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
 
     if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
         display_name = strdup("me");
@@ -1532,8 +1528,6 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
         display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
         flags = NO_ME;
     }
-
-    jid_destroy(jidp);
 
     buffer_prepend(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
     wins_add_urls_ac(window, message, TRUE);

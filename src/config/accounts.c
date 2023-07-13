@@ -128,7 +128,7 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
     // set account name and resource
     const char* barejid = account_name;
     auto_gchar gchar* resource = jid_random_resource();
-    Jid* jid = jid_create(account_name);
+    auto_jid Jid* jid = jid_create(account_name);
     if (jid) {
         barejid = jid->barejid;
         if (jid->resourcepart) {
@@ -137,7 +137,6 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
     }
 
     if (g_key_file_has_group(accounts, account_name)) {
-        jid_destroy(jid);
         return;
     }
 
@@ -157,15 +156,13 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
         g_key_file_set_string(accounts, account_name, "auth.policy", auth_policy);
     }
 
-    Jid* jidp = jid_create(barejid);
+    auto_jid Jid* jidp = jid_create(barejid);
 
     if (jidp->localpart == NULL) {
         g_key_file_set_string(accounts, account_name, "muc.nick", jidp->domainpart);
     } else {
         g_key_file_set_string(accounts, account_name, "muc.nick", jidp->localpart);
     }
-
-    jid_destroy(jidp);
 
     g_key_file_set_string(accounts, account_name, "presence.last", "online");
     g_key_file_set_string(accounts, account_name, "presence.login", "online");
@@ -178,8 +175,6 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
     _save_accounts();
     autocomplete_add(all_ac, account_name);
     autocomplete_add(enabled_ac, account_name);
-
-    jid_destroy(jid);
 }
 
 int
@@ -459,7 +454,7 @@ accounts_account_exists(const char* const account_name)
 void
 accounts_set_jid(const char* const account_name, const char* const value)
 {
-    Jid* jid = jid_create(value);
+    auto_jid Jid* jid = jid_create(value);
     if (jid) {
         if (accounts_account_exists(account_name)) {
             g_key_file_set_string(accounts, account_name, "jid", jid->barejid);
@@ -475,8 +470,6 @@ accounts_set_jid(const char* const account_name, const char* const value)
 
             _save_accounts();
         }
-
-        jid_destroy(jid);
     }
 }
 

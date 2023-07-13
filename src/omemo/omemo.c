@@ -447,9 +447,8 @@ omemo_start_muc_sessions(const char* const roomjid)
     GList* members = muc_members(roomjid);
     GList* iter;
     for (iter = members; iter != NULL; iter = iter->next) {
-        Jid* jid = jid_create(iter->data);
+        auto_jid Jid* jid = jid_create(iter->data);
         omemo_start_session(jid->barejid);
-        jid_destroy(jid);
     }
     g_list_free(members);
 }
@@ -547,7 +546,7 @@ void
 omemo_set_device_list(const char* const from, GList* device_list)
 {
     log_debug("[OMEMO] Setting device list for %s", STR_MAYBE_NULL(from));
-    Jid* jid;
+    auto_jid Jid* jid;
     if (from) {
         jid = jid_create(from);
     } else {
@@ -595,7 +594,6 @@ omemo_set_device_list(const char* const from, GList* device_list)
             }
         }
     }
-    jid_destroy(jid);
 }
 
 GKeyFile*
@@ -754,7 +752,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 {
     char* id = NULL;
     int res;
-    Jid* jid = jid_create(connection_get_fulljid());
+    auto_jid Jid* jid = jid_create(connection_get_fulljid());
     GList* keys = NULL;
 
     unsigned char* key;
@@ -790,9 +788,8 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
         GList* members = muc_members(mucwin->roomjid);
         GList* iter;
         for (iter = members; iter != NULL; iter = iter->next) {
-            Jid* jid = jid_create(iter->data);
-            recipients = g_list_append(recipients, strdup(jid->barejid));
-            jid_destroy(jid);
+            auto_jid Jid* jidp = jid_create(iter->data);
+            recipients = g_list_append(recipients, strdup(jidp->barejid));
         }
         g_list_free(members);
     } else {
@@ -932,7 +929,6 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     }
 
 out:
-    jid_destroy(jid);
     g_list_free_full(keys, (GDestroyNotify)omemo_key_free);
     free(ciphertext);
     gcry_free(key);
@@ -949,11 +945,11 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
                       const unsigned char* const payload, size_t payload_len, gboolean muc, gboolean* trusted)
 {
     unsigned char* plaintext = NULL;
-    Jid* sender = NULL;
-    Jid* from = jid_create(from_jid);
+    auto_jid Jid* sender = NULL;
+    auto_jid Jid* from = jid_create(from_jid);
     if (!from) {
         log_error("[OMEMO][RECV] Invalid jid %s", from_jid);
-        goto out;
+        return NULL;
     }
 
     int res;
@@ -968,7 +964,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
 
     if (!key) {
         log_warning("[OMEMO][RECV] received a message with no corresponding key");
-        goto out;
+        return NULL;
     }
 
     if (muc) {
@@ -984,7 +980,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         g_list_free(roster);
         if (!sender) {
             log_warning("[OMEMO][RECV] cannot find MUC message sender fulljid");
-            goto out;
+            return NULL;
         }
     } else {
         sender = jid_create(from->barejid);
@@ -1001,7 +997,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
     res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
     if (res != 0) {
         log_error("[OMEMO][RECV] cannot create session cipher");
-        goto out;
+        return NULL;
     }
 
     if (key->prekey) {
@@ -1060,13 +1056,13 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
     session_cipher_free(cipher);
     if (res != 0) {
         log_error("[OMEMO][RECV] cannot decrypt message key");
-        goto out;
+        return NULL;
     }
 
     if (signal_buffer_len(plaintext_key) != AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH) {
         log_error("[OMEMO][RECV] invalid key length");
         signal_buffer_free(plaintext_key);
-        goto out;
+        return NULL;
     }
 
     size_t plaintext_len = payload_len;
@@ -1078,15 +1074,11 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
     if (res != 0) {
         log_error("[OMEMO][RECV] cannot decrypt message: %s", gcry_strerror(res));
         free(plaintext);
-        plaintext = NULL;
-        goto out;
+        return NULL;
     }
 
     plaintext[plaintext_len] = '\0';
 
-out:
-    jid_destroy(from);
-    jid_destroy(sender);
     return (char*)plaintext;
 }
 

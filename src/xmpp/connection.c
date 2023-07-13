@@ -181,7 +181,7 @@ connection_shutdown(void)
 static gboolean
 _conn_apply_settings(const char* const jid, const char* const passwd, const char* const tls_policy, const char* const auth_policy)
 {
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
     if (jidp == NULL) {
         log_error("Malformed JID not able to connect: %s", jid);
         conn.conn_status = JABBER_DISCONNECTED;
@@ -189,7 +189,6 @@ _conn_apply_settings(const char* const jid, const char* const passwd, const char
     }
 
     _compute_identifier(jidp->barejid);
-    jid_destroy(jidp);
 
     xmpp_ctx_set_verbosity(conn.xmpp_ctx, 0);
     xmpp_conn_set_jid(conn.xmpp_conn, jid);

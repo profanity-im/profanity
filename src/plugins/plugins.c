@@ -660,7 +660,7 @@ plugins_on_room_history_message(const char* const barejid, const char* const nic
 char*
 plugins_pre_priv_message_display(const char* const fulljid, const char* message)
 {
-    Jid* jidp = jid_create(fulljid);
+    auto_jid Jid* jidp = jid_create(fulljid);
     char* new_message = NULL;
     char* curr_message = strdup(message);
 
@@ -677,15 +677,13 @@ plugins_pre_priv_message_display(const char* const fulljid, const char* message)
         curr = g_list_next(curr);
     }
     g_list_free(values);
-
-    jid_destroy(jidp);
     return curr_message;
 }
 
 void
 plugins_post_priv_message_display(const char* const fulljid, const char* message)
 {
-    Jid* jidp = jid_create(fulljid);
+    auto_jid Jid* jidp = jid_create(fulljid);
 
     GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
@@ -695,14 +693,12 @@ plugins_post_priv_message_display(const char* const fulljid, const char* message
         curr = g_list_next(curr);
     }
     g_list_free(values);
-
-    jid_destroy(jidp);
 }
 
 char*
 plugins_pre_priv_message_send(const char* const fulljid, const char* const message)
 {
-    Jid* jidp = jid_create(fulljid);
+    auto_jid Jid* jidp = jid_create(fulljid);
     char* new_message = NULL;
     char* curr_message = strdup(message);
 
@@ -719,7 +715,6 @@ plugins_pre_priv_message_send(const char* const fulljid, const char* const messa
             } else {
                 free(curr_message);
                 g_list_free(values);
-                jid_destroy(jidp);
 
                 return NULL;
             }
@@ -728,14 +723,13 @@ plugins_pre_priv_message_send(const char* const fulljid, const char* const messa
     }
     g_list_free(values);
 
-    jid_destroy(jidp);
     return curr_message;
 }
 
 void
 plugins_post_priv_message_send(const char* const fulljid, const char* const message)
 {
-    Jid* jidp = jid_create(fulljid);
+    auto_jid Jid* jidp = jid_create(fulljid);
 
     GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
@@ -744,9 +738,8 @@ plugins_post_priv_message_send(const char* const fulljid, const char* const mess
         plugin->post_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 
-    jid_destroy(jidp);
+    g_list_free(values);
 }
 
 char*

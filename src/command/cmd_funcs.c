@@ -675,7 +675,7 @@ cmd_account_default(ProfWin* window, const char* const command, gchar** args)
 gboolean
 _account_set_jid(char* account_name, char* jid)
 {
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
     if (jidp == NULL) {
         cons_show("Malformed jid: %s", jid);
     } else {
@@ -687,7 +687,6 @@ _account_set_jid(char* account_name, char* jid)
         }
         cons_show("");
     }
-    jid_destroy(jidp);
 
     return TRUE;
 }
@@ -1259,7 +1258,7 @@ cmd_sub(ProfWin* window, const char* const command, gchar** args)
         jid = chatwin->barejid;
     }
 
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
 
     if (strcmp(subcmd, "allow") == 0) {
         presence_subscription(jidp->barejid, PRESENCE_SUBSCRIBED);
@@ -1303,8 +1302,6 @@ cmd_sub(ProfWin* window, const char* const command, gchar** args)
     } else {
         cons_bad_cmd_usage(command);
     }
-
-    jid_destroy(jidp);
 
     return TRUE;
 }
@@ -2203,13 +2200,11 @@ cmd_msg(ProfWin* window, const char* const command, gchar** args)
         if (occupant) {
             // in case of non-anon muc send regular chatmessage
             if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
-                Jid* jidp = jid_create(occupant->jid);
+                auto_jid Jid* jidp = jid_create(occupant->jid);
 
                 _cmd_msg_chatwin(jidp->barejid, msg);
                 win_println(window, THEME_DEFAULT, "-", "Starting direct message with occupant \"%s\" from room \"%s\" as \"%s\".", usr, mucwin->roomjid, jidp->barejid);
                 cons_show("Starting direct message with occupant \"%s\" from room \"%s\" as \"%s\".", usr, mucwin->roomjid, jidp->barejid);
-
-                jid_destroy(jidp);
             } else {
                 // otherwise send mucpm
                 GString* full_jid = g_string_new(mucwin->roomjid);
@@ -3299,14 +3294,13 @@ cmd_status_get(ProfWin* window, const char* const command, gchar** args)
         } else {
             ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
             assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-            Jid* jid = jid_create(privatewin->fulljid);
+            auto_jid Jid* jid = jid_create(privatewin->fulljid);
             Occupant* occupant = muc_roster_item(jid->barejid, jid->resourcepart);
             if (occupant) {
                 win_show_occupant(window, occupant);
             } else {
                 win_println(window, THEME_DEFAULT, "-", "Error getting contact info.");
             }
-            jid_destroy(jid);
         }
         break;
     case WIN_CONSOLE:
@@ -3389,14 +3383,13 @@ cmd_info(ProfWin* window, const char* const command, gchar** args)
         } else {
             ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
             assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-            Jid* jid = jid_create(privatewin->fulljid);
+            auto_jid Jid* jid = jid_create(privatewin->fulljid);
             Occupant* occupant = muc_roster_item(jid->barejid, jid->resourcepart);
             if (occupant) {
                 win_show_occupant_info(window, jid->barejid, occupant);
             } else {
                 win_println(window, THEME_DEFAULT, "-", "Error getting contact info.");
             }
-            jid_destroy(jid);
         }
         break;
     case WIN_CONSOLE:
@@ -3431,9 +3424,8 @@ cmd_caps(ProfWin* window, const char* const command, gchar** args)
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             occupant = muc_roster_item(mucwin->roomjid, args[0]);
             if (occupant) {
-                Jid* jidp = jid_create_from_bare_and_resource(mucwin->roomjid, args[0]);
+                auto_jid Jid* jidp = jid_create_from_bare_and_resource(mucwin->roomjid, args[0]);
                 cons_show_caps(jidp->fulljid, occupant->presence);
-                jid_destroy(jidp);
             } else {
                 cons_show("No such participant \"%s\" in room.", args[0]);
             }
@@ -3444,7 +3436,7 @@ cmd_caps(ProfWin* window, const char* const command, gchar** args)
     case WIN_CHAT:
     case WIN_CONSOLE:
         if (args[0]) {
-            Jid* jid = jid_create(args[0]);
+            auto_jid Jid* jid = jid_create(args[0]);
 
             if (jid->fulljid == NULL) {
                 cons_show("You must provide a full jid to the /caps command.");
@@ -3461,7 +3453,6 @@ cmd_caps(ProfWin* window, const char* const command, gchar** args)
                     }
                 }
             }
-            jid_destroy(jid);
         } else {
             cons_show("You must provide a jid to the /caps command.");
         }
@@ -3472,11 +3463,10 @@ cmd_caps(ProfWin* window, const char* const command, gchar** args)
         } else {
             ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
             assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-            Jid* jid = jid_create(privatewin->fulljid);
+            auto_jid Jid* jid = jid_create(privatewin->fulljid);
             if (jid) {
                 occupant = muc_roster_item(jid->barejid, jid->resourcepart);
                 cons_show_caps(jid->resourcepart, occupant->presence);
-                jid_destroy(jid);
             }
         }
         break;
@@ -3491,7 +3481,7 @@ static void
 _send_software_version_iq_to_fulljid(char* request)
 {
     auto_char char* mybarejid = connection_get_barejid();
-    Jid* jid = jid_create(request);
+    auto_jid Jid* jid = jid_create(request);
 
     if (jid == NULL || jid->fulljid == NULL) {
         cons_show("You must provide a full jid to the /software command.");
@@ -3500,7 +3490,6 @@ _send_software_version_iq_to_fulljid(char* request)
     } else {
         iq_send_software_version(jid->fulljid);
     }
-    jid_destroy(jid);
 }
 
 gboolean
@@ -3520,9 +3509,8 @@ cmd_software(ProfWin* window, const char* const command, gchar** args)
             assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             Occupant* occupant = muc_roster_item(mucwin->roomjid, args[0]);
             if (occupant) {
-                Jid* jid = jid_create_from_bare_and_resource(mucwin->roomjid, args[0]);
+                auto_jid Jid* jid = jid_create_from_bare_and_resource(mucwin->roomjid, args[0]);
                 iq_send_software_version(jid->fulljid);
-                jid_destroy(jid);
             } else {
                 cons_show("No such participant \"%s\" in room.", args[0]);
             }
@@ -3628,7 +3616,7 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    Jid* room_arg = jid_create(args[0]);
+    auto_jid Jid* room_arg = jid_create(args[0]);
     if (room_arg == NULL) {
         cons_show_error("Specified room has incorrect format.");
         cons_show("");
@@ -3663,7 +3651,6 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
     if (!parsed) {
         cons_bad_cmd_usage(command);
         cons_show("");
-        jid_destroy(room_arg);
         return TRUE;
     }
 
@@ -3692,7 +3679,6 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
         ui_switch_to_room(room);
     }
 
-    jid_destroy(room_arg);
     account_free(account);
 
     return TRUE;
@@ -4889,9 +4875,8 @@ cmd_disco(ProfWin* window, const char* const command, gchar** args)
     if (args[1]) {
         jid = g_string_append(jid, args[1]);
     } else {
-        Jid* jidp = jid_create(connection_get_fulljid());
+        auto_jid Jid* jidp = jid_create(connection_get_fulljid());
         jid = g_string_append(jid, jidp->domainpart);
-        jid_destroy(jidp);
     }
 
     if (g_strcmp0(args[0], "info") == 0) {
@@ -5089,13 +5074,12 @@ cmd_lastactivity(ProfWin* window, const char* const command, gchar** args)
 
     if ((g_strcmp0(args[0], "get") == 0)) {
         if (args[1] == NULL) {
-            Jid* jidp = jid_create(connection_get_fulljid());
+            auto_jid Jid* jidp = jid_create(connection_get_fulljid());
             GString* jid = g_string_new(jidp->domainpart);
 
             iq_last_activity_request(jid->str);
 
             g_string_free(jid, TRUE);
-            jid_destroy(jidp);
 
             return TRUE;
         } else {
@@ -10057,10 +10041,9 @@ cmd_vcard_get(ProfWin* window, const char* const command, gchar** args)
             if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
                 // non-anon muc: get the user's jid and send vcard request to them
                 Occupant* occupant = muc_roster_item(mucwin->roomjid, user);
-                Jid* jid_occupant = jid_create(occupant->jid);
+                auto_jid Jid* jid_occupant = jid_create(occupant->jid);
 
                 vcard_print(ctx, window, jid_occupant->barejid);
-                jid_destroy(jid_occupant);
             } else {
                 // anon muc: send the vcard request through the MUC's server
                 GString* full_jid = g_string_new(mucwin->roomjid);
@@ -10126,10 +10109,9 @@ cmd_vcard_photo(ProfWin* window, const char* const command, gchar** args)
             if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
                 // non-anon muc: get the user's jid and send vcard request to them
                 Occupant* occupant = muc_roster_item(mucwin->roomjid, user);
-                Jid* jid_occupant = jid_create(occupant->jid);
+                auto_jid Jid* jid_occupant = jid_create(occupant->jid);
 
                 jid = g_strdup(jid_occupant->barejid);
-                jid_destroy(jid_occupant);
             } else {
                 // anon muc: send the vcard request through the MUC's server
                 jid = g_strdup_printf("%s/%s", mucwin->roomjid, user);

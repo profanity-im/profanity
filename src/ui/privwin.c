@@ -59,7 +59,7 @@ privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
     ProfWin* window = (ProfWin*)privatewin;
     int num = wins_get_num(window);
 
-    Jid* jidp = jid_create(privatewin->fulljid);
+    auto_jid Jid* jidp = jid_create(privatewin->fulljid);
     if (jidp == NULL) {
         return;
     }
@@ -97,8 +97,6 @@ privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
     if (notify) {
         notify_message(jidp->resourcepart, num, message->plain);
     }
-
-    jid_destroy(jidp);
 }
 
 void
@@ -133,9 +131,8 @@ privwin_occupant_offline(ProfPrivateWin* privwin)
     assert(privwin != NULL);
 
     privwin->occupant_offline = TRUE;
-    Jid* jidp = jid_create(privwin->fulljid);
+    auto_jid Jid* jidp = jid_create(privwin->fulljid);
     win_println((ProfWin*)privwin, THEME_OFFLINE, "-", "<- %s has left the room.", jidp->resourcepart);
-    jid_destroy(jidp);
 }
 
 void
@@ -144,9 +141,8 @@ privwin_occupant_kicked(ProfPrivateWin* privwin, const char* const actor, const 
     assert(privwin != NULL);
 
     privwin->occupant_offline = TRUE;
-    Jid* jidp = jid_create(privwin->fulljid);
+    auto_jid Jid* jidp = jid_create(privwin->fulljid);
     GString* message = g_string_new(jidp->resourcepart);
-    jid_destroy(jidp);
     g_string_append(message, " has been kicked from the room");
     if (actor) {
         g_string_append(message, " by ");
@@ -167,9 +163,8 @@ privwin_occupant_banned(ProfPrivateWin* privwin, const char* const actor, const 
     assert(privwin != NULL);
 
     privwin->occupant_offline = TRUE;
-    Jid* jidp = jid_create(privwin->fulljid);
+    auto_jid Jid* jidp = jid_create(privwin->fulljid);
     GString* message = g_string_new(jidp->resourcepart);
-    jid_destroy(jidp);
     g_string_append(message, " has been banned from the room");
     if (actor) {
         g_string_append(message, " by ");
@@ -190,9 +185,8 @@ privwin_occupant_online(ProfPrivateWin* privwin)
     assert(privwin != NULL);
 
     privwin->occupant_offline = FALSE;
-    Jid* jidp = jid_create(privwin->fulljid);
+    auto_jid Jid* jidp = jid_create(privwin->fulljid);
     win_println((ProfWin*)privwin, THEME_ONLINE, "-", "-- %s has joined the room.", jidp->resourcepart);
-    jid_destroy(jidp);
 }
 
 void
@@ -201,9 +195,8 @@ privwin_room_destroyed(ProfPrivateWin* privwin)
     assert(privwin != NULL);
 
     privwin->room_left = TRUE;
-    Jid* jidp = jid_create(privwin->fulljid);
+    auto_jid Jid* jidp = jid_create(privwin->fulljid);
     win_println((ProfWin*)privwin, THEME_OFFLINE, "!", "-- %s has been destroyed.", jidp->barejid);
-    jid_destroy(jidp);
 }
 
 void
@@ -212,9 +205,8 @@ privwin_room_joined(ProfPrivateWin* privwin)
     assert(privwin != NULL);
 
     privwin->room_left = FALSE;
-    Jid* jidp = jid_create(privwin->fulljid);
+    auto_jid Jid* jidp = jid_create(privwin->fulljid);
     win_println((ProfWin*)privwin, THEME_OFFLINE, "!", "-- You have joined %s.", jidp->barejid);
-    jid_destroy(jidp);
 }
 
 void
@@ -223,9 +215,8 @@ privwin_room_left(ProfPrivateWin* privwin)
     assert(privwin != NULL);
 
     privwin->room_left = TRUE;
-    Jid* jidp = jid_create(privwin->fulljid);
+    auto_jid Jid* jidp = jid_create(privwin->fulljid);
     win_println((ProfWin*)privwin, THEME_OFFLINE, "!", "-- You have left %s.", jidp->barejid);
-    jid_destroy(jidp);
 }
 
 void
@@ -235,9 +226,8 @@ privwin_room_kicked(ProfPrivateWin* privwin, const char* const actor, const char
 
     privwin->room_left = TRUE;
     GString* message = g_string_new("Kicked from ");
-    Jid* jidp = jid_create(privwin->fulljid);
+    auto_jid Jid* jidp = jid_create(privwin->fulljid);
     g_string_append(message, jidp->barejid);
-    jid_destroy(jidp);
     if (actor) {
         g_string_append(message, " by ");
         g_string_append(message, actor);
@@ -258,9 +248,8 @@ privwin_room_banned(ProfPrivateWin* privwin, const char* const actor, const char
 
     privwin->room_left = TRUE;
     GString* message = g_string_new("Banned from ");
-    Jid* jidp = jid_create(privwin->fulljid);
+    auto_jid Jid* jidp = jid_create(privwin->fulljid);
     g_string_append(message, jidp->barejid);
-    jid_destroy(jidp);
     if (actor) {
         g_string_append(message, " by ");
         g_string_append(message, actor);

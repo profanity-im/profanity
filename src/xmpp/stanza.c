@@ -1395,11 +1395,10 @@ stanza_is_muc_self_presence(xmpp_stanza_t* const stanza,
     // check if 'from' attribute identifies this user
     const char* from = xmpp_stanza_get_from(stanza);
     if (from) {
-        Jid* from_jid = jid_create(from);
+        auto_jid Jid* from_jid = jid_create(from);
         if (muc_active(from_jid->barejid)) {
             char* nick = muc_nick(from_jid->barejid);
             if (g_strcmp0(from_jid->resourcepart, nick) == 0) {
-                jid_destroy(from_jid);
                 return TRUE;
             }
         }
@@ -1411,13 +1410,10 @@ stanza_is_muc_self_presence(xmpp_stanza_t* const stanza,
                 char* nick = muc_nick(from_jid->barejid);
                 char* old_nick = muc_old_nick(from_jid->barejid, new_nick);
                 if (g_strcmp0(old_nick, nick) == 0) {
-                    jid_destroy(from_jid);
                     return TRUE;
                 }
             }
         }
-
-        jid_destroy(from_jid);
     }
 
     // self presence not found

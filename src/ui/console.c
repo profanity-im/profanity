@@ -1141,9 +1141,8 @@ cons_show_account(ProfAccount* account)
                 win_append(console, presence_colour, ", \"%s\"", resource->status);
             }
             win_appendln(console, THEME_DEFAULT, "");
-            Jid* jidp = jid_create_from_bare_and_resource(account->jid, resource->name);
+            auto_jid Jid* jidp = jid_create_from_bare_and_resource(account->jid, resource->name);
             EntityCapabilities* caps = caps_lookup(jidp->fulljid);
-            jid_destroy(jidp);
 
             if (caps) {
                 // show identity

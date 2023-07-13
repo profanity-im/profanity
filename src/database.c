@@ -153,11 +153,9 @@ log_database_add_incoming(ProfMessage* message)
     if (message->to_jid) {
         _add_to_db(message, NULL, message->from_jid, message->to_jid);
     } else {
-        Jid* myjid = jid_create(connection_get_fulljid());
+        auto_jid Jid* myjid = jid_create(connection_get_fulljid());
 
         _add_to_db(message, NULL, message->from_jid, myjid);
-
-        jid_destroy(myjid);
     }
 }
 
@@ -173,11 +171,10 @@ _log_database_add_outgoing(char* type, const char* const id, const char* const b
     msg->timestamp = g_date_time_new_now_local(); // TODO: get from outside. best to have whole ProfMessage from outside
     msg->enc = enc;
 
-    Jid* myjid = jid_create(connection_get_fulljid());
+    auto_jid Jid* myjid = jid_create(connection_get_fulljid());
 
     _add_to_db(msg, type, myjid, msg->from_jid); // TODO: myjid now in profmessage
 
-    jid_destroy(myjid);
     message_free(msg);
 }
 
@@ -206,7 +203,7 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
     sqlite3_stmt* stmt = NULL;
     gchar* query;
     const char* jid = connection_get_fulljid();
-    Jid* myjid = jid_create(jid);
+    auto_jid Jid* myjid = jid_create(jid);
     if (!myjid)
         return NULL;
 
@@ -220,8 +217,6 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
         log_error("log_database_get_last_info(): SQL query. could not allocate memory");
         return NULL;
     }
-
-    jid_destroy(myjid);
 
     int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
@@ -252,7 +247,7 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
 {
     sqlite3_stmt* stmt = NULL;
     const char* jid = connection_get_fulljid();
-    Jid* myjid = jid_create(jid);
+    auto_jid Jid* myjid = jid_create(jid);
     if (!myjid)
         return NULL;
 
@@ -269,8 +264,6 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
         log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
         return NULL;
     }
-
-    jid_destroy(myjid);
 
     int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {

@@ -495,11 +495,10 @@ muc_roster_add(const char* const room, const char* const nick, const char* const
         g_hash_table_replace(chat_room->roster, strdup(nick), occupant);
 
         if (jid) {
-            Jid* jidp = jid_create(jid);
+            auto_jid Jid* jidp = jid_create(jid);
             if (jidp->barejid) {
                 autocomplete_add(chat_room->jid_ac, jidp->barejid);
             }
-            jid_destroy(jidp);
         }
     }
 
@@ -771,13 +770,12 @@ muc_jid_autocomplete_add_all(const char* const room, GSList* jids)
             GSList* curr_jid = jids;
             while (curr_jid) {
                 const char* jid = curr_jid->data;
-                Jid* jidp = jid_create(jid);
+                auto_jid Jid* jidp = jid_create(jid);
                 if (jidp) {
                     if (jidp->barejid) {
                         autocomplete_add(chat_room->jid_ac, jidp->barejid);
                     }
                 }
-                jid_destroy(jidp);
                 curr_jid = g_slist_next(curr_jid);
             }
         }

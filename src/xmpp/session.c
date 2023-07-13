@@ -123,9 +123,8 @@ session_connect_with_account(const ProfAccount* const account)
 
     auto_char char* jid = NULL;
     if (account->resource) {
-        Jid* jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
+        auto_jid Jid* jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
         jid = strdup(jidp->fulljid);
-        jid_destroy(jidp);
     } else {
         jid = strdup(account->jid);
     }
@@ -175,16 +174,15 @@ session_connect_with_details(const char* const jid, const char* const passwd, co
     }
 
     // use 'profanity' when no resourcepart in provided jid
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
     if (jidp->resourcepart == NULL) {
-        jid_destroy(jidp);
         auto_gchar gchar* resource = jid_random_resource();
+        jid_destroy(jidp);
         jidp = jid_create_from_bare_and_resource(jid, resource);
         saved_details.jid = strdup(jidp->fulljid);
     } else {
         saved_details.jid = strdup(jid);
     }
-    jid_destroy(jidp);
 
     // connect with fulljid
     log_info("Connecting without account, JID: %s", saved_details.jid);

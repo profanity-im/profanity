@@ -1080,11 +1080,10 @@ _room_list_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             const char* item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
             auto_gchar gchar* item_jid_lower = NULL;
             if (item_jid) {
-                Jid* jidp = jid_create(item_jid);
+                auto_jid Jid* jidp = jid_create(item_jid);
                 if (jidp && jidp->localpart) {
                     item_jid_lower = g_utf8_strdown(jidp->localpart, -1);
                 }
-                jid_destroy(jidp);
             }
             const char* item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
             auto_gchar gchar* item_name_lower = NULL;
@@ -1505,7 +1504,7 @@ _version_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
     xmpp_ctx_t* ctx = connection_get_ctx();
 
-    Jid* jidp = jid_create((char*)userdata);
+    auto_jid Jid* jidp = jid_create((char*)userdata);
 
     const char* presence = NULL;
 
@@ -1542,8 +1541,6 @@ _version_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         // server or component
         ui_show_software_version(jidp->barejid, "online", name_str, version_str, os_str);
     }
-
-    jid_destroy(jidp);
 
     if (name_str)
         xmpp_free(ctx, name_str);
