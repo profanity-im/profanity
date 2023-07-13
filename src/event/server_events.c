@@ -1319,10 +1319,9 @@ static void
 _cut(ProfMessage* message, const char* cut)
 {
     if (strstr(message->plain, cut)) {
-        gchar** split = g_strsplit(message->plain, cut, -1);
+        auto_gcharv gchar** split = g_strsplit(message->plain, cut, -1);
         free(message->plain);
         message->plain = g_strjoinv("", split);
-        g_strfreev(split);
     }
 }
 

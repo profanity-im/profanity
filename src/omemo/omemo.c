@@ -1597,60 +1597,59 @@ _load_identity(void)
 static void
 _load_trust(void)
 {
-    char** keys = NULL;
-    gchar** groups = g_key_file_get_groups(omemo_ctx.trust_keyfile, NULL);
-    if (groups) {
-        int i;
-        for (i = 0; groups[i] != NULL; i++) {
-            GHashTable* trusted;
+    auto_gcharv gchar** groups = g_key_file_get_groups(omemo_ctx.trust_keyfile, NULL);
 
-            trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, groups[i]);
-            if (!trusted) {
-                trusted = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
-                g_hash_table_insert(omemo_ctx.identity_key_store.trusted, strdup(groups[i]), trusted);
-            }
+    if (!groups) {
+        return;
+    }
 
-            keys = g_key_file_get_keys(omemo_ctx.trust_keyfile, groups[i], NULL, NULL);
-            int j;
-            for (j = 0; keys[j] != NULL; j++) {
-                auto_gchar gchar* key_b64 = g_key_file_get_string(omemo_ctx.trust_keyfile, groups[i], keys[j], NULL);
-                size_t key_len;
-                auto_guchar guchar* key = g_base64_decode(key_b64, &key_len);
-                signal_buffer* buffer = signal_buffer_create(key, key_len);
-                uint32_t device_id = strtoul(keys[j], NULL, 10);
-                g_hash_table_insert(trusted, GINT_TO_POINTER(device_id), buffer);
-            }
-            g_strfreev(keys);
+    for (int i = 0; groups[i] != NULL; i++) {
+        GHashTable* trusted;
+
+        trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, groups[i]);
+        if (!trusted) {
+            trusted = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
+            g_hash_table_insert(omemo_ctx.identity_key_store.trusted, strdup(groups[i]), trusted);
         }
-        g_strfreev(groups);
+
+        auto_gcharv gchar** keys = g_key_file_get_keys(omemo_ctx.trust_keyfile, groups[i], NULL, NULL);
+        for (int j = 0; keys[j] != NULL; j++) {
+            auto_gchar gchar* key_b64 = g_key_file_get_string(omemo_ctx.trust_keyfile, groups[i], keys[j], NULL);
+            size_t key_len;
+            auto_guchar guchar* key = g_base64_decode(key_b64, &key_len);
+            signal_buffer* buffer = signal_buffer_create(key, key_len);
+            uint32_t device_id = strtoul(keys[j], NULL, 10);
+            g_hash_table_insert(trusted, GINT_TO_POINTER(device_id), buffer);
+        }
     }
 }
 
 static void
 _load_sessions(void)
 {
-    int i;
     auto_gcharv gchar** groups = g_key_file_get_groups(omemo_ctx.sessions_keyfile, NULL);
-    if (groups) {
-        for (i = 0; groups[i] != NULL; i++) {
-            int j;
-            GHashTable* device_store = NULL;
 
-            device_store = g_hash_table_lookup(omemo_ctx.session_store, groups[i]);
-            if (!device_store) {
-                device_store = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
-                g_hash_table_insert(omemo_ctx.session_store, strdup(groups[i]), device_store);
-            }
+    if (!groups) {
+        return;
+    }
 
-            auto_gcharv gchar** keys = g_key_file_get_keys(omemo_ctx.sessions_keyfile, groups[i], NULL, NULL);
-            for (j = 0; keys[j] != NULL; j++) {
-                uint32_t id = strtoul(keys[j], NULL, 10);
-                auto_gchar gchar* record_b64 = g_key_file_get_string(omemo_ctx.sessions_keyfile, groups[i], keys[j], NULL);
-                size_t record_len;
-                auto_guchar guchar* record = g_base64_decode(record_b64, &record_len);
-                signal_buffer* buffer = signal_buffer_create(record, record_len);
-                g_hash_table_insert(device_store, GINT_TO_POINTER(id), buffer);
-            }
+    for (int i = 0; groups[i] != NULL; i++) {
+        GHashTable* device_store = NULL;
+
+        device_store = g_hash_table_lookup(omemo_ctx.session_store, groups[i]);
+        if (!device_store) {
+            device_store = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
+            g_hash_table_insert(omemo_ctx.session_store, strdup(groups[i]), device_store);
+        }
+
+        auto_gcharv gchar** keys = g_key_file_get_keys(omemo_ctx.sessions_keyfile, groups[i], NULL, NULL);
+        for (int j = 0; keys[j] != NULL; j++) {
+            uint32_t id = strtoul(keys[j], NULL, 10);
+            auto_gchar gchar* record_b64 = g_key_file_get_string(omemo_ctx.sessions_keyfile, groups[i], keys[j], NULL);
+            size_t record_len;
+            auto_guchar guchar* record = g_base64_decode(record_b64, &record_len);
+            signal_buffer* buffer = signal_buffer_create(record, record_len);
+            g_hash_table_insert(device_store, GINT_TO_POINTER(id), buffer);
         }
     }
 }
@@ -1658,25 +1657,26 @@ _load_sessions(void)
 static void
 _load_known_devices(void)
 {
-    int i;
     auto_gcharv gchar** groups = g_key_file_get_groups(omemo_ctx.known_devices_keyfile, NULL);
-    if (groups) {
-        for (i = 0; groups[i] != NULL; i++) {
-            int j;
-            GHashTable* known_identities = NULL;
 
-            known_identities = g_hash_table_lookup(omemo_ctx.known_devices, groups[i]);
-            if (!known_identities) {
-                known_identities = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-                g_hash_table_insert(omemo_ctx.known_devices, strdup(groups[i]), known_identities);
-            }
+    if (!groups) {
+        return;
+    }
 
-            auto_gcharv gchar** keys = g_key_file_get_keys(omemo_ctx.known_devices_keyfile, groups[i], NULL, NULL);
-            for (j = 0; keys[j] != NULL; j++) {
-                uint32_t device_id = strtoul(keys[j], NULL, 10);
-                auto_gchar gchar* fingerprint = g_key_file_get_string(omemo_ctx.known_devices_keyfile, groups[i], keys[j], NULL);
-                g_hash_table_insert(known_identities, strdup(fingerprint), GINT_TO_POINTER(device_id));
-            }
+    for (int i = 0; groups[i] != NULL; i++) {
+        GHashTable* known_identities = NULL;
+
+        known_identities = g_hash_table_lookup(omemo_ctx.known_devices, groups[i]);
+        if (!known_identities) {
+            known_identities = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+            g_hash_table_insert(omemo_ctx.known_devices, strdup(groups[i]), known_identities);
+        }
+
+        auto_gcharv gchar** keys = g_key_file_get_keys(omemo_ctx.known_devices_keyfile, groups[i], NULL, NULL);
+        for (int j = 0; keys[j] != NULL; j++) {
+            uint32_t device_id = strtoul(keys[j], NULL, 10);
+            auto_gchar gchar* fingerprint = g_key_file_get_string(omemo_ctx.known_devices_keyfile, groups[i], keys[j], NULL);
+            g_hash_table_insert(known_identities, strdup(fingerprint), GINT_TO_POINTER(device_id));
         }
     }
 }

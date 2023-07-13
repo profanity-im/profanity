@@ -3210,14 +3210,14 @@ _form_field_autocomplete(ProfWin* window, const char* const input, gboolean prev
         return NULL;
     }
 
-    gchar** split = g_strsplit(input, " ", 0);
+    auto_gcharv gchar** split = g_strsplit(input, " ", 0);
 
     if (g_strv_length(split) == 3) {
         char* field_tag = split[0] + 1;
         if (form_tag_exists(form, field_tag)) {
             form_field_type_t field_type = form_get_field_type(form, field_tag);
             Autocomplete value_ac = form_get_value_ac(form, field_tag);
-            ;
+
             GString* beginning = g_string_new(split[0]);
             g_string_append(beginning, " ");
             g_string_append(beginning, split[1]);
@@ -3225,10 +3225,8 @@ _form_field_autocomplete(ProfWin* window, const char* const input, gboolean prev
             if (((g_strcmp0(split[1], "add") == 0) || (g_strcmp0(split[1], "remove") == 0))
                 && field_type == FIELD_LIST_MULTI) {
                 found = autocomplete_param_with_ac(input, beginning->str, value_ac, TRUE, previous);
-
             } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_TEXT_MULTI) {
                 found = autocomplete_param_with_ac(input, beginning->str, value_ac, TRUE, previous);
-
             } else if ((g_strcmp0(split[1], "remove") == 0) && field_type == FIELD_JID_MULTI) {
                 found = autocomplete_param_with_ac(input, beginning->str, value_ac, TRUE, previous);
             }
@@ -3241,7 +3239,6 @@ _form_field_autocomplete(ProfWin* window, const char* const input, gboolean prev
         if (form_tag_exists(form, field_tag)) {
             form_field_type_t field_type = form_get_field_type(form, field_tag);
             Autocomplete value_ac = form_get_value_ac(form, field_tag);
-            ;
 
             switch (field_type) {
             case FIELD_BOOLEAN:
@@ -3260,8 +3257,6 @@ _form_field_autocomplete(ProfWin* window, const char* const input, gboolean prev
             }
         }
     }
-
-    g_strfreev(split);
 
     return found;
 }

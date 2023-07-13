@@ -216,12 +216,11 @@ _prefs_load(void)
 
     room_trigger_ac = autocomplete_new();
     gsize len = 0;
-    gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    auto_gcharv gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
     for (int i = 0; i < len; i++) {
         autocomplete_add(room_trigger_ac, triggers[i]);
     }
-    g_strfreev(triggers);
 }
 
 /* Clean up after _prefs_load() */
@@ -333,7 +332,7 @@ prefs_message_get_triggers(const char* const message)
 
     auto_gchar gchar* message_lower = g_utf8_strdown(message, -1);
     gsize len = 0;
-    gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    auto_gcharv gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
     for (int i = 0; i < len; i++) {
         auto_gchar gchar* trigger_lower = g_utf8_strdown(triggers[i], -1);
@@ -341,8 +340,6 @@ prefs_message_get_triggers(const char* const message)
             result = g_list_append(result, strdup(triggers[i]));
         }
     }
-
-    g_strfreev(triggers);
 
     return result;
 }
@@ -863,12 +860,6 @@ prefs_remove_plugin(const char* const name)
 }
 
 void
-prefs_free_plugins(gchar** plugins)
-{
-    g_strfreev(plugins);
-}
-
-void
 prefs_set_occupants_size(gint value)
 {
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "occupants.size", value);
@@ -1316,13 +1307,11 @@ prefs_get_room_notify_triggers(void)
 {
     GList* result = NULL;
     gsize len = 0;
-    gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    auto_gcharv gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
     for (int i = 0; i < len; i++) {
         result = g_list_append(result, strdup(triggers[i]));
     }
-
-    g_strfreev(triggers);
 
     return result;
 }
@@ -1665,7 +1654,7 @@ prefs_get_aliases(void)
     } else {
         GList* result = NULL;
         gsize len;
-        gchar** keys = g_key_file_get_keys(prefs, PREF_GROUP_ALIAS, &len, NULL);
+        auto_gcharv gchar** keys = g_key_file_get_keys(prefs, PREF_GROUP_ALIAS, &len, NULL);
 
         for (int i = 0; i < len; i++) {
             char* name = keys[i];
@@ -1679,8 +1668,6 @@ prefs_get_aliases(void)
                 result = g_list_insert_sorted(result, alias, (GCompareFunc)_alias_cmp);
             }
         }
-
-        g_strfreev(keys);
 
         return result;
     }

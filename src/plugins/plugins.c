@@ -82,50 +82,47 @@ plugins_init(void)
 #endif
 
     // load plugins
-    gchar** plugins_pref = prefs_get_plugins();
-    if (plugins_pref) {
-        for (int i = 0; i < g_strv_length(plugins_pref); i++) {
-            gboolean loaded = FALSE;
-            gchar* filename = plugins_pref[i];
+    auto_gcharv gchar** plugins_pref = prefs_get_plugins();
+    if (!plugins_pref) {
+        return;
+    }
+    for (int i = 0; i < g_strv_length(plugins_pref); i++) {
+        gboolean loaded = FALSE;
+        gchar* filename = plugins_pref[i];
 #ifdef HAVE_PYTHON
-            if (g_str_has_suffix(filename, ".py")) {
-                ProfPlugin* plugin = python_plugin_create(filename);
-                if (plugin) {
-                    g_hash_table_insert(plugins, strdup(filename), plugin);
-                    loaded = TRUE;
-                }
+        if (g_str_has_suffix(filename, ".py")) {
+            ProfPlugin* plugin = python_plugin_create(filename);
+            if (plugin) {
+                g_hash_table_insert(plugins, strdup(filename), plugin);
+                loaded = TRUE;
             }
+        }
 #endif
 #ifdef HAVE_C
-            if (g_str_has_suffix(filename, ".so")) {
-                ProfPlugin* plugin = c_plugin_create(filename);
-                if (plugin) {
-                    g_hash_table_insert(plugins, strdup(filename), plugin);
-                    loaded = TRUE;
-                }
+        if (g_str_has_suffix(filename, ".so")) {
+            ProfPlugin* plugin = c_plugin_create(filename);
+            if (plugin) {
+                g_hash_table_insert(plugins, strdup(filename), plugin);
+                loaded = TRUE;
             }
+        }
 #endif
-            if (loaded) {
-                log_info("Loaded plugin: %s", filename);
-            } else {
-                log_info("Failed to load plugin: %s", filename);
-            }
+        if (loaded) {
+            log_info("Loaded plugin: %s", filename);
+        } else {
+            log_info("Failed to load plugin: %s", filename);
         }
-
-        // initialise plugins
-        GList* values = g_hash_table_get_values(plugins);
-        GList* curr = values;
-        while (curr) {
-            ProfPlugin* plugin = curr->data;
-            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
-            curr = g_list_next(curr);
-        }
-        g_list_free(values);
     }
 
-    prefs_free_plugins(plugins_pref);
-
-    return;
+    // initialise plugins
+    GList* values = g_hash_table_get_values(plugins);
+    GList* curr = values;
+    while (curr) {
+        ProfPlugin* plugin = curr->data;
+        plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
+        curr = g_list_next(curr);
+    }
+    g_list_free(values);
 }
 
 void

@@ -253,7 +253,6 @@ gint prefs_get_autoxa_time(void);
 void prefs_set_autoxa_time(gint value);
 
 gchar** prefs_get_plugins(void);
-void prefs_free_plugins(gchar** plugins);
 void prefs_add_plugin(const char* const name);
 void prefs_remove_plugin(const char* const name);
 

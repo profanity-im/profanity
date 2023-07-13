@@ -877,7 +877,7 @@ _caps_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
     }
 
     // validate sha1
-    gchar** split = g_strsplit(node, "#", -1);
+    auto_gcharv gchar** split = g_strsplit(node, "#", -1);
     char* given_sha1 = split[1];
     auto_gchar gchar* generated_sha1 = stanza_create_caps_sha1_from_query(query);
 
@@ -900,8 +900,6 @@ _caps_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
         caps_map_jid_to_ver(from, given_sha1);
     }
-
-    g_strfreev(split);
 
     return 0;
 }

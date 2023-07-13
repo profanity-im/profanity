@@ -378,7 +378,7 @@ _caps_by_ver(const char* const ver)
     auto_gchar gchar* os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
 
     gsize features_len = 0;
-    gchar** features_list = g_key_file_get_string_list(cache, ver, "features", &features_len, NULL);
+    auto_gcharv gchar** features_list = g_key_file_get_string_list(cache, ver, "features", &features_len, NULL);
     GSList* features = NULL;
     if (features_list && features_len > 0) {
         for (int i = 0; i < features_len; i++) {
@@ -391,9 +391,6 @@ _caps_by_ver(const char* const ver)
         software, software_version, os, os_version,
         features);
 
-    if (features_list) {
-        g_strfreev(features_list);
-    }
     g_slist_free(features);
 
     return result;

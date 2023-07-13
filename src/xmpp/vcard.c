@@ -1350,7 +1350,7 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
     }
 
     if (data->open) {
-        gchar** argv;
+        auto_gcharv gchar** argv;
         gint argc;
 
         auto_gchar gchar* cmdtemplate = prefs_get_string(PREF_VCARD_PHOTO_CMD);
@@ -1366,7 +1366,6 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
             if (!call_external(argv)) {
                 cons_show_error("Unable to execute command");
             }
-            g_strfreev(argv);
         }
     }
 

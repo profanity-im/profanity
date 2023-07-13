@@ -78,7 +78,7 @@ accounts_load(void)
 
     // create the logins searchable list for autocompletion
     gsize naccounts;
-    gchar** account_names = g_key_file_get_groups(accounts, &naccounts);
+    auto_gcharv gchar** account_names = g_key_file_get_groups(accounts, &naccounts);
 
     for (gsize i = 0; i < naccounts; i++) {
         autocomplete_add(all_ac, account_names[i]);
@@ -86,8 +86,6 @@ accounts_load(void)
             autocomplete_add(enabled_ac, account_names[i]);
         }
     }
-
-    g_strfreev(account_names);
 }
 
 void
@@ -245,30 +243,27 @@ accounts_get_account(const char* const name)
 
         gsize length;
         GList* otr_manual = NULL;
-        gchar** manual = g_key_file_get_string_list(accounts, name, "otr.manual", &length, NULL);
+        auto_gcharv gchar** manual = g_key_file_get_string_list(accounts, name, "otr.manual", &length, NULL);
         if (manual) {
             for (int i = 0; i < length; i++) {
                 otr_manual = g_list_append(otr_manual, strdup(manual[i]));
             }
-            g_strfreev(manual);
         }
 
         GList* otr_opportunistic = NULL;
-        gchar** opportunistic = g_key_file_get_string_list(accounts, name, "otr.opportunistic", &length, NULL);
+        auto_gcharv gchar** opportunistic = g_key_file_get_string_list(accounts, name, "otr.opportunistic", &length, NULL);
         if (opportunistic) {
             for (int i = 0; i < length; i++) {
                 otr_opportunistic = g_list_append(otr_opportunistic, strdup(opportunistic[i]));
             }
-            g_strfreev(opportunistic);
         }
 
         GList* otr_always = NULL;
-        gchar** always = g_key_file_get_string_list(accounts, name, "otr.always", &length, NULL);
+        auto_gcharv gchar** always = g_key_file_get_string_list(accounts, name, "otr.always", &length, NULL);
         if (always) {
             for (int i = 0; i < length; i++) {
                 otr_always = g_list_append(otr_always, strdup(always[i]));
             }
-            g_strfreev(always);
         }
 
         gchar* omemo_policy = NULL;
@@ -277,39 +272,35 @@ accounts_get_account(const char* const name)
         }
 
         GList* omemo_enabled = NULL;
-        gchar** omemo_enabled_list = g_key_file_get_string_list(accounts, name, "omemo.enabled", &length, NULL);
+        auto_gcharv gchar** omemo_enabled_list = g_key_file_get_string_list(accounts, name, "omemo.enabled", &length, NULL);
         if (omemo_enabled_list) {
             for (int i = 0; i < length; i++) {
                 omemo_enabled = g_list_append(omemo_enabled, strdup(omemo_enabled_list[i]));
             }
-            g_strfreev(omemo_enabled_list);
         }
 
         GList* omemo_disabled = NULL;
-        gchar** omemo_disabled_list = g_key_file_get_string_list(accounts, name, "omemo.disabled", &length, NULL);
+        auto_gcharv gchar** omemo_disabled_list = g_key_file_get_string_list(accounts, name, "omemo.disabled", &length, NULL);
         if (omemo_disabled_list) {
             for (int i = 0; i < length; i++) {
                 omemo_disabled = g_list_append(omemo_disabled, strdup(omemo_disabled_list[i]));
             }
-            g_strfreev(omemo_disabled_list);
         }
 
         GList* ox_enabled = NULL;
-        gchar** ox_enabled_list = g_key_file_get_string_list(accounts, name, "ox.enabled", &length, NULL);
+        auto_gcharv gchar** ox_enabled_list = g_key_file_get_string_list(accounts, name, "ox.enabled", &length, NULL);
         if (ox_enabled_list) {
             for (int i = 0; i < length; i++) {
                 ox_enabled = g_list_append(ox_enabled, strdup(ox_enabled_list[i]));
             }
-            g_strfreev(ox_enabled_list);
         }
 
         GList* pgp_enabled = NULL;
-        gchar** pgp_enabled_list = g_key_file_get_string_list(accounts, name, "pgp.enabled", &length, NULL);
+        auto_gcharv gchar** pgp_enabled_list = g_key_file_get_string_list(accounts, name, "pgp.enabled", &length, NULL);
         if (pgp_enabled_list) {
             for (int i = 0; i < length; i++) {
                 pgp_enabled = g_list_append(pgp_enabled, strdup(pgp_enabled_list[i]));
             }
-            g_strfreev(pgp_enabled_list);
         }
 
         gchar* pgp_keyid = NULL;

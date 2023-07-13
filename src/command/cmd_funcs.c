@@ -505,9 +505,8 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_account_list(ProfWin* window, const char* const command, gchar** args)
 {
-    gchar** accounts = accounts_get_list();
+    auto_gcharv gchar** accounts = accounts_get_list();
     cons_show_account_list(accounts);
-    g_strfreev(accounts);
 
     return TRUE;
 }
@@ -4839,9 +4838,8 @@ cmd_bookmark_ignore(ProfWin* window, const char* const command, gchar** args)
     // `/bookmark ignore` lists them
     if (args[1] == NULL) {
         gsize len = 0;
-        gchar** list = bookmark_ignore_list(&len);
+        auto_gcharv gchar** list = bookmark_ignore_list(&len);
         cons_show_bookmarks_ignore(list, len);
-        g_strfreev(list);
         return TRUE;
     }
 
@@ -8479,18 +8477,16 @@ _cmd_execute(ProfWin* window, const char* const command, const char* const inp)
 {
     if (g_str_has_prefix(command, "/field") && window->type == WIN_CONFIG) {
         gboolean result = FALSE;
-        gchar** args = parse_args_with_freetext(inp, 1, 2, &result);
+        auto_gcharv gchar** args = parse_args_with_freetext(inp, 1, 2, &result);
         if (!result) {
             win_println(window, THEME_DEFAULT, "!", "Invalid command, see /form help");
             result = TRUE;
         } else {
-            gchar** tokens = g_strsplit(inp, " ", 2);
+            auto_gcharv gchar** tokens = g_strsplit(inp, " ", 2);
             char* field = tokens[0] + 1;
             result = cmd_form_field(window, field, args);
-            g_strfreev(tokens);
         }
 
-        g_strfreev(args);
         return result;
     }
 
@@ -8498,7 +8494,7 @@ _cmd_execute(ProfWin* window, const char* const command, const char* const inp)
     gboolean result = FALSE;
 
     if (cmd) {
-        gchar** args = cmd->parser(inp, cmd->min_args, cmd->max_args, &result);
+        auto_gcharv gchar** args = cmd->parser(inp, cmd->min_args, cmd->max_args, &result);
         if (result == FALSE) {
             ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
             return TRUE;
@@ -8507,20 +8503,17 @@ _cmd_execute(ProfWin* window, const char* const command, const char* const inp)
             int i = 0;
             while (cmd->sub_funcs[i].cmd) {
                 if (g_strcmp0(args[0], (char*)cmd->sub_funcs[i].cmd) == 0) {
-                    result = cmd->sub_funcs[i].func(window, command, args);
-                    goto out;
+                    return cmd->sub_funcs[i].func(window, command, args);
                 }
                 i++;
             }
         }
         if (!cmd->func) {
             ui_invalid_command_usage(cmd->cmd, cmd->setting_func);
-            result = TRUE;
-            goto out;
+            return TRUE;
         }
         result = cmd->func(window, command, args);
-out:
-        g_strfreev(args);
+
         return result;
     } else if (plugins_run_command(inp)) {
         return TRUE;
@@ -9543,15 +9536,13 @@ _url_http_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* p
 void
 _url_external_method(const char* cmd_template, const char* url, gchar* filename)
 {
-    gchar** argv = format_call_external_argv(cmd_template, url, filename);
+    auto_gcharv gchar** argv = format_call_external_argv(cmd_template, url, filename);
 
     if (!call_external(argv)) {
         cons_show_error("Unable to call external executable for url: check the logs for more information.");
     } else {
         cons_show("URL '%s' has been called with '%s'.", url, cmd_template);
     }
-
-    g_strfreev(argv);
 }
 
 gboolean

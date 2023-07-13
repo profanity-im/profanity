@@ -177,14 +177,13 @@ p_gpg_on_connect(const char* const barejid)
 
     // load each keyid
     gsize len = 0;
-    gchar** jids = g_key_file_get_groups(pubkeyfile, &len);
+    auto_gcharv gchar** jids = g_key_file_get_groups(pubkeyfile, &len);
 
     gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
 
     if (error) {
         log_error("GPG: Failed to create gpgme context. %s %s", gpgme_strsource(error), gpgme_strerror(error));
-        g_strfreev(jids);
         return;
     }
 
@@ -212,7 +211,6 @@ p_gpg_on_connect(const char* const barejid)
     }
 
     gpgme_release(ctx);
-    g_strfreev(jids);
 
     _save_pubkeys();
 }
