@@ -562,10 +562,9 @@ _inp_rl_startup_hook(void)
     rl_variable_bind("disable-completion", "on");
 
     // check for and load ~/.config/profanity/inputrc
-    gchar* inputrc = files_get_inputrc_file();
+    auto_gchar gchar* inputrc = files_get_inputrc_file();
     if (inputrc) {
         rl_read_init_file(inputrc);
-        g_free(inputrc);
     }
 
     return 0;
@@ -948,7 +947,7 @@ _inp_rl_send_to_editor(int count, int key)
         return 0;
     }
 
-    gchar* message = NULL;
+    auto_gchar gchar* message = NULL;
 
     if (get_message_from_editor(rl_line_buffer, &message)) {
         return 0;
@@ -958,7 +957,6 @@ _inp_rl_send_to_editor(int count, int key)
     ui_resize();
     rl_point = rl_end;
     rl_forced_update_display();
-    g_free(message);
 
     return 0;
 }

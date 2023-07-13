@@ -4387,9 +4387,8 @@ _url_autocomplete(ProfWin* window, const char* const input, gboolean previous)
             if ((num_args == 1 && space_at_end) || (num_args == 2 && !space_at_end)) {
                 result = autocomplete_param_with_func(input, "/url save", wins_get_url, previous, window);
             } else if ((num_args == 2 && space_at_end) || (num_args == 3 && !space_at_end)) {
-                gchar* cmd = g_strdup_printf("/url save %s", args[1]);
+                auto_gchar gchar* cmd = g_strdup_printf("/url save %s", args[1]);
                 result = cmd_ac_complete_filepath(input, cmd, previous);
-                g_free(cmd);
             }
         }
     }

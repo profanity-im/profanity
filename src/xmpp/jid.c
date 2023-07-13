@@ -163,9 +163,8 @@ jid_is_valid_room_form(Jid* jid)
 char*
 create_fulljid(const char* const barejid, const char* const resource)
 {
-    gchar* barejidlower = g_utf8_strdown(barejid, -1);
+    auto_gchar gchar* barejidlower = g_utf8_strdown(barejid, -1);
     GString* full_jid = g_string_new(barejidlower);
-    g_free(barejidlower);
     g_string_append(full_jid, "/");
     g_string_append(full_jid, resource);
 
@@ -209,7 +208,7 @@ jid_fulljid_or_barejid(Jid* jid)
     }
 }
 
-char*
+gchar*
 jid_random_resource(void)
 {
     auto_char char* rand = get_random_string(4);

@@ -31,6 +31,9 @@
  * statement from your version. If you delete this exception statement from all
  * source files in the program, then also delete it here.
  *
+ * @file common.h
+ *
+ * @brief Common utilities for the project.
  */
 
 #ifndef COMMON_H
@@ -56,6 +59,25 @@ void auto_free_gcharv(gchar*** args);
 #define auto_gcharv __attribute__((__cleanup__(auto_free_gcharv)))
 void auto_free_char(char** str);
 #define auto_char __attribute__((__cleanup__(auto_free_char)))
+/**
+ * Frees the memory allocated for a guchar* string.
+ *
+ * @param str Pointer to the guchar* string to be freed. If NULL, no action is taken.
+ */
+void auto_free_guchar(guchar** str);
+
+/**
+ * @brief Macro for automatically freeing a guchar* string when it goes out of scope.
+ *
+ * This macro is used to automatically free a guchar* string when it goes out of scope.
+ * It utilizes the `auto_free_guchar` function and should be placed before the variable declaration.
+ *
+ * Example usage:
+ * ```
+ * auto_guchar guchar* myString = g_base64_decode("SGVsbG8sIHdvcmxkIQ==", NULL);
+ * ```
+ */
+#define auto_guchar __attribute__((__cleanup__(auto_free_guchar)))
 
 #if defined(__OpenBSD__)
 #define STR_MAYBE_NULL(p) (p) ?: "(null)"

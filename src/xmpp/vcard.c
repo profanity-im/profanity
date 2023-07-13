@@ -757,10 +757,9 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
                 xmpp_stanza_t* binval = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(binval, "BINVAL");
 
-                gchar* base64 = g_base64_encode(element->photo.data, element->photo.length);
+                auto_gchar gchar* base64 = g_base64_encode(element->photo.data, element->photo.length);
                 xmpp_stanza_t* binval_text = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_text(binval_text, base64);
-                g_free(base64);
                 xmpp_stanza_add_child(binval, binval_text);
                 xmpp_stanza_release(binval_text);
 
@@ -789,10 +788,9 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
             xmpp_stanza_t* birthday = xmpp_stanza_new(ctx);
             xmpp_stanza_set_name(birthday, "BDAY");
 
-            gchar* bday_text = g_date_time_format(element->birthday, "%Y-%m-%d");
+            auto_gchar gchar* bday_text = g_date_time_format(element->birthday, "%Y-%m-%d");
             xmpp_stanza_t* birthday_text = xmpp_stanza_new(ctx);
             xmpp_stanza_set_text(birthday_text, bday_text);
-            g_free(bday_text);
             xmpp_stanza_add_child(birthday, birthday_text);
             xmpp_stanza_release(birthday_text);
 

@@ -230,7 +230,7 @@ omemo_on_connect(ProfAccount* account)
     omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
     omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)glib_hash_table_free);
 
-    gchar* omemo_dir = files_file_in_account_data_path(DIR_OMEMO, account->jid, NULL);
+    auto_gchar gchar* omemo_dir = files_file_in_account_data_path(DIR_OMEMO, account->jid, NULL);
     if (!omemo_dir) {
         log_error("[OMEMO] failed creating directory");
         return;
@@ -244,8 +244,6 @@ omemo_on_connect(ProfAccount* account)
     g_string_append(omemo_ctx.sessions_filename, "/sessions.txt");
     omemo_ctx.known_devices_filename = g_string_new(omemo_dir);
     g_string_append(omemo_ctx.known_devices_filename, "/known_devices.txt");
-
-    g_free(omemo_dir);
 
     omemo_devicelist_subscribe();
 
@@ -1535,7 +1533,7 @@ _load_identity(void)
     }
 
     size_t identity_key_public_len;
-    unsigned char* identity_key_public = g_base64_decode(identity_key_public_b64, &identity_key_public_len);
+    auto_guchar guchar* identity_key_public = g_base64_decode(identity_key_public_b64, &identity_key_public_len);
     omemo_ctx.identity_key_store.public = signal_buffer_create(identity_key_public, identity_key_public_len);
 
     error = NULL;
@@ -1546,7 +1544,7 @@ _load_identity(void)
     }
 
     size_t identity_key_private_len;
-    unsigned char* identity_key_private = g_base64_decode(identity_key_private_b64, &identity_key_private_len);
+    auto_guchar guchar* identity_key_private = g_base64_decode(identity_key_private_b64, &identity_key_private_len);
     omemo_ctx.identity_key_store.private = signal_buffer_create(identity_key_private, identity_key_private_len);
 
     ec_public_key* public_key;
@@ -1554,9 +1552,6 @@ _load_identity(void)
     ec_private_key* private_key;
     curve_decode_private_point(&private_key, identity_key_private, identity_key_private_len, omemo_ctx.signal);
     ratchet_identity_key_pair_create(&omemo_ctx.identity_key_pair, public_key, private_key);
-
-    g_free(identity_key_public);
-    g_free(identity_key_private);
 
     char** keys = NULL;
     int i;
@@ -1567,9 +1562,8 @@ _load_identity(void)
         for (i = 0; keys[i] != NULL; i++) {
             auto_gchar gchar* pre_key_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_PREKEYS, keys[i], NULL);
             size_t pre_key_len;
-            unsigned char* pre_key = g_base64_decode(pre_key_b64, &pre_key_len);
+            auto_guchar guchar* pre_key = g_base64_decode(pre_key_b64, &pre_key_len);
             signal_buffer* buffer = signal_buffer_create(pre_key, pre_key_len);
-            g_free(pre_key);
             g_hash_table_insert(omemo_ctx.pre_key_store, GINT_TO_POINTER(strtoul(keys[i], NULL, 10)), buffer);
         }
 
@@ -1588,9 +1582,8 @@ _load_identity(void)
         for (i = 0; keys[i] != NULL; i++) {
             auto_gchar gchar* signed_pre_key_b64 = g_key_file_get_string(omemo_ctx.identity_keyfile, OMEMO_STORE_GROUP_SIGNED_PREKEYS, keys[i], NULL);
             size_t signed_pre_key_len;
-            unsigned char* signed_pre_key = g_base64_decode(signed_pre_key_b64, &signed_pre_key_len);
+            auto_guchar guchar* signed_pre_key = g_base64_decode(signed_pre_key_b64, &signed_pre_key_len);
             signal_buffer* buffer = signal_buffer_create(signed_pre_key, signed_pre_key_len);
-            g_free(signed_pre_key);
             g_hash_table_insert(omemo_ctx.signed_pre_key_store, GINT_TO_POINTER(strtoul(keys[i], NULL, 10)), buffer);
             omemo_ctx.signed_pre_key_id = strtoul(keys[i], NULL, 10);
         }
@@ -1630,9 +1623,8 @@ _load_trust(void)
             for (j = 0; keys[j] != NULL; j++) {
                 auto_gchar gchar* key_b64 = g_key_file_get_string(omemo_ctx.trust_keyfile, groups[i], keys[j], NULL);
                 size_t key_len;
-                unsigned char* key = g_base64_decode(key_b64, &key_len);
+                auto_guchar guchar* key = g_base64_decode(key_b64, &key_len);
                 signal_buffer* buffer = signal_buffer_create(key, key_len);
-                g_free(key);
                 uint32_t device_id = strtoul(keys[j], NULL, 10);
                 g_hash_table_insert(trusted, GINT_TO_POINTER(device_id), buffer);
             }
@@ -1663,9 +1655,8 @@ _load_sessions(void)
                 uint32_t id = strtoul(keys[j], NULL, 10);
                 auto_gchar gchar* record_b64 = g_key_file_get_string(omemo_ctx.sessions_keyfile, groups[i], keys[j], NULL);
                 size_t record_len;
-                unsigned char* record = g_base64_decode(record_b64, &record_len);
+                auto_guchar guchar* record = g_base64_decode(record_b64, &record_len);
                 signal_buffer* buffer = signal_buffer_create(record, record_len);
-                g_free(record);
                 g_hash_table_insert(device_store, GINT_TO_POINTER(id), buffer);
             }
         }

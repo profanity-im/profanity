@@ -169,8 +169,8 @@ sv_ev_roster_received(void)
 
     // send initial presence
     resource_presence_t conn_presence = accounts_get_login_presence(account_name);
-    char* last_activity_str = accounts_get_last_activity(account_name);
-    char* status_message = accounts_get_login_status(account_name);
+    auto_gchar gchar* last_activity_str = accounts_get_last_activity(account_name);
+    auto_gchar gchar* status_message = accounts_get_login_status(account_name);
     int diff_secs = 0;
 
     if (prefs_get_boolean(PREF_LASTACTIVITY) && last_activity_str) {
@@ -189,9 +189,6 @@ sv_ev_roster_received(void)
     }
     connection_set_presence_msg(status_message);
     cl_ev_presence_send(conn_presence, diff_secs);
-
-    g_free(status_message);
-    g_free(last_activity_str);
 
     const char* fulljid = connection_get_fulljid();
     plugins_on_connect(account_name, fulljid);
@@ -278,7 +275,7 @@ sv_ev_room_history(ProfMessage* message)
         // check if this message was sent while we were offline.
         // if so, treat it as a new message rather than a history event.
         char* account_name = session_get_account_name();
-        char* last_activity = accounts_get_last_activity(account_name);
+        auto_gchar gchar* last_activity = accounts_get_last_activity(account_name);
         int msg_is_new = 0;
 
         if (last_activity) {
@@ -292,7 +289,6 @@ sv_ev_room_history(ProfMessage* message)
                 msg_is_new = (time_diff > 0);
                 g_date_time_unref(lastdt);
             }
-            g_free(last_activity);
 
             if (msg_is_new) {
                 sv_ev_room_message(message);

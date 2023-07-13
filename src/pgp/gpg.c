@@ -191,11 +191,10 @@ p_gpg_on_connect(const char* const barejid)
     for (int i = 0; i < len; i++) {
         GError* gerr = NULL;
         gchar* jid = jids[i];
-        gchar* keyid = g_key_file_get_string(pubkeyfile, jid, "keyid", &gerr);
+        auto_gchar gchar* keyid = g_key_file_get_string(pubkeyfile, jid, "keyid", &gerr);
         if (gerr) {
             log_error("Error loading PGP key id for %s", jid);
             g_error_free(gerr);
-            g_free(keyid);
         } else {
             gpgme_key_t key = NULL;
             error = gpgme_get_key(ctx, keyid, &key, 0);
@@ -208,7 +207,6 @@ p_gpg_on_connect(const char* const barejid)
             pubkeyid->id = strdup(keyid);
             pubkeyid->received = FALSE;
             g_hash_table_replace(pubkeys, strdup(jid), pubkeyid);
-            g_free(keyid);
             gpgme_key_unref(key);
         }
     }
@@ -978,8 +976,7 @@ static void
 _save_pubkeys(void)
 {
     gsize g_data_size;
-    gchar* g_pubkeys_data = g_key_file_to_data(pubkeyfile, &g_data_size, NULL);
+    auto_gchar gchar* g_pubkeys_data = g_key_file_to_data(pubkeyfile, &g_data_size, NULL);
     g_file_set_contents(pubsloc, g_pubkeys_data, g_data_size, NULL);
     g_chmod(pubsloc, S_IRUSR | S_IWUSR);
-    g_free(g_pubkeys_data);
 }

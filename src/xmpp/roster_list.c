@@ -163,9 +163,8 @@ roster_get_contact(const char* const barejid)
 {
     assert(roster != NULL);
 
-    gchar* barejidlower = g_utf8_strdown(barejid, -1);
+    auto_gchar gchar* barejidlower = g_utf8_strdown(barejid, -1);
     PContact contact = g_hash_table_lookup(roster->contacts, barejidlower);
-    g_free(barejidlower);
 
     return contact;
 }

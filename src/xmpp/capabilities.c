@@ -65,7 +65,7 @@ static GHashTable* jid_to_ver;
 static GHashTable* jid_to_caps;
 
 static GHashTable* prof_features;
-static char* my_sha1;
+static gchar* my_sha1;
 
 static void _save_cache(void);
 static EntityCapabilities* _caps_by_ver(const char* const ver);
@@ -464,8 +464,7 @@ static void
 _save_cache(void)
 {
     gsize g_data_size;
-    gchar* g_cache_data = g_key_file_to_data(cache, &g_data_size, NULL);
+    auto_gchar gchar* g_cache_data = g_key_file_to_data(cache, &g_data_size, NULL);
     g_file_set_contents(cache_loc, g_cache_data, g_data_size, NULL);
     g_chmod(cache_loc, S_IRUSR | S_IWUSR);
-    g_free(g_cache_data);
 }

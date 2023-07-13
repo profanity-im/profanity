@@ -53,8 +53,8 @@ static char* _files_get_xdg_data_home(void);
 void
 files_create_directories(void)
 {
-    gchar* xdg_config = _files_get_xdg_config_home();
-    gchar* xdg_data = _files_get_xdg_data_home();
+    auto_gchar gchar* xdg_config = _files_get_xdg_config_home();
+    auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
 
     GString* themes_dir = g_string_new(xdg_config);
     g_string_append(themes_dir, "/profanity/themes");
@@ -88,17 +88,13 @@ files_create_directories(void)
     g_string_free(chatlogs_dir, TRUE);
     g_string_free(logs_dir, TRUE);
     g_string_free(plugins_dir, TRUE);
-
-    g_free(xdg_config);
-    g_free(xdg_data);
 }
 
 gchar*
 files_get_inputrc_file(void)
 {
-    gchar* xdg_config = _files_get_xdg_config_home();
+    auto_gchar gchar* xdg_config = _files_get_xdg_config_home();
     GString* inputrc_file = g_string_new(xdg_config);
-    g_free(xdg_config);
 
     g_string_append(inputrc_file, "/profanity/inputrc");
 
@@ -121,11 +117,10 @@ files_get_log_file(const char* const log_file)
     GString* logfile;
 
     if (log_file) {
-        gchar* log_path = g_path_get_dirname(log_file);
+        auto_gchar gchar* log_path = g_path_get_dirname(log_file);
         if (!create_dir(log_path)) {
             log_error("Error while creating directory %s", log_path);
         }
-        g_free(log_path);
 
         logfile = g_string_new(log_file);
     } else {
@@ -149,9 +144,8 @@ files_get_log_file(const char* const log_file)
 gchar*
 files_get_config_path(const char* const config_base)
 {
-    gchar* xdg_config = _files_get_xdg_config_home();
+    auto_gchar gchar* xdg_config = _files_get_xdg_config_home();
     gchar* result = g_strdup_printf("%s/profanity/%s", xdg_config, config_base);
-    g_free(xdg_config);
     return result;
 }
 

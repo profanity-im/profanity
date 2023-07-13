@@ -651,7 +651,7 @@ _available_handler(xmpp_stanza_t* const stanza)
         const char* account_name = session_get_account_name();
         int max_sessions = accounts_get_max_sessions(account_name);
         if (max_sessions > 0) {
-            const char* cur_resource = accounts_get_resource(account_name);
+            const gchar* cur_resource = accounts_get_resource(account_name);
             int res_count = connection_count_available_resources();
             if (res_count > max_sessions && g_strcmp0(cur_resource, resource->name)) {
                 ProfWin* console = wins_get_console();

@@ -79,6 +79,15 @@ auto_free_gchar(gchar** str)
 }
 
 void
+auto_free_guchar(guchar** ptr)
+{
+    if (ptr == NULL) {
+        return;
+    }
+    g_free(*ptr);
+}
+
+void
 auto_free_gcharv(gchar*** args)
 {
     if (args == NULL)
@@ -545,16 +554,14 @@ basename_from_url(const char* url)
     const char* default_name = "index";
 
     GFile* file = g_file_new_for_commandline_arg(url);
-    char* basename = g_file_get_basename(file);
-
-    if (_has_directory_suffix(basename)) {
-        g_free(basename);
-        basename = strdup(default_name);
-    }
-
+    auto_gchar gchar* basename = g_file_get_basename(file);
     g_object_unref(file);
 
-    return basename;
+    if (_has_directory_suffix(basename)) {
+        return strdup(default_name);
+    }
+
+    return strdup(basename);
 }
 
 gchar*
@@ -589,9 +596,8 @@ unique_filename_from_url(const char* url, const char* path)
     if (_has_directory_suffix(realpath) || g_file_test(realpath, G_FILE_TEST_IS_DIR)) {
         // The target should be used as a directory. Assume that the basename
         // should be derived from the URL.
-        char* basename = basename_from_url(url);
+        auto_char char* basename = basename_from_url(url);
         filename = g_build_filename(g_file_peek_path(target), basename, NULL);
-        g_free(basename);
     } else {
         // Just use the target as filename.
         filename = g_build_filename(g_file_peek_path(target), NULL);

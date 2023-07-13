@@ -127,7 +127,7 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
 {
     // set account name and resource
     const char* barejid = account_name;
-    char* resource = jid_random_resource();
+    auto_gchar gchar* resource = jid_random_resource();
     Jid* jid = jid_create(account_name);
     if (jid) {
         barejid = jid->barejid;
@@ -137,7 +137,6 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
     }
 
     if (g_key_file_has_group(accounts, account_name)) {
-        g_free(resource);
         jid_destroy(jid);
         return;
     }
@@ -181,7 +180,6 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
     autocomplete_add(enabled_ac, account_name);
 
     jid_destroy(jid);
-    g_free(resource);
 }
 
 int
@@ -433,10 +431,9 @@ accounts_rename(const char* const account_name, const char* const new_name)
     };
 
     for (int i = 0; i < ARRAY_SIZE(string_keys); i++) {
-        char* value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
+        auto_gchar gchar* value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
         if (value) {
             g_key_file_set_string(accounts, new_name, string_keys[i], value);
-            g_free(value);
         }
     }
 
@@ -868,7 +865,7 @@ accounts_set_last_activity(const char* const account_name)
     }
 }
 
-char*
+gchar*
 accounts_get_last_activity(const char* const account_name)
 {
     if (accounts_account_exists(account_name)) {
@@ -878,7 +875,7 @@ accounts_get_last_activity(const char* const account_name)
     }
 }
 
-char*
+gchar*
 accounts_get_resource(const char* const account_name)
 {
     if (!accounts_account_exists(account_name)) {
@@ -909,7 +906,7 @@ resource_presence_t
 accounts_get_last_presence(const char* const account_name)
 {
     resource_presence_t result;
-    gchar* setting = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
+    auto_gchar gchar* setting = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
 
     if (setting == NULL || (strcmp(setting, "online") == 0)) {
         result = RESOURCE_ONLINE;
@@ -927,7 +924,6 @@ accounts_get_last_presence(const char* const account_name)
         result = RESOURCE_ONLINE;
     }
 
-    g_free(setting);
     return result;
 }
 

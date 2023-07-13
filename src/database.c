@@ -260,11 +260,10 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
     gchar* sort1 = from_start ? "ASC" : "DESC";
     gchar* sort2 = !flip ? "ASC" : "DESC";
     GDateTime* now = g_date_time_new_now_local();
-    gchar* end_date_fmt = end_time ? end_time : g_date_time_format_iso8601(now);
+    auto_gchar gchar* end_date_fmt = end_time ? end_time : g_date_time_format_iso8601(now);
     auto_sqlite gchar* query = sqlite3_mprintf("SELECT * FROM (SELECT COALESCE(B.`message`, A.`message`) AS message, A.`timestamp`, A.`from_jid`, A.`type`, A.`encryption` from `ChatLogs` AS A LEFT JOIN `ChatLogs` AS B ON A.`stanza_id` = B.`replace_id` WHERE A.`replace_id` = '' AND ((A.`from_jid` = '%q' AND A.`to_jid` = '%q') OR (A.`from_jid` = '%q' AND A.`to_jid` = '%q')) AND A.`timestamp` < '%q' AND (%Q IS NULL OR A.`timestamp` > %Q) ORDER BY A.`timestamp` %s LIMIT %d) ORDER BY `timestamp` %s;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, end_date_fmt, start_time, start_time, sort1, MESSAGES_TO_RETRIEVE, sort2);
 
     g_date_time_unref(now);
-    g_free(end_date_fmt);
 
     if (!query) {
         log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
@@ -389,7 +388,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
 
     char* err_msg;
     gchar* query;
-    gchar* date_fmt;
+    auto_gchar gchar* date_fmt;
 
     if (message->timestamp) {
         date_fmt = g_date_time_format_iso8601(message->timestamp);
@@ -423,7 +422,6 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
         log_error("log_database_add(): SQL query. could not allocate memory");
         return;
     }
-    g_free(date_fmt);
 
     if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         if (err_msg) {

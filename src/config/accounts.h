@@ -61,7 +61,7 @@ void accounts_set_jid(const char* const account_name, const char* const value);
 void accounts_set_server(const char* const account_name, const char* const value);
 void accounts_set_port(const char* const account_name, const int value);
 void accounts_set_resource(const char* const account_name, const char* const value);
-char* accounts_get_resource(const char* const account_name);
+gchar* accounts_get_resource(const char* const account_name);
 void accounts_set_password(const char* const account_name, const char* const value);
 void accounts_set_eval_password(const char* const account_name, const char* const value);
 void accounts_set_muc_service(const char* const account_name, const char* const value);
@@ -72,7 +72,7 @@ void accounts_set_auth_policy(const char* const account_name, const char* const 
 void accounts_set_last_presence(const char* const account_name, const char* const value);
 void accounts_set_last_status(const char* const account_name, const char* const value);
 void accounts_set_last_activity(const char* const account_name);
-char* accounts_get_last_activity(const char* const account_name);
+gchar* accounts_get_last_activity(const char* const account_name);
 void accounts_set_login_presence(const char* const account_name, const char* const value);
 resource_presence_t accounts_get_login_presence(const char* const account_name);
 char* accounts_get_last_status(const char* const account_name);

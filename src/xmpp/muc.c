@@ -737,7 +737,7 @@ muc_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         }
     }
 
-    char* result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE, previous);
+    auto_gchar gchar* result = autocomplete_complete(chat_room->nick_ac, search_str, FALSE, previous);
     if (result == NULL) {
         return NULL;
     }
@@ -748,7 +748,6 @@ muc_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     if (strlen(chat_room->autocomplete_prefix) == 0) {
         g_string_append(replace_with, ": ");
     }
-    g_free(result);
     return g_string_free(replace_with, FALSE);
 }
 

@@ -525,9 +525,8 @@ c_api_init(void)
 static char*
 _c_plugin_name(const char* filename)
 {
-    gchar* name = g_strndup(filename, strlen(filename) - 1);
+    auto_gchar gchar* name = g_strndup(filename, strlen(filename) - 1);
     gchar* result = g_strdup_printf("%sso", name);
-    g_free(name);
 
     return result;
 }

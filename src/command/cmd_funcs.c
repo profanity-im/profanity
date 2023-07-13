@@ -3635,7 +3635,7 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    char* room = NULL;
+    auto_gchar gchar* room = NULL;
     char* nick = NULL;
     char* passwd = NULL;
     char* account_name = session_get_account_name();
@@ -3663,7 +3663,6 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
     if (!parsed) {
         cons_bad_cmd_usage(command);
         cons_show("");
-        g_free(room);
         jid_destroy(room_arg);
         return TRUE;
     }
@@ -3693,7 +3692,6 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
         ui_switch_to_room(room);
     }
 
-    g_free(room);
     jid_destroy(room_arg);
     account_free(account);
 
@@ -4578,8 +4576,8 @@ cmd_rooms(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    gchar* service = NULL;
-    gchar* filter = NULL;
+    auto_gchar gchar* service = NULL;
+    auto_gchar gchar* filter = NULL;
     if (args[0] != NULL) {
         if (g_strcmp0(args[0], "service") == 0) {
             if (args[1] == NULL) {
@@ -4628,8 +4626,6 @@ cmd_rooms(ProfWin* window, const char* const command, gchar** args)
             if (args[3] == NULL) {
                 cons_bad_cmd_usage(command);
                 cons_show("");
-                g_free(service);
-                g_free(filter);
                 return TRUE;
             }
             g_free(service);
@@ -4638,8 +4634,6 @@ cmd_rooms(ProfWin* window, const char* const command, gchar** args)
             if (args[3] == NULL) {
                 cons_bad_cmd_usage(command);
                 cons_show("");
-                g_free(service);
-                g_free(filter);
                 return TRUE;
             }
             g_free(filter);
@@ -4647,8 +4641,6 @@ cmd_rooms(ProfWin* window, const char* const command, gchar** args)
         } else {
             cons_bad_cmd_usage(command);
             cons_show("");
-            g_free(service);
-            g_free(filter);
             return TRUE;
         }
     }
@@ -4661,8 +4653,6 @@ cmd_rooms(ProfWin* window, const char* const command, gchar** args)
         } else {
             cons_show("Account MUC service property not found.");
             account_free(account);
-            g_free(service);
-            g_free(filter);
             return TRUE;
         }
     }
@@ -4674,9 +4664,6 @@ cmd_rooms(ProfWin* window, const char* const command, gchar** args)
         cons_show("Room list request sent: %s", service);
     }
     iq_room_list_request(service, filter);
-
-    g_free(service);
-    g_free(filter);
 
     return TRUE;
 }
@@ -9680,11 +9667,9 @@ _cmd_executable_template(const preference_t setting, const char* command, gchar*
     }
 
     if (g_strcmp0(args[1], "set") == 0 && num_args >= 3) {
-        gchar* str = g_strjoinv(" ", &args[2]);
+        auto_gchar gchar* str = g_strjoinv(" ", &args[2]);
         prefs_set_string(setting, str);
         cons_show("`%s` command set to invoke '%s'", command, str);
-        g_free(str);
-
     } else if (g_strcmp0(args[1], "default") == 0) {
         prefs_set_string(setting, NULL);
         auto_gchar gchar* def = prefs_get_string(setting);
@@ -10129,7 +10114,7 @@ cmd_vcard_photo(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    char* jid = NULL;
+    auto_gchar gchar* jid = NULL;
     char* filepath = NULL;
     int index = 0;
 
@@ -10241,9 +10226,6 @@ cmd_vcard_photo(ProfWin* window, const char* const command, gchar** args)
         cons_bad_cmd_usage(command);
     }
 
-    if (!jidless) {
-        g_free(jid);
-    }
     return TRUE;
 }
 

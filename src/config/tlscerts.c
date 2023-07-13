@@ -387,8 +387,7 @@ static void
 _save_tlscerts(void)
 {
     gsize g_data_size;
-    gchar* g_tlscerts_data = g_key_file_to_data(tlscerts, &g_data_size, NULL);
+    auto_gchar gchar* g_tlscerts_data = g_key_file_to_data(tlscerts, &g_data_size, NULL);
     g_file_set_contents(tlscerts_loc, g_tlscerts_data, g_data_size, NULL);
     g_chmod(tlscerts_loc, S_IRUSR | S_IWUSR);
-    g_free(g_tlscerts_data);
 }

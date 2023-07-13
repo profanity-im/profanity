@@ -1318,7 +1318,7 @@ wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message, con
     g_regex_match(regex, message->plain, 0, &match_info);
 
     while (g_match_info_matches(match_info)) {
-        gchar* word = g_match_info_fetch(match_info, 0);
+        auto_gchar gchar* word = g_match_info_fetch(match_info, 0);
 
         if (flip) {
             autocomplete_add_unsorted(win->urls_ac, word, FALSE);
@@ -1328,7 +1328,6 @@ wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message, con
         // for people who run profanity a long time, we don't want to waste a lot of memory
         autocomplete_remove_older_than_max_reverse(win->urls_ac, 20);
 
-        g_free(word);
         g_match_info_next(match_info, NULL);
     }
 

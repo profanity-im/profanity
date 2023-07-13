@@ -178,7 +178,7 @@ session_connect_with_details(const char* const jid, const char* const passwd, co
     Jid* jidp = jid_create(jid);
     if (jidp->resourcepart == NULL) {
         jid_destroy(jidp);
-        auto_char char* resource = jid_random_resource();
+        auto_gchar gchar* resource = jid_random_resource();
         jidp = jid_create_from_bare_and_resource(jid, resource);
         saved_details.jid = strdup(jidp->fulljid);
     } else {

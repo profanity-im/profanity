@@ -3039,14 +3039,13 @@ command_mangen(void)
     create_dir("docs");
 
     GDateTime* now = g_date_time_new_now_local();
-    gchar* date = g_date_time_format(now, "%F");
-    gchar* header = g_strdup_printf(".TH man 1 \"%s\" \"" PACKAGE_VERSION "\" \"Profanity XMPP client\"\n", date);
+    auto_gchar gchar* date = g_date_time_format(now, "%F");
+    auto_gchar gchar* header = g_strdup_printf(".TH man 1 \"%s\" \"" PACKAGE_VERSION "\" \"Profanity XMPP client\"\n", date);
     if (!header) {
         log_error("command_mangen(): could not allocate memory");
         return;
     }
     g_date_time_unref(now);
-    g_free(date);
 
     GList* curr = cmds;
     while (curr) {
@@ -3098,6 +3097,5 @@ command_mangen(void)
 
     printf("\nProcessed %d commands.\n\n", g_list_length(cmds));
 
-    g_free(header);
     g_list_free(cmds);
 }
