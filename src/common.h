@@ -54,16 +54,41 @@
 #define PROF_STRINGIFY(n)  PROF_STRINGIFY_(n)
 
 void auto_free_gchar(gchar** str);
-#define auto_gchar __attribute__((__cleanup__(auto_free_gchar)))
-void auto_free_gcharv(gchar*** args);
-#define auto_gcharv __attribute__((__cleanup__(auto_free_gcharv)))
-void auto_free_char(char** str);
-#define auto_char __attribute__((__cleanup__(auto_free_char)))
+
 /**
- * Frees the memory allocated for a guchar* string.
+ * Macro for automatically freeing a gchar* string when it goes out of scope.
  *
- * @param str Pointer to the guchar* string to be freed. If NULL, no action is taken.
+ * Example usage:
+ * ```
+ * auto_gchar gchar* myString = g_strdup("Hello, world!");
+ * ```
  */
+#define auto_gchar __attribute__((__cleanup__(auto_free_gchar)))
+
+void auto_free_gcharv(gchar*** args);
+
+/**
+ * Macro for automatically freeing a gchar** string array when it goes out of scope.
+ *
+ * Example usage:
+ * ```
+ * auto_gcharv gchar** stringArray = g_strsplit("Hello, world!", " ", -1);
+ * ```
+ */
+#define auto_gcharv __attribute__((__cleanup__(auto_free_gcharv)))
+
+void auto_free_char(char** str);
+
+/**
+ * Macro for automatically freeing a char* string when it goes out of scope.
+ *
+ * Example usage:
+ * ```
+ * auto_char char* myString = strdup("Hello, world!");
+ * ```
+ */
+#define auto_char __attribute__((__cleanup__(auto_free_char)))
+
 void auto_free_guchar(guchar** str);
 
 /**

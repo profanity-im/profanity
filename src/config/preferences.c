@@ -517,6 +517,14 @@ prefs_set_boolean(preference_t pref, gboolean value)
     g_key_file_set_boolean(prefs, group, key, value);
 }
 
+/**
+ * @brief Retrieves a string preference value.
+ *
+ * @param pref The preference identifier.
+ * @return The string preference value or `NULL` if not found.
+ *
+ * @note Remember to free the returned string using `auto_gchar` or `g_free()`.
+ */
 gchar*
 prefs_get_string(preference_t pref)
 {
@@ -537,6 +545,15 @@ prefs_get_string(preference_t pref)
     }
 }
 
+/**
+ * @brief Retrieves a localized string preference value.
+ *
+ * @param pref   The preference to retrieve the value for.
+ * @param locale The option to consider.
+ * @return       Returns the value associated with pref translated in the given locale if available.
+ *
+ * @note Remember to free the returned string using `auto_gchar` or `g_free()`.
+ */
 gchar*
 prefs_get_string_with_locale(preference_t pref, gchar* locale)
 {
@@ -562,6 +579,12 @@ prefs_get_string_with_locale(preference_t pref, gchar* locale)
     return result;
 }
 
+/**
+ * @brief Sets or deletes a string value for the given preference in the preference file.
+ *
+ * @param pref      The preference to set the value for.
+ * @param new_value The new string value to set. Pass NULL to remove the key.
+ */
 void
 prefs_set_string(preference_t pref, gchar* new_value)
 {

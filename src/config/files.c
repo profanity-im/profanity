@@ -155,8 +155,7 @@ files_get_config_path(const char* const config_base)
  * @param location The location (directory or file) to append to the project base path.
  * @return The full path obtained by appending the location to the project base path.
  *
- * @note The returned value must be freed using g_free when it is no longer needed
- *       to prevent memory leaks.
+ * @note Remember to free returned string using `auto_gchar` or `g_free()` when it is no longer needed to prevent memory leaks.
  */
 gchar*
 files_get_data_path(const char* const location)
