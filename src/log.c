@@ -214,13 +214,12 @@ log_msg(log_level_t level, const char* const area, const char* const msg)
 
         char* level_str = _log_abbreviation_string_from_level(level);
 
-        gchar* date_fmt = g_date_time_format_iso8601(dt);
+        auto_gchar gchar* date_fmt = g_date_time_format_iso8601(dt);
 
         fprintf(logp, "%s: %s: %s: %s\n", date_fmt, area, level_str, msg);
         g_date_time_unref(dt);
 
         fflush(logp);
-        g_free(date_fmt);
 
         if (prefs_get_boolean(PREF_LOG_ROTATE) && !user_provided_log) {
             long result = ftell(logp);

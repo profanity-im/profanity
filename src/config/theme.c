@@ -237,10 +237,9 @@ GSList*
 theme_list(void)
 {
     GSList* result = NULL;
-    gchar* themes_dir = files_get_config_path(DIR_THEMES);
+    auto_gchar gchar* themes_dir = files_get_config_path(DIR_THEMES);
 
     _theme_list_dir(themes_dir, &result);
-    g_free(themes_dir);
 
 #ifdef THEMES_PATH
     _theme_list_dir(THEMES_PATH, &result);
@@ -281,9 +280,8 @@ static void
 _set_string_preference(char* prefstr, preference_t pref)
 {
     if (g_key_file_has_key(theme, "ui", prefstr, NULL)) {
-        gchar* val = g_key_file_get_string(theme, "ui", prefstr, NULL);
+        auto_gchar gchar* val = g_key_file_get_string(theme, "ui", prefstr, NULL);
         prefs_set_string(pref, val);
-        g_free(val);
     }
 }
 
@@ -408,100 +406,88 @@ _load_preferences(void)
     // load chars from theme and set them to prefs
     // with custom set functions
     if (g_key_file_has_key(theme, "ui", "occupants.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "occupants.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "occupants.char", NULL);
         if (ch && g_utf8_strlen(ch, 4) == 1) {
             prefs_set_occupants_char(ch);
-            g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "occupants.header.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "occupants.header.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "occupants.header.char", NULL);
         if (ch && g_utf8_strlen(ch, 4) == 1) {
             prefs_set_occupants_header_char(ch);
-            g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.header.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "roster.header.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "roster.header.char", NULL);
         if (ch && g_utf8_strlen(ch, 4) == 1) {
             prefs_set_roster_header_char(ch);
-            g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.contact.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "roster.contact.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "roster.contact.char", NULL);
         if (ch && g_utf8_strlen(ch, 4) == 1) {
             prefs_set_roster_contact_char(ch);
-            g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.resource.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "roster.resource.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "roster.resource.char", NULL);
         if (ch && g_utf8_strlen(ch, 4) == 1) {
             prefs_set_roster_resource_char(ch);
-            g_free(ch);
         }
     } else {
         prefs_clear_roster_resource_char();
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.rooms.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "roster.rooms.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "roster.rooms.char", NULL);
         if (ch && g_utf8_strlen(ch, 4) == 1) {
             prefs_set_roster_room_char(ch);
-            g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.rooms.private.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "roster.rooms.private.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "roster.rooms.private.char", NULL);
         if (ch && g_utf8_strlen(ch, 4) == 1) {
             prefs_set_roster_room_private_char(ch);
-            g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "roster.private.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "roster.private.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "roster.private.char", NULL);
         if (ch && g_utf8_strlen(ch, 4) == 1) {
             prefs_set_roster_private_char(ch);
-            g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "otr.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "otr.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "otr.char", NULL);
         if (ch && g_utf8_strlen(ch, 4) == 1) {
             prefs_set_otr_char(ch);
-            g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "pgp.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "pgp.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "pgp.char", NULL);
         if (ch && g_utf8_strlen(ch, 4) == 1) {
             prefs_set_pgp_char(ch);
-            g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "omemo.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "omemo.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "omemo.char", NULL);
         if (ch && g_utf8_strlen(ch, 4) == 1) {
             prefs_set_omemo_char(ch);
-            g_free(ch);
         }
     }
 
     if (g_key_file_has_key(theme, "ui", "correction.char", NULL)) {
-        gchar* ch = g_key_file_get_string(theme, "ui", "correction.char", NULL);
+        auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "correction.char", NULL);
         if (ch && strlen(ch) > 0) {
             prefs_set_correction_char(ch[0]);
-            g_free(ch);
         }
     }
 
@@ -538,11 +524,10 @@ static GString*
 _theme_find(const char* const theme_name)
 {
     GString* path = NULL;
-    gchar* themes_dir = files_get_config_path(DIR_THEMES);
+    auto_gchar gchar* themes_dir = files_get_config_path(DIR_THEMES);
 
     if (themes_dir) {
         path = g_string_new(themes_dir);
-        g_free(themes_dir);
         g_string_append(path, "/");
         g_string_append(path, theme_name);
         if (!g_file_test(path->str, G_FILE_TEST_EXISTS)) {
@@ -641,7 +626,7 @@ theme_main_presence_attrs(const char* const presence)
 static void
 _theme_prep_bgnd(char* setting, char* def, GString* lookup_str)
 {
-    gchar* val = g_key_file_get_string(theme, "colours", setting, NULL);
+    auto_gchar gchar* val = g_key_file_get_string(theme, "colours", setting, NULL);
     if (!val) {
         g_string_append(lookup_str, def);
     } else {
@@ -651,7 +636,6 @@ _theme_prep_bgnd(char* setting, char* def, GString* lookup_str)
             g_string_append(lookup_str, val);
         }
     }
-    g_free(val);
 }
 
 /* return value needs to be freed */
@@ -666,7 +650,7 @@ theme_get_bkgnd(void)
 static void
 _theme_prep_fgnd(char* setting, GString* lookup_str, gboolean* bold)
 {
-    gchar* conf_str = g_key_file_get_string(theme, "colours", setting, NULL);
+    auto_gchar gchar* conf_str = g_key_file_get_string(theme, "colours", setting, NULL);
     gchar* val = conf_str;
 
     if (!val)
@@ -679,8 +663,6 @@ _theme_prep_fgnd(char* setting, GString* lookup_str, gboolean* bold)
         g_string_append(lookup_str, val);
         *bold = FALSE;
     }
-
-    g_free(conf_str);
 }
 
 char*

@@ -691,12 +691,12 @@ win_page_down(ProfWin* window)
     if ((*page_start == y || (*page_start == page_space && *page_start >= y)) && window->type == WIN_CHAT) {
         int bf_size = buffer_size(window->layout->buffer);
         if (bf_size > 0) {
-            char* start = g_date_time_format_iso8601(buffer_get_entry(window->layout->buffer, bf_size - 1)->time);
+            auto_gchar gchar* start = g_date_time_format_iso8601(buffer_get_entry(window->layout->buffer, bf_size - 1)->time);
             GDateTime* now = g_date_time_new_now_local();
-            char* end = g_date_time_format_iso8601(now);
+            gchar* end = g_date_time_format_iso8601(now);
+            // end is free'd inside
             chatwin_db_history((ProfChatWin*)window, start, end, FALSE);
 
-            g_free(start);
             g_date_time_unref(now);
         }
     }
@@ -976,9 +976,8 @@ win_show_occupant_info(ProfWin* window, const char* const room, Occupant* occupa
     win_println(window, THEME_DEFAULT, "!", "  Affiliation: %s", occupant_affiliation);
     win_println(window, THEME_DEFAULT, "!", "  Role: %s", occupant_role);
 
-    Jid* jidp = jid_create_from_bare_and_resource(room, occupant->nick);
+    auto_jid Jid* jidp = jid_create_from_bare_and_resource(room, occupant->nick);
     EntityCapabilities* caps = caps_lookup(jidp->fulljid);
-    jid_destroy(jidp);
 
     if (caps) {
         // show identity
@@ -1099,9 +1098,8 @@ win_show_info(ProfWin* window, PContact contact)
         }
         win_newline(window);
 
-        Jid* jidp = jid_create_from_bare_and_resource(barejid, resource->name);
+        auto_jid Jid* jidp = jid_create_from_bare_and_resource(barejid, resource->name);
         EntityCapabilities* caps = caps_lookup(jidp->fulljid);
-        jid_destroy(jidp);
 
         if (caps) {
             // show identity
@@ -1496,7 +1494,7 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
     auto_gchar gchar* display_name;
     int flags = 0;
     const char* jid = connection_get_fulljid();
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
 
     if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
         display_name = strdup("me");
@@ -1504,8 +1502,6 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
         display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
         flags = NO_ME;
     }
-
-    jid_destroy(jidp);
 
     buffer_append(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
     wins_add_urls_ac(window, message, FALSE);
@@ -1521,10 +1517,10 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
 {
     g_date_time_ref(message->timestamp);
 
-    auto_gchar gchar* display_name;
+    auto_char char* display_name;
     int flags = 0;
     const char* jid = connection_get_fulljid();
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
 
     if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
         display_name = strdup("me");
@@ -1532,8 +1528,6 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
         display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
         flags = NO_ME;
     }
-
-    jid_destroy(jidp);
 
     buffer_prepend(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
     wins_add_urls_ac(window, message, TRUE);
@@ -1788,7 +1782,7 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
     int colour = theme_attrs(THEME_ME);
     size_t indent = 0;
 
-    char* time_pref = NULL;
+    auto_gchar gchar* time_pref = NULL;
     switch (window->type) {
     case WIN_CHAT:
         time_pref = prefs_get_string(PREF_TIME_CHAT);
@@ -1810,13 +1804,12 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
         break;
     }
 
-    gchar* date_fmt = NULL;
+    auto_gchar gchar* date_fmt = NULL;
     if (g_strcmp0(time_pref, "off") == 0 || time == NULL) {
         date_fmt = g_strdup("");
     } else {
         date_fmt = g_date_time_format(time, time_pref);
     }
-    g_free(time_pref);
     assert(date_fmt != NULL);
 
     if (strlen(date_fmt) != 0) {
@@ -1903,8 +1896,6 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
             wattroff(window->layout->win, theme_attrs(theme_item));
         }
     }
-
-    g_free(date_fmt);
 }
 
 static void
@@ -2309,21 +2300,17 @@ win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previo
         return NULL;
     }
 
-    char* result = autocomplete_complete(window->quotes_ac, input + 1, FALSE, previous);
+    auto_gchar gchar* result = autocomplete_complete(window->quotes_ac, input + 1, FALSE, previous);
     if (result == NULL) {
         return NULL;
     }
 
-    gchar** parts = g_strsplit(result, "\n", -1);
-    gchar* quoted_result = g_strjoinv("\n> ", parts);
+    auto_gcharv gchar** parts = g_strsplit(result, "\n", -1);
+    auto_gchar gchar* quoted_result = g_strjoinv("\n> ", parts);
 
     GString* replace_with = g_string_new("> ");
     g_string_append(replace_with, quoted_result);
     g_string_append(replace_with, "\n");
-
-    g_free(result);
-    g_free(quoted_result);
-    g_strfreev(parts);
 
     return g_string_free(replace_with, FALSE);
 }

@@ -34,6 +34,7 @@
  */
 
 #include "config.h"
+#include "common.h"
 
 #include <string.h>
 #include <glib.h>
@@ -42,7 +43,7 @@ gboolean
 conf_string_list_add(GKeyFile* keyfile, const char* const group, const char* const key, const char* const item)
 {
     gsize length;
-    gchar** list = g_key_file_get_string_list(keyfile, group, key, &length, NULL);
+    auto_gcharv gchar** list = g_key_file_get_string_list(keyfile, group, key, &length, NULL);
     GList* glist = NULL;
 
     // list found
@@ -81,7 +82,6 @@ conf_string_list_add(GKeyFile* keyfile, const char* const group, const char* con
         g_key_file_set_string_list(keyfile, group, key, new_list, 1);
     }
 
-    g_strfreev(list);
     g_list_free_full(glist, g_free);
 
     return TRUE;
@@ -91,44 +91,43 @@ gboolean
 conf_string_list_remove(GKeyFile* keyfile, const char* const group, const char* const key, const char* const item)
 {
     gsize length;
-    gchar** list = g_key_file_get_string_list(keyfile, group, key, &length, NULL);
+    auto_gcharv gchar** list = g_key_file_get_string_list(keyfile, group, key, &length, NULL);
 
     gboolean deleted = FALSE;
-    if (list) {
-        int i = 0;
-        GList* glist = NULL;
+    if (!list) {
+        return FALSE;
+    }
+    int i = 0;
+    GList* glist = NULL;
 
-        for (i = 0; i < length; i++) {
-            // item found, mark as deleted
-            if (strcmp(list[i], item) == 0) {
-                deleted = TRUE;
-            } else {
-                // add item to our g_list
-                glist = g_list_append(glist, strdup(list[i]));
-            }
+    for (i = 0; i < length; i++) {
+        // item found, mark as deleted
+        if (strcmp(list[i], item) == 0) {
+            deleted = TRUE;
+        } else {
+            // add item to our g_list
+            glist = g_list_append(glist, strdup(list[i]));
         }
-
-        if (deleted) {
-            if (g_list_length(glist) == 0) {
-                g_key_file_remove_key(keyfile, group, key, NULL);
-            } else {
-                // create the new list entry
-                const gchar* new_list[g_list_length(glist) + 1];
-                GList* curr = glist;
-                i = 0;
-                while (curr) {
-                    new_list[i++] = curr->data;
-                    curr = g_list_next(curr);
-                }
-                new_list[i] = NULL;
-                g_key_file_set_string_list(keyfile, group, key, new_list, g_list_length(glist));
-            }
-        }
-
-        g_list_free_full(glist, g_free);
     }
 
-    g_strfreev(list);
+    if (deleted) {
+        if (g_list_length(glist) == 0) {
+            g_key_file_remove_key(keyfile, group, key, NULL);
+        } else {
+            // create the new list entry
+            const gchar* new_list[g_list_length(glist) + 1];
+            GList* curr = glist;
+            i = 0;
+            while (curr) {
+                new_list[i++] = curr->data;
+                curr = g_list_next(curr);
+            }
+            new_list[i] = NULL;
+            g_key_file_set_string_list(keyfile, group, key, new_list, g_list_length(glist));
+        }
+    }
+
+    g_list_free_full(glist, g_free);
 
     return deleted;
 }

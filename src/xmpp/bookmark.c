@@ -93,11 +93,10 @@ bookmark_add(const char* jid, const char* nick, const char* password, const char
 {
     assert(jid != NULL);
 
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
     if (jidp->domainpart) {
         muc_confserver_add(jidp->domainpart);
     }
-    jid_destroy(jidp);
 
     if (g_hash_table_contains(bookmarks, jid)) {
         return FALSE;
@@ -334,11 +333,10 @@ _bookmark_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             sv_ev_bookmark_autojoin(bookmark);
         }
 
-        Jid* jidp = jid_create(barejid);
+        auto_jid Jid* jidp = jid_create(barejid);
         if (jidp->domainpart) {
             muc_confserver_add(jidp->domainpart);
         }
-        jid_destroy(jidp);
 
         child = xmpp_stanza_get_next(child);
     }
@@ -387,11 +385,10 @@ _send_bookmarks(void)
             xmpp_stanza_set_attribute(conference, STANZA_ATTR_NAME, bookmark->name);
         } else {
             // use localpart of JID by if no name is specified
-            Jid* jidp = jid_create(bookmark->barejid);
+            auto_jid Jid* jidp = jid_create(bookmark->barejid);
             if (jidp->localpart) {
                 xmpp_stanza_set_attribute(conference, STANZA_ATTR_NAME, jidp->localpart);
             }
-            jid_destroy(jidp);
         }
 
         if (bookmark->autojoin) {

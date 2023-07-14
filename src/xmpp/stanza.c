@@ -61,7 +61,7 @@
 #include "database.h"
 
 static void _stanza_add_unique_id(xmpp_stanza_t* stanza);
-static char* _stanza_create_sha1_hash(char* str);
+static gchar* _stanza_create_sha1_hash(char* str);
 
 #if 0
 xmpp_stanza_t*
@@ -233,10 +233,9 @@ stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id,
     }
     xmpp_stanza_set_attribute(request, STANZA_ATTR_FILENAME, basename(filename_cpy));
 
-    gchar* filesize = g_strdup_printf("%jd", (intmax_t)(upload->filesize));
+    auto_gchar gchar* filesize = g_strdup_printf("%jd", (intmax_t)(upload->filesize));
     if (filesize) {
         xmpp_stanza_set_attribute(request, STANZA_ATTR_SIZE, filesize);
-        g_free(filesize);
     }
 
     xmpp_stanza_set_attribute(request, STANZA_ATTR_CONTENTTYPE, upload->mime_type);
@@ -1026,7 +1025,7 @@ stanza_create_ping_iq(xmpp_ctx_t* ctx, const char* const target)
     return iq;
 }
 
-char*
+gchar*
 stanza_create_caps_sha1_from_query(xmpp_stanza_t* const query)
 {
     GSList* identities = NULL;
@@ -1116,7 +1115,7 @@ stanza_create_caps_sha1_from_query(xmpp_stanza_t* const query)
         curr = g_slist_next(curr);
     }
 
-    char* result = _stanza_create_sha1_hash(s->str);
+    gchar* result = _stanza_create_sha1_hash(s->str);
 
     g_string_free(s, TRUE);
     g_slist_free_full(identities, g_free);
@@ -1396,11 +1395,10 @@ stanza_is_muc_self_presence(xmpp_stanza_t* const stanza,
     // check if 'from' attribute identifies this user
     const char* from = xmpp_stanza_get_from(stanza);
     if (from) {
-        Jid* from_jid = jid_create(from);
+        auto_jid Jid* from_jid = jid_create(from);
         if (muc_active(from_jid->barejid)) {
             char* nick = muc_nick(from_jid->barejid);
             if (g_strcmp0(from_jid->resourcepart, nick) == 0) {
-                jid_destroy(from_jid);
                 return TRUE;
             }
         }
@@ -1412,13 +1410,10 @@ stanza_is_muc_self_presence(xmpp_stanza_t* const stanza,
                 char* nick = muc_nick(from_jid->barejid);
                 char* old_nick = muc_old_nick(from_jid->barejid, new_nick);
                 if (g_strcmp0(old_nick, nick) == 0) {
-                    jid_destroy(from_jid);
                     return TRUE;
                 }
             }
         }
-
-        jid_destroy(from_jid);
     }
 
     // self presence not found
@@ -2353,9 +2348,8 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t* ctx, const char* const id,
     xmpp_stanza_set_attribute(signed_prekey_public_stanza, "signedPreKeyId", "1");
 
     xmpp_stanza_t* signed_prekey_public_stanza_text = xmpp_stanza_new(ctx);
-    char* signed_prekey_b64 = g_base64_encode(signed_prekey, signed_prekey_length);
+    auto_gchar gchar* signed_prekey_b64 = g_base64_encode(signed_prekey, signed_prekey_length);
     xmpp_stanza_set_text(signed_prekey_public_stanza_text, signed_prekey_b64);
-    g_free(signed_prekey_b64);
     xmpp_stanza_add_child(signed_prekey_public_stanza, signed_prekey_public_stanza_text);
     xmpp_stanza_release(signed_prekey_public_stanza_text);
 
@@ -2363,9 +2357,8 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t* ctx, const char* const id,
     xmpp_stanza_set_name(signed_prekey_signature_stanza, "signedPreKeySignature");
 
     xmpp_stanza_t* signed_prekey_signature_stanza_text = xmpp_stanza_new(ctx);
-    char* signed_prekey_signature_b64 = g_base64_encode(signed_prekey_signature, signed_prekey_signature_length);
+    auto_gchar gchar* signed_prekey_signature_b64 = g_base64_encode(signed_prekey_signature, signed_prekey_signature_length);
     xmpp_stanza_set_text(signed_prekey_signature_stanza_text, signed_prekey_signature_b64);
-    g_free(signed_prekey_signature_b64);
     xmpp_stanza_add_child(signed_prekey_signature_stanza, signed_prekey_signature_stanza_text);
     xmpp_stanza_release(signed_prekey_signature_stanza_text);
 
@@ -2373,9 +2366,8 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t* ctx, const char* const id,
     xmpp_stanza_set_name(identity_key_stanza, "identityKey");
 
     xmpp_stanza_t* identity_key_stanza_text = xmpp_stanza_new(ctx);
-    char* identity_key_b64 = g_base64_encode(identity_key, identity_key_length);
+    auto_gchar gchar* identity_key_b64 = g_base64_encode(identity_key, identity_key_length);
     xmpp_stanza_set_text(identity_key_stanza_text, identity_key_b64);
-    g_free(identity_key_b64);
     xmpp_stanza_add_child(identity_key_stanza, identity_key_stanza_text);
     xmpp_stanza_release(identity_key_stanza_text);
 
@@ -2390,9 +2382,8 @@ stanza_create_omemo_bundle_publish(xmpp_ctx_t* ctx, const char* const id,
         xmpp_stanza_set_attribute(prekey, "preKeyId", id);
 
         xmpp_stanza_t* prekey_text = xmpp_stanza_new(ctx);
-        char* prekey_b64 = g_base64_encode(p->data, GPOINTER_TO_INT(l->data));
+        auto_gchar gchar* prekey_b64 = g_base64_encode(p->data, GPOINTER_TO_INT(l->data));
         xmpp_stanza_set_text(prekey_text, prekey_b64);
-        g_free(prekey_b64);
 
         xmpp_stanza_add_child(prekey, prekey_text);
         xmpp_stanza_add_child(prekeys_stanza, prekey);
@@ -2517,7 +2508,7 @@ _stanza_add_unique_id(xmpp_stanza_t* stanza)
     xmpp_stanza_set_id(stanza, id);
 }
 
-static char*
+static gchar*
 _stanza_create_sha1_hash(char* str)
 {
     unsigned char* digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
@@ -2525,7 +2516,7 @@ _stanza_create_sha1_hash(char* str)
 
     xmpp_sha1_digest((unsigned char*)str, strlen(str), digest);
 
-    char* b64 = g_base64_encode(digest, XMPP_SHA1_DIGEST_SIZE);
+    gchar* b64 = g_base64_encode(digest, XMPP_SHA1_DIGEST_SIZE);
     assert(b64 != NULL);
     free(digest);
 

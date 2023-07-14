@@ -211,7 +211,7 @@ otr_on_connect(ProfAccount* account)
     jid = strdup(account->jid);
     log_info("Loading OTR key for %s", jid);
 
-    gchar* otr_dir = files_file_in_account_data_path(DIR_OTR, jid, NULL);
+    auto_gchar gchar* otr_dir = files_file_in_account_data_path(DIR_OTR, jid, NULL);
     if (!otr_dir) {
         log_error("Could not create directory for account %s.", jid);
         cons_show_error("Could not create directory for account %s.", jid);
@@ -236,7 +236,6 @@ otr_on_connect(ProfAccount* account)
         if (err != GPG_ERR_NO_ERROR) {
             log_warning("Failed to read OTR private key file: %s", keysfilename->str);
             cons_show_error("Failed to read OTR private key file: %s", keysfilename->str);
-            g_free(otr_dir);
             g_string_free(keysfilename, TRUE);
             return;
         }
@@ -245,7 +244,6 @@ otr_on_connect(ProfAccount* account)
         if (!privkey) {
             log_warning("No OTR private key found for account \"%s\", protocol \"xmpp\" in file: %s", jid, keysfilename->str);
             cons_show_error("No OTR private key found for account \"%s\", protocol \"xmpp\" in file: %s", jid, keysfilename->str);
-            g_free(otr_dir);
             g_string_free(keysfilename, TRUE);
             return;
         }
@@ -263,7 +261,6 @@ otr_on_connect(ProfAccount* account)
         err = otrl_privkey_read_fingerprints(user_state, fpsfilename->str, NULL, NULL);
         if (err != GPG_ERR_NO_ERROR) {
             log_error("Failed to load OTR fingerprints file: %s", fpsfilename->str);
-            g_free(otr_dir);
             g_string_free(keysfilename, TRUE);
             g_string_free(fpsfilename, TRUE);
             return;
@@ -277,7 +274,6 @@ otr_on_connect(ProfAccount* account)
         cons_show("Loaded OTR private key for %s", jid);
     }
 
-    g_free(otr_dir);
     g_string_free(keysfilename, TRUE);
     g_string_free(fpsfilename, TRUE);
     return;
@@ -373,7 +369,7 @@ otr_keygen(ProfAccount* account)
     jid = strdup(account->jid);
     log_info("Generating OTR key for %s", jid);
 
-    gchar* otr_dir = files_file_in_account_data_path(DIR_OTR, jid, NULL);
+    auto_gchar gchar* otr_dir = files_file_in_account_data_path(DIR_OTR, jid, NULL);
 
     if (!otr_dir) {
         log_error("Could not create directory for account %s.", jid);
@@ -391,7 +387,6 @@ otr_keygen(ProfAccount* account)
     ui_update();
     err = otrl_privkey_generate(user_state, keysfilename->str, account->jid, "xmpp");
     if (err != GPG_ERR_NO_ERROR) {
-        g_free(otr_dir);
         g_string_free(keysfilename, TRUE);
         log_error("Failed to generate private key");
         cons_show_error("Failed to generate private key");
@@ -406,7 +401,6 @@ otr_keygen(ProfAccount* account)
     log_debug("Generating fingerprints file %s for %s", fpsfilename->str, jid);
     err = otrl_privkey_write_fingerprints(user_state, fpsfilename->str);
     if (err != GPG_ERR_NO_ERROR) {
-        g_free(otr_dir);
         g_string_free(keysfilename, TRUE);
         log_error("Failed to create fingerprints file");
         cons_show_error("Failed to create fingerprints file");
@@ -416,7 +410,6 @@ otr_keygen(ProfAccount* account)
 
     err = otrl_privkey_read(user_state, keysfilename->str);
     if (err != GPG_ERR_NO_ERROR) {
-        g_free(otr_dir);
         g_string_free(keysfilename, TRUE);
         log_error("Failed to load private key");
         data_loaded = FALSE;
@@ -425,7 +418,6 @@ otr_keygen(ProfAccount* account)
 
     err = otrl_privkey_read_fingerprints(user_state, fpsfilename->str, NULL, NULL);
     if (err != GPG_ERR_NO_ERROR) {
-        g_free(otr_dir);
         g_string_free(keysfilename, TRUE);
         log_error("Failed to load fingerprints");
         data_loaded = FALSE;
@@ -434,7 +426,6 @@ otr_keygen(ProfAccount* account)
 
     data_loaded = TRUE;
 
-    g_free(otr_dir);
     g_string_free(keysfilename, TRUE);
     g_string_free(fpsfilename, TRUE);
     return;

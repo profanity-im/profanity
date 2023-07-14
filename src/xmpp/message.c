@@ -647,10 +647,9 @@ message_send_chat_omemo(const char* const jid, uint32_t sid, GList* keys,
             xmpp_stanza_set_attribute(key_stanza, "prekey", "true");
         }
 
-        gchar* key_raw = g_base64_encode(key->data, key->length);
+        auto_gchar gchar* key_raw = g_base64_encode(key->data, key->length);
         xmpp_stanza_t* key_text = xmpp_stanza_new(ctx);
         xmpp_stanza_set_text(key_text, key_raw);
-        g_free(key_raw);
 
         xmpp_stanza_add_child(key_stanza, key_text);
         xmpp_stanza_add_child(header, key_stanza);
@@ -661,10 +660,9 @@ message_send_chat_omemo(const char* const jid, uint32_t sid, GList* keys,
     xmpp_stanza_t* iv_stanza = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(iv_stanza, "iv");
 
-    gchar* iv_raw = g_base64_encode(iv, iv_len);
+    auto_gchar gchar* iv_raw = g_base64_encode(iv, iv_len);
     xmpp_stanza_t* iv_text = xmpp_stanza_new(ctx);
     xmpp_stanza_set_text(iv_text, iv_raw);
-    g_free(iv_raw);
 
     xmpp_stanza_add_child(iv_stanza, iv_text);
     xmpp_stanza_add_child(header, iv_stanza);
@@ -677,10 +675,9 @@ message_send_chat_omemo(const char* const jid, uint32_t sid, GList* keys,
     xmpp_stanza_t* payload = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(payload, "payload");
 
-    gchar* ciphertext_raw = g_base64_encode(ciphertext, ciphertext_len);
+    auto_gchar gchar* ciphertext_raw = g_base64_encode(ciphertext, ciphertext_len);
     xmpp_stanza_t* payload_text = xmpp_stanza_new(ctx);
     xmpp_stanza_set_text(payload_text, ciphertext_raw);
-    g_free(ciphertext_raw);
 
     xmpp_stanza_add_child(payload, payload_text);
     xmpp_stanza_add_child(encrypted, payload);

@@ -108,9 +108,8 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
     new_account->muc_service = muc_service;
 
     if (muc_nick == NULL) {
-        Jid* jidp = jid_create(new_account->jid);
+        auto_jid Jid* jidp = jid_create(new_account->jid);
         new_account->muc_nick = strdup(jidp->domainpart);
-        jid_destroy(jidp);
     } else {
         new_account->muc_nick = muc_nick;
     }

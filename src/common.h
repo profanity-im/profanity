@@ -31,6 +31,9 @@
  * statement from your version. If you delete this exception statement from all
  * source files in the program, then also delete it here.
  *
+ * @file common.h
+ *
+ * @brief Common utilities for the project.
  */
 
 #ifndef COMMON_H
@@ -51,11 +54,55 @@
 #define PROF_STRINGIFY(n)  PROF_STRINGIFY_(n)
 
 void auto_free_gchar(gchar** str);
+
+/**
+ * Macro for automatically freeing a gchar* string when it goes out of scope.
+ *
+ * Example usage:
+ * ```
+ * auto_gchar gchar* myString = g_strdup("Hello, world!");
+ * ```
+ */
 #define auto_gchar __attribute__((__cleanup__(auto_free_gchar)))
+
 void auto_free_gcharv(gchar*** args);
+
+/**
+ * Macro for automatically freeing a gchar** string array when it goes out of scope.
+ *
+ * Example usage:
+ * ```
+ * auto_gcharv gchar** stringArray = g_strsplit("Hello, world!", " ", -1);
+ * ```
+ */
 #define auto_gcharv __attribute__((__cleanup__(auto_free_gcharv)))
+
 void auto_free_char(char** str);
+
+/**
+ * Macro for automatically freeing a char* string when it goes out of scope.
+ *
+ * Example usage:
+ * ```
+ * auto_char char* myString = strdup("Hello, world!");
+ * ```
+ */
 #define auto_char __attribute__((__cleanup__(auto_free_char)))
+
+void auto_free_guchar(guchar** str);
+
+/**
+ * @brief Macro for automatically freeing a guchar* string when it goes out of scope.
+ *
+ * This macro is used to automatically free a guchar* string when it goes out of scope.
+ * It utilizes the `auto_free_guchar` function and should be placed before the variable declaration.
+ *
+ * Example usage:
+ * ```
+ * auto_guchar guchar* myString = g_base64_decode("SGVsbG8sIHdvcmxkIQ==", NULL);
+ * ```
+ */
+#define auto_guchar __attribute__((__cleanup__(auto_free_guchar)))
 
 #if defined(__OpenBSD__)
 #define STR_MAYBE_NULL(p) (p) ?: "(null)"

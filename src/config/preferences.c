@@ -216,12 +216,11 @@ _prefs_load(void)
 
     room_trigger_ac = autocomplete_new();
     gsize len = 0;
-    gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    auto_gcharv gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
     for (int i = 0; i < len; i++) {
         autocomplete_add(room_trigger_ac, triggers[i]);
     }
-    g_strfreev(triggers);
 }
 
 /* Clean up after _prefs_load() */
@@ -333,7 +332,7 @@ prefs_message_get_triggers(const char* const message)
 
     auto_gchar gchar* message_lower = g_utf8_strdown(message, -1);
     gsize len = 0;
-    gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    auto_gcharv gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
     for (int i = 0; i < len; i++) {
         auto_gchar gchar* trigger_lower = g_utf8_strdown(triggers[i], -1);
@@ -341,8 +340,6 @@ prefs_message_get_triggers(const char* const message)
             result = g_list_append(result, strdup(triggers[i]));
         }
     }
-
-    g_strfreev(triggers);
 
     return result;
 }
@@ -520,6 +517,14 @@ prefs_set_boolean(preference_t pref, gboolean value)
     g_key_file_set_boolean(prefs, group, key, value);
 }
 
+/**
+ * @brief Retrieves a string preference value.
+ *
+ * @param pref The preference identifier.
+ * @return The string preference value or `NULL` if not found.
+ *
+ * @note Remember to free the returned string using `auto_gchar` or `g_free()`.
+ */
 gchar*
 prefs_get_string(preference_t pref)
 {
@@ -540,14 +545,23 @@ prefs_get_string(preference_t pref)
     }
 }
 
+/**
+ * @brief Retrieves a localized string preference value.
+ *
+ * @param pref   The preference to retrieve the value for.
+ * @param locale The option to consider.
+ * @return       Returns the value associated with pref translated in the given locale if available.
+ *
+ * @note Remember to free the returned string using `auto_gchar` or `g_free()`.
+ */
 gchar*
-prefs_get_string_with_option(preference_t pref, gchar* option)
+prefs_get_string_with_locale(preference_t pref, gchar* locale)
 {
     const char* group = _get_group(pref);
     const char* key = _get_key(pref);
     char* def = _get_default_string(pref);
 
-    gchar* result = g_key_file_get_locale_string(prefs, group, key, option, NULL);
+    gchar* result = g_key_file_get_locale_string(prefs, group, key, locale, NULL);
 
     if (result == NULL) {
         // check for user set default
@@ -565,15 +579,21 @@ prefs_get_string_with_option(preference_t pref, gchar* option)
     return result;
 }
 
+/**
+ * @brief Sets or deletes a string value for the given preference in the preference file.
+ *
+ * @param pref      The preference to set the value for.
+ * @param new_value The new string value to set. Pass NULL to remove the key.
+ */
 void
-prefs_set_string(preference_t pref, char* value)
+prefs_set_string(preference_t pref, gchar* new_value)
 {
     const char* group = _get_group(pref);
     const char* key = _get_key(pref);
-    if (value == NULL) {
+    if (new_value == NULL) {
         g_key_file_remove_key(prefs, group, key, NULL);
     } else {
-        g_key_file_set_string(prefs, group, key, value);
+        g_key_file_set_string(prefs, group, key, new_value);
     }
 }
 
@@ -860,12 +880,6 @@ prefs_remove_plugin(const char* const name)
 {
     conf_string_list_remove(prefs, PREF_GROUP_PLUGINS, "load", name);
     _save_prefs();
-}
-
-void
-prefs_free_plugins(gchar** plugins)
-{
-    g_strfreev(plugins);
 }
 
 void
@@ -1316,13 +1330,11 @@ prefs_get_room_notify_triggers(void)
 {
     GList* result = NULL;
     gsize len = 0;
-    gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
+    auto_gcharv gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
     for (int i = 0; i < len; i++) {
         result = g_list_append(result, strdup(triggers[i]));
     }
-
-    g_strfreev(triggers);
 
     return result;
 }
@@ -1665,7 +1677,7 @@ prefs_get_aliases(void)
     } else {
         GList* result = NULL;
         gsize len;
-        gchar** keys = g_key_file_get_keys(prefs, PREF_GROUP_ALIAS, &len, NULL);
+        auto_gcharv gchar** keys = g_key_file_get_keys(prefs, PREF_GROUP_ALIAS, &len, NULL);
 
         for (int i = 0; i < len; i++) {
             char* name = keys[i];
@@ -1679,8 +1691,6 @@ prefs_get_aliases(void)
                 result = g_list_insert_sorted(result, alias, (GCompareFunc)_alias_cmp);
             }
         }
-
-        g_strfreev(keys);
 
         return result;
     }

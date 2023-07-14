@@ -317,7 +317,7 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
         }
     }
 
-    auto_gchar gchar* from = str_replace(from_attr, "@", "_at_");
+    auto_char char* from = str_replace(from_attr, "@", "_at_");
     g_string_append(filename, from);
 
     avatar_metadata* data = (avatar_metadata*)userdata;
@@ -345,18 +345,16 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
 
     // if we shall open it
     if (g_hash_table_contains(shall_open, from_attr)) {
-        gchar* cmdtemplate = prefs_get_string(PREF_AVATAR_CMD);
+        auto_gchar gchar* cmdtemplate = prefs_get_string(PREF_AVATAR_CMD);
 
         if (cmdtemplate == NULL) {
             cons_show_error("No default `avatar open` command found in executables preferences.");
         } else {
-            gchar** argv = format_call_external_argv(cmdtemplate, NULL, filename->str);
+            auto_gcharv gchar** argv = format_call_external_argv(cmdtemplate, NULL, filename->str);
 
             if (!call_external(argv)) {
                 cons_show_error("Unable to display avatar: check the logs for more information.");
             }
-
-            g_strfreev(argv);
         }
 
         g_hash_table_remove(shall_open, from_attr);

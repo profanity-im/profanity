@@ -70,6 +70,11 @@ struct curl_data_t
 
 static size_t _data_callback(void* ptr, size_t size, size_t nmemb, void* data);
 
+/**
+ * Frees the memory allocated for a gchar* string.
+ *
+ * @param str Pointer to the gchar* string to be freed. If NULL, no action is taken.
+ */
 void
 auto_free_gchar(gchar** str)
 {
@@ -78,6 +83,25 @@ auto_free_gchar(gchar** str)
     g_free(*str);
 }
 
+/**
+ * Frees the memory allocated for a guchar* string.
+ *
+ * @param str Pointer to the guchar* string to be freed. If NULL, no action is taken.
+ */
+void
+auto_free_guchar(guchar** ptr)
+{
+    if (ptr == NULL) {
+        return;
+    }
+    g_free(*ptr);
+}
+
+/**
+ * Frees the memory allocated for a gchar** string array.
+ *
+ * @param args Pointer to the gchar** string array to be freed. If NULL, no action is taken.
+ */
 void
 auto_free_gcharv(gchar*** args)
 {
@@ -86,6 +110,11 @@ auto_free_gcharv(gchar*** args)
     g_strfreev(*args);
 }
 
+/**
+ * Frees the memory allocated for a char* string.
+ *
+ * @param str Pointer to the char* string to be freed. If NULL, no action is taken.
+ */
 void
 auto_free_char(char** str)
 {
@@ -125,6 +154,18 @@ copy_file(const char* const sourcepath, const char* const targetpath, const gboo
     return success;
 }
 
+/**
+ * @brief Replaces all occurrences of a substring with a replacement in a string.
+ *
+ * @param string      The input string to perform replacement on.
+ * @param substr      The substring to be replaced.
+ * @param replacement The replacement string.
+ * @return            The modified string with replacements, or NULL on failure.
+ *
+ * @note Remember to free returned value using `auto_char` or `free()` when it is no longer needed.
+ * @note If 'string' is NULL, the function returns NULL.
+ * @note If 'substr' or 'replacement' is NULL or an empty string, a duplicate of 'string' is returned.
+ */
 char*
 str_replace(const char* string, const char* substr,
             const char* replacement)
@@ -487,6 +528,18 @@ call_external(gchar** argv)
     return is_successful;
 }
 
+/**
+ * @brief Formats an argument vector for calling an external command with placeholders.
+ *
+ * This function constructs an argument vector (argv) based on the provided template string, replacing placeholders ("%u" and "%p") with the provided URL and filename, respectively.
+ *
+ * @param template  The template string with placeholders.
+ * @param url       The URL to replace "%u" (or NULL to skip).
+ * @param filename  The filename to replace "%p" (or NULL to skip).
+ * @return          The constructed argument vector (argv) as a null-terminated array of strings.
+ *
+ * @note Remember to free the returned argument vector using `auto_gcharv` or `g_strfreev()`.
+ */
 gchar**
 format_call_external_argv(const char* template, const char* url, const char* filename)
 {
@@ -539,24 +592,38 @@ _has_directory_suffix(const char* path)
             || g_str_has_suffix(path, G_DIR_SEPARATOR_S));
 }
 
+/**
+ * @brief Extracts the basename from a given URL.
+ *
+ * @param url The URL to extract the basename from.
+ * @return The extracted basename or a default name ("index") if the basename has a directory suffix.
+ *
+ * @note The returned string must be freed by the caller using `auto_free` or `free()`.
+ */
 char*
 basename_from_url(const char* url)
 {
     const char* default_name = "index";
 
     GFile* file = g_file_new_for_commandline_arg(url);
-    char* basename = g_file_get_basename(file);
-
-    if (_has_directory_suffix(basename)) {
-        g_free(basename);
-        basename = strdup(default_name);
-    }
-
+    auto_gchar gchar* basename = g_file_get_basename(file);
     g_object_unref(file);
 
-    return basename;
+    if (_has_directory_suffix(basename)) {
+        return strdup(default_name);
+    }
+
+    return strdup(basename);
 }
 
+/**
+ * Expands the provided path by resolving special characters like '~' and 'file://'.
+ *
+ * @param path The path to expand.
+ * @return The expanded path.
+ *
+ * @note Remember to free the returned value using `auto_gchar` or `g_free()`.
+ */
 gchar*
 get_expanded_path(const char* path)
 {
@@ -570,6 +637,15 @@ get_expanded_path(const char* path)
     }
 }
 
+/**
+ * Generates a unique filename based on the provided URL and path.
+ *
+ * @param url The URL to derive the basename from.
+ * @param path The path to prepend to the generated filename. If NULL, the current directory is used.
+ * @return A unique filename combining the path and derived basename from the URL.
+ *
+ * @note Remember to free the returned value using `auto_gchar` or `g_free()`.
+ */
 gchar*
 unique_filename_from_url(const char* url, const char* path)
 {
@@ -589,9 +665,8 @@ unique_filename_from_url(const char* url, const char* path)
     if (_has_directory_suffix(realpath) || g_file_test(realpath, G_FILE_TEST_IS_DIR)) {
         // The target should be used as a directory. Assume that the basename
         // should be derived from the URL.
-        char* basename = basename_from_url(url);
+        auto_char char* basename = basename_from_url(url);
         filename = g_build_filename(g_file_peek_path(target), basename, NULL);
-        g_free(basename);
     } else {
         // Just use the target as filename.
         filename = g_build_filename(g_file_peek_path(target), NULL);

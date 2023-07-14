@@ -65,7 +65,7 @@ static GHashTable* jid_to_ver;
 static GHashTable* jid_to_caps;
 
 static GHashTable* prof_features;
-static char* my_sha1;
+static gchar* my_sha1;
 
 static void _save_cache(void);
 static EntityCapabilities* _caps_by_ver(const char* const ver);
@@ -378,7 +378,7 @@ _caps_by_ver(const char* const ver)
     auto_gchar gchar* os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
 
     gsize features_len = 0;
-    gchar** features_list = g_key_file_get_string_list(cache, ver, "features", &features_len, NULL);
+    auto_gcharv gchar** features_list = g_key_file_get_string_list(cache, ver, "features", &features_len, NULL);
     GSList* features = NULL;
     if (features_list && features_len > 0) {
         for (int i = 0; i < features_len; i++) {
@@ -391,9 +391,6 @@ _caps_by_ver(const char* const ver)
         software, software_version, os, os_version,
         features);
 
-    if (features_list) {
-        g_strfreev(features_list);
-    }
     g_slist_free(features);
 
     return result;
@@ -464,8 +461,7 @@ static void
 _save_cache(void)
 {
     gsize g_data_size;
-    gchar* g_cache_data = g_key_file_to_data(cache, &g_data_size, NULL);
+    auto_gchar gchar* g_cache_data = g_key_file_to_data(cache, &g_data_size, NULL);
     g_file_set_contents(cache_loc, g_cache_data, g_data_size, NULL);
     g_chmod(cache_loc, S_IRUSR | S_IWUSR);
-    g_free(g_cache_data);
 }

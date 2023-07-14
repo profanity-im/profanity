@@ -273,7 +273,7 @@ callbacks_get_window_handler(const char* tag)
 gboolean
 plugins_run_command(const char* const input)
 {
-    gchar** split = g_strsplit(input, " ", -1);
+    auto_gcharv gchar** split = g_strsplit(input, " ", -1);
 
     GList* command_hashes = g_hash_table_get_values(p_commands);
     GList* curr_hash = command_hashes;
@@ -283,26 +283,20 @@ plugins_run_command(const char* const input)
         PluginCommand* command = g_hash_table_lookup(command_hash, split[0]);
         if (command) {
             gboolean result;
-            gchar** args = parse_args_with_freetext(input, command->min_args, command->max_args, &result);
+            auto_gcharv gchar** args = parse_args_with_freetext(input, command->min_args, command->max_args, &result);
             if (result == FALSE) {
                 ui_invalid_command_usage(command->command_name, NULL);
-                g_strfreev(split);
-                g_list_free(command_hashes);
-                return TRUE;
             } else {
                 command->callback_exec(command, args);
-                g_strfreev(split);
-                g_strfreev(args);
-                g_list_free(command_hashes);
-                return TRUE;
             }
+            g_list_free(command_hashes);
+            return TRUE;
         }
 
         curr_hash = g_list_next(curr_hash);
     }
 
     g_list_free(command_hashes);
-    g_strfreev(split);
     return FALSE;
 }
 

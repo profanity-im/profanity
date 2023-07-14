@@ -877,9 +877,9 @@ _caps_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
     }
 
     // validate sha1
-    gchar** split = g_strsplit(node, "#", -1);
+    auto_gcharv gchar** split = g_strsplit(node, "#", -1);
     char* given_sha1 = split[1];
-    char* generated_sha1 = stanza_create_caps_sha1_from_query(query);
+    auto_gchar gchar* generated_sha1 = stanza_create_caps_sha1_from_query(query);
 
     if (g_strcmp0(given_sha1, generated_sha1) != 0) {
         log_warning("Generated sha-1 does not match given:");
@@ -900,9 +900,6 @@ _caps_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
         caps_map_jid_to_ver(from, given_sha1);
     }
-
-    g_free(generated_sha1);
-    g_strfreev(split);
 
     return 0;
 }
@@ -1079,16 +1076,15 @@ _room_list_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         const char* stanza_name = xmpp_stanza_get_name(child);
         if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
             const char* item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
-            gchar* item_jid_lower = NULL;
+            auto_gchar gchar* item_jid_lower = NULL;
             if (item_jid) {
-                Jid* jidp = jid_create(item_jid);
+                auto_jid Jid* jidp = jid_create(item_jid);
                 if (jidp && jidp->localpart) {
                     item_jid_lower = g_utf8_strdown(jidp->localpart, -1);
                 }
-                jid_destroy(jidp);
             }
             const char* item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
-            gchar* item_name_lower = NULL;
+            auto_gchar gchar* item_name_lower = NULL;
             if (item_name) {
                 item_name_lower = g_utf8_strdown(item_name, -1);
             }
@@ -1106,8 +1102,6 @@ _room_list_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                 cons_show("  %s", item->str);
                 g_string_free(item, TRUE);
             }
-            g_free(item_jid_lower);
-            g_free(item_name_lower);
         }
         child = xmpp_stanza_get_next(child);
     }
@@ -1508,7 +1502,7 @@ _version_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
     xmpp_ctx_t* ctx = connection_get_ctx();
 
-    Jid* jidp = jid_create((char*)userdata);
+    auto_jid Jid* jidp = jid_create((char*)userdata);
 
     const char* presence = NULL;
 
@@ -1545,8 +1539,6 @@ _version_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         // server or component
         ui_show_software_version(jidp->barejid, "online", name_str, version_str, os_str);
     }
-
-    jid_destroy(jidp);
 
     if (name_str)
         xmpp_free(ctx, name_str);
@@ -2594,7 +2586,7 @@ iq_mam_request_older(ProfChatWin* win)
 
     ProfMessage* first_msg = log_database_get_limits_info(win->barejid, FALSE);
     char* firstid = NULL;
-    char* enddate = NULL;
+    auto_gchar gchar* enddate = NULL;
 
     // If first message found
     if (first_msg->timestamp) {
@@ -2608,7 +2600,6 @@ iq_mam_request_older(ProfChatWin* win)
     xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, NULL, enddate, firstid, NULL);
     iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_buffer_commit_handler, NULL, win);
 
-    g_free(enddate);
     message_free(first_msg);
 
     iq_send_stanza(iq);

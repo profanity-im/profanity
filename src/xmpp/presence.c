@@ -96,7 +96,7 @@ presence_subscription(const char* const jid, const jabber_subscr_t action)
 {
     assert(jid != NULL);
 
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
     autocomplete_remove(sub_requests_ac, jidp->barejid);
 
     const char* type = NULL;
@@ -129,7 +129,6 @@ presence_subscription(const char* const jid, const jabber_subscr_t action)
 
     xmpp_stanza_set_type(presence, type);
     xmpp_stanza_set_to(presence, jidp->barejid);
-    jid_destroy(jidp);
 
     _send_presence_stanza(presence);
 
@@ -278,7 +277,7 @@ _send_room_presence(xmpp_stanza_t* presence)
 void
 presence_join_room(const char* const room, const char* const nick, const char* const passwd)
 {
-    Jid* jid = jid_create_from_bare_and_resource(room, nick);
+    auto_jid Jid* jid = jid_create_from_bare_and_resource(room, nick);
     log_debug("Sending room join presence to: %s", jid->fulljid);
 
     resource_presence_t presence_type = accounts_get_last_presence(session_get_account_name());
@@ -296,7 +295,6 @@ presence_join_room(const char* const room, const char* const nick, const char* c
     _send_presence_stanza(presence);
 
     xmpp_stanza_release(presence);
-    jid_destroy(jid);
 }
 
 void
@@ -415,13 +413,12 @@ _presence_error_handler(xmpp_stanza_t* const stanza)
             error_cond = "unknown";
         }
 
-        Jid* fulljid = jid_create(from);
+        auto_jid Jid* fulljid = jid_create(from);
         log_info("Error joining room: %s, reason: %s", fulljid->barejid, error_cond);
         if (muc_active(fulljid->barejid)) {
             muc_leave(fulljid->barejid);
         }
         cons_show_error("Error joining room %s, reason: %s", fulljid->barejid, error_cond);
-        jid_destroy(fulljid);
 
         return;
     }
@@ -472,11 +469,9 @@ _unsubscribed_handler(xmpp_stanza_t* const stanza)
     }
     log_debug("Unsubscribed presence handler fired for %s", from);
 
-    Jid* from_jid = jid_create(from);
+    auto_jid Jid* from_jid = jid_create(from);
     sv_ev_subscription(from_jid->barejid, PRESENCE_UNSUBSCRIBED);
     autocomplete_remove(sub_requests_ac, from_jid->barejid);
-
-    jid_destroy(from_jid);
 }
 
 static void
@@ -489,11 +484,9 @@ _subscribed_handler(xmpp_stanza_t* const stanza)
     }
     log_debug("Subscribed presence handler fired for %s", from);
 
-    Jid* from_jid = jid_create(from);
+    auto_jid Jid* from_jid = jid_create(from);
     sv_ev_subscription(from_jid->barejid, PRESENCE_SUBSCRIBED);
     autocomplete_remove(sub_requests_ac, from_jid->barejid);
-
-    jid_destroy(from_jid);
 }
 
 static void
@@ -505,15 +498,13 @@ _subscribe_handler(xmpp_stanza_t* const stanza)
     }
     log_debug("Subscribe presence handler fired for %s", from);
 
-    Jid* from_jid = jid_create(from);
+    auto_jid Jid* from_jid = jid_create(from);
     if (from_jid == NULL) {
         return;
     }
 
     sv_ev_subscription(from_jid->barejid, PRESENCE_SUBSCRIBE);
     autocomplete_add(sub_requests_ac, from_jid->barejid);
-
-    jid_destroy(from_jid);
 }
 
 static void
@@ -529,11 +520,9 @@ _unavailable_handler(xmpp_stanza_t* const stanza)
     }
     log_debug("Unavailable presence handler fired for %s", from);
 
-    Jid* my_jid = jid_create(jid);
-    Jid* from_jid = jid_create(from);
+    auto_jid Jid* my_jid = jid_create(jid);
+    auto_jid Jid* from_jid = jid_create(from);
     if (my_jid == NULL || from_jid == NULL) {
-        jid_destroy(my_jid);
-        jid_destroy(from_jid);
         return;
     }
 
@@ -551,9 +540,6 @@ _unavailable_handler(xmpp_stanza_t* const stanza)
             connection_remove_available_resource(from_jid->resourcepart);
         }
     }
-
-    jid_destroy(my_jid);
-    jid_destroy(from_jid);
 }
 
 static void
@@ -634,7 +620,7 @@ _available_handler(xmpp_stanza_t* const stanza)
 
     xmpp_conn_t* conn = connection_get_conn();
     const char* my_jid_str = xmpp_conn_get_jid(conn);
-    Jid* my_jid = jid_create(my_jid_str);
+    auto_jid Jid* my_jid = jid_create(my_jid_str);
 
     XMPPCaps* caps = stanza_parse_caps(stanza);
     if ((g_strcmp0(my_jid->fulljid, xmpp_presence->jid->fulljid) != 0) && caps) {
@@ -651,7 +637,7 @@ _available_handler(xmpp_stanza_t* const stanza)
         const char* account_name = session_get_account_name();
         int max_sessions = accounts_get_max_sessions(account_name);
         if (max_sessions > 0) {
-            const char* cur_resource = accounts_get_resource(account_name);
+            const gchar* cur_resource = accounts_get_resource(account_name);
             int res_count = connection_count_available_resources();
             if (res_count > max_sessions && g_strcmp0(cur_resource, resource->name)) {
                 ProfWin* console = wins_get_console();
@@ -721,7 +707,6 @@ _available_handler(xmpp_stanza_t* const stanza)
         xmpp_free(ctx, pgpsig);
     }
 
-    jid_destroy(my_jid);
     stanza_free_presence(xmpp_presence);
 }
 
@@ -752,7 +737,7 @@ static void
 _muc_user_self_handler(xmpp_stanza_t* stanza)
 {
     const char* from = xmpp_stanza_get_from(stanza);
-    Jid* from_jid = jid_create(from);
+    auto_jid Jid* from_jid = jid_create(from);
 
     log_debug("Room self presence received from %s", from_jid->fulljid);
 
@@ -823,8 +808,6 @@ _muc_user_self_handler(xmpp_stanza_t* stanza)
         }
         sv_ev_muc_self_online(room, nick, config_required, role, affiliation, actor, reason, jid, show_str, status_str);
     }
-
-    jid_destroy(from_jid);
 }
 
 static void
@@ -921,13 +904,11 @@ _muc_user_handler(xmpp_stanza_t* const stanza)
         return;
     }
 
-    Jid* from_jid = jid_create(from);
+    auto_jid Jid* from_jid = jid_create(from);
     if (from_jid == NULL || from_jid->resourcepart == NULL) {
         log_warning("MUC User stanza received with invalid from attribute: %s", from);
-        jid_destroy(from_jid);
         return;
     }
-    jid_destroy(from_jid);
 
     if (stanza_is_muc_self_presence(stanza, connection_get_fulljid())) {
         _muc_user_self_handler(stanza);

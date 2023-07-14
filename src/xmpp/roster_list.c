@@ -151,9 +151,8 @@ roster_update_presence(const char* const barejid, Resource* resource, GDateTime*
         p_contact_set_last_activity(contact, last_activity);
     }
     p_contact_set_presence(contact, resource);
-    Jid* jid = jid_create_from_bare_and_resource(barejid, resource->name);
+    auto_jid Jid* jid = jid_create_from_bare_and_resource(barejid, resource->name);
     autocomplete_add(roster->fulljid_ac, jid->fulljid);
-    jid_destroy(jid);
 
     return TRUE;
 }
@@ -163,9 +162,8 @@ roster_get_contact(const char* const barejid)
 {
     assert(roster != NULL);
 
-    gchar* barejidlower = g_utf8_strdown(barejid, -1);
+    auto_gchar gchar* barejidlower = g_utf8_strdown(barejid, -1);
     PContact contact = g_hash_table_lookup(roster->contacts, barejidlower);
-    g_free(barejidlower);
 
     return contact;
 }
@@ -238,9 +236,8 @@ roster_contact_offline(const char* const barejid, const char* const resource, co
     } else {
         gboolean result = p_contact_remove_resource(contact, resource);
         if (result == TRUE) {
-            Jid* jid = jid_create_from_bare_and_resource(barejid, resource);
+            auto_jid Jid* jid = jid_create_from_bare_and_resource(barejid, resource);
             autocomplete_remove(roster->fulljid_ac, jid->fulljid);
-            jid_destroy(jid);
         }
 
         return result;

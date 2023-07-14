@@ -2768,7 +2768,7 @@ _cmd_index(const Command* cmd)
         index_source = g_string_append(index_source, " ");
     }
 
-    gchar** tokens = g_str_tokenize_and_fold(index_source->str, NULL, NULL);
+    auto_gcharv gchar** tokens = g_str_tokenize_and_fold(index_source->str, NULL, NULL);
     g_string_free(index_source, TRUE);
 
     GString* index = g_string_new("");
@@ -2776,7 +2776,6 @@ _cmd_index(const Command* cmd)
         index = g_string_append(index, tokens[i]);
         index = g_string_append(index, " ");
     }
-    g_strfreev(tokens);
 
     return g_string_free(index, FALSE);
 }
@@ -2786,7 +2785,7 @@ cmd_search_index_any(char* term)
 {
     GList* results = NULL;
 
-    gchar** processed_terms = g_str_tokenize_and_fold(term, NULL, NULL);
+    auto_gcharv gchar** processed_terms = g_str_tokenize_and_fold(term, NULL, NULL);
     int terms_len = g_strv_length(processed_terms);
 
     for (int i = 0; i < terms_len; i++) {
@@ -2802,8 +2801,6 @@ cmd_search_index_any(char* term)
         g_list_free(index_keys);
     }
 
-    g_strfreev(processed_terms);
-
     return results;
 }
 
@@ -2812,7 +2809,7 @@ cmd_search_index_all(char* term)
 {
     GList* results = NULL;
 
-    gchar** terms = g_str_tokenize_and_fold(term, NULL, NULL);
+    auto_gcharv gchar** terms = g_str_tokenize_and_fold(term, NULL, NULL);
     int terms_len = g_strv_length(terms);
 
     GList* commands = g_hash_table_get_keys(search_index);
@@ -2833,7 +2830,6 @@ cmd_search_index_all(char* term)
     }
 
     g_list_free(commands);
-    g_strfreev(terms);
 
     return results;
 }
@@ -3039,14 +3035,13 @@ command_mangen(void)
     create_dir("docs");
 
     GDateTime* now = g_date_time_new_now_local();
-    gchar* date = g_date_time_format(now, "%F");
-    gchar* header = g_strdup_printf(".TH man 1 \"%s\" \"" PACKAGE_VERSION "\" \"Profanity XMPP client\"\n", date);
+    auto_gchar gchar* date = g_date_time_format(now, "%F");
+    auto_gchar gchar* header = g_strdup_printf(".TH man 1 \"%s\" \"" PACKAGE_VERSION "\" \"Profanity XMPP client\"\n", date);
     if (!header) {
         log_error("command_mangen(): could not allocate memory");
         return;
     }
     g_date_time_unref(now);
-    g_free(date);
 
     GList* curr = cmds;
     while (curr) {
@@ -3098,6 +3093,5 @@ command_mangen(void)
 
     printf("\nProcessed %d commands.\n\n", g_list_length(cmds));
 
-    g_free(header);
     g_list_free(cmds);
 }

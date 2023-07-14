@@ -201,10 +201,9 @@ _create_tab(const int win, win_type_t wintype, char* identifier, gboolean highli
             if (pcontact_name) {
                 tab->display_name = strdup(pcontact_name);
             } else {
-                Jid* jidp = jid_create(tab->identifier);
+                auto_jid Jid* jidp = jid_create(tab->identifier);
                 if (jidp) {
                     tab->display_name = jidp->localpart != NULL ? strdup(jidp->localpart) : strdup(jidp->barejid);
-                    jid_destroy(jidp);
                 } else {
                     tab->display_name = strdup(tab->identifier);
                 }
@@ -543,15 +542,13 @@ _status_bar_draw_maintext(int pos)
             return pos;
         }
         if (g_strcmp0(pref, "user") == 0) {
-            Jid* jidp = jid_create(statusbar->fulljid);
+            auto_jid Jid* jidp = jid_create(statusbar->fulljid);
             mvwprintw(statusbar_win, 0, pos, "%s", jidp->localpart);
-            jid_destroy(jidp);
             return pos;
         }
         if (g_strcmp0(pref, "barejid") == 0) {
-            Jid* jidp = jid_create(statusbar->fulljid);
+            auto_jid Jid* jidp = jid_create(statusbar->fulljid);
             mvwprintw(statusbar_win, 0, pos, "%s", jidp->barejid);
-            jid_destroy(jidp);
             return pos;
         }
 
@@ -655,9 +652,8 @@ _display_name(StatusBarTab* tab)
     } else if (tab->window_type == WIN_MUC) {
         auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_ROOM);
         if (g_strcmp0("room", pref) == 0) {
-            Jid* jidp = jid_create(tab->identifier);
+            auto_jid Jid* jidp = jid_create(tab->identifier);
             char* room = strdup(jidp->localpart);
-            jid_destroy(jidp);
             fullname = room;
         } else {
             fullname = strdup(tab->identifier);
@@ -667,9 +663,8 @@ _display_name(StatusBarTab* tab)
         GString* display_str = g_string_new("");
 
         if (g_strcmp0("room", pref) == 0) {
-            Jid* jidp = jid_create(tab->identifier);
+            auto_jid Jid* jidp = jid_create(tab->identifier);
             g_string_append(display_str, jidp->localpart);
-            jid_destroy(jidp);
         } else {
             g_string_append(display_str, tab->identifier);
         }
@@ -682,11 +677,10 @@ _display_name(StatusBarTab* tab)
         auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_ROOM);
         if (g_strcmp0("room", pref) == 0) {
             GString* display_str = g_string_new("");
-            Jid* jidp = jid_create(tab->identifier);
+            auto_jid Jid* jidp = jid_create(tab->identifier);
             g_string_append(display_str, jidp->localpart);
             g_string_append(display_str, "/");
             g_string_append(display_str, jidp->resourcepart);
-            jid_destroy(jidp);
             char* result = strdup(display_str->str);
             g_string_free(display_str, TRUE);
             fullname = result;

@@ -1045,7 +1045,6 @@ ui_contact_offline(char* barejid, char* resource, char* status)
 {
     auto_gchar gchar* show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
     auto_gchar gchar* show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
-    Jid* jid = jid_create_from_bare_and_resource(barejid, resource);
     PContact contact = roster_get_contact(barejid);
     if (p_contact_subscription(contact)) {
         if (strcmp(p_contact_subscription(contact), "none") != 0) {
@@ -1080,8 +1079,6 @@ ui_contact_offline(char* barejid, char* resource, char* status)
     if (chatwin && chatwin->resource_override && (g_strcmp0(resource, chatwin->resource_override) == 0)) {
         FREE_SET_NULL(chatwin->resource_override);
     }
-
-    jid_destroy(jid);
 }
 
 void
@@ -1261,13 +1258,12 @@ void
 ui_show_software_version(const char* const jid, const char* const presence,
                          const char* const name, const char* const version, const char* const os)
 {
-    Jid* jidp = jid_create(jid);
+    auto_jid Jid* jidp = jid_create(jid);
     ProfWin* window = NULL;
     ProfWin* chatwin = (ProfWin*)wins_get_chat(jidp->barejid);
     ProfWin* mucwin = (ProfWin*)wins_get_muc(jidp->barejid);
     ProfWin* privwin = (ProfWin*)wins_get_private(jidp->fulljid);
     ProfWin* console = wins_get_console();
-    jid_destroy(jidp);
 
     if (chatwin) {
         if (wins_is_current(chatwin)) {

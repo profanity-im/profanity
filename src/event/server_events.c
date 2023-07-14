@@ -169,8 +169,8 @@ sv_ev_roster_received(void)
 
     // send initial presence
     resource_presence_t conn_presence = accounts_get_login_presence(account_name);
-    char* last_activity_str = accounts_get_last_activity(account_name);
-    char* status_message = accounts_get_login_status(account_name);
+    auto_gchar gchar* last_activity_str = accounts_get_last_activity(account_name);
+    auto_gchar gchar* status_message = accounts_get_login_status(account_name);
     int diff_secs = 0;
 
     if (prefs_get_boolean(PREF_LASTACTIVITY) && last_activity_str) {
@@ -189,9 +189,6 @@ sv_ev_roster_received(void)
     }
     connection_set_presence_msg(status_message);
     cl_ev_presence_send(conn_presence, diff_secs);
-
-    g_free(status_message);
-    g_free(last_activity_str);
 
     const char* fulljid = connection_get_fulljid();
     plugins_on_connect(account_name, fulljid);
@@ -278,7 +275,7 @@ sv_ev_room_history(ProfMessage* message)
         // check if this message was sent while we were offline.
         // if so, treat it as a new message rather than a history event.
         char* account_name = session_get_account_name();
-        char* last_activity = accounts_get_last_activity(account_name);
+        auto_gchar gchar* last_activity = accounts_get_last_activity(account_name);
         int msg_is_new = 0;
 
         if (last_activity) {
@@ -292,7 +289,6 @@ sv_ev_room_history(ProfMessage* message)
                 msg_is_new = (time_diff > 0);
                 g_date_time_unref(lastdt);
             }
-            g_free(last_activity);
 
             if (msg_is_new) {
                 sv_ev_room_message(message);
@@ -399,10 +395,9 @@ sv_ev_room_message(ProfMessage* message)
     mucwin->last_msg_timestamp = g_date_time_new_now_local();
 
     if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL)) {
-        Jid* jidp = jid_create(mucwin->roomjid);
+        auto_jid Jid* jidp = jid_create(mucwin->roomjid);
         if (jidp) {
             notify_room_message(message->from_jid->resourcepart, jidp->localpart, num, message->plain);
-            jid_destroy(jidp);
         }
     }
 
@@ -906,9 +901,8 @@ sv_ev_room_occupant_offline(const char* const room, const char* const nick,
         mucwin_occupant_offline(mucwin, nick);
     }
 
-    Jid* jidp = jid_create_from_bare_and_resource(room, nick);
+    auto_jid Jid* jidp = jid_create_from_bare_and_resource(room, nick);
     ProfPrivateWin* privwin = wins_get_private(jidp->fulljid);
-    jid_destroy(jidp);
     if (privwin != NULL) {
         privwin_occupant_offline(privwin);
     }
@@ -927,9 +921,8 @@ sv_ev_room_occupent_kicked(const char* const room, const char* const nick, const
         mucwin_occupant_kicked(mucwin, nick, actor, reason);
     }
 
-    Jid* jidp = jid_create_from_bare_and_resource(room, nick);
+    auto_jid Jid* jidp = jid_create_from_bare_and_resource(room, nick);
     ProfPrivateWin* privwin = wins_get_private(jidp->fulljid);
-    jid_destroy(jidp);
     if (privwin != NULL) {
         privwin_occupant_kicked(privwin, actor, reason);
     }
@@ -948,12 +941,10 @@ sv_ev_room_occupent_banned(const char* const room, const char* const nick, const
         mucwin_occupant_banned(mucwin, nick, actor, reason);
     }
 
-    Jid* jidp = jid_create_from_bare_and_resource(room, nick);
+    auto_jid Jid* jidp = jid_create_from_bare_and_resource(room, nick);
 
     muc_members_remove(room, jidp->fulljid);
     ProfPrivateWin* privwin = wins_get_private(jidp->fulljid);
-
-    jid_destroy(jidp);
 
     if (privwin != NULL) {
         privwin_occupant_banned(privwin, actor, reason);
@@ -1007,11 +998,10 @@ sv_ev_muc_self_online(const char* const room, const char* const nick, gboolean c
             ui_room_join(room, TRUE);
         }
 
-        Jid* jidp = jid_create(room);
+        auto_jid Jid* jidp = jid_create(room);
         if (jidp->domainpart) {
             muc_confserver_add(jidp->domainpart);
         }
-        jid_destroy(jidp);
 
         iq_room_info_request(room, FALSE);
 
@@ -1126,9 +1116,8 @@ sv_ev_muc_occupant_online(const char* const room, const char* const nick, const 
         }
 
         if (mucwin) {
-            Jid* jidp = jid_create_from_bare_and_resource(mucwin->roomjid, nick);
+            auto_jid Jid* jidp = jid_create_from_bare_and_resource(mucwin->roomjid, nick);
             ProfPrivateWin* privwin = wins_get_private(jidp->fulljid);
-            jid_destroy(jidp);
             if (privwin) {
                 privwin_occupant_online(privwin);
             }
@@ -1234,7 +1223,7 @@ sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert)
 void
 sv_ev_lastactivity_response(const char* const from, const int seconds, const char* const msg)
 {
-    Jid* jidp = jid_create(from);
+    auto_jid Jid* jidp = jid_create(from);
 
     if (!jidp) {
         return;
@@ -1296,7 +1285,6 @@ sv_ev_lastactivity_response(const char* const from, const int seconds, const cha
 
     g_date_time_unref(now);
     g_date_time_unref(active);
-    jid_destroy(jidp);
 }
 
 void
@@ -1331,10 +1319,9 @@ static void
 _cut(ProfMessage* message, const char* cut)
 {
     if (strstr(message->plain, cut)) {
-        gchar** split = g_strsplit(message->plain, cut, -1);
+        auto_gcharv gchar** split = g_strsplit(message->plain, cut, -1);
         free(message->plain);
         message->plain = g_strjoinv("", split);
-        g_strfreev(split);
     }
 }
 

@@ -78,7 +78,7 @@ accounts_load(void)
 
     // create the logins searchable list for autocompletion
     gsize naccounts;
-    gchar** account_names = g_key_file_get_groups(accounts, &naccounts);
+    auto_gcharv gchar** account_names = g_key_file_get_groups(accounts, &naccounts);
 
     for (gsize i = 0; i < naccounts; i++) {
         autocomplete_add(all_ac, account_names[i]);
@@ -86,8 +86,6 @@ accounts_load(void)
             autocomplete_add(enabled_ac, account_names[i]);
         }
     }
-
-    g_strfreev(account_names);
 }
 
 void
@@ -127,8 +125,8 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
 {
     // set account name and resource
     const char* barejid = account_name;
-    char* resource = jid_random_resource();
-    Jid* jid = jid_create(account_name);
+    auto_gchar gchar* resource = jid_random_resource();
+    auto_jid Jid* jid = jid_create(account_name);
     if (jid) {
         barejid = jid->barejid;
         if (jid->resourcepart) {
@@ -137,8 +135,6 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
     }
 
     if (g_key_file_has_group(accounts, account_name)) {
-        g_free(resource);
-        jid_destroy(jid);
         return;
     }
 
@@ -158,15 +154,13 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
         g_key_file_set_string(accounts, account_name, "auth.policy", auth_policy);
     }
 
-    Jid* jidp = jid_create(barejid);
+    auto_jid Jid* jidp = jid_create(barejid);
 
     if (jidp->localpart == NULL) {
         g_key_file_set_string(accounts, account_name, "muc.nick", jidp->domainpart);
     } else {
         g_key_file_set_string(accounts, account_name, "muc.nick", jidp->localpart);
     }
-
-    jid_destroy(jidp);
 
     g_key_file_set_string(accounts, account_name, "presence.last", "online");
     g_key_file_set_string(accounts, account_name, "presence.login", "online");
@@ -179,9 +173,6 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
     _save_accounts();
     autocomplete_add(all_ac, account_name);
     autocomplete_add(enabled_ac, account_name);
-
-    jid_destroy(jid);
-    g_free(resource);
 }
 
 int
@@ -252,30 +243,27 @@ accounts_get_account(const char* const name)
 
         gsize length;
         GList* otr_manual = NULL;
-        gchar** manual = g_key_file_get_string_list(accounts, name, "otr.manual", &length, NULL);
+        auto_gcharv gchar** manual = g_key_file_get_string_list(accounts, name, "otr.manual", &length, NULL);
         if (manual) {
             for (int i = 0; i < length; i++) {
                 otr_manual = g_list_append(otr_manual, strdup(manual[i]));
             }
-            g_strfreev(manual);
         }
 
         GList* otr_opportunistic = NULL;
-        gchar** opportunistic = g_key_file_get_string_list(accounts, name, "otr.opportunistic", &length, NULL);
+        auto_gcharv gchar** opportunistic = g_key_file_get_string_list(accounts, name, "otr.opportunistic", &length, NULL);
         if (opportunistic) {
             for (int i = 0; i < length; i++) {
                 otr_opportunistic = g_list_append(otr_opportunistic, strdup(opportunistic[i]));
             }
-            g_strfreev(opportunistic);
         }
 
         GList* otr_always = NULL;
-        gchar** always = g_key_file_get_string_list(accounts, name, "otr.always", &length, NULL);
+        auto_gcharv gchar** always = g_key_file_get_string_list(accounts, name, "otr.always", &length, NULL);
         if (always) {
             for (int i = 0; i < length; i++) {
                 otr_always = g_list_append(otr_always, strdup(always[i]));
             }
-            g_strfreev(always);
         }
 
         gchar* omemo_policy = NULL;
@@ -284,39 +272,35 @@ accounts_get_account(const char* const name)
         }
 
         GList* omemo_enabled = NULL;
-        gchar** omemo_enabled_list = g_key_file_get_string_list(accounts, name, "omemo.enabled", &length, NULL);
+        auto_gcharv gchar** omemo_enabled_list = g_key_file_get_string_list(accounts, name, "omemo.enabled", &length, NULL);
         if (omemo_enabled_list) {
             for (int i = 0; i < length; i++) {
                 omemo_enabled = g_list_append(omemo_enabled, strdup(omemo_enabled_list[i]));
             }
-            g_strfreev(omemo_enabled_list);
         }
 
         GList* omemo_disabled = NULL;
-        gchar** omemo_disabled_list = g_key_file_get_string_list(accounts, name, "omemo.disabled", &length, NULL);
+        auto_gcharv gchar** omemo_disabled_list = g_key_file_get_string_list(accounts, name, "omemo.disabled", &length, NULL);
         if (omemo_disabled_list) {
             for (int i = 0; i < length; i++) {
                 omemo_disabled = g_list_append(omemo_disabled, strdup(omemo_disabled_list[i]));
             }
-            g_strfreev(omemo_disabled_list);
         }
 
         GList* ox_enabled = NULL;
-        gchar** ox_enabled_list = g_key_file_get_string_list(accounts, name, "ox.enabled", &length, NULL);
+        auto_gcharv gchar** ox_enabled_list = g_key_file_get_string_list(accounts, name, "ox.enabled", &length, NULL);
         if (ox_enabled_list) {
             for (int i = 0; i < length; i++) {
                 ox_enabled = g_list_append(ox_enabled, strdup(ox_enabled_list[i]));
             }
-            g_strfreev(ox_enabled_list);
         }
 
         GList* pgp_enabled = NULL;
-        gchar** pgp_enabled_list = g_key_file_get_string_list(accounts, name, "pgp.enabled", &length, NULL);
+        auto_gcharv gchar** pgp_enabled_list = g_key_file_get_string_list(accounts, name, "pgp.enabled", &length, NULL);
         if (pgp_enabled_list) {
             for (int i = 0; i < length; i++) {
                 pgp_enabled = g_list_append(pgp_enabled, strdup(pgp_enabled_list[i]));
             }
-            g_strfreev(pgp_enabled_list);
         }
 
         gchar* pgp_keyid = NULL;
@@ -433,10 +417,9 @@ accounts_rename(const char* const account_name, const char* const new_name)
     };
 
     for (int i = 0; i < ARRAY_SIZE(string_keys); i++) {
-        char* value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
+        auto_gchar gchar* value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
         if (value) {
             g_key_file_set_string(accounts, new_name, string_keys[i], value);
-            g_free(value);
         }
     }
 
@@ -462,7 +445,7 @@ accounts_account_exists(const char* const account_name)
 void
 accounts_set_jid(const char* const account_name, const char* const value)
 {
-    Jid* jid = jid_create(value);
+    auto_jid Jid* jid = jid_create(value);
     if (jid) {
         if (accounts_account_exists(account_name)) {
             g_key_file_set_string(accounts, account_name, "jid", jid->barejid);
@@ -478,8 +461,6 @@ accounts_set_jid(const char* const account_name, const char* const value)
 
             _save_accounts();
         }
-
-        jid_destroy(jid);
     }
 }
 
@@ -868,7 +849,7 @@ accounts_set_last_activity(const char* const account_name)
     }
 }
 
-char*
+gchar*
 accounts_get_last_activity(const char* const account_name)
 {
     if (accounts_account_exists(account_name)) {
@@ -878,7 +859,7 @@ accounts_get_last_activity(const char* const account_name)
     }
 }
 
-char*
+gchar*
 accounts_get_resource(const char* const account_name)
 {
     if (!accounts_account_exists(account_name)) {
@@ -909,7 +890,7 @@ resource_presence_t
 accounts_get_last_presence(const char* const account_name)
 {
     resource_presence_t result;
-    gchar* setting = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
+    auto_gchar gchar* setting = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
 
     if (setting == NULL || (strcmp(setting, "online") == 0)) {
         result = RESOURCE_ONLINE;
@@ -927,7 +908,6 @@ accounts_get_last_presence(const char* const account_name)
         result = RESOURCE_ONLINE;
     }
 
-    g_free(setting);
     return result;
 }
 

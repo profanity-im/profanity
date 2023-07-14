@@ -113,11 +113,10 @@ rosterwin_roster(void)
         GList* curr = privchats;
         while (curr) {
             ProfPrivateWin* privwin = curr->data;
-            Jid* jidp = jid_create(privwin->fulljid);
+            auto_jid Jid* jidp = jid_create(privwin->fulljid);
             if (!muc_active(jidp->barejid)) {
                 orphaned_privchats = g_list_append(orphaned_privchats, privwin);
             }
-            jid_destroy(jidp);
             curr = g_list_next(curr);
         }
 
@@ -163,11 +162,10 @@ rosterwin_roster(void)
         GList* curr = privchats;
         while (curr) {
             ProfPrivateWin* privwin = curr->data;
-            Jid* jidp = jid_create(privwin->fulljid);
+            auto_jid Jid* jidp = jid_create(privwin->fulljid);
             if (!muc_active(jidp->barejid)) {
                 orphaned_privchats = g_list_append(orphaned_privchats, privwin);
             }
-            jid_destroy(jidp);
             curr = g_list_next(curr);
         }
 
@@ -677,13 +675,12 @@ _rosterwin_rooms_by_service(ProfLayoutSplit* layout)
     GList* services = NULL;
     while (curr) {
         char* roomjid = curr->data;
-        Jid* jidp = jid_create(roomjid);
+        auto_jid Jid* jidp = jid_create(roomjid);
 
         if (!g_list_find_custom(services, jidp->domainpart, (GCompareFunc)g_strcmp0)) {
             services = g_list_insert_sorted(services, strdup(jidp->domainpart), (GCompareFunc)g_strcmp0);
         }
 
-        jid_destroy(jidp);
         curr = g_list_next(curr);
     }
 
@@ -695,13 +692,12 @@ _rosterwin_rooms_by_service(ProfLayoutSplit* layout)
         curr = rooms;
         while (curr) {
             char* roomjid = curr->data;
-            Jid* jidp = jid_create(roomjid);
+            auto_jid Jid* jidp = jid_create(roomjid);
 
             if (g_strcmp0(curr_service->data, jidp->domainpart) == 0) {
                 filtered_rooms = g_list_append(filtered_rooms, strdup(jidp->barejid));
             }
 
-            jid_destroy(jidp);
             curr = g_list_next(curr);
         }
 
@@ -754,9 +750,8 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
 
     if (g_strcmp0(roombypref, "service") == 0) {
         if (mucwin->room_name == NULL || (g_strcmp0(use_as_name, "jid") == 0)) {
-            Jid* jidp = jid_create(mucwin->roomjid);
+            auto_jid Jid* jidp = jid_create(mucwin->roomjid);
             g_string_append(msg, jidp->localpart);
-            jid_destroy(jidp);
         } else {
             g_string_append(msg, mucwin->room_name);
         }
@@ -770,15 +765,13 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
                 g_string_append(msg, mucwin->room_name);
             }
         } else {
-            Jid* jidp = jid_create(mucwin->roomjid);
+            auto_jid Jid* jidp = jid_create(mucwin->roomjid);
 
             if (mucwin->room_name == NULL || (g_strcmp0(use_as_name, "jid") == 0)) {
                 g_string_append(msg, jidp->localpart);
             } else {
                 g_string_append(msg, mucwin->room_name);
             }
-
-            jid_destroy(jidp);
         }
     }
 
@@ -830,8 +823,8 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
                 }
             }
 
-            unreadpos = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
-            if ((g_strcmp0(unreadpos, "before") == 0) && privwin->unread > 0) {
+            auto_gchar gchar* unreadpos2 = prefs_get_string(PREF_ROSTER_ROOMS_UNREAD);
+            if ((g_strcmp0(unreadpos2, "before") == 0) && privwin->unread > 0) {
                 g_string_append_printf(privmsg, "(%d) ", privwin->unread);
             }
 
@@ -843,7 +836,7 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
             char* nick = privwin->fulljid + strlen(mucwin->roomjid) + 1;
             g_string_append(privmsg, nick);
 
-            if ((g_strcmp0(unreadpos, "after") == 0) && privwin->unread > 0) {
+            if ((g_strcmp0(unreadpos2, "after") == 0) && privwin->unread > 0) {
                 g_string_append_printf(privmsg, " (%d)", privwin->unread);
             }
 
@@ -937,9 +930,8 @@ _rosterwin_private_chats(ProfLayoutSplit* layout, GList* orphaned_privchats)
                 g_string_append_printf(privmsg, " (%d)", privwin->unread);
             }
 
-            Jid* jidp = jid_create(privwin->fulljid);
+            auto_jid Jid* jidp = jid_create(privwin->fulljid);
             Occupant* occupant = muc_roster_item(jidp->barejid, jidp->resourcepart);
-            jid_destroy(jidp);
 
             const char* presence = "offline";
             if (occupant) {

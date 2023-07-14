@@ -82,50 +82,47 @@ plugins_init(void)
 #endif
 
     // load plugins
-    gchar** plugins_pref = prefs_get_plugins();
-    if (plugins_pref) {
-        for (int i = 0; i < g_strv_length(plugins_pref); i++) {
-            gboolean loaded = FALSE;
-            gchar* filename = plugins_pref[i];
+    auto_gcharv gchar** plugins_pref = prefs_get_plugins();
+    if (!plugins_pref) {
+        return;
+    }
+    for (int i = 0; i < g_strv_length(plugins_pref); i++) {
+        gboolean loaded = FALSE;
+        gchar* filename = plugins_pref[i];
 #ifdef HAVE_PYTHON
-            if (g_str_has_suffix(filename, ".py")) {
-                ProfPlugin* plugin = python_plugin_create(filename);
-                if (plugin) {
-                    g_hash_table_insert(plugins, strdup(filename), plugin);
-                    loaded = TRUE;
-                }
+        if (g_str_has_suffix(filename, ".py")) {
+            ProfPlugin* plugin = python_plugin_create(filename);
+            if (plugin) {
+                g_hash_table_insert(plugins, strdup(filename), plugin);
+                loaded = TRUE;
             }
+        }
 #endif
 #ifdef HAVE_C
-            if (g_str_has_suffix(filename, ".so")) {
-                ProfPlugin* plugin = c_plugin_create(filename);
-                if (plugin) {
-                    g_hash_table_insert(plugins, strdup(filename), plugin);
-                    loaded = TRUE;
-                }
+        if (g_str_has_suffix(filename, ".so")) {
+            ProfPlugin* plugin = c_plugin_create(filename);
+            if (plugin) {
+                g_hash_table_insert(plugins, strdup(filename), plugin);
+                loaded = TRUE;
             }
+        }
 #endif
-            if (loaded) {
-                log_info("Loaded plugin: %s", filename);
-            } else {
-                log_info("Failed to load plugin: %s", filename);
-            }
+        if (loaded) {
+            log_info("Loaded plugin: %s", filename);
+        } else {
+            log_info("Failed to load plugin: %s", filename);
         }
-
-        // initialise plugins
-        GList* values = g_hash_table_get_values(plugins);
-        GList* curr = values;
-        while (curr) {
-            ProfPlugin* plugin = curr->data;
-            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
-            curr = g_list_next(curr);
-        }
-        g_list_free(values);
     }
 
-    prefs_free_plugins(plugins_pref);
-
-    return;
+    // initialise plugins
+    GList* values = g_hash_table_get_values(plugins);
+    GList* curr = values;
+    while (curr) {
+        ProfPlugin* plugin = curr->data;
+        plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
+        curr = g_list_next(curr);
+    }
+    g_list_free(values);
 }
 
 void
@@ -660,7 +657,7 @@ plugins_on_room_history_message(const char* const barejid, const char* const nic
 char*
 plugins_pre_priv_message_display(const char* const fulljid, const char* message)
 {
-    Jid* jidp = jid_create(fulljid);
+    auto_jid Jid* jidp = jid_create(fulljid);
     char* new_message = NULL;
     char* curr_message = strdup(message);
 
@@ -677,15 +674,13 @@ plugins_pre_priv_message_display(const char* const fulljid, const char* message)
         curr = g_list_next(curr);
     }
     g_list_free(values);
-
-    jid_destroy(jidp);
     return curr_message;
 }
 
 void
 plugins_post_priv_message_display(const char* const fulljid, const char* message)
 {
-    Jid* jidp = jid_create(fulljid);
+    auto_jid Jid* jidp = jid_create(fulljid);
 
     GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
@@ -695,14 +690,12 @@ plugins_post_priv_message_display(const char* const fulljid, const char* message
         curr = g_list_next(curr);
     }
     g_list_free(values);
-
-    jid_destroy(jidp);
 }
 
 char*
 plugins_pre_priv_message_send(const char* const fulljid, const char* const message)
 {
-    Jid* jidp = jid_create(fulljid);
+    auto_jid Jid* jidp = jid_create(fulljid);
     char* new_message = NULL;
     char* curr_message = strdup(message);
 
@@ -719,7 +712,6 @@ plugins_pre_priv_message_send(const char* const fulljid, const char* const messa
             } else {
                 free(curr_message);
                 g_list_free(values);
-                jid_destroy(jidp);
 
                 return NULL;
             }
@@ -728,14 +720,13 @@ plugins_pre_priv_message_send(const char* const fulljid, const char* const messa
     }
     g_list_free(values);
 
-    jid_destroy(jidp);
     return curr_message;
 }
 
 void
 plugins_post_priv_message_send(const char* const fulljid, const char* const message)
 {
-    Jid* jidp = jid_create(fulljid);
+    auto_jid Jid* jidp = jid_create(fulljid);
 
     GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
@@ -744,9 +735,8 @@ plugins_post_priv_message_send(const char* const fulljid, const char* const mess
         plugin->post_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 
-    jid_destroy(jidp);
+    g_list_free(values);
 }
 
 char*

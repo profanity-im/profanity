@@ -71,12 +71,11 @@ tlscerts_init(void)
 
     certs_ac = autocomplete_new();
     gsize len = 0;
-    gchar** groups = g_key_file_get_groups(tlscerts, &len);
+    auto_gcharv gchar** groups = g_key_file_get_groups(tlscerts, &len);
 
     for (int i = 0; i < g_strv_length(groups); i++) {
         autocomplete_add(certs_ac, groups[i]);
     }
-    g_strfreev(groups);
 
     current_fp = NULL;
 }
@@ -116,7 +115,7 @@ tlscerts_list(void)
 {
     GList* res = NULL;
     gsize len = 0;
-    gchar** groups = g_key_file_get_groups(tlscerts, &len);
+    auto_gcharv gchar** groups = g_key_file_get_groups(tlscerts, &len);
 
     for (int i = 0; i < g_strv_length(groups); i++) {
         char* fingerprint = strdup(groups[i]);
@@ -133,10 +132,6 @@ tlscerts_list(void)
                                             notafter, keyalg, signaturealg, NULL);
 
         res = g_list_append(res, cert);
-    }
-
-    if (groups) {
-        g_strfreev(groups);
     }
 
     return res;
@@ -178,9 +173,9 @@ tlscerts_new(const char* const fingerprint, int version, const char* const seria
         cert->pem = strdup(pem);
     }
 
-    gchar** fields = g_strsplit(subjectname, "/", 0);
+    auto_gcharv gchar** fields = g_strsplit(subjectname, "/", 0);
     for (int i = 0; i < g_strv_length(fields); i++) {
-        gchar** keyval = g_strsplit(fields[i], "=", 2);
+        auto_gcharv gchar** keyval = g_strsplit(fields[i], "=", 2);
         if (g_strv_length(keyval) == 2) {
             if ((g_strcmp0(keyval[0], "C") == 0) || (g_strcmp0(keyval[0], "countryName") == 0)) {
                 cert->subject_country = strdup(keyval[1]);
@@ -207,13 +202,11 @@ tlscerts_new(const char* const fingerprint, int version, const char* const seria
                 cert->subject_email = strdup(keyval[1]);
             }
         }
-        g_strfreev(keyval);
     }
-    g_strfreev(fields);
 
-    fields = g_strsplit(issuername, "/", 0);
-    for (int i = 0; i < g_strv_length(fields); i++) {
-        gchar** keyval = g_strsplit(fields[i], "=", 2);
+    auto_gcharv gchar** fields2 = g_strsplit(issuername, "/", 0);
+    for (int i = 0; i < g_strv_length(fields2); i++) {
+        auto_gcharv gchar** keyval = g_strsplit(fields2[i], "=", 2);
         if (g_strv_length(keyval) == 2) {
             if ((g_strcmp0(keyval[0], "C") == 0) || (g_strcmp0(keyval[0], "countryName") == 0)) {
                 cert->issuer_country = strdup(keyval[1]);
@@ -240,9 +233,7 @@ tlscerts_new(const char* const fingerprint, int version, const char* const seria
                 cert->issuer_email = strdup(keyval[1]);
             }
         }
-        g_strfreev(keyval);
     }
-    g_strfreev(fields);
 
     return cert;
 }
@@ -387,8 +378,7 @@ static void
 _save_tlscerts(void)
 {
     gsize g_data_size;
-    gchar* g_tlscerts_data = g_key_file_to_data(tlscerts, &g_data_size, NULL);
+    auto_gchar gchar* g_tlscerts_data = g_key_file_to_data(tlscerts, &g_data_size, NULL);
     g_file_set_contents(tlscerts_loc, g_tlscerts_data, g_data_size, NULL);
     g_chmod(tlscerts_loc, S_IRUSR | S_IWUSR);
-    g_free(g_tlscerts_data);
 }

@@ -757,10 +757,9 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
                 xmpp_stanza_t* binval = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_name(binval, "BINVAL");
 
-                gchar* base64 = g_base64_encode(element->photo.data, element->photo.length);
+                auto_gchar gchar* base64 = g_base64_encode(element->photo.data, element->photo.length);
                 xmpp_stanza_t* binval_text = xmpp_stanza_new(ctx);
                 xmpp_stanza_set_text(binval_text, base64);
-                g_free(base64);
                 xmpp_stanza_add_child(binval, binval_text);
                 xmpp_stanza_release(binval_text);
 
@@ -789,10 +788,9 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
             xmpp_stanza_t* birthday = xmpp_stanza_new(ctx);
             xmpp_stanza_set_name(birthday, "BDAY");
 
-            gchar* bday_text = g_date_time_format(element->birthday, "%Y-%m-%d");
+            auto_gchar gchar* bday_text = g_date_time_format(element->birthday, "%Y-%m-%d");
             xmpp_stanza_t* birthday_text = xmpp_stanza_new(ctx);
             xmpp_stanza_set_text(birthday_text, bday_text);
-            g_free(bday_text);
             xmpp_stanza_add_child(birthday, birthday_text);
             xmpp_stanza_release(birthday_text);
 
@@ -1322,12 +1320,10 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
                 g_string_free(filename, TRUE);
             }
         }
-        gchar* from1 = str_replace(from, "@", "_at_");
-        gchar* from2 = str_replace(from1, "/", "_slash_");
-        g_free(from1);
+        auto_char char* from1 = str_replace(from, "@", "_at_");
+        auto_char char* from2 = str_replace(from1, "/", "_slash_");
 
         g_string_append(filename, from2);
-        g_free(from2);
     } else {
         filename = g_string_new(data->filename);
     }
@@ -1354,25 +1350,22 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
     }
 
     if (data->open) {
-        gchar** argv;
+        auto_gcharv gchar** argv;
         gint argc;
 
-        gchar* cmdtemplate = prefs_get_string(PREF_VCARD_PHOTO_CMD);
+        auto_gchar gchar* cmdtemplate = prefs_get_string(PREF_VCARD_PHOTO_CMD);
 
         // this makes it work with filenames that contain spaces
         g_string_prepend(filename, "\"");
         g_string_append(filename, "\"");
-        gchar* cmd = str_replace(cmdtemplate, "%p", filename->str);
-        g_free(cmdtemplate);
+        auto_char char* cmd = str_replace(cmdtemplate, "%p", filename->str);
 
         if (g_shell_parse_argv(cmd, &argc, &argv, &err) == FALSE) {
             cons_show_error("Failed to parse command template");
-            g_free(cmd);
         } else {
             if (!call_external(argv)) {
                 cons_show_error("Unable to execute command");
             }
-            g_strfreev(argv);
         }
     }
 

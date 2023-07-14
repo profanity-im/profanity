@@ -75,7 +75,7 @@ theme_item_t
 plugin_themes_get(const char* const group, const char* const key, const char* const def)
 {
     if (group && key && g_key_file_has_key(themes, group, key, NULL)) {
-        gchar* result = g_key_file_get_string(themes, group, key, NULL);
+        auto_gchar gchar* result = g_key_file_get_string(themes, group, key, NULL);
 
         theme_item_t ret;
 
@@ -147,8 +147,6 @@ plugin_themes_get(const char* const group, const char* const key, const char* co
 
         else
             ret = THEME_TEXT;
-
-        g_free(result);
 
         return ret;
 

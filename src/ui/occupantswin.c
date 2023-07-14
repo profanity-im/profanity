@@ -85,9 +85,8 @@ _occuptantswin_occupant(ProfLayoutSplit* layout, GList* item, gboolean showjid, 
     gboolean wrap = prefs_get_boolean(PREF_OCCUPANTS_WRAP);
 
     if (isoffline) {
-        Jid* jid = jid_create(item->data);
+        auto_jid Jid* jid = jid_create(item->data);
         g_string_append(msg, jid->barejid);
-        jid_destroy(jid);
     } else {
         g_string_append(msg, occupant->nick);
     }
@@ -208,7 +207,7 @@ occupantswin_occupants(const char* const roomjid)
                     g_string_free(role, TRUE);
                     roster_curr = members;
                     while (roster_curr) {
-                        Jid* jid = jid_create(roster_curr->data);
+                        auto_jid Jid* jid = jid_create(roster_curr->data);
                         gboolean found = false;
                         GList* iter = online_occupants;
                         for (; iter != NULL; iter = iter->next) {
@@ -223,7 +222,6 @@ occupantswin_occupants(const char* const roomjid)
                             offline_occupants = g_list_append(offline_occupants, jid->barejid);
                         }
 
-                        jid_destroy(jid);
                         roster_curr = g_list_next(roster_curr);
                     }
                     g_list_free(members);

@@ -1141,9 +1141,8 @@ cons_show_account(ProfAccount* account)
                 win_append(console, presence_colour, ", \"%s\"", resource->status);
             }
             win_appendln(console, THEME_DEFAULT, "");
-            Jid* jidp = jid_create_from_bare_and_resource(account->jid, resource->name);
+            auto_jid Jid* jidp = jid_create_from_bare_and_resource(account->jid, resource->name);
             EntityCapabilities* caps = caps_lookup(jidp->fulljid);
-            jid_destroy(jidp);
 
             if (caps) {
                 // show identity
@@ -2198,30 +2197,25 @@ cons_correction_setting(void)
 void
 cons_executable_setting(void)
 {
-    gchar* avatar = prefs_get_string(PREF_AVATAR_CMD);
+    auto_gchar gchar* avatar = prefs_get_string(PREF_AVATAR_CMD);
     cons_show("Default '/avatar open' command (/executable avatar)                      : %s", avatar);
-    g_free(avatar);
 
     // TODO: there needs to be a way to get all the "locales"/schemes so we can
     // display the default openers for all filetypes
-    gchar* urlopen = prefs_get_string(PREF_URL_OPEN_CMD);
+    auto_gchar gchar* urlopen = prefs_get_string(PREF_URL_OPEN_CMD);
     cons_show("Default '/url open' command (/executable urlopen)                        : %s", urlopen);
-    g_free(urlopen);
 
-    gchar* urlsave = prefs_get_string(PREF_URL_SAVE_CMD);
+    auto_gchar gchar* urlsave = prefs_get_string(PREF_URL_SAVE_CMD);
     if (urlsave == NULL) {
         urlsave = g_strdup("(built-in)");
     }
     cons_show("Default '/url save' command (/executable urlsave)                        : %s", urlsave);
-    g_free(urlsave);
 
-    gchar* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
+    auto_gchar gchar* editor = prefs_get_string(PREF_COMPOSE_EDITOR);
     cons_show("Default '/editor' command (/executable editor)                           : %s", editor);
-    g_free(editor);
 
-    gchar* vcard_cmd = prefs_get_string(PREF_VCARD_PHOTO_CMD);
+    auto_gchar gchar* vcard_cmd = prefs_get_string(PREF_VCARD_PHOTO_CMD);
     cons_show("Default '/vcard photo open' command (/executable vcard_photo)            : %s", vcard_cmd);
-    g_free(vcard_cmd);
 }
 
 void

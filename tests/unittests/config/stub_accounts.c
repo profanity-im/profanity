@@ -325,7 +325,7 @@ void
 accounts_add_otr_policy(const char* const account_name, const char* const contact_jid, const char* const policy)
 {
 }
-char*
+gchar*
 accounts_get_last_activity(const char* const account_name)
 {
     return NULL;

@@ -64,6 +64,6 @@ char* create_fulljid(const char* const barejid, const char* const resource);
 char* get_nick_from_full_jid(const char* const full_room_jid);
 
 char* jid_fulljid_or_barejid(Jid* jid);
-char* jid_random_resource(void);
+gchar* jid_random_resource(void);
 
 #endif

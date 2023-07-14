@@ -253,7 +253,6 @@ gint prefs_get_autoxa_time(void);
 void prefs_set_autoxa_time(gint value);
 
 gchar** prefs_get_plugins(void);
-void prefs_free_plugins(gchar** plugins);
 void prefs_add_plugin(const char* const name);
 void prefs_remove_plugin(const char* const name);
 
@@ -336,8 +335,8 @@ void prefs_save_win_placement(ProfWinPlacement* placement);
 gboolean prefs_get_boolean(preference_t pref);
 void prefs_set_boolean(preference_t pref, gboolean value);
 gchar* prefs_get_string(preference_t pref);
-gchar* prefs_get_string_with_option(preference_t pref, gchar* option);
-void prefs_set_string(preference_t pref, char* value);
+gchar* prefs_get_string_with_locale(preference_t pref, gchar* locale);
+void prefs_set_string(preference_t pref, gchar* new_value);
 void prefs_set_string_with_option(preference_t pref, char* option, char* value);
 void prefs_set_string_list_with_option(preference_t pref, char* option, const gchar* const* values);
 

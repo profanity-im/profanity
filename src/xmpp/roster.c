@@ -268,7 +268,7 @@ roster_result_handler(xmpp_stanza_t* const stanza)
 
     while (item) {
         const char* barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
-        gchar* barejid_lower = g_utf8_strdown(barejid, -1);
+        auto_gchar gchar* barejid_lower = g_utf8_strdown(barejid, -1);
         const char* name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
         const char* sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
 
@@ -289,7 +289,6 @@ roster_result_handler(xmpp_stanza_t* const stanza)
             log_warning("Attempt to add contact twice: %s", barejid_lower);
         }
 
-        g_free(barejid_lower);
         item = xmpp_stanza_get_next(item);
     }
 

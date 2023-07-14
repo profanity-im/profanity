@@ -79,9 +79,8 @@ _get_icons(void)
 
 #endif /* ICONS_PATH */
 
-    gchar* icons_dir_s = files_get_config_path(DIR_ICONS);
+    auto_gchar gchar* icons_dir_s = files_get_config_path(DIR_ICONS);
     icons_dir = g_string_new(icons_dir_s);
-    g_free(icons_dir_s);
     GError* err = NULL;
 
     if (!g_file_test(icons_dir->str, G_FILE_TEST_IS_DIR)) {
