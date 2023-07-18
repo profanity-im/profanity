@@ -2738,29 +2738,31 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
                 auto_char char* firstid = NULL;
                 xmpp_stanza_t* first = xmpp_stanza_get_child_by_name(set, STANZA_NAME_FIRST);
-                firstid = xmpp_stanza_get_text(first);
+                if (first) {
+                    firstid = xmpp_stanza_get_text(first);
 
-                // 4.3.2. send same stanza with set,max stanza
-                xmpp_ctx_t* const ctx = connection_get_ctx();
+                    // 4.3.2. send same stanza with set,max stanza
+                    xmpp_ctx_t* const ctx = connection_get_ctx();
 
-                if (data->end_datestr) {
-                    free(data->end_datestr);
-                    data->end_datestr = NULL;
+                    if (data->end_datestr) {
+                        free(data->end_datestr);
+                        data->end_datestr = NULL;
+                    }
+                    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
+
+                    MamRsmUserdata* ndata = malloc(sizeof(*ndata));
+                    *ndata = *data;
+                    if (data->end_datestr)
+                        ndata->end_datestr = strdup(data->end_datestr);
+                    if (data->start_datestr)
+                        ndata->start_datestr = strdup(data->start_datestr);
+                    if (data->barejid)
+                        ndata->barejid = strdup(data->barejid);
+                    iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, ndata);
+
+                    iq_send_stanza(iq);
+                    xmpp_stanza_release(iq);
                 }
-                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
-
-                MamRsmUserdata* ndata = malloc(sizeof(*ndata));
-                *ndata = *data;
-                if (data->end_datestr)
-                    ndata->end_datestr = strdup(data->end_datestr);
-                if (data->start_datestr)
-                    ndata->start_datestr = strdup(data->start_datestr);
-                if (data->barejid)
-                    ndata->barejid = strdup(data->barejid);
-                iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, ndata);
-
-                iq_send_stanza(iq);
-                xmpp_stanza_release(iq);
             }
         }
     }

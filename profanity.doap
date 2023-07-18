@@ -135,6 +135,16 @@
       </xmpp:SupportedXep>
     </implements>
 
+    <!-- XEP-0059: Result Set Management --> 
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0059.html'/>
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:version>1.0</xmpp:version>
+        <xmpp:since>DEV</xmpp:since>
+      </xmpp:SupportedXep>
+    </implements>
+
     <!-- XEP-0060: Publish-Subscribe --> 
     <implements>
       <xmpp:SupportedXep>
