@@ -237,23 +237,19 @@ parse_args_with_freetext(const char* const inp, int min, int max, gboolean* resu
 gchar**
 parse_args_as_one(const char* const inp, int min, int max, gboolean* result)
 {
-    gchar** args = g_malloc0(2 * sizeof(*args));
+    gchar** args = NULL;
     int length = g_utf8_strlen(inp, -1);
     gchar* space = g_utf8_strchr(inp, length, ' ');
-    if (space) {
-        int sub_length = g_utf8_strlen(space, -1);
-        if (sub_length > 1) {
-            args[0] = g_strdup(space + 1);
-            *result = TRUE;
-            return args;
-        } else {
-            g_free(args);
-        }
-    } else {
-        g_free(args);
+
+    if (space && space - inp + 1 < length) {
+        args = g_new0(gchar*, 2);
+        args[0] = g_strdup(space + 1);
+        *result = TRUE;
+        return args;
     }
 
     *result = FALSE;
+    g_free(args);
     return NULL;
 }
 

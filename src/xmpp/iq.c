@@ -35,6 +35,11 @@
 
 #include "config.h"
 
+#ifdef HAVE_GIT_VERSION
+#include "gitversion.h"
+#endif
+
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -294,7 +299,7 @@ void
 iq_id_handler_add(const char* const id, ProfIqCallback func, ProfIqFreeCallback free_func, void* userdata)
 {
     ProfIqHandler* handler = malloc(sizeof(ProfIqHandler));
-
+    assert(handler != NULL);
     handler->func = func;
     handler->free_func = free_func;
     handler->userdata = userdata;
@@ -1259,6 +1264,7 @@ _command_exec_response_handler(xmpp_stanza_t* const stanza, void* const userdata
 
         DataForm* form = form_create(x);
         CommandConfigData* data = malloc(sizeof(CommandConfigData));
+        assert(data != NULL);
         if (sessionid == NULL) {
             data->sessionid = NULL;
         } else {
