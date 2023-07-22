@@ -34,6 +34,7 @@
  */
 
 #include "config.h"
+#include "config/preferences.h"
 
 #ifdef HAVE_GIT_VERSION
 #include "gitversion.h"
@@ -561,6 +562,15 @@ stanza_create_room_join_presence(xmpp_ctx_t* const ctx,
         xmpp_stanza_add_child(x, pass);
         xmpp_stanza_release(text);
         xmpp_stanza_release(pass);
+    }
+
+    // Disable muc history
+    if (prefs_get_boolean(PREF_MAM)) {
+        xmpp_stanza_t* history = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(history, STANZA_NAME_HISTORY);
+        xmpp_stanza_set_attribute(history, "maxchars", "0");
+        xmpp_stanza_add_child(x, history);
+        xmpp_stanza_release(history);
     }
 
     xmpp_stanza_add_child(presence, x);

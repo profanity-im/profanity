@@ -56,6 +56,7 @@
 #define STANZA_NAME_PRESENCE  "presence"
 #define STANZA_NAME_PRIORITY  "priority"
 #define STANZA_NAME_X         "x"
+#define STANZA_NAME_HISTORY   "history"
 // XEP-0373: OpenPGP for XMPP
 #define STANZA_NAME_OPENPGP          "openpgp"
 #define STANZA_NAME_PUPKEY           "pubkey"
