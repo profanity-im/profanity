@@ -47,6 +47,7 @@
 #include "config/theme.h"
 #include "plugins/plugins.h"
 #include "ui/ui.h"
+#include "ui/window.h"
 #include "ui/window_list.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
@@ -885,6 +886,12 @@ wins_lost_connection(void)
         ProfWin* window = curr->data;
         if (window->type != WIN_CONSOLE) {
             win_println(window, THEME_ERROR, "-", "Lost connection.");
+            ProfBuffEntry* first_message = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0) : NULL;
+            gboolean is_fetching_mam = first_message && (first_message->theme_item == THEME_ROOMINFO && g_strcmp0(first_message->message, LOADING_MESSAGE) == 0);
+
+            if (is_fetching_mam) {
+                buffer_remove_entry(window->layout->buffer, 0);
+            }
 
             // if current win, set current_win_dirty
             if (wins_is_current(window)) {
