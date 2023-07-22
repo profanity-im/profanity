@@ -73,6 +73,8 @@ mucwin_new(const char* const barejid)
     if (prefs_get_boolean(PREF_MAM)) {
         iq_mam_request(window, NULL);
         win_print_loading_history(window);
+    } else if ((prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY))) {
+        mucwin_db_history(mucwin, NULL, NULL, TRUE);
     }
 
     // Force redraw here to show correct offline users; before this point muc_members returns a wrong list
