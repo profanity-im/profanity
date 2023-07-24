@@ -2722,7 +2722,7 @@ static const struct cmd_t command_defs[] = {
     },
 
     { CMD_PREAMBLE("/privacy",
-                   parse_args, 2, 3, NULL)
+                   parse_args, 2, 3, &cons_privacy_setting)
       CMD_MAINFUNC(cmd_privacy)
       CMD_TAGS(
               CMD_TAG_CHAT)

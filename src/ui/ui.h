@@ -342,6 +342,7 @@ void cons_mam_setting(void);
 void cons_silence_setting(void);
 void cons_mood_setting(void);
 void cons_strophe_setting(void);
+void cons_privacy_setting(void);
 void cons_show_contact_online(PContact contact, Resource* resource, GDateTime* last_activity);
 void cons_show_contact_offline(PContact contact, char* resource, char* status);
 void cons_theme_properties(void);

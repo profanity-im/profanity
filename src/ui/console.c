@@ -2940,3 +2940,20 @@ cons_strophe_setting(void)
     cons_show("XEP-0198 Stream-Management                : %s", sm_setting);
     cons_show("libstrophe Verbosity                      : %s", prefs_get_string(PREF_STROPHE_VERBOSITY));
 }
+
+void
+cons_privacy_setting(void)
+{
+    cons_show("Database logging                          : %s", prefs_get_string(PREF_DBLOG));
+
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        cons_show("Chat logging (/logging chat)              : ON");
+    } else {
+        cons_show("Chat logging (/logging chat)              : OFF");
+    }
+    if (prefs_get_boolean(PREF_HISTORY)) {
+        cons_show("Chat history (/history)                   : ON");
+    } else {
+        cons_show("Chat history (/history)                   : OFF");
+    }
+}

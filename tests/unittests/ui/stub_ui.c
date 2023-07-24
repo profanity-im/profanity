@@ -1161,6 +1161,11 @@ cons_strophe_setting(void)
 }
 
 void
+cons_privacy_setting(void)
+{
+}
+
+void
 cons_show_bookmarks_ignore(gchar** list, gsize len)
 {
 }
