@@ -2934,22 +2934,38 @@ cons_strophe_setting(void)
 void
 cons_privacy_setting(void)
 {
-    cons_show("Database logging                          : %s", prefs_get_string(PREF_DBLOG));
+    cons_show("Database logging                               : %s", prefs_get_string(PREF_DBLOG));
 
     if (prefs_get_boolean(PREF_CHLOG)) {
-        cons_show("Chat logging (/logging chat)              : ON");
+        cons_show("Chat logging (/logging chat)                   : ON");
     } else {
-        cons_show("Chat logging (/logging chat)              : OFF");
+        cons_show("Chat logging (/logging chat)                   : OFF");
     }
     if (prefs_get_boolean(PREF_HISTORY)) {
-        cons_show("Chat history (/history)                   : ON");
+        cons_show("Chat history (/history)                        : ON");
     } else {
-        cons_show("Chat history (/history)                   : OFF");
+        cons_show("Chat history (/history)                        : OFF");
     }
 
     if (prefs_get_boolean(PREF_REVEAL_OS)) {
         cons_show("Reveal OS name when asked for software version (XEP-0092) (/privacy os)    : ON");
     } else {
         cons_show("Reveal OS name when asked for software version (XEP-0092) (/privacy os)    : OFF");
+    }
+
+    if (connection_get_status() == JABBER_CONNECTED) {
+        char* account_name = session_get_account_name();
+        ProfAccount* account = accounts_get_account(account_name);
+
+        if (account->client) {
+            cons_show("Client name (/account set <account> clientid)  : %s", account->client);
+        } else {
+            cons_show("Client name (/account set <account> clientid)  : (default)");
+        }
+        if (account->max_sessions > 0) {
+            cons_show("Max sessions alarm (/account set <account> session_alarm)  : %s", account->max_sessions);
+        } else {
+            cons_show("Max sessions alarm (/account set <account> session_alarm)  : not set");
+        }
     }
 }

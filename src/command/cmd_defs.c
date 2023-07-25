@@ -2720,7 +2720,10 @@ static const struct cmd_t command_defs[] = {
               "/privacy logging on|redact|off",
               "/privacy os on|off")
       CMD_DESC(
-              "Configure privacy settings.")
+              "Configure privacy settings."
+              "Also check the the following settings in /account: "
+              "clientid to set the client identification name"
+              "session_alarm to configure an alarm when more clients log in.")
       CMD_ARGS(
               { "logging on|redact|off", "Switch chat logging. This will also disable logging in the internally used SQL database. Your messages will not be saved anywhere locally. This might have unintended consequences, such as not being able to decrypt OMEMO encrypted messages received later via MAM, and should be used with caution." },
               { "os on|off", "Choose whether to include the OS name if a user asks for software information (XEP-0092)." }
