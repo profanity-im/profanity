@@ -66,10 +66,6 @@
 #include "xmpp/muc.h"
 #include "xmpp/roster_list.h"
 
-#ifdef HAVE_GIT_VERSION
-#include "gitversion.h"
-#endif
-
 static void _cons_splash_logo(void);
 static void _show_roster_contacts(GSList* list, gboolean show_groups);
 static GList* alert_list;
@@ -413,16 +409,8 @@ cons_about(void)
     if (prefs_get_boolean(PREF_SPLASH)) {
         _cons_splash_logo();
     } else {
-
-        if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-            win_println(console, THEME_DEFAULT, "-", "Welcome to Profanity, version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
-#else
-            win_println(console, THEME_DEFAULT, "Welcome to Profanity, version %sdev", PACKAGE_VERSION);
-#endif
-        } else {
-            win_println(console, THEME_DEFAULT, "-", "Welcome to Profanity, version %s", PACKAGE_VERSION);
-        }
+        auto_gchar gchar* prof_version = prof_get_version();
+        win_println(console, THEME_DEFAULT, "-", "Welcome to Profanity, version %s", prof_version);
     }
 
     win_println(console, THEME_DEFAULT, "-", "Copyright (C) 2012 - 2019 James Booth <boothj5web@gmail.com>.");
@@ -2778,15 +2766,8 @@ _cons_splash_logo(void)
     win_println(console, THEME_SPLASH, "-", "|_|                                   (____/ ");
     win_println(console, THEME_SPLASH, "-", "");
 
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-        win_println(console, THEME_DEFAULT, "-", "Version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
-#else
-        win_println(console, THEME_DEFAULT, "Version %sdev", PACKAGE_VERSION);
-#endif
-    } else {
-        win_println(console, THEME_DEFAULT, "-", "Version %s", PACKAGE_VERSION);
-    }
+    auto_gchar gchar* prof_version = prof_get_version();
+    win_println(console, THEME_DEFAULT, "-", "Version %s", prof_version);
 }
 
 static void

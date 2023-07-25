@@ -35,10 +35,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_GIT_VERSION
-#include "gitversion.h"
-#endif
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -963,17 +959,8 @@ stanza_create_caps_query_element(xmpp_ctx_t* ctx)
     GString* name_str = g_string_new(is_custom_client ? client : "Profanity ");
     if (!is_custom_client) {
         xmpp_stanza_set_type(identity, "console");
-        g_string_append(name_str, PACKAGE_VERSION);
-        if (g_strcmp0(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-            g_string_append(name_str, "dev.");
-            g_string_append(name_str, PROF_GIT_BRANCH);
-            g_string_append(name_str, ".");
-            g_string_append(name_str, PROF_GIT_REVISION);
-#else
-            g_string_append(name_str, "dev");
-#endif
-        }
+        auto_gchar gchar* prof_version = prof_get_version();
+        g_string_append(name_str, prof_version);
     }
 
     account_free(account);
