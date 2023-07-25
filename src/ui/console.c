@@ -2172,16 +2172,6 @@ cons_color_setting(void)
 }
 
 void
-cons_os_setting(void)
-{
-    if (prefs_get_boolean(PREF_REVEAL_OS)) {
-        cons_show("Reveal OS name when asked for software version (XEP-0092) (/os)    : ON");
-    } else {
-        cons_show("Reveal OS name when asked for software version (XEP-0092) (/os)    : OFF");
-    }
-}
-
-void
 cons_correction_setting(void)
 {
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW)) {
@@ -2955,5 +2945,11 @@ cons_privacy_setting(void)
         cons_show("Chat history (/history)                   : ON");
     } else {
         cons_show("Chat history (/history)                   : OFF");
+    }
+
+    if (prefs_get_boolean(PREF_REVEAL_OS)) {
+        cons_show("Reveal OS name when asked for software version (XEP-0092) (/privacy os)    : ON");
+    } else {
+        cons_show("Reveal OS name when asked for software version (XEP-0092) (/privacy os)    : OFF");
     }
 }

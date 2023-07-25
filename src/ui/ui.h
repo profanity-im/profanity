@@ -334,7 +334,6 @@ void cons_inpblock_setting(void);
 void cons_statusbar_setting(void);
 void cons_winpos_setting(void);
 void cons_color_setting(void);
-void cons_os_setting(void);
 void cons_correction_setting(void);
 void cons_executable_setting(void);
 void cons_slashguard_setting(void);

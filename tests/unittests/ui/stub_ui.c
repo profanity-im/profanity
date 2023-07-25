@@ -1125,10 +1125,6 @@ cons_tray_setting(void)
 {
 }
 void
-cons_os_setting(void)
-{
-}
-void
 cons_correction_setting(void)
 {
 }

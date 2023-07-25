@@ -1075,6 +1075,7 @@ cmd_ac_init(void)
 
     privacy_ac = autocomplete_new();
     autocomplete_add(privacy_ac, "logging");
+    autocomplete_add(privacy_ac, "os");
 
     privacy_log_ac = autocomplete_new();
     autocomplete_add(privacy_log_ac, "on");
@@ -2031,7 +2032,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     // autocomplete boolean settings
     gchar* boolean_choices[] = { "/beep", "/states", "/outtype", "/flash", "/splash",
                                  "/history", "/vercheck", "/privileges", "/wrap",
-                                 "/carbons", "/os", "/slashguard", "/mam", "/silence" };
+                                 "/carbons", "/slashguard", "/mam", "/silence" };
 
     for (int i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice, previous, NULL);
@@ -4235,6 +4236,11 @@ _privacy_autocomplete(ProfWin* window, const char* const input, gboolean previou
     }
 
     found = autocomplete_param_with_ac(input, "/privacy logging", privacy_log_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_func(input, "/privacy os", prefs_autocomplete_boolean_choice, previous, NULL);
     if (found) {
         return found;
     }
