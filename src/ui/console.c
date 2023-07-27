@@ -73,14 +73,10 @@ static GList* alert_list;
 void
 cons_debug(const char* const msg, ...)
 {
-    ProfWin* console = wins_get_console();
     if (strcmp(PACKAGE_STATUS, "development") == 0) {
         va_list arg;
         va_start(arg, msg);
-        GString* fmt_msg = g_string_new(NULL);
-        g_string_vprintf(fmt_msg, msg, arg);
-        win_println(console, THEME_DEFAULT, "-", "%s", fmt_msg->str);
-        g_string_free(fmt_msg, TRUE);
+        win_println_va(wins_get_console(), THEME_DEFAULT, "-", msg, arg);
         va_end(arg);
     }
 }
@@ -88,25 +84,20 @@ cons_debug(const char* const msg, ...)
 void
 cons_show(const char* const msg, ...)
 {
-    ProfWin* console = wins_get_console();
     va_list arg;
     va_start(arg, msg);
-    GString* fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, msg, arg);
-    win_println(console, THEME_DEFAULT, "-", "%s", fmt_msg->str);
-    g_string_free(fmt_msg, TRUE);
+    win_println_va(wins_get_console(), THEME_DEFAULT, "-", msg, arg);
     va_end(arg);
 }
 
 void
 cons_show_padded(int pad, const char* const msg, ...)
 {
-    ProfWin* console = wins_get_console();
     va_list arg;
     va_start(arg, msg);
     GString* fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_println_indent(console, pad, "%s", fmt_msg->str);
+    win_println_indent(wins_get_console(), pad, "%s", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
