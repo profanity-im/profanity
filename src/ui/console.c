@@ -2947,7 +2947,7 @@ cons_privacy_setting(void)
             cons_show("Client name (/account set <account> clientid)              : Profanity %s", prof_version);
         }
         if (account->max_sessions > 0) {
-            cons_show("Max sessions alarm (/account set <account> session_alarm)  : %s", account->max_sessions);
+            cons_show("Max sessions alarm (/account set <account> session_alarm)  : %d", account->max_sessions);
         } else {
             cons_show("Max sessions alarm (/account set <account> session_alarm)  : not set");
         }
