@@ -9352,7 +9352,7 @@ cmd_avatar(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_os(ProfWin* window, const char* const command, gchar** args)
 {
-    _cmd_set_boolean_preference(args[0], "Revealing OS name", PREF_REVEAL_OS);
+    _cmd_set_boolean_preference(args[1], "Revealing OS name", PREF_REVEAL_OS);
 
     return TRUE;
 }

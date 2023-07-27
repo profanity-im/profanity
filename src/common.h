@@ -180,4 +180,6 @@ gchar* get_expanded_path(const char* path);
 void glib_hash_table_free(GHashTable* hash_table);
 char* basename_from_url(const char* url);
 
+gchar* prof_get_version(void);
+
 #endif

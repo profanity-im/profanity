@@ -35,10 +35,6 @@
  */
 #include "config.h"
 
-#ifdef HAVE_GIT_VERSION
-#include "gitversion.h"
-#endif
-
 #ifdef HAVE_GTK
 #include "ui/tray.h"
 #endif
@@ -180,15 +176,8 @@ _init(char* log_level, char* config_file, char* log_file, char* theme_name)
     log_init(prof_log_level, log_file);
     log_stderr_init(PROF_LEVEL_ERROR);
 
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-        log_info("Starting Profanity (%sdev.%s.%s)…", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
-#else
-        log_info("Starting Profanity (%sdev)…", PACKAGE_VERSION);
-#endif
-    } else {
-        log_info("Starting Profanity (%s)…", PACKAGE_VERSION);
-    }
+    auto_gchar gchar* prof_version = prof_get_version();
+    log_info("Starting Profanity (%s)…", prof_version);
 
     chat_log_init();
     groupchat_log_init();

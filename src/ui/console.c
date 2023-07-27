@@ -66,10 +66,6 @@
 #include "xmpp/muc.h"
 #include "xmpp/roster_list.h"
 
-#ifdef HAVE_GIT_VERSION
-#include "gitversion.h"
-#endif
-
 static void _cons_splash_logo(void);
 static void _show_roster_contacts(GSList* list, gboolean show_groups);
 static GList* alert_list;
@@ -413,16 +409,8 @@ cons_about(void)
     if (prefs_get_boolean(PREF_SPLASH)) {
         _cons_splash_logo();
     } else {
-
-        if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-            win_println(console, THEME_DEFAULT, "-", "Welcome to Profanity, version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
-#else
-            win_println(console, THEME_DEFAULT, "Welcome to Profanity, version %sdev", PACKAGE_VERSION);
-#endif
-        } else {
-            win_println(console, THEME_DEFAULT, "-", "Welcome to Profanity, version %s", PACKAGE_VERSION);
-        }
+        auto_gchar gchar* prof_version = prof_get_version();
+        win_println(console, THEME_DEFAULT, "-", "Welcome to Profanity, version %s", prof_version);
     }
 
     win_println(console, THEME_DEFAULT, "-", "Copyright (C) 2012 - 2019 James Booth <boothj5web@gmail.com>.");
@@ -2172,16 +2160,6 @@ cons_color_setting(void)
 }
 
 void
-cons_os_setting(void)
-{
-    if (prefs_get_boolean(PREF_REVEAL_OS)) {
-        cons_show("Reveal OS name when asked for software version (XEP-0092) (/os)    : ON");
-    } else {
-        cons_show("Reveal OS name when asked for software version (XEP-0092) (/os)    : OFF");
-    }
-}
-
-void
 cons_correction_setting(void)
 {
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW)) {
@@ -2788,15 +2766,8 @@ _cons_splash_logo(void)
     win_println(console, THEME_SPLASH, "-", "|_|                                   (____/ ");
     win_println(console, THEME_SPLASH, "-", "");
 
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-        win_println(console, THEME_DEFAULT, "-", "Version %sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
-#else
-        win_println(console, THEME_DEFAULT, "Version %sdev", PACKAGE_VERSION);
-#endif
-    } else {
-        win_println(console, THEME_DEFAULT, "-", "Version %s", PACKAGE_VERSION);
-    }
+    auto_gchar gchar* prof_version = prof_get_version();
+    win_println(console, THEME_DEFAULT, "-", "Version %s", prof_version);
 }
 
 static void
@@ -2939,4 +2910,46 @@ cons_strophe_setting(void)
     }
     cons_show("XEP-0198 Stream-Management                : %s", sm_setting);
     cons_show("libstrophe Verbosity                      : %s", prefs_get_string(PREF_STROPHE_VERBOSITY));
+}
+
+void
+cons_privacy_setting(void)
+{
+    cons_show("Database logging                                           : %s", prefs_get_string(PREF_DBLOG));
+
+    if (prefs_get_boolean(PREF_CHLOG)) {
+        cons_show("Chat logging (/logging chat)                               : ON");
+    } else {
+        cons_show("Chat logging (/logging chat)                               : OFF");
+    }
+    if (prefs_get_boolean(PREF_HISTORY)) {
+        cons_show("Chat history (/history)                                    : ON");
+    } else {
+        cons_show("Chat history (/history)                                    : OFF");
+    }
+
+    if (prefs_get_boolean(PREF_REVEAL_OS)) {
+        cons_show("Reveal OS name when asked for software");
+        cons_show("version (XEP-0092) (/privacy os)                           : ON");
+    } else {
+        cons_show("Reveal OS name when asked for software");
+        cons_show("version (XEP-0092) (/privacy os)                           : OFF");
+    }
+
+    if (connection_get_status() == JABBER_CONNECTED) {
+        char* account_name = session_get_account_name();
+        ProfAccount* account = accounts_get_account(account_name);
+
+        if (account->client) {
+            cons_show("Client name (/account set <account> clientid)              : %s", account->client);
+        } else {
+            auto_gchar gchar* prof_version = prof_get_version();
+            cons_show("Client name (/account set <account> clientid)              : Profanity %s", prof_version);
+        }
+        if (account->max_sessions > 0) {
+            cons_show("Max sessions alarm (/account set <account> session_alarm)  : %s", account->max_sessions);
+        } else {
+            cons_show("Max sessions alarm (/account set <account> session_alarm)  : not set");
+        }
+    }
 }

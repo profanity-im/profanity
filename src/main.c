@@ -39,10 +39,6 @@
 #include <string.h>
 #include <glib.h>
 
-#ifdef HAVE_GIT_VERSION
-#include "gitversion.h"
-#endif
-
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
 #endif
@@ -104,15 +100,8 @@ main(int argc, char** argv)
     g_option_context_free(context);
 
     if (version == TRUE) {
-        if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-            g_print("Profanity, version %sdev.%s.%s\n", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
-#else
-            g_print("Profanity, version %sdev\n", PACKAGE_VERSION);
-#endif
-        } else {
-            g_print("Profanity, version %s\n", PACKAGE_VERSION);
-        }
+        auto_gchar gchar* prof_version = prof_get_version();
+        g_print("Profanity, version %s\n", prof_version);
 
         // lets use fixed email instead of PACKAGE_BUGREPORT
         g_print("Copyright (C) 2012 - 2019 James Booth <boothj5web@gmail.com>.\n");

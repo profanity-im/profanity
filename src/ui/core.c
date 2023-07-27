@@ -35,10 +35,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_GIT_VERSION
-#include "gitversion.h"
-#endif
-
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>

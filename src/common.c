@@ -62,6 +62,10 @@
 #include "log.h"
 #include "common.h"
 
+#ifdef HAVE_GIT_VERSION
+#include "gitversion.h"
+#endif
+
 struct curl_data_t
 {
     char* buffer;
@@ -687,4 +691,21 @@ glib_hash_table_free(GHashTable* hash_table)
 {
     g_hash_table_remove_all(hash_table);
     g_hash_table_unref(hash_table);
+}
+
+/* build profanity version string.
+ * example: 0.13.1dev.master.69d8c1f9
+ */
+gchar*
+prof_get_version(void)
+{
+    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+#ifdef HAVE_GIT_VERSION
+        return g_strdup_printf("%sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+#else
+        return g_strdup_printf("%sdev", PACKAGE_VERSION);
+#endif
+    } else {
+        return g_strdup_printf("%s", PACKAGE_VERSION);
+    }
 }

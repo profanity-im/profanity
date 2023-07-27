@@ -2448,19 +2448,6 @@ static const struct cmd_t command_defs[] = {
               "/avatar get thor@valhalla.edda",
               "/avatar open freyja@vanaheimr.edda") },
 
-    { CMD_PREAMBLE("/os",
-                   parse_args, 1, 1, &cons_os_setting)
-      CMD_MAINFUNC(cmd_os)
-      CMD_TAGS(
-              CMD_TAG_DISCOVERY)
-      CMD_SYN(
-              "/os <on>|<off>")
-      CMD_DESC(
-              "Choose whether to include the OS name if a user asks for software information (XEP-0092).")
-      CMD_ARGS(
-              { "on|off", "" })
-    },
-
     { CMD_PREAMBLE("/correction",
                    parse_args, 1, 2, &cons_correction_setting)
       CMD_MAINFUNC(cmd_correction)
@@ -2722,18 +2709,28 @@ static const struct cmd_t command_defs[] = {
     },
 
     { CMD_PREAMBLE("/privacy",
-                   parse_args, 2, 3, NULL)
+                   parse_args, 2, 3, &cons_privacy_setting)
+      CMD_SUBFUNCS(
+              { "os", cmd_os })
       CMD_MAINFUNC(cmd_privacy)
       CMD_TAGS(
-              CMD_TAG_CHAT)
+              CMD_TAG_CHAT,
+              CMD_TAG_DISCOVERY)
       CMD_SYN(
-              "/privacy logging on|redact|off")
+              "/privacy logging on|redact|off",
+              "/privacy os on|off")
       CMD_DESC(
-              "Configure privacy settings.")
+              "Configure privacy settings."
+              "Also check the the following settings in /account: "
+              "clientid to set the client identification name"
+              "session_alarm to configure an alarm when more clients log in.")
       CMD_ARGS(
-              { "logging on|redact|off", "Switch chat logging. This will also disable logging in the internally used SQL database. Your messages will not be saved anywhere locally. This might have unintended consequences, such as not being able to decrypt OMEMO encrypted messages received later via MAM, and should be used with caution." })
+              { "logging on|redact|off", "Switch chat logging. This will also disable logging in the internally used SQL database. Your messages will not be saved anywhere locally. This might have unintended consequences, such as not being able to decrypt OMEMO encrypted messages received later via MAM, and should be used with caution." },
+              { "os on|off", "Choose whether to include the OS name if a user asks for software information (XEP-0092)." }
+              )
       CMD_EXAMPLES(
-              "/privacy logging off")
+              "/privacy logging off",
+              "/privacy os off")
     },
     // NEXT-COMMAND (search helper)
 };

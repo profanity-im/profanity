@@ -35,10 +35,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_GIT_VERSION
-#include "gitversion.h"
-#endif
-
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -1627,20 +1623,10 @@ _version_get_handler(xmpp_stanza_t* const stanza)
     xmpp_stanza_t* version = xmpp_stanza_new(ctx);
     xmpp_stanza_set_name(version, "version");
     xmpp_stanza_t* version_txt = xmpp_stanza_new(ctx);
-    GString* version_str = g_string_new(PACKAGE_VERSION);
+    auto_gchar gchar* prof_version = prof_get_version();
 
     if (!is_custom_client) {
-        if (strcmp(PACKAGE_STATUS, "development") == 0) {
-#ifdef HAVE_GIT_VERSION
-            g_string_append(version_str, "dev.");
-            g_string_append(version_str, PROF_GIT_BRANCH);
-            g_string_append(version_str, ".");
-            g_string_append(version_str, PROF_GIT_REVISION);
-#else
-            g_string_append(version_str, "dev");
-#endif
-        }
-        xmpp_stanza_set_text(version_txt, version_str->str);
+        xmpp_stanza_set_text(version_txt, prof_version);
         xmpp_stanza_add_child(version, version_txt);
         xmpp_stanza_add_child(query, version);
 
@@ -1678,7 +1664,6 @@ _version_get_handler(xmpp_stanza_t* const stanza)
     iq_send_stanza(response);
 
     // Cleanup
-    g_string_free(version_str, TRUE);
     xmpp_stanza_release(version_txt);
     xmpp_stanza_release(name_txt);
     if (!is_custom_client && include_os) {
