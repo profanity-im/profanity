@@ -184,7 +184,7 @@ log_init(log_level_t filter, char* log_file)
     g_chmod(mainlogfile, S_IRUSR | S_IWUSR);
 }
 
-const char*
+const gchar*
 get_log_file_location(void)
 {
     return mainlogfile;

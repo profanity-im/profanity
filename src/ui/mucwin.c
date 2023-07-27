@@ -931,7 +931,7 @@ mucwin_hide_occupants(ProfMucWin* mucwin)
     }
 }
 
-char*
+gchar*
 mucwin_get_string(ProfMucWin* mucwin)
 {
     assert(mucwin != NULL);

@@ -503,7 +503,7 @@ chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status)
     win_show_status_string((ProfWin*)chatwin, display_str, "offline", status, NULL, "--", "offline");
 }
 
-char*
+gchar*
 chatwin_get_string(ProfChatWin* chatwin)
 {
     assert(chatwin != NULL);

@@ -263,7 +263,7 @@ privwin_room_banned(ProfPrivateWin* privwin, const char* const actor, const char
     g_string_free(message, TRUE);
 }
 
-char*
+gchar*
 privwin_get_string(ProfPrivateWin* privwin)
 {
     assert(privwin != NULL);

@@ -195,7 +195,7 @@ _title_bar_draw(void)
         waddch(win, ' ');
     }
 
-    auto_char char* title = win_get_title(current);
+    auto_gchar gchar* title = win_get_title(current);
 
     mvwprintw(win, 0, 0, " %s", title);
     pos = strlen(title) + 1;

@@ -131,7 +131,7 @@ void chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char*
 void chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message);
 void chatwin_contact_online(ProfChatWin* chatwin, Resource* resource, GDateTime* last_activity);
 void chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status);
-char* chatwin_get_string(ProfChatWin* chatwin);
+gchar* chatwin_get_string(ProfChatWin* chatwin);
 #ifdef HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin* chatwin, gboolean trusted);
 void chatwin_otr_unsecured(ProfChatWin* chatwin);
@@ -194,7 +194,7 @@ void mucwin_role_set_error(ProfMucWin* mucwin, const char* const nick, const cha
 void mucwin_role_list_error(ProfMucWin* mucwin, const char* const role, const char* const error);
 void mucwin_handle_role_list(ProfMucWin* mucwin, const char* const role, GSList* nicks);
 void mucwin_kick_error(ProfMucWin* mucwin, const char* const nick, const char* const error);
-char* mucwin_get_string(ProfMucWin* mucwin);
+gchar* mucwin_get_string(ProfMucWin* mucwin);
 void mucwin_set_enctext(ProfMucWin* mucwin, const char* const enctext);
 void mucwin_unset_enctext(ProfMucWin* mucwin);
 void mucwin_set_message_char(ProfMucWin* mucwin, const char* const ch);
@@ -207,7 +207,7 @@ void privwin_message_occupant_offline(ProfPrivateWin* privwin);
 
 void privwin_message_left_room(ProfPrivateWin* privwin);
 
-char* privwin_get_string(ProfPrivateWin* privwin);
+gchar* privwin_get_string(ProfPrivateWin* privwin);
 void privwin_occupant_offline(ProfPrivateWin* privwin);
 void privwin_occupant_kicked(ProfPrivateWin* privwin, const char* const actor, const char* const reason);
 void privwin_occupant_banned(ProfPrivateWin* privwin, const char* const actor, const char* const reason);
@@ -225,15 +225,15 @@ void confwin_show_form(ProfConfWin* confwin);
 void confwin_show_form_field(ProfConfWin* confwin, DataForm* form, char* tag);
 void confwin_form_help(ProfConfWin* confwin);
 void confwin_field_help(ProfConfWin* confwin, char* tag);
-char* confwin_get_string(ProfConfWin* confwin);
+gchar* confwin_get_string(ProfConfWin* confwin);
 
 // xml console
 void xmlwin_show(ProfXMLWin* xmlwin, const char* const msg);
-char* xmlwin_get_string(ProfXMLWin* xmlwin);
+gchar* xmlwin_get_string(ProfXMLWin* xmlwin);
 
 // vCard window
 void vcardwin_show_vcard_config(ProfVcardWin* vcardwin);
-char* vcardwin_get_string(ProfVcardWin* vcardwin);
+gchar* vcardwin_get_string(ProfVcardWin* vcardwin);
 void vcardwin_update(void);
 
 // Input window
@@ -267,7 +267,7 @@ void cons_show_roster(GSList* list);
 void cons_show_roster_group(const char* const group, GSList* list);
 void cons_show_wins(gboolean unread);
 void cons_show_wins_attention();
-char* cons_get_string(ProfConsoleWin* conswin);
+gchar* cons_get_string(ProfConsoleWin* conswin);
 void cons_show_status(const char* const barejid);
 void cons_show_info(PContact pcontact);
 void cons_show_caps(const char* const fulljid, resource_presence_t presence);
@@ -399,7 +399,7 @@ void win_appendln(ProfWin* window, theme_item_t theme_item, const char* const me
 void win_append_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
 void win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
 
-char* win_get_title(ProfWin* window);
+gchar* win_get_title(ProfWin* window);
 void win_show_occupant(ProfWin* window, Occupant* occupant);
 void win_show_occupant_info(ProfWin* window, const char* const room, Occupant* occupant);
 void win_show_contact(ProfWin* window, PContact contact);
@@ -408,7 +408,7 @@ void win_show_vcard(ProfWin* window, vCard* vcard);
 
 void win_clear(ProfWin* window);
 char* win_get_tab_identifier(ProfWin* window);
-char* win_to_string(ProfWin* window);
+gchar* win_to_string(ProfWin* window);
 void win_command_list_error(ProfWin* window, const char* const error);
 void win_command_exec_error(ProfWin* window, const char* const command, const char* const error, ...);
 void win_handle_command_list(ProfWin* window, GSList* cmds);

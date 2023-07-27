@@ -58,10 +58,10 @@ xmlwin_show(ProfXMLWin* xmlwin, const char* const msg)
     }
 }
 
-char*
+gchar*
 xmlwin_get_string(ProfXMLWin* xmlwin)
 {
     assert(xmlwin != NULL);
 
-    return strdup("XML console");
+    return g_strdup("XML console");
 }

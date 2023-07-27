@@ -49,7 +49,7 @@ vcardwin_show_vcard_config(ProfVcardWin* vcardwin)
     win_println(window, THEME_DEFAULT, "-", "Use '/help vcard' for more information.");
 }
 
-char*
+gchar*
 vcardwin_get_string(ProfVcardWin* vcardwin)
 {
     GString* string = g_string_new("vCard: ");

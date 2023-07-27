@@ -1134,7 +1134,7 @@ wins_create_summary(gboolean unread)
             GString* line = g_string_new("");
 
             int ui_index = GPOINTER_TO_INT(curr->data);
-            auto_char char* winstring = win_to_string(window);
+            auto_gchar gchar* winstring = win_to_string(window);
             if (!winstring) {
                 g_string_free(line, TRUE);
                 continue;
@@ -1179,7 +1179,7 @@ wins_create_summary_attention()
             GString* line = g_string_new("");
 
             int ui_index = GPOINTER_TO_INT(curr->data);
-            auto_char char* winstring = win_to_string(window);
+            auto_gchar gchar* winstring = win_to_string(window);
             if (!winstring) {
                 g_string_free(line, TRUE);
                 continue;
