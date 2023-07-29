@@ -225,13 +225,12 @@ _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
                     log_debug("Avatar ID for %s is: %s", from, id);
 
                     avatar_metadata* data = malloc(sizeof(avatar_metadata));
-                    if (data) {
-                        data->type = strdup(type);
-                        data->id = strdup(id);
 
-                        // request the actual (image) data
-                        _avatar_request_item_by_id(from, data);
-                    }
+                    data->type = strdup(type);
+                    data->id = strdup(id);
+
+                    // request the actual (image) data
+                    _avatar_request_item_by_id(from, data);
                 }
             } else {
                 cons_show("We couldn't get the user's avatar, possibly because they haven't set one or have disabled avatar publishing. "

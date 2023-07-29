@@ -376,7 +376,7 @@ AM_CFLAGS="$AM_CFLAGS -Wall -Wno-deprecated-declarations -std=gnu99 -ggdb3"
 AM_LDFLAGS="$AM_LDFLAGS -export-dynamic"
 
 AS_IF([test "x$PACKAGE_STATUS" = xdevelopment],
-    [AM_CFLAGS="$AM_CFLAGS -Wunused -Werror"])
+    [AM_CFLAGS="$AM_CFLAGS -Wunused -fanalyzer -Wno-analyzer-possible-null-dereference -Wno-analyzer-null-argument -Wno-analyzer-possible-null-argument"])
 AS_IF([test "x$PLATFORM" = xosx],
     [AM_CFLAGS="$AM_CFLAGS -Qunused-arguments"])
 

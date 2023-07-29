@@ -294,13 +294,12 @@ void
 iq_id_handler_add(const char* const id, ProfIqCallback func, ProfIqFreeCallback free_func, void* userdata)
 {
     ProfIqHandler* handler = malloc(sizeof(ProfIqHandler));
-    if (handler) {
-        handler->func = func;
-        handler->free_func = free_func;
-        handler->userdata = userdata;
 
-        g_hash_table_insert(id_handlers, strdup(id), handler);
-    }
+    handler->func = func;
+    handler->free_func = free_func;
+    handler->userdata = userdata;
+
+    g_hash_table_insert(id_handlers, strdup(id), handler);
 }
 
 void
@@ -482,15 +481,14 @@ iq_room_info_request(const char* const room, gboolean display_result)
     xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, id, room, NULL);
 
     ProfRoomInfoData* cb_data = malloc(sizeof(ProfRoomInfoData));
-    if (cb_data) {
-        cb_data->room = strdup(room);
-        cb_data->display = display_result;
 
-        iq_id_handler_add(id, _room_info_response_id_handler, (ProfIqFreeCallback)_iq_free_room_data, cb_data);
+    cb_data->room = strdup(room);
+    cb_data->display = display_result;
 
-        iq_send_stanza(iq);
-        xmpp_stanza_release(iq);
-    }
+    iq_id_handler_add(id, _room_info_response_id_handler, (ProfIqFreeCallback)_iq_free_room_data, cb_data);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 }
 
 void
@@ -666,15 +664,14 @@ iq_room_affiliation_list(const char* const room, char* affiliation, bool show_ui
     const char* id = xmpp_stanza_get_id(iq);
 
     ProfAffiliationList* affiliation_list = malloc(sizeof(ProfAffiliationList));
-    if (affiliation_list) {
-        affiliation_list->affiliation = strdup(affiliation);
-        affiliation_list->show_ui_message = show_ui_message;
 
-        iq_id_handler_add(id, _room_affiliation_list_result_id_handler, (ProfIqFreeCallback)_iq_free_affiliation_list, affiliation_list);
+    affiliation_list->affiliation = strdup(affiliation);
+    affiliation_list->show_ui_message = show_ui_message;
 
-        iq_send_stanza(iq);
-        xmpp_stanza_release(iq);
-    }
+    iq_id_handler_add(id, _room_affiliation_list_result_id_handler, (ProfIqFreeCallback)_iq_free_affiliation_list, affiliation_list);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 }
 
 void
@@ -700,15 +697,14 @@ iq_room_affiliation_set(const char* const room, const char* const jid, char* aff
     const char* id = xmpp_stanza_get_id(iq);
 
     ProfPrivilegeSet* affiliation_set = malloc(sizeof(struct privilege_set_t));
-    if (affiliation_set) {
-        affiliation_set->item = strdup(jid);
-        affiliation_set->privilege = strdup(affiliation);
 
-        iq_id_handler_add(id, _room_affiliation_set_result_id_handler, (ProfIqFreeCallback)_iq_free_affiliation_set, affiliation_set);
+    affiliation_set->item = strdup(jid);
+    affiliation_set->privilege = strdup(affiliation);
 
-        iq_send_stanza(iq);
-        xmpp_stanza_release(iq);
-    }
+    iq_id_handler_add(id, _room_affiliation_set_result_id_handler, (ProfIqFreeCallback)_iq_free_affiliation_set, affiliation_set);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 }
 
 void
@@ -721,15 +717,14 @@ iq_room_role_set(const char* const room, const char* const nick, char* role,
     const char* id = xmpp_stanza_get_id(iq);
 
     struct privilege_set_t* role_set = malloc(sizeof(ProfPrivilegeSet));
-    if (role_set) {
-        role_set->item = strdup(nick);
-        role_set->privilege = strdup(role);
 
-        iq_id_handler_add(id, _room_role_set_result_id_handler, (ProfIqFreeCallback)_iq_free_affiliation_set, role_set);
+    role_set->item = strdup(nick);
+    role_set->privilege = strdup(role);
 
-        iq_send_stanza(iq);
-        xmpp_stanza_release(iq);
-    }
+    iq_id_handler_add(id, _room_role_set_result_id_handler, (ProfIqFreeCallback)_iq_free_affiliation_set, role_set);
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 }
 
 void
@@ -2469,16 +2464,15 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
             const char* item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
             if (item_jid) {
                 DiscoItem* item = malloc(sizeof(struct disco_item_t));
-                if (item) {
-                    item->jid = strdup(item_jid);
-                    const char* item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
-                    if (item_name) {
-                        item->name = strdup(item_name);
-                    } else {
-                        item->name = NULL;
-                    }
-                    items = g_slist_append(items, item);
+
+                item->jid = strdup(item_jid);
+                const char* item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+                if (item_name) {
+                    item->name = strdup(item_name);
+                } else {
+                    item->name = NULL;
                 }
+                items = g_slist_append(items, item);
             }
         }
 
@@ -2641,15 +2635,14 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
     xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, startdate_str, enddate_str, firstid, NULL);
 
     MamRsmUserdata* data = malloc(sizeof(MamRsmUserdata));
-    if (data) {
-        data->start_datestr = startdate_str;
-        data->end_datestr = enddate_str;
-        data->barejid = strdup(win->barejid);
-        data->fetch_next = fetch_next;
-        data->win = win;
 
-        iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, data);
-    }
+    data->start_datestr = startdate_str;
+    data->end_datestr = enddate_str;
+    data->barejid = strdup(win->barejid);
+    data->fetch_next = fetch_next;
+    data->win = win;
+
+    iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, data);
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);

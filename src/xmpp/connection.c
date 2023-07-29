@@ -747,7 +747,9 @@ connection_get_user(void)
     char* result = strdup(jid);
 
     char* split = strchr(result, '@');
-    *split = '\0';
+    if (split) {
+        *split = '\0';
+    }
 
     return result;
 }
