@@ -152,7 +152,7 @@ else
 fi
 
 ## Check for libstrophe
-PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.12.2],
+PKG_CHECK_MODULES([libstrophe], [libstrophe >= 0.12.3],
     [LIBS="$libstrophe_LIBS $LIBS" CFLAGS="$CFLAGS $libstrophe_CFLAGS"])
 
 AC_MSG_CHECKING([whether libstrophe works])
