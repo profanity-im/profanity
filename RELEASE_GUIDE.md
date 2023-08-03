@@ -27,15 +27,14 @@ AC_INIT([profanity], [0.6.0], [boothj5web@gmail.com])
 ```
 
 * Set the package status in configure.ac:
+```
+PACKAGE_STATUS="release"
+```
 
 * Update date and version in man pages
 * Generate manpages for profanity commands (the mangen argument only works when package status is development)
     `./profanity mangen`
   These files should be added to the docs subfolder and added to git whenever a command changes.
-
-```
-PACKAGE_STATUS="release"
-```
 
 * Add generated command manpages: `git add docs/profanity-*.1`
 

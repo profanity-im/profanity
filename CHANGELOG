@@ -1,7 +1,7 @@
 0.14.0 (2023-08-03)
 ===================
 
-13 people contributed to this release: Daniel Santos, @DebXWoody, @H3rnand3zzz, @ike08, @MarcoPolo-PasTonMolo, @mdosch, @pasis, @paulfertser, @shahab-vahedi, @sjaeckel, @techmetx11, @thexhr and jubalh.
+13 people contributed to this release: Daniel Santos, @DebXWoody, @H3rnand3zzz, @ike08, @MarcoPolo-PasTonMolo, @mdosch, @pasis, @paulfertser, @shahab-vahedi, @sjaeckel, @techmetx11, @thexhr and @jubalh.
 
 Thanks a lot to our sponsors: @mdosch, @LeSpocky, @jamesponddotco and one anonymous sponsor.
 If you want to support us too: https://profanity-im.github.io/donate.html
@@ -9,13 +9,13 @@ If you want to support us too: https://profanity-im.github.io/donate.html
 This release depends on libstrophe >= 0.12.3. This is not done for feature reasons, but because several issues were fixed inside libstrophe.
 
 Changes:
-- Introduce new `/privacy command (#1836, #1870)
+- Introduce new `/privacy` command (#1836, #1870)
   `/os` -> `/privacy os`
   `/privacy logging`
 - Fix crash when using NetBSD curses implementation (#1769)
 - Fix OMEMO autodetection in autotools (#1865)
 - Add ability to completely turn logs off (#1857)
-- Extend /pgp command to make key exchange procedure easier (#1850)
+- Extend `/pgp` command to make key exchange procedure easier (#1850)
   Used by PSI and Pidgin as well.
 - Add ability to download and install plugins directly (#1842)
   `/plugins install`
@@ -41,7 +41,7 @@ Changes:
 - Improve OMEMO QR code (#1796)
 - Improve OMEMO help (#1838)
 - Fix duplicate download IDs (#1794)
-- Add macro for possible NULL prints and use it on known sports (#1786)
+- Add macro for possible NULL prints (#1786)
 - Prevent setting invalid combination of libstrophe flags
 - Fix libstrophe timer-callback usage
 - Fix memory leaks (#1780, #1814, #1837)
@@ -53,7 +53,7 @@ Changes:
 - Improve MAM support (#1724, #1791, #1868)
 - Add vCard support (XEP-0054) (#1757)
 - Fix autocompletion for lastactivity
-- Improve /msg and /win autocompletion: autocomplete roster nickname and actual barejid
+- Improve `/msg` and `/win` autocompletion: autocomplete roster nickname and actual barejid
 - UI improvements (#1800, #1773, #1821)
 
 0.13.1 (2022-10-12)
