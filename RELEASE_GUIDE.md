@@ -18,6 +18,7 @@
 * Update CHANGELOG
 * Update profrc.example
 * Update profanity.doap (new XEPs and latest version). Look for `DEV` which marks what is done on the development branch.
+* Add new release to profanity.doap
 
 ## Creating artefacts
 * Set the correct release version in configure.ac:
