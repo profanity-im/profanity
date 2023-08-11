@@ -118,7 +118,10 @@ _handle_headline(xmpp_stanza_t* const stanza)
     if (body) {
         char* text = xmpp_stanza_get_text(body);
         if (text) {
-            cons_show("Headline: %s", text);
+            const char* const stanza_from = xmpp_stanza_get_from(stanza);
+            if (stanza_from) {
+                cons_show("Headline from %s: %s", stanza_from, text);
+            }
             xmpp_free(connection_get_ctx(), text);
         }
     }
