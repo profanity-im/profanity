@@ -156,7 +156,7 @@ ui_get_idle_time(void)
 #ifdef HAVE_LIBXSS
     if (display) {
         XScreenSaverInfo* info = XScreenSaverAllocInfo();
-        if (info && display) {
+        if (info) {
             XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
             unsigned long result = info->idle;
             XFree(info);
