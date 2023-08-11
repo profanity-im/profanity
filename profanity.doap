@@ -114,6 +114,17 @@
       </xmpp:SupportedXep>
     </implements>
 
+    <!-- XEP-0049: Private XML Storage --> 
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0049.html'/>
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:version>1.2</xmpp:version>
+        <xmpp:since>0.4.5</xmpp:since>
+        <xmpp:note xml:lang='en'></xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+
     <!-- XEP-0050: Ad-Hoc Commands --> 
     <implements>
       <xmpp:SupportedXep>
