@@ -107,7 +107,11 @@ ui_init(void)
     notifier_initialise();
     cons_about();
 #ifdef HAVE_LIBXSS
-    display = XOpenDisplay(0);
+    char* x11_display = getenv("DISPLAY");
+    char* wayland_display = getenv("WAYLAND_DISPLAY");
+    if (x11_display && !wayland_display) {
+        display = XOpenDisplay(0);
+    }
 #endif
     ui_idle_time = g_timer_new();
     inp_size = 0;
@@ -150,15 +154,17 @@ ui_get_idle_time(void)
 {
 // if compiled with libxss, get the x sessions idle time
 #ifdef HAVE_LIBXSS
-    XScreenSaverInfo* info = XScreenSaverAllocInfo();
-    if (info && display) {
-        XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
-        unsigned long result = info->idle;
-        XFree(info);
-        return result;
-    }
-    if (info) {
-        XFree(info);
+    if (display) {
+        XScreenSaverInfo* info = XScreenSaverAllocInfo();
+        if (info && display) {
+            XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
+            unsigned long result = info->idle;
+            XFree(info);
+            return result;
+        }
+        if (info) {
+            XFree(info);
+        }
     }
 // if no libxss or xss idle time failed, use profanity idle time
 #endif
