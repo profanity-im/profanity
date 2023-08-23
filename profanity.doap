@@ -409,6 +409,17 @@
       </xmpp:SupportedXep>
     </implements>
 
+   <!-- XEP-0373: OpenPGP for XMPP -->
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0373.html'/>
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:version>0.7.0</xmpp:version>
+        <xmpp:since>0.11.0</xmpp:since>
+        <xmpp:note xml:lang='en'></xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+
    <!-- XEP-0374: OpenPGP for XMPP Instant Messaging --> 
     <implements>
       <xmpp:SupportedXep>
