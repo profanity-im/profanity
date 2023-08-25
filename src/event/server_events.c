@@ -471,6 +471,8 @@ sv_ev_outgoing_carbon(ProfMessage* message)
 
     if (message->enc == PROF_MSG_ENC_OMEMO) {
         chatwin_outgoing_carbon(chatwin, message);
+    } else if (message->enc == PROF_MSG_ENC_OX) {
+        chatwin_outgoing_carbon(chatwin, message);
     } else if (message->encrypted) {
 #ifdef HAVE_LIBGPGME
         message->plain = p_gpg_decrypt(message->encrypted);
