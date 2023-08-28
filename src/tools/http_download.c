@@ -134,7 +134,10 @@ http_file_get(void* userdata)
     gchar* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     gchar* cafile = cafile_get_name();
     ProfAccount* account = accounts_get_account(session_get_account_name());
-    gboolean insecure = account->tls_policy && strcmp(account->tls_policy, "trust") == 0;
+    gboolean insecure = FALSE;
+    if (account) {
+        insecure = account->tls_policy && strcmp(account->tls_policy, "trust") == 0;
+    }
     account_free(account);
     pthread_mutex_unlock(&lock);
 
