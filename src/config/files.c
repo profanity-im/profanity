@@ -161,8 +161,7 @@ gchar*
 files_get_data_path(const char* const location)
 {
     auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
-    gchar* result = g_strdup_printf("%s/profanity/%s", xdg_data, location);
-    return result;
+    return g_strdup_printf("%s/profanity/%s", xdg_data, location);
 }
 
 gchar*

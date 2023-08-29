@@ -53,7 +53,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/jid.h"
 
-static gchar* accounts_loc;
+static prof_keyfile_t accounts_prof_keyfile;
 static GKeyFile* accounts;
 
 static Autocomplete all_ac;
@@ -67,14 +67,8 @@ accounts_load(void)
     log_info("Loading accounts");
     all_ac = autocomplete_new();
     enabled_ac = autocomplete_new();
-    accounts_loc = files_get_data_path(FILE_ACCOUNTS);
-
-    if (g_file_test(accounts_loc, G_FILE_TEST_EXISTS)) {
-        g_chmod(accounts_loc, S_IRUSR | S_IWUSR);
-    }
-
-    accounts = g_key_file_new();
-    g_key_file_load_from_file(accounts, accounts_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    load_data_keyfile(&accounts_prof_keyfile, FILE_ACCOUNTS);
+    accounts = accounts_prof_keyfile.keyfile;
 
     // create the logins searchable list for autocompletion
     gsize naccounts;
@@ -93,7 +87,8 @@ accounts_close(void)
 {
     autocomplete_free(all_ac);
     autocomplete_free(enabled_ac);
-    g_key_file_free(accounts);
+    free_keyfile(&accounts_prof_keyfile);
+    accounts = NULL;
 }
 
 char*
@@ -959,11 +954,5 @@ accounts_get_login_status(const char* const account_name)
 static void
 _save_accounts(void)
 {
-    gsize g_data_size;
-    auto_gchar gchar* g_accounts_data = g_key_file_to_data(accounts, &g_data_size, NULL);
-
-    auto_gchar gchar* base = g_path_get_dirname(accounts_loc);
-    auto_gchar gchar* true_loc = get_file_or_linked(accounts_loc, base);
-    g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
-    g_chmod(accounts_loc, S_IRUSR | S_IWUSR);
+    save_keyfile(&accounts_prof_keyfile);
 }

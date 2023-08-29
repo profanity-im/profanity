@@ -1102,31 +1102,18 @@ _xmpp_file_logger(void* const userdata, const xmpp_log_level_t xmpp_level, const
 static void
 _random_bytes_init(void)
 {
-    auto_gchar gchar* rndbytes_loc = files_get_data_path(FILE_PROFANITY_IDENTIFIER);
-    GKeyFile* rndbytes;
+    prof_keyfile_t keyfile;
+    load_data_keyfile(&keyfile, FILE_PROFANITY_IDENTIFIER);
 
-    if (g_file_test(rndbytes_loc, G_FILE_TEST_EXISTS)) {
-        g_chmod(rndbytes_loc, S_IRUSR | S_IWUSR);
-    }
-
-    rndbytes = g_key_file_new();
-    g_key_file_load_from_file(rndbytes, rndbytes_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
-
-    if (g_key_file_has_group(rndbytes, "identifier")) {
-        profanity_instance_id = g_key_file_get_string(rndbytes, "identifier", "random_bytes", NULL);
+    if (g_key_file_has_group(keyfile.keyfile, "identifier")) {
+        profanity_instance_id = g_key_file_get_string(keyfile.keyfile, "identifier", "random_bytes", NULL);
     } else {
         profanity_instance_id = get_random_string(10);
-        g_key_file_set_string(rndbytes, "identifier", "random_bytes", profanity_instance_id);
-
-        gsize g_data_size;
-        auto_gchar gchar* g_accounts_data = g_key_file_to_data(rndbytes, &g_data_size, NULL);
-
-        auto_gchar gchar* base = g_path_get_dirname(rndbytes_loc);
-        auto_gchar gchar* true_loc = get_file_or_linked(rndbytes_loc, base);
-        g_file_set_contents(true_loc, g_accounts_data, g_data_size, NULL);
+        g_key_file_set_string(keyfile.keyfile, "identifier", "random_bytes", profanity_instance_id);
+        save_keyfile(&keyfile);
     }
 
-    g_key_file_free(rndbytes);
+    free_keyfile(&keyfile);
 }
 
 static void

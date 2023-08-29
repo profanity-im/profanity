@@ -50,6 +50,7 @@
 #include <curl/easy.h>
 #include <glib.h>
 #include <gio/gio.h>
+#include <glib/gstdio.h>
 
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
@@ -61,6 +62,7 @@
 
 #include "log.h"
 #include "common.h"
+#include "config/files.h"
 
 #ifdef HAVE_GIT_VERSION
 #include "gitversion.h"
@@ -73,6 +75,7 @@ struct curl_data_t
 };
 
 static size_t _data_callback(void* ptr, size_t size, size_t nmemb, void* data);
+static gchar* _get_file_or_linked(gchar* loc);
 
 /**
  * Frees the memory allocated for a gchar* string.
@@ -125,6 +128,74 @@ auto_free_char(char** str)
     if (str == NULL)
         return;
     free(*str);
+}
+
+static gboolean
+_load_keyfile(prof_keyfile_t* keyfile)
+{
+    GError* error = NULL;
+    keyfile->keyfile = g_key_file_new();
+
+    if (g_key_file_load_from_file(keyfile->keyfile, keyfile->filename, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, &error)) {
+        return TRUE;
+    } else if (error->code != G_FILE_ERROR_NOENT) {
+        log_warning("[Keyfile] error loading %s: %s", keyfile->filename, error->message);
+        g_error_free(error);
+    } else {
+        log_warning("[Keyfile] no such file: %s", keyfile->filename);
+        g_error_free(error);
+    }
+    return FALSE;
+}
+
+gboolean
+load_data_keyfile(prof_keyfile_t* keyfile, const char* filename)
+{
+    auto_gchar gchar* loc = files_get_data_path(filename);
+    return load_custom_keyfile(keyfile, _get_file_or_linked(loc));
+}
+
+gboolean
+load_config_keyfile(prof_keyfile_t* keyfile, const char* filename)
+{
+    auto_gchar gchar* loc = files_get_config_path(filename);
+    return load_custom_keyfile(keyfile, _get_file_or_linked(loc));
+}
+
+gboolean
+load_custom_keyfile(prof_keyfile_t* keyfile, gchar* filename)
+{
+    keyfile->filename = filename;
+
+    if (g_file_test(keyfile->filename, G_FILE_TEST_EXISTS)) {
+        g_chmod(keyfile->filename, S_IRUSR | S_IWUSR);
+    }
+
+    return _load_keyfile(keyfile);
+}
+
+gboolean
+save_keyfile(prof_keyfile_t* keyfile)
+{
+    GError* error = NULL;
+    if (!g_key_file_save_to_file(keyfile->keyfile, keyfile->filename, &error)) {
+        log_error("[Keyfile]: saving file %s failed! %s", keyfile->filename, error->message);
+        g_error_free(error);
+        return FALSE;
+    }
+    g_chmod(keyfile->filename, S_IRUSR | S_IWUSR);
+    return TRUE;
+}
+
+void
+free_keyfile(prof_keyfile_t* keyfile)
+{
+    log_debug("[Keyfile]: free %s", STR_MAYBE_NULL(keyfile->filename));
+    if (keyfile->keyfile)
+        g_key_file_free(keyfile->keyfile);
+    keyfile->keyfile = NULL;
+    g_free(keyfile->filename);
+    keyfile->filename = NULL;
 }
 
 gboolean
@@ -342,9 +413,10 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
     return realsize;
 }
 
-gchar*
-get_file_or_linked(gchar* loc, gchar* basedir)
+static gchar*
+_get_file_or_linked(gchar* loc)
 {
+    auto_gchar gchar* basedir = g_path_get_dirname(loc);
     gchar* true_loc = g_strdup(loc);
 
     // check for symlink

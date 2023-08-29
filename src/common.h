@@ -110,6 +110,23 @@ void auto_free_guchar(guchar** str);
 #define STR_MAYBE_NULL(p) (p)
 #endif
 
+typedef struct prof_keyfile_t
+{
+    gchar* filename;
+    GKeyFile* keyfile;
+} prof_keyfile_t;
+
+gboolean
+load_data_keyfile(prof_keyfile_t* keyfile, const char* filename);
+gboolean
+load_config_keyfile(prof_keyfile_t* keyfile, const char* filename);
+gboolean
+load_custom_keyfile(prof_keyfile_t* keyfile, gchar* filename);
+gboolean
+save_keyfile(prof_keyfile_t* keyfile);
+void
+free_keyfile(prof_keyfile_t* keyfile);
+
 /* Our own define of MB_CUR_MAX but this time at compile time */
 #define PROF_MB_CUR_MAX 8
 
@@ -157,7 +174,6 @@ int utf8_display_len(const char* const str);
 char* release_get_latest(void);
 gboolean release_is_new(char* found_version);
 
-gchar* get_file_or_linked(gchar* loc, gchar* basedir);
 char* strip_arg_quotes(const char* const input);
 gboolean is_notify_enabled(void);
 

@@ -47,7 +47,7 @@
 #include "config/tlscerts.h"
 #include "tools/autocomplete.h"
 
-static char* tlscerts_loc;
+static prof_keyfile_t tlscerts_prof_keyfile;
 static GKeyFile* tlscerts;
 
 static void _save_tlscerts(void);
@@ -60,14 +60,8 @@ void
 tlscerts_init(void)
 {
     log_info("Loading TLS certificates");
-    tlscerts_loc = files_get_data_path(FILE_TLSCERTS);
-
-    if (g_file_test(tlscerts_loc, G_FILE_TEST_EXISTS)) {
-        g_chmod(tlscerts_loc, S_IRUSR | S_IWUSR);
-    }
-
-    tlscerts = g_key_file_new();
-    g_key_file_load_from_file(tlscerts, tlscerts_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    load_data_keyfile(&tlscerts_prof_keyfile, FILE_TLSCERTS);
+    tlscerts = tlscerts_prof_keyfile.keyfile;
 
     certs_ac = autocomplete_new();
     gsize len = 0;
@@ -365,7 +359,7 @@ tlscerts_free(TLSCertificate* cert)
 void
 tlscerts_close(void)
 {
-    g_key_file_free(tlscerts);
+    free_keyfile(&tlscerts_prof_keyfile);
     tlscerts = NULL;
 
     free(current_fp);
@@ -377,8 +371,5 @@ tlscerts_close(void)
 static void
 _save_tlscerts(void)
 {
-    gsize g_data_size;
-    auto_gchar gchar* g_tlscerts_data = g_key_file_to_data(tlscerts, &g_data_size, NULL);
-    g_file_set_contents(tlscerts_loc, g_tlscerts_data, g_data_size, NULL);
-    g_chmod(tlscerts_loc, S_IRUSR | S_IWUSR);
+    save_keyfile(&tlscerts_prof_keyfile);
 }

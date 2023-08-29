@@ -46,32 +46,21 @@
 
 #include "xmpp/xmpp.h"
 
+static prof_keyfile_t bookmark_ignore_prof_keyfile;
 static GKeyFile* bookmark_ignore_keyfile = NULL;
 static gchar* account_jid = NULL;
 
 static void
 _bookmark_ignore_load()
 {
-    auto_gchar gchar* bi_loc = files_get_data_path(FILE_BOOKMARK_AUTOJOIN_IGNORE);
-
-    if (g_file_test(bi_loc, G_FILE_TEST_EXISTS)) {
-        g_chmod(bi_loc, S_IRUSR | S_IWUSR);
-    }
-
-    bookmark_ignore_keyfile = g_key_file_new();
-    g_key_file_load_from_file(bookmark_ignore_keyfile, bi_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    load_data_keyfile(&bookmark_ignore_prof_keyfile, FILE_BOOKMARK_AUTOJOIN_IGNORE);
+    bookmark_ignore_keyfile = bookmark_ignore_prof_keyfile.keyfile;
 }
 
 static void
 _bookmark_save()
 {
-    gsize g_data_size;
-    auto_gchar gchar* g_bookmark_ignore_data = g_key_file_to_data(bookmark_ignore_keyfile, &g_data_size, NULL);
-
-    auto_gchar gchar* bi_loc = files_get_data_path(FILE_BOOKMARK_AUTOJOIN_IGNORE);
-
-    g_file_set_contents(bi_loc, g_bookmark_ignore_data, g_data_size, NULL);
-    g_chmod(bi_loc, S_IRUSR | S_IWUSR);
+    save_keyfile(&bookmark_ignore_prof_keyfile);
 }
 
 void
@@ -86,9 +75,10 @@ bookmark_ignore_on_connect(const char* const barejid)
 void
 bookmark_ignore_on_disconnect()
 {
-    g_key_file_free(bookmark_ignore_keyfile);
+    free_keyfile(&bookmark_ignore_prof_keyfile);
     bookmark_ignore_keyfile = NULL;
     g_free(account_jid);
+    account_jid = NULL;
 }
 
 gboolean

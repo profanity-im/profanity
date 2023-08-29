@@ -44,30 +44,20 @@
 #include "config/theme.h"
 #include "config/files.h"
 
+static prof_keyfile_t themes_prof_keyfile;
 static GKeyFile* themes;
 
 void
 plugin_themes_init(void)
 {
-    auto_gchar gchar* themes_file = files_get_data_path(FILE_PLUGIN_THEMES);
-
-    if (g_file_test(themes_file, G_FILE_TEST_EXISTS)) {
-        g_chmod(themes_file, S_IRUSR | S_IWUSR);
-    }
-
-    themes = g_key_file_new();
-    g_key_file_load_from_file(themes, themes_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
-
-    gsize g_data_size;
-    auto_gchar gchar* g_data = g_key_file_to_data(themes, &g_data_size, NULL);
-    g_file_set_contents(themes_file, g_data, g_data_size, NULL);
-    g_chmod(themes_file, S_IRUSR | S_IWUSR);
+    load_data_keyfile(&themes_prof_keyfile, FILE_PLUGIN_THEMES);
+    themes = themes_prof_keyfile.keyfile;
 }
 
 void
 plugin_themes_close(void)
 {
-    g_key_file_free(themes);
+    free_keyfile(&themes_prof_keyfile);
     themes = NULL;
 }
 

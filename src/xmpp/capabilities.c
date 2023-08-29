@@ -55,6 +55,7 @@
 #include "xmpp/capabilities.h"
 
 static gchar* cache_loc;
+static prof_keyfile_t caps_prof_keyfile;
 static GKeyFile* cache;
 
 static GHashTable* jid_to_ver;
@@ -72,14 +73,8 @@ void
 caps_init(void)
 {
     log_info("Loading capabilities cache");
-    cache_loc = files_get_data_path(FILE_CAPSCACHE);
-
-    if (g_file_test(cache_loc, G_FILE_TEST_EXISTS)) {
-        g_chmod(cache_loc, S_IRUSR | S_IWUSR);
-    }
-
-    cache = g_key_file_new();
-    g_key_file_load_from_file(cache, cache_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    load_data_keyfile(&caps_prof_keyfile, FILE_CAPSCACHE);
+    cache = caps_prof_keyfile.keyfile;
 
     jid_to_ver = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
     jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)caps_destroy);
@@ -347,7 +342,7 @@ caps_reset_ver(void)
 void
 caps_close(void)
 {
-    g_key_file_free(cache);
+    free_keyfile(&caps_prof_keyfile);
     cache = NULL;
     g_hash_table_destroy(jid_to_ver);
     g_hash_table_destroy(jid_to_caps);
@@ -456,8 +451,5 @@ caps_destroy(EntityCapabilities* caps)
 static void
 _save_cache(void)
 {
-    gsize g_data_size;
-    auto_gchar gchar* g_cache_data = g_key_file_to_data(cache, &g_data_size, NULL);
-    g_file_set_contents(cache_loc, g_cache_data, g_data_size, NULL);
-    g_chmod(cache_loc, S_IRUSR | S_IWUSR);
+    save_keyfile(&caps_prof_keyfile);
 }
