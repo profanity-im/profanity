@@ -345,21 +345,20 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
 gchar*
 get_file_or_linked(gchar* loc, gchar* basedir)
 {
-    gchar* true_loc = NULL;
+    gchar* true_loc = g_strdup(loc);
 
     // check for symlink
-    if (g_file_test(loc, G_FILE_TEST_IS_SYMLINK)) {
-        true_loc = g_file_read_link(loc, NULL);
+    while (g_file_test(true_loc, G_FILE_TEST_IS_SYMLINK)) {
+        gchar* tmp = g_file_read_link(true_loc, NULL);
+        g_free(true_loc);
+        true_loc = tmp;
 
         // if relative, add basedir
         if (!g_str_has_prefix(true_loc, "/") && !g_str_has_prefix(true_loc, "~")) {
-            gchar* tmp = g_strdup_printf("%s/%s", basedir, true_loc);
+            tmp = g_strdup_printf("%s/%s", basedir, true_loc);
             g_free(true_loc);
             true_loc = tmp;
         }
-        // use given location
-    } else {
-        true_loc = g_strdup(loc);
     }
 
     return true_loc;
