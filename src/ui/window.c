@@ -354,16 +354,14 @@ win_get_title(ProfWin* window)
     }
     case WIN_CONFIG:
     {
-        if (window->type == WIN_CONFIG) {
-            ProfConfWin* confwin = (ProfConfWin*)window;
-            assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
-            GString* title = g_string_new(confwin->roomjid);
-            g_string_append(title, " config");
-            if (confwin->form->modified) {
-                g_string_append(title, " *");
-            }
-            return g_string_free(title, FALSE);
+        ProfConfWin* confwin = (ProfConfWin*)window;
+        assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+        GString* title = g_string_new(confwin->roomjid);
+        g_string_append(title, " config");
+        if (confwin->form->modified) {
+            g_string_append(title, " *");
         }
+        return g_string_free(title, FALSE);
     }
     case WIN_PRIVATE:
     {
