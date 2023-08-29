@@ -174,9 +174,12 @@ char*
 str_replace(const char* string, const char* substr,
             const char* replacement)
 {
-    char* tok = NULL;
+    const char* head = NULL;
+    const char* tok = NULL;
     char* newstr = NULL;
-    char* head = NULL;
+    char* wr = NULL;
+    size_t num_substr = 0;
+    size_t len_string, len_substr, len_replacement, len_string_remains, len_newstr;
 
     if (string == NULL)
         return NULL;
@@ -184,26 +187,40 @@ str_replace(const char* string, const char* substr,
     if (substr == NULL || replacement == NULL || (strcmp(substr, "") == 0))
         return strdup(string);
 
-    newstr = strdup(string);
-    head = newstr;
+    tok = string;
+    while ((tok = strstr(tok, substr))) {
+        num_substr++;
+        tok++;
+    }
+
+    if (num_substr == 0)
+        return strdup(string);
+
+    len_string = strlen(string);
+    len_substr = strlen(substr);
+    len_replacement = strlen(replacement);
+    len_newstr = len_string - (num_substr * len_substr) + (num_substr * len_replacement);
+    newstr = malloc(len_newstr + 1);
+    if (newstr == NULL) {
+        return NULL;
+    }
+    len_string_remains = len_string;
+
+    head = string;
+    wr = newstr;
 
     while ((tok = strstr(head, substr))) {
-        auto_char char* oldstr = newstr;
-        newstr = malloc(strlen(oldstr) - strlen(substr) + strlen(replacement) + 1);
+        size_t l = tok - head;
+        memcpy(wr, head, l);
+        wr += l;
+        memcpy(wr, replacement, len_replacement);
+        wr += len_replacement;
+        len_string_remains -= len_substr + l;
 
-        if (newstr == NULL) {
-            return NULL;
-        }
-
-        memcpy(newstr, oldstr, tok - oldstr);
-        memcpy(newstr + (tok - oldstr), replacement, strlen(replacement));
-        memcpy(newstr + (tok - oldstr) + strlen(replacement),
-               tok + strlen(substr),
-               strlen(oldstr) - strlen(substr) - (tok - oldstr));
-        memset(newstr + strlen(oldstr) - strlen(substr) + strlen(replacement), 0, 1);
-
-        head = newstr + (tok - oldstr) + strlen(replacement);
+        head = tok + len_substr;
     }
+    memcpy(wr, head, len_string_remains);
+    newstr[len_newstr] = '\0';
 
     return newstr;
 }
