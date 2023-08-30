@@ -205,13 +205,10 @@ typedef struct prof_winplacement_t
     int inputwin_pos;
 } ProfWinPlacement;
 
-void prefs_load(char* config_file);
+void prefs_load(const char* config_file);
 void prefs_save(void);
 void prefs_close(void);
 void prefs_reload(void);
-
-char* prefs_find_login(char* prefix);
-void prefs_reset_login_search(void);
 
 gchar* prefs_autocomplete_boolean_choice(const char* const prefix, gboolean previous, void* context);
 void prefs_reset_boolean_choice(void);
@@ -358,7 +355,5 @@ gboolean prefs_has_room_notify_trigger(const char* const roomjid);
 gboolean prefs_get_room_notify(const char* const roomjid);
 gboolean prefs_get_room_notify_mention(const char* const roomjid);
 gboolean prefs_get_room_notify_trigger(const char* const roomjid);
-
-gchar* prefs_get_inputrc(void);
 
 #endif
