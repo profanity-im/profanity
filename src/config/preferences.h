@@ -205,13 +205,10 @@ typedef struct prof_winplacement_t
     int inputwin_pos;
 } ProfWinPlacement;
 
-void prefs_load(char* config_file);
+void prefs_load(const char* config_file);
 void prefs_save(void);
 void prefs_close(void);
 void prefs_reload(void);
-
-char* prefs_find_login(char* prefix);
-void prefs_reset_login_search(void);
 
 gchar* prefs_autocomplete_boolean_choice(const char* const prefix, gboolean previous, void* context);
 void prefs_reset_boolean_choice(void);
@@ -256,38 +253,38 @@ gchar** prefs_get_plugins(void);
 void prefs_add_plugin(const char* const name);
 void prefs_remove_plugin(const char* const name);
 
-char* prefs_get_otr_char(void);
+gchar* prefs_get_otr_char(void);
 gboolean prefs_set_otr_char(char* ch);
-char* prefs_get_pgp_char(void);
+gchar* prefs_get_pgp_char(void);
 gboolean prefs_set_pgp_char(char* ch);
-char* prefs_get_omemo_char(void);
+gchar* prefs_get_omemo_char(void);
 gboolean prefs_set_omemo_char(char* ch);
 // XEP-0373: OpenPGP for XMPP
 char* prefs_get_ox_char(void);
 gboolean prefs_set_ox_char(char* ch);
 
-char* prefs_get_roster_header_char(void);
+gchar* prefs_get_roster_header_char(void);
 void prefs_set_roster_header_char(char* ch);
 void prefs_clear_roster_header_char(void);
-char* prefs_get_roster_contact_char(void);
+gchar* prefs_get_roster_contact_char(void);
 void prefs_set_roster_contact_char(char* ch);
 void prefs_clear_roster_contact_char(void);
-char* prefs_get_roster_resource_char(void);
+gchar* prefs_get_roster_resource_char(void);
 void prefs_set_roster_resource_char(char* ch);
 void prefs_clear_roster_resource_char(void);
-char* prefs_get_roster_private_char(void);
+gchar* prefs_get_roster_private_char(void);
 void prefs_set_roster_private_char(char* ch);
 void prefs_clear_roster_private_char(void);
-char* prefs_get_roster_room_char(void);
+gchar* prefs_get_roster_room_char(void);
 void prefs_set_roster_room_char(char* ch);
 void prefs_clear_roster_room_char(void);
-char* prefs_get_roster_room_private_char(void);
+gchar* prefs_get_roster_room_private_char(void);
 void prefs_set_roster_room_private_char(char* ch);
 void prefs_clear_roster_room_private_char(void);
-char* prefs_get_occupants_char(void);
+gchar* prefs_get_occupants_char(void);
 void prefs_set_occupants_char(char* ch);
 void prefs_clear_occupants_char(void);
-char* prefs_get_occupants_header_char(void);
+gchar* prefs_get_occupants_header_char(void);
 void prefs_set_occupants_header_char(char* ch);
 void prefs_clear_occupants_header_char(void);
 
@@ -300,7 +297,7 @@ void prefs_set_roster_presence_indent(gint value);
 gint prefs_get_occupants_indent(void);
 void prefs_set_occupants_indent(gint value);
 
-char* prefs_get_correction_char(void);
+gchar* prefs_get_correction_char(void);
 void prefs_set_correction_char(char ch);
 
 void prefs_add_login(const char* jid);
@@ -358,7 +355,5 @@ gboolean prefs_has_room_notify_trigger(const char* const roomjid);
 gboolean prefs_get_room_notify(const char* const roomjid);
 gboolean prefs_get_room_notify_mention(const char* const roomjid);
 gboolean prefs_get_room_notify_trigger(const char* const roomjid);
-
-gchar* prefs_get_inputrc(void);
 
 #endif

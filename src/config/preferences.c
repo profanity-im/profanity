@@ -251,7 +251,7 @@ prefs_reload(void)
 }
 
 void
-prefs_load(char* config_file)
+prefs_load(const char* config_file)
 {
     if (config_file == NULL) {
         prefs_loc = files_get_config_path(FILE_PROFRC);
@@ -900,11 +900,11 @@ prefs_get_occupants_size(void)
     }
 }
 
-char*
+gchar*
 prefs_get_occupants_char(void)
 {
 
-    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.char", NULL);
+    gchar* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.char", NULL);
 
     return result;
 }
@@ -946,10 +946,10 @@ prefs_set_occupants_indent(gint value)
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "occupants.indent", value);
 }
 
-char*
+gchar*
 prefs_get_occupants_header_char(void)
 {
-    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.header.char", NULL);
+    gchar* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "occupants.header.char", NULL);
 
     return result;
 }
@@ -988,14 +988,14 @@ prefs_get_roster_size(void)
     }
 }
 
-static char*
+static gchar*
 _prefs_get_encryption_char(const char* const ch, const char* const pref_group, const char* const key)
 {
-    char* result = NULL;
+    gchar* result = NULL;
 
-    char* resultstr = g_key_file_get_string(prefs, pref_group, key, NULL);
+    gchar* resultstr = g_key_file_get_string(prefs, pref_group, key, NULL);
     if (!resultstr) {
-        result = strdup(ch);
+        result = g_strdup(ch);
     } else {
         result = resultstr;
     }
@@ -1015,7 +1015,7 @@ _prefs_set_encryption_char(const char* const ch, const char* const pref_group, c
     return FALSE;
 }
 
-char*
+gchar*
 prefs_get_otr_char(void)
 {
     return _prefs_get_encryption_char("~", PREF_GROUP_OTR, "otr.char");
@@ -1027,7 +1027,7 @@ prefs_set_otr_char(char* ch)
     return _prefs_set_encryption_char(ch, PREF_GROUP_OTR, "otr.char");
 }
 
-char*
+gchar*
 prefs_get_pgp_char(void)
 {
     return _prefs_get_encryption_char("~", PREF_GROUP_PGP, "pgp.char");
@@ -1039,7 +1039,7 @@ prefs_set_pgp_char(char* ch)
     return _prefs_set_encryption_char(ch, PREF_GROUP_PGP, "pgp.char");
 }
 
-char*
+gchar*
 prefs_get_ox_char(void)
 {
     return _prefs_get_encryption_char("%", PREF_GROUP_OX, "ox.char");
@@ -1051,7 +1051,7 @@ prefs_set_ox_char(char* ch)
     return _prefs_set_encryption_char(ch, PREF_GROUP_OX, "ox.char");
 }
 
-char*
+gchar*
 prefs_get_omemo_char(void)
 {
     return _prefs_get_encryption_char("~", PREF_GROUP_OMEMO, "omemo.char");
@@ -1063,17 +1063,10 @@ prefs_set_omemo_char(char* ch)
     return _prefs_set_encryption_char(ch, PREF_GROUP_OMEMO, "omemo.char");
 }
 
-char*
+gchar*
 prefs_get_roster_header_char(void)
 {
-    char* result = NULL;
-
-    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.header.char", NULL);
-    if (resultstr) {
-        result = resultstr;
-    }
-
-    return result;
+    return g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.header.char", NULL);
 }
 
 void
@@ -1092,12 +1085,10 @@ prefs_clear_roster_header_char(void)
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.header.char", NULL);
 }
 
-char*
+gchar*
 prefs_get_roster_contact_char(void)
 {
-    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.contact.char", NULL);
-
-    return result;
+    return g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.contact.char", NULL);
 }
 
 void
@@ -1116,12 +1107,10 @@ prefs_clear_roster_contact_char(void)
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.contact.char", NULL);
 }
 
-char*
+gchar*
 prefs_get_roster_resource_char(void)
 {
-    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.resource.char", NULL);
-
-    return result;
+    return g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.resource.char", NULL);
 }
 
 void
@@ -1140,12 +1129,10 @@ prefs_clear_roster_resource_char(void)
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.resource.char", NULL);
 }
 
-char*
+gchar*
 prefs_get_roster_private_char(void)
 {
-    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
-
-    return result;
+    return g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
 }
 
 void
@@ -1164,12 +1151,10 @@ prefs_clear_roster_private_char(void)
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.private.char", NULL);
 }
 
-char*
+gchar*
 prefs_get_roster_room_char(void)
 {
-    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
-
-    return result;
+    return g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
 }
 
 void
@@ -1188,12 +1173,10 @@ prefs_clear_roster_room_char(void)
     g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.rooms.char", NULL);
 }
 
-char*
+gchar*
 prefs_get_roster_room_private_char(void)
 {
-    char* result = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", NULL);
-
-    return result;
+    return g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", NULL);
 }
 
 void
@@ -1275,19 +1258,12 @@ prefs_set_roster_presence_indent(gint value)
     g_key_file_set_integer(prefs, PREF_GROUP_UI, "roster.presence.indent", value);
 }
 
-char*
+gchar*
 prefs_get_correction_char(void)
 {
-    char* result = "+";
+    gchar* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "correction.char", NULL);
 
-    char* resultstr = g_key_file_get_string(prefs, PREF_GROUP_UI, "correction.char", NULL);
-    if (!resultstr) {
-        result = strdup("+");
-    } else {
-        result = resultstr;
-    }
-
-    return result;
+    return resultstr ? resultstr : g_strdup("+");
 }
 
 void

@@ -329,7 +329,7 @@ _confwin_form_field(ProfWin* window, char* tag, FormField* field)
     }
 }
 
-char*
+gchar*
 confwin_get_string(ProfConfWin* confwin)
 {
     assert(confwin != NULL);

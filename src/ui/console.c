@@ -2168,7 +2168,7 @@ cons_correction_setting(void)
         cons_show("Last Message Correction (XEP-0308) (/correction)                   : OFF");
     }
 
-    auto_char char* cc = prefs_get_correction_char();
+    auto_gchar gchar* cc = prefs_get_correction_char();
     cons_show("LMC indication char (/correction char)                             : %s", cc);
 }
 
@@ -2258,7 +2258,7 @@ cons_show_otr_prefs(void)
         cons_show("OTR logging (/otr log)   : Redacted");
     }
 
-    auto_char char* ch = prefs_get_otr_char();
+    auto_gchar gchar* ch = prefs_get_otr_char();
     cons_show("OTR char (/otr char)     : %s", ch);
 
     if (prefs_get_boolean(PREF_OTR_SENDFILE)) {
@@ -2285,7 +2285,7 @@ cons_show_pgp_prefs(void)
         cons_show("PGP logging (/pgp log)   : Redacted");
     }
 
-    auto_char char* ch = prefs_get_pgp_char();
+    auto_gchar gchar* ch = prefs_get_pgp_char();
     cons_show("PGP char (/pgp char)     : %s", ch);
 
     if (prefs_get_boolean(PREF_PGP_SENDFILE)) {
@@ -2315,7 +2315,7 @@ cons_show_omemo_prefs(void)
         cons_show("OMEMO logging (/omemo log)   : Redacted");
     }
 
-    auto_char char* ch = prefs_get_omemo_char();
+    auto_gchar gchar* ch = prefs_get_omemo_char();
     cons_show("OMEMO char (/omemo char)     : %s", ch);
 
     cons_alert(NULL);
@@ -2336,7 +2336,7 @@ cons_show_ox_prefs(void)
         cons_show("OX logging (/ox log)   : Redacted");
     }
 
-    auto_char char* ch = prefs_get_ox_char();
+    auto_gchar gchar* ch = prefs_get_ox_char();
     cons_show("OX char (/ox char)     : %s", ch);
 
     cons_alert(NULL);
@@ -2541,11 +2541,11 @@ cons_alert(ProfWin* alert_origin_window)
     if (current->type != WIN_CONSOLE) {
         status_bar_new(1, WIN_CONSOLE, "console");
 
-        auto_char char* win_name;
+        auto_gchar gchar* win_name;
         if (alert_origin_window) {
             win_name = win_to_string(alert_origin_window);
         } else {
-            win_name = strdup("console");
+            win_name = g_strdup("console");
         }
 
         GList* item = g_list_find_custom(alert_list, win_name, (GCompareFunc)g_strcmp0);
@@ -2555,12 +2555,12 @@ cons_alert(ProfWin* alert_origin_window)
     }
 }
 
-char*
+gchar*
 cons_get_string(ProfConsoleWin* conswin)
 {
     assert(conswin != NULL);
 
-    return strdup("Console");
+    return g_strdup("Console");
 }
 
 void
@@ -2881,7 +2881,7 @@ cons_clear_alerts(void)
 void
 cons_remove_alert(ProfWin* window)
 {
-    auto_char char* win_name = win_to_string(window);
+    auto_gchar gchar* win_name = win_to_string(window);
     GList* item = g_list_find_custom(alert_list, win_name, (GCompareFunc)g_strcmp0);
     alert_list = g_list_remove_link(alert_list, item);
     g_list_free_full(item, g_free);

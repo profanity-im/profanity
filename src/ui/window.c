@@ -296,17 +296,17 @@ win_create_vcard(vCard* vcard)
     return &new_win->window;
 }
 
-char*
+gchar*
 win_get_title(ProfWin* window)
 {
     if (window == NULL) {
-        return strdup(CONS_WIN_TITLE);
+        return g_strdup(CONS_WIN_TITLE);
     }
 
     switch (window->type) {
     case WIN_CONSOLE:
     {
-        return strdup(CONS_WIN_TITLE);
+        return g_strdup(CONS_WIN_TITLE);
     }
     case WIN_CHAT:
     {
@@ -318,15 +318,15 @@ win_get_title(ProfWin* window)
         jabber_conn_status_t conn_status = connection_get_status();
 
         if (conn_status != JABBER_CONNECTED || !show_titlebar_name) {
-            return strdup(chatwin->barejid);
+            return g_strdup(chatwin->barejid);
         }
         PContact contact = roster_get_contact(chatwin->barejid);
         if (!contact) {
-            return strdup(chatwin->barejid);
+            return g_strdup(chatwin->barejid);
         }
         const char* name = p_contact_name(contact);
         if (name == NULL) {
-            return strdup(chatwin->barejid);
+            return g_strdup(chatwin->barejid);
         }
         if (show_titlebar_jid) {
             return g_strdup_printf("%s <%s>", name, chatwin->barejid);
@@ -354,32 +354,30 @@ win_get_title(ProfWin* window)
     }
     case WIN_CONFIG:
     {
-        if (window->type == WIN_CONFIG) {
-            ProfConfWin* confwin = (ProfConfWin*)window;
-            assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
-            GString* title = g_string_new(confwin->roomjid);
-            g_string_append(title, " config");
-            if (confwin->form->modified) {
-                g_string_append(title, " *");
-            }
-            return g_string_free(title, FALSE);
+        ProfConfWin* confwin = (ProfConfWin*)window;
+        assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+        GString* title = g_string_new(confwin->roomjid);
+        g_string_append(title, " config");
+        if (confwin->form->modified) {
+            g_string_append(title, " *");
         }
+        return g_string_free(title, FALSE);
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        return strdup(privatewin->fulljid);
+        return g_strdup(privatewin->fulljid);
     }
     case WIN_XML:
     {
-        return strdup(XML_WIN_TITLE);
+        return g_strdup(XML_WIN_TITLE);
     }
     case WIN_PLUGIN:
     {
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
         assert(pluginwin->memcheck == PROFPLUGINWIN_MEMCHECK);
-        return strdup(pluginwin->tag);
+        return g_strdup(pluginwin->tag);
     }
     case WIN_VCARD:
     {
@@ -478,7 +476,7 @@ win_get_last_sent_message(ProfWin* window)
     return last_message;
 }
 
-char*
+gchar*
 win_to_string(ProfWin* window)
 {
     assert(window != NULL);
@@ -1372,7 +1370,7 @@ _win_correct(ProfWin* window, const char* const message, const char* const id, c
     entry->date = buffer_date_new_now();
     */
 
-    free(entry->show_char);
+    g_free(entry->show_char);
     entry->show_char = prefs_get_correction_char();
 
     if (entry->message) {

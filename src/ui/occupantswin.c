@@ -65,8 +65,8 @@ _occuptantswin_occupant(ProfLayoutSplit* layout, GList* item, gboolean showjid, 
 
     GString* spaces = g_string_new(" ");
 
-    int indent = prefs_get_occupants_indent();
-    int current_indent = 0;
+    gint indent = prefs_get_occupants_indent();
+    gint current_indent = 0;
     if (indent > 0) {
         current_indent += indent;
         while (indent > 0) {
@@ -77,7 +77,7 @@ _occuptantswin_occupant(ProfLayoutSplit* layout, GList* item, gboolean showjid, 
 
     GString* msg = g_string_new(spaces->str);
 
-    auto_char char* ch = prefs_get_occupants_char();
+    auto_gchar gchar* ch = prefs_get_occupants_char();
     if (ch) {
         g_string_append_printf(msg, "%s", ch);
     }
@@ -129,7 +129,7 @@ occupantswin_occupants(const char* const roomjid)
 
             GString* prefix = g_string_new(" ");
 
-            auto_char char* ch = prefs_get_occupants_header_char();
+            auto_gchar gchar* ch = prefs_get_occupants_header_char();
             if (ch) {
                 g_string_append_printf(prefix, "%s", ch);
             }

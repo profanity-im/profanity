@@ -50,7 +50,7 @@ typedef struct delivery_receipt_t
 typedef struct prof_buff_entry_t
 {
     // pointer because it could be a unicode symbol as well
-    char* show_char;
+    gchar* show_char;
     int pad_indent;
     GDateTime* time;
     int flags;
