@@ -340,17 +340,17 @@ win_get_title(ProfWin* window)
 
         gboolean show_titlebar_jid = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_JID);
         gboolean show_titlebar_name = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_NAME);
-        GString* title = g_string_new("");
 
         if (show_titlebar_name && mucwin->room_name) {
-            g_string_append(title, mucwin->room_name);
-            g_string_append(title, " ");
+            if (show_titlebar_jid)
+                return g_strdup_printf("%s %s", mucwin->room_name, mucwin->roomjid);
+            else
+                return g_strdup(mucwin->room_name);
         }
-        if (show_titlebar_jid) {
-            g_string_append(title, mucwin->roomjid);
-        }
+        if (show_titlebar_jid)
+            return g_strdup(mucwin->roomjid);
 
-        return g_string_free(title, FALSE);
+        return g_strdup("");
     }
     case WIN_CONFIG:
     {
@@ -1536,143 +1536,86 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
     g_date_time_unref(message->timestamp);
 }
 
-void
-win_print(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, ...)
+static void
+win_println_va_internal(ProfWin* window, theme_item_t theme_item, int pad, int flags, const char* show_char, const char* const message, va_list arg)
 {
     GDateTime* timestamp = g_date_time_new_now_local();
 
-    va_list arg;
-    va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
+    auto_gchar gchar* msg = g_strdup_vprintf(message, arg);
 
-    buffer_append(window->layout->buffer, show_char, 0, timestamp, NO_EOL, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, show_char, 0, timestamp, NO_EOL, theme_item, "", fmt_msg->str, NULL);
+    buffer_append(window->layout->buffer, show_char, pad, timestamp, flags, theme_item, "", NULL, msg, NULL, NULL);
+    _win_print_internal(window, show_char, pad, timestamp, flags, theme_item, "", msg, NULL);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
+}
 
-    g_string_free(fmt_msg, TRUE);
+void
+win_print(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, ...)
+{
+    va_list arg;
+    va_start(arg, message);
+    win_println_va_internal(window, theme_item, 0, NO_EOL, show_char, message, arg);
     va_end(arg);
+}
+
+void
+win_println_va(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, va_list arg)
+{
+    win_println_va_internal(window, theme_item, 0, 0, show_char, message, arg);
 }
 
 void
 win_println(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
-
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-
-    buffer_append(window->layout->buffer, show_char, 0, timestamp, 0, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, show_char, 0, timestamp, 0, theme_item, "", fmt_msg->str, NULL);
-
-    inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
-
-    g_string_free(fmt_msg, TRUE);
+    win_println_va_internal(window, theme_item, 0, 0, show_char, message, arg);
     va_end(arg);
 }
 
 void
 win_println_indent(ProfWin* window, int pad, const char* const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
-
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-
-    buffer_append(window->layout->buffer, "-", pad, timestamp, 0, THEME_DEFAULT, "", NULL, fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, "-", pad, timestamp, 0, THEME_DEFAULT, "", fmt_msg->str, NULL);
-
-    inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
-
-    g_string_free(fmt_msg, TRUE);
+    win_println_va_internal(window, THEME_DEFAULT, pad, 0, "-", message, arg);
     va_end(arg);
 }
 
 void
 win_append(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
-
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-
-    buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_EOL, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, "-", 0, timestamp, NO_DATE | NO_EOL, theme_item, "", fmt_msg->str, NULL);
-
-    inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
-
-    g_string_free(fmt_msg, TRUE);
+    win_println_va_internal(window, theme_item, 0, NO_DATE | NO_EOL, "-", message, arg);
     va_end(arg);
 }
 
 void
 win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
-
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-
-    buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, "-", 0, timestamp, NO_DATE, theme_item, "", fmt_msg->str, NULL);
-
-    inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
-
-    g_string_free(fmt_msg, TRUE);
+    win_println_va_internal(window, theme_item, 0, NO_DATE, "-", message, arg);
     va_end(arg);
 }
 
 void
 win_append_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
-
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-
-    buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, "-", 0, timestamp, NO_DATE | NO_ME | NO_EOL, theme_item, "", fmt_msg->str, NULL);
-
-    inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
-
-    g_string_free(fmt_msg, TRUE);
+    win_println_va_internal(window, theme_item, 0, NO_DATE | NO_ME | NO_EOL, "-", message, arg);
     va_end(arg);
 }
 
 void
 win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
-
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
-
-    buffer_append(window->layout->buffer, "-", 0, timestamp, NO_DATE | NO_ME, theme_item, "", NULL, fmt_msg->str, NULL, NULL);
-    _win_print_internal(window, "-", 0, timestamp, NO_DATE | NO_ME, theme_item, "", fmt_msg->str, NULL);
-
-    inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
-
-    g_string_free(fmt_msg, TRUE);
+    win_println_va_internal(window, theme_item, 0, NO_DATE | NO_ME, "-", message, arg);
     va_end(arg);
 }
 
@@ -1752,16 +1695,15 @@ _win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* t
 
     va_list arg;
     va_start(arg, message);
-    GString* fmt_msg = g_string_new(NULL);
-    g_string_vprintf(fmt_msg, message, arg);
 
-    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, fmt_msg->str, NULL, message_id);
-    _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, fmt_msg->str, NULL);
+    auto_gchar gchar* msg = g_strdup_vprintf(message, arg);
+
+    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, msg, NULL, message_id);
+    _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, msg, NULL);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
 
-    g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
 
@@ -2221,12 +2163,10 @@ win_command_exec_error(ProfWin* window, const char* const command, const char* c
     assert(window != NULL);
     va_list arg;
     va_start(arg, error);
-    GString* msg = g_string_new(NULL);
-    g_string_vprintf(msg, error, arg);
+    auto_gchar gchar* msg = g_strdup_vprintf(error, arg);
 
-    win_println(window, THEME_ERROR, "!", "Error executing command %s: %s", command, msg->str);
+    win_println(window, THEME_ERROR, "!", "Error executing command %s: %s", command, msg);
 
-    g_string_free(msg, TRUE);
     va_end(arg);
 }
 
@@ -2306,9 +2246,5 @@ win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previo
     auto_gcharv gchar** parts = g_strsplit(result, "\n", -1);
     auto_gchar gchar* quoted_result = g_strjoinv("\n> ", parts);
 
-    GString* replace_with = g_string_new("> ");
-    g_string_append(replace_with, quoted_result);
-    g_string_append(replace_with, "\n");
-
-    return g_string_free(replace_with, FALSE);
+    return g_strdup_printf("> %s\n", quoted_result);
 }

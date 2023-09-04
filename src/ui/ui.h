@@ -393,6 +393,8 @@ void win_print(ProfWin* window, theme_item_t theme_item, const char* show_char, 
 void win_println(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, ...);
 void win_println_indent(ProfWin* window, int pad, const char* const message, ...);
 
+void win_println_va(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, va_list arg);
+
 void win_append(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
 void win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
 
