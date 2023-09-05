@@ -63,7 +63,7 @@
 static const char* libversion = NULL;
 static GHashTable* pubkeys;
 
-static gchar* pubsloc;
+static prof_keyfile_t pubkeys_prof_keyfile;
 static GKeyFile* pubkeyfile;
 
 static char* passphrase;
@@ -136,13 +136,8 @@ p_gpg_close(void)
         pubkeys = NULL;
     }
 
-    if (pubkeyfile) {
-        g_key_file_free(pubkeyfile);
-        pubkeyfile = NULL;
-    }
-
-    free(pubsloc);
-    pubsloc = NULL;
+    free_keyfile(&pubkeys_prof_keyfile);
+    pubkeyfile = NULL;
 
     autocomplete_free(key_ac);
     key_ac = NULL;
@@ -161,19 +156,14 @@ p_gpg_close(void)
 void
 p_gpg_on_connect(const char* const barejid)
 {
-    pubsloc = files_file_in_account_data_path(DIR_PGP, barejid, "pubkeys");
+    gchar* pubsloc = files_file_in_account_data_path(DIR_PGP, barejid, "pubkeys");
     if (!pubsloc) {
         log_error("Could not create directory for account %s.", barejid);
         cons_show_error("Could not create directory for account %s.", barejid);
         return;
     }
-
-    if (g_file_test(pubsloc, G_FILE_TEST_EXISTS)) {
-        g_chmod(pubsloc, S_IRUSR | S_IWUSR);
-    }
-
-    pubkeyfile = g_key_file_new();
-    g_key_file_load_from_file(pubkeyfile, pubsloc, G_KEY_FILE_KEEP_COMMENTS, NULL);
+    load_custom_keyfile(&pubkeys_prof_keyfile, pubsloc);
+    pubkeyfile = pubkeys_prof_keyfile.keyfile;
 
     // load each keyid
     gsize len = 0;
@@ -218,28 +208,9 @@ p_gpg_on_connect(const char* const barejid)
 void
 p_gpg_on_disconnect(void)
 {
-    if (pubkeys) {
-        g_hash_table_destroy(pubkeys);
-        pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_p_gpg_free_pubkeyid);
-    }
-
-    if (pubkeyfile) {
-        g_key_file_free(pubkeyfile);
-        pubkeyfile = NULL;
-    }
-
-    free(pubsloc);
-    pubsloc = NULL;
-
-    if (passphrase) {
-        free(passphrase);
-        passphrase = NULL;
-    }
-
-    if (passphrase_attempt) {
-        free(passphrase_attempt);
-        passphrase_attempt = NULL;
-    }
+    p_gpg_close();
+    pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_p_gpg_free_pubkeyid);
+    key_ac = autocomplete_new();
 }
 
 gboolean
@@ -973,8 +944,5 @@ _add_header_footer(const char* const str, const char* const header, const char* 
 static void
 _save_pubkeys(void)
 {
-    gsize g_data_size;
-    auto_gchar gchar* g_pubkeys_data = g_key_file_to_data(pubkeyfile, &g_data_size, NULL);
-    g_file_set_contents(pubsloc, g_pubkeys_data, g_data_size, NULL);
-    g_chmod(pubsloc, S_IRUSR | S_IWUSR);
+    save_keyfile(&pubkeys_prof_keyfile);
 }

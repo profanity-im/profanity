@@ -69,7 +69,7 @@
 
 #define INPBLOCK_DEFAULT 1000
 
-static gchar* prefs_loc;
+static prof_keyfile_t prefs_prof_keyfile;
 static GKeyFile* prefs;
 gint log_maxsize = 0;
 
@@ -234,37 +234,20 @@ _prefs_close(void)
 void
 prefs_reload(void)
 {
-    /*
-     * Current function contains copy-paste, but we wanted to avoid config_file
-     * manipulation from prefs_load/prefs_close
-     */
-
-    _prefs_close();
-
-    g_key_file_free(prefs);
-    prefs = NULL;
-
-    prefs = g_key_file_new();
-    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS, NULL);
-
-    _prefs_load();
+    auto_gchar gchar* loc = g_strdup(prefs_prof_keyfile.filename);
+    prefs_close();
+    prefs_load(loc);
 }
 
 void
 prefs_load(const char* config_file)
 {
     if (config_file == NULL) {
-        prefs_loc = files_get_config_path(FILE_PROFRC);
+        load_config_keyfile(&prefs_prof_keyfile, FILE_PROFRC);
     } else {
-        prefs_loc = g_strdup(config_file);
+        load_custom_keyfile(&prefs_prof_keyfile, g_strdup(config_file));
     }
-
-    if (g_file_test(prefs_loc, G_FILE_TEST_EXISTS)) {
-        g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
-    }
-
-    prefs = g_key_file_new();
-    g_key_file_load_from_file(prefs, prefs_loc, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, NULL);
+    prefs = prefs_prof_keyfile.keyfile;
 
     _prefs_load();
 }
@@ -280,11 +263,8 @@ prefs_close(void)
 {
     _prefs_close();
 
-    g_key_file_free(prefs);
+    free_keyfile(&prefs_prof_keyfile);
     prefs = NULL;
-
-    g_free(prefs_loc);
-    prefs_loc = NULL;
 }
 
 gchar*
@@ -1689,13 +1669,7 @@ prefs_free_aliases(GList* aliases)
 static void
 _save_prefs(void)
 {
-    gsize g_data_size;
-    auto_gchar gchar* g_prefs_data = g_key_file_to_data(prefs, &g_data_size, NULL);
-    auto_gchar gchar* base = g_path_get_dirname(prefs_loc);
-    auto_gchar gchar* true_loc = get_file_or_linked(prefs_loc, base);
-
-    g_file_set_contents(true_loc, g_prefs_data, g_data_size, NULL);
-    g_chmod(prefs_loc, S_IRUSR | S_IWUSR);
+    save_keyfile(&prefs_prof_keyfile);
 }
 
 // get the preference group for a specific preference

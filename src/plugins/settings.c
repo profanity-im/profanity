@@ -46,6 +46,7 @@
 #include "config/files.h"
 #include "config/conflists.h"
 
+static prof_keyfile_t settings_prof_keyfile;
 static GKeyFile* settings;
 
 static void _save_settings(void);
@@ -53,25 +54,14 @@ static void _save_settings(void);
 void
 plugin_settings_init(void)
 {
-    auto_gchar gchar* settings_file = files_get_data_path(FILE_PLUGIN_SETTINGS);
-
-    if (g_file_test(settings_file, G_FILE_TEST_EXISTS)) {
-        g_chmod(settings_file, S_IRUSR | S_IWUSR);
-    }
-
-    settings = g_key_file_new();
-    g_key_file_load_from_file(settings, settings_file, G_KEY_FILE_KEEP_COMMENTS, NULL);
-
-    gsize g_data_size;
-    auto_gchar gchar* g_data = g_key_file_to_data(settings, &g_data_size, NULL);
-    g_file_set_contents(settings_file, g_data, g_data_size, NULL);
-    g_chmod(settings_file, S_IRUSR | S_IWUSR);
+    load_data_keyfile(&settings_prof_keyfile, FILE_PLUGIN_SETTINGS);
+    settings = settings_prof_keyfile.keyfile;
 }
 
 void
 plugin_settings_close(void)
 {
-    g_key_file_free(settings);
+    free_keyfile(&settings_prof_keyfile);
     settings = NULL;
 }
 
@@ -172,12 +162,5 @@ plugin_settings_string_list_clear(const char* const group, const char* const key
 static void
 _save_settings(void)
 {
-    gsize g_data_size;
-    auto_gchar gchar* g_data = g_key_file_to_data(settings, &g_data_size, NULL);
-
-    auto_gchar gchar* fileloc = files_get_data_path(FILE_PLUGIN_SETTINGS);
-    auto_gchar gchar* base = g_path_get_dirname(fileloc);
-    auto_gchar gchar* true_loc = get_file_or_linked(fileloc, base);
-    g_file_set_contents(true_loc, g_data, g_data_size, NULL);
-    g_chmod(fileloc, S_IRUSR | S_IWUSR);
+    save_keyfile(&settings_prof_keyfile);
 }
