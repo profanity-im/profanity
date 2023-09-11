@@ -230,24 +230,22 @@ omemo_on_connect(ProfAccount* account)
         return;
     }
 
-    if (!load_custom_keyfile(&omemo_ctx.identity, g_strdup_printf("%s/%s", omemo_dir, "identity.txt")) || !_load_identity()) {
-        return;
+    if (load_custom_keyfile(&omemo_ctx.identity, g_strdup_printf("%s/%s", omemo_dir, "identity.txt"))) {
+        if (!_load_identity())
+            return;
     }
 
-    if (!load_custom_keyfile(&omemo_ctx.trust, g_strdup_printf("%s/%s", omemo_dir, "trust.txt"))) {
-        return;
+    if (load_custom_keyfile(&omemo_ctx.trust, g_strdup_printf("%s/%s", omemo_dir, "trust.txt"))) {
+        _load_trust();
     }
-    _load_trust();
 
-    if (!load_custom_keyfile(&omemo_ctx.sessions, g_strdup_printf("%s/%s", omemo_dir, "sessions.txt"))) {
-        return;
+    if (load_custom_keyfile(&omemo_ctx.sessions, g_strdup_printf("%s/%s", omemo_dir, "sessions.txt"))) {
+        _load_sessions();
     }
-    _load_sessions();
 
-    if (!load_custom_keyfile(&omemo_ctx.knowndevices, g_strdup_printf("%s/%s", omemo_dir, "known_devices.txt"))) {
-        return;
+    if (load_custom_keyfile(&omemo_ctx.knowndevices, g_strdup_printf("%s/%s", omemo_dir, "known_devices.txt"))) {
+        _load_known_devices();
     }
-    _load_known_devices();
 
     omemo_devicelist_subscribe();
 }
