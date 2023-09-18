@@ -52,6 +52,8 @@
 #include "ui/window_list.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/connection.h"
+#include "xmpp/jingle.h"
+#include "xmpp/ibb.h"
 #include "xmpp/session.h"
 #include "xmpp/iq.h"
 #include "xmpp/capabilities.h"
@@ -233,6 +235,16 @@ _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const us
     xmpp_stanza_t* blocking = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_BLOCKING);
     if (blocking && (g_strcmp0(type, STANZA_TYPE_SET) == 0)) {
         blocked_set_handler(stanza);
+    }
+
+    xmpp_stanza_t* jingle = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_JINGLE);
+    if (jingle) {
+        handle_jingle_iq(stanza);
+    }
+
+    xmpp_stanza_t* ibb = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_IBB);
+    if (ibb) {
+        handle_ibb(stanza);
     }
 
     const char* id = xmpp_stanza_get_id(stanza);

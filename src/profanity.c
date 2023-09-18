@@ -69,6 +69,8 @@
 #include "xmpp/chat_session.h"
 #include "xmpp/chat_state.h"
 #include "xmpp/contact.h"
+#include "xmpp/ibb.h"
+#include "xmpp/jingle.h"
 #include "xmpp/roster_list.h"
 
 #ifdef HAVE_LIBOTR
@@ -216,6 +218,8 @@ _init(char* log_level, char* config_file, char* log_file, char* theme_name)
 #ifdef HAVE_GTK
     tray_init();
 #endif
+    jingle_init();
+    ibb_init();
     inp_nonblocking(TRUE);
     ui_resize();
 }
@@ -251,6 +255,8 @@ _shutdown(void)
 #ifdef HAVE_OMEMO
     omemo_close();
 #endif
+    jingle_close();
+    ibb_close();
     chat_log_close();
     theme_close();
     accounts_close();

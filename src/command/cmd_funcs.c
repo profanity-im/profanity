@@ -88,6 +88,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/contact.h"
 #include "xmpp/jid.h"
+#include "xmpp/jingle.h"
 #include "xmpp/muc.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/session.h"
@@ -10833,5 +10834,106 @@ cmd_vcard_save(ProfWin* window, const char* const command, gchar** args)
 
     vcard_user_save();
     cons_show("User vCard uploaded");
+    return TRUE;
+}
+
+// TODO: Also list sessions
+gboolean
+cmd_jingle(ProfWin* window, const char* const command, gchar** args)
+{
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    if (g_strcmp0(args[0], "session") == 0) {
+        const char* session_id = NULL;
+        // todo: check arg length
+
+        // if contains @, then it's a jid
+        if (g_strrstr(args[2], "@") != NULL) {
+            session_id = jingle_find_unique_session_by_jid(args[2]);
+            if (!session_id) {
+                return TRUE;
+            }
+        } else {
+            session_id = args[2];
+        }
+
+        const gchar* action = args[1];
+        if (g_strcmp0(action, "accept") == 0) {
+            if (jingle_accept_session(session_id)) {
+                cons_show("Successfully %sed the jingle session %s", action, session_id);
+            } else {
+                cons_show("Unable to %s the session.", action);
+            }
+        } else if (g_strcmp0(action, "reject") == 0) {
+            if (jingle_reject_session(session_id)) {
+                cons_show("Successfully %sed the jingle session %s", action, session_id);
+            } else {
+                cons_show("Unable to %s the session.", action);
+            }
+        } else if (g_strcmp0(action, "cancel") == 0) {
+            if (jingle_cancel_session(session_id)) {
+                cons_show("Successfully %sed the jingle session %s", action, session_id);
+            } else {
+                cons_show("Unable to %s the session.", action);
+            }
+        } else {
+            cons_show_error("Invalid session action.");
+            cons_bad_cmd_usage(command);
+        }
+
+        // /jingle sendfiles [<jid>] <file1> <file2> ... <fileN>
+    } else if (g_strcmp0(args[0], "sendfiles") == 0) {
+        auto_jid Jid* jid = jid_create(args[1]);
+        char* recipient = NULL;
+
+        if (!jid || !jid->resourcepart) {
+            if (window->type == WIN_CHAT) {
+                ProfChatWin* chatwin = (ProfChatWin*)window;
+                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+
+                char* resource = NULL;
+                ChatSession* session = chat_session_get(chatwin->barejid);
+                if (chatwin->resource_override) {
+                    resource = chatwin->resource_override;
+                } else if (session && session->resource) {
+                    resource = session->resource;
+                }
+
+                if (resource) {
+                    recipient = g_strdup_printf("%s/%s", chatwin->barejid, resource);
+                } else {
+                    win_println(window, THEME_DEFAULT, "-", "[Jingle] Unable to fetch resource for the current window.");
+                    return TRUE;
+                }
+
+            } else if (window->type == WIN_PRIVATE) {
+                ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
+                assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+                jid = jid_create(privatewin->fulljid);
+                if (!jid) {
+                    win_println(window, THEME_DEFAULT, "-", "[Jingle] Unable to get jid.");
+                }
+            } else {
+                cons_show_error("Invalid JID provided. Please, provide correct full JID.");
+                return TRUE;
+            }
+        } else {
+            recipient = strdup(jid->fulljid);
+        }
+        GList* files = NULL;
+
+        for (int i = 2; args[i] != NULL; i++) {
+            files = g_list_append(files, args[i]);
+        }
+
+        jingle_send_files(recipient, files);
+    } else {
+        cons_show_error("Invalid action.");
+        cons_bad_cmd_usage(command);
+    }
+
     return TRUE;
 }

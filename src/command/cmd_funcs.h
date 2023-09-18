@@ -268,5 +268,6 @@ gboolean cmd_vcard_photo(ProfWin* window, const char* const command, gchar** arg
 gboolean cmd_vcard_refresh(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_vcard_set(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_vcard_save(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_jingle(ProfWin* window, const char* const command, gchar** args);
 
 #endif

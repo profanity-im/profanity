@@ -323,6 +323,14 @@ strtoi_range(const char* str, int* saveptr, int min, int max, gchar** err_msg)
     return TRUE;
 }
 
+gboolean
+string_to_ul(const char* s, unsigned long* ul)
+{
+    char* endptr;
+    *ul = strtoul(s, &endptr, 10);
+    return *endptr == '\0';
+}
+
 int
 utf8_display_len(const char* const str)
 {

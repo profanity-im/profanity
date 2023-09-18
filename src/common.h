@@ -169,6 +169,7 @@ gboolean create_dir(const char* name);
 gboolean copy_file(const char* const src, const char* const target, const gboolean overwrite_existing);
 char* str_replace(const char* string, const char* substr, const char* replacement);
 gboolean strtoi_range(const char* str, int* saveptr, int min, int max, char** err_msg);
+gboolean string_to_ul(const char* s, unsigned long* ul);
 int utf8_display_len(const char* const str);
 
 char* release_get_latest(void);

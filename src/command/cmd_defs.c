@@ -2726,11 +2726,33 @@ static const struct cmd_t command_defs[] = {
               "session_alarm to configure an alarm when more clients log in.")
       CMD_ARGS(
               { "logging on|redact|off", "Switch chat logging. This will also disable logging in the internally used SQL database. Your messages will not be saved anywhere locally. This might have unintended consequences, such as not being able to decrypt OMEMO encrypted messages received later via MAM, and should be used with caution." },
-              { "os on|off", "Choose whether to include the OS name if a user asks for software information (XEP-0092)." }
-              )
+              { "os on|off", "Choose whether to include the OS name if a user asks for software information (XEP-0092)." })
       CMD_EXAMPLES(
               "/privacy logging off",
               "/privacy os off")
+    },
+
+    { CMD_PREAMBLE("/jingle",  // TODO: autocomplete
+                   parse_args, 2, 1000, NULL)
+      CMD_MAINFUNC(cmd_jingle)
+      CMD_TAGS(
+              CMD_TAG_CHAT)
+      CMD_SYN(
+              "/jingle session accept|reject|cancel [<session_id|jid>]",
+              "/jingle sendfiles [<jid>] <file1> <file2> ... <fileN>")
+      CMD_DESC(
+              "Manage Jingle sessions. "
+              "Jingle (XEP-0166) allows you to set up sessions for files transfer and A/V calls. "
+              "Currently only file transfer is supported. "
+              "WARNING: files are transferred in PLAIN TEXT format, it means that your "
+              "or your recipient's XMPP provider can access the file's content.")
+      CMD_ARGS(
+              { "session accept|reject|cancel <session_id|jid>", "Accept/reject session upon the request from other user (e.g. accept file transfer) or to cancel ongoing session." },
+              { "sendfiles <jid> <file1> <file2> ...", "Send a file(s) to recipient." })
+      CMD_EXAMPLES(
+              "/jingle session accept SESSION_ID",
+              "/jingle session reject loki@valhalla.edda",
+              "/jingle sendfiles odin@valhalla.edda meme.jpg naked_valkyrie.png") // TODO: remove joke before release
     },
     // NEXT-COMMAND (search helper)
 };

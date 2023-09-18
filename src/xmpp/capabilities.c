@@ -89,6 +89,9 @@ caps_init(void)
     g_hash_table_add(prof_features, strdup(STANZA_NS_CHATSTATES));
     g_hash_table_add(prof_features, strdup(STANZA_NS_PING));
     g_hash_table_add(prof_features, strdup(STANZA_NS_STABLE_ID));
+    g_hash_table_add(prof_features, strdup(STANZA_NS_JINGLE));
+    g_hash_table_add(prof_features, strdup(STANZA_NS_JINGLE_FT5));
+    g_hash_table_add(prof_features, strdup(STANZA_NS_JINGLE_TRANSPORTS_IBB));
 
     if (prefs_get_boolean(PREF_RECEIPTS_SEND)) {
         g_hash_table_add(prof_features, strdup(STANZA_NS_RECEIPTS));

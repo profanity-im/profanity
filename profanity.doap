@@ -103,6 +103,17 @@
       </xmpp:SupportedXep>
     </implements>
 
+    <!-- XEP-0047: In-Band Bytestreams --> 
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0045.html'/>
+        <xmpp:status>complete</xmpp:status>
+        <xmpp:version>2.0.1</xmpp:version>
+        <xmpp:since>DEV</xmpp:since>
+        <xmpp:note xml:lang='en'></xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+
     <!-- XEP-0048: Bookmarks --> 
     <implements>
       <xmpp:SupportedXep>
@@ -255,6 +266,17 @@
       </xmpp:SupportedXep>
     </implements>
 
+    <!-- XEP-0166: Jingle --> 
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0166.html'/>
+        <xmpp:status>partial</xmpp:status>
+        <xmpp:version>1.1.2</xmpp:version>
+        <xmpp:since>DEV</xmpp:since>
+        <xmpp:note xml:lang='en'></xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+
     <!-- XEP-0184: Message Delivery Receipts -->
     <implements>
       <xmpp:SupportedXep>
@@ -310,6 +332,17 @@
       </xmpp:SupportedXep>
     </implements>
 
+    <!-- XEP-0234: Jingle File Transfer --> 
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0234.html'/>
+        <xmpp:status>partial</xmpp:status>
+        <xmpp:version>0.19.1</xmpp:version>
+        <xmpp:since>DEV</xmpp:since>
+        <xmpp:note xml:lang='en'></xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+
     <!-- XEP-0245: The /me Command --> 
     <implements>
       <xmpp:SupportedXep>
@@ -339,6 +372,17 @@
         <xmpp:status>complete</xmpp:status>
         <xmpp:version>1.1</xmpp:version>
         <xmpp:since>0.4.5</xmpp:since>
+        <xmpp:note xml:lang='en'></xmpp:note>
+      </xmpp:SupportedXep>
+    </implements>
+
+    <!-- XEP-0261: Jingle In-Band Bytestreams Transport Method --> 
+    <implements>
+      <xmpp:SupportedXep>
+        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0261.html'/>
+        <xmpp:status>partial</xmpp:status>
+        <xmpp:version>1.0</xmpp:version>
+        <xmpp:since>DEV</xmpp:since>
         <xmpp:note xml:lang='en'></xmpp:note>
       </xmpp:SupportedXep>
     </implements>

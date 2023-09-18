@@ -51,6 +51,8 @@
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/chat_session.h"
+#include "xmpp/ibb.h"
+#include "xmpp/jingle.h"
 #include "xmpp/muc.h"
 #include "xmpp/session.h"
 #include "xmpp/message.h"
@@ -89,7 +91,6 @@ static void _send_message_stanza(xmpp_stanza_t* const stanza);
 static gboolean _handle_mam(xmpp_stanza_t* const stanza);
 static void _handle_pubsub(xmpp_stanza_t* const stanza, xmpp_stanza_t* const event);
 static gboolean _handle_form(xmpp_stanza_t* const stanza);
-static gboolean _handle_jingle_message(xmpp_stanza_t* const stanza);
 static gboolean _should_ignore_based_on_silence(xmpp_stanza_t* const stanza);
 
 #ifdef HAVE_LIBGPGME
@@ -185,7 +186,7 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
         }
 
         // XEP-0353: Jingle Message Initiation
-        if (_handle_jingle_message(stanza)) {
+        if (handle_jingle_message(stanza)) {
             return 1;
         }
 
@@ -1698,23 +1699,6 @@ message_request_voice(const char* const roomjid)
 
     _send_message_stanza(stanza);
     xmpp_stanza_release(stanza);
-}
-
-static gboolean
-_handle_jingle_message(xmpp_stanza_t* const stanza)
-{
-    xmpp_stanza_t* propose = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_PROPOSE, STANZA_NS_JINGLE_MESSAGE);
-
-    if (propose) {
-        xmpp_stanza_t* description = xmpp_stanza_get_child_by_ns(propose, STANZA_NS_JINGLE_RTP);
-        if (description) {
-            const char* const from = xmpp_stanza_get_from(stanza);
-            cons_show("Ring ring: %s is trying to call you", from);
-            cons_alert(NULL);
-            return TRUE;
-        }
-    }
-    return FALSE;
 }
 
 static gboolean
