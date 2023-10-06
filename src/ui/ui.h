@@ -41,6 +41,7 @@
 
 #include "config/tlscerts.h"
 #include "config/account.h"
+#include "config/preferences.h"
 #include "command/cmd_funcs.h"
 #include "ui/win_types.h"
 #include "xmpp/message.h"
@@ -199,6 +200,8 @@ void mucwin_set_enctext(ProfMucWin* mucwin, const char* const enctext);
 void mucwin_unset_enctext(ProfMucWin* mucwin);
 void mucwin_set_message_char(ProfMucWin* mucwin, const char* const ch);
 void mucwin_unset_message_char(ProfMucWin* mucwin);
+gchar* mucwin_generate_title(const gchar* const muc_jid, const preference_t pref);
+gboolean mucwin_set_room_name(const gchar* const muc_jid, const gchar* const new_room_name);
 
 // MUC private chat window
 void privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message);

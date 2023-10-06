@@ -144,16 +144,6 @@ _prefs_load(void)
         g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar.goodbye", NULL);
     }
 
-    // after 0.8.1: titlebar use jid|name -> titlebar show|hide jid|name
-    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.muc.title", NULL)) {
-        auto_gchar gchar* value = g_key_file_get_string(prefs, PREF_GROUP_UI, "titlebar.muc.title", NULL);
-        if (g_strcmp0(value, "name") == 0) {
-            g_key_file_set_boolean(prefs, PREF_GROUP_UI, "titlebar.muc.title.name", TRUE);
-        } else if (g_strcmp0(value, "jid") == 0) {
-            g_key_file_set_boolean(prefs, PREF_GROUP_UI, "titlebar.muc.title.jid", TRUE);
-        }
-    }
-
     // 0.9.0 introduced /urlopen. It was saved under "logging" section. Now we have a new "executables" section.
     if (g_key_file_has_key(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL)) {
         auto_gchar gchar* val = g_key_file_get_string(prefs, PREF_GROUP_LOGGING, "urlopen.cmd", NULL);
@@ -208,6 +198,50 @@ _prefs_load(void)
         g_key_file_remove_key(prefs, PREF_GROUP_PLUGINS, "sourcepath", NULL);
     }
 
+    // after 0.14.0: "/roster room use name|jid" and "/roster room show|hide server"
+    // became "/roster room title bookmark|jid|localpart|name".
+    // The outer-most if-statement is not needed, but it is included for better performance.
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "roster.rooms.use.name", NULL) || g_key_file_has_key(prefs, PREF_GROUP_UI, "roster.rooms.server", NULL)) {
+        GError* err = NULL;
+        auto_gchar gchar* pref_use_name = g_key_file_get_string(prefs, PREF_GROUP_UI, "roster.rooms.use.name", NULL);
+        if (g_strcmp0(pref_use_name, "jid") == 0) {
+            const gboolean pref_show_server = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "roster.rooms.server", &err);
+            if (!pref_show_server && !err) {
+                g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.title", "localpart");
+            } else {
+                g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.title", "jid");
+            }
+        }
+        g_clear_error(&err);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.rooms.server", NULL);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "roster.rooms.use.name", NULL);
+    }
+
+    // after 0.14.0: "/statusbar room room|jid" became "/statusbar room title bookmark|jid|localpart|name"
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "statusbar.room", NULL)) {
+        auto_gchar gchar* statusbar_room = g_key_file_get_string(prefs, PREF_GROUP_UI, "statusbar.room", NULL);
+        if (g_strcmp0(statusbar_room, "room") == 0) {
+            g_key_file_set_string(prefs, PREF_GROUP_UI, "statusbar.room.title", "localpart");
+        } else if (g_strcmp0(statusbar_room, "jid") == 0) {
+            g_key_file_set_string(prefs, PREF_GROUP_UI, "statusbar.room.title", "jid");
+        }
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "statusbar.room", NULL);
+    }
+
+    // after 0.14.0: "/statusbar show jid" and "/statusbar show name"
+    // became "/titlebar room title bookmark|jid|localpart|name"
+    // The outer-most if-statement is not needed, but it is included for better performance.
+    if (g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.muc.title.jid", NULL) || g_key_file_has_key(prefs, PREF_GROUP_UI, "titlebar.muc.title.name", NULL)) {
+        GError* err = NULL;
+        const gboolean pref_titlebar_muc_title_jid = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "titlebar.muc.title.jid", NULL);
+        const gboolean pref_titlebar_muc_title_name = g_key_file_get_boolean(prefs, PREF_GROUP_UI, "titlebar.muc.title.name", &err);
+        if (pref_titlebar_muc_title_jid && !pref_titlebar_muc_title_name && !err) {
+            g_key_file_set_string(prefs, PREF_GROUP_UI, "titlebar.muc.title", "jid");
+        }
+        g_clear_error(&err);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar.muc.title.jid", NULL);
+        g_key_file_remove_key(prefs, PREF_GROUP_UI, "titlebar.muc.title.name", NULL);
+    }
     _save_prefs();
 
     boolean_choice_ac = autocomplete_new();
@@ -1731,8 +1765,7 @@ _get_group(preference_t pref)
     case PREF_ROSTER_ROOMS_BY:
     case PREF_ROSTER_ROOMS_ORDER:
     case PREF_ROSTER_ROOMS_UNREAD:
-    case PREF_ROSTER_ROOMS_SERVER:
-    case PREF_ROSTER_ROOMS_USE_AS_NAME:
+    case PREF_ROSTER_ROOMS_TITLE:
     case PREF_ROSTER_PRIVATE:
     case PREF_RESOURCE_TITLE:
     case PREF_RESOURCE_MESSAGE:
@@ -1751,10 +1784,9 @@ _get_group(preference_t pref)
     case PREF_STATUSBAR_SHOW_READ:
     case PREF_STATUSBAR_SELF:
     case PREF_STATUSBAR_CHAT:
-    case PREF_STATUSBAR_ROOM:
+    case PREF_STATUSBAR_ROOM_TITLE:
     case PREF_STATUSBAR_TABMODE:
-    case PREF_TITLEBAR_MUC_TITLE_JID:
-    case PREF_TITLEBAR_MUC_TITLE_NAME:
+    case PREF_TITLEBAR_MUC_TITLE:
     case PREF_SLASH_GUARD:
     case PREF_COMPOSE_EDITOR:
     case PREF_OUTGOING_STAMP:
@@ -2022,10 +2054,8 @@ _get_key(preference_t pref)
         return "roster.rooms.order";
     case PREF_ROSTER_ROOMS_UNREAD:
         return "roster.rooms.unread";
-    case PREF_ROSTER_ROOMS_SERVER:
-        return "roster.rooms.server";
-    case PREF_ROSTER_ROOMS_USE_AS_NAME:
-        return "roster.rooms.use.name";
+    case PREF_ROSTER_ROOMS_TITLE:
+        return "roster.rooms.title";
     case PREF_ROSTER_PRIVATE:
         return "roster.private";
     case PREF_RESOURCE_TITLE:
@@ -2036,10 +2066,8 @@ _get_key(preference_t pref)
         return "inpblock.dynamic";
     case PREF_ENC_WARN:
         return "enc.warn";
-    case PREF_TITLEBAR_MUC_TITLE_JID:
-        return "titlebar.muc.title.jid";
-    case PREF_TITLEBAR_MUC_TITLE_NAME:
-        return "titlebar.muc.title.name";
+    case PREF_TITLEBAR_MUC_TITLE:
+        return "titlebar.muc.title";
     case PREF_PGP_LOG:
         return "log";
     case PREF_PGP_SENDFILE:
@@ -2080,8 +2108,8 @@ _get_key(preference_t pref)
         return "statusbar.self";
     case PREF_STATUSBAR_CHAT:
         return "statusbar.chat";
-    case PREF_STATUSBAR_ROOM:
-        return "statusbar.room";
+    case PREF_STATUSBAR_ROOM_TITLE:
+        return "statusbar.room.title";
     case PREF_STATUSBAR_TABMODE:
         return "statusbar.tabmode";
     case PREF_OMEMO_LOG:
@@ -2154,7 +2182,6 @@ _get_default_boolean(preference_t pref)
     case PREF_ROSTER_CONTACTS:
     case PREF_ROSTER_UNSUBSCRIBED:
     case PREF_ROSTER_ROOMS:
-    case PREF_ROSTER_ROOMS_SERVER:
     case PREF_TLS_SHOW:
     case PREF_LASTACTIVITY:
     case PREF_TRAY_READ:
@@ -2168,7 +2195,6 @@ _get_default_boolean(preference_t pref)
     case PREF_CARBONS:
     case PREF_STATES:
     case PREF_OUTTYPE:
-    case PREF_TITLEBAR_MUC_TITLE_NAME:
     case PREF_COLOR_NICK_OWN:
     case PREF_INTYPE:
     case PREF_INTYPE_CONSOLE:
@@ -2211,7 +2237,7 @@ _get_default_string(preference_t pref)
     case PREF_STATUSES_CHAT:
     case PREF_STATUSES_MUC:
         return "none";
-    case PREF_ROSTER_ROOMS_USE_AS_NAME:
+    case PREF_ROSTER_ROOMS_TITLE:
         return "name";
     case PREF_ROSTER_ROOMS_ORDER:
         return "name";
@@ -2247,10 +2273,12 @@ _get_default_string(preference_t pref)
         return "fulljid";
     case PREF_STATUSBAR_CHAT:
         return "user";
-    case PREF_STATUSBAR_ROOM:
-        return "room";
+    case PREF_STATUSBAR_ROOM_TITLE:
+        return "name";
     case PREF_STATUSBAR_TABMODE:
         return "default";
+    case PREF_TITLEBAR_MUC_TITLE:
+        return "name";
     case PREF_OMEMO_LOG:
         return "on";
     case PREF_OMEMO_POLICY:

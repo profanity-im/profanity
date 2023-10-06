@@ -988,3 +988,48 @@ _mucwin_set_last_message(ProfMucWin* mucwin, const char* const id, const char* c
     free(mucwin->last_msg_id);
     mucwin->last_msg_id = strdup(id);
 }
+
+gchar*
+mucwin_generate_title(const gchar* const muc_jid, const preference_t pref)
+{
+    auto_gchar gchar* pref_val = prefs_get_string(pref);
+    if (g_strcmp0(pref_val, "name") == 0) {
+        const ProfMucWin* mucwin = wins_get_muc(muc_jid);
+        if (mucwin && mucwin->room_name) {
+            return g_strdup(mucwin->room_name);
+        }
+    } else if (g_strcmp0(pref_val, "bookmark") == 0) {
+        const Bookmark* bookmark = bookmark_get_by_jid(muc_jid);
+        if (bookmark && bookmark->name) {
+            return g_strdup(bookmark->name);
+        }
+    }
+
+    auto_gchar gchar* roster_room_by = prefs_get_string(PREF_ROSTER_ROOMS_BY);
+    if (g_strcmp0(pref_val, "localpart") == 0 || (g_strcmp0(roster_room_by, "service") == 0 && pref == PREF_ROSTER_ROOMS_TITLE)) {
+        auto_jid Jid* jid = jid_create(muc_jid);
+        if (jid && jid->localpart) {
+            return g_strdup(jid->localpart);
+        }
+    }
+
+    return g_strdup(muc_jid);
+}
+
+gboolean
+mucwin_set_room_name(const gchar* const muc_jid, const gchar* const new_room_name)
+{
+    ProfMucWin* mucwin = wins_get_muc(muc_jid);
+    if (!mucwin) {
+        log_error("No window found with this JID: '%s'", muc_jid);
+        return FALSE;
+    }
+
+    free(mucwin->room_name);
+    if (new_room_name) {
+        mucwin->room_name = strdup(new_room_name);
+    } else {
+        mucwin->room_name = NULL;
+    }
+    return TRUE;
+}

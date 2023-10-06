@@ -182,8 +182,7 @@ static Autocomplete roster_presence_ac;
 static Autocomplete roster_char_ac;
 static Autocomplete roster_remove_all_ac;
 static Autocomplete roster_room_ac;
-static Autocomplete roster_room_show_ac;
-static Autocomplete roster_room_use_ac;
+static Autocomplete roster_room_title_ac;
 static Autocomplete roster_room_position_ac;
 static Autocomplete roster_room_by_ac;
 static Autocomplete roster_room_order_ac;
@@ -241,6 +240,8 @@ static Autocomplete ox_log_ac;
 #endif
 static Autocomplete tls_ac;
 static Autocomplete titlebar_ac;
+static Autocomplete titlebar_room_ac;
+static Autocomplete titlebar_room_title_ac;
 static Autocomplete titlebar_show_ac;
 static Autocomplete tls_certpath_ac;
 static Autocomplete script_ac;
@@ -262,6 +263,7 @@ static Autocomplete statusbar_ac;
 static Autocomplete statusbar_self_ac;
 static Autocomplete statusbar_chat_ac;
 static Autocomplete statusbar_room_ac;
+static Autocomplete statusbar_room_title_ac;
 static Autocomplete statusbar_show_ac;
 static Autocomplete statusbar_tabmode_ac;
 static Autocomplete clear_ac;
@@ -601,20 +603,17 @@ cmd_ac_init(void)
     autocomplete_add(roster_room_ac, "order");
     autocomplete_add(roster_room_ac, "unread");
     autocomplete_add(roster_room_ac, "private");
-    autocomplete_add(roster_room_ac, "show");
-    autocomplete_add(roster_room_ac, "hide");
-    autocomplete_add(roster_room_ac, "use");
-
-    roster_room_show_ac = autocomplete_new();
-    autocomplete_add(roster_room_show_ac, "server");
+    autocomplete_add(roster_room_ac, "title");
 
     roster_room_by_ac = autocomplete_new();
     autocomplete_add(roster_room_by_ac, "service");
     autocomplete_add(roster_room_by_ac, "none");
 
-    roster_room_use_ac = autocomplete_new();
-    autocomplete_add(roster_room_use_ac, "jid");
-    autocomplete_add(roster_room_use_ac, "name");
+    roster_room_title_ac = autocomplete_new();
+    autocomplete_add(roster_room_title_ac, "bookmark");
+    autocomplete_add(roster_room_title_ac, "jid");
+    autocomplete_add(roster_room_title_ac, "localpart");
+    autocomplete_add(roster_room_title_ac, "name");
 
     roster_room_order_ac = autocomplete_new();
     autocomplete_add(roster_room_order_ac, "name");
@@ -941,14 +940,22 @@ cmd_ac_init(void)
     autocomplete_add(titlebar_ac, "down");
     autocomplete_add(titlebar_ac, "show");
     autocomplete_add(titlebar_ac, "hide");
+    autocomplete_add(titlebar_ac, "room");
+
+    titlebar_room_ac = autocomplete_new();
+    autocomplete_add(titlebar_room_ac, "title");
+
+    titlebar_room_title_ac = autocomplete_new();
+    autocomplete_add(titlebar_room_title_ac, "bookmark");
+    autocomplete_add(titlebar_room_title_ac, "jid");
+    autocomplete_add(titlebar_room_title_ac, "localpart");
+    autocomplete_add(titlebar_room_title_ac, "name");
 
     titlebar_show_ac = autocomplete_new();
     autocomplete_add(titlebar_show_ac, "tls");
     autocomplete_add(titlebar_show_ac, "encwarn");
     autocomplete_add(titlebar_show_ac, "resource");
     autocomplete_add(titlebar_show_ac, "presence");
-    autocomplete_add(titlebar_show_ac, "jid");
-    autocomplete_add(titlebar_show_ac, "name");
 
     tls_certpath_ac = autocomplete_new();
     autocomplete_add(tls_certpath_ac, "set");
@@ -1046,8 +1053,13 @@ cmd_ac_init(void)
     autocomplete_add(statusbar_chat_ac, "jid");
 
     statusbar_room_ac = autocomplete_new();
-    autocomplete_add(statusbar_room_ac, "room");
-    autocomplete_add(statusbar_room_ac, "jid");
+    autocomplete_add(statusbar_room_ac, "title");
+
+    statusbar_room_title_ac = autocomplete_new();
+    autocomplete_add(statusbar_room_title_ac, "bookmark");
+    autocomplete_add(statusbar_room_title_ac, "jid");
+    autocomplete_add(statusbar_room_title_ac, "localpart");
+    autocomplete_add(statusbar_room_title_ac, "name");
 
     statusbar_show_ac = autocomplete_new();
     autocomplete_add(statusbar_show_ac, "name");
@@ -1611,8 +1623,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(roster_count_ac);
     autocomplete_reset(roster_order_ac);
     autocomplete_reset(roster_room_ac);
-    autocomplete_reset(roster_room_show_ac);
-    autocomplete_reset(roster_room_use_ac);
+    autocomplete_reset(roster_room_title_ac);
     autocomplete_reset(roster_room_by_ac);
     autocomplete_reset(roster_unread_ac);
     autocomplete_reset(roster_room_position_ac);
@@ -1672,6 +1683,8 @@ cmd_ac_reset(ProfWin* window)
 #endif
     autocomplete_reset(tls_ac);
     autocomplete_reset(titlebar_ac);
+    autocomplete_reset(titlebar_room_ac);
+    autocomplete_reset(titlebar_room_title_ac);
     autocomplete_reset(titlebar_show_ac);
     autocomplete_reset(tls_certpath_ac);
     autocomplete_reset(console_ac);
@@ -1687,6 +1700,7 @@ cmd_ac_reset(ProfWin* window)
     autocomplete_reset(statusbar_self_ac);
     autocomplete_reset(statusbar_chat_ac);
     autocomplete_reset(statusbar_room_ac);
+    autocomplete_reset(statusbar_room_title_ac);
     autocomplete_reset(statusbar_show_ac);
     autocomplete_reset(statusbar_tabmode_ac);
     autocomplete_reset(clear_ac);
@@ -1794,8 +1808,7 @@ cmd_ac_uninit(void)
     autocomplete_free(roster_count_ac);
     autocomplete_free(roster_order_ac);
     autocomplete_free(roster_room_ac);
-    autocomplete_free(roster_room_show_ac);
-    autocomplete_free(roster_room_use_ac);
+    autocomplete_free(roster_room_title_ac);
     autocomplete_free(roster_room_by_ac);
     autocomplete_free(roster_unread_ac);
     autocomplete_free(roster_room_position_ac);
@@ -1853,6 +1866,8 @@ cmd_ac_uninit(void)
 #endif
     autocomplete_free(tls_ac);
     autocomplete_free(titlebar_ac);
+    autocomplete_free(titlebar_room_ac);
+    autocomplete_free(titlebar_room_title_ac);
     autocomplete_free(titlebar_show_ac);
     autocomplete_free(tls_certpath_ac);
     autocomplete_free(script_ac);
@@ -1874,6 +1889,7 @@ cmd_ac_uninit(void)
     autocomplete_free(statusbar_self_ac);
     autocomplete_free(statusbar_chat_ac);
     autocomplete_free(statusbar_room_ac);
+    autocomplete_free(statusbar_room_title_ac);
     autocomplete_free(statusbar_show_ac);
     autocomplete_free(statusbar_tabmode_ac);
     autocomplete_free(clear_ac);
@@ -2265,15 +2281,7 @@ _roster_autocomplete(ProfWin* window, const char* const input, gboolean previous
     if (result) {
         return result;
     }
-    result = autocomplete_param_with_ac(input, "/roster room show", roster_room_show_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-    result = autocomplete_param_with_ac(input, "/roster room hide", roster_room_show_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-    result = autocomplete_param_with_ac(input, "/roster room use", roster_room_use_ac, TRUE, previous);
+    result = autocomplete_param_with_ac(input, "/roster room title", roster_room_title_ac, TRUE, previous);
     if (result) {
         return result;
     }
@@ -3549,6 +3557,16 @@ _titlebar_autocomplete(ProfWin* window, const char* const input, gboolean previo
 {
     char* result = NULL;
 
+    result = autocomplete_param_with_ac(input, "/titlebar room title", titlebar_room_title_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/titlebar room", titlebar_room_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
     result = autocomplete_param_with_ac(input, "/titlebar show", titlebar_show_ac, TRUE, previous);
     if (result) {
         return result;
@@ -4130,6 +4148,11 @@ _statusbar_autocomplete(ProfWin* window, const char* const input, gboolean previ
     }
 
     found = autocomplete_param_with_ac(input, "/statusbar room", statusbar_room_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_ac(input, "/statusbar room title", statusbar_room_title_ac, TRUE, previous);
 
     return found;
 }

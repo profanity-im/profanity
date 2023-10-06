@@ -2140,11 +2140,7 @@ _room_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata
                     if (identity) {
                         if (name) {
                             identity->name = strdup(name);
-                            ProfMucWin* mucwin = wins_get_muc(cb_data->room);
-                            if (mucwin) {
-                                free(mucwin->room_name);
-                                mucwin->room_name = strdup(name);
-                            }
+                            mucwin_set_room_name(cb_data->room, name);
                         } else {
                             identity->name = NULL;
                         }

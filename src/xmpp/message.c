@@ -994,13 +994,7 @@ _room_config_handler(xmpp_stanza_t* const stanza, void* const userdata)
     xmpp_stanza_t* query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     EntityCapabilities* capabilities = stanza_create_caps_from_query_element(query);
 
-    // Update window name
-    ProfMucWin* win = wins_get_muc(from);
-    if (win != NULL) {
-        free(win->room_name);
-        win->room_name = strdup(capabilities->identity->name);
-
-        // Update features
+    if (mucwin_set_room_name(from, capabilities->identity->name)) {
         muc_set_features(from, capabilities->features);
     }
     caps_destroy(capabilities);

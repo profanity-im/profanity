@@ -310,64 +310,41 @@ win_get_title(ProfWin* window)
     }
     case WIN_CHAT:
     {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
+        const ProfChatWin* chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-
-        gboolean show_titlebar_jid = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_JID);
-        gboolean show_titlebar_name = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_NAME);
-        jabber_conn_status_t conn_status = connection_get_status();
-
-        if (conn_status != JABBER_CONNECTED || !show_titlebar_name) {
-            return g_strdup(chatwin->barejid);
-        }
-        PContact contact = roster_get_contact(chatwin->barejid);
+        const PContact contact = roster_get_contact(chatwin->barejid);
         if (!contact) {
             return g_strdup(chatwin->barejid);
         }
         const char* name = p_contact_name(contact);
-        if (name == NULL) {
+        if (!name) {
             return g_strdup(chatwin->barejid);
         }
-        if (show_titlebar_jid) {
-            return g_strdup_printf("%s <%s>", name, chatwin->barejid);
-        }
-        return g_strdup_printf("%s", name);
+        return g_strconcat(name, " <", chatwin->barejid, ">", NULL);
     }
     case WIN_MUC:
     {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
+        const ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-
-        gboolean show_titlebar_jid = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_JID);
-        gboolean show_titlebar_name = prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_NAME);
-
-        if (show_titlebar_name && mucwin->room_name) {
-            if (show_titlebar_jid)
-                return g_strdup_printf("%s %s", mucwin->room_name, mucwin->roomjid);
-            else
-                return g_strdup(mucwin->room_name);
-        }
-        if (show_titlebar_jid)
-            return g_strdup(mucwin->roomjid);
-
-        return g_strdup("");
+        return mucwin_generate_title(mucwin->roomjid, PREF_TITLEBAR_MUC_TITLE);
     }
     case WIN_CONFIG:
     {
-        ProfConfWin* confwin = (ProfConfWin*)window;
+        const ProfConfWin* confwin = (ProfConfWin*)window;
         assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
-        GString* title = g_string_new(confwin->roomjid);
-        g_string_append(title, " config");
+        auto_gchar gchar* mucwin_title = mucwin_generate_title(confwin->roomjid, PREF_TITLEBAR_MUC_TITLE);
         if (confwin->form->modified) {
-            g_string_append(title, " *");
+            return g_strconcat(mucwin_title, " config *", NULL);
         }
-        return g_string_free(title, FALSE);
+        return g_strconcat(mucwin_title, " config", NULL);
     }
     case WIN_PRIVATE:
     {
-        ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
+        const ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        return g_strdup(privatewin->fulljid);
+        auto_jid Jid* jid = jid_create(privatewin->fulljid);
+        auto_gchar gchar* mucwin_title = mucwin_generate_title(jid->barejid, PREF_TITLEBAR_MUC_TITLE);
+        return g_strconcat(mucwin_title, "/", jid->resourcepart, NULL);
     }
     case WIN_XML:
     {

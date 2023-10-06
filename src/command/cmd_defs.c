@@ -275,9 +275,7 @@ static const struct cmd_t command_defs[] = {
               "/roster room by service|none",
               "/roster room order name|unread",
               "/roster room unread before|after|off",
-              "/roster room show server",
-              "/roster room hide server",
-              "/roster room use name|jid",
+              "/roster room title bookmark|jid|localpart|name",
               "/roster private room|group|off",
               "/roster private char <char>|none",
               "/roster header char <char>|none",
@@ -349,10 +347,7 @@ static const struct cmd_t command_defs[] = {
               { "room unread before", "Show unread message count before room." },
               { "room unread after", "Show unread message count after room." },
               { "room unread off", "Do not show unread message count for rooms." },
-              { "room show server", "Show the conference server with room JIDs." },
-              { "room hide server", "Do not show the conference server with room JIDs." },
-              { "room use name", "Use the MUC name as room name." },
-              { "room use jid", "Use the JID as room name." },
+              { "room title bookmark|jid|localpart|name", "Display the bookmark name, JID, JID localpart, or room name as the roster title for MUCs." },
               { "private room", "Show room private chats with the room." },
               { "private group", "Show room private chats as a separate roster group." },
               { "private off", "Do not show room private chats." },
@@ -1241,7 +1236,7 @@ static const struct cmd_t command_defs[] = {
 
 
     { CMD_PREAMBLE("/titlebar",
-                   parse_args, 1, 2, &cons_titlebar_setting)
+                   parse_args, 1, 3, &cons_titlebar_setting)
       CMD_SUBFUNCS(
               { "show", cmd_titlebar_show_hide },
               { "hide", cmd_titlebar_show_hide })
@@ -1251,7 +1246,8 @@ static const struct cmd_t command_defs[] = {
       CMD_SYN(
               "/titlebar up",
               "/titlebar down",
-              "/titlebar show|hide [encwarn|resource|tls]")
+              "/titlebar show|hide encwarn|resource|tls",
+              "/titlebar room title bookmark|jid|localpart|name")
       CMD_DESC(
               "Titlebar settings.")
       CMD_ARGS(
@@ -1260,12 +1256,12 @@ static const struct cmd_t command_defs[] = {
               { "show tls", "Show or hide TLS indicator in the titlebar." },
               { "show encwarn", "Enable or disable the unencrypted warning message in the titlebar." },
               { "show resource", "Show or hide the current resource in the titlebar." },
-              { "show name", "Show the nickname or MUC name in the titlebar." },
-              { "show jid", "Show the JID in the titlebar." })
+              { "room title bookmark|jid|localpart|name", "Display the bookmark name, JID, JID localpart, or room name as the MUC window title." })
       CMD_EXAMPLES(
               "/titlebar up",
               "/titlebar show tls",
-              "/titlebar hide encwarn")
+              "/titlebar hide encwarn",
+              "/titlebar room title localpart")
     },
 
     { CMD_PREAMBLE("/mainwin",
@@ -1284,7 +1280,7 @@ static const struct cmd_t command_defs[] = {
     },
 
     { CMD_PREAMBLE("/statusbar",
-                   parse_args, 1, 2, &cons_statusbar_setting)
+                   parse_args, 1, 3, &cons_statusbar_setting)
       CMD_MAINFUNC(cmd_statusbar)
       CMD_TAGS(
               CMD_TAG_UI)
@@ -1296,7 +1292,7 @@ static const struct cmd_t command_defs[] = {
               "/statusbar tabmode default|actlist",
               "/statusbar self user|barejid|fulljid|off",
               "/statusbar chat user|jid",
-              "/statusbar room room|jid",
+              "/statusbar room title bookmark|jid|localpart|name",
               "/statusbar up",
               "/statusbar down")
       CMD_DESC(
@@ -1311,7 +1307,7 @@ static const struct cmd_t command_defs[] = {
               { "self user|barejid|fulljid", "Show account user name, barejid, fulljid as status bar title." },
               { "self off", "Disable showing self as status bar title." },
               { "chat user|jid", "Show users name, or fulljid. Change needs a redraw/restart to take effect." },
-              { "room room|jid", "Show room name, or the fulljid for room tabs." },
+              { "room title bookmark|jid|localpart|name", "Display the bookmark name, JID, JID localpart, or room name as the title for MUC tabs." },
               { "up", "Move the status bar up the screen." },
               { "down", "Move the status bar down the screen." })
       CMD_EXAMPLES(
