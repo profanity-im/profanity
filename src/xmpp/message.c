@@ -153,6 +153,7 @@ static int
 _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
 {
     log_debug("Message stanza handler fired");
+    autoping_timer_extend();
 
     if (_handled_by_plugin(stanza)) {
         return 1;

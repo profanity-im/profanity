@@ -43,6 +43,9 @@ src/gitversion.h.in
 src/stamp-h1
 src/plugins/profapi.lo
 
+# out-of-tree build folders
+build*/
+
 # binaries
 profanity
 **/*.o
@@ -89,8 +92,11 @@ python2/
 python3/
 
 .DS_Store
+.gdbinit
 *.bak
 *.orig
+*.patch
+*.rej
 breaks
 
 *.tar.*

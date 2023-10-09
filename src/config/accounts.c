@@ -481,7 +481,7 @@ static void
 _accounts_set_string_option(const char* account_name, const char* const option, const char* const value)
 {
     if (accounts_account_exists(account_name)) {
-        g_key_file_set_string(accounts, account_name, option, value);
+        g_key_file_set_string(accounts, account_name, option, value ?: "");
         _save_accounts();
     }
 }

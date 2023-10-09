@@ -300,7 +300,8 @@ sv_ev_room_history(ProfMessage* message)
     ProfMucWin* mucwin = wins_get_muc(message->from_jid->barejid);
     if (mucwin) {
         // if this is the first successful connection
-        if (ev_is_first_connect()) {
+        // or for some reason the `last_msg_timestamp` is not initialized
+        if (ev_is_first_connect() || !mucwin->last_msg_timestamp) {
             // save timestamp of last received muc message
             // so we dont display, if there was no activity in channel, once we reconnect
             if (mucwin->last_msg_timestamp) {
