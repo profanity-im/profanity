@@ -2855,49 +2855,17 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
                 cons_bad_cmd_usage(command);
                 return TRUE;
             }
-        } else if (g_strcmp0(args[1], "show") == 0) {
-            if (g_strcmp0(args[2], "server") == 0) {
-                cons_show("Roster room server enabled.");
-                prefs_set_boolean(PREF_ROSTER_ROOMS_SERVER, TRUE);
+        } else if (g_strcmp0(args[1], "title") == 0) {
+            if (g_strcmp0(args[2], "bookmark") == 0 || g_strcmp0(args[2], "jid") == 0 || g_strcmp0(args[2], "localpart") == 0 || g_strcmp0(args[2], "name") == 0) {
+                cons_show("Roster MUCs will display '%s' as their title.", args[2]);
+                prefs_set_string(PREF_ROSTER_ROOMS_TITLE, args[2]);
                 if (conn_status == JABBER_CONNECTED) {
                     rosterwin_roster();
                 }
-                return TRUE;
-            } else {
-                cons_bad_cmd_usage(command);
                 return TRUE;
             }
-        } else if (g_strcmp0(args[1], "hide") == 0) {
-            if (g_strcmp0(args[2], "server") == 0) {
-                cons_show("Roster room server disabled.");
-                prefs_set_boolean(PREF_ROSTER_ROOMS_SERVER, FALSE);
-                if (conn_status == JABBER_CONNECTED) {
-                    rosterwin_roster();
-                }
-                return TRUE;
-            } else {
-                cons_bad_cmd_usage(command);
-                return TRUE;
-            }
-        } else if (g_strcmp0(args[1], "use") == 0) {
-            if (g_strcmp0(args[2], "jid") == 0) {
-                cons_show("Roster room display jid as name.");
-                prefs_set_string(PREF_ROSTER_ROOMS_USE_AS_NAME, "jid");
-                if (conn_status == JABBER_CONNECTED) {
-                    rosterwin_roster();
-                }
-                return TRUE;
-            } else if (g_strcmp0(args[2], "name") == 0) {
-                cons_show("Roster room display room name as name.");
-                prefs_set_string(PREF_ROSTER_ROOMS_USE_AS_NAME, "name");
-                if (conn_status == JABBER_CONNECTED) {
-                    rosterwin_roster();
-                }
-                return TRUE;
-            } else {
-                cons_bad_cmd_usage(command);
-                return TRUE;
-            }
+            cons_bad_cmd_usage(command);
+            return TRUE;
         } else {
             cons_bad_cmd_usage(command);
             return TRUE;
@@ -6089,6 +6057,15 @@ cmd_titlebar(ProfWin* window, const char* const command, gchar** args)
 
         return TRUE;
     }
+    if (g_strcmp0(args[0], "room") == 0) {
+        if (g_strcmp0(args[1], "title") == 0) {
+            if (g_strcmp0(args[2], "bookmark") == 0 || g_strcmp0(args[2], "jid") == 0 || g_strcmp0(args[2], "localpart") == 0 || g_strcmp0(args[2], "name") == 0) {
+                cons_show("MUC windows will display '%s' as the window title.", args[2]);
+                prefs_set_string(PREF_TITLEBAR_MUC_TITLE, args[2]);
+                return TRUE;
+            }
+        }
+    }
 
     cons_bad_cmd_usage(command);
 
@@ -6113,12 +6090,6 @@ cmd_titlebar_show_hide(ProfWin* window, const char* const command, gchar** args)
             } else if (g_strcmp0(args[1], "presence") == 0) {
                 cons_show("Showing contact presence in titlebar enabled.");
                 prefs_set_boolean(PREF_PRESENCE, TRUE);
-            } else if (g_strcmp0(args[1], "jid") == 0) {
-                cons_show("Showing MUC JID in titlebar as title enabled.");
-                prefs_set_boolean(PREF_TITLEBAR_MUC_TITLE_JID, TRUE);
-            } else if (g_strcmp0(args[1], "name") == 0) {
-                cons_show("Showing MUC name in titlebar as title enabled.");
-                prefs_set_boolean(PREF_TITLEBAR_MUC_TITLE_NAME, TRUE);
             } else {
                 cons_bad_cmd_usage(command);
             }
@@ -6136,12 +6107,6 @@ cmd_titlebar_show_hide(ProfWin* window, const char* const command, gchar** args)
             } else if (g_strcmp0(args[1], "presence") == 0) {
                 cons_show("Showing contact presence in titlebar disabled.");
                 prefs_set_boolean(PREF_PRESENCE, FALSE);
-            } else if (g_strcmp0(args[1], "jid") == 0) {
-                cons_show("Showing MUC JID in titlebar as title disabled.");
-                prefs_set_boolean(PREF_TITLEBAR_MUC_TITLE_JID, FALSE);
-            } else if (g_strcmp0(args[1], "name") == 0) {
-                cons_show("Showing MUC name in titlebar as title disabled.");
-                prefs_set_boolean(PREF_TITLEBAR_MUC_TITLE_NAME, FALSE);
             } else {
                 cons_bad_cmd_usage(command);
             }
@@ -6367,17 +6332,13 @@ cmd_statusbar(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (g_strcmp0(args[0], "room") == 0) {
-        if (g_strcmp0(args[1], "jid") == 0) {
-            prefs_set_string(PREF_STATUSBAR_ROOM, "jid");
-            cons_show("Using jid for room tabs.");
-            ui_resize();
-            return TRUE;
-        }
-        if (g_strcmp0(args[1], "room") == 0) {
-            prefs_set_string(PREF_STATUSBAR_ROOM, "room");
-            cons_show("Using room name for room tabs.");
-            ui_resize();
-            return TRUE;
+        if (g_strcmp0(args[1], "title") == 0) {
+            if (g_strcmp0(args[2], "bookmark") == 0 || g_strcmp0(args[2], "jid") == 0 || g_strcmp0(args[2], "localpart") == 0 || g_strcmp0(args[2], "name") == 0) {
+                prefs_set_string(PREF_STATUSBAR_ROOM_TITLE, args[2]);
+                cons_show("Displaying '%s' as the title for MUC tabs.", args[2]);
+                ui_resize();
+                return TRUE;
+            }
         }
         cons_bad_cmd_usage(command);
         return TRUE;

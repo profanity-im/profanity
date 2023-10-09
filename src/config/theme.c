@@ -321,13 +321,10 @@ _load_preferences(void)
     _set_boolean_preference("roster.contacts", PREF_ROSTER_CONTACTS);
     _set_boolean_preference("roster.unsubscribed", PREF_ROSTER_UNSUBSCRIBED);
     _set_boolean_preference("roster.rooms", PREF_ROSTER_ROOMS);
-    _set_boolean_preference("roster.rooms.server", PREF_ROSTER_ROOMS_SERVER);
     _set_boolean_preference("privileges", PREF_MUC_PRIVILEGES);
     _set_boolean_preference("presence", PREF_PRESENCE);
     _set_boolean_preference("intype", PREF_INTYPE);
     _set_boolean_preference("enc.warn", PREF_ENC_WARN);
-    _set_boolean_preference("titlebar.muc.title.name", PREF_TITLEBAR_MUC_TITLE_NAME);
-    _set_boolean_preference("titlebar.muc.title.jid", PREF_TITLEBAR_MUC_TITLE_JID);
     _set_boolean_preference("tls.show", PREF_TLS_SHOW);
     _set_boolean_preference("statusbar.show.name", PREF_STATUSBAR_SHOW_NAME);
     _set_boolean_preference("statusbar.show.number", PREF_STATUSBAR_SHOW_NUMBER);
@@ -356,10 +353,11 @@ _load_preferences(void)
     _set_string_preference("roster.rooms.by", PREF_ROSTER_ROOMS_BY);
     _set_string_preference("roster.private", PREF_ROSTER_PRIVATE);
     _set_string_preference("roster.count", PREF_ROSTER_COUNT);
-    _set_string_preference("roster.rooms.use.name", PREF_ROSTER_ROOMS_USE_AS_NAME);
+    _set_string_preference("roster.rooms.title", PREF_ROSTER_ROOMS_TITLE);
     _set_string_preference("statusbar.self", PREF_STATUSBAR_SELF);
     _set_string_preference("statusbar.chat", PREF_STATUSBAR_CHAT);
-    _set_string_preference("statusbar.room", PREF_STATUSBAR_ROOM);
+    _set_string_preference("statusbar.room.title", PREF_STATUSBAR_ROOM_TITLE);
+    _set_string_preference("titlebar.muc.title", PREF_TITLEBAR_MUC_TITLE);
 
     // load ints from theme and set them to prefs
     // with custom set functions

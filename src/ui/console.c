@@ -1277,17 +1277,8 @@ cons_titlebar_setting(void)
         cons_show("Titlebar presence (/titlebar)       : OFF");
     }
 
-    if (prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_NAME)) {
-        cons_show("Titlebar show MUC name (/titlebar)       : ON");
-    } else {
-        cons_show("Titlebar show MUC name (/titlebar)       : OFF");
-    }
-
-    if (prefs_get_boolean(PREF_TITLEBAR_MUC_TITLE_JID)) {
-        cons_show("Titlebar show MUC JID (/titlebar)       : ON");
-    } else {
-        cons_show("Titlebar show MUC JID (/titlebar)       : OFF");
-    }
+    auto_gchar gchar* titlebar_muc_title = prefs_get_string(PREF_TITLEBAR_MUC_TITLE);
+    cons_show("MUC window title (/titlebar)        : %s", titlebar_muc_title);
 }
 
 void
@@ -1630,11 +1621,6 @@ cons_roster_setting(void)
         cons_show("Roster unread (/roster)             : OFF");
     }
 
-    if (prefs_get_boolean(PREF_ROSTER_ROOMS))
-        cons_show("Roster rooms (/roster)              : show");
-    else
-        cons_show("Roster rooms (/roster)              : hide");
-
     auto_gchar gchar* priv = prefs_get_string(PREF_ROSTER_PRIVATE);
     if (g_strcmp0(priv, "room") == 0) {
         cons_show("Roster private (/roster)            : room");
@@ -1650,8 +1636,8 @@ cons_roster_setting(void)
     auto_gchar gchar* rooms_by = prefs_get_string(PREF_ROSTER_ROOMS_BY);
     cons_show("Roster rooms by (/roster)           : %s", rooms_by);
 
-    auto_gchar gchar* rooms_use = prefs_get_string(PREF_ROSTER_ROOMS_USE_AS_NAME);
-    cons_show("Roster rooms use (/roster)          : %s", rooms_use);
+    auto_gchar gchar* rooms_title = prefs_get_string(PREF_ROSTER_ROOMS_TITLE);
+    cons_show("Roster rooms title (/roster)        : %s", rooms_title);
 
     auto_gchar gchar* rooms_order = prefs_get_string(PREF_ROSTER_ROOMS_ORDER);
     cons_show("Roster rooms order (/roster)        : %s", rooms_order);
@@ -1949,8 +1935,8 @@ cons_statusbar_setting(void)
     auto_gchar gchar* pref_chat = prefs_get_string(PREF_STATUSBAR_CHAT);
     cons_show("Chat tab display (/statusbar)               : %s", pref_chat);
 
-    auto_gchar gchar* pref_room = prefs_get_string(PREF_STATUSBAR_ROOM);
-    cons_show("Room tab display (/statusbar)               : %s", pref_room);
+    auto_gchar gchar* pref_room_title = prefs_get_string(PREF_STATUSBAR_ROOM_TITLE);
+    cons_show("Room tab display (/statusbar)               : %s", pref_room_title);
 
     auto_gchar gchar* pref_tabmode = prefs_get_string(PREF_STATUSBAR_TABMODE);
     cons_show("Tab mode (/statusbar)                       : %s", pref_tabmode);

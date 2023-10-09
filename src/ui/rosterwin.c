@@ -745,35 +745,8 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
         g_string_append_printf(msg, "(%d) ", mucwin->unread);
     }
 
-    auto_gchar gchar* use_as_name = prefs_get_string(PREF_ROSTER_ROOMS_USE_AS_NAME);
-    auto_gchar gchar* roombypref = prefs_get_string(PREF_ROSTER_ROOMS_BY);
-
-    if (g_strcmp0(roombypref, "service") == 0) {
-        if (mucwin->room_name == NULL || (g_strcmp0(use_as_name, "jid") == 0)) {
-            auto_jid Jid* jidp = jid_create(mucwin->roomjid);
-            g_string_append(msg, jidp->localpart);
-        } else {
-            g_string_append(msg, mucwin->room_name);
-        }
-    } else {
-        gboolean show_server = prefs_get_boolean(PREF_ROSTER_ROOMS_SERVER);
-
-        if (show_server) {
-            if (mucwin->room_name == NULL || (g_strcmp0(use_as_name, "jid") == 0)) {
-                g_string_append(msg, mucwin->roomjid);
-            } else {
-                g_string_append(msg, mucwin->room_name);
-            }
-        } else {
-            auto_jid Jid* jidp = jid_create(mucwin->roomjid);
-
-            if (mucwin->room_name == NULL || (g_strcmp0(use_as_name, "jid") == 0)) {
-                g_string_append(msg, jidp->localpart);
-            } else {
-                g_string_append(msg, mucwin->room_name);
-            }
-        }
-    }
+    auto_gchar gchar* mucwin_title = mucwin_generate_title(mucwin->roomjid, PREF_ROSTER_ROOMS_TITLE);
+    g_string_append(msg, mucwin_title);
 
     if ((g_strcmp0(unreadpos, "after") == 0) && mucwin->unread > 0) {
         g_string_append_printf(msg, " (%d)", mucwin->unread);

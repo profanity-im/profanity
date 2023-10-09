@@ -650,43 +650,15 @@ _display_name(StatusBarTab* tab)
             fullname = strdup(tab->display_name);
         }
     } else if (tab->window_type == WIN_MUC) {
-        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_ROOM);
-        if (g_strcmp0("room", pref) == 0) {
-            auto_jid Jid* jidp = jid_create(tab->identifier);
-            char* room = strdup(jidp->localpart);
-            fullname = room;
-        } else {
-            fullname = strdup(tab->identifier);
-        }
+        auto_gchar gchar* mucwin_title = mucwin_generate_title(tab->identifier, PREF_STATUSBAR_ROOM_TITLE);
+        fullname = strdup(mucwin_title);
     } else if (tab->window_type == WIN_CONFIG) {
-        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_ROOM);
-        GString* display_str = g_string_new("");
-
-        if (g_strcmp0("room", pref) == 0) {
-            auto_jid Jid* jidp = jid_create(tab->identifier);
-            g_string_append(display_str, jidp->localpart);
-        } else {
-            g_string_append(display_str, tab->identifier);
-        }
-
-        g_string_append(display_str, " conf");
-        char* result = strdup(display_str->str);
-        g_string_free(display_str, TRUE);
-        fullname = result;
+        auto_gchar gchar* mucwin_title = mucwin_generate_title(tab->identifier, PREF_STATUSBAR_ROOM_TITLE);
+        fullname = g_strconcat(mucwin_title, " conf", NULL);
     } else if (tab->window_type == WIN_PRIVATE) {
-        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_ROOM);
-        if (g_strcmp0("room", pref) == 0) {
-            GString* display_str = g_string_new("");
-            auto_jid Jid* jidp = jid_create(tab->identifier);
-            g_string_append(display_str, jidp->localpart);
-            g_string_append(display_str, "/");
-            g_string_append(display_str, jidp->resourcepart);
-            char* result = strdup(display_str->str);
-            g_string_free(display_str, TRUE);
-            fullname = result;
-        } else {
-            fullname = strdup(tab->identifier);
-        }
+        auto_jid Jid* jid = jid_create(tab->identifier);
+        auto_gchar gchar* mucwin_title = mucwin_generate_title(jid->barejid, PREF_STATUSBAR_ROOM_TITLE);
+        fullname = g_strconcat(mucwin_title, "/", jid->resourcepart, NULL);
     } else {
         fullname = strdup("window");
     }
