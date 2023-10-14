@@ -1843,7 +1843,7 @@ _room_config_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
     if (from == NULL) {
         log_warning("No from attribute for IQ config request result");
-        ui_handle_room_configuration_form_error(from, "No from attribute for room cofig response.");
+        ui_handle_room_configuration_form_error(from, "No from attribute for room config response.");
         return 0;
     }
 

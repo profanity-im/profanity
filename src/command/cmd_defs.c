@@ -2325,12 +2325,12 @@ static const struct cmd_t command_defs[] = {
         CMD_DESC(
             "OMEMO commands to manage keys, and perform encryption during chat sessions.")
         CMD_ARGS(
-            { "gen",                     "Generate OMEMO crytographic materials for current account." },
+            { "gen",                     "Generate OMEMO cryptographic materials for current account." },
             { "start [<contact>]",       "Start an OMEMO session with contact, or current recipient if omitted." },
             { "end",                     "End the current OMEMO session." },
             { "log on|off",              "Enable or disable plaintext logging of OMEMO encrypted messages." },
             { "log redact",              "Log OMEMO encrypted messages, but replace the contents with [redacted]." },
-            { "fingerprint [<contact>]", "Show contact fingerprints, or current recipient if omitted." },
+            { "fingerprint [<contact>]", "Show contact's fingerprints, or current recipient's if omitted." },
             { "char <char>",             "Set the character to be displayed next to OMEMO encrypted messages." },
             { "trustmode manual",        "Set the global OMEMO trust mode to manual, OMEMO keys has to be trusted manually." },
             { "trustmode firstusage",    "Set the global OMEMO trust mode to ToFu, first OMEMO keys trusted automatically." },

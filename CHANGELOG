@@ -261,7 +261,7 @@ Changes:
   `/affiliation register`
 - Fix segfault on `/sendfile` using OMEMO on Raspberry Pi (#1512)
 - Use shorter IDs (#1520)
-- Add abbility to launch external editor to write (multiline) messages (#1485, #1546)
+- Add ability to launch external editor to write (multiline) messages (#1485, #1546)
   `/editor`
 - Introdcue OMEMO trustmode (#1506)
   `/omemo trustmode manual|firstusage|blind`
@@ -683,7 +683,7 @@ Changes:
 - HTTP file upload (xep-0363) (/sendfile)
 - Blocking command (xep-0191) (/blocked)
 - Allow auto extended away (/autoaway)
-- Include last acitvity in initial presence (xep-0256) (/lastactivity)
+- Include last activity in initial presence (xep-0256) (/lastactivity)
 - Last Activity (xep-0012) (/lastactivity)
 - Ability to run command scripts (/script)
 - Account startscript property to execute a command script on connect (/account)
