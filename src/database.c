@@ -380,7 +380,6 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     }
 
     char* err_msg;
-    gchar* query;
     auto_gchar gchar* date_fmt;
 
     if (message->timestamp) {
@@ -397,24 +396,48 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
         type = (char*)_get_message_type_str(message->type);
     }
 
-    query = sqlite3_mprintf("INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) SELECT '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q' WHERE NOT EXISTS (SELECT 1 FROM `ChatLogs` WHERE (`archive_id` = '%q' AND `archive_id` != '') OR (`stanza_id` = '%q' AND `stanza_id` != ''))",
-                            from_jid->barejid,
-                            from_jid->resourcepart ? from_jid->resourcepart : "",
-                            to_jid->barejid,
-                            to_jid->resourcepart ? to_jid->resourcepart : "",
-                            message->plain ? message->plain : "",
-                            date_fmt ? date_fmt : "",
-                            message->id ? message->id : "",
-                            message->stanzaid ? message->stanzaid : "",
-                            message->replace_id ? message->replace_id : "",
-                            type ? type : "",
-                            enc ? enc : "",
-                            message->stanzaid ? message->stanzaid : "",
-                            message->id ? message->id : "");
+    auto_sqlite char* duplicate_check_query = sqlite3_mprintf("SELECT 1 FROM `ChatLogs` WHERE (`archive_id` = '%q' AND `archive_id` != '') OR (`stanza_id` = '%q' AND `stanza_id` != '')",
+                                                              message->stanzaid ? message->stanzaid : "",
+                                                              message->id ? message->id : "");
+
+    if (!duplicate_check_query) {
+        log_error("log_database_add(): SQL query for duplicate check. could not allocate memory");
+        return;
+    }
+
+    int duplicate_exists = 0;
+    sqlite3_stmt* stmt;
+
+    if (SQLITE_OK == sqlite3_prepare_v2(g_chatlog_database, duplicate_check_query, -1, &stmt, NULL)) {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            duplicate_exists = 1;
+        }
+        sqlite3_finalize(stmt);
+    }
+
+    if (duplicate_exists) {
+        log_warning("Duplicate stanza-id found for the message. stanza_id: %s; archive_id: %s; sender: %s; content: %s", message->id, message->stanzaid, from_jid->barejid, message->plain);
+        return;
+    }
+
+    auto_sqlite char* query = sqlite3_mprintf("INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) VALUES ('%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q')",
+                                              from_jid->barejid,
+                                              from_jid->resourcepart ? from_jid->resourcepart : "",
+                                              to_jid->barejid,
+                                              to_jid->resourcepart ? to_jid->resourcepart : "",
+                                              message->plain ? message->plain : "",
+                                              date_fmt ? date_fmt : "",
+                                              message->id ? message->id : "",
+                                              message->stanzaid ? message->stanzaid : "",
+                                              message->replace_id ? message->replace_id : "",
+                                              type ? type : "",
+                                              enc ? enc : "");
     if (!query) {
         log_error("log_database_add(): SQL query. could not allocate memory");
         return;
     }
+
+    log_debug("Writing to DB. Query: %s", query);
 
     if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         if (err_msg) {
@@ -423,6 +446,10 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
         } else {
             log_error("Unknown SQLite error");
         }
+    } else {
+        int inserted_rows_count = sqlite3_changes(g_chatlog_database);
+        if (inserted_rows_count < 1) {
+            log_error("SQLite did not insert message (rows: %d, id: %s, content: %s)", inserted_rows_count, message->id, message->plain);
+        }
     }
-    sqlite3_free(query);
 }
