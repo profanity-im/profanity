@@ -6467,7 +6467,6 @@ cmd_reconnect(ProfWin* window, const char* const command, gchar** args)
     int intval = 0;
     auto_char char* err_msg = NULL;
     if (g_strcmp0(value, "now") == 0) {
-        cons_show("Reconnecting now.");
         cl_ev_reconnect();
     } else if (strtoi_range(value, &intval, 0, INT_MAX, &err_msg)) {
         prefs_set_reconnect(intval);
