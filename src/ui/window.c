@@ -312,7 +312,10 @@ win_get_title(ProfWin* window)
     {
         const ProfChatWin* chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        const PContact contact = roster_get_contact(chatwin->barejid);
+        PContact contact = NULL;
+        if (roster_exists()) {
+            contact = roster_get_contact(chatwin->barejid);
+        }
         if (!contact) {
             return g_strdup(chatwin->barejid);
         }
