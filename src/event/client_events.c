@@ -98,7 +98,14 @@ cl_ev_disconnect(void)
 void
 cl_ev_reconnect(void)
 {
-    if (connection_get_status() != JABBER_DISCONNECTED) {
+    jabber_conn_status_t conn_status = connection_get_status();
+    if (conn_status == JABBER_CONNECTING) {
+        cons_show_error("Reconnection aborted: Connection attempt is already in progress");
+        return;
+    }
+
+    cons_show("Reconnecting now.");
+    if (conn_status != JABBER_DISCONNECTED && conn_status != JABBER_DISCONNECTING) {
         connection_disconnect();
         ev_disconnect_cleanup();
         // on intentional disconnect reset the counter
