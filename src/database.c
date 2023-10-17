@@ -215,13 +215,13 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
     }
 
     if (!query) {
-        log_error("log_database_get_last_info(): SQL query. could not allocate memory");
+        log_error("Could not allocate memory for SQL query in log_database_get_limits_info()");
         return NULL;
     }
 
     int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
-        log_error("log_database_get_last_info(): unknown SQLite error");
+        log_error("Unknown SQLite error in log_database_get_last_info()");
         return NULL;
     }
 
@@ -272,13 +272,13 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
     g_date_time_unref(now);
 
     if (!query) {
-        log_error("log_database_get_previous_chat(): SQL query. could not allocate memory");
+        log_error("Could not allocate memory");
         return NULL;
     }
 
     int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
-        log_error("log_database_get_previous_chat(): unknown SQLite error");
+        log_error("Unknown SQLite error in log_database_get_previous_chat()");
         return NULL;
     }
 
@@ -413,7 +413,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                                                                 message->replace_id ? message->replace_id : "");
 
         if (!replace_check_query) {
-            log_error("log_database_add(): SQL query for LMC check. could not allocate memory");
+            log_error("Could not allocate memory for SQL replace query in log_database_add()");
             return;
         }
 
@@ -424,7 +424,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                 const char* from_jid_orig = (const char*)sqlite3_column_text(lmc_stmt, 0);
 
                 if (g_strcmp0(from_jid_orig, from_jid->barejid) != 0) {
-                    log_error("log_database_add(): Mismatch between 'from_jid' in the database and the current message for LMC. Corrected message sender: %s; original message sender: %s; replace_id: %s; message: %s", from_jid->barejid, from_jid_orig, message->replace_id, message->plain);
+                    log_error("Mismatch in sender JIDs when trying to do LMC. Corrected message sender: %s. Original message sender: %s. Replace-ID: %s. Message: %s", from_jid->barejid, from_jid_orig, message->replace_id, message->plain);
                     cons_show_error("%s sent message correction with mismatched sender. See log for details.", from_jid->barejid);
                     sqlite3_finalize(lmc_stmt);
                     return;
@@ -440,7 +440,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                                                               message->id ? message->id : "");
 
     if (!duplicate_check_query) {
-        log_error("log_database_add(): SQL query for duplicate check. could not allocate memory");
+        log_error("Could not allocate memory for SQL duplicate query in log_database_add()");
         return;
     }
 
@@ -473,7 +473,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                                               type ? type : "",
                                               enc ? enc : "");
     if (!query) {
-        log_error("log_database_add(): SQL query. could not allocate memory");
+        log_error("Could not allocate memory for SQL insert query in log_database_add()");
         return;
     }
 
