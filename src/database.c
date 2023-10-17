@@ -48,6 +48,7 @@
 #include "config/files.h"
 #include "database.h"
 #include "config/preferences.h"
+#include "ui/ui.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/message.h"
 
@@ -256,7 +257,17 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
     gchar* sort2 = !flip ? "ASC" : "DESC";
     GDateTime* now = g_date_time_new_now_local();
     auto_gchar gchar* end_date_fmt = end_time ? end_time : g_date_time_format_iso8601(now);
-    auto_sqlite gchar* query = sqlite3_mprintf("SELECT * FROM (SELECT COALESCE(B.`message`, A.`message`) AS message, A.`timestamp`, A.`from_jid`, A.`type`, A.`encryption` from `ChatLogs` AS A LEFT JOIN `ChatLogs` AS B ON A.`stanza_id` = B.`replace_id` WHERE A.`replace_id` = '' AND ((A.`from_jid` = '%q' AND A.`to_jid` = '%q') OR (A.`from_jid` = '%q' AND A.`to_jid` = '%q')) AND A.`timestamp` < '%q' AND (%Q IS NULL OR A.`timestamp` > %Q) ORDER BY A.`timestamp` %s LIMIT %d) ORDER BY `timestamp` %s;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, end_date_fmt, start_time, start_time, sort1, MESSAGES_TO_RETRIEVE, sort2);
+    auto_sqlite gchar* query = sqlite3_mprintf("SELECT * FROM ("
+                                               "SELECT COALESCE(B.`message`, A.`message`) AS message, "
+                                               "A.`timestamp`, A.`from_jid`, A.`type`, A.`encryption` FROM `ChatLogs` AS A "
+                                               "LEFT JOIN `ChatLogs` AS B ON (A.`stanza_id` = B.`replace_id` AND A.`from_jid` = B.`from_jid`) "
+                                               "WHERE A.`replace_id` = '' "
+                                               "AND ((A.`from_jid` = '%q' AND A.`to_jid` = '%q') OR (A.`from_jid` = '%q' AND A.`to_jid` = '%q')) "
+                                               "AND A.`timestamp` < '%q' "
+                                               "AND (%Q IS NULL OR A.`timestamp` > %Q) "
+                                               "ORDER BY A.`timestamp` %s LIMIT %d) "
+                                               "ORDER BY `timestamp` %s;",
+                                               contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, end_date_fmt, start_time, start_time, sort1, MESSAGES_TO_RETRIEVE, sort2);
 
     g_date_time_unref(now);
 
@@ -396,6 +407,34 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
         type = (char*)_get_message_type_str(message->type);
     }
 
+    // Check LMC validity (XEP-0308)
+    if (message->replace_id) {
+        auto_sqlite char* replace_check_query = sqlite3_mprintf("SELECT `from_jid` FROM `ChatLogs` WHERE `stanza_id` = '%q'",
+                                                                message->replace_id ? message->replace_id : "");
+
+        if (!replace_check_query) {
+            log_error("log_database_add(): SQL query for LMC check. could not allocate memory");
+            return;
+        }
+
+        sqlite3_stmt* lmc_stmt = NULL;
+
+        if (SQLITE_OK == sqlite3_prepare_v2(g_chatlog_database, replace_check_query, -1, &lmc_stmt, NULL)) {
+            if (sqlite3_step(lmc_stmt) == SQLITE_ROW) {
+                const char* from_jid_orig = (const char*)sqlite3_column_text(lmc_stmt, 0);
+
+                if (g_strcmp0(from_jid_orig, from_jid->barejid) != 0) {
+                    log_error("log_database_add(): Mismatch between 'from_jid' in the database and the current message for LMC. Corrected message sender: %s; original message sender: %s; replace_id: %s; message: %s", from_jid->barejid, from_jid_orig, message->replace_id, message->plain);
+                    cons_show_error("%s sent message correction with mismatched sender. See log for details.", from_jid->barejid);
+                    sqlite3_finalize(lmc_stmt);
+                    return;
+                }
+            }
+            sqlite3_finalize(lmc_stmt);
+        }
+    }
+
+    // Check for duplicate messages
     auto_sqlite char* duplicate_check_query = sqlite3_mprintf("SELECT 1 FROM `ChatLogs` WHERE (`archive_id` = '%q' AND `archive_id` != '') OR (`stanza_id` = '%q' AND `stanza_id` != '')",
                                                               message->stanzaid ? message->stanzaid : "",
                                                               message->id ? message->id : "");
@@ -420,6 +459,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
         return;
     }
 
+    // Insert the message
     auto_sqlite char* query = sqlite3_mprintf("INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) VALUES ('%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q')",
                                               from_jid->barejid,
                                               from_jid->resourcepart ? from_jid->resourcepart : "",
