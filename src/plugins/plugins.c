@@ -354,6 +354,9 @@ plugins_reload(const char* const name, GString* error_message)
     gboolean res = plugins_unload(name);
     if (res) {
         res = plugins_load(name, error_message);
+    } else {
+        log_info("Failed to reload plugin: %s, not loaded", name);
+        g_string_assign(error_message, "cannot unload");
     }
 
     return res;

@@ -7197,7 +7197,7 @@ cmd_plugins_reload(ProfWin* window, const char* const command, gchar** args)
     if (res) {
         cons_show("Reloaded plugin: %s", args[1]);
     } else {
-        cons_show("Failed to reload plugin: %s, %s", args[1], error_message);
+        cons_show("Failed to reload plugin: %s, %s.", args[1], error_message->str);
     }
     g_string_free(error_message, TRUE);
 
