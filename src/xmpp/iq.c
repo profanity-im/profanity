@@ -111,6 +111,7 @@ typedef struct mam_rsm_userdata
     char* start_datestr;
     char* end_datestr;
     gboolean fetch_next;
+    gboolean is_reconnect;
     ProfWin* win;
 } MamRsmUserdata;
 
@@ -119,6 +120,7 @@ typedef struct late_delivery_userdata
     ProfWin* win;
     GDateTime* enddate;
     GDateTime* startdate;
+    gboolean is_reconnect;
 } LateDeliveryUserdata;
 
 static int _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
@@ -158,7 +160,7 @@ static int _command_exec_response_handler(xmpp_stanza_t* const stanza, void* con
 static int _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _register_change_password_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 
-static void _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate);
+static void _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate, gboolean is_reconnect);
 static void _iq_free_room_data(ProfRoomInfoData* roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet* affiliation_set);
 static void _iq_free_affiliation_list(ProfAffiliationList* affiliation_list);
@@ -306,6 +308,12 @@ iq_id_handler_add(const char* const id, ProfIqCallback func, ProfIqFreeCallback 
 
         g_hash_table_insert(id_handlers, strdup(id), handler);
     }
+}
+
+void
+iq_disco_items_on_disconnect(void)
+{
+    received_disco_items = FALSE;
 }
 
 void
@@ -2552,7 +2560,7 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
 
         while (late_delivery_windows) {
             LateDeliveryUserdata* del_data = late_delivery_windows->data;
-            _iq_mam_request(del_data->win, del_data->startdate, del_data->enddate);
+            _iq_mam_request(del_data->win, del_data->startdate, del_data->enddate, del_data->is_reconnect);
             free(del_data);
             late_delivery_windows = g_slist_delete_link(late_delivery_windows,
                                                         late_delivery_windows);
@@ -2617,10 +2625,10 @@ _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
     if (win->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)win;
-        chatwin_db_history(chatwin, NULL, NULL, TRUE);
+        chatwin_db_history(chatwin, NULL, NULL, TRUE, TRUE);
     } else if (win->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)win;
-        mucwin_db_history(mucwin, NULL, NULL, TRUE);
+        mucwin_db_history(mucwin, NULL, NULL, TRUE, TRUE);
     }
     return 0;
 }
@@ -2638,7 +2646,7 @@ iq_mam_request_older(ProfWin* win)
 
     char* win_jid = win_get_tab_identifier(win);
 
-    ProfMessage* first_msg = log_database_get_limits_info(win_jid, FALSE);
+    ProfMessage* first_msg = log_database_get_limits_info(win_jid, FALSE, NULL);
     char* firstid = NULL;
     char* enddate = NULL;
 
@@ -2677,7 +2685,7 @@ _mam_userdata_free(MamRsmUserdata* data)
 }
 
 void
-_iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate)
+_iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate, gboolean is_reconnect)
 {
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
@@ -2687,7 +2695,8 @@ _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate)
         return;
     }
 
-    char* firstid = "";
+    // Empty firstid means that the rsm paging will start from the last/most recent page
+    char* firstid = is_reconnect ? NULL : "";
     char* startdate_str = NULL;
     char* enddate_str = NULL;
     gboolean fetch_next = FALSE;
@@ -2719,10 +2728,12 @@ _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate)
         data->barejid = strdup(win_jid);
         data->fetch_next = fetch_next;
         data->win = win;
+        data->is_reconnect = is_reconnect;
 
         iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, data);
     }
 
+    win_println(win, THEME_DEFAULT, "-", "(%s) (%s) (%s) (%d)", startdate_str, enddate_str, win_jid, fetch_next);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
     free(win_jid);
@@ -2731,10 +2742,10 @@ _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate)
 }
 
 void
-iq_mam_request(ProfWin* win, GDateTime* enddate)
+iq_mam_request(ProfWin* win, GDateTime* enddate, gboolean is_reconnect)
 {
     char* win_jid = win_get_tab_identifier(win);
-    ProfMessage* last_msg = log_database_get_limits_info(win_jid, TRUE);
+    ProfMessage* last_msg = log_database_get_limits_info(win_jid, TRUE, NULL);
     GDateTime* startdate = g_date_time_add_seconds(last_msg->timestamp, 0);
     message_free(last_msg);
 
@@ -2744,6 +2755,7 @@ iq_mam_request(ProfWin* win, GDateTime* enddate)
         cur_del_data->win = win;
         cur_del_data->enddate = enddate;
         cur_del_data->startdate = startdate;
+        cur_del_data->is_reconnect = is_reconnect;
         late_delivery_windows = g_slist_append(late_delivery_windows, cur_del_data);
         log_debug("Save MAM request of %s for later", win_jid);
         free(win_jid);
@@ -2751,9 +2763,30 @@ iq_mam_request(ProfWin* win, GDateTime* enddate)
     }
 
     free(win_jid);
-    _iq_mam_request(win, startdate, enddate);
+    _iq_mam_request(win, startdate, enddate, is_reconnect);
 
     return;
+}
+
+void
+_handle_mam_db_history(ProfWin* win, char* start_time, char* end_time, gboolean flip, gboolean limit_results)
+{
+    switch (win->type) {
+    case WIN_CHAT:
+        {
+            ProfChatWin* chatwin = (ProfChatWin*)win;
+            chatwin_db_history(chatwin, start_time, end_time, flip, limit_results);
+            return;
+        }
+    case WIN_MUC:
+        {
+            ProfMucWin* mucwin = (ProfMucWin*)win;
+            mucwin_db_history(mucwin, start_time, end_time, flip, limit_results);
+            return;
+        }
+    default:
+        return;
+    }
 }
 
 static int
@@ -2770,9 +2803,7 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         if (fin) {
             gboolean is_complete = g_strcmp0(xmpp_stanza_get_attribute(fin, "complete"), "true") == 0;
             MamRsmUserdata* data = (MamRsmUserdata*)userdata;
-            ProfWin* window = (ProfWin*)data->win;
-
-            buffer_remove_entry(window->layout->buffer, 0);
+            ProfWin* window = data->win;
 
             auto_char char* start_str = NULL;
             if (data->start_datestr) {
@@ -2787,49 +2818,43 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                 end_str[strlen(end_str) - 3] = '\0';
             }
 
-            if (is_complete || !data->fetch_next) {
-                switch (data->win->type) {
-                case WIN_CHAT:
-                {
-                    ProfChatWin* chatwin = (ProfChatWin*)data->win;
-                    chatwin_db_history(chatwin, is_complete ? NULL : start_str, end_str, TRUE);
+            if (data->is_reconnect) {
+                _handle_mam_db_history(data->win, start_str, end_str, FALSE, FALSE);
+                if (is_complete) {
+                    char* old_end = end_str;
+                    GDateTime* now = g_date_time_new_now_local();
+                    end_str = g_date_time_format(now, mam_timestamp_format_string);
+                    end_str[strlen(end_str) - 3] = '\0';
+                    _handle_mam_db_history(data->win, old_end, end_str, FALSE, FALSE);
                     return 0;
                 }
-                case WIN_MUC:
-                {
-                    ProfMucWin* mucwin = (ProfMucWin*)data->win;
-                    mucwin_db_history(mucwin, is_complete ? NULL : start_str, end_str, TRUE);
+            } else {
+                buffer_remove_entry(window->layout->buffer, 0);
+                if (is_complete || !data->fetch_next) {
+                    _handle_mam_db_history(data->win, is_complete ? NULL : start_str, end_str, TRUE, TRUE);
                     return 0;
                 }
-                default:
-                    return 0;
-                }
+
+                _handle_mam_db_history(data->win, start_str, end_str, TRUE, TRUE);
             }
 
-            switch (data->win->type) {
-            case WIN_CHAT:
-            {
-                ProfChatWin* chatwin = (ProfChatWin*)data->win;
-                chatwin_db_history(chatwin, start_str, end_str, TRUE);
-                return 0;
-            }
-            case WIN_MUC:
-            {
-                ProfMucWin* mucwin = (ProfMucWin*)data->win;
-                mucwin_db_history(mucwin, start_str, end_str, TRUE);
-                return 0;
-            }
-            default:
-                return 0;
-            }
 
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {
-                win_print_loading_history(window);
-
-                char* firstid = NULL;
-                xmpp_stanza_t* first = xmpp_stanza_get_child_by_name(set, STANZA_NAME_FIRST);
-                firstid = xmpp_stanza_get_text(first);
+                char* firstid = NULL, *lastid = NULL;
+                if (!data->is_reconnect) {
+                    win_print_loading_history(window);
+                    xmpp_stanza_t* first = xmpp_stanza_get_child_by_name(set, STANZA_NAME_FIRST);
+                    firstid = xmpp_stanza_get_text(first);
+                } else {
+                    char* win_jid = win_get_tab_identifier(window);
+                    ProfMessage* last_msg = log_database_get_limits_info(win_jid, TRUE, data->end_datestr);
+                    GDateTime* startdate = g_date_time_add_seconds(last_msg->timestamp, 0);
+                    _iq_mam_request(window, startdate, g_date_time_new_from_iso8601(data->end_datestr, NULL), TRUE);
+                    message_free(last_msg);
+                    free(win_jid);
+                    return 0;
+                }
 
                 // 4.3.2. send same stanza with set,max stanza
                 xmpp_ctx_t* const ctx = connection_get_ctx();
@@ -2838,8 +2863,12 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                     free(data->end_datestr);
                     data->end_datestr = NULL;
                 }
-                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL, data->win->type == WIN_MUC);
-                free(firstid);
+
+                xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, lastid, data->win->type == WIN_MUC);
+
+                if (!data->is_reconnect) {
+                    free(data->is_reconnect ? lastid : firstid);
+                }
 
                 MamRsmUserdata* ndata = malloc(sizeof(*ndata));
                 *ndata = *data;

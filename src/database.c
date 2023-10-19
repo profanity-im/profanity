@@ -201,9 +201,9 @@ log_database_add_outgoing_muc_pm(const char* const id, const char* const barejid
     _log_database_add_outgoing("mucpm", id, barejid, message, replace_id, enc);
 }
 
-// Get info (timestamp and stanza_id) of the first or last message in db
+// Get info (timestamp and stanza_id) of the first or last message in db after or before from_timestamp
 ProfMessage*
-log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_last)
+log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_last, char* from_timestamp)
 {
     sqlite3_stmt* stmt = NULL;
     gchar* query;
@@ -212,10 +212,10 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
     if (!myjid)
         return NULL;
 
-    if (is_last) {
-        query = sqlite3_mprintf("SELECT * FROM (SELECT `archive_id`, `timestamp` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` DESC LIMIT 1) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
+    if (from_timestamp) {
+        query = sqlite3_mprintf("SELECT * FROM (SELECT `archive_id`, `timestamp` from `ChatLogs` WHERE ((`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q')) AND `timestamp` %c '%q' ORDER BY `timestamp` %s LIMIT 1) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, is_last ? '<' : '>', from_timestamp, is_last ? "DESC" : "ASC");
     } else {
-        query = sqlite3_mprintf("SELECT * FROM (SELECT `archive_id`, `timestamp` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` ASC LIMIT 1) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
+        query = sqlite3_mprintf("SELECT * FROM (SELECT `archive_id`, `timestamp` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` %s LIMIT 1) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, is_last ? "DESC" : "ASC");
     }
 
     if (!query) {
@@ -250,7 +250,7 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
 // null the current time is used. from_start gets first few messages if true
 // otherwise the last ones. Flip flips the order of the results
 GSList*
-log_database_get_previous_chat(const gchar* const contact_barejid, const char* start_time, char* end_time, gboolean from_start, gboolean flip)
+log_database_get_previous_chat(const gchar* const contact_barejid, const char* start_time, char* end_time, gboolean from_start, gboolean flip, gboolean limit_results)
 {
     sqlite3_stmt* stmt = NULL;
     const char* jid = connection_get_fulljid();
@@ -263,7 +263,36 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
     gchar* sort2 = !flip ? "ASC" : "DESC";
     GDateTime* now = g_date_time_new_now_local();
     gchar* end_date_fmt = end_time ? end_time : g_date_time_format_iso8601(now);
-    auto_sqlite gchar* query = sqlite3_mprintf("SELECT * FROM (SELECT COALESCE(B.`message`, A.`message`) AS message, A.`timestamp`, A.`from_jid`, A.`type`, A.`encryption` from `ChatLogs` AS A LEFT JOIN `ChatLogs` AS B ON A.`stanza_id` = B.`replace_id` WHERE A.`replace_id` = '' AND ((A.`from_jid` = '%q' AND A.`to_jid` = '%q') OR (A.`from_jid` = '%q' AND A.`to_jid` = '%q')) AND A.`timestamp` < '%q' AND (%Q IS NULL OR A.`timestamp` > %Q) ORDER BY A.`timestamp` %s LIMIT %d) ORDER BY `timestamp` %s;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, end_date_fmt, start_time, start_time, sort1, MESSAGES_TO_RETRIEVE, sort2);
+    auto_sqlite gchar* query;
+
+    if (limit_results) {
+        query = sqlite3_mprintf(
+            "SELECT * FROM (SELECT COALESCE(B.`message`, A.`message`) AS message, A.`timestamp`, A.`from_jid`, A.`type`, A.`encryption` from `ChatLogs` AS A LEFT JOIN `ChatLogs` AS B ON A.`stanza_id` = B.`replace_id` WHERE A.`replace_id` = '' AND ((A.`from_jid` = '%q' AND A.`to_jid` = '%q') OR (A.`from_jid` = '%q' AND A.`to_jid` = '%q')) AND A.`timestamp` < '%q' AND (%Q IS NULL OR A.`timestamp` > %Q) ORDER BY A.`timestamp` %s LIMIT %d) ORDER BY `timestamp` %s;",
+            contact_barejid,
+            myjid->barejid,
+            myjid->barejid,
+            contact_barejid,
+            end_date_fmt,
+            start_time,
+            start_time,
+            sort1,
+            MESSAGES_TO_RETRIEVE,
+            sort2
+        );
+    } else {
+        query = sqlite3_mprintf(
+            "SELECT * FROM (SELECT COALESCE(B.`message`, A.`message`) AS message, A.`timestamp`, A.`from_jid`, A.`type`, A.`encryption` from `ChatLogs` AS A LEFT JOIN `ChatLogs` AS B ON A.`stanza_id` = B.`replace_id` WHERE A.`replace_id` = '' AND ((A.`from_jid` = '%q' AND A.`to_jid` = '%q') OR (A.`from_jid` = '%q' AND A.`to_jid` = '%q')) AND A.`timestamp` < '%q' AND (%Q IS NULL OR A.`timestamp` > %Q) ORDER BY A.`timestamp`) ORDER BY `timestamp` %s;",
+            contact_barejid,
+            myjid->barejid,
+            myjid->barejid,
+            contact_barejid,
+            end_date_fmt,
+            start_time,
+            start_time,
+            sort1,
+            sort2
+        );
+    }
 
     g_date_time_unref(now);
     g_free(end_date_fmt);

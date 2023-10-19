@@ -932,6 +932,10 @@ wins_reestablished_connection(void)
             }
 #endif
 
+            if (prefs_get_boolean(PREF_MAM)) {
+                iq_mam_request(window, g_date_time_new_now_local(), TRUE);
+            }
+
             // if current win, set current_win_dirty
             if (wins_is_current(window)) {
                 win_update_virtual(window);

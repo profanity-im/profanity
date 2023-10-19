@@ -33,6 +33,7 @@
  *
  */
 
+#include "xmpp/session.h"
 #define _XOPEN_SOURCE_EXTENDED
 #include "config.h"
 
@@ -913,6 +914,7 @@ _inp_rl_win_pageup_handler(int count, int key)
 static int
 _inp_rl_win_pagedown_handler(int count, int key)
 {
+    session_lost_connection();
     ProfWin* current = wins_get_current();
     win_page_down(current);
     return 0;

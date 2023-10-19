@@ -146,7 +146,7 @@ chatwin_new(const char* const barejid)
     }
 
     if (prefs_get_boolean(PREF_MAM)) {
-        iq_mam_request(window, NULL);
+        iq_mam_request(window, NULL, FALSE);
         win_print_loading_history(window);
     }
 
@@ -575,7 +575,7 @@ static void
 _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 {
     if (!chatwin->history_shown) {
-        GSList* history = log_database_get_previous_chat(contact_barejid, NULL, NULL, FALSE, FALSE);
+        GSList* history = log_database_get_previous_chat(contact_barejid, NULL, NULL, FALSE, FALSE, TRUE);
         GSList* curr = history;
 
         while (curr) {
@@ -598,13 +598,13 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 // first entry's timestamp in the buffer is used. Flip true to prepend to buffer.
 // Timestamps should be in iso8601
 gboolean
-chatwin_db_history(ProfChatWin* chatwin, const char* start_time, char* end_time, gboolean flip)
+chatwin_db_history(ProfChatWin* chatwin, const char* start_time, char* end_time, gboolean flip, gboolean limit_results)
 {
     if (!end_time) {
         end_time = buffer_size(((ProfWin*)chatwin)->layout->buffer) == 0 ? NULL : g_date_time_format_iso8601(buffer_get_entry(((ProfWin*)chatwin)->layout->buffer, 0)->time);
     }
 
-    GSList* history = log_database_get_previous_chat(chatwin->barejid, start_time, end_time, !flip, flip);
+    GSList* history = log_database_get_previous_chat(chatwin->barejid, start_time, end_time, !flip, flip, limit_results);
     gboolean has_items = g_slist_length(history) != 0;
     GSList* curr = history;
 

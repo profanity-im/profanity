@@ -662,7 +662,7 @@ win_page_up(ProfWin* window)
 
             // Don't do anything if still fetching mam messages
             if (is_not_fetching) {
-                if (!chatwin_db_history(chatwin, NULL, NULL, TRUE) && prefs_get_boolean(PREF_MAM)) {
+                if (!chatwin_db_history(chatwin, NULL, NULL, TRUE, TRUE) && prefs_get_boolean(PREF_MAM)) {
                     win_print_loading_history(window);
                     iq_mam_request_older(window);
                 }
@@ -672,7 +672,7 @@ win_page_up(ProfWin* window)
 
             // Don't do anything if still fetching mam messages
             if (is_not_fetching) {
-                if (!mucwin_db_history(mucwin, NULL, NULL, TRUE) && prefs_get_boolean(PREF_MAM)) {
+                if (!mucwin_db_history(mucwin, NULL, NULL, TRUE, TRUE) && prefs_get_boolean(PREF_MAM)) {
                     win_print_loading_history(window);
                     iq_mam_request_older(window);
                 }
@@ -710,7 +710,7 @@ win_page_down(ProfWin* window)
             char* start = g_date_time_format_iso8601(buffer_get_entry(window->layout->buffer, bf_size - 1)->time);
             GDateTime* now = g_date_time_new_now_local();
             char* end = g_date_time_format_iso8601(now);
-            chatwin_db_history((ProfChatWin*)window, start, end, FALSE);
+            chatwin_db_history((ProfChatWin*)window, start, end, FALSE, TRUE);
 
             g_free(start);
             g_date_time_unref(now);

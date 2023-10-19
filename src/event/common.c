@@ -61,6 +61,7 @@ ev_disconnect_cleanup(void)
     ui_disconnected();
     session_disconnect();
     roster_destroy();
+    iq_disco_items_on_disconnect();
     iq_autoping_timer_cancel();
     muc_invites_clear();
     muc_confserver_clear();

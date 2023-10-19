@@ -145,7 +145,7 @@ void chatwin_set_incoming_char(ProfChatWin* chatwin, const char* const ch);
 void chatwin_unset_incoming_char(ProfChatWin* chatwin);
 void chatwin_set_outgoing_char(ProfChatWin* chatwin, const char* const ch);
 void chatwin_unset_outgoing_char(ProfChatWin* chatwin);
-gboolean chatwin_db_history(ProfChatWin* chatwin, const char* start_time, char* end_time, gboolean flip);
+gboolean chatwin_db_history(ProfChatWin* chatwin, const char* start_time, char* end_time, gboolean flip, gboolean limit_results);
 
 // MUC window
 ProfMucWin* mucwin_new(const char* const barejid);
@@ -162,7 +162,7 @@ void mucwin_occupant_role_and_affiliation_change(ProfMucWin* mucwin, const char*
                                                  const char* const role, const char* const affiliation, const char* const actor, const char* const reason);
 void mucwin_roster(ProfMucWin* mucwin, GList* occupants, const char* const presence);
 void mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message, gboolean flip);
-gboolean mucwin_db_history(ProfMucWin* mucwin, char* start_time, char* end_time, gboolean flip);
+gboolean mucwin_db_history(ProfMucWin* mucwin, char* start_time, char* end_time, gboolean flip, gboolean limit_results);
 void mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* const id, prof_enc_t enc_mode, const char* const replace_id);
 void mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList* mentions, GList* triggers, gboolean filter_reflection, gboolean flip);
 void mucwin_subject(ProfMucWin* mucwin, const char* const nick, const char* const subject);

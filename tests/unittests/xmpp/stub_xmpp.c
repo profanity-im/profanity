@@ -404,6 +404,9 @@ void
 iq_last_activity_request(gchar* jid)
 {
 }
+iq_disco_items_on_disconnect(void)
+{
+}
 void
 iq_autoping_timer_cancel(void)
 {
@@ -435,7 +438,7 @@ iq_muc_register_nick(const char* const roomjid)
 }
 
 void
-iq_mam_request(ProfWin* win, GDateTime* enddate)
+iq_mam_request(ProfWin* win, GDateTime* enddate, gboolean is_reconnect)
 {
 }
 

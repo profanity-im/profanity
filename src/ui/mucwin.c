@@ -71,10 +71,10 @@ mucwin_new(const char* const barejid)
 #endif
 
     if (prefs_get_boolean(PREF_MAM)) {
-        iq_mam_request(window, NULL);
+        iq_mam_request(window, NULL, FALSE);
         win_print_loading_history(window);
     } else if ((prefs_get_boolean(PREF_CHLOG) && prefs_get_boolean(PREF_HISTORY))) {
-        mucwin_db_history(mucwin, NULL, NULL, TRUE);
+        mucwin_db_history(mucwin, NULL, NULL, TRUE, TRUE);
     }
 
     // Force redraw here to show correct offline users; before this point muc_members returns a wrong list
@@ -389,13 +389,13 @@ mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message, gboolean fl
 }
 
 gboolean
-mucwin_db_history(ProfMucWin* mucwin, char* start_time, char* end_time, gboolean flip)
+mucwin_db_history(ProfMucWin* mucwin, char* start_time, char* end_time, gboolean flip, gboolean limit_results)
 {
     if (!end_time) {
         end_time = buffer_size(((ProfWin*)mucwin)->layout->buffer) == 0 ? NULL : g_date_time_format_iso8601(buffer_get_entry(((ProfWin*)mucwin)->layout->buffer, 0)->time);
     }
 
-    GSList* history = log_database_get_previous_chat(mucwin->roomjid, start_time, end_time, !flip, flip);
+    GSList* history = log_database_get_previous_chat(mucwin->roomjid, start_time, end_time, !flip, flip, limit_results);
     gboolean has_items = g_slist_length(history) != 0;
     GSList* curr = history;
 

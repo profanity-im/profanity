@@ -650,7 +650,7 @@ sv_ev_incoming_message(ProfMessage* message)
 
         if (prefs_get_boolean(PREF_MAM)) {
             win_print_loading_history(window);
-            iq_mam_request(window, g_date_time_add_seconds(message->timestamp, 0)); // copy timestamp
+            iq_mam_request(window, g_date_time_add_seconds(message->timestamp, 0), FALSE); // copy timestamp
         }
 
 #ifdef HAVE_OMEMO
