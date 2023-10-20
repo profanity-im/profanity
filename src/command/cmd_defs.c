@@ -1643,12 +1643,13 @@ static const struct cmd_t command_defs[] = {
               "Add, remove or list command aliases.")
       CMD_ARGS(
               { "list", "List all aliases." },
-              { "add <name> <value>", "Add a new command alias." },
+              { "add <name> <value>", "Add a new command alias. The alias name must not contain any space characters." },
               { "remove <name>", "Remove a command alias." })
       CMD_EXAMPLES(
               "/alias add friends /who online friends",
               "/alias add /q /quit",
-              "/alias add a /away \"I'm in a meeting.\"",
+              "/alias add urg /msg odin@valhalla.edda [URGENT]",
+              "/alias add afk /status set away \"Away From Keyboard\"",
               "/alias remove q",
               "/alias list")
     },

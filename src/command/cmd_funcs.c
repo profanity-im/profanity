@@ -5091,6 +5091,10 @@ cmd_alias(ProfWin* window, const char* const command, gchar** args)
             cons_bad_cmd_usage(command);
             return TRUE;
         } else {
+            if (strchr(alias, ' ')) {
+                cons_bad_cmd_usage(command);
+                return TRUE;
+            }
             char* alias_p = alias;
             GString* ac_value = g_string_new("");
             if (alias[0] == '/') {
@@ -8565,15 +8569,20 @@ _cmd_execute_alias(ProfWin* window, const char* const inp, gboolean* ran)
     }
 
     auto_char char* alias = strdup(inp + 1);
-    auto_gchar gchar* value = prefs_get_alias(alias);
-    if (value) {
-        *ran = TRUE;
-        gboolean result = cmd_process_input(window, value);
-        return result;
+    auto_gcharv char** alias_parts = g_strsplit(alias, " ", 2);
+    auto_gchar gchar* value = prefs_get_alias(alias_parts[0]);
+
+    if (!value) {
+        *ran = FALSE;
+        return TRUE;
     }
 
-    *ran = FALSE;
-    return TRUE;
+    char* params = alias_parts[1];
+    auto_gchar gchar* full_cmd = params ? g_strdup_printf("%s %s", value, params) : g_strdup(value);
+
+    *ran = TRUE;
+    gboolean result = cmd_process_input(window, full_cmd);
+    return result;
 }
 
 // helper function for status change commands
