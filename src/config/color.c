@@ -361,7 +361,18 @@ find_closest_col(int h, int s, int l)
 static int
 find_col(const char* col_name, int n)
 {
+    char* endptr;
+    unsigned long col_value = strtoul(col_name, &endptr, 0);
     char name[32] = { 0 };
+
+    /*
+     * When the col_name is a uint8, then we don’t need to look up by
+     * color name (which is problematic given the duplicate names)
+     */
+
+    if ((*endptr == '\0' || *endptr == '\n') && col_value <= UINT8_MAX) {
+        return (int)col_value;
+    }
 
     /*
      * make a null terminated version of col_name. we don't want to
