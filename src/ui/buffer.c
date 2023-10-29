@@ -53,7 +53,7 @@
 #include "ui/window.h"
 #include "ui/buffer.h"
 
-#define BUFF_SIZE 1200
+#define BUFF_SIZE 200
 
 struct prof_buff_t
 {
