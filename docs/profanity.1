@@ -105,6 +105,27 @@ for interactive history search and
 .B C-x C-r
 for reloading inputrc without restart.
 .SH USING PROFANITY
+The first step is to connect to an XMPP Server. The \fB/connect\fR and \fB/account\fR command can be used to setup the XMPP accounts within profanity (see
+.BR profanity-connect (1)
+and
+.BR profanity-account (1))
+with an existing XMPP Account. The \fB/register\fR command can be used to register an account on a server.
+.BR profanity-register (1)
+Use the \fB/help commands connection\fR command in profanity to display more commands for managing your connection.
+.PP
+The roster is your address book. By default, your roster will be shown in "window 1" which is the profanity \fB/console\fR.
+It's possible to \fB/roster hide\fR and to \fB/roster show\fR the address book in the profanity console. Buddies can be added via \fB/roster add JID\fR.
+.PP
+To see the online status of your contacts, the \fB/sub\fR command can be used to manage subscriptions to the presence of contacts.
+\fB/sub request\fR will send a request. \fB/sub allow\fR is used to approve a contact's subscription request. Use \fB/help commands roster\fR to get a list of commands which can be used to manage your roster.
+.PP
+Open chat windows can been shown by \fB/wins\fR command. Jumping to a window can be done via \fB/win NUMBER\fR or \fB/win JID\fR. profanity supports autocompletion with TAB-Key.
+.
+The \fB/msg\fR command can be used to start a chat with your contact. Groupchats can be joined with the \fB/join\fR command or managed within the account's bookmark.
+.PP
+If the group chat is stored in the bookmarks, the group chat can be set to auto-join. If the auto-join is switched off, use \fB/bookmark join\fR to join the group chat.
+The \fB/sendfile\fR and \fB/url\fR command can be used to share and download files. Enter > and press the TAB key to quote an existing message in the chat window.
+.PP
 The user guide can be found at <https://profanity-im.github.io/userguide.html>.
 .SH ENCRYPTION
 Profanity supports various kinds of encryption: OMEMO, OTR, PGP, OX.
@@ -131,12 +152,16 @@ There is some XMPP specific terminology that might be unknown for fresh users. W
 .TP
 .BR JID
 Stands for Jabber ID. It refers to an XMPP address. Historically XMPP was also known as Jabber.
+.TP
 .BR MAM
 Stands for Message Archive Management (XEP-0313) and describes the ability to store messages on the server and retrieve them later.
+.TP
 .BR MUC
 Stands for Mutli-User Chats (XEP-0045) and are also called, groups, group chats, chatrooms or conferences.
+.TP
 .BR Roster
 The roster is your contact list. By default displayed at the right side on the console window. See RFC6121.
+.TP
 .BR XEP
 XMPP is aa extendable protocol. There are core features and optional features described in XMPP Extension Protocols, short XEPs.
 .SH SEE ALSO
