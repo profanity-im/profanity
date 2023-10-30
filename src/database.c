@@ -290,7 +290,7 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
         char* date = (char*)sqlite3_column_text(stmt, 1);
         char* from = (char*)sqlite3_column_text(stmt, 2);
         char* type = (char*)sqlite3_column_text(stmt, 3);
-        char* encryption = (char*)sqlite3_column_text(stmt, 3);
+        char* encryption = (char*)sqlite3_column_text(stmt, 4);
 
         ProfMessage* msg = message_init();
         msg->from_jid = jid_create(from);
