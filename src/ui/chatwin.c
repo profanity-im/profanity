@@ -451,8 +451,8 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
         win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, message);
     }
 
-    // save last id and message for LMC
-    if (id) {
+    // save last id and message for LMC in case if it's not LMC message
+    if (id && !replace_id) {
         _chatwin_set_last_message(chatwin, id, message);
     }
 }

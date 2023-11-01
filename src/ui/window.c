@@ -1335,19 +1335,27 @@ win_show_status_string(ProfWin* window, const char* const from,
     win_appendln(window, presence_colour, "");
 }
 
-static void
+/** Corrects the visual representation of a message with prior check for sender validity.
+ *
+ * Returns TRUE if the message was successfully corrected and should not be printed, FALSE otherwise.
+ */
+static gboolean
 _win_correct(ProfWin* window, const char* const message, const char* const id, const char* const replace_id, const char* const from_jid)
 {
+    if (!replace_id) {
+        return FALSE;
+    }
+
     ProfBuffEntry* entry = buffer_get_entry_by_id(window->layout->buffer, replace_id);
     if (!entry) {
-        log_debug("Replace ID %s could not be found in buffer. Message: %s", replace_id, message);
-        return;
+        log_warning("Replace ID %s could not be found in buffer. Message: %s", replace_id, message);
+        return FALSE;
     }
 
     if (g_strcmp0(entry->from_jid, from_jid) != 0) {
         log_debug("Illicit LMC attempt from %s for message from %s with: %s", from_jid, entry->from_jid, message);
         cons_show("Illicit LMC attempt from %s for message from %s", from_jid, entry->from_jid);
-        return;
+        return TRUE;
     }
 
     /*TODO: set date?
@@ -1369,12 +1377,10 @@ _win_correct(ProfWin* window, const char* const message, const char* const id, c
     }
     entry->message = strdup(message);
 
-    if (entry->id) {
-        free(entry->id);
-    }
-    entry->id = strdup(id);
+    // LMC requires original message ID, hence ID remains the same
 
     win_redraw(window);
+    return TRUE;
 }
 
 void
@@ -1406,9 +1412,7 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
             enc_char = strdup("-");
         }
 
-        if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
-            _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->barejid);
-        } else {
+        if (!prefs_get_boolean(PREF_CORRECTION_ALLOW) || !_win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->barejid)) {
             // Prevent duplicate messages when current client is sending a message or if it's mam
             if (g_strcmp0(message->from_jid->fulljid, connection_get_fulljid()) != 0 && !message->is_mam) {
                 _win_printf(window, enc_char, 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
@@ -1434,9 +1438,7 @@ win_print_them(ProfWin* window, theme_item_t theme_item, const char* const show_
 void
 win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const ProfMessage* const message)
 {
-    if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
-        _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->fulljid);
-    } else {
+    if (!prefs_get_boolean(PREF_CORRECTION_ALLOW) || !_win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->fulljid)) {
         _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->from_jid->resourcepart, message->from_jid->fulljid, message->id, "%s", message->plain);
     }
 
@@ -1448,9 +1450,7 @@ win_print_outgoing_muc_msg(ProfWin* window, char* show_char, const char* const m
 {
     GDateTime* timestamp = g_date_time_new_now_local();
 
-    if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && replace_id) {
-        _win_correct(window, message, id, replace_id, me);
-    } else {
+    if (!prefs_get_boolean(PREF_CORRECTION_ALLOW) || !_win_correct(window, message, id, replace_id, me)) {
         _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, me, me, id, "%s", message);
     }
 
@@ -1464,9 +1464,7 @@ win_print_outgoing(ProfWin* window, const char* show_char, const char* const id,
     GDateTime* timestamp = g_date_time_new_now_local();
 
     const char* myjid = connection_get_fulljid();
-    if (replace_id) {
-        _win_correct(window, message, id, replace_id, myjid);
-    } else {
+    if (!_win_correct(window, message, id, replace_id, myjid)) {
         auto_gchar gchar* outgoing_str = prefs_get_string(PREF_OUTGOING_STAMP);
         _win_printf(window, show_char, 0, timestamp, 0, THEME_TEXT_ME, outgoing_str, myjid, id, "%s", message);
     }
@@ -1625,8 +1623,7 @@ win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const ch
     receipt->received = FALSE;
 
     const char* myjid = connection_get_fulljid();
-    if (replace_id) {
-        _win_correct(window, message, id, replace_id, myjid);
+    if (_win_correct(window, message, id, replace_id, myjid)) {
         free(receipt); // TODO: probably we should use this in _win_correct()
     } else {
         buffer_append(window->layout->buffer, show_char, 0, time, 0, THEME_TEXT_ME, from, myjid, message, receipt, id);

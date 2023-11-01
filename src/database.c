@@ -36,6 +36,7 @@
 #include "config.h"
 
 #include <sys/stat.h>
+#include <sys/statvfs.h>
 #include <sqlite3.h>
 #include <glib.h>
 #include <stdio.h>
@@ -58,8 +59,13 @@ static void _add_to_db(ProfMessage* message, char* type, const Jid* const from_j
 static char* _get_db_filename(ProfAccount* account);
 static prof_msg_type_t _get_message_type_type(const char* const type);
 static prof_enc_t _get_message_enc_type(const char* const encstr);
+static int _get_db_version(void);
+static gboolean _migrate_to_v2(void);
+static gboolean _check_available_space_for_db_migration(char* path_to_db);
 
 #define auto_sqlite __attribute__((__cleanup__(auto_free_sqlite)))
+
+static const int latest_version = 2;
 
 static void
 auto_free_sqlite(gchar** str)
@@ -97,32 +103,101 @@ log_database_init(ProfAccount* account)
     }
 
     char* err_msg;
-    // id is the ID of DB the entry
-    // from_jid is the senders jid
-    // to_jid is the receivers jid
-    // from_resource is the senders resource
-    // to_jid is the receivers resource
-    // message is the message text
-    // timestamp the timestamp like "2020/03/24 11:12:14"
+
+    int db_version = _get_db_version();
+    if (db_version == latest_version) {
+        return TRUE;
+    }
+
+    // ChatLogs Table
+    // Contains all chat messages
+    //
+    // id is primary key
+    // from_jid is the sender's jid
+    // to_jid is the receiver's jid
+    // from_resource is the sender's resource
+    // to_resource is the receiver's resource
+    // message is the message's text
+    // timestamp is the timestamp like "2020/03/24 11:12:14"
     // type is there to distinguish: message (chat), MUC message (muc), muc pm (mucpm)
     // stanza_id is the ID in <message>
     // archive_id is the stanza-id from from XEP-0359: Unique and Stable Stanza IDs used for XEP-0313: Message Archive Management
-    // replace_id is the ID from XEP-0308: Last Message Correction
     // encryption is to distinguish: none, omemo, otr, pgp
     // marked_read is 0/1 whether a message has been marked as read via XEP-0333: Chat Markers
-    char* query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ( `id` INTEGER PRIMARY KEY AUTOINCREMENT, `from_jid` TEXT NOT NULL, `to_jid` TEXT NOT NULL, `from_resource` TEXT, `to_resource` TEXT, `message` TEXT, `timestamp` TEXT, `type` TEXT, `stanza_id` TEXT, `archive_id` TEXT, `replace_id` TEXT, `encryption` TEXT, `marked_read` INTEGER)";
+    // replace_id is the ID from XEP-0308: Last Message Correction
+    // replaces_db_id is ID (primary key) of the original message that LMC message corrects/replaces
+    // replaced_by_db_id is ID (primary key) of the last correcting (LMC) message for the original message
+    char* query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ("
+                  "`id` INTEGER PRIMARY KEY AUTOINCREMENT, "
+                  "`from_jid` TEXT NOT NULL, "
+                  "`to_jid` TEXT NOT NULL, "
+                  "`from_resource` TEXT, "
+                  "`to_resource` TEXT, "
+                  "`message` TEXT, "
+                  "`timestamp` TEXT, "
+                  "`type` TEXT, "
+                  "`stanza_id` TEXT, "
+                  "`archive_id` TEXT, "
+                  "`encryption` TEXT, "
+                  "`marked_read` INTEGER, "
+                  "`replace_id` TEXT, "
+                  "`replaces_db_id` INTEGER, "
+                  "`replaced_by_db_id` INTEGER)";
     if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         goto out;
     }
 
-    query = "CREATE TABLE IF NOT EXISTS `DbVersion` ( `dv_id` INTEGER PRIMARY KEY, `version` INTEGER UNIQUE)";
+    query = "CREATE TRIGGER IF NOT EXISTS update_corrected_message "
+            "AFTER INSERT ON ChatLogs "
+            "FOR EACH ROW "
+            "WHEN NEW.replaces_db_id IS NOT NULL "
+            "BEGIN "
+            "UPDATE ChatLogs "
+            "SET replaced_by_db_id = NEW.id "
+            "WHERE id = NEW.replaces_db_id; "
+            "END;";
+    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+        log_error("Unable to add `update_corrected_message` trigger.");
+        goto out;
+    }
+
+    query = "CREATE INDEX IF NOT EXISTS ChatLogs_timestamp_IDX ON `ChatLogs` (`timestamp`)";
+    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+        log_error("Unable to create index for timestamp.");
+        goto out;
+    }
+    query = "CREATE INDEX IF NOT EXISTS ChatLogs_to_from_jid_IDX ON `ChatLogs` (`to_jid`, `from_jid`)";
+    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+        log_error("Unable to create index for to_jid.");
+        goto out;
+    }
+
+    query = "CREATE TABLE IF NOT EXISTS `DbVersion` (`dv_id` INTEGER PRIMARY KEY, `version` INTEGER UNIQUE)";
     if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         goto out;
     }
 
-    query = "INSERT OR IGNORE INTO `DbVersion` (`version`) VALUES('1')";
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+    if (db_version == -1) {
+        query = "INSERT OR IGNORE INTO `DbVersion` (`version`) VALUES ('2')";
+        if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+            goto out;
+        }
+        db_version = _get_db_version();
+    }
+
+    // Unlikely event, but we don't want to migrate if we are just unable to determine the DB version
+    if (db_version == -1) {
+        cons_show_error("DB Initialization Error: Unable to check DB version.");
         goto out;
+    }
+
+    if (db_version < latest_version) {
+        cons_show("Migrating database schema. This operation may take a while...");
+        if (db_version < 2 && (!_check_available_space_for_db_migration(filename) || !_migrate_to_v2())) {
+            cons_show_error("Database Initialization Error: Unable to migrate database to version 2. Please, check error logs for details.");
+            goto out;
+        }
+        cons_show("Database schema migration was successful.");
     }
 
     log_debug("Initialized SQLite database: %s", filename);
@@ -130,10 +205,10 @@ log_database_init(ProfAccount* account)
 
 out:
     if (err_msg) {
-        log_error("SQLite error: %s", err_msg);
+        log_error("SQLite error in log_database_init(): %s", err_msg);
         sqlite3_free(err_msg);
     } else {
-        log_error("Unknown SQLite error");
+        log_error("Unknown SQLite error in log_database_init().");
     }
     return FALSE;
 }
@@ -202,17 +277,17 @@ ProfMessage*
 log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_last)
 {
     sqlite3_stmt* stmt = NULL;
-    gchar* query;
     const char* jid = connection_get_fulljid();
     auto_jid Jid* myjid = jid_create(jid);
     if (!myjid)
         return NULL;
 
-    if (is_last) {
-        query = sqlite3_mprintf("SELECT * FROM (SELECT `archive_id`, `timestamp` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` DESC LIMIT 1) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
-    } else {
-        query = sqlite3_mprintf("SELECT * FROM (SELECT `archive_id`, `timestamp` from `ChatLogs` WHERE (`from_jid` = '%q' AND `to_jid` = '%q') OR (`from_jid` = '%q' AND `to_jid` = '%q') ORDER BY `timestamp` ASC LIMIT 1) ORDER BY `timestamp` ASC;", contact_barejid, myjid->barejid, myjid->barejid, contact_barejid);
-    }
+    const char* order = is_last ? "DESC" : "ASC";
+    auto_sqlite char* query = sqlite3_mprintf("SELECT `archive_id`, `timestamp` FROM `ChatLogs` WHERE "
+                                              "(`from_jid` = '%q' AND `to_jid` = '%q') OR "
+                                              "(`from_jid` = '%q' AND `to_jid` = '%q') "
+                                              "ORDER BY `timestamp` %s LIMIT 1;",
+                                              contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, order);
 
     if (!query) {
         log_error("Could not allocate memory for SQL query in log_database_get_limits_info()");
@@ -221,7 +296,7 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
 
     int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
-        log_error("Unknown SQLite error in log_database_get_last_info()");
+        log_error("Unknown SQLite error in log_database_get_last_info().");
         return NULL;
     }
 
@@ -235,7 +310,6 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
         msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
     }
     sqlite3_finalize(stmt);
-    sqlite3_free(query);
 
     return msg;
 }
@@ -259,9 +333,9 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
     auto_gchar gchar* end_date_fmt = end_time ? end_time : g_date_time_format_iso8601(now);
     auto_sqlite gchar* query = sqlite3_mprintf("SELECT * FROM ("
                                                "SELECT COALESCE(B.`message`, A.`message`) AS message, "
-                                               "A.`timestamp`, A.`from_jid`, A.`type`, A.`encryption` FROM `ChatLogs` AS A "
-                                               "LEFT JOIN `ChatLogs` AS B ON (A.`stanza_id` = B.`replace_id` AND A.`from_jid` = B.`from_jid`) "
-                                               "WHERE A.`replace_id` = '' "
+                                               "A.`timestamp`, A.`from_jid`, A.`to_jid`, A.`type`, A.`encryption` FROM `ChatLogs` AS A "
+                                               "LEFT JOIN `ChatLogs` AS B ON (A.`replaced_by_db_id` = B.`id` AND A.`from_jid` = B.`from_jid`) "
+                                               "WHERE (A.`replaces_db_id` IS NULL OR A.`replaces_db_id` = '') "
                                                "AND ((A.`from_jid` = '%q' AND A.`to_jid` = '%q') OR (A.`from_jid` = '%q' AND A.`to_jid` = '%q')) "
                                                "AND A.`timestamp` < '%q' "
                                                "AND (%Q IS NULL OR A.`timestamp` > %Q) "
@@ -278,22 +352,23 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
 
     int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
-        log_error("Unknown SQLite error in log_database_get_previous_chat()");
+        log_error("SQLite error in log_database_get_previous_chat(): %s", sqlite3_errmsg(g_chatlog_database));
         return NULL;
     }
 
     GSList* history = NULL;
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        // TODO: also save to jid. since now part of profmessage
         char* message = (char*)sqlite3_column_text(stmt, 0);
         char* date = (char*)sqlite3_column_text(stmt, 1);
         char* from = (char*)sqlite3_column_text(stmt, 2);
-        char* type = (char*)sqlite3_column_text(stmt, 3);
-        char* encryption = (char*)sqlite3_column_text(stmt, 4);
+        char* to_jid = (char*)sqlite3_column_text(stmt, 3);
+        char* type = (char*)sqlite3_column_text(stmt, 4);
+        char* encryption = (char*)sqlite3_column_text(stmt, 5);
 
         ProfMessage* msg = message_init();
         msg->from_jid = jid_create(from);
+        msg->to_jid = jid_create(to_jid);
         msg->plain = strdup(message);
         msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
         msg->type = _get_message_type_type(type);
@@ -375,6 +450,7 @@ static void
 _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Jid* const to_jid)
 {
     auto_gchar gchar* pref_dblog = prefs_get_string(PREF_DBLOG);
+    sqlite_int64 original_message_id = -1;
 
     if (g_strcmp0(pref_dblog, "off") == 0) {
         return;
@@ -407,10 +483,10 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
         type = (char*)_get_message_type_str(message->type);
     }
 
-    // Check LMC validity (XEP-0308)
+    // Apply LMC and check its validity (XEP-0308)
     if (message->replace_id) {
-        auto_sqlite char* replace_check_query = sqlite3_mprintf("SELECT `from_jid` FROM `ChatLogs` WHERE `stanza_id` = '%q'",
-                                                                message->replace_id ? message->replace_id : "");
+        auto_sqlite char* replace_check_query = sqlite3_mprintf("SELECT `id`, `from_jid`, `replaces_db_id` FROM `ChatLogs` WHERE `stanza_id` = %Q ORDER BY `timestamp` DESC LIMIT 1",
+                                                                message->replace_id);
 
         if (!replace_check_query) {
             log_error("Could not allocate memory for SQL replace query in log_database_add()");
@@ -419,48 +495,60 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
 
         sqlite3_stmt* lmc_stmt = NULL;
 
-        if (SQLITE_OK == sqlite3_prepare_v2(g_chatlog_database, replace_check_query, -1, &lmc_stmt, NULL)) {
-            if (sqlite3_step(lmc_stmt) == SQLITE_ROW) {
-                const char* from_jid_orig = (const char*)sqlite3_column_text(lmc_stmt, 0);
+        if (SQLITE_OK != sqlite3_prepare_v2(g_chatlog_database, replace_check_query, -1, &lmc_stmt, NULL)) {
+            log_error("SQLite error in _add_to_db() on selecting original message: %s", sqlite3_errmsg(g_chatlog_database));
+            return;
+        }
 
-                if (g_strcmp0(from_jid_orig, from_jid->barejid) != 0) {
-                    log_error("Mismatch in sender JIDs when trying to do LMC. Corrected message sender: %s. Original message sender: %s. Replace-ID: %s. Message: %s", from_jid->barejid, from_jid_orig, message->replace_id, message->plain);
-                    cons_show_error("%s sent message correction with mismatched sender. See log for details.", from_jid->barejid);
-                    sqlite3_finalize(lmc_stmt);
-                    return;
-                }
+        if (sqlite3_step(lmc_stmt) == SQLITE_ROW) {
+            original_message_id = sqlite3_column_int64(lmc_stmt, 0);
+            const char* from_jid_orig = (const char*)sqlite3_column_text(lmc_stmt, 1);
+
+            // Handle non-XEP-compliant replacement messages (edit->edit->original)
+            sqlite_int64 tmp = sqlite3_column_int64(lmc_stmt, 2);
+            original_message_id = tmp ? tmp : original_message_id;
+
+            if (g_strcmp0(from_jid_orig, from_jid->barejid) != 0) {
+                log_error("Mismatch in sender JIDs when trying to do LMC. Corrected message sender: %s. Original message sender: %s. Replace-ID: %s. Message: %s", from_jid->barejid, from_jid_orig, message->replace_id, message->plain);
+                cons_show_error("%s sent a message correction with mismatched sender. See log for details.", from_jid->barejid);
+                sqlite3_finalize(lmc_stmt);
+                return;
             }
-            sqlite3_finalize(lmc_stmt);
+        } else {
+            log_warning("Got LMC message that does not have original message counterpart in the database from %s", message->from_jid->fulljid);
+        }
+        sqlite3_finalize(lmc_stmt);
+    }
+
+    // stanza-id (XEP-0359) doesn't have to be present in the message.
+    // But if it's duplicated, it's a serious server-side problem, so we better track it.
+    if (message->stanzaid) {
+        auto_sqlite char* duplicate_check_query = sqlite3_mprintf("SELECT 1 FROM `ChatLogs` WHERE (`archive_id` = '%q')",
+                                                                  message->stanzaid);
+
+        if (!duplicate_check_query) {
+            log_error("Could not allocate memory for SQL duplicate query in log_database_add()");
+            return;
+        }
+
+        sqlite3_stmt* stmt;
+
+        if (SQLITE_OK == sqlite3_prepare_v2(g_chatlog_database, duplicate_check_query, -1, &stmt, NULL)) {
+            if (sqlite3_step(stmt) == SQLITE_ROW) {
+                log_error("Duplicate stanza-id found for the message. stanza_id: %s; archive_id: %s; sender: %s; content: %s", message->id, message->stanzaid, from_jid->barejid, message->plain);
+                cons_show_error("Got a message with duplicate (server-generated) stanza-id from %s.", from_jid->fulljid);
+            }
+            sqlite3_finalize(stmt);
         }
     }
 
-    // Check for duplicate messages
-    auto_sqlite char* duplicate_check_query = sqlite3_mprintf("SELECT 1 FROM `ChatLogs` WHERE (`archive_id` = '%q' AND `archive_id` != '') OR (`stanza_id` = '%q' AND `stanza_id` != '')",
-                                                              message->stanzaid ? message->stanzaid : "",
-                                                              message->id ? message->id : "");
+    auto_sqlite char* orig_message_id = original_message_id == -1 ? NULL : sqlite3_mprintf("%d", original_message_id);
 
-    if (!duplicate_check_query) {
-        log_error("Could not allocate memory for SQL duplicate query in log_database_add()");
-        return;
-    }
-
-    int duplicate_exists = 0;
-    sqlite3_stmt* stmt;
-
-    if (SQLITE_OK == sqlite3_prepare_v2(g_chatlog_database, duplicate_check_query, -1, &stmt, NULL)) {
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
-            duplicate_exists = 1;
-        }
-        sqlite3_finalize(stmt);
-    }
-
-    if (duplicate_exists) {
-        log_warning("Duplicate stanza-id found for the message. stanza_id: %s; archive_id: %s; sender: %s; content: %s", message->id, message->stanzaid, from_jid->barejid, message->plain);
-        return;
-    }
-
-    // Insert the message
-    auto_sqlite char* query = sqlite3_mprintf("INSERT INTO `ChatLogs` (`from_jid`, `from_resource`, `to_jid`, `to_resource`, `message`, `timestamp`, `stanza_id`, `archive_id`, `replace_id`, `type`, `encryption`) VALUES ('%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q', '%q')",
+    auto_sqlite char* query = sqlite3_mprintf("INSERT INTO `ChatLogs` "
+                                              "(`from_jid`, `from_resource`, `to_jid`, `to_resource`, "
+                                              "`message`, `timestamp`, `stanza_id`, `archive_id`, "
+                                              "`replaces_db_id`, `replace_id`, `type`, `encryption`) "
+                                              "VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q)",
                                               from_jid->barejid,
                                               from_jid->resourcepart ? from_jid->resourcepart : "",
                                               to_jid->barejid,
@@ -469,6 +557,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                                               date_fmt ? date_fmt : "",
                                               message->id ? message->id : "",
                                               message->stanzaid ? message->stanzaid : "",
+                                              orig_message_id,
                                               message->replace_id ? message->replace_id : "",
                                               type ? type : "",
                                               enc ? enc : "");
@@ -481,15 +570,108 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
 
     if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
         if (err_msg) {
-            log_error("SQLite error: %s", err_msg);
+            log_error("SQLite error in _add_to_db(): %s", err_msg);
             sqlite3_free(err_msg);
         } else {
-            log_error("Unknown SQLite error");
+            log_error("Unknown SQLite error in _add_to_db().");
         }
     } else {
         int inserted_rows_count = sqlite3_changes(g_chatlog_database);
         if (inserted_rows_count < 1) {
             log_error("SQLite did not insert message (rows: %d, id: %s, content: %s)", inserted_rows_count, message->id, message->plain);
         }
+    }
+}
+
+static int
+_get_db_version(void)
+{
+    int current_version = -1;
+    const char* query = "SELECT `version` FROM `DbVersion` LIMIT 1";
+    sqlite3_stmt* statement;
+
+    if (sqlite3_prepare_v2(g_chatlog_database, query, -1, &statement, NULL) == SQLITE_OK) {
+        if (sqlite3_step(statement) == SQLITE_ROW) {
+            current_version = sqlite3_column_int(statement, 0);
+        }
+        sqlite3_finalize(statement);
+    }
+    return current_version;
+}
+
+/**
+ * Migration to version 2 introduces new columns. Returns TRUE on success.
+ *
+ * New columns:
+ * `replaces_db_id` database ID for correcting message of the original message
+ * `replaced_by_db_id` database ID for original message of the last correcting message
+ */
+static gboolean
+_migrate_to_v2(void)
+{
+    char* err_msg = NULL;
+
+    const char* sql_statements[] = {
+        "BEGIN TRANSACTION",
+        "ALTER TABLE `ChatLogs` ADD COLUMN `replaces_db_id` INTEGER;",
+        "ALTER TABLE `ChatLogs` ADD COLUMN `replaced_by_db_id` INTEGER;",
+        "UPDATE `ChatLogs` AS A "
+        "SET `replaces_db_id` = B.`id` "
+        "FROM `ChatLogs` AS B "
+        "WHERE A.`replace_id` IS NOT NULL AND A.`replace_id` != '' "
+        "AND A.`replace_id` = B.`stanza_id` "
+        "AND A.`from_jid` = B.`from_jid` AND A.`to_jid` = B.`to_jid`;",
+        "UPDATE `ChatLogs` AS A "
+        "SET `replaced_by_db_id` = B.`id` "
+        "FROM `ChatLogs` AS B "
+        "WHERE (A.`replace_id` IS NULL OR A.`replace_id` = '') "
+        "AND A.`id` = B.`replaces_db_id` "
+        "AND A.`from_jid` = B.`from_jid`;",
+        "UPDATE `DbVersion` SET `version` = 2",
+        "END TRANSACTION"
+    };
+
+    int statements_count = sizeof(sql_statements) / sizeof(sql_statements[0]);
+
+    for (int i = 0; i < statements_count; i++) {
+        if (SQLITE_OK != sqlite3_exec(g_chatlog_database, sql_statements[i], NULL, 0, &err_msg)) {
+            log_error("SQLite error in _migrate_to_v2() on statement %d: %s", i, err_msg);
+            if (err_msg) {
+                sqlite3_free(err_msg);
+                err_msg = NULL;
+            }
+            goto cleanup;
+        }
+    }
+
+    return TRUE;
+
+cleanup:
+    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, "ROLLBACK;", NULL, 0, &err_msg)) {
+        log_error("[DB Migration] Unable to ROLLBACK: %s", err_msg);
+        if (err_msg) {
+            sqlite3_free(err_msg);
+        }
+    }
+
+    return FALSE;
+}
+
+// Checks if there is more system storage space available than current database takes + 40% (for indexing and other potential size increases)
+static gboolean
+_check_available_space_for_db_migration(char* path_to_db)
+{
+    struct stat file_stat;
+    struct statvfs fs_stat;
+
+    if (statvfs(path_to_db, &fs_stat) == 0 && stat(path_to_db, &file_stat) == 0) {
+        unsigned long long file_size = file_stat.st_size / 1024;
+        unsigned long long available_space_kb = fs_stat.f_frsize * fs_stat.f_bavail / 1024;
+        log_debug("_check_available_space_for_db_migration(): Available space on disk: %llu KB; DB size: %llu KB", available_space_kb, file_size);
+
+        return (available_space_kb >= (file_size + (file_size * 10 / 4)));
+    } else {
+        log_error("Error checking available space.");
+        return FALSE;
     }
 }
