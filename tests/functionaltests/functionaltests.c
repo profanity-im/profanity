@@ -23,11 +23,11 @@
 #include "test_muc.h"
 #include "test_disconnect.h"
 
-#define PROF_FUNC_TEST(test) unit_test_setup_teardown(test, init_prof_test, close_prof_test)
+#define PROF_FUNC_TEST(test) cmocka_unit_test_setup_teardown(test, init_prof_test, close_prof_test)
 
 int main(int argc, char* argv[]) {
 
-    const UnitTest all_tests[] = {
+    const struct CMUnitTest all_tests[] = {
 
         PROF_FUNC_TEST(connect_jid_requests_roster),
         PROF_FUNC_TEST(connect_jid_sends_presence_after_receiving_roster),
@@ -111,5 +111,5 @@ int main(int argc, char* argv[]) {
         PROF_FUNC_TEST(disconnect_ends_session),
     };
 
-    return run_tests(all_tests);
+    return cmocka_run_group_tests(all_tests, NULL, NULL);
 }

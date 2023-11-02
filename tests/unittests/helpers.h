@@ -1,10 +1,10 @@
 #include "glib.h"
 
-void load_preferences(void** state);
-void close_preferences(void** state);
+int load_preferences(void** state);
+int close_preferences(void** state);
 
-void init_chat_sessions(void** state);
-void close_chat_sessions(void** state);
+int init_chat_sessions(void** state);
+int close_chat_sessions(void** state);
 
 int utf8_pos_to_col(char* str, int utf8_pos);
 

@@ -138,12 +138,12 @@ prof_start(void)
     setbuf(fp, (char *)0);
 }
 
-void
+int
 init_prof_test(void **state)
 {
     if (stbbr_start(STBBR_LOGDEBUG ,5230, 0) != 0) {
         assert_true(FALSE);
-        return;
+        return -1;
     }
 
     config_orig = getenv("XDG_CONFIG_HOME");
@@ -190,9 +190,10 @@ init_prof_test(void **state)
     assert_true(prof_output_exact("Private chat time display disabled."));
     prof_input("/time xml off");
     assert_true(prof_output_exact("XML Console time display disabled."));
+    return 0;
 }
 
-void
+int
 close_prof_test(void **state)
 {
     prof_input("/quit");
@@ -203,6 +204,7 @@ close_prof_test(void **state)
     setenv("XDG_DATA_HOME", data_orig, 1);
 
     stbbr_stop();
+    return 0;
 }
 
 void
