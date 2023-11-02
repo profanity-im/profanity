@@ -6,16 +6,18 @@
 
 #include "xmpp/muc.h"
 
-void
+int
 muc_before_test(void** state)
 {
     muc_init();
+    return 0;
 }
 
-void
+int
 muc_after_test(void** state)
 {
     muc_close();
+    return 0;
 }
 
 void

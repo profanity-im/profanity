@@ -1,5 +1,5 @@
-void muc_before_test(void** state);
-void muc_after_test(void** state);
+int muc_before_test(void** state);
+int muc_after_test(void** state);
 
 void test_muc_invites_add(void** state);
 void test_muc_remove_invite(void** state);

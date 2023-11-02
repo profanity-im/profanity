@@ -44,7 +44,7 @@ remove_data_dir(void** state)
     rmdir("./tests/files/xdg_data_home");
 }
 
-void
+int
 load_preferences(void** state)
 {
     create_config_dir(state);
@@ -53,29 +53,33 @@ load_preferences(void** state)
         prefs_load(NULL);
     }
     fclose(f);
+    return 0;
 }
 
-void
+int
 close_preferences(void** state)
 {
     prefs_close();
     remove("./tests/files/xdg_config_home/profanity/profrc");
     remove_config_dir(state);
     rmdir("./tests/files");
+    return 0;
 }
 
-void
+int
 init_chat_sessions(void** state)
 {
     load_preferences(NULL);
     chat_sessions_init();
+    return 0;
 }
 
-void
+int
 close_chat_sessions(void** state)
 {
     chat_sessions_clear();
     close_preferences(NULL);
+    return 0;
 }
 
 int
