@@ -1281,13 +1281,13 @@ prefs_get_correction_char(void)
 }
 
 void
-prefs_set_correction_char(char ch)
+prefs_set_correction_char(char* ch)
 {
-    char str[2];
-    str[0] = ch;
-    str[1] = '\0';
-
-    g_key_file_set_string(prefs, PREF_GROUP_UI, "correction.char", str);
+    if (g_utf8_strlen(ch, 4) == 1) {
+        g_key_file_set_string(prefs, PREF_GROUP_UI, "correction.char", ch);
+    } else {
+        log_error("Could not set correction char: %s", ch);
+    }
 }
 
 gboolean
