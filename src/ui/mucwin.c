@@ -518,16 +518,8 @@ mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* c
     auto_char char* ch;
     if (mucwin->message_char) {
         ch = strdup(mucwin->message_char);
-    } else if (enc_mode == PROF_MSG_ENC_OTR) {
-        ch = prefs_get_otr_char();
-    } else if (enc_mode == PROF_MSG_ENC_PGP) {
-        ch = prefs_get_pgp_char();
-    } else if (enc_mode == PROF_MSG_ENC_OMEMO) {
-        ch = prefs_get_omemo_char();
-    } else if (enc_mode == PROF_MSG_ENC_OX) {
-        ch = prefs_get_omemo_char();
     } else {
-        ch = strdup("-");
+        ch = get_show_char(enc_mode);
     }
 
     win_print_outgoing_muc_msg(window, ch, mynick, id, replace_id, message);
@@ -566,14 +558,8 @@ mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList
     auto_char char* ch;
     if (mucwin->message_char) {
         ch = strdup(mucwin->message_char);
-    } else if (message->enc == PROF_MSG_ENC_OTR) {
-        ch = prefs_get_otr_char();
-    } else if (message->enc == PROF_MSG_ENC_PGP) {
-        ch = prefs_get_pgp_char();
-    } else if (message->enc == PROF_MSG_ENC_OMEMO) {
-        ch = prefs_get_omemo_char();
     } else {
-        ch = strdup("-");
+        ch = get_show_char(message->enc);
     }
 
     win_insert_last_read_position_marker((ProfWin*)mucwin, mucwin->roomjid);
