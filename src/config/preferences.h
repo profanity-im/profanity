@@ -296,7 +296,7 @@ gint prefs_get_occupants_indent(void);
 void prefs_set_occupants_indent(gint value);
 
 gchar* prefs_get_correction_char(void);
-void prefs_set_correction_char(char ch);
+void prefs_set_correction_char(char* ch);
 
 void prefs_add_login(const char* jid);
 

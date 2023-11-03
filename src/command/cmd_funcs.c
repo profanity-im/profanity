@@ -9329,7 +9329,6 @@ cmd_os(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_correction(ProfWin* window, const char* const command, gchar** args)
 {
-    // enable/disable
     if (g_strcmp0(args[0], "on") == 0) {
         _cmd_set_boolean_preference(args[0], "Last Message Correction", PREF_CORRECTION_ALLOW);
         caps_add_feature(XMPP_FEATURE_LAST_MESSAGE_CORRECTION);
@@ -9340,15 +9339,12 @@ cmd_correction(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    // char
     if (g_strcmp0(args[0], "char") == 0) {
-        if (args[1] == NULL) {
-            cons_bad_cmd_usage(command);
-        } else if (strlen(args[1]) != 1) {
+        if (args[1] == NULL || g_utf8_strlen(args[1], 4) != 1) {
             cons_bad_cmd_usage(command);
         } else {
-            prefs_set_correction_char(args[1][0]);
-            cons_show("LMC char set to %c.", args[1][0]);
+            prefs_set_correction_char(args[1]);
+            cons_show("LMC char set to %s.", args[1]);
         }
     }
 

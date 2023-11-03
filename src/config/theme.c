@@ -484,8 +484,8 @@ _load_preferences(void)
 
     if (g_key_file_has_key(theme, "ui", "correction.char", NULL)) {
         auto_gchar gchar* ch = g_key_file_get_string(theme, "ui", "correction.char", NULL);
-        if (ch && strlen(ch) > 0) {
-            prefs_set_correction_char(ch[0]);
+        if (ch && g_utf8_strlen(ch, 4) == 1) {
+            prefs_set_correction_char(ch);
         }
     }
 
