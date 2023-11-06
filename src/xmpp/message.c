@@ -1115,14 +1115,6 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
         }
     }
 
-    xmpp_stanza_t* replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
-    if (replace_id_stanza) {
-        const char* replace_id = xmpp_stanza_get_id(replace_id_stanza);
-        if (replace_id) {
-            message->replace_id = strdup(replace_id);
-        }
-    }
-
     message->body = xmpp_message_get_body(stanza);
 
     // check omemo encryption
@@ -1167,6 +1159,14 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
     if (is_muc_history) {
         sv_ev_room_history(message);
     } else {
+        // XEP-0308 states: `corrections must not be allowed (by the receiver) for messages received before the sender joined the room`
+        xmpp_stanza_t* replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
+        if (replace_id_stanza) {
+            const char* replace_id = xmpp_stanza_get_id(replace_id_stanza);
+            if (replace_id) {
+                message->replace_id = strdup(replace_id);
+            }
+        }
         sv_ev_room_message(message);
     }
 
