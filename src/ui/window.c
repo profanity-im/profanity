@@ -1394,16 +1394,8 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
 
         if (chatwin->incoming_char) {
             enc_char = strdup(chatwin->incoming_char);
-        } else if (message->enc == PROF_MSG_ENC_OTR) {
-            enc_char = prefs_get_otr_char();
-        } else if (message->enc == PROF_MSG_ENC_PGP) {
-            enc_char = prefs_get_pgp_char();
-        } else if (message->enc == PROF_MSG_ENC_OX) { // XEP-0373: OpenPGP for XMPP
-            enc_char = prefs_get_ox_char();
-        } else if (message->enc == PROF_MSG_ENC_OMEMO) {
-            enc_char = prefs_get_omemo_char();
         } else {
-            enc_char = strdup("-");
+            enc_char = get_show_char(message->enc);
         }
 
         if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
@@ -1492,10 +1484,12 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
         flags = NO_ME;
     }
 
-    buffer_append(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
+    auto_char char* ch = get_show_char(message->enc);
+
+    buffer_append(window->layout->buffer, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
     wins_add_urls_ac(window, message, FALSE);
     wins_add_quotes_ac(window, message->plain, FALSE);
-    _win_print_internal(window, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
+    _win_print_internal(window, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(message->timestamp);
@@ -1518,10 +1512,12 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
         flags = NO_ME;
     }
 
-    buffer_prepend(window->layout->buffer, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
+    auto_char char* ch = get_show_char(message->enc);
+
+    buffer_prepend(window->layout->buffer, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
     wins_add_urls_ac(window, message, TRUE);
     wins_add_quotes_ac(window, message->plain, TRUE);
-    _win_print_internal(window, "-", 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
+    _win_print_internal(window, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
 
     inp_nonblocking(TRUE);
     g_date_time_unref(message->timestamp);
@@ -2238,4 +2234,25 @@ win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previo
     auto_gchar gchar* quoted_result = g_strjoinv("\n> ", parts);
 
     return g_strdup_printf("> %s\n", quoted_result);
+}
+
+// Derive encryption char from encryption mode. Output needs to be freed by caller.
+char*
+get_show_char(prof_enc_t encryption_mode)
+{
+    char* enc_char;
+
+    if (encryption_mode == PROF_MSG_ENC_OTR) {
+        enc_char = prefs_get_otr_char();
+    } else if (encryption_mode == PROF_MSG_ENC_PGP) {
+        enc_char = prefs_get_pgp_char();
+    } else if (encryption_mode == PROF_MSG_ENC_OMEMO) {
+        enc_char = prefs_get_omemo_char();
+    } else if (encryption_mode == PROF_MSG_ENC_OX) {
+        enc_char = prefs_get_ox_char();
+    } else {
+        enc_char = strdup("-");
+    }
+
+    return enc_char;
 }

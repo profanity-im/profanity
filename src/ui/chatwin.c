@@ -433,16 +433,8 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
     auto_char char* enc_char;
     if (chatwin->outgoing_char) {
         enc_char = chatwin->outgoing_char;
-    } else if (enc_mode == PROF_MSG_ENC_OTR) {
-        enc_char = prefs_get_otr_char();
-    } else if (enc_mode == PROF_MSG_ENC_PGP) {
-        enc_char = prefs_get_pgp_char();
-    } else if (enc_mode == PROF_MSG_ENC_OMEMO) {
-        enc_char = prefs_get_omemo_char();
-    } else if (enc_mode == PROF_MSG_ENC_OX) {
-        enc_char = prefs_get_ox_char();
     } else {
-        enc_char = strdup("-");
+        enc_char = get_show_char(enc_mode);
     }
 
     if (request_receipt && id) {
