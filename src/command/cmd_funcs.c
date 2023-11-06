@@ -8887,7 +8887,7 @@ cmd_omemo_fingerprint(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    auto_jid Jid* jid;
+    auto_jid Jid* jid = NULL;
     if (!args[1]) {
         if (window->type == WIN_CONSOLE) {
             auto_char char* fingerprint = omemo_own_fingerprint(TRUE);
