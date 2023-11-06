@@ -284,8 +284,8 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
 
     const char* order = is_last ? "DESC" : "ASC";
     auto_sqlite char* query = sqlite3_mprintf("SELECT `archive_id`, `timestamp` FROM `ChatLogs` WHERE "
-                                              "(`from_jid` = '%q' AND `to_jid` = '%q') OR "
-                                              "(`from_jid` = '%q' AND `to_jid` = '%q') "
+                                              "(`from_jid` = %Q AND `to_jid` = %Q) OR "
+                                              "(`from_jid` = %Q AND `to_jid` = %Q) "
                                               "ORDER BY `timestamp` %s LIMIT 1;",
                                               contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, order);
 
@@ -335,9 +335,9 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
                                                "SELECT COALESCE(B.`message`, A.`message`) AS message, "
                                                "A.`timestamp`, A.`from_jid`, A.`to_jid`, A.`type`, A.`encryption` FROM `ChatLogs` AS A "
                                                "LEFT JOIN `ChatLogs` AS B ON (A.`replaced_by_db_id` = B.`id` AND A.`from_jid` = B.`from_jid`) "
-                                               "WHERE (A.`replaces_db_id` IS NULL OR A.`replaces_db_id` = '') "
-                                               "AND ((A.`from_jid` = '%q' AND A.`to_jid` = '%q') OR (A.`from_jid` = '%q' AND A.`to_jid` = '%q')) "
-                                               "AND A.`timestamp` < '%q' "
+                                               "WHERE (A.`replaces_db_id` IS NULL) "
+                                               "AND ((A.`from_jid` = %Q AND A.`to_jid` = %Q) OR (A.`from_jid` = %Q AND A.`to_jid` = %Q)) "
+                                               "AND A.`timestamp` < %Q "
                                                "AND (%Q IS NULL OR A.`timestamp` > %Q) "
                                                "ORDER BY A.`timestamp` %s LIMIT %d) "
                                                "ORDER BY `timestamp` %s;",
@@ -523,7 +523,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     // stanza-id (XEP-0359) doesn't have to be present in the message.
     // But if it's duplicated, it's a serious server-side problem, so we better track it.
     if (message->stanzaid) {
-        auto_sqlite char* duplicate_check_query = sqlite3_mprintf("SELECT 1 FROM `ChatLogs` WHERE (`archive_id` = '%q')",
+        auto_sqlite char* duplicate_check_query = sqlite3_mprintf("SELECT 1 FROM `ChatLogs` WHERE (`archive_id` = %Q)",
                                                                   message->stanzaid);
 
         if (!duplicate_check_query) {
@@ -550,17 +550,17 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                                               "`replaces_db_id`, `replace_id`, `type`, `encryption`) "
                                               "VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q)",
                                               from_jid->barejid,
-                                              from_jid->resourcepart ? from_jid->resourcepart : "",
+                                              from_jid->resourcepart,
                                               to_jid->barejid,
-                                              to_jid->resourcepart ? to_jid->resourcepart : "",
-                                              message->plain ? message->plain : "",
-                                              date_fmt ? date_fmt : "",
-                                              message->id ? message->id : "",
-                                              message->stanzaid ? message->stanzaid : "",
+                                              to_jid->resourcepart,
+                                              message->plain,
+                                              date_fmt,
+                                              message->id,
+                                              message->stanzaid,
                                               orig_message_id,
-                                              message->replace_id ? message->replace_id : "",
-                                              type ? type : "",
-                                              enc ? enc : "");
+                                              message->replace_id,
+                                              type,
+                                              enc);
     if (!query) {
         log_error("Could not allocate memory for SQL insert query in log_database_add()");
         return;
@@ -611,6 +611,7 @@ _migrate_to_v2(void)
 {
     char* err_msg = NULL;
 
+    // from_resource, to_resource, message, timestamp, stanza_id, archive_id, replace_id, type, encryption
     const char* sql_statements[] = {
         "BEGIN TRANSACTION",
         "ALTER TABLE `ChatLogs` ADD COLUMN `replaces_db_id` INTEGER;",
@@ -627,7 +628,17 @@ _migrate_to_v2(void)
         "WHERE (A.`replace_id` IS NULL OR A.`replace_id` = '') "
         "AND A.`id` = B.`replaces_db_id` "
         "AND A.`from_jid` = B.`from_jid`;",
-        "UPDATE `DbVersion` SET `version` = 2",
+        "UPDATE ChatLogs SET "
+        "from_resource = COALESCE(NULLIF(from_resource, ''), NULL), "
+        "to_resource = COALESCE(NULLIF(to_resource, ''), NULL), "
+        "message = COALESCE(NULLIF(message, ''), NULL), "
+        "timestamp = COALESCE(NULLIF(timestamp, ''), NULL), "
+        "stanza_id = COALESCE(NULLIF(stanza_id, ''), NULL), "
+        "archive_id = COALESCE(NULLIF(archive_id, ''), NULL), "
+        "replace_id = COALESCE(NULLIF(replace_id, ''), NULL), "
+        "type = COALESCE(NULLIF(type, ''), NULL), "
+        "encryption = COALESCE(NULLIF(encryption, ''), NULL);",
+        "UPDATE `DbVersion` SET `version` = 2;",
         "END TRANSACTION"
     };
 
