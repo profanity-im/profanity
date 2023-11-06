@@ -126,7 +126,7 @@ avatar_set(const char* path)
         pixbuf = new_pixbuf;
     }
 
-    auto_gchar gchar* img_data;
+    auto_gchar gchar* img_data = NULL;
     gsize len = -1;
 
     if (!gdk_pixbuf_save_to_buffer(pixbuf, &img_data, &len, "png", &err, NULL)) {

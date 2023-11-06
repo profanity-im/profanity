@@ -98,6 +98,20 @@ static xmpp_stanza_t* _ox_openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const t
 
 static GHashTable* pubsub_event_handlers;
 
+gchar*
+get_display_name(const ProfMessage* const message, int* flags)
+{
+    auto_char char* barejid = connection_get_barejid();
+
+    if (g_strcmp0(barejid, message->from_jid->barejid) == 0) {
+        return g_strdup("me");
+    } else {
+        if (flags)
+            *flags = NO_ME;
+        return roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
+    }
+}
+
 static gboolean
 _handled_by_plugin(xmpp_stanza_t* const stanza)
 {

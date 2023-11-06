@@ -328,13 +328,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     ProfWin* window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
 
-    auto_gchar gchar* display_name;
-    auto_char char* mybarejid = connection_get_barejid();
-    if (g_strcmp0(mybarejid, message->from_jid->barejid) == 0) {
-        display_name = strdup("me");
-    } else {
-        display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
-    }
+    auto_gchar gchar* display_name = get_display_name(message, NULL);
 
 #ifdef HAVE_LIBGPGME
     if (prefs_get_boolean(PREF_PGP_PUBKEY_AUTOIMPORT)) {
@@ -430,12 +424,7 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
     ProfWin* window = (ProfWin*)chatwin;
     wins_add_quotes_ac(window, message, FALSE);
 
-    auto_char char* enc_char;
-    if (chatwin->outgoing_char) {
-        enc_char = chatwin->outgoing_char;
-    } else {
-        enc_char = get_show_char(enc_mode);
-    }
+    auto_char char* enc_char = get_enc_char(enc_mode, chatwin->outgoing_char);
 
     if (request_receipt && id) {
         win_print_outgoing_with_receipt((ProfWin*)chatwin, enc_char, "me", message, id, replace_id);
@@ -454,7 +443,7 @@ chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message)
 {
     assert(chatwin != NULL);
 
-    auto_char char* enc_char;
+    auto_char char* enc_char = NULL;
     if (message->enc == PROF_MSG_ENC_PGP) {
         enc_char = prefs_get_pgp_char();
     } else if (message->enc == PROF_MSG_ENC_OMEMO) {

@@ -1350,7 +1350,7 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
     }
 
     if (data->open) {
-        auto_gcharv gchar** argv;
+        auto_gcharv gchar** argv = NULL;
         gint argc;
 
         auto_gchar gchar* cmdtemplate = prefs_get_string(PREF_VCARD_PHOTO_CMD);

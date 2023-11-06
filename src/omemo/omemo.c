@@ -495,12 +495,7 @@ void
 omemo_set_device_list(const char* const from, GList* device_list)
 {
     log_debug("[OMEMO] Setting device list for %s", STR_MAYBE_NULL(from));
-    auto_jid Jid* jid;
-    if (from) {
-        jid = jid_create(from);
-    } else {
-        jid = jid_create(connection_get_fulljid());
-    }
+    auto_jid Jid* jid = jid_create(from ?: connection_get_fulljid());
 
     g_hash_table_insert(omemo_ctx.device_list, strdup(jid->barejid), device_list);
 

@@ -2518,12 +2518,7 @@ cons_alert(ProfWin* alert_origin_window)
     if (current->type != WIN_CONSOLE) {
         status_bar_new(1, WIN_CONSOLE, "console");
 
-        auto_gchar gchar* win_name;
-        if (alert_origin_window) {
-            win_name = win_to_string(alert_origin_window);
-        } else {
-            win_name = g_strdup("console");
-        }
+        auto_gchar gchar* win_name = alert_origin_window ? win_to_string(alert_origin_window) : g_strdup("console");
 
         GList* item = g_list_find_custom(alert_list, win_name, (GCompareFunc)g_strcmp0);
         if (!item) {
