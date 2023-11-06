@@ -317,4 +317,5 @@ void form_reset_autocompleters(DataForm* form);
 
 void publish_user_mood(const char* const mood, const char* const text);
 
+gchar* get_display_name(const ProfMessage* const message, int* flags);
 #endif

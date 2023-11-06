@@ -99,5 +99,6 @@ void win_remove_entry_message(ProfWin* window, const char* const id);
 char* win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 
 char* get_show_char(prof_enc_t encryption_mode);
+char* get_enc_char(prof_enc_t enc_mode, const char* alt);
 
 #endif

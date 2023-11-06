@@ -41,6 +41,13 @@ jobs:
     continue-on-error: true
     steps:
       - uses: actions/checkout@v2
+      # if this check fails, you have to update the number of auto types known and the list of auto types in the check below
+      - name: Check auto types are up-to-date
+        run: |
+          [[ "$(find src -type f -name '*.[ch]' -exec awk '/^#define auto_[\W]*/ {print $2}' '{}' \; | sort -u | wc -l)" == "6" ]] || exit -1
+      - name: Check auto types are initialized
+        run: |
+          grep -P 'auto_(char|gchar|gcharv|guchar|jid|sqlite)[\w *]*;$' -r src && exit -1 || true
       - name: Run clang-format
         uses: jidicula/clang-format-action@v4.11.0
         with:

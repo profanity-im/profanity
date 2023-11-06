@@ -515,12 +515,7 @@ mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* c
     char* mynick = muc_nick(mucwin->roomjid);
 
     // displayed message char
-    auto_char char* ch;
-    if (mucwin->message_char) {
-        ch = strdup(mucwin->message_char);
-    } else {
-        ch = get_show_char(enc_mode);
-    }
+    auto_char char* ch = get_enc_char(enc_mode, mucwin->message_char);
 
     win_print_outgoing_muc_msg(window, ch, mynick, id, replace_id, message);
 
@@ -555,12 +550,7 @@ mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList
     ProfWin* window = (ProfWin*)mucwin;
     char* mynick = muc_nick(mucwin->roomjid);
 
-    auto_char char* ch;
-    if (mucwin->message_char) {
-        ch = strdup(mucwin->message_char);
-    } else {
-        ch = get_show_char(message->enc);
-    }
+    auto_char char* ch = get_enc_char(message->enc, mucwin->message_char);
 
     win_insert_last_read_position_marker((ProfWin*)mucwin, mucwin->roomjid);
     wins_add_urls_ac(window, message, FALSE);

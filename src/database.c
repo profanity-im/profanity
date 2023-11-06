@@ -391,7 +391,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     }
 
     char* err_msg;
-    auto_gchar gchar* date_fmt;
+    auto_gchar gchar* date_fmt = NULL;
 
     if (message->timestamp) {
         date_fmt = g_date_time_format_iso8601(message->timestamp);

@@ -1389,14 +1389,8 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
     switch (window->type) {
     case WIN_CHAT:
     {
-        auto_char char* enc_char;
         ProfChatWin* chatwin = (ProfChatWin*)window;
-
-        if (chatwin->incoming_char) {
-            enc_char = strdup(chatwin->incoming_char);
-        } else {
-            enc_char = get_show_char(message->enc);
-        }
+        auto_char char* enc_char = get_enc_char(message->enc, chatwin->incoming_char);
 
         if (prefs_get_boolean(PREF_CORRECTION_ALLOW) && message->replace_id) {
             _win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->barejid);
@@ -1472,18 +1466,8 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
 {
     g_date_time_ref(message->timestamp);
 
-    auto_gchar gchar* display_name;
     int flags = 0;
-    const char* jid = connection_get_fulljid();
-    auto_jid Jid* jidp = jid_create(jid);
-
-    if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
-        display_name = strdup("me");
-    } else {
-        display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
-        flags = NO_ME;
-    }
-
+    auto_gchar gchar* display_name = get_display_name(message, &flags);
     auto_char char* ch = get_show_char(message->enc);
 
     buffer_append(window->layout->buffer, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
@@ -1500,17 +1484,8 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
 {
     g_date_time_ref(message->timestamp);
 
-    auto_char char* display_name;
     int flags = 0;
-    const char* jid = connection_get_fulljid();
-    auto_jid Jid* jidp = jid_create(jid);
-
-    if (g_strcmp0(jidp->barejid, message->from_jid->barejid) == 0) {
-        display_name = strdup("me");
-    } else {
-        display_name = roster_get_msg_display_name(message->from_jid->barejid, message->from_jid->resourcepart);
-        flags = NO_ME;
-    }
+    auto_gchar gchar* display_name = get_display_name(message, &flags);
 
     auto_char char* ch = get_show_char(message->enc);
 
@@ -2255,4 +2230,13 @@ get_show_char(prof_enc_t encryption_mode)
     }
 
     return enc_char;
+}
+
+char*
+get_enc_char(prof_enc_t enc_mode, const char* alt)
+{
+    if (alt)
+        return strdup(alt);
+    else
+        return get_show_char(enc_mode);
 }
