@@ -375,7 +375,7 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
         ProfMessage* msg = message_init();
         msg->from_jid = jid_create(from);
         msg->to_jid = jid_create(to_jid);
-        msg->plain = _db_strdup(message);
+        msg->plain = strdup(message ?: "");
         msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
         msg->type = _get_message_type_type(type);
         msg->enc = _get_message_enc_type(encryption);
