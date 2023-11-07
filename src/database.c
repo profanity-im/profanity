@@ -63,9 +63,15 @@ static int _get_db_version(void);
 static gboolean _migrate_to_v2(void);
 static gboolean _check_available_space_for_db_migration(char* path_to_db);
 
-#define auto_sqlite __attribute__((__cleanup__(auto_free_sqlite)))
-
 static const int latest_version = 2;
+
+static char*
+_db_strdup(const char* str)
+{
+    return str ? strdup(str) : NULL;
+}
+
+#define auto_sqlite __attribute__((__cleanup__(auto_free_sqlite)))
 
 static void
 auto_free_sqlite(gchar** str)
@@ -240,10 +246,10 @@ _log_database_add_outgoing(char* type, const char* const id, const char* const b
 {
     ProfMessage* msg = message_init();
 
-    msg->id = id ? strdup(id) : NULL;
+    msg->id = _db_strdup(id);
     msg->from_jid = jid_create(barejid);
-    msg->plain = message ? strdup(message) : NULL;
-    msg->replace_id = replace_id ? strdup(replace_id) : NULL;
+    msg->plain = _db_strdup(message);
+    msg->replace_id = _db_strdup(replace_id);
     msg->timestamp = g_date_time_new_now_local(); // TODO: get from outside. best to have whole ProfMessage from outside
     msg->enc = enc;
 
@@ -306,7 +312,7 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
         char* archive_id = (char*)sqlite3_column_text(stmt, 0);
         char* date = (char*)sqlite3_column_text(stmt, 1);
 
-        msg->stanzaid = strdup(archive_id);
+        msg->stanzaid = _db_strdup(archive_id);
         msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
     }
     sqlite3_finalize(stmt);
@@ -369,7 +375,7 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
         ProfMessage* msg = message_init();
         msg->from_jid = jid_create(from);
         msg->to_jid = jid_create(to_jid);
-        msg->plain = strdup(message);
+        msg->plain = _db_strdup(message);
         msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
         msg->type = _get_message_type_type(type);
         msg->enc = _get_message_enc_type(encryption);
