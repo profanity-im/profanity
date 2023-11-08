@@ -78,15 +78,18 @@ static GTimeZone* tz;
 static StatusBar* statusbar;
 static WINDOW* statusbar_win;
 
+void _get_range_bounds(int* start, int* end);
 static int _status_bar_draw_time(int pos);
 static int _status_bar_draw_maintext(int pos);
 static int _status_bar_draw_bracket(gboolean current, int pos, const char* ch);
-static int _status_bar_draw_extended_tabs(int pos);
+static int _status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end);
 static int _status_bar_draw_tab(StatusBarTab* tab, int pos, int num);
+static int _status_bar_draw_tabs(int pos);
 static void _destroy_tab(StatusBarTab* tab);
-static int _tabs_width(void);
+static int _tabs_width(int start, int end);
+static unsigned int _count_digits(int number);
+static unsigned int _count_digits_in_range(int start, int end);
 static char* _display_name(StatusBarTab* tab);
-static gboolean _extended_new(void);
 static gboolean _tabmode_is_actlist(void);
 
 void
@@ -282,26 +285,40 @@ status_bar_draw(void)
     werase(statusbar_win);
     wbkgd(statusbar_win, theme_attrs(THEME_STATUS_TEXT));
 
+    gint max_tabs = prefs_get_statusbartabs();
     int pos = 1;
 
     pos = _status_bar_draw_time(pos);
-
     pos = _status_bar_draw_maintext(pos);
+    if (max_tabs != 0)
+        pos = _status_bar_draw_tabs(pos);
 
+    wnoutrefresh(statusbar_win);
+    inp_put_back();
+}
+
+static int
+_status_bar_draw_tabs(int pos)
+{
     if (!_tabmode_is_actlist()) {
-        pos = getmaxx(stdscr) - _tabs_width();
+        int start, end;
+        _get_range_bounds(&start, &end);
+
+        pos = getmaxx(stdscr) - _tabs_width(start, end);
         if (pos < 0) {
             pos = 0;
         }
-        gint max_tabs = prefs_get_statusbartabs();
-        for (int i = 1; i <= max_tabs; i++) {
+
+        pos = _status_bar_draw_extended_tabs(pos, TRUE, start, end);
+
+        for (int i = start; i <= end; i++) {
             StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
                 pos = _status_bar_draw_tab(tab, pos, i);
             }
         }
 
-        _status_bar_draw_extended_tabs(pos);
+        pos = _status_bar_draw_extended_tabs(pos, FALSE, start, end);
     } else {
         pos++;
         guint print_act = 0;
@@ -339,13 +356,13 @@ status_bar_draw(void)
             pos = _status_bar_draw_bracket(FALSE, pos, "]");
         }
     }
-
-    wnoutrefresh(statusbar_win);
-    inp_put_back();
+    return pos;
 }
 
+// Checks if there are highlighted (unread) messages on the (left side if `left_side` is true, else right side)
+// within the current displayed tabs range.
 static gboolean
-_extended_new(void)
+_has_new_msgs_beyond_range_on_side(gboolean left_side, int display_tabs_start, int display_tabs_end)
 {
     gint max_tabs = prefs_get_statusbartabs();
     int tabs_count = g_hash_table_size(statusbar->tabs);
@@ -353,7 +370,10 @@ _extended_new(void)
         return FALSE;
     }
 
-    for (int i = max_tabs + 1; i <= tabs_count; i++) {
+    int start = left_side ? 1 : display_tabs_end + 1;
+    int end = left_side ? display_tabs_start - 1 : tabs_count;
+
+    for (int i = start; i <= end; i++) {
         StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
         if (tab && tab->highlight) {
             return TRUE;
@@ -364,36 +384,43 @@ _extended_new(void)
 }
 
 static int
-_status_bar_draw_extended_tabs(int pos)
+_status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end)
 {
     gint max_tabs = prefs_get_statusbartabs();
     if (max_tabs == 0) {
         return pos;
     }
 
-    if (g_hash_table_size(statusbar->tabs) > max_tabs) {
-        gboolean is_current = statusbar->current_tab > max_tabs;
-
-        pos = _status_bar_draw_bracket(is_current, pos, "[");
-
-        int status_attrs;
-        if (is_current) {
-            // currently selected
-            status_attrs = theme_attrs(THEME_STATUS_CURRENT);
-        } else if (_extended_new()) {
-            // new one
-            status_attrs = theme_attrs(THEME_STATUS_NEW);
-        } else {
-            // all other
-            status_attrs = theme_attrs(THEME_STATUS_ACTIVE);
-        }
-        wattron(statusbar_win, status_attrs);
-        mvwprintw(statusbar_win, 0, pos, ">");
-        wattroff(statusbar_win, status_attrs);
-        pos++;
-
-        pos = _status_bar_draw_bracket(is_current, pos, "]");
+    guint opened_tabs = g_hash_table_size(statusbar->tabs);
+    if (g_hash_table_size(statusbar->tabs) <= max_tabs) {
+        return pos;
     }
+
+    if (prefix && start < 2) {
+        return pos;
+    }
+    if (!prefix && end > opened_tabs - 1) {
+        return pos;
+    }
+    gboolean is_current = FALSE;
+
+    pos = _status_bar_draw_bracket(is_current, pos, "[");
+
+    int status_attrs;
+
+    if (_has_new_msgs_beyond_range_on_side(prefix, start, end)) {
+        // Apply theme attributes for a tab with new messages.
+        status_attrs = theme_attrs(THEME_STATUS_NEW);
+    } else {
+        // Apply theme attributes for a tab without new messages.
+        status_attrs = theme_attrs(THEME_STATUS_ACTIVE);
+    }
+    wattron(statusbar_win, status_attrs);
+    mvwprintw(statusbar_win, 0, pos, prefix ? "<" : ">");
+    wattroff(statusbar_win, status_attrs);
+    pos++;
+
+    pos = _status_bar_draw_bracket(is_current, pos, "]");
 
     return pos;
 }
@@ -401,7 +428,6 @@ _status_bar_draw_extended_tabs(int pos)
 static int
 _status_bar_draw_tab(StatusBarTab* tab, int pos, int num)
 {
-    int display_num = num == 10 ? 0 : num;
     gboolean is_current = num == statusbar->current_tab;
 
     gboolean show_number = prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER);
@@ -424,8 +450,9 @@ _status_bar_draw_tab(StatusBarTab* tab, int pos, int num)
     }
     wattron(statusbar_win, status_attrs);
     if (show_number) {
-        mvwprintw(statusbar_win, 0, pos, "%d", display_num);
-        pos++;
+        mvwprintw(statusbar_win, 0, pos, "%d", num);
+        // calculate number of digits
+        pos += _count_digits(num);
     }
     if (show_number && show_name) {
         mvwprintw(statusbar_win, 0, pos, ":");
@@ -585,16 +612,19 @@ _destroy_tab(StatusBarTab* tab)
 }
 
 static int
-_tabs_width(void)
+_tabs_width(int start, int end)
 {
     gboolean show_number = prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER);
     gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
     gboolean show_read = prefs_get_boolean(PREF_STATUSBAR_SHOW_READ);
     gint max_tabs = prefs_get_statusbartabs();
+    guint opened_tabs = g_hash_table_size(statusbar->tabs);
+
+    int width = start < 2 ? 1 : 4;
+    width += end > opened_tabs - 1 ? 0 : 3;
 
     if (show_name && show_number) {
-        int width = g_hash_table_size(statusbar->tabs) > max_tabs ? 4 : 1;
-        for (int i = 1; i <= max_tabs; i++) {
+        for (int i = start; i <= end; i++) {
             StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
                 gboolean is_current = i == statusbar->current_tab;
@@ -604,15 +634,14 @@ _tabs_width(void)
 
                 auto_char char* display_name = _display_name(tab);
                 width += utf8_display_len(display_name);
-                width += 4;
+                width += 3 + _count_digits(i);
             }
         }
         return width;
     }
 
     if (show_name && !show_number) {
-        int width = g_hash_table_size(statusbar->tabs) > max_tabs ? 4 : 1;
-        for (int i = 1; i <= max_tabs; i++) {
+        for (int i = start; i <= end; i++) {
             StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
                 gboolean is_current = i == statusbar->current_tab;
@@ -628,10 +657,12 @@ _tabs_width(void)
         return width;
     }
 
-    if (g_hash_table_size(statusbar->tabs) > max_tabs) {
-        return max_tabs * 3 + (g_hash_table_size(statusbar->tabs) > max_tabs ? 4 : 1);
+    if (opened_tabs > max_tabs) {
+        width += _count_digits_in_range(start, end);
+        width += start > end ? 0 : (end - start) * 3;
+        return width;
     }
-    return g_hash_table_size(statusbar->tabs) * 3 + (g_hash_table_size(statusbar->tabs) > max_tabs ? 4 : 1);
+    return opened_tabs * 3 + 1;
 }
 
 static char*
@@ -678,4 +709,57 @@ _display_name(StatusBarTab* tab)
     free(fullname);
 
     return trimmedname;
+}
+
+void
+_get_range_bounds(int* start, int* end)
+{
+    int current_tab = statusbar->current_tab;
+    gint display_range = prefs_get_statusbartabs();
+    int total_tabs = g_hash_table_size(statusbar->tabs);
+    int side_range = display_range / 2;
+
+    if (total_tabs <= display_range) {
+        *start = 1;
+        *end = total_tabs;
+    } else if (current_tab - side_range <= 1) {
+        *start = 1;
+        *end = display_range;
+    } else if (current_tab + side_range >= total_tabs) {
+        *start = total_tabs - display_range + 1;
+        *end = total_tabs;
+    } else {
+        *start = current_tab - side_range;
+        *end = current_tab + side_range;
+    }
+}
+
+// Counts amount of digits in a number
+static unsigned int
+_count_digits(int number)
+{
+    unsigned int digits_count = 0;
+    if (number < 0)
+        number = -number;
+
+    do {
+        number /= 10;
+        digits_count++;
+    } while (number != 0);
+
+    return digits_count;
+}
+
+// Counts the total number of digits in a range of numbers, inclusive.
+// Example: _count_digits_in_range(2, 3) returns 2, _count_digits_in_range(2, 922) returns 2657
+static unsigned int
+_count_digits_in_range(int start, int end)
+{
+    int total_digits = 0;
+
+    for (int i = start; i <= end; i++) {
+        total_digits += _count_digits(i);
+    }
+
+    return total_digits;
 }
