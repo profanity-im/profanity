@@ -427,15 +427,18 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
 
     auto_char char* enc_char = get_enc_char(enc_mode, chatwin->outgoing_char);
 
+    auto_jid Jid* myjid = jid_create(connection_get_fulljid());
+    auto_char char* display_message = plugins_pre_chat_message_display(myjid->barejid, myjid->resourcepart, strdup(message));
+
     if (request_receipt && id) {
-        win_print_outgoing_with_receipt((ProfWin*)chatwin, enc_char, "me", message, id, replace_id);
+        win_print_outgoing_with_receipt((ProfWin*)chatwin, enc_char, "me", display_message, id, replace_id);
     } else {
-        win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, message);
+        win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, display_message);
     }
 
     // save last id and message for LMC in case if it's not LMC message
     if (id && !replace_id) {
-        _chatwin_set_last_message(chatwin, id, message);
+        _chatwin_set_last_message(chatwin, id, display_message);
     }
 }
 
