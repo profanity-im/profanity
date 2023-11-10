@@ -159,6 +159,8 @@ http_file_get(void* userdata)
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "profanity");
 
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
     if (cafile) {
         curl_easy_setopt(curl, CURLOPT_CAINFO, cafile);
     }
