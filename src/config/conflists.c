@@ -53,7 +53,6 @@ conf_string_list_add(GKeyFile* keyfile, const char* const group, const char* con
             // item already in list, exit function
             if (strcmp(list[i], item) == 0) {
                 g_list_free_full(glist, g_free);
-                g_strfreev(list);
                 return FALSE;
             }
             // add item to our g_list
