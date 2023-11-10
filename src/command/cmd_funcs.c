@@ -9625,31 +9625,31 @@ _cmd_executable_template(const preference_t setting, const char* command, gchar*
 gboolean
 cmd_executable_avatar(ProfWin* window, const char* const command, gchar** args)
 {
-    return _cmd_executable_template(PREF_AVATAR_CMD, args[0], args);
+    return _cmd_executable_template(PREF_AVATAR_CMD, command, args);
 }
 
 gboolean
 cmd_executable_urlopen(ProfWin* window, const char* const command, gchar** args)
 {
-    return _cmd_executable_template(PREF_URL_OPEN_CMD, args[0], args);
+    return _cmd_executable_template(PREF_URL_OPEN_CMD, command, args);
 }
 
 gboolean
 cmd_executable_urlsave(ProfWin* window, const char* const command, gchar** args)
 {
-    return _cmd_executable_template(PREF_URL_SAVE_CMD, args[0], args);
+    return _cmd_executable_template(PREF_URL_SAVE_CMD, command, args);
 }
 
 gboolean
 cmd_executable_editor(ProfWin* window, const char* const command, gchar** args)
 {
-    return _cmd_executable_template(PREF_COMPOSE_EDITOR, args[0], args);
+    return _cmd_executable_template(PREF_COMPOSE_EDITOR, command, args);
 }
 
 gboolean
 cmd_executable_vcard_photo(ProfWin* window, const char* const command, gchar** args)
 {
-    return _cmd_executable_template(PREF_VCARD_PHOTO_CMD, args[0], args);
+    return _cmd_executable_template(PREF_VCARD_PHOTO_CMD, command, args);
 }
 
 gboolean
