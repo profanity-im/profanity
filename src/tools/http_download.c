@@ -159,6 +159,8 @@ http_file_get(void* userdata)
 
     curl_easy_setopt(curl, CURLOPT_USERAGENT, "profanity");
 
+    curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+
     if (cafile) {
         curl_easy_setopt(curl, CURLOPT_CAINFO, cafile);
     }
@@ -172,6 +174,10 @@ http_file_get(void* userdata)
 
     if ((res = curl_easy_perform(curl)) != CURLE_OK) {
         err = strdup(curl_easy_strerror(res));
+    }
+
+    if (ftell(outfh) == 0) {
+        err = strdup("Output file is empty.");
     }
 
     curl_easy_cleanup(curl);
