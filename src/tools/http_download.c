@@ -176,6 +176,10 @@ http_file_get(void* userdata)
         err = strdup(curl_easy_strerror(res));
     }
 
+    if (ftell(outfh) == 0) {
+        err = strdup("Output file is empty.");
+    }
+
     curl_easy_cleanup(curl);
     curl_global_cleanup();
 
