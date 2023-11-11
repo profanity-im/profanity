@@ -137,6 +137,7 @@ static int _inp_rl_subwin_pagedown_handler(int count, int key);
 static int _inp_rl_startup_hook(void);
 static int _inp_rl_down_arrow_handler(int count, int key);
 static int _inp_rl_send_to_editor(int count, int key);
+static int _inp_rl_print_newline_symbol(int count, int key);
 
 void
 create_input_window(void)
@@ -482,6 +483,7 @@ _inp_rl_addfuncs(void)
     rl_add_funmap_entry("prof_win_close", _inp_rl_win_close_handler);
     rl_add_funmap_entry("prof_send_to_editor", _inp_rl_send_to_editor);
     rl_add_funmap_entry("prof_cut_to_history", _inp_rl_down_arrow_handler);
+    rl_add_funmap_entry("prof_print_newline_symbol", _inp_rl_print_newline_symbol);
 }
 
 // Readline callbacks
@@ -554,6 +556,8 @@ _inp_rl_startup_hook(void)
 
     rl_bind_keyseq("\\e[1;5B", _inp_rl_down_arrow_handler); // ctrl+arrow down
     rl_bind_keyseq("\\eOb", _inp_rl_down_arrow_handler);
+
+    rl_bind_keyseq("\\e\\C-\r", _inp_rl_print_newline_symbol); // alt+enter
 
     // unbind unwanted mappings
     rl_bind_keyseq("\\e=", NULL);
@@ -958,5 +962,12 @@ _inp_rl_send_to_editor(int count, int key)
     rl_point = rl_end;
     rl_forced_update_display();
 
+    return 0;
+}
+
+static int
+_inp_rl_print_newline_symbol(int count, int key)
+{
+    rl_insert_text("\n");
     return 0;
 }
