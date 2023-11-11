@@ -528,7 +528,8 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
 
     // stanza-id (XEP-0359) doesn't have to be present in the message.
     // But if it's duplicated, it's a serious server-side problem, so we better track it.
-    if (message->stanzaid) {
+    // Unless it's MAM, in that case it's expected behaviour.
+    if (message->stanzaid && !message->is_mam) {
         auto_sqlite char* duplicate_check_query = sqlite3_mprintf("SELECT 1 FROM `ChatLogs` WHERE (`archive_id` = %Q)",
                                                                   message->stanzaid);
 
