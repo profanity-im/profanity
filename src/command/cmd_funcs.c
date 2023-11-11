@@ -5543,7 +5543,7 @@ gboolean
 cmd_states(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[0] == NULL) {
-        return FALSE;
+        return TRUE;
     }
 
     _cmd_set_boolean_preference(args[0], "Sending chat states", PREF_STATES);
@@ -5580,7 +5580,7 @@ gboolean
 cmd_outtype(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[0] == NULL) {
-        return FALSE;
+        return TRUE;
     }
 
     _cmd_set_boolean_preference(args[0], "Sending typing notifications", PREF_OUTTYPE);
@@ -6837,14 +6837,14 @@ cmd_privacy(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[0] == NULL) {
         cons_bad_cmd_usage(command);
-        return FALSE;
+        return TRUE;
     }
 
     if (g_strcmp0(args[0], "logging") == 0) {
         gchar* arg = args[1];
         if (arg == NULL) {
             cons_bad_cmd_usage(command);
-            return FALSE;
+            return TRUE;
         }
 
         if (g_strcmp0(arg, "on") == 0) {
@@ -6862,7 +6862,7 @@ cmd_privacy(ProfWin* window, const char* const command, gchar** args)
             prefs_set_string(PREF_DBLOG, arg);
         } else {
             cons_bad_cmd_usage(command);
-            return FALSE;
+            return TRUE;
         }
         return TRUE;
     }
@@ -6888,7 +6888,8 @@ cmd_logging(ProfWin* window, const char* const command, gchar** args)
 
         return TRUE;
     } else if (g_strcmp0(args[0], "group") == 0 && args[1] != NULL) {
-        return _cmd_set_boolean_preference(args[1], "Groupchat logging", PREF_GRLOG);
+        _cmd_set_boolean_preference(args[1], "Groupchat logging", PREF_GRLOG);
+        return TRUE;
     }
 
     cons_bad_cmd_usage(command);
@@ -6899,7 +6900,8 @@ gboolean
 cmd_history(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[0] == NULL) {
-        return FALSE;
+        cons_bad_cmd_usage(command);
+        return TRUE;
     }
 
     _cmd_set_boolean_preference(args[0], "Chat history", PREF_HISTORY);
@@ -6916,7 +6918,8 @@ gboolean
 cmd_carbons(ProfWin* window, const char* const command, gchar** args)
 {
     if (args[0] == NULL) {
-        return FALSE;
+        cons_bad_cmd_usage(command);
+        return TRUE;
     }
 
     _cmd_set_boolean_preference(args[0], "Message carbons preference", PREF_CARBONS);
@@ -9854,7 +9857,7 @@ cmd_strophe(ProfWin* window, const char* const command, gchar** args)
         }
     }
     cons_bad_cmd_usage(command);
-    return FALSE;
+    return TRUE;
 }
 
 gboolean
