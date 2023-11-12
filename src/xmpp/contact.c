@@ -35,13 +35,13 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <glib.h>
 
 #include "common.h"
+#include "trace.h"
 #include "tools/autocomplete.h"
 #include "xmpp/resource.h"
 #include "xmpp/contact.h"
@@ -290,7 +290,7 @@ _get_most_available_resource(PContact contact)
 const char*
 p_contact_presence(const PContact contact)
 {
-    assert(contact != NULL);
+    PROF_ASSERT(contact != NULL);
 
     // no available resources, offline
     if (g_hash_table_size(contact->available_resources) == 0) {
@@ -305,7 +305,7 @@ p_contact_presence(const PContact contact)
 const char*
 p_contact_status(const PContact contact)
 {
-    assert(contact != NULL);
+    PROF_ASSERT(contact != NULL);
 
     // no available resources, use offline message
     if (g_hash_table_size(contact->available_resources) == 0) {
@@ -358,7 +358,7 @@ p_contact_last_activity(const PContact contact)
 GList*
 p_contact_get_available_resources(const PContact contact)
 {
-    assert(contact != NULL);
+    PROF_ASSERT(contact != NULL);
     GList* resources = g_hash_table_get_values(contact->available_resources);
     GList* ordered = NULL;
 

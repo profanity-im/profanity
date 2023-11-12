@@ -45,7 +45,6 @@
 #include <curl/curl.h>
 #include <gio/gio.h>
 #include <pthread.h>
-#include <assert.h>
 #include <errno.h>
 
 #include "profanity.h"
@@ -53,6 +52,7 @@
 #include "tools/http_download.h"
 #include "config/cafile.h"
 #include "config/preferences.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "common.h"

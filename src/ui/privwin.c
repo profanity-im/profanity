@@ -35,12 +35,12 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <glib.h>
 #include <stdlib.h>
 
 #include "log.h"
 #include "config/preferences.h"
+#include "trace.h"
 #include "ui/win_types.h"
 #include "ui/window.h"
 #include "ui/titlebar.h"
@@ -49,7 +49,7 @@
 void
 privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
 {
-    assert(privatewin != NULL);
+    PROF_ASSERT(privatewin != NULL);
 
     if (message->plain == NULL) {
         log_error("privwin_incoming_msg: Message with no plain field from: %s", message->from_jid);
@@ -102,7 +102,7 @@ privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
 void
 privwin_outgoing_msg(ProfPrivateWin* privwin, const char* const message)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     ProfWin* window = (ProfWin*)privwin;
     wins_add_quotes_ac(window, message, FALSE);
@@ -112,7 +112,7 @@ privwin_outgoing_msg(ProfPrivateWin* privwin, const char* const message)
 void
 privwin_message_occupant_offline(ProfPrivateWin* privwin)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     win_println((ProfWin*)privwin, THEME_ERROR, "-", "Unable to send message, occupant no longer present in room.");
 }
@@ -120,7 +120,7 @@ privwin_message_occupant_offline(ProfPrivateWin* privwin)
 void
 privwin_message_left_room(ProfPrivateWin* privwin)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     win_println((ProfWin*)privwin, THEME_ERROR, "-", "Unable to send message, you are no longer present in room.");
 }
@@ -128,7 +128,7 @@ privwin_message_left_room(ProfPrivateWin* privwin)
 void
 privwin_occupant_offline(ProfPrivateWin* privwin)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     privwin->occupant_offline = TRUE;
     auto_jid Jid* jidp = jid_create(privwin->fulljid);
@@ -138,7 +138,7 @@ privwin_occupant_offline(ProfPrivateWin* privwin)
 void
 privwin_occupant_kicked(ProfPrivateWin* privwin, const char* const actor, const char* const reason)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     privwin->occupant_offline = TRUE;
     auto_jid Jid* jidp = jid_create(privwin->fulljid);
@@ -160,7 +160,7 @@ privwin_occupant_kicked(ProfPrivateWin* privwin, const char* const actor, const 
 void
 privwin_occupant_banned(ProfPrivateWin* privwin, const char* const actor, const char* const reason)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     privwin->occupant_offline = TRUE;
     auto_jid Jid* jidp = jid_create(privwin->fulljid);
@@ -182,7 +182,7 @@ privwin_occupant_banned(ProfPrivateWin* privwin, const char* const actor, const 
 void
 privwin_occupant_online(ProfPrivateWin* privwin)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     privwin->occupant_offline = FALSE;
     auto_jid Jid* jidp = jid_create(privwin->fulljid);
@@ -192,7 +192,7 @@ privwin_occupant_online(ProfPrivateWin* privwin)
 void
 privwin_room_destroyed(ProfPrivateWin* privwin)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     privwin->room_left = TRUE;
     auto_jid Jid* jidp = jid_create(privwin->fulljid);
@@ -202,7 +202,7 @@ privwin_room_destroyed(ProfPrivateWin* privwin)
 void
 privwin_room_joined(ProfPrivateWin* privwin)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     privwin->room_left = FALSE;
     auto_jid Jid* jidp = jid_create(privwin->fulljid);
@@ -212,7 +212,7 @@ privwin_room_joined(ProfPrivateWin* privwin)
 void
 privwin_room_left(ProfPrivateWin* privwin)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     privwin->room_left = TRUE;
     auto_jid Jid* jidp = jid_create(privwin->fulljid);
@@ -222,7 +222,7 @@ privwin_room_left(ProfPrivateWin* privwin)
 void
 privwin_room_kicked(ProfPrivateWin* privwin, const char* const actor, const char* const reason)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     privwin->room_left = TRUE;
     GString* message = g_string_new("Kicked from ");
@@ -244,7 +244,7 @@ privwin_room_kicked(ProfPrivateWin* privwin, const char* const actor, const char
 void
 privwin_room_banned(ProfPrivateWin* privwin, const char* const actor, const char* const reason)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     privwin->room_left = TRUE;
     GString* message = g_string_new("Banned from ");
@@ -266,7 +266,7 @@ privwin_room_banned(ProfPrivateWin* privwin, const char* const actor, const char
 gchar*
 privwin_get_string(ProfPrivateWin* privwin)
 {
-    assert(privwin != NULL);
+    PROF_ASSERT(privwin != NULL);
 
     GString* res = g_string_new("Private ");
     g_string_append(res, privwin->fulljid);

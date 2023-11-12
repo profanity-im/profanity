@@ -38,7 +38,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
@@ -62,6 +61,7 @@
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/statusbar.h"
+#include "trace.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/muc.h"
 #include "xmpp/roster_list.h"
@@ -2530,7 +2530,7 @@ cons_alert(ProfWin* alert_origin_window)
 gchar*
 cons_get_string(ProfConsoleWin* conswin)
 {
-    assert(conswin != NULL);
+    PROF_ASSERT(conswin != NULL);
 
     return g_strdup("Console");
 }

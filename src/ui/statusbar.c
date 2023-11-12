@@ -36,7 +36,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -50,6 +49,7 @@
 
 #include "config/theme.h"
 #include "config/preferences.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
@@ -474,7 +474,7 @@ _status_bar_draw_time(int pos)
 
     GDateTime* datetime = g_date_time_new_now(tz);
     statusbar->time = g_date_time_format(datetime, time_pref);
-    assert(statusbar->time != NULL);
+    PROF_ASSERT(statusbar->time != NULL);
     g_date_time_unref(datetime);
 
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);

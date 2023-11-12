@@ -38,7 +38,6 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 
-#include <assert.h>
 #include <errno.h>
 #include <glib.h>
 #include <pthread.h>
@@ -55,6 +54,7 @@
 #include "omemo/crypto.h"
 #include "omemo/omemo.h"
 #include "omemo/store.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/connection.h"
@@ -712,7 +712,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     GList* recipients = NULL;
     if (muc) {
         ProfMucWin* mucwin = (ProfMucWin*)win;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         GList* members = muc_members(mucwin->roomjid);
         GList* iter;
         for (iter = members; iter != NULL; iter = iter->next) {
@@ -722,7 +722,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
         g_list_free(members);
     } else {
         ProfChatWin* chatwin = (ProfChatWin*)win;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         recipients = g_list_append(recipients, strdup(chatwin->barejid));
     }
 
@@ -848,11 +848,11 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     // Send the message
     if (muc) {
         ProfMucWin* mucwin = (ProfMucWin*)win;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         id = message_send_chat_omemo(mucwin->roomjid, omemo_ctx.device_id, keys, iv, AES128_GCM_IV_LENGTH, ciphertext, ciphertext_len, request_receipt, TRUE, replace_id);
     } else {
         ProfChatWin* chatwin = (ProfChatWin*)win;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         id = message_send_chat_omemo(chatwin->barejid, omemo_ctx.device_id, keys, iv, AES128_GCM_IV_LENGTH, ciphertext, ciphertext_len, request_receipt, FALSE, replace_id);
     }
 

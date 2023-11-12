@@ -35,7 +35,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -50,6 +49,7 @@
 #include "event/server_events.h"
 #include "event/client_events.h"
 #include "tools/autocomplete.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "xmpp/session.h"
 #include "xmpp/iq.h"

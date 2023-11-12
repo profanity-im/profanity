@@ -37,12 +37,12 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include <glib.h>
 
 #include "common.h"
 #include "tools/autocomplete.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/jid.h"
@@ -715,7 +715,7 @@ muc_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     ProfMucWin* mucwin = (ProfMucWin*)window;
-    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+    PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
     ChatRoom* chat_room = g_hash_table_lookup(rooms, mucwin->roomjid);
     if (chat_room == NULL || chat_room->nick_ac == NULL) {
         return NULL;

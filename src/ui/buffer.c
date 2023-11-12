@@ -38,7 +38,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <stdlib.h>
 
 #include <glib.h>
@@ -50,6 +49,7 @@
 #include <curses.h>
 #endif
 
+#include "trace.h"
 #include "ui/window.h"
 #include "ui/buffer.h"
 

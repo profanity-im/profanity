@@ -37,7 +37,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include <glib.h>
 
@@ -53,6 +52,7 @@
 #include "plugins/themes.h"
 #include "plugins/settings.h"
 #include "plugins/disco.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/roster_list.h"
@@ -204,7 +204,7 @@ api_get_current_recipient(void)
     ProfWin* current = wins_get_current();
     if (current->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)current;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         return chatwin->barejid;
     } else {
         return NULL;
@@ -217,7 +217,7 @@ api_get_current_muc(void)
     ProfWin* current = wins_get_current();
     if (current->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)current;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return mucwin->roomjid;
     } else {
         return NULL;
@@ -230,7 +230,7 @@ api_get_current_nick(void)
     ProfWin* current = wins_get_current();
     if (current->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)current;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return muc_nick(mucwin->roomjid);
     } else {
         return NULL;
@@ -255,7 +255,7 @@ api_get_current_occupants(void)
     ProfWin* current = wins_get_current();
     if (current->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)current;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         GList* occupants_list = muc_roster(mucwin->roomjid);
         char** result = malloc((g_list_length(occupants_list) + 1) * sizeof(char*));
         GList* curr = occupants_list;

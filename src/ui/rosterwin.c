@@ -36,11 +36,11 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "config/preferences.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/window_list.h"
@@ -96,7 +96,7 @@ rosterwin_roster(void)
     }
 
     ProfLayoutSplit* layout = (ProfLayoutSplit*)console->layout;
-    assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
+    PROF_ASSERT(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
 
     if (layout->subwin == NULL) {
         return;

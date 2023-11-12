@@ -35,7 +35,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -50,6 +49,7 @@
 #include "config/preferences.h"
 #include "event/server_events.h"
 #include "plugins/plugins.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/window_list.h"
@@ -94,7 +94,7 @@ presence_handlers_init(void)
 void
 presence_subscription(const char* const jid, const jabber_subscr_t action)
 {
-    assert(jid != NULL);
+    PROF_ASSERT(jid != NULL);
 
     auto_jid Jid* jidp = jid_create(jid);
     autocomplete_remove(sub_requests_ac, jidp->barejid);
@@ -300,8 +300,8 @@ presence_join_room(const char* const room, const char* const nick, const char* c
 void
 presence_change_room_nick(const char* const room, const char* const nick)
 {
-    assert(room != NULL);
-    assert(nick != NULL);
+    PROF_ASSERT(room != NULL);
+    PROF_ASSERT(nick != NULL);
 
     log_debug("Sending room nickname change to: %s, nick: %s", room, nick);
     resource_presence_t presence_type = accounts_get_last_presence(session_get_account_name());
@@ -325,7 +325,7 @@ presence_change_room_nick(const char* const room, const char* const nick)
 void
 presence_leave_chat_room(const char* const room_jid)
 {
-    assert(room_jid != NULL);
+    PROF_ASSERT(room_jid != NULL);
 
     char* nick = muc_nick(room_jid);
     if (!nick) {

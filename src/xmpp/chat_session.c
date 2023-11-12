@@ -37,12 +37,12 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include <glib.h>
 
 #include "log.h"
 #include "config/preferences.h"
+#include "trace.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/stanza.h"
 #include "xmpp/chat_session.h"
@@ -53,8 +53,8 @@ static void
 _chat_session_new(const char* const barejid, const char* const resource, gboolean resource_override,
                   gboolean send_states)
 {
-    assert(barejid != NULL);
-    assert(resource != NULL);
+    PROF_ASSERT(barejid != NULL);
+    PROF_ASSERT(resource != NULL);
 
     ChatSession* new_session = malloc(sizeof(struct chat_session_t));
     new_session->barejid = strdup(barejid);
@@ -140,8 +140,8 @@ chat_session_get_state(const char* const barejid)
 void
 chat_session_recipient_gone(const char* const barejid, const char* const resource)
 {
-    assert(barejid != NULL);
-    assert(resource != NULL);
+    PROF_ASSERT(barejid != NULL);
+    PROF_ASSERT(resource != NULL);
 
     ChatSession* session = g_hash_table_lookup(sessions, barejid);
     if (session && g_strcmp0(session->resource, resource) == 0) {
@@ -173,8 +173,8 @@ void
 chat_session_recipient_active(const char* const barejid, const char* const resource,
                               gboolean send_states)
 {
-    assert(barejid != NULL);
-    assert(resource != NULL);
+    PROF_ASSERT(barejid != NULL);
+    PROF_ASSERT(resource != NULL);
 
     ChatSession* session = g_hash_table_lookup(sessions, barejid);
     if (session) {

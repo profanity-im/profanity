@@ -36,9 +36,9 @@
 #include "config.h"
 
 #include <glib.h>
-#include <assert.h>
 
 #include "log.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
@@ -89,7 +89,7 @@ static char* _gettimestamp();
 gboolean
 ox_announce_public_key(const char* const filename)
 {
-    assert(filename);
+    PROF_ASSERT(filename);
 
     cons_show("Announce OpenPGP Key for OX %s …", filename);
     log_info("[OX] Announce OpenPGP Key of OX: %s", filename);
@@ -176,7 +176,7 @@ ox_announce_public_key(const char* const filename)
 void
 ox_discover_public_key(const char* const jid)
 {
-    assert(jid && strlen(jid) > 0);
+    PROF_ASSERT(jid && strlen(jid) > 0);
     log_info("[OX] Discovering Public Key for %s", jid);
     cons_show("Discovering Public Key for %s", jid);
     // iq
@@ -240,8 +240,8 @@ void
 _ox_metadata_node__public_key(const char* const fingerprint)
 {
     log_info("Announce OpenPGP metadata: %s", fingerprint);
-    assert(fingerprint);
-    assert(strlen(fingerprint) == KEYID_LENGTH);
+    PROF_ASSERT(fingerprint);
+    PROF_ASSERT(strlen(fingerprint) == KEYID_LENGTH);
     // iq
     xmpp_ctx_t* const ctx = connection_get_ctx();
     char* id = connection_create_stanza_id();
@@ -358,8 +358,8 @@ _ox_metadata_result(xmpp_stanza_t* const stanza, void* const userdata)
 void
 _ox_request_public_key(const char* const jid, const char* const fingerprint)
 {
-    assert(jid);
-    assert(fingerprint);
+    PROF_ASSERT(jid);
+    PROF_ASSERT(fingerprint);
 
     if (strlen(fingerprint) != KEYID_LENGTH) {
         cons_show_error("Invalid fingerprint length %s for %s", fingerprint, jid);

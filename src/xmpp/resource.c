@@ -35,17 +35,17 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "common.h"
+#include "trace.h"
 #include "xmpp/resource.h"
 
 Resource*
 resource_new(const char* const name, resource_presence_t presence, const char* const status, const int priority)
 {
-    assert(name != NULL);
+    PROF_ASSERT(name != NULL);
     Resource* new_resource = malloc(sizeof(struct resource_t));
     new_resource->name = strdup(name);
     new_resource->presence = presence;
@@ -102,7 +102,7 @@ resource_destroy(Resource* resource)
 gboolean
 valid_resource_presence_string(const char* const str)
 {
-    assert(str != NULL);
+    PROF_ASSERT(str != NULL);
     if ((strcmp(str, "online") == 0) || (strcmp(str, "chat") == 0) || (strcmp(str, "away") == 0) || (strcmp(str, "xa") == 0) || (strcmp(str, "dnd") == 0)) {
         return TRUE;
     } else {

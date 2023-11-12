@@ -38,7 +38,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #include "config/accounts.h"
 #include "profanity.h"
@@ -54,6 +53,7 @@
 #include "event/server_events.h"
 #include "event/common.h"
 #include "plugins/plugins.h"
+#include "trace.h"
 #include "ui/window_list.h"
 #include "ui/window.h"
 #include "tools/bookmark_ignore.h"
@@ -1238,7 +1238,7 @@ sv_ev_lastactivity_response(const char* const from, const int seconds, const cha
     auto_gchar gchar* date_fmt = NULL;
     auto_gchar gchar* time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
     date_fmt = g_date_time_format(active, time_pref);
-    assert(date_fmt != NULL);
+    PROF_ASSERT(date_fmt != NULL);
 
     // full jid - last activity
     if (jidp->resourcepart) {

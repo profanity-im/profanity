@@ -38,7 +38,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <libgen.h>
 #include <dirent.h>
 #include <ctype.h>
@@ -57,6 +56,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
 #include "ui/buffer.h"
+#include "trace.h"
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
@@ -1546,7 +1546,7 @@ cmd_ac_reset(ProfWin* window)
 
         if (window->type == WIN_CHAT) {
             ProfChatWin* chatwin = (ProfChatWin*)window;
-            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
             PContact contact = roster_get_contact(chatwin->barejid);
             if (contact) {
                 p_contact_resource_ac_reset(contact);
@@ -1744,14 +1744,14 @@ cmd_ac_reset(ProfWin* window)
 
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         muc_autocomplete_reset(mucwin->roomjid);
         muc_jid_autocomplete_reset(mucwin->roomjid);
     }
 
     if (window->type == WIN_CONFIG) {
         ProfConfWin* confwin = (ProfConfWin*)window;
-        assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+        PROF_ASSERT(confwin->memcheck == PROFCONFWIN_MEMCHECK);
         if (confwin->form) {
             form_reset_autocompleters(confwin->form);
         }
@@ -2060,7 +2060,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     // autocomplete nickname in chat rooms
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
         if (nick_ac) {
             gchar* nick_choices[] = { "/msg", "/info", "/caps" };
@@ -2868,7 +2868,7 @@ _omemo_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 
         if (window->type == WIN_CHAT) {
             ProfChatWin* chatwin = (ProfChatWin*)window;
-            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
             found = autocomplete_param_with_func(input, "/omemo trust", omemo_fingerprint_autocomplete, previous, chatwin->barejid);
             if (found) {
                 return found;
@@ -2895,7 +2895,7 @@ _omemo_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 
         if (window->type == WIN_CHAT) {
             ProfChatWin* chatwin = (ProfChatWin*)window;
-            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
             found = autocomplete_param_with_func(input, "/omemo untrust", omemo_fingerprint_autocomplete, previous, chatwin->barejid);
             if (found) {
                 return found;
@@ -3108,7 +3108,7 @@ _resource_autocomplete(ProfWin* window, const char* const input, gboolean previo
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED && window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         PContact contact = roster_get_contact(chatwin->barejid);
         if (contact) {
             Autocomplete ac = p_contact_resource_ac(contact);
@@ -3399,7 +3399,7 @@ _kick_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     ProfMucWin* mucwin = (ProfMucWin*)window;
-    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+    PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
     Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
     if (nick_ac == NULL) {
         return NULL;
@@ -3418,7 +3418,7 @@ _ban_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     ProfMucWin* mucwin = (ProfMucWin*)window;
-    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+    PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
     Autocomplete jid_ac = muc_roster_jid_ac(mucwin->roomjid);
     if (jid_ac == NULL) {
         return NULL;
@@ -3436,7 +3436,7 @@ _affiliation_autocomplete(ProfWin* window, const char* const input, gboolean pre
 
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         gboolean parse_result;
         Autocomplete jid_ac = muc_roster_jid_ac(mucwin->roomjid);
 
@@ -3480,7 +3480,7 @@ _role_autocomplete(ProfWin* window, const char* const input, gboolean previous)
 
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         gboolean parse_result;
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
 
@@ -3873,7 +3873,7 @@ _subject_autocomplete(ProfWin* window, const char* const input, gboolean previou
         if ((g_strcmp0(input, "/subject edit ") == 0)
             || (g_strcmp0(input, "/subject edit \"") == 0)) {
             ProfMucWin* mucwin = (ProfMucWin*)window;
-            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
             char* subject = muc_subject(mucwin->roomjid);
             if (subject) {
@@ -4224,7 +4224,7 @@ _status_autocomplete(ProfWin* window, const char* const input, gboolean previous
         // MUC completion with nicknames
         if (window->type == WIN_MUC) {
             ProfMucWin* mucwin = (ProfMucWin*)window;
-            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
             if (nick_ac) {
                 result = autocomplete_param_with_ac(unquoted, "/status get", nick_ac, TRUE, previous);
@@ -4358,7 +4358,7 @@ _software_autocomplete(ProfWin* window, const char* const input, gboolean previo
 
     if (window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
         GString* search_str = g_string_new("/software ");
         g_string_append(search_str, chatwin->barejid);
@@ -4366,7 +4366,7 @@ _software_autocomplete(ProfWin* window, const char* const input, gboolean previo
         g_string_free(search_str, TRUE);
     } else if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
 
@@ -4614,7 +4614,7 @@ _vcard_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         char* unquoted = strip_arg_quotes(input);
 
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         Autocomplete nick_ac = muc_roster_ac(mucwin->roomjid);
 
         if (nick_ac) {

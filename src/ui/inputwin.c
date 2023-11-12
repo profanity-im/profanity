@@ -36,7 +36,6 @@
 #define _XOPEN_SOURCE_EXTENDED
 #include "config.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <sys/select.h>
 #include <stdlib.h>
@@ -65,6 +64,7 @@
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/screen.h"
 #include "ui/statusbar.h"
@@ -145,7 +145,7 @@ create_input_window(void)
      * locale, therefore we check that our own version is big enough
      * and bail out if it isn't.
      */
-    assert(MB_CUR_MAX <= PROF_MB_CUR_MAX);
+    PROF_ASSERT(MB_CUR_MAX <= PROF_MB_CUR_MAX);
 #ifdef NCURSES_REENTRANT
     set_escdelay(25);
 #else

@@ -38,7 +38,6 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 
 #include "xmpp/chat_session.h"
 #include "window_list.h"
@@ -46,6 +45,7 @@
 #include "log.h"
 #include "database.h"
 #include "config/preferences.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/titlebar.h"
@@ -159,7 +159,7 @@ chatwin_new(const char* const barejid)
 void
 chatwin_receipt_received(ProfChatWin* chatwin, const char* const id)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     ProfWin* win = (ProfWin*)chatwin;
     win_mark_received(win, id);
@@ -169,7 +169,7 @@ chatwin_receipt_received(ProfChatWin* chatwin, const char* const id)
 void
 chatwin_otr_secured(ProfChatWin* chatwin, gboolean trusted)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     chatwin->is_otr = TRUE;
     chatwin->otr_is_trusted = trusted;
@@ -199,7 +199,7 @@ chatwin_otr_secured(ProfChatWin* chatwin, gboolean trusted)
 void
 chatwin_otr_unsecured(ProfChatWin* chatwin)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     chatwin->is_otr = FALSE;
     chatwin->otr_is_trusted = FALSE;
@@ -214,7 +214,7 @@ chatwin_otr_unsecured(ProfChatWin* chatwin)
 void
 chatwin_otr_smp_event(ProfChatWin* chatwin, prof_otr_smp_event_t event, void* data)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     switch (event) {
     case PROF_OTR_SMP_INIT:
@@ -262,7 +262,7 @@ chatwin_otr_smp_event(ProfChatWin* chatwin, prof_otr_smp_event_t event, void* da
 void
 chatwin_otr_trust(ProfChatWin* chatwin)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     chatwin->is_otr = TRUE;
     chatwin->otr_is_trusted = TRUE;
@@ -277,7 +277,7 @@ chatwin_otr_trust(ProfChatWin* chatwin)
 void
 chatwin_otr_untrust(ProfChatWin* chatwin)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     chatwin->is_otr = TRUE;
     chatwin->otr_is_trusted = FALSE;
@@ -293,7 +293,7 @@ chatwin_otr_untrust(ProfChatWin* chatwin)
 void
 chatwin_recipient_gone(ProfChatWin* chatwin)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     const char* display_usr = NULL;
     PContact contact = roster_get_contact(chatwin->barejid);
@@ -313,7 +313,7 @@ chatwin_recipient_gone(ProfChatWin* chatwin)
 void
 chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_created)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     if (message->plain == NULL) {
         log_error("chatwin_incoming_msg: Message with no plain field from: %s", message->from_jid);
@@ -419,7 +419,7 @@ void
 chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, prof_enc_t enc_mode,
                      gboolean request_receipt, const char* const replace_id)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     ProfWin* window = (ProfWin*)chatwin;
     wins_add_quotes_ac(window, message, FALSE);
@@ -441,7 +441,7 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
 void
 chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     auto_char char* enc_char = NULL;
     if (message->enc == PROF_MSG_ENC_PGP) {
@@ -464,7 +464,7 @@ chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message)
 void
 chatwin_contact_online(ProfChatWin* chatwin, Resource* resource, GDateTime* last_activity)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     const char* show = string_from_resource_presence(resource->presence);
     PContact contact = roster_get_contact(chatwin->barejid);
@@ -476,7 +476,7 @@ chatwin_contact_online(ProfChatWin* chatwin, Resource* resource, GDateTime* last
 void
 chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     PContact contact = roster_get_contact(chatwin->barejid);
     auto_char char* display_str = p_contact_create_display_string(contact, resource);
@@ -487,7 +487,7 @@ chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status)
 gchar*
 chatwin_get_string(ProfChatWin* chatwin)
 {
-    assert(chatwin != NULL);
+    PROF_ASSERT(chatwin != NULL);
 
     GString* res = g_string_new("Chat ");
 

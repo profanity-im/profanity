@@ -40,7 +40,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include <assert.h>
 #include <wchar.h>
 
 #include <glib.h>
@@ -56,6 +55,7 @@
 #include "log.h"
 #include "config/theme.h"
 #include "config/preferences.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/screen.h"
@@ -314,7 +314,7 @@ win_get_title(ProfWin* window)
     case WIN_CHAT:
     {
         const ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         PContact contact = NULL;
         if (roster_exists()) {
             contact = roster_get_contact(chatwin->barejid);
@@ -331,13 +331,13 @@ win_get_title(ProfWin* window)
     case WIN_MUC:
     {
         const ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return mucwin_generate_title(mucwin->roomjid, PREF_TITLEBAR_MUC_TITLE);
     }
     case WIN_CONFIG:
     {
         const ProfConfWin* confwin = (ProfConfWin*)window;
-        assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+        PROF_ASSERT(confwin->memcheck == PROFCONFWIN_MEMCHECK);
         auto_gchar gchar* mucwin_title = mucwin_generate_title(confwin->roomjid, PREF_TITLEBAR_MUC_TITLE);
         if (confwin->form->modified) {
             return g_strconcat(mucwin_title, " config *", NULL);
@@ -347,7 +347,7 @@ win_get_title(ProfWin* window)
     case WIN_PRIVATE:
     {
         const ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
-        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+        PROF_ASSERT(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
         auto_jid Jid* jid = jid_create(privatewin->fulljid);
         auto_gchar gchar* mucwin_title = mucwin_generate_title(jid->barejid, PREF_TITLEBAR_MUC_TITLE);
         return g_strconcat(mucwin_title, "/", jid->resourcepart, NULL);
@@ -359,13 +359,13 @@ win_get_title(ProfWin* window)
     case WIN_PLUGIN:
     {
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
-        assert(pluginwin->memcheck == PROFPLUGINWIN_MEMCHECK);
+        PROF_ASSERT(pluginwin->memcheck == PROFPLUGINWIN_MEMCHECK);
         return g_strdup(pluginwin->tag);
     }
     case WIN_VCARD:
     {
         ProfVcardWin* vcardwin = (ProfVcardWin*)window;
-        assert(vcardwin->memcheck == PROFVCARDWIN_MEMCHECK);
+        PROF_ASSERT(vcardwin->memcheck == PROFVCARDWIN_MEMCHECK);
 
         GString* title = g_string_new("vCard ");
         auto_char char* jid = connection_get_barejid();
@@ -379,13 +379,14 @@ win_get_title(ProfWin* window)
         return g_string_free(title, FALSE);
     }
     }
-    assert(FALSE);
+    PROF_ASSERT(FALSE);
+    return NULL;
 }
 
 char*
 win_get_tab_identifier(ProfWin* window)
 {
-    assert(window != NULL);
+    PROF_ASSERT(window != NULL);
 
     switch (window->type) {
     case WIN_CONSOLE:
@@ -426,7 +427,8 @@ win_get_tab_identifier(ProfWin* window)
         return strdup("vcard");
     }
     }
-    assert(FALSE);
+    PROF_ASSERT(FALSE);
+    return NULL;
 }
 
 char*
@@ -437,14 +439,14 @@ win_get_last_sent_message(ProfWin* window)
     case WIN_CHAT:
     {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         last_message = chatwin->last_message;
         break;
     }
     case WIN_MUC:
     {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         last_message = mucwin->last_message;
         break;
     }
@@ -462,7 +464,7 @@ win_get_last_sent_message(ProfWin* window)
 gchar*
 win_to_string(ProfWin* window)
 {
-    assert(window != NULL);
+    PROF_ASSERT(window != NULL);
 
     switch (window->type) {
     case WIN_CONSOLE:
@@ -508,7 +510,8 @@ win_to_string(ProfWin* window)
         return vcardwin_get_string(vcardwin);
     }
     }
-    assert(FALSE);
+    PROF_ASSERT(FALSE);
+    return NULL;
 }
 
 void
@@ -789,7 +792,7 @@ win_resize(ProfWin* window)
                 rosterwin_roster();
             } else if (window->type == WIN_MUC) {
                 ProfMucWin* mucwin = (ProfMucWin*)window;
-                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+                PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 occupantswin_occupants(mucwin->roomjid);
             }
         } else {
@@ -1172,7 +1175,7 @@ win_show_vcard(ProfWin* window, vCard* vcard)
     }
     index = 0;
     for (pointer = g_queue_peek_head_link(vcard->elements); pointer != NULL; pointer = pointer->next, index++) {
-        assert(pointer->data != NULL);
+        PROF_ASSERT(pointer->data != NULL);
         vcard_element_t* element = (vcard_element_t*)pointer->data;
 
         switch (element->type) {
@@ -1195,7 +1198,7 @@ win_show_vcard(ProfWin* window, vCard* vcard)
             auto_gchar gchar* date_format = prefs_get_string(PREF_TIME_VCARD);
             auto_gchar gchar* date = g_date_time_format(element->birthday, date_format);
 
-            assert(date != NULL);
+            PROF_ASSERT(date != NULL);
             win_println(window, THEME_DEFAULT, "!", "[%d] Birthday: %s", index, date);
             break;
         }
@@ -1324,7 +1327,7 @@ win_show_status_string(ProfWin* window, const char* const from,
         auto_gchar gchar* date_fmt = NULL;
         auto_gchar gchar* time_pref = prefs_get_string(PREF_TIME_LASTACTIVITY);
         date_fmt = g_date_time_format(last_activity, time_pref);
-        assert(date_fmt != NULL);
+        PROF_ASSERT(date_fmt != NULL);
 
         win_append(window, presence_colour, ", last activity: %s", date_fmt);
     }
@@ -1410,7 +1413,7 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
         _win_printf(window, "-", 0, message->timestamp, flags, THEME_TEXT_THEM, display_name_from, message->from_jid->barejid, message->id, "%s", message->plain);
         break;
     default:
-        assert(FALSE);
+        PROF_ASSERT(FALSE);
         break;
     }
 }
@@ -1709,7 +1712,7 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
     } else {
         date_fmt = g_date_time_format(time, time_pref);
     }
-    assert(date_fmt != NULL);
+    PROF_ASSERT(date_fmt != NULL);
 
     if (strlen(date_fmt) != 0) {
         indent = 3 + strlen(date_fmt);
@@ -1992,7 +1995,7 @@ win_notify_remind(ProfWin* window)
     case WIN_CHAT:
     {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
         if (prefs_get_boolean(PREF_NOTIFY_CHAT) && chatwin->unread > 0) {
             return TRUE;
@@ -2003,14 +2006,14 @@ win_notify_remind(ProfWin* window)
     case WIN_MUC:
     {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
         return prefs_do_room_notify_mention(mucwin->roomjid, mucwin->unread, mucwin->unread_mentions, mucwin->unread_triggers);
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
-        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+        PROF_ASSERT(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
 
         if (prefs_get_boolean(PREF_NOTIFY_CHAT) && privatewin->unread > 0) {
             return TRUE;
@@ -2028,15 +2031,15 @@ win_unread(ProfWin* window)
 {
     if (window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         return chatwin->unread;
     } else if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return mucwin->unread;
     } else if (window->type == WIN_PRIVATE) {
         ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
-        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+        PROF_ASSERT(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
         return privatewin->unread;
     } else {
         return 0;
@@ -2048,11 +2051,11 @@ win_has_attention(ProfWin* window)
 {
     if (window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         return chatwin->has_attention;
     } else if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return mucwin->has_attention;
     }
     return FALSE;
@@ -2063,12 +2066,12 @@ win_toggle_attention(ProfWin* window)
 {
     if (window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         chatwin->has_attention = !chatwin->has_attention;
         return chatwin->has_attention;
     } else if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+        PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         mucwin->has_attention = !mucwin->has_attention;
         return mucwin->has_attention;
     }
@@ -2111,7 +2114,7 @@ win_sub_newline_lazy(WINDOW* win)
 void
 win_command_list_error(ProfWin* window, const char* const error)
 {
-    assert(window != NULL);
+    PROF_ASSERT(window != NULL);
 
     win_println(window, THEME_ERROR, "!", "Error retrieving command list: %s", error);
 }
@@ -2119,7 +2122,7 @@ win_command_list_error(ProfWin* window, const char* const error)
 void
 win_command_exec_error(ProfWin* window, const char* const command, const char* const error, ...)
 {
-    assert(window != NULL);
+    PROF_ASSERT(window != NULL);
     va_list arg;
     va_start(arg, error);
     auto_gchar gchar* msg = g_strdup_vprintf(error, arg);
@@ -2132,7 +2135,7 @@ win_command_exec_error(ProfWin* window, const char* const command, const char* c
 void
 win_handle_command_list(ProfWin* window, GSList* cmds)
 {
-    assert(window != NULL);
+    PROF_ASSERT(window != NULL);
 
     if (cmds) {
         win_println(window, THEME_DEFAULT, "!", "Ad hoc commands:");
@@ -2152,14 +2155,14 @@ win_handle_command_list(ProfWin* window, GSList* cmds)
 void
 win_handle_command_exec_status(ProfWin* window, const char* const command, const char* const value)
 {
-    assert(window != NULL);
+    PROF_ASSERT(window != NULL);
     win_println(window, THEME_DEFAULT, "!", "%s %s", command, value);
 }
 
 void
 win_handle_command_exec_result_note(ProfWin* window, const char* const type, const char* const value)
 {
-    assert(window != NULL);
+    PROF_ASSERT(window != NULL);
     win_println(window, THEME_DEFAULT, "!", value);
 }
 

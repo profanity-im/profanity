@@ -74,7 +74,8 @@ core_sources = \
 	src/plugins/themes.c src/plugins/themes.h \
 	src/plugins/settings.c src/plugins/settings.h \
 	src/plugins/disco.c src/plugins/disco.h \
-	src/ui/tray.h src/ui/tray.c
+	src/ui/tray.h src/ui/tray.c \
+	src/trace.h
 
 unittest_sources = \
 	src/xmpp/contact.c src/xmpp/contact.h src/common.c \

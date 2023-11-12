@@ -38,7 +38,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include <glib.h>
 #include <glib/gstdio.h>
@@ -54,6 +53,7 @@
 #include "xmpp/session.h"
 #include "xmpp/stanza.h"
 #include "xmpp/iq.h"
+#include "trace.h"
 #include "ui/ui.h"
 
 typedef struct prof_conn_t
@@ -99,7 +99,7 @@ static void*
 _xmalloc(size_t size, void* userdata)
 {
     void* ret = malloc(size);
-    assert(ret != NULL);
+    PROF_ASSERT(ret != NULL);
     return ret;
 }
 
@@ -113,7 +113,7 @@ static void*
 _xrealloc(void* p, size_t size, void* userdata)
 {
     void* ret = realloc(p, size);
-    assert(ret != NULL);
+    PROF_ASSERT(ret != NULL);
     return ret;
 }
 
@@ -258,8 +258,8 @@ jabber_conn_status_t
 connection_connect(const char* const jid, const char* const passwd, const char* const altdomain, int port,
                    const char* const tls_policy, const char* const auth_policy)
 {
-    assert(jid != NULL);
-    assert(passwd != NULL);
+    PROF_ASSERT(jid != NULL);
+    PROF_ASSERT(passwd != NULL);
     log_info("Connecting as %s", jid);
 
     _conn_apply_settings(jid, passwd, tls_policy, auth_policy);
@@ -809,7 +809,7 @@ char*
 connection_create_stanza_id(void)
 {
     auto_char char* rndid = get_random_string(CON_RAND_ID_LEN);
-    assert(rndid != NULL);
+    PROF_ASSERT(rndid != NULL);
 
     auto_gchar gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA1,
                                                        (guchar*)prof_identifier, strlen(prof_identifier),

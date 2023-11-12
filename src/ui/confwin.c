@@ -35,9 +35,9 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdlib.h>
 
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/win_types.h"
@@ -81,7 +81,7 @@ confwin_show_form(ProfConfWin* confwin)
 void
 confwin_show_form_field(ProfConfWin* confwin, DataForm* form, char* tag)
 {
-    assert(confwin != NULL);
+    PROF_ASSERT(confwin != NULL);
 
     FormField* field = form_get_field_by_tag(form, tag);
     ProfWin* window = (ProfWin*)confwin;
@@ -92,7 +92,7 @@ confwin_show_form_field(ProfConfWin* confwin, DataForm* form, char* tag)
 void
 confwin_handle_configuration(ProfConfWin* confwin, DataForm* form)
 {
-    assert(confwin != NULL);
+    PROF_ASSERT(confwin != NULL);
 
     ProfWin* window = (ProfWin*)confwin;
     ui_focus_win(window);
@@ -111,7 +111,7 @@ confwin_handle_configuration(ProfConfWin* confwin, DataForm* form)
 void
 confwin_field_help(ProfConfWin* confwin, char* tag)
 {
-    assert(confwin != NULL);
+    PROF_ASSERT(confwin != NULL);
 
     ProfWin* window = (ProfWin*)confwin;
     FormField* field = form_get_field_by_tag(confwin->form, tag);
@@ -194,7 +194,7 @@ confwin_field_help(ProfConfWin* confwin, char* tag)
 void
 confwin_form_help(ProfConfWin* confwin)
 {
-    assert(confwin != NULL);
+    PROF_ASSERT(confwin != NULL);
 
     if (confwin->form->instructions) {
         ProfWin* window = (ProfWin*)confwin;
@@ -332,7 +332,7 @@ _confwin_form_field(ProfWin* window, char* tag, FormField* field)
 gchar*
 confwin_get_string(ProfConfWin* confwin)
 {
-    assert(confwin != NULL);
+    PROF_ASSERT(confwin != NULL);
 
     return win_get_title((ProfWin*)confwin);
 }

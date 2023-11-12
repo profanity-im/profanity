@@ -37,7 +37,6 @@
 
 #include <dlfcn.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <string.h>
 
 #include <glib.h>
@@ -51,6 +50,7 @@
 #include "plugins/plugins.h"
 #include "plugins/c_plugins.h"
 #include "plugins/c_api.h"
+#include "trace.h"
 #include "ui/ui.h"
 
 void
@@ -126,7 +126,7 @@ c_init_hook(ProfPlugin* plugin, const char* const version, const char* const sta
     void (*func)(const char* const __version, const char* const __status, const char* const __account_name,
                  const char* const __fulljid);
 
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_init"))) {
         log_warning("warning: %s does not have init function", plugin->name);
@@ -154,7 +154,7 @@ c_on_start_hook(ProfPlugin* plugin)
 {
     void* f = NULL;
     void (*func)(void);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_start")))
         return;
@@ -168,7 +168,7 @@ c_on_shutdown_hook(ProfPlugin* plugin)
 {
     void* f = NULL;
     void (*func)(void);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_shutdown")))
         return;
@@ -182,7 +182,7 @@ c_on_unload_hook(ProfPlugin* plugin)
 {
     void* f = NULL;
     void (*func)(void);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_unload")))
         return;
@@ -196,7 +196,7 @@ c_on_connect_hook(ProfPlugin* plugin, const char* const account_name, const char
 {
     void* f = NULL;
     void (*func)(const char* const __account_name, const char* const __fulljid);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_connect")))
         return;
@@ -210,7 +210,7 @@ c_on_disconnect_hook(ProfPlugin* plugin, const char* const account_name, const c
 {
     void* f = NULL;
     void (*func)(const char* const __account_name, const char* const __fulljid);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_disconnect")))
         return;
@@ -224,7 +224,7 @@ c_pre_chat_message_display_hook(ProfPlugin* plugin, const char* const barejid, c
 {
     void* f = NULL;
     char* (*func)(const char* const __barejid, const char* const __resource, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_chat_message_display")))
         return NULL;
@@ -238,7 +238,7 @@ c_post_chat_message_display_hook(ProfPlugin* plugin, const char* const barejid, 
 {
     void* f = NULL;
     void (*func)(const char* const __barejid, const char* const __resource, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_chat_message_display")))
         return;
@@ -252,7 +252,7 @@ c_pre_chat_message_send_hook(ProfPlugin* plugin, const char* const barejid, cons
 {
     void* f = NULL;
     char* (*func)(const char* const __barejid, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_chat_message_send")))
         return NULL;
@@ -266,7 +266,7 @@ c_post_chat_message_send_hook(ProfPlugin* plugin, const char* const barejid, con
 {
     void* f = NULL;
     void (*func)(const char* const __barejid, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_chat_message_send")))
         return;
@@ -280,7 +280,7 @@ c_pre_room_message_display_hook(ProfPlugin* plugin, const char* const barejid, c
 {
     void* f = NULL;
     char* (*func)(const char* const __barejid, const char* const __nick, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_room_message_display")))
         return NULL;
@@ -295,7 +295,7 @@ c_post_room_message_display_hook(ProfPlugin* plugin, const char* const barejid, 
 {
     void* f = NULL;
     void (*func)(const char* const __barejid, const char* const __nick, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_room_message_display")))
         return;
@@ -309,7 +309,7 @@ c_pre_room_message_send_hook(ProfPlugin* plugin, const char* const barejid, cons
 {
     void* f = NULL;
     char* (*func)(const char* const __barejid, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_room_message_send")))
         return NULL;
@@ -323,7 +323,7 @@ c_post_room_message_send_hook(ProfPlugin* plugin, const char* const barejid, con
 {
     void* f = NULL;
     void (*func)(const char* const __barejid, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_room_message_send")))
         return;
@@ -339,7 +339,7 @@ c_on_room_history_message_hook(ProfPlugin* plugin, const char* const barejid, co
     void* f = NULL;
     void (*func)(const char* const __barejid, const char* const __nick, const char* const __message,
                  const char* const __timestamp);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_room_history_message")))
         return;
@@ -353,7 +353,7 @@ c_pre_priv_message_display_hook(ProfPlugin* plugin, const char* const barejid, c
 {
     void* f = NULL;
     char* (*func)(const char* const __barejid, const char* const __nick, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_priv_message_display")))
         return NULL;
@@ -368,7 +368,7 @@ c_post_priv_message_display_hook(ProfPlugin* plugin, const char* const barejid, 
 {
     void* f = NULL;
     void (*func)(const char* const __barejid, const char* const __nick, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_priv_message_display")))
         return;
@@ -382,7 +382,7 @@ c_pre_priv_message_send_hook(ProfPlugin* plugin, const char* const barejid, cons
 {
     void* f = NULL;
     char* (*func)(const char* const __barejid, const char* const __nick, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_pre_priv_message_send")))
         return NULL;
@@ -396,7 +396,7 @@ c_post_priv_message_send_hook(ProfPlugin* plugin, const char* const barejid, con
 {
     void* f = NULL;
     void (*func)(const char* const __barejid, const char* const __nick, const char* __message);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_post_priv_message_send")))
         return;
@@ -410,7 +410,7 @@ c_on_message_stanza_send_hook(ProfPlugin* plugin, const char* const text)
 {
     void* f = NULL;
     char* (*func)(const char* const __text);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_message_stanza_send")))
         return NULL;
@@ -424,7 +424,7 @@ c_on_message_stanza_receive_hook(ProfPlugin* plugin, const char* const text)
 {
     void* f = NULL;
     int (*func)(const char* const __text);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_message_stanza_receive")))
         return TRUE;
@@ -438,7 +438,7 @@ c_on_presence_stanza_send_hook(ProfPlugin* plugin, const char* const text)
 {
     void* f = NULL;
     char* (*func)(const char* const __text);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_presence_stanza_send")))
         return NULL;
@@ -452,7 +452,7 @@ c_on_presence_stanza_receive_hook(ProfPlugin* plugin, const char* const text)
 {
     void* f = NULL;
     int (*func)(const char* const __text);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_presence_stanza_receive")))
         return TRUE;
@@ -466,7 +466,7 @@ c_on_iq_stanza_send_hook(ProfPlugin* plugin, const char* const text)
 {
     void* f = NULL;
     char* (*func)(const char* const __text);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_iq_stanza_send")))
         return NULL;
@@ -480,7 +480,7 @@ c_on_iq_stanza_receive_hook(ProfPlugin* plugin, const char* const text)
 {
     void* f = NULL;
     int (*func)(const char* const __text);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_iq_stanza_receive")))
         return TRUE;
@@ -495,7 +495,7 @@ c_on_contact_offline_hook(ProfPlugin* plugin, const char* const barejid, const c
 {
     void* f = NULL;
     void (*func)(const char* const __barejid, const char* const __resource, const char* const __status);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_contact_offline")))
         return;
@@ -511,7 +511,7 @@ c_on_contact_presence_hook(ProfPlugin* plugin, const char* const barejid, const 
     void* f = NULL;
     void (*func)(const char* const __barejid, const char* const __resource, const char* const __presence,
                  const char* const __status, const int __priority);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_contact_presence")))
         return;
@@ -525,7 +525,7 @@ c_on_chat_win_focus_hook(ProfPlugin* plugin, const char* const barejid)
 {
     void* f = NULL;
     void (*func)(const char* const __barejid);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_chat_win_focus")))
         return;
@@ -539,7 +539,7 @@ c_on_room_win_focus_hook(ProfPlugin* plugin, const char* const barejid)
 {
     void* f = NULL;
     void (*func)(const char* const __barejid);
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     if (NULL == (f = dlsym(plugin->module, "prof_on_room_win_focus")))
         return;
@@ -551,7 +551,7 @@ c_on_room_win_focus_hook(ProfPlugin* plugin, const char* const barejid)
 void
 c_plugin_destroy(ProfPlugin* plugin)
 {
-    assert(plugin && plugin->module);
+    PROF_ASSERT(plugin && plugin->module);
 
     callbacks_remove(plugin->name);
 

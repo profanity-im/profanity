@@ -43,13 +43,13 @@
 #include <curl/curl.h>
 #include <gio/gio.h>
 #include <pthread.h>
-#include <assert.h>
 
 #include "profanity.h"
 #include "event/client_events.h"
 #include "tools/http_upload.h"
 #include "config/cafile.h"
 #include "config/preferences.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "common.h"
@@ -344,21 +344,21 @@ http_file_put(void* userdata)
                 case WIN_CHAT:
                 {
                     ProfChatWin* chatwin = (ProfChatWin*)(upload->window);
-                    assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+                    PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
                     cl_ev_send_msg(chatwin, url, url);
                     break;
                 }
                 case WIN_PRIVATE:
                 {
                     ProfPrivateWin* privatewin = (ProfPrivateWin*)(upload->window);
-                    assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
+                    PROF_ASSERT(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
                     cl_ev_send_priv_msg(privatewin, url, url);
                     break;
                 }
                 case WIN_MUC:
                 {
                     ProfMucWin* mucwin = (ProfMucWin*)(upload->window);
-                    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+                    PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                     cl_ev_send_muc_msg(mucwin, url, url);
                     break;
                 }

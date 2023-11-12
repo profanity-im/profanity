@@ -37,12 +37,11 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <assert.h>
 #include <glib.h>
-#include <assert.h>
 
 #include "config/preferences.h"
 #include "tools/autocomplete.h"
+#include "trace.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/resource.h"
 #include "xmpp/contact.h"
@@ -89,7 +88,7 @@ static void _add_name_and_barejid(const char* const name, const char* const bare
 void
 roster_create(void)
 {
-    assert(roster == NULL);
+    PROF_ASSERT(roster == NULL);
 
     roster = malloc(sizeof(ProfRoster));
     roster->contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free, (GDestroyNotify)p_contact_free);
@@ -118,7 +117,7 @@ _pendingPresence_free(ProfPendingPresence* presence)
 void
 roster_destroy(void)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     g_hash_table_destroy(roster->contacts);
     autocomplete_free(roster->name_ac);
@@ -139,10 +138,10 @@ roster_destroy(void)
 gboolean
 roster_update_presence(const char* const barejid, Resource* resource, GDateTime* last_activity)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
-    assert(barejid != NULL);
-    assert(resource != NULL);
+    PROF_ASSERT(barejid != NULL);
+    PROF_ASSERT(resource != NULL);
 
     if (!roster_received) {
         ProfPendingPresence* presence = malloc(sizeof(ProfPendingPresence));
@@ -175,7 +174,7 @@ roster_update_presence(const char* const barejid, Resource* resource, GDateTime*
 PContact
 roster_get_contact(const char* const barejid)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     auto_gchar gchar* barejidlower = g_utf8_strdown(barejid, -1);
     PContact contact = g_hash_table_lookup(roster->contacts, barejidlower);
@@ -186,7 +185,7 @@ roster_get_contact(const char* const barejid)
 char*
 roster_get_display_name(const char* const barejid)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     GString* result = g_string_new("");
 
@@ -207,7 +206,7 @@ roster_get_display_name(const char* const barejid)
 gchar*
 roster_get_msg_display_name(const char* const barejid, const char* const resource)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     gchar* incoming_str = prefs_get_string(PREF_INCOMING_STAMP);
 
@@ -239,7 +238,7 @@ roster_get_msg_display_name(const char* const barejid, const char* const resourc
 gboolean
 roster_contact_offline(const char* const barejid, const char* const resource, const char* const status)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     PContact contact = roster_get_contact(barejid);
 
@@ -262,7 +261,7 @@ roster_contact_offline(const char* const barejid, const char* const resource, co
 void
 roster_reset_search_attempts(void)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     autocomplete_reset(roster->name_ac);
     autocomplete_reset(roster->barejid_ac);
@@ -273,8 +272,8 @@ roster_reset_search_attempts(void)
 void
 roster_change_name(PContact contact, const char* const new_name)
 {
-    assert(roster != NULL);
-    assert(contact != NULL);
+    PROF_ASSERT(roster != NULL);
+    PROF_ASSERT(contact != NULL);
 
     auto_char char* current_name = NULL;
     const char* barejid = p_contact_barejid(contact);
@@ -290,7 +289,7 @@ roster_change_name(PContact contact, const char* const new_name)
 void
 roster_remove(const char* const name, const char* const barejid)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     autocomplete_remove(roster->barejid_ac, barejid);
     autocomplete_remove(roster->name_ac, name);
@@ -336,10 +335,10 @@ void
 roster_update(const char* const barejid, const char* const name, GSList* groups, const char* const subscription,
               gboolean pending_out)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     PContact contact = roster_get_contact(barejid);
-    assert(contact != NULL);
+    PROF_ASSERT(contact != NULL);
 
     p_contact_set_subscription(contact, subscription);
     p_contact_set_pending_out(contact, pending_out);
@@ -395,7 +394,7 @@ gboolean
 roster_add(const char* const barejid, const char* const name, GSList* groups, const char* const subscription,
            gboolean pending_out)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     PContact contact = roster_get_contact(barejid);
     if (contact) {
@@ -438,7 +437,7 @@ roster_add(const char* const barejid, const char* const name, GSList* groups, co
 char*
 roster_barejid_from_name(const char* const name)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     if (name) {
         return g_hash_table_lookup(roster->name_to_barejid, name);
@@ -450,7 +449,7 @@ roster_barejid_from_name(const char* const name)
 GSList*
 roster_get_contacts_by_presence(const char* const presence)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     GSList* result = NULL;
     GHashTableIter iter;
@@ -472,7 +471,7 @@ roster_get_contacts_by_presence(const char* const presence)
 GSList*
 roster_get_contacts(roster_ord_t order)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     GSList* result = NULL;
     GHashTableIter iter;
@@ -498,7 +497,7 @@ roster_get_contacts(roster_ord_t order)
 GSList*
 roster_get_contacts_online(void)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     GSList* result = NULL;
     GHashTableIter iter;
@@ -518,7 +517,7 @@ roster_get_contacts_online(void)
 gboolean
 roster_has_pending_subscriptions(void)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     GHashTableIter iter;
     gpointer key;
@@ -538,7 +537,7 @@ roster_has_pending_subscriptions(void)
 char*
 roster_contact_autocomplete(const char* const search_str, gboolean previous, void* context)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     return autocomplete_complete(roster->name_ac, search_str, TRUE, previous);
 }
@@ -546,7 +545,7 @@ roster_contact_autocomplete(const char* const search_str, gboolean previous, voi
 char*
 roster_fulljid_autocomplete(const char* const search_str, gboolean previous, void* context)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     return autocomplete_complete(roster->fulljid_ac, search_str, TRUE, previous);
 }
@@ -554,7 +553,7 @@ roster_fulljid_autocomplete(const char* const search_str, gboolean previous, voi
 GSList*
 roster_get_group(const char* const group, roster_ord_t order)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     GSList* result = NULL;
     GHashTableIter iter;
@@ -593,7 +592,7 @@ roster_get_group(const char* const group, roster_ord_t order)
 GList*
 roster_get_groups(void)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     return autocomplete_create_list(roster->groups_ac);
 }
@@ -601,7 +600,7 @@ roster_get_groups(void)
 char*
 roster_group_autocomplete(const char* const search_str, gboolean previous, void* context)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     return autocomplete_complete(roster->groups_ac, search_str, TRUE, previous);
 }
@@ -609,7 +608,7 @@ roster_group_autocomplete(const char* const search_str, gboolean previous, void*
 char*
 roster_barejid_autocomplete(const char* const search_str, gboolean previous, void* context)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     return autocomplete_complete(roster->barejid_ac, search_str, TRUE, previous);
 }
@@ -640,7 +639,7 @@ _datetimes_equal(GDateTime* dt1, GDateTime* dt2)
 static void
 _replace_name(const char* const current_name, const char* const new_name, const char* const barejid)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     // current handle exists already
     if (current_name) {
@@ -658,7 +657,7 @@ _replace_name(const char* const current_name, const char* const new_name, const 
 static void
 _add_name_and_barejid(const char* const name, const char* const barejid)
 {
-    assert(roster != NULL);
+    PROF_ASSERT(roster != NULL);
 
     if (name) {
         autocomplete_add(roster->name_ac, name);

@@ -37,7 +37,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <errno.h>
 
 #include <glib.h>
@@ -45,6 +44,7 @@
 #include "common.h"
 #include "log.h"
 #include "config/account.h"
+#include "trace.h"
 #include "xmpp/jid.h"
 #include "xmpp/resource.h"
 
@@ -157,8 +157,8 @@ account_create_connect_jid(ProfAccount* account)
 gboolean
 account_eval_password(ProfAccount* account)
 {
-    assert(account != NULL);
-    assert(account->eval_password != NULL);
+    PROF_ASSERT(account != NULL);
+    PROF_ASSERT(account->eval_password != NULL);
 
     errno = 0;
 

@@ -36,11 +36,11 @@
 #include "config.h"
 
 #include <stdlib.h>
-#include <assert.h>
 
 #include <glib.h>
 
 #include "config/preferences.h"
+#include "trace.h"
 #include "ui/window_list.h"
 #include "ui/win_types.h"
 #include "xmpp/xmpp.h"
@@ -183,7 +183,7 @@ chat_state_activity(void)
 
     if ((status == JABBER_CONNECTED) && (current->type == WIN_CHAT)) {
         ProfChatWin* chatwin = (ProfChatWin*)current;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+        PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         chat_state_handle_typing(chatwin->barejid, chatwin->state);
     }
 }

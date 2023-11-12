@@ -34,13 +34,13 @@
  */
 #include "config.h"
 
-#include <assert.h>
 #include <signal/signal_protocol.h>
 #include <signal/signal_protocol_types.h>
 
 #include "log.h"
 #include "omemo/omemo.h"
 #include "omemo/crypto.h"
+#include "trace.h"
 
 #define AES256_GCM_TAG_LENGTH  16
 #define AES256_GCM_BUFFER_SIZE 1024
@@ -219,7 +219,7 @@ omemo_encrypt_func(signal_buffer** output, int cipher, const uint8_t* key, size_
         padding = 16 - (plaintext_len % 16);
         break;
     default:
-        assert(FALSE);
+        PROF_ASSERT(FALSE);
     }
 
     padded_plaintext = malloc(plaintext_len + padding);
@@ -276,7 +276,7 @@ omemo_decrypt_func(signal_buffer** output, int cipher, const uint8_t* key, size_
         gcry_cipher_setiv(hd, iv, iv_len);
         break;
     default:
-        assert(FALSE);
+        PROF_ASSERT(FALSE);
     }
 
     plaintext_len = ciphertext_len;
@@ -288,7 +288,7 @@ omemo_decrypt_func(signal_buffer** output, int cipher, const uint8_t* key, size_
         padding = plaintext[plaintext_len - 1];
         break;
     default:
-        assert(FALSE);
+        PROF_ASSERT(FALSE);
     }
 
     for (int i = 0; i < padding; i++) {

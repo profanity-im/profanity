@@ -37,7 +37,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
 
@@ -61,6 +60,7 @@
 #include "command/cmd_ac.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/titlebar.h"
 #include "ui/statusbar.h"
@@ -493,13 +493,13 @@ ui_close_connected_win(int index)
     if (window) {
         if (window->type == WIN_MUC) {
             ProfMucWin* mucwin = (ProfMucWin*)window;
-            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             presence_leave_chat_room(mucwin->roomjid);
             muc_leave(mucwin->roomjid);
             ui_leave_room(mucwin->roomjid);
         } else if (window->type == WIN_CHAT) {
             ProfChatWin* chatwin = (ProfChatWin*)window;
-            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
+            PROF_ASSERT(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 #ifdef HAVE_LIBOTR
             if (chatwin->is_otr) {
                 otr_end_session(chatwin->barejid);
@@ -576,7 +576,7 @@ ui_redraw_all_room_rosters(void)
         ProfWin* window = wins_get_by_num(num);
         if (window->type == WIN_MUC && win_has_active_subwin(window)) {
             ProfMucWin* mucwin = (ProfMucWin*)window;
-            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             occupantswin_occupants(mucwin->roomjid);
         }
         curr = g_list_next(curr);
@@ -597,7 +597,7 @@ ui_hide_all_room_rosters(void)
         ProfWin* window = wins_get_by_num(num);
         if (window->type == WIN_MUC && win_has_active_subwin(window)) {
             ProfMucWin* mucwin = (ProfMucWin*)window;
-            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             mucwin_hide_occupants(mucwin);
         }
         curr = g_list_next(curr);
@@ -618,7 +618,7 @@ ui_show_all_room_rosters(void)
         ProfWin* window = wins_get_by_num(num);
         if (window->type == WIN_MUC && !win_has_active_subwin(window)) {
             ProfMucWin* mucwin = (ProfMucWin*)window;
-            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
+            PROF_ASSERT(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             mucwin_show_occupants(mucwin);
         }
         curr = g_list_next(curr);
@@ -635,7 +635,7 @@ ui_win_has_unsaved_form(int num)
 
     if (window->type == WIN_CONFIG) {
         ProfConfWin* confwin = (ProfConfWin*)window;
-        assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+        PROF_ASSERT(confwin->memcheck == PROFCONFWIN_MEMCHECK);
         return confwin->form->modified;
     } else {
         return FALSE;
@@ -645,7 +645,7 @@ ui_win_has_unsaved_form(int num)
 void
 ui_focus_win(ProfWin* window)
 {
-    assert(window != NULL);
+    PROF_ASSERT(window != NULL);
 
     if (wins_is_current(window)) {
         return;

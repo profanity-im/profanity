@@ -36,9 +36,8 @@
 
 #include "config.h"
 
-#include <assert.h>
-
 #include "config/preferences.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/window_list.h"
@@ -123,7 +122,7 @@ occupantswin_occupants(const char* const roomjid)
         GList* occupants = muc_roster(roomjid);
         if (occupants) {
             ProfLayoutSplit* layout = (ProfLayoutSplit*)mucwin->window.layout;
-            assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
+            PROF_ASSERT(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
 
             werase(layout->subwin);
 

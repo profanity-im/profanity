@@ -46,6 +46,7 @@
 #include <glib/gstdio.h>
 #include <gpgme.h>
 
+#include "trace.h"
 #include "log.h"
 #include "common.h"
 #include "pgp/ox.h"
@@ -249,7 +250,7 @@ p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient
 gboolean
 ox_is_private_key_available(const char* const barejid)
 {
-    g_assert(barejid);
+    PROF_ASSERT(barejid);
     gboolean result = FALSE;
 
     gpgme_key_t key = _ox_key_lookup(barejid, TRUE);
@@ -266,7 +267,7 @@ ox_is_private_key_available(const char* const barejid)
 gboolean
 ox_is_public_key_available(const char* const barejid)
 {
-    g_assert(barejid);
+    PROF_ASSERT(barejid);
     gboolean result = FALSE;
     gpgme_key_t key = _ox_key_lookup(barejid, FALSE);
     if (key) {
@@ -281,7 +282,7 @@ ox_is_public_key_available(const char* const barejid)
 static gpgme_key_t
 _ox_key_lookup(const char* const barejid, gboolean secret_only)
 {
-    g_assert(barejid);
+    PROF_ASSERT(barejid);
     log_debug("OX: Looking for %s key: %s", secret_only == TRUE ? "Private" : "Public", barejid);
     gpgme_key_t key = NULL;
     gpgme_error_t error;

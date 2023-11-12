@@ -35,7 +35,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -47,6 +46,7 @@
 #include "log.h"
 #include "event/server_events.h"
 #include "plugins/plugins.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "xmpp/connection.h"
 #include "xmpp/iq.h"
@@ -91,7 +91,7 @@ bookmark_request(void)
 gboolean
 bookmark_add(const char* jid, const char* nick, const char* password, const char* autojoin_str, const char* name)
 {
-    assert(jid != NULL);
+    PROF_ASSERT(jid != NULL);
 
     auto_jid Jid* jidp = jid_create(jid);
     if (jidp->domainpart) {
@@ -138,7 +138,7 @@ bookmark_add(const char* jid, const char* nick, const char* password, const char
 gboolean
 bookmark_update(const char* jid, const char* nick, const char* password, const char* autojoin_str, const char* name)
 {
-    assert(jid != NULL);
+    PROF_ASSERT(jid != NULL);
 
     Bookmark* bookmark = g_hash_table_lookup(bookmarks, jid);
     if (!bookmark) {
@@ -172,7 +172,7 @@ bookmark_update(const char* jid, const char* nick, const char* password, const c
 gboolean
 bookmark_join(const char* jid)
 {
-    assert(jid != NULL);
+    PROF_ASSERT(jid != NULL);
 
     Bookmark* bookmark = g_hash_table_lookup(bookmarks, jid);
     if (!bookmark) {
@@ -203,7 +203,7 @@ bookmark_join(const char* jid)
 gboolean
 bookmark_remove(const char* jid)
 {
-    assert(jid != NULL);
+    PROF_ASSERT(jid != NULL);
 
     Bookmark* bookmark = g_hash_table_lookup(bookmarks, jid);
     if (!bookmark) {

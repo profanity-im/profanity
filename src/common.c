@@ -38,7 +38,6 @@
 
 #include <errno.h>
 #include <sys/select.h>
-#include <assert.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -63,6 +62,7 @@
 #include "log.h"
 #include "common.h"
 #include "config/files.h"
+#include "trace.h"
 
 #ifdef HAVE_GIT_VERSION
 #include "gitversion.h"

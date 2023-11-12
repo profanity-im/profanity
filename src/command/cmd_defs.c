@@ -36,7 +36,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
@@ -62,6 +61,7 @@
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/xmpp.h"

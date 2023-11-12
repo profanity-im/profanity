@@ -33,7 +33,6 @@
  *
  */
 
-#include <assert.h>
 #include <errno.h>
 #include <glib.h>
 #include <strophe.h>
@@ -42,6 +41,7 @@
 #include "xmpp/vcard.h"
 #include "config/files.h"
 #include "config/preferences.h"
+#include "trace.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/connection.h"
@@ -717,7 +717,7 @@ vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
     GList* pointer = g_queue_peek_head_link(vcard->elements);
 
     for (; pointer != NULL; pointer = pointer->next) {
-        assert(pointer->data != NULL);
+        PROF_ASSERT(pointer->data != NULL);
         vcard_element_t* element = (vcard_element_t*)pointer->data;
 
         switch (element->type) {

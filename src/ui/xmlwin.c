@@ -35,16 +35,16 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <string.h>
 
+#include "trace.h"
 #include "ui/win_types.h"
 #include "ui/window_list.h"
 
 void
 xmlwin_show(ProfXMLWin* xmlwin, const char* const msg)
 {
-    assert(xmlwin != NULL);
+    PROF_ASSERT(xmlwin != NULL);
 
     ProfWin* window = (ProfWin*)xmlwin;
     if (g_str_has_prefix(msg, "SENT:")) {
@@ -61,7 +61,7 @@ xmlwin_show(ProfXMLWin* xmlwin, const char* const msg)
 gchar*
 xmlwin_get_string(ProfXMLWin* xmlwin)
 {
-    assert(xmlwin != NULL);
+    PROF_ASSERT(xmlwin != NULL);
 
     return g_strdup("XML console");
 }

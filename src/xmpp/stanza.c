@@ -40,7 +40,6 @@
 #include <stdio.h>
 #include <libgen.h>
 #include <inttypes.h>
-#include <assert.h>
 
 #include <glib.h>
 
@@ -48,6 +47,7 @@
 
 #include "common.h"
 #include "log.h"
+#include "trace.h"
 #include "xmpp/session.h"
 #include "xmpp/stanza.h"
 #include "xmpp/capabilities.h"
@@ -2499,12 +2499,12 @@ static gchar*
 _stanza_create_sha1_hash(char* str)
 {
     unsigned char* digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
-    assert(digest != NULL);
+    PROF_ASSERT(digest != NULL);
 
     xmpp_sha1_digest((unsigned char*)str, strlen(str), digest);
 
     gchar* b64 = g_base64_encode(digest, XMPP_SHA1_DIGEST_SIZE);
-    assert(b64 != NULL);
+    PROF_ASSERT(b64 != NULL);
     free(digest);
 
     return b64;

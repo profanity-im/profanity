@@ -36,7 +36,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -51,6 +50,7 @@
 #include "common.h"
 #include "config/files.h"
 #include "config/preferences.h"
+#include "trace.h"
 
 #define PROF "prof"
 
@@ -234,8 +234,8 @@ int
 log_level_from_string(char* log_level, log_level_t* level)
 {
     int ret = 0;
-    assert(log_level != NULL);
-    assert(level != NULL);
+    PROF_ASSERT(log_level != NULL);
+    PROF_ASSERT(level != NULL);
     if (strcmp(log_level, "DEBUG") == 0) {
         *level = PROF_LEVEL_DEBUG;
     } else if (strcmp(log_level, "INFO") == 0) {

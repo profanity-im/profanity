@@ -35,7 +35,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -46,6 +45,7 @@
 #include "plugins/plugins.h"
 #include "event/server_events.h"
 #include "event/client_events.h"
+#include "trace.h"
 #include "xmpp/bookmark.h"
 #include "xmpp/blocking.h"
 #include "xmpp/connection.h"
@@ -111,7 +111,7 @@ session_init(void)
 jabber_conn_status_t
 session_connect_with_account(const ProfAccount* const account)
 {
-    assert(account != NULL);
+    PROF_ASSERT(account != NULL);
 
     log_info("Connecting using account: %s", account->name);
 
@@ -144,8 +144,8 @@ jabber_conn_status_t
 session_connect_with_details(const char* const jid, const char* const passwd, const char* const altdomain,
                              const int port, const char* const tls_policy, const char* const auth_policy)
 {
-    assert(jid != NULL);
-    assert(passwd != NULL);
+    PROF_ASSERT(jid != NULL);
+    PROF_ASSERT(passwd != NULL);
 
     _session_free_internals();
 
@@ -390,7 +390,7 @@ session_lost_connection(void)
     /* this callback also clears all cached data */
     sv_ev_lost_connection();
     if (prefs_get_reconnect() != 0) {
-        assert(reconnect_timer == NULL);
+        PROF_ASSERT(reconnect_timer == NULL);
         reconnect_timer = g_timer_new();
     } else {
         _session_free_internals();

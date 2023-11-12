@@ -36,7 +36,6 @@
 
 #include "config.h"
 
-#include <assert.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
@@ -52,6 +51,7 @@
 #include "common.h"
 #include "config/files.h"
 #include "config/preferences.h"
+#include "trace.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/muc.h"
 
