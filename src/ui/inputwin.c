@@ -237,15 +237,16 @@ inp_win_resize(void)
     }
 
     wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));
-    ;
+
     _inp_win_update_virtual();
 }
 
 void
 inp_nonblocking(gboolean reset)
 {
+    gint inpblock = prefs_get_inpblock();
     if (!prefs_get_boolean(PREF_INPBLOCK_DYNAMIC)) {
-        inp_timeout = prefs_get_inpblock();
+        inp_timeout = inpblock;
         return;
     }
 
@@ -254,14 +255,14 @@ inp_nonblocking(gboolean reset)
         no_input_count = 0;
     }
 
-    if (inp_timeout < prefs_get_inpblock()) {
+    if (inp_timeout < inpblock) {
         no_input_count++;
 
         if (no_input_count % 10 == 0) {
             inp_timeout += no_input_count;
 
-            if (inp_timeout > prefs_get_inpblock()) {
-                inp_timeout = prefs_get_inpblock();
+            if (inp_timeout > inpblock) {
+                inp_timeout = inpblock;
             }
         }
     }
