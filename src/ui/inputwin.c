@@ -136,6 +136,7 @@ static int _inp_rl_subwin_pageup_handler(int count, int key);
 static int _inp_rl_subwin_pagedown_handler(int count, int key);
 static int _inp_rl_startup_hook(void);
 static int _inp_rl_down_arrow_handler(int count, int key);
+static int _inp_rl_scroll_handler(int count, int key);
 static int _inp_rl_send_to_editor(int count, int key);
 static int _inp_rl_print_newline_symbol(int count, int key);
 
@@ -554,6 +555,8 @@ _inp_rl_startup_hook(void)
     rl_bind_key('\t', _inp_rl_tab_handler);
     rl_bind_keyseq("\\e[Z", _inp_rl_shift_tab_handler);
 
+    rl_bind_keyseq("\\e[1;3A", _inp_rl_scroll_handler);     // alt + scroll/arrow up
+    rl_bind_keyseq("\\e[1;3B", _inp_rl_scroll_handler);     // alt + scroll/arrow down
     rl_bind_keyseq("\\e[1;5B", _inp_rl_down_arrow_handler); // ctrl+arrow down
     rl_bind_keyseq("\\eOb", _inp_rl_down_arrow_handler);
 
@@ -906,7 +909,7 @@ static int
 _inp_rl_win_pageup_handler(int count, int key)
 {
     ProfWin* current = wins_get_current();
-    win_page_up(current);
+    win_page_up(current, 0);
     return 0;
 }
 
@@ -914,7 +917,7 @@ static int
 _inp_rl_win_pagedown_handler(int count, int key)
 {
     ProfWin* current = wins_get_current();
-    win_page_down(current);
+    win_page_down(current, 0);
     return 0;
 }
 
@@ -931,6 +934,21 @@ _inp_rl_subwin_pagedown_handler(int count, int key)
 {
     ProfWin* current = wins_get_current();
     win_sub_page_down(current);
+    return 0;
+}
+
+static int
+_inp_rl_scroll_handler(int count, int key)
+{
+    ProfWin* window = wins_get_current();
+
+    if (key == 'B') {
+        // mouse wheel down
+        win_page_down(window, 4);
+    } else if (key == 'A') {
+        // mouse wheel up
+        win_page_up(window, 4);
+    }
     return 0;
 }
 

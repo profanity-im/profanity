@@ -623,17 +623,20 @@ win_free(ProfWin* window)
 }
 
 void
-win_page_up(ProfWin* window)
+win_page_up(ProfWin* window, int scroll_size)
 {
     _reached_bottom_of_database = FALSE;
     int rows = getmaxy(stdscr);
-    int y = getcury(window->layout->win);
+    int total_rows = getcury(window->layout->win);
     int page_space = rows - 4;
     int* page_start = &(window->layout->y_pos);
+    int page_start_initial = *page_start;
+    if (scroll_size == 0)
+        scroll_size = page_space;
 
-    *page_start -= page_space;
+    *page_start -= scroll_size;
 
-    if (*page_start == -page_space && window->type == WIN_CHAT) {
+    if (*page_start == -scroll_size && window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
         ProfBuffEntry* first_entry = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0) : NULL;
 
@@ -655,27 +658,33 @@ win_page_up(ProfWin* window)
         *page_start = 0;
 
     window->layout->paged = 1;
-    win_update_virtual(window);
+    // update only if position has changed
+    if (page_start_initial != *page_start) {
+        win_update_virtual(window);
+    }
 
     // switch off page if last line and space line visible
-    if ((y) - *page_start == page_space) {
+    if ((total_rows) - *page_start == page_space) {
         window->layout->paged = 0;
     }
 }
 
 void
-win_page_down(ProfWin* window)
+win_page_down(ProfWin* window, int scroll_size)
 {
     _reached_top_of_database = FALSE;
     int rows = getmaxy(stdscr);
-    int y = getcury(window->layout->win);
-    int page_space = rows - 4;
     int* page_start = &(window->layout->y_pos);
+    int total_rows = getcury(window->layout->win);
+    int page_space = rows - 4;
+    int page_start_initial = *page_start;
+    if (scroll_size == 0)
+        scroll_size = page_space;
 
-    *page_start += page_space;
+    *page_start += scroll_size;
 
     // Scrolled down after reaching the bottom of the page
-    if ((*page_start == y || (*page_start == page_space && *page_start >= y)) && window->type == WIN_CHAT) {
+    if ((*page_start == total_rows || (*page_start == page_space && *page_start >= total_rows)) && window->type == WIN_CHAT) {
         int bf_size = buffer_size(window->layout->buffer);
         if (bf_size > 0) {
             auto_gchar gchar* start = g_date_time_format_iso8601(buffer_get_entry(window->layout->buffer, bf_size - 1)->time);
@@ -691,18 +700,21 @@ win_page_down(ProfWin* window)
     }
 
     // only got half a screen, show full screen
-    if ((y - (*page_start)) < page_space)
-        *page_start = y - page_space;
+    if ((total_rows - (*page_start)) < page_space)
+        *page_start = total_rows - page_space;
 
     // went past end, show full screen
-    else if (*page_start >= y)
-        *page_start = y - page_space - 1;
+    else if (*page_start >= total_rows)
+        *page_start = total_rows - page_space - 1;
 
     window->layout->paged = 1;
-    win_update_virtual(window);
+    // update only if position has changed
+    if (page_start_initial != *page_start) {
+        win_update_virtual(window);
+    }
 
     // switch off page if last line and space line visible
-    if ((y) - *page_start == page_space) {
+    if ((total_rows) - *page_start == page_space) {
         window->layout->paged = 0;
     }
 }
