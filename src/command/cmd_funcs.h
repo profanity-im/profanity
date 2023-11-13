@@ -255,6 +255,7 @@ gboolean cmd_executable_vcard_photo(ProfWin* window, const char* const command, 
 gboolean cmd_mam(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_editor(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_correct_editor(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_redraw(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_silence(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_register(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_mood(ProfWin* window, const char* const command, gchar** args);

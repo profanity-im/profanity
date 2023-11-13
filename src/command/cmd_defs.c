@@ -2729,6 +2729,18 @@ static const struct cmd_t command_defs[] = {
               "/privacy logging off",
               "/privacy os off")
     },
+
+    { CMD_PREAMBLE("/redraw",
+                   parse_args, 0, 0, NULL)
+      CMD_MAINFUNC(cmd_redraw)
+      CMD_TAGS(
+              CMD_TAG_UI)
+      CMD_SYN(
+              "/redraw")
+      CMD_DESC(
+              "Redraw user interface. Can be used when some other program interrupted profanity or wrote to the same terminal and the interface looks \"broken\"." )
+    },
+
     // NEXT-COMMAND (search helper)
 };
 
