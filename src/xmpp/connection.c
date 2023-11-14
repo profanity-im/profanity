@@ -997,22 +997,25 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         log_debug("Connection handler: XMPP_CONN_DISCONNECT");
 
         // lost connection for unknown reason
-        if (conn.conn_status == JABBER_CONNECTED) {
+        if (conn.conn_status == JABBER_CONNECTED || conn.conn_status == JABBER_DISCONNECTING) {
             if (prefs_get_boolean(PREF_STROPHE_SM_ENABLED)) {
                 int send_queue_len = xmpp_conn_send_queue_len(conn.xmpp_conn);
-                log_debug("Connection handler: Lost connection for unknown reason");
+                log_debug("Connection handler: Lost connection for unknown reason, %d messages in send queue", send_queue_len);
                 conn.sm_state = xmpp_conn_get_sm_state(conn.xmpp_conn);
                 if (send_queue_len > 0 && prefs_get_boolean(PREF_STROPHE_SM_RESEND)) {
                     conn.queued_messages = calloc(send_queue_len + 1, sizeof(*conn.queued_messages));
                     for (int n = 0; n < send_queue_len && conn.queued_messages[n]; ++n) {
                         conn.queued_messages[n] = xmpp_conn_send_queue_drop_element(conn.xmpp_conn, XMPP_QUEUE_OLDEST);
                     }
+                } else if (send_queue_len > 0) {
+                    log_debug("Connection handler: dropping those messages since SM RESEND is disabled");
                 }
             }
-            session_lost_connection();
+            if (conn.conn_status == JABBER_CONNECTED)
+                session_lost_connection();
 
             // login attempt failed
-        } else if (conn.conn_status != JABBER_DISCONNECTING) {
+        } else {
             gchar* host;
             int port;
             if (stream_error && stream_error->stanza && _get_other_host(stream_error->stanza, &host, &port)) {
