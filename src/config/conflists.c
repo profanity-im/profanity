@@ -65,14 +65,16 @@ conf_string_list_add(GKeyFile* keyfile, const char* const group, const char* con
     }
 
     // Add item to the existing list
-    gchar** new_list = g_new(gchar*, length + 2);
+    const gchar** new_list = g_new(const gchar*, length + 2);
     for (gsize i = 0; i < length; ++i) {
-        new_list[i] = g_strdup(list[i]);
+        new_list[i] = list[i];
     }
-    new_list[length] = g_strdup(item);
+    new_list[length] = item;
     new_list[length + 1] = NULL;
 
-    g_key_file_set_string_list(keyfile, group, key, (const gchar* const*)new_list, length + 1);
+    g_key_file_set_string_list(keyfile, group, key, new_list, length + 1);
+
+    g_free(new_list);
 
     return TRUE;
 }
