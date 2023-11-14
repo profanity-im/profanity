@@ -652,7 +652,7 @@ format_call_external_argv(const char* template, const char* url, const char* fil
     return argv;
 }
 
-gchar*
+static gchar*
 _unique_filename(const char* filename)
 {
     gchar* unique = g_strdup(filename);
@@ -676,7 +676,7 @@ _unique_filename(const char* filename)
     return unique;
 }
 
-bool
+static bool
 _has_directory_suffix(const char* path)
 {
     return (g_str_has_suffix(path, ".")

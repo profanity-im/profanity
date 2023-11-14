@@ -836,9 +836,7 @@ connection_create_stanza_id(void)
                                                        (guchar*)prof_identifier, strlen(prof_identifier),
                                                        rndid, strlen(rndid));
 
-    char* ret = g_strdup_printf("%s%s", rndid, hmac);
-
-    return ret;
+    return g_strdup_printf("%s%s", rndid, hmac);
 }
 
 char*

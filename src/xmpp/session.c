@@ -209,9 +209,7 @@ session_disconnect(void)
     if (connection_get_status() == JABBER_CONNECTED) {
         log_info("Closing connection");
 
-        char* account_name = session_get_account_name();
-        const char* fulljid = connection_get_fulljid();
-        plugins_on_disconnect(account_name, fulljid);
+        plugins_on_disconnect(session_get_account_name(), connection_get_fulljid());
 
         accounts_set_last_activity(session_get_account_name());
 

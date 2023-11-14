@@ -458,8 +458,7 @@ cons_show_login_success(ProfAccount* account, gboolean secured)
 {
     ProfWin* console = wins_get_console();
 
-    const char* fulljid = connection_get_fulljid();
-    win_print(console, THEME_DEFAULT, "-", "%s logged in successfully, ", fulljid);
+    win_print(console, THEME_DEFAULT, "-", "%s logged in successfully, ", connection_get_fulljid());
 
     resource_presence_t presence = accounts_get_login_presence(account->name);
     const char* presence_str = string_from_resource_presence(presence);

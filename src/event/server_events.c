@@ -190,8 +190,7 @@ sv_ev_roster_received(void)
     connection_set_presence_msg(status_message);
     cl_ev_presence_send(conn_presence, diff_secs);
 
-    const char* fulljid = connection_get_fulljid();
-    plugins_on_connect(account_name, fulljid);
+    plugins_on_connect(account_name, connection_get_fulljid());
 }
 
 void
