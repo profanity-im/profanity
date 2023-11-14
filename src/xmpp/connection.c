@@ -561,7 +561,7 @@ connection_disconnect(void)
         }
     }
 
-    free(prof_identifier);
+    g_free(prof_identifier);
     prof_identifier = NULL;
 }
 
@@ -1126,7 +1126,7 @@ static void
 _compute_identifier(const char* barejid)
 {
     // in case of reconnect (lost connection)
-    free(prof_identifier);
+    g_free(prof_identifier);
 
     prof_identifier = g_compute_hmac_for_string(G_CHECKSUM_SHA256,
                                                 (guchar*)profanity_instance_id, strlen(profanity_instance_id),

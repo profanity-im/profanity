@@ -1261,7 +1261,7 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
     ProfMessage* message = message_init();
     message->type = PROF_MSG_TYPE_MUCPM;
 
-    const gchar* from = xmpp_stanza_get_from(stanza);
+    const char* from = xmpp_stanza_get_from(stanza);
     if (!from) {
         goto out;
     }
@@ -1360,7 +1360,7 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
         return;
     }
 
-    const gchar* from = xmpp_stanza_get_from(stanza);
+    const char* from = xmpp_stanza_get_from(stanza);
     if (!from) {
         return;
     }
