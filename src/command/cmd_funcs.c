@@ -9731,6 +9731,14 @@ cmd_correct_editor(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_redraw(ProfWin* window, const char* const command, gchar** args)
+{
+    ui_resize();
+
+    return TRUE;
+}
+
+gboolean
 cmd_silence(ProfWin* window, const char* const command, gchar** args)
 {
     _cmd_set_boolean_preference(args[0], "Block all messages from JIDs that are not in the roster", PREF_SILENCE_NON_ROSTER);
