@@ -190,7 +190,6 @@ _conn_apply_settings(const char* const jid, const char* const passwd, const char
 
     _compute_identifier(jidp->barejid);
 
-    xmpp_ctx_set_verbosity(conn.xmpp_ctx, 0);
     xmpp_conn_set_jid(conn.xmpp_conn, jid);
     if (passwd)
         xmpp_conn_set_pass(conn.xmpp_conn, passwd);
