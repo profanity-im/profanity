@@ -339,7 +339,7 @@ omemo_publish_crypto_materials(void)
 static void
 _acquire_sender_devices_list(void)
 {
-    auto_char char* barejid = connection_get_barejid();
+    const char* barejid = connection_get_barejid();
 
     g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_own_device_list);
     omemo_devicelist_request(barejid);
@@ -375,8 +375,7 @@ omemo_start_session(const char* const barejid)
             log_debug("[OMEMO] missing device list for %s", barejid);
             // Own devices are handled by _handle_own_device_list
             // We won't add _handle_device_list_start_session for ourself
-            auto_char char* mybarejid = connection_get_barejid();
-            if (g_strcmp0(mybarejid, barejid) != 0) {
+            if (g_strcmp0(connection_get_barejid(), barejid) != 0) {
                 g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
             }
             omemo_devicelist_request(barejid);
@@ -680,7 +679,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 {
     char* id = NULL;
     int res;
-    auto_jid Jid* jid = jid_create(connection_get_fulljid());
+    const Jid* jid = connection_get_jid();
     GList* keys = NULL;
 
     unsigned char* key;
@@ -754,15 +753,12 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             // Don't encrypt for this device (according to
             // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
             // Yourself as recipients in case of MUC
-            char* mybarejid = connection_get_barejid();
-            if (!g_strcmp0(mybarejid, recipients_iter->data)) {
+            if (!g_strcmp0(connection_get_barejid(), recipients_iter->data)) {
                 if (GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
-                    free(mybarejid);
                     log_debug("[OMEMO][SEND] Skipping %d (my device) ", GPOINTER_TO_INT(device_ids_iter->data));
                     continue;
                 }
             }
-            free(mybarejid);
 
             log_debug("[OMEMO][SEND] recipients with device id %d for %s", GPOINTER_TO_INT(device_ids_iter->data), recipients_iter->data);
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
@@ -1806,14 +1802,10 @@ out:
 char*
 omemo_qrcode_str()
 {
-    char* mybarejid = connection_get_barejid();
-    char* fingerprint = omemo_own_fingerprint(FALSE);
+    auto_char char* fingerprint = omemo_own_fingerprint(FALSE);
     uint32_t sid = omemo_device_id();
 
-    char* qrstr = g_strdup_printf("xmpp:%s?omemo-sid-%d=%s", mybarejid, sid, fingerprint);
-
-    free(mybarejid);
-    free(fingerprint);
+    char* qrstr = g_strdup_printf("xmpp:%s?omemo-sid-%d=%s", connection_get_barejid(), sid, fingerprint);
 
     return qrstr;
 }

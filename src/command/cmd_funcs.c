@@ -3448,12 +3448,11 @@ cmd_caps(ProfWin* window, const char* const command, gchar** args)
 static void
 _send_software_version_iq_to_fulljid(char* request)
 {
-    auto_char char* mybarejid = connection_get_barejid();
     auto_jid Jid* jid = jid_create(request);
 
     if (jid == NULL || jid->fulljid == NULL) {
         cons_show("You must provide a full jid to the /software command.");
-    } else if (g_strcmp0(jid->barejid, mybarejid) == 0) {
+    } else if (g_strcmp0(jid->barejid, connection_get_barejid()) == 0) {
         cons_show("Cannot request software version for yourself.");
     } else {
         iq_send_software_version(jid->fulljid);
@@ -4842,8 +4841,7 @@ cmd_disco(ProfWin* window, const char* const command, gchar** args)
     if (args[1]) {
         jid = g_string_append(jid, args[1]);
     } else {
-        auto_jid Jid* jidp = jid_create(connection_get_fulljid());
-        jid = g_string_append(jid, jidp->domainpart);
+        jid = g_string_append(jid, connection_get_jid()->domainpart);
     }
 
     if (g_strcmp0(args[0], "info") == 0) {
@@ -5039,8 +5037,7 @@ cmd_lastactivity(ProfWin* window, const char* const command, gchar** args)
 
     if ((g_strcmp0(args[0], "get") == 0)) {
         if (args[1] == NULL) {
-            auto_jid Jid* jidp = jid_create(connection_get_fulljid());
-            GString* jid = g_string_new(jidp->domainpart);
+            GString* jid = g_string_new(connection_get_jid()->domainpart);
 
             iq_last_activity_request(jid->str);
 

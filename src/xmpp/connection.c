@@ -68,6 +68,7 @@ typedef struct prof_conn_t
     char* presence_message;
     int priority;
     char* domain;
+    Jid* jid;
     GHashTable* available_resources;
     GHashTable* features_by_jid;
     GHashTable* requested_features;
@@ -135,6 +136,7 @@ connection_init(void)
     conn.conn_last_event = XMPP_CONN_DISCONNECT;
     conn.presence_message = NULL;
     conn.domain = NULL;
+    conn.jid = NULL;
     conn.features_by_jid = NULL;
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
     conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
@@ -562,6 +564,9 @@ connection_disconnect(void)
 
     g_free(prof_identifier);
     prof_identifier = NULL;
+
+    jid_destroy(conn.jid);
+    conn.jid = NULL;
 }
 
 void
@@ -724,17 +729,34 @@ connection_get_fulljid(void)
     }
 }
 
-char*
+const Jid*
+connection_get_jid(void)
+{
+    static const char* fulljid;
+    const char* cur_fulljid = connection_get_fulljid();
+    if (!conn.jid || cur_fulljid != fulljid) {
+        fulljid = cur_fulljid;
+        if (conn.jid)
+            jid_destroy(conn.jid);
+        conn.jid = jid_create(fulljid);
+        if (!conn.jid) {
+            log_error("Could not create connection-wide JID object from \"%s\"", STR_MAYBE_NULL(fulljid));
+            /* In case we failed to create the jid or we're not yet
+             * connected (or whatever else could fail) return the
+             * pointer to a zero-initialized static object, so
+             * de-referencing that pointer won't fail.
+             */
+            static const Jid jid = { 0 };
+            return &jid;
+        }
+    }
+    return conn.jid;
+}
+
+const char*
 connection_get_barejid(void)
 {
-    const char* jid = connection_get_fulljid();
-    if (!jid)
-        return NULL;
-
-    auto_jid Jid* jidp = jid_create(jid);
-    char* result = strdup(jidp->barejid);
-
-    return result;
+    return connection_get_jid()->barejid;
 }
 
 char*
@@ -953,9 +975,8 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         log_debug("Connection handler: XMPP_CONN_CONNECT");
         conn.conn_status = JABBER_CONNECTED;
 
-        Jid* my_jid = jid_create(xmpp_conn_get_jid(conn.xmpp_conn));
-        conn.domain = strdup(my_jid->domainpart);
-        jid_destroy(my_jid);
+        connection_get_jid();
+        conn.domain = strdup(conn.jid->domainpart);
 
         connection_clear_data();
         conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
@@ -979,10 +1000,10 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         log_debug("Connection handler: XMPP_CONN_RAW_CONNECT");
         conn.conn_status = JABBER_RAW_CONNECTED;
 
-        Jid* my_raw_jid = jid_create(xmpp_conn_get_jid(conn.xmpp_conn));
-        log_debug("jid: %s", xmpp_conn_get_jid(conn.xmpp_conn));
-        conn.domain = strdup(my_raw_jid->domainpart);
-        jid_destroy(my_raw_jid);
+        connection_get_jid();
+        conn.jid = jid_create(xmpp_conn_get_jid(conn.xmpp_conn));
+        log_debug("jid: %s", conn.jid->str);
+        conn.domain = strdup(conn.jid->domainpart);
 
         connection_clear_data();
         conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);

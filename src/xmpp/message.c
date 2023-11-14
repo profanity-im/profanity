@@ -101,9 +101,7 @@ static GHashTable* pubsub_event_handlers;
 gchar*
 get_display_name(const ProfMessage* const message, int* flags)
 {
-    auto_char char* barejid = connection_get_barejid();
-
-    if (g_strcmp0(barejid, message->from_jid->barejid) == 0) {
+    if (g_strcmp0(connection_get_barejid(), message->from_jid->barejid) == 0) {
         return g_strdup("me");
     } else {
         if (flags)
@@ -261,11 +259,10 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
         if (carbons) {
 
             // carbon must come from ourselves
-            auto_char char* mybarejid = connection_get_barejid();
             const char* const stanza_from = xmpp_stanza_get_from(stanza);
 
             if (stanza_from) {
-                if (g_strcmp0(mybarejid, stanza_from) != 0) {
+                if (g_strcmp0(connection_get_barejid(), stanza_from) != 0) {
                     log_warning("Invalid carbon received, from: %s", stanza_from);
                     msg_stanza = NULL;
                 } else {
@@ -1464,10 +1461,8 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
 
     if (message->plain || message->body || message->encrypted) {
         if (is_carbon) {
-            auto_char char* mybarejid = connection_get_barejid();
-
             // if we are the recipient, treat as standard incoming message
-            if (g_strcmp0(mybarejid, message->to_jid->barejid) == 0) {
+            if (g_strcmp0(connection_get_barejid(), message->to_jid->barejid) == 0) {
                 sv_ev_incoming_carbon(message);
                 // else treat as a sent message
             } else {

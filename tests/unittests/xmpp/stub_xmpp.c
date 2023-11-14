@@ -58,6 +58,11 @@ void
 connection_disconnect(void)
 {
 }
+const Jid*
+connection_get_jid(void)
+{
+    return mock_ptr_type(Jid*);
+}
 const char*
 connection_get_fulljid(void)
 {

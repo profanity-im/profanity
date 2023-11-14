@@ -630,8 +630,7 @@ sv_ev_incoming_message(ProfMessage* message)
     char* looking_for_jid = message->from_jid->barejid;
 
     if (message->is_mam) {
-        auto_char char* mybarejid = connection_get_barejid();
-        if (g_strcmp0(mybarejid, message->from_jid->barejid) == 0) {
+        if (g_strcmp0(connection_get_barejid(), message->from_jid->barejid) == 0) {
             if (message->to_jid) {
                 looking_for_jid = message->to_jid->barejid;
             }

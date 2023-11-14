@@ -87,9 +87,8 @@ omemo_devicelist_configure(void)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
     auto_char char* id = connection_create_stanza_id();
-    auto_jid Jid* jid = jid_create(connection_get_fulljid());
 
-    xmpp_stanza_t* iq = stanza_create_pubsub_configure_request(ctx, id, jid->barejid, STANZA_NS_OMEMO_DEVICELIST);
+    xmpp_stanza_t* iq = stanza_create_pubsub_configure_request(ctx, id, connection_get_jid()->barejid, STANZA_NS_OMEMO_DEVICELIST);
 
     iq_id_handler_add(id, _omemo_devicelist_configure_submit, NULL, NULL);
 
@@ -196,9 +195,7 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
     }
 
     if (!from_attr) {
-        Jid* jid = jid_create(connection_get_fulljid());
-        from = strdup(jid->barejid);
-        jid_destroy(jid);
+        from = strdup(connection_get_jid()->barejid);
     } else {
         from = strdup(from_attr);
     }
@@ -608,9 +605,8 @@ _omemo_devicelist_configure_submit(xmpp_stanza_t* const stanza, void* const user
     form_set_value(form, "pubsub#access_model", "open");
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_jid Jid* jid = jid_create(connection_get_fulljid());
     auto_char char* id = connection_create_stanza_id();
-    xmpp_stanza_t* iq = stanza_create_pubsub_configure_submit(ctx, id, jid->barejid, STANZA_NS_OMEMO_DEVICELIST, form);
+    xmpp_stanza_t* iq = stanza_create_pubsub_configure_submit(ctx, id, connection_get_jid()->barejid, STANZA_NS_OMEMO_DEVICELIST, form);
 
     iq_id_handler_add(id, _omemo_devicelist_configure_result, NULL, NULL);
 
@@ -633,10 +629,7 @@ _omemo_devicelist_configure_result(xmpp_stanza_t* const stanza, void* const user
     log_debug("[OMEMO] node configured");
 
     // Try to publish
-    char* barejid = connection_get_barejid();
-    omemo_devicelist_request(barejid);
-
-    free(barejid);
+    omemo_devicelist_request(connection_get_barejid());
 
     return 0;
 }
@@ -660,12 +653,11 @@ _omemo_bundle_publish_result(xmpp_stanza_t* const stanza, void* const userdata)
 
     log_debug("[OMEMO] cannot publish bundle with open access model, trying to configure node");
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_jid Jid* jid = jid_create(connection_get_fulljid());
     auto_char char* id = connection_create_stanza_id();
     auto_gchar gchar* node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
     log_debug("[OMEMO] node: %s", node);
 
-    xmpp_stanza_t* iq = stanza_create_pubsub_configure_request(ctx, id, jid->barejid, node);
+    xmpp_stanza_t* iq = stanza_create_pubsub_configure_request(ctx, id, connection_get_jid()->barejid, node);
 
     iq_id_handler_add(id, _omemo_bundle_publish_configure, NULL, userdata);
 
@@ -700,10 +692,9 @@ _omemo_bundle_publish_configure(xmpp_stanza_t* const stanza, void* const userdat
     form_set_value(form, "pubsub#access_model", "open");
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_jid Jid* jid = jid_create(connection_get_fulljid());
     auto_char char* id = connection_create_stanza_id();
     auto_gchar gchar* node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
-    xmpp_stanza_t* iq = stanza_create_pubsub_configure_submit(ctx, id, jid->barejid, node, form);
+    xmpp_stanza_t* iq = stanza_create_pubsub_configure_submit(ctx, id, connection_get_jid()->barejid, node, form);
 
     iq_id_handler_add(id, _omemo_bundle_publish_configure_result, NULL, userdata);
 
