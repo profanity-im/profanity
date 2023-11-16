@@ -51,8 +51,6 @@ typedef enum {
     PROF_OMEMOPOLICY_ALWAYS
 } prof_omemopolicy_t;
 
-typedef struct omemo_context_t omemo_context;
-
 typedef struct omemo_key
 {
     unsigned char* data;
