@@ -259,6 +259,7 @@ iq_handlers_init(void)
         int millis = prefs_get_autoping() * 1000;
         xmpp_timed_handler_add(conn, _autoping_timed_send, millis, ctx);
     }
+    received_disco_items = FALSE;
 
     iq_rooms_cache_clear();
     iq_handlers_clear();
@@ -316,7 +317,7 @@ iq_handlers_remove_win(ProfWin* window)
 }
 
 void
-iq_handlers_clear()
+iq_handlers_clear(void)
 {
     if (id_handlers) {
         g_hash_table_remove_all(id_handlers);
