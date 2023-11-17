@@ -932,21 +932,23 @@ void
 plugins_shutdown(void)
 {
     GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList *curr = values, *next;
 
     while (curr) {
+        next = g_list_next(curr);
 #ifdef HAVE_PYTHON
-        if (((ProfPlugin*)curr->data)->lang == LANG_PYTHON) {
+        if (curr && ((ProfPlugin*)curr->data)->lang == LANG_PYTHON) {
             python_plugin_destroy(curr->data);
+            curr = NULL;
         }
 #endif
 #ifdef HAVE_C
-        if (((ProfPlugin*)curr->data)->lang == LANG_C) {
+        if (curr && ((ProfPlugin*)curr->data)->lang == LANG_C) {
             c_plugin_destroy(curr->data);
+            curr = NULL;
         }
 #endif
-
-        curr = g_list_next(curr);
+        curr = next;
     }
     g_list_free(values);
 #ifdef HAVE_PYTHON

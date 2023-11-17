@@ -256,9 +256,9 @@ _shutdown(void)
     accounts_close();
     tlscerts_close();
     log_stderr_close();
-    log_close();
     plugins_shutdown();
     cmd_uninit();
     ui_close();
     prefs_close();
+    log_close();
 }
