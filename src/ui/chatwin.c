@@ -322,7 +322,9 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
 
     char* old_plain = message->plain;
 
-    message->plain = plugins_pre_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
+    auto_char char* new_plain = plugins_pre_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, strdup(message->plain));
+    message->plain = new_plain;
+
     gboolean show_message = true;
 
     ProfWin* window = (ProfWin*)chatwin;
@@ -411,7 +413,6 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
 
     plugins_post_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
 
-    free(message->plain);
     message->plain = old_plain;
 }
 
@@ -426,15 +427,18 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
 
     auto_char char* enc_char = get_enc_char(enc_mode, chatwin->outgoing_char);
 
+    auto_jid Jid* myjid = jid_create(connection_get_fulljid());
+    auto_char char* display_message = plugins_pre_chat_message_display(myjid->barejid, myjid->resourcepart, strdup(message));
+
     if (request_receipt && id) {
-        win_print_outgoing_with_receipt((ProfWin*)chatwin, enc_char, "me", message, id, replace_id);
+        win_print_outgoing_with_receipt((ProfWin*)chatwin, enc_char, "me", display_message, id, replace_id);
     } else {
-        win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, message);
+        win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, display_message);
     }
 
     // save last id and message for LMC in case if it's not LMC message
     if (id && !replace_id) {
-        _chatwin_set_last_message(chatwin, id, message);
+        _chatwin_set_last_message(chatwin, id, display_message);
     }
 }
 
@@ -575,11 +579,7 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
 
         while (curr) {
             ProfMessage* msg = curr->data;
-            char* msg_plain = msg->plain;
             msg->plain = plugins_pre_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
-            // This is dirty workaround for memory leak. We reassign msg->plain above so have to free previous object
-            // TODO: Make a better solution, for example, pass msg object to the function and it will replace msg->plain properly if needed.
-            free(msg_plain);
             win_print_history((ProfWin*)chatwin, msg);
             curr = g_slist_next(curr);
         }
@@ -605,11 +605,7 @@ chatwin_db_history(ProfChatWin* chatwin, const char* start_time, char* end_time,
 
     while (curr) {
         ProfMessage* msg = curr->data;
-        char* msg_plain = msg->plain;
         msg->plain = plugins_pre_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
-        // This is dirty workaround for memory leak. We reassign msg->plain above so have to free previous object
-        // TODO: Make a better solution, for example, pass msg object to the function and it will replace msg->plain properly if needed.
-        free(msg_plain);
         if (flip) {
             win_print_old_history((ProfWin*)chatwin, msg);
         } else {

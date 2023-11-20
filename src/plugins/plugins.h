@@ -134,7 +134,7 @@ void plugins_on_shutdown(void);
 void plugins_on_connect(const char* const account_name, const char* const fulljid);
 void plugins_on_disconnect(const char* const account_name, const char* const fulljid);
 
-char* plugins_pre_chat_message_display(const char* const barejid, const char* const resource, const char* message);
+char* plugins_pre_chat_message_display(const char* const barejid, const char* const resource, char* message);
 void plugins_post_chat_message_display(const char* const barejid, const char* const resource, const char* message);
 char* plugins_pre_chat_message_send(const char* const barejid, const char* message);
 void plugins_post_chat_message_send(const char* const barejid, const char* message);
