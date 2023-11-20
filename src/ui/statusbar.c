@@ -78,11 +78,11 @@ static GTimeZone* tz;
 static StatusBar* statusbar;
 static WINDOW* statusbar_win;
 
-void _get_range_bounds(int* start, int* end);
+void _get_range_bounds(int* start, int* end, gboolean is_static);
 static int _status_bar_draw_time(int pos);
 static int _status_bar_draw_maintext(int pos);
 static int _status_bar_draw_bracket(gboolean current, int pos, const char* ch);
-static int _status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end);
+static int _status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end, gboolean is_static);
 static int _status_bar_draw_tab(StatusBarTab* tab, int pos, int num);
 static int _status_bar_draw_tabs(int pos);
 static void _destroy_tab(StatusBarTab* tab);
@@ -300,16 +300,19 @@ status_bar_draw(void)
 static int
 _status_bar_draw_tabs(int pos)
 {
-    if (!_tabmode_is_actlist()) {
+    auto_gchar gchar* tabmode = prefs_get_string(PREF_STATUSBAR_TABMODE);
+
+    if (g_strcmp0(tabmode, "actlist") != 0) {
         int start, end;
-        _get_range_bounds(&start, &end);
+        gboolean is_static = g_strcmp0(tabmode, "dynamic") != 0;
+        _get_range_bounds(&start, &end, is_static);
 
         pos = getmaxx(stdscr) - _tabs_width(start, end);
         if (pos < 0) {
             pos = 0;
         }
 
-        pos = _status_bar_draw_extended_tabs(pos, TRUE, start, end);
+        pos = _status_bar_draw_extended_tabs(pos, TRUE, start, end, is_static);
 
         for (int i = start; i <= end; i++) {
             StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
@@ -318,7 +321,7 @@ _status_bar_draw_tabs(int pos)
             }
         }
 
-        pos = _status_bar_draw_extended_tabs(pos, FALSE, start, end);
+        pos = _status_bar_draw_extended_tabs(pos, FALSE, start, end, is_static);
     } else {
         pos++;
         guint print_act = 0;
@@ -384,7 +387,7 @@ _has_new_msgs_beyond_range_on_side(gboolean left_side, int display_tabs_start, i
 }
 
 static int
-_status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end)
+_status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end, gboolean is_static)
 {
     gint max_tabs = prefs_get_statusbartabs();
     if (max_tabs == 0) {
@@ -402,7 +405,7 @@ _status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end)
     if (!prefix && end > opened_tabs - 1) {
         return pos;
     }
-    gboolean is_current = FALSE;
+    gboolean is_current = is_static && statusbar->current_tab > max_tabs;
 
     pos = _status_bar_draw_bracket(is_current, pos, "[");
 
@@ -712,7 +715,7 @@ _display_name(StatusBarTab* tab)
 }
 
 void
-_get_range_bounds(int* start, int* end)
+_get_range_bounds(int* start, int* end, gboolean is_static)
 {
     int current_tab = statusbar->current_tab;
     gint display_range = prefs_get_statusbartabs();
@@ -722,7 +725,7 @@ _get_range_bounds(int* start, int* end)
     if (total_tabs <= display_range) {
         *start = 1;
         *end = total_tabs;
-    } else if (current_tab - side_range <= 1) {
+    } else if (current_tab - side_range <= 1 || is_static) {
         *start = 1;
         *end = display_range;
     } else if (current_tab + side_range >= total_tabs) {

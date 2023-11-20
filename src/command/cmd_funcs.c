@@ -6273,14 +6273,11 @@ cmd_statusbar(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (g_strcmp0(args[0], "tabmode") == 0) {
-        char* tabmode = NULL;
-        if ((g_strcmp0(args[1], "default") == 0) || (g_strcmp0(args[1], "actlist") == 0)) {
-            tabmode = args[1];
-        }
-        if (tabmode == NULL) {
+        if ((g_strcmp0(args[1], "default") != 0) && (g_strcmp0(args[1], "actlist") != 0) && (g_strcmp0(args[1], "dynamic") != 0)) {
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+        char* tabmode = args[1];
         prefs_set_string(PREF_STATUSBAR_TABMODE, tabmode);
         cons_show("Using \"%s\" tabmode for statusbar.", tabmode);
         ui_resize();

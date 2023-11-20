@@ -1068,6 +1068,7 @@ cmd_ac_init(void)
 
     statusbar_tabmode_ac = autocomplete_new();
     autocomplete_add(statusbar_tabmode_ac, "actlist");
+    autocomplete_add(statusbar_tabmode_ac, "dynamic");
     autocomplete_add(statusbar_tabmode_ac, "default");
 
     status_ac = autocomplete_new();

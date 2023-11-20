@@ -1289,7 +1289,7 @@ static const struct cmd_t command_defs[] = {
               "/statusbar hide name|number|read",
               "/statusbar maxtabs <value>",
               "/statusbar tablen <value>",
-              "/statusbar tabmode default|actlist",
+              "/statusbar tabmode default|dynamic|actlist",
               "/statusbar self user|barejid|fulljid|off",
               "/statusbar chat user|jid",
               "/statusbar room title bookmark|jid|localpart|name",
@@ -1300,7 +1300,7 @@ static const struct cmd_t command_defs[] = {
       CMD_ARGS(
               { "maxtabs <value>", "Set the maximum number of tabs to display, <value> must be between 0 and 10." },
               { "tablen <value>", "Set the maximum number of characters to show as the tab name, 0 sets to unlimited." },
-              { "tabmode default|actlist", "Set the mode how the 'active tabs' are shown." },
+              { "tabmode default|dynamic|actlist", "Set the mode tabs are shown. `dynamic` is a mode that displays tabs conveniently around current tab, thus providing proper pagination. `actlist` setting shows only active tabs. `default` setting always shows tabs in 1 to max_tabs range." },
               { "show|hide name", "Show or hide names in tabs." },
               { "show|hide number", "Show or hide numbers in tabs." },
               { "show|hide read", "Show or hide inactive tabs." },
