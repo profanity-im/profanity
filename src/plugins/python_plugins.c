@@ -318,6 +318,11 @@ python_pre_chat_message_display_hook(ProfPlugin* plugin, const char* const barej
 {
     disable_python_threads();
     PyObject* p_args = Py_BuildValue("sss", barejid, resource, message);
+    if (!p_args) {
+        log_warning("Unable to convert strings in `python_pre_chat_message_display_hook` to 'UTF8'. barejid: %s, resource: %s, message: %s", barejid, resource, message);
+        allow_python_threads();
+        return NULL;
+    }
     PyObject* p_function;
 
     PyObject* p_module = plugin->module;
@@ -408,6 +413,12 @@ python_pre_room_message_display_hook(ProfPlugin* plugin, const char* const barej
 {
     disable_python_threads();
     PyObject* p_args = Py_BuildValue("sss", barejid, nick, message);
+    if (!p_args) {
+        log_warning("Unable to convert strings in `python_pre_room_message_display_hook` to 'UTF8'. barejid: %s, nick: %s, message: %s", barejid, nick, message);
+        allow_python_threads();
+        return NULL;
+    }
+
     PyObject* p_function;
 
     PyObject* p_module = plugin->module;
