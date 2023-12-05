@@ -88,8 +88,8 @@ void win_update_entry_message(ProfWin* window, const char* const id, const char*
 
 gboolean win_has_active_subwin(ProfWin* window);
 
-void win_page_up(ProfWin* window);
-void win_page_down(ProfWin* window);
+void win_page_up(ProfWin* window, int scroll_size);
+void win_page_down(ProfWin* window, int scroll_size);
 void win_sub_page_down(ProfWin* window);
 void win_sub_page_up(ProfWin* window);
 

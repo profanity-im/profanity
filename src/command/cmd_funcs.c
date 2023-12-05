@@ -81,6 +81,7 @@
 #include "tools/bookmark_ignore.h"
 #include "tools/editor.h"
 #include "plugins/plugins.h"
+#include "ui/inputwin.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/avatar.h"
