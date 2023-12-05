@@ -75,9 +75,6 @@ static void _win_print_internal(ProfWin* window, const char* show_char, int pad_
                                 int flags, theme_item_t theme_item, const char* const from, const char* const message, DeliveryReceipt* receipt);
 static void _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pad_indent);
 
-static gboolean _reached_top_of_database = FALSE;
-static gboolean _reached_bottom_of_database = FALSE;
-
 int
 win_roster_cols(void)
 {
@@ -136,6 +133,7 @@ win_create_console(void)
 {
     ProfConsoleWin* new_win = malloc(sizeof(ProfConsoleWin));
     new_win->window.type = WIN_CONSOLE;
+    new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_split_layout();
 
     return &new_win->window;
@@ -146,6 +144,7 @@ win_create_chat(const char* const barejid)
 {
     ProfChatWin* new_win = malloc(sizeof(ProfChatWin));
     new_win->window.type = WIN_CHAT;
+    new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->barejid = strdup(barejid);
@@ -177,6 +176,7 @@ win_create_muc(const char* const roomjid)
     int cols = getmaxx(stdscr);
 
     new_win->window.type = WIN_MUC;
+    new_win->window.scroll_state = WIN_SCROLL_INNER;
     ProfLayoutSplit* layout = malloc(sizeof(ProfLayoutSplit));
     layout->base.type = LAYOUT_SPLIT;
 
@@ -231,6 +231,7 @@ win_create_config(const char* const roomjid, DataForm* form, ProfConfWinCallback
 {
     ProfConfWin* new_win = malloc(sizeof(ProfConfWin));
     new_win->window.type = WIN_CONFIG;
+    new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
     new_win->roomjid = strdup(roomjid);
     new_win->form = form;
@@ -248,6 +249,7 @@ win_create_private(const char* const fulljid)
 {
     ProfPrivateWin* new_win = malloc(sizeof(ProfPrivateWin));
     new_win->window.type = WIN_PRIVATE;
+    new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
     new_win->fulljid = strdup(fulljid);
     new_win->unread = 0;
@@ -264,6 +266,7 @@ win_create_xmlconsole(void)
 {
     ProfXMLWin* new_win = malloc(sizeof(ProfXMLWin));
     new_win->window.type = WIN_XML;
+    new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->memcheck = PROFXMLWIN_MEMCHECK;
@@ -276,6 +279,7 @@ win_create_plugin(const char* const plugin_name, const char* const tag)
 {
     ProfPluginWin* new_win = malloc(sizeof(ProfPluginWin));
     new_win->window.type = WIN_PLUGIN;
+    new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->tag = strdup(tag);
@@ -291,6 +295,7 @@ win_create_vcard(vCard* vcard)
 {
     ProfVcardWin* new_win = malloc(sizeof(ProfVcardWin));
     new_win->window.type = WIN_VCARD;
+    new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->vcard = vcard;
@@ -625,7 +630,6 @@ win_free(ProfWin* window)
 void
 win_page_up(ProfWin* window, int scroll_size)
 {
-    _reached_bottom_of_database = FALSE;
     int rows = getmaxy(stdscr);
     int total_rows = getcury(window->layout->win);
     int page_space = rows - 4;
@@ -633,6 +637,8 @@ win_page_up(ProfWin* window, int scroll_size)
     int page_start_initial = *page_start;
     if (scroll_size == 0)
         scroll_size = page_space;
+    win_scroll_state_t* scroll_state = &window->scroll_state;
+    *scroll_state = (*scroll_state == WIN_SCROLL_REACHED_BOTTOM) ? WIN_SCROLL_INNER : *scroll_state;
 
     *page_start -= scroll_size;
 
@@ -642,11 +648,11 @@ win_page_up(ProfWin* window, int scroll_size)
 
         // Don't do anything if still fetching mam messages
         if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, LOADING_MESSAGE) == 0)) {
-            if (!_reached_top_of_database) {
-                _reached_top_of_database = !chatwin_db_history(chatwin, NULL, NULL, TRUE);
+            if (*scroll_state != WIN_SCROLL_REACHED_TOP) {
+                *scroll_state = !chatwin_db_history(chatwin, NULL, NULL, TRUE) ? WIN_SCROLL_REACHED_TOP : WIN_SCROLL_INNER;
             }
 
-            if (_reached_top_of_database && prefs_get_boolean(PREF_MAM)) {
+            if (*scroll_state == WIN_SCROLL_REACHED_TOP && prefs_get_boolean(PREF_MAM)) {
                 win_print_loading_history(window);
                 iq_mam_request_older(chatwin);
             }
@@ -672,7 +678,6 @@ win_page_up(ProfWin* window, int scroll_size)
 void
 win_page_down(ProfWin* window, int scroll_size)
 {
-    _reached_top_of_database = FALSE;
     int rows = getmaxy(stdscr);
     int* page_start = &(window->layout->y_pos);
     int total_rows = getcury(window->layout->win);
@@ -680,6 +685,8 @@ win_page_down(ProfWin* window, int scroll_size)
     int page_start_initial = *page_start;
     if (scroll_size == 0)
         scroll_size = page_space;
+    win_scroll_state_t* scroll_state = &window->scroll_state;
+    *scroll_state = (*scroll_state == WIN_SCROLL_REACHED_TOP) ? WIN_SCROLL_INNER : *scroll_state;
 
     *page_start += scroll_size;
 
@@ -691,8 +698,8 @@ win_page_down(ProfWin* window, int scroll_size)
             GDateTime* now = g_date_time_new_now_local();
             gchar* end = g_date_time_format_iso8601(now);
             // end is free'd inside
-            if (!_reached_bottom_of_database && !chatwin_db_history((ProfChatWin*)window, start, end, FALSE)) {
-                _reached_bottom_of_database = TRUE;
+            if (*scroll_state != WIN_SCROLL_REACHED_BOTTOM && !chatwin_db_history((ProfChatWin*)window, start, end, FALSE)) {
+                *scroll_state = WIN_SCROLL_REACHED_BOTTOM;
             }
 
             g_date_time_unref(now);

@@ -146,9 +146,16 @@ typedef enum {
     WIN_VCARD
 } win_type_t;
 
+typedef enum {
+    WIN_SCROLL_INNER,
+    WIN_SCROLL_REACHED_TOP,
+    WIN_SCROLL_REACHED_BOTTOM
+} win_scroll_state_t;
+
 typedef struct prof_win_t
 {
     win_type_t type;
+    win_scroll_state_t scroll_state;
     ProfLayout* layout;
     Autocomplete urls_ac;
     Autocomplete quotes_ac;
