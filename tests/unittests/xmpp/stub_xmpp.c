@@ -75,6 +75,12 @@ connection_get_barejid(void)
     return mock_ptr_type(char*);
 }
 
+gboolean
+equals_our_barejid(const char* cmp)
+{
+    return TRUE;
+}
+
 char*
 connection_get_user(void)
 {

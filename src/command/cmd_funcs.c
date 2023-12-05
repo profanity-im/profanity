@@ -3452,7 +3452,7 @@ _send_software_version_iq_to_fulljid(char* request)
 
     if (jid == NULL || jid->fulljid == NULL) {
         cons_show("You must provide a full jid to the /software command.");
-    } else if (g_strcmp0(jid->barejid, connection_get_barejid()) == 0) {
+    } else if (equals_our_barejid(jid->barejid)) {
         cons_show("Cannot request software version for yourself.");
     } else {
         iq_send_software_version(jid->fulljid);

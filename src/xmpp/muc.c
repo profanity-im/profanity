@@ -882,7 +882,7 @@ muc_members_add(const char* const room, const char* const jid)
         if (g_hash_table_insert(chat_room->members, strdup(jid), NULL)) {
 #ifdef HAVE_OMEMO
             if (chat_room->anonymity_type == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
-                if (strcmp(jid, connection_get_barejid()) != 0) {
+                if (!equals_our_barejid(jid)) {
                     omemo_start_session(jid);
                 }
             }

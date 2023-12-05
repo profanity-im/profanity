@@ -378,7 +378,7 @@ omemo_start_session(const char* const barejid)
             log_debug("[OMEMO] missing device list for %s", barejid);
             // Own devices are handled by _handle_own_device_list
             // We won't add _handle_device_list_start_session for ourself
-            if (g_strcmp0(connection_get_barejid(), barejid) != 0) {
+            if (equals_our_barejid(barejid)) {
                 g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
             }
             omemo_devicelist_request(barejid);
@@ -756,7 +756,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             // Don't encrypt for this device (according to
             // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
             // Yourself as recipients in case of MUC
-            if (!g_strcmp0(connection_get_barejid(), recipients_iter->data)) {
+            if (equals_our_barejid(recipients_iter->data)) {
                 if (GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
                     log_debug("[OMEMO][SEND] Skipping %d (my device) ", GPOINTER_TO_INT(device_ids_iter->data));
                     continue;

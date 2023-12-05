@@ -195,6 +195,7 @@ void connection_set_presence_msg(const char* const message);
 const char* connection_get_fulljid(void);
 const Jid* connection_get_jid(void);
 const char* connection_get_barejid(void);
+gboolean equals_our_barejid(const char* cmp);
 char* connection_get_user(void);
 char* connection_create_uuid(void);
 void connection_free_uuid(char* uuid);

@@ -759,6 +759,12 @@ connection_get_barejid(void)
     return connection_get_jid()->barejid;
 }
 
+gboolean
+equals_our_barejid(const char* cmp)
+{
+    return g_strcmp0(connection_get_jid()->barejid, cmp) == 0;
+}
+
 char*
 connection_get_user(void)
 {
