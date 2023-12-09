@@ -5037,17 +5037,11 @@ cmd_lastactivity(ProfWin* window, const char* const command, gchar** args)
 
     if ((g_strcmp0(args[0], "get") == 0)) {
         if (args[1] == NULL) {
-            GString* jid = g_string_new(connection_get_jid()->domainpart);
-
-            iq_last_activity_request(jid->str);
-
-            g_string_free(jid, TRUE);
-
-            return TRUE;
+            iq_last_activity_request(connection_get_jid()->domainpart);
         } else {
             iq_last_activity_request(args[1]);
-            return TRUE;
         }
+        return TRUE;
     }
 
     cons_bad_cmd_usage(command);
@@ -8330,7 +8324,7 @@ cmd_command_list(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    char* jid = args[1];
+    const char* jid = args[1];
     if (jid == NULL) {
         switch (window->type) {
         case WIN_MUC:
@@ -8391,7 +8385,7 @@ cmd_command_exec(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    char* jid = args[2];
+    const char* jid = args[2];
     if (jid == NULL) {
         switch (window->type) {
         case WIN_MUC:
@@ -9668,12 +9662,11 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    auto_char char* user = connection_get_user();
     auto_char char* passwd = ui_ask_password(false);
     auto_char char* confirm_passwd = ui_ask_password(true);
 
     if (g_strcmp0(passwd, confirm_passwd) == 0) {
-        iq_register_change_password(user, passwd);
+        iq_register_change_password(connection_get_user(), passwd);
     } else {
         cons_show("Aborted! The new password and the confirmed password do not match.");
     }

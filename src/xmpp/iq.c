@@ -417,7 +417,7 @@ iq_rooms_cache_clear(void)
 }
 
 void
-iq_room_list_request(gchar* conferencejid, gchar* filter)
+iq_room_list_request(const char* conferencejid, char* filter)
 {
     if (g_hash_table_contains(rooms_cache, conferencejid)) {
         log_debug("Rooms request cached for: %s", conferencejid);
@@ -466,7 +466,7 @@ iq_disable_carbons(void)
 void
 iq_http_upload_request(HTTPUpload* upload)
 {
-    char* jid = connection_jid_for_feature(STANZA_NS_HTTP_UPLOAD);
+    const char* jid = connection_jid_for_feature(STANZA_NS_HTTP_UPLOAD);
     if (jid == NULL) {
         cons_show_error("XEP-0363 HTTP File Upload is not supported by the server");
         return;
@@ -484,7 +484,7 @@ iq_http_upload_request(HTTPUpload* upload)
 }
 
 void
-iq_disco_info_request(gchar* jid)
+iq_disco_info_request(const char* jid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
     auto_char char* id = connection_create_stanza_id();
@@ -497,7 +497,7 @@ iq_disco_info_request(gchar* jid)
 }
 
 void
-iq_disco_info_request_onconnect(gchar* jid)
+iq_disco_info_request_onconnect(const char* jid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
     auto_char char* id = connection_create_stanza_id();
@@ -510,7 +510,7 @@ iq_disco_info_request_onconnect(gchar* jid)
 }
 
 void
-iq_last_activity_request(gchar* jid)
+iq_last_activity_request(const char* jid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
     auto_char char* id = connection_create_stanza_id();
@@ -618,7 +618,7 @@ iq_send_caps_request_legacy(const char* const to, const char* const id,
 }
 
 void
-iq_disco_items_request(gchar* jid)
+iq_disco_items_request(const char* jid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_stanza_t* iq = stanza_create_disco_items_iq(ctx, "discoitemsreq", jid, NULL);
@@ -627,7 +627,7 @@ iq_disco_items_request(gchar* jid)
 }
 
 void
-iq_disco_items_request_onconnect(gchar* jid)
+iq_disco_items_request_onconnect(const char* jid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_stanza_t* iq = stanza_create_disco_items_iq(ctx, "discoitemsreq_onconnect", jid, NULL);
@@ -1078,7 +1078,7 @@ _caps_response_legacy_id_handler(xmpp_stanza_t* const stanza, void* const userda
 static int
 _room_list_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
-    gchar* filter = (gchar*)userdata;
+    const char* filter = userdata;
     const char* id = xmpp_stanza_get_id(stanza);
     const char* from = xmpp_stanza_get_from(stanza);
 

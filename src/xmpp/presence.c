@@ -192,7 +192,7 @@ presence_send(const resource_presence_t presence_type, const int idle, char* sig
         return;
     }
 
-    char* msg = connection_get_presence_msg();
+    const char* msg = connection_get_presence_msg();
     if (msg) {
         log_debug("Updating presence: %s, \"%s\"", string_from_resource_presence(presence_type), msg);
     } else {
@@ -282,7 +282,7 @@ presence_join_room(const char* const room, const char* const nick, const char* c
 
     resource_presence_t presence_type = accounts_get_last_presence(session_get_account_name());
     const char* show = stanza_get_presence_string_from_type(presence_type);
-    char* status = connection_get_presence_msg();
+    const char* status = connection_get_presence_msg();
     int pri = accounts_get_priority_for_presence_type(session_get_account_name(), presence_type);
 
     xmpp_ctx_t* ctx = connection_get_ctx();
@@ -306,7 +306,7 @@ presence_change_room_nick(const char* const room, const char* const nick)
     log_debug("Sending room nickname change to: %s, nick: %s", room, nick);
     resource_presence_t presence_type = accounts_get_last_presence(session_get_account_name());
     const char* show = stanza_get_presence_string_from_type(presence_type);
-    char* status = connection_get_presence_msg();
+    const char* status = connection_get_presence_msg();
     int pri = accounts_get_priority_for_presence_type(session_get_account_name(), presence_type);
     auto_char char* full_room_jid = create_fulljid(room, nick);
 

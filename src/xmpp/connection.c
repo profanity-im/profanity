@@ -648,7 +648,7 @@ connection_supports(const char* const feature)
     return ret;
 }
 
-char*
+const char*
 connection_jid_for_feature(const char* const feature)
 {
     if (conn.features_by_jid == NULL) {
@@ -765,18 +765,10 @@ equals_our_barejid(const char* cmp)
     return g_strcmp0(connection_get_jid()->barejid, cmp) == 0;
 }
 
-char*
+const char*
 connection_get_user(void)
 {
-    const char* jid = connection_get_fulljid();
-    if (!jid)
-        return NULL;
-    char* result = strdup(jid);
-
-    char* split = strchr(result, '@');
-    *split = '\0';
-
-    return result;
+    return connection_get_jid()->localpart;
 }
 
 void
@@ -845,13 +837,13 @@ connection_create_stanza_id(void)
     return g_strdup_printf("%s%s", rndid, hmac);
 }
 
-char*
+const char*
 connection_get_domain(void)
 {
     return conn.domain;
 }
 
-char*
+const char*
 connection_get_presence_msg(void)
 {
     return conn.presence_message;

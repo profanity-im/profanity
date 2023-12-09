@@ -223,7 +223,7 @@ accounts_get_account(const char* const name)
         } else {
             jabber_conn_status_t conn_status = connection_get_status();
             if (conn_status == JABBER_CONNECTED) {
-                char* conf_jid = connection_jid_for_feature(XMPP_FEATURE_MUC);
+                const char* conf_jid = connection_jid_for_feature(XMPP_FEATURE_MUC);
                 if (conf_jid) {
                     muc_service = strdup(conf_jid);
                 }

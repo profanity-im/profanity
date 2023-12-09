@@ -69,10 +69,10 @@ connection_get_fulljid(void)
     return mock_ptr_type(char*);
 }
 
-char*
+const char*
 connection_get_barejid(void)
 {
-    return mock_ptr_type(char*);
+    return mock_ptr_type(const char*);
 }
 
 gboolean
@@ -81,10 +81,10 @@ equals_our_barejid(const char* cmp)
     return TRUE;
 }
 
-char*
+const char*
 connection_get_user(void)
 {
-    return mock_ptr_type(char*);
+    return mock_ptr_type(const char*);
 }
 
 const char*
@@ -122,10 +122,10 @@ connection_get_status(void)
     return mock_type(jabber_conn_status_t);
 }
 
-char*
+const char*
 connection_get_presence_msg(void)
 {
-    return mock_ptr_type(char*);
+    return mock_ptr_type(const char*);
 }
 
 char*
@@ -324,18 +324,18 @@ iq_send_software_version(const char* const fulljid)
 }
 
 void
-iq_room_list_request(gchar* conferencejid, gchar* filter)
+iq_room_list_request(const char* conferencejid, char* filter)
 {
     check_expected(conferencejid);
     check_expected(filter);
 }
 
 void
-iq_disco_info_request(gchar* jid)
+iq_disco_info_request(const char* jid)
 {
 }
 void
-iq_disco_items_request(gchar* jid)
+iq_disco_items_request(const char* jid)
 {
 }
 void
@@ -412,7 +412,7 @@ iq_room_role_list(const char* const room, char* role)
 {
 }
 void
-iq_last_activity_request(gchar* jid)
+iq_last_activity_request(const char* jid)
 {
 }
 void
