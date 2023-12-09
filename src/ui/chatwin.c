@@ -295,19 +295,7 @@ chatwin_recipient_gone(ProfChatWin* chatwin)
 {
     assert(chatwin != NULL);
 
-    const char* display_usr = NULL;
-    PContact contact = roster_get_contact(chatwin->barejid);
-    if (contact) {
-        if (p_contact_name(contact)) {
-            display_usr = p_contact_name(contact);
-        } else {
-            display_usr = chatwin->barejid;
-        }
-    } else {
-        display_usr = chatwin->barejid;
-    }
-
-    win_println((ProfWin*)chatwin, THEME_GONE, "!", "<- %s has left the conversation.", display_usr);
+    win_println((ProfWin*)chatwin, THEME_GONE, "!", "<- %s has left the conversation.", roster_get_display_name(chatwin->barejid));
 }
 
 void

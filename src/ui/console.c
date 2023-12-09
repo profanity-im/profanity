@@ -267,20 +267,7 @@ cons_show_tlscert(const TLSCertificate* cert)
 void
 cons_show_typing(const char* const barejid)
 {
-    ProfWin* console = wins_get_console();
-    const char* display_usr = NULL;
-    PContact contact = roster_get_contact(barejid);
-    if (contact) {
-        if (p_contact_name(contact)) {
-            display_usr = p_contact_name(contact);
-        } else {
-            display_usr = barejid;
-        }
-    } else {
-        display_usr = barejid;
-    }
-
-    win_println(console, THEME_TYPING, "-", "!! %s is typing a message…", display_usr);
+    win_println(wins_get_console(), THEME_TYPING, "-", "!! %s is typing a message…", roster_get_display_name(barejid));
     cons_alert(NULL);
 }
 
@@ -925,17 +912,7 @@ cons_show_status(const char* const barejid)
 void
 cons_show_room_invite(const char* const invitor, const char* const room, const char* const reason)
 {
-    auto_char char* display_from = NULL;
-    PContact contact = roster_get_contact(invitor);
-    if (contact) {
-        if (p_contact_name(contact)) {
-            display_from = strdup(p_contact_name(contact));
-        } else {
-            display_from = strdup(invitor);
-        }
-    } else {
-        display_from = strdup(invitor);
-    }
+    const char* display_from = roster_get_display_name(invitor);
 
     cons_show("");
     cons_show("Chat room invite received:");

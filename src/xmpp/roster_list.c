@@ -183,25 +183,12 @@ roster_get_contact(const char* const barejid)
     return contact;
 }
 
-char*
+const char*
 roster_get_display_name(const char* const barejid)
 {
     assert(roster != NULL);
 
-    GString* result = g_string_new("");
-
-    PContact contact = roster_get_contact(barejid);
-    if (contact) {
-        if (p_contact_name(contact)) {
-            g_string_append(result, p_contact_name(contact));
-        } else {
-            g_string_append(result, barejid);
-        }
-    } else {
-        g_string_append(result, barejid);
-    }
-
-    return g_string_free(result, FALSE);
+    return p_contact_name(roster_get_contact(barejid)) ?: barejid;
 }
 
 gchar*
@@ -215,25 +202,12 @@ roster_get_msg_display_name(const char* const barejid, const char* const resourc
         return incoming_str;
     }
 
-    GString* result = g_string_new("");
-
-    PContact contact = roster_get_contact(barejid);
-    if (contact) {
-        if (p_contact_name(contact)) {
-            g_string_append(result, p_contact_name(contact));
-        } else {
-            g_string_append(result, barejid);
-        }
-    } else {
-        g_string_append(result, barejid);
-    }
+    const char* contact_name = roster_get_display_name(barejid);
 
     if (resource && prefs_get_boolean(PREF_RESOURCE_MESSAGE)) {
-        g_string_append(result, "/");
-        g_string_append(result, resource);
+        return g_strdup_printf("%s/%s", contact_name, resource);
     }
-
-    return g_string_free(result, FALSE);
+    return g_strdup(contact_name);
 }
 
 gboolean
