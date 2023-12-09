@@ -231,10 +231,8 @@ cmd_process_input(ProfWin* window, char* inp)
 void
 cmd_execute_connect(ProfWin* window, const char* const account)
 {
-    GString* command = g_string_new("/connect ");
-    g_string_append(command, account);
-    cmd_process_input(window, command->str);
-    g_string_free(command, TRUE);
+    auto_gchar gchar* command = g_strdup_printf("/connect %s", account);
+    cmd_process_input(window, command);
 }
 
 gboolean
@@ -2207,21 +2205,16 @@ cmd_msg(ProfWin* window, const char* const command, gchar** args)
                 cons_show("Starting direct message with occupant \"%s\" from room \"%s\" as \"%s\".", usr, mucwin->roomjid, jidp->barejid);
             } else {
                 // otherwise send mucpm
-                GString* full_jid = g_string_new(mucwin->roomjid);
-                g_string_append(full_jid, "/");
-                g_string_append(full_jid, usr);
-
-                ProfPrivateWin* privwin = wins_get_private(full_jid->str);
+                auto_gchar gchar* full_jid = g_strdup_printf("%s/%s", mucwin->roomjid, usr);
+                ProfPrivateWin* privwin = wins_get_private(full_jid);
                 if (!privwin) {
-                    privwin = (ProfPrivateWin*)wins_new_private(full_jid->str);
+                    privwin = (ProfPrivateWin*)wins_new_private(full_jid);
                 }
                 ui_focus_win((ProfWin*)privwin);
 
                 if (msg) {
                     cl_ev_send_priv_msg(privwin, msg, NULL);
                 }
-
-                g_string_free(full_jid, TRUE);
             }
 
         } else {
@@ -3502,10 +3495,8 @@ cmd_software(ProfWin* window, const char* const command, gchar** args)
             }
 
             if (resource) {
-                GString* fulljid = g_string_new(chatwin->barejid);
-                g_string_append_printf(fulljid, "/%s", resource);
-                iq_send_software_version(fulljid->str);
-                g_string_free(fulljid, TRUE);
+                auto_gchar gchar* fulljid = g_strdup_printf("%s/%s", chatwin->barejid, resource);
+                iq_send_software_version(fulljid);
             } else {
                 win_println(window, THEME_DEFAULT, "-", "Unknown resource for /software command. See /help resource.");
             }
@@ -3565,20 +3556,17 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
     if (args[0] == NULL) {
         char* account_name = session_get_account_name();
         ProfAccount* account = accounts_get_account(account_name);
-        if (account->muc_service) {
-            GString* room_str = g_string_new("");
+        if (account && account->muc_service) {
             char* uuid = connection_create_uuid();
-            g_string_append_printf(room_str, "private-chat-%s@%s", uuid, account->muc_service);
+            auto_gchar gchar* room_str = g_strdup_printf("private-chat-%s@%s", uuid, account->muc_service);
             connection_free_uuid(uuid);
 
-            presence_join_room(room_str->str, account->muc_nick, NULL);
-            muc_join(room_str->str, account->muc_nick, NULL, FALSE);
-
-            g_string_free(room_str, TRUE);
-            account_free(account);
+            presence_join_room(room_str, account->muc_nick, NULL);
+            muc_join(room_str, account->muc_nick, NULL, FALSE);
         } else {
             cons_show("Account MUC service property not found.");
         }
+        account_free(account);
 
         return TRUE;
     }
@@ -4122,10 +4110,8 @@ cmd_subject(ProfWin* window, const char* const command, gchar** args)
         if (args[1]) {
             char* old_subject = muc_subject(mucwin->roomjid);
             if (old_subject) {
-                GString* new_subject = g_string_new(args[1]);
-                g_string_append(new_subject, old_subject);
-                message_send_groupchat_subject(mucwin->roomjid, new_subject->str);
-                g_string_free(new_subject, TRUE);
+                auto_gchar gchar* new_subject = g_strdup_printf("%s%s", args[1], old_subject);
+                message_send_groupchat_subject(mucwin->roomjid, new_subject);
             } else {
                 win_print(window, THEME_ROOMINFO, "!", "Room does not have a subject, use /subject set <subject>");
             }
@@ -4139,10 +4125,8 @@ cmd_subject(ProfWin* window, const char* const command, gchar** args)
         if (args[1]) {
             char* old_subject = muc_subject(mucwin->roomjid);
             if (old_subject) {
-                GString* new_subject = g_string_new(old_subject);
-                g_string_append(new_subject, args[1]);
-                message_send_groupchat_subject(mucwin->roomjid, new_subject->str);
-                g_string_free(new_subject, TRUE);
+                auto_gchar gchar* new_subject = g_strdup_printf("%s%s", old_subject, args[1]);
+                message_send_groupchat_subject(mucwin->roomjid, new_subject);
             } else {
                 win_print(window, THEME_ROOMINFO, "!", "Room does not have a subject, use /subject set <subject>");
             }
@@ -4837,20 +4821,13 @@ cmd_disco(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    GString* jid = g_string_new("");
-    if (args[1]) {
-        jid = g_string_append(jid, args[1]);
-    } else {
-        jid = g_string_append(jid, connection_get_jid()->domainpart);
-    }
+    auto_gchar gchar* jid = g_strdup_printf("%s", args[1] ?: connection_get_jid()->domainpart);
 
     if (g_strcmp0(args[0], "info") == 0) {
-        iq_disco_info_request(jid->str);
+        iq_disco_info_request(jid);
     } else {
-        iq_disco_items_request(jid->str);
+        iq_disco_items_request(jid);
     }
-
-    g_string_free(jid, TRUE);
 
     return TRUE;
 }
@@ -5086,32 +5063,26 @@ cmd_alias(ProfWin* window, const char* const command, gchar** args)
                 return TRUE;
             }
             char* alias_p = alias;
-            GString* ac_value = g_string_new("");
+            auto_gchar gchar* ac_value = NULL;
             if (alias[0] == '/') {
-                g_string_append(ac_value, alias);
+                ac_value = g_strdup_printf("%s", alias);
                 alias_p = &alias[1];
             } else {
-                g_string_append(ac_value, "/");
-                g_string_append(ac_value, alias);
+                ac_value = g_strdup_printf("/%s", alias);
             }
 
             char* value = args[2];
             if (value == NULL) {
                 cons_bad_cmd_usage(command);
-                g_string_free(ac_value, TRUE);
-                return TRUE;
-            } else if (cmd_ac_exists(ac_value->str)) {
-                cons_show("Command or alias '%s' already exists.", ac_value->str);
-                g_string_free(ac_value, TRUE);
-                return TRUE;
+            } else if (cmd_ac_exists(ac_value)) {
+                cons_show("Command or alias '%s' already exists.", ac_value);
             } else {
                 prefs_add_alias(alias_p, value);
-                cmd_ac_add(ac_value->str);
+                cmd_ac_add(ac_value);
                 cmd_ac_add_alias_value(alias_p);
-                cons_show("Command alias added %s -> %s", ac_value->str, value);
-                g_string_free(ac_value, TRUE);
-                return TRUE;
+                cons_show("Command alias added %s -> %s", ac_value, value);
             }
+            return TRUE;
         }
     } else if (strcmp(subcmd, "remove") == 0) {
         char* alias = args[1];
@@ -5126,11 +5097,9 @@ cmd_alias(ProfWin* window, const char* const command, gchar** args)
             if (!removed) {
                 cons_show("No such command alias /%s", alias);
             } else {
-                GString* ac_value = g_string_new("/");
-                g_string_append(ac_value, alias);
-                cmd_ac_remove(ac_value->str);
+                auto_gchar gchar* ac_value = g_strdup_printf("/%s", alias);
+                cmd_ac_remove(ac_value);
                 cmd_ac_remove_alias_value(alias);
-                g_string_free(ac_value, TRUE);
                 cons_show("Command alias removed -> /%s", alias);
             }
             return TRUE;
@@ -7429,10 +7398,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
             return TRUE;
         }
 
-        GString* fullstr = g_string_new("Using libgpgme version ");
-        g_string_append(fullstr, libver);
-        cons_show("%s", fullstr->str);
-        g_string_free(fullstr, TRUE);
+        cons_show("Using libgpgme version %s", libver);
 
         return TRUE;
     }
@@ -7675,10 +7641,8 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
                 GSList* curr_c = roster_list;
                 while (!contact && curr_c) {
                     contact = curr_c->data;
-                    const char* jid = p_contact_barejid(contact);
-                    GString* xmppuri = g_string_new("xmpp:");
-                    g_string_append(xmppuri, jid);
-                    if (g_strcmp0(key->name, xmppuri->str)) {
+                    auto_gchar gchar* xmppuri = g_strdup_printf("xmpp:%s", p_contact_barejid(contact));
+                    if (g_strcmp0(key->name, xmppuri)) {
                         contact = NULL;
                     }
                     curr_c = g_slist_next(curr_c);
@@ -9999,13 +9963,8 @@ cmd_vcard_get(ProfWin* window, const char* const command, gchar** args)
                 vcard_print(ctx, window, jid_occupant->barejid);
             } else {
                 // anon muc: send the vcard request through the MUC's server
-                GString* full_jid = g_string_new(mucwin->roomjid);
-                g_string_append(full_jid, "/");
-                g_string_append(full_jid, user);
-
-                vcard_print(ctx, window, full_jid->str);
-
-                g_string_free(full_jid, TRUE);
+                auto_gchar gchar* full_jid = g_strdup_printf("%s/%s", mucwin->roomjid, user);
+                vcard_print(ctx, window, full_jid);
             }
         } else {
             char* jid = roster_barejid_from_name(user);
