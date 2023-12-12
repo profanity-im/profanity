@@ -259,6 +259,7 @@ iq_handlers_init(void)
         int millis = prefs_get_autoping() * 1000;
         xmpp_timed_handler_add(conn, _autoping_timed_send, millis, ctx);
     }
+    received_disco_items = FALSE;
 
     iq_rooms_cache_clear();
     iq_handlers_clear();
@@ -267,8 +268,56 @@ iq_handlers_init(void)
     rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)xmpp_stanza_release);
 }
 
+struct iq_win_finder
+{
+    gsize max, cur;
+    char** to_be_removed;
+};
+
+static void
+_win_find(char* key,
+          ProfIqHandler* handler,
+          struct iq_win_finder* finder)
+{
+    if (handler->func == _mam_rsm_id_handler) {
+        if (finder->cur >= finder->max) {
+            finder->max *= 2;
+            finder->to_be_removed = g_realloc_n(finder->to_be_removed, finder->max, sizeof(char*));
+        }
+        finder->to_be_removed[finder->cur++] = g_strdup(key);
+    }
+}
+
 void
-iq_handlers_clear()
+iq_handlers_remove_win(ProfWin* window)
+{
+    log_debug("Remove window %p of type %d", window, window ? window->type : -1);
+    if (!window)
+        return;
+    GSList *cur = late_delivery_windows, *next;
+    while (cur) {
+        LateDeliveryUserdata* del_data = cur->data;
+        next = g_slist_next(cur);
+        if (del_data->win == (void*)window)
+            late_delivery_windows = g_slist_delete_link(late_delivery_windows,
+                                                        cur);
+        cur = next;
+    }
+    struct iq_win_finder st = { 0 };
+    st.max = g_hash_table_size(id_handlers);
+    if (st.max == 0)
+        return;
+    st.to_be_removed = g_new(char*, st.max);
+    g_hash_table_foreach(id_handlers, (GHFunc)_win_find, &st);
+    for (gsize n = 0; n < st.cur; ++n) {
+        g_hash_table_remove(id_handlers, st.to_be_removed[n]);
+        g_free(st.to_be_removed[n]);
+    }
+    g_free(st.to_be_removed);
+}
+
+void
+iq_handlers_clear(void)
 {
     if (id_handlers) {
         g_hash_table_remove_all(id_handlers);
@@ -2696,6 +2745,10 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             gboolean is_complete = g_strcmp0(xmpp_stanza_get_attribute(fin, "complete"), "true") == 0;
             MamRsmUserdata* data = (MamRsmUserdata*)userdata;
             ProfWin* window = (ProfWin*)data->win;
+            if (wins_get_num(window) == -1) {
+                log_error("Window %p should not get any events anymore", window);
+                return 0;
+            }
 
             buffer_remove_entry(window->layout->buffer, 0);
 

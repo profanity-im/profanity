@@ -712,6 +712,8 @@ ui_close_win(int index)
         }
     }
 
+    // remove the IQ handlers
+    iq_handlers_remove_win(window);
     wins_close_by_num(index);
     title_bar_console();
     status_bar_current(1);
