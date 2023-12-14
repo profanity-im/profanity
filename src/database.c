@@ -235,9 +235,7 @@ log_database_add_incoming(ProfMessage* message)
     if (message->to_jid) {
         _add_to_db(message, NULL, message->from_jid, message->to_jid);
     } else {
-        auto_jid Jid* myjid = jid_create(connection_get_fulljid());
-
-        _add_to_db(message, NULL, message->from_jid, myjid);
+        _add_to_db(message, NULL, message->from_jid, connection_get_jid());
     }
 }
 
@@ -253,9 +251,7 @@ _log_database_add_outgoing(char* type, const char* const id, const char* const b
     msg->timestamp = g_date_time_new_now_local(); // TODO: get from outside. best to have whole ProfMessage from outside
     msg->enc = enc;
 
-    auto_jid Jid* myjid = jid_create(connection_get_fulljid());
-
-    _add_to_db(msg, type, myjid, msg->from_jid); // TODO: myjid now in profmessage
+    _add_to_db(msg, type, connection_get_jid(), msg->from_jid); // TODO: myjid now in profmessage
 
     message_free(msg);
 }
@@ -283,9 +279,8 @@ ProfMessage*
 log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_last)
 {
     sqlite3_stmt* stmt = NULL;
-    const char* jid = connection_get_fulljid();
-    auto_jid Jid* myjid = jid_create(jid);
-    if (!myjid)
+    const Jid* myjid = connection_get_jid();
+    if (!myjid->str)
         return NULL;
 
     const char* order = is_last ? "DESC" : "ASC";
@@ -327,9 +322,8 @@ GSList*
 log_database_get_previous_chat(const gchar* const contact_barejid, const char* start_time, char* end_time, gboolean from_start, gboolean flip)
 {
     sqlite3_stmt* stmt = NULL;
-    const char* jid = connection_get_fulljid();
-    auto_jid Jid* myjid = jid_create(jid);
-    if (!myjid)
+    const Jid* myjid = connection_get_jid();
+    if (!myjid->str)
         return NULL;
 
     // Flip order when querying older pages

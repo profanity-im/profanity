@@ -192,6 +192,8 @@ p_contact_barejid_collate_key(const PContact contact)
 const char*
 p_contact_name(const PContact contact)
 {
+    if (!contact)
+        return NULL;
     return contact->name;
 }
 

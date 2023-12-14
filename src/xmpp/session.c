@@ -209,9 +209,7 @@ session_disconnect(void)
     if (connection_get_status() == JABBER_CONNECTED) {
         log_info("Closing connection");
 
-        char* account_name = session_get_account_name();
-        const char* fulljid = connection_get_fulljid();
-        plugins_on_disconnect(account_name, fulljid);
+        plugins_on_disconnect(session_get_account_name(), connection_get_fulljid());
 
         accounts_set_last_activity(session_get_account_name());
 
@@ -347,7 +345,7 @@ session_login_success(gboolean secured)
 
     // items discovery
     connection_request_features();
-    char* domain = connection_get_domain();
+    const char* domain = connection_get_domain();
     iq_disco_items_request_onconnect(domain);
 
     if (prefs_get_boolean(PREF_CARBONS)) {

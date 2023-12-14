@@ -299,18 +299,7 @@ ui_contact_typing(const char* const barejid, const char* const resource)
             is_current = wins_is_current(window);
         }
         if (!is_current || (is_current && prefs_get_boolean(PREF_NOTIFY_TYPING_CURRENT))) {
-            PContact contact = roster_get_contact(barejid);
-            char const* display_usr = NULL;
-            if (contact) {
-                if (p_contact_name(contact)) {
-                    display_usr = p_contact_name(contact);
-                } else {
-                    display_usr = barejid;
-                }
-            } else {
-                display_usr = barejid;
-            }
-            notify_typing(display_usr);
+            notify_typing(roster_get_display_name(barejid));
         }
     }
 }

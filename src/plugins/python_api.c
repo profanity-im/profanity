@@ -452,7 +452,7 @@ python_api_get_name_from_roster(PyObject* self, PyObject* args)
     char* barejid_str = python_str_or_unicode_to_string(barejid);
 
     allow_python_threads();
-    char* name = roster_get_display_name(barejid_str);
+    char* name = strdup(roster_get_display_name(barejid_str));
     free(barejid_str);
     disable_python_threads();
     if (name) {

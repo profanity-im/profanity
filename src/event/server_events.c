@@ -190,8 +190,7 @@ sv_ev_roster_received(void)
     connection_set_presence_msg(status_message);
     cl_ev_presence_send(conn_presence, diff_secs);
 
-    const char* fulljid = connection_get_fulljid();
-    plugins_on_connect(account_name, fulljid);
+    plugins_on_connect(account_name, connection_get_fulljid());
 }
 
 void
@@ -630,8 +629,7 @@ sv_ev_incoming_message(ProfMessage* message)
     char* looking_for_jid = message->from_jid->barejid;
 
     if (message->is_mam) {
-        auto_char char* mybarejid = connection_get_barejid();
-        if (g_strcmp0(mybarejid, message->from_jid->barejid) == 0) {
+        if (equals_our_barejid(message->from_jid->barejid)) {
             if (message->to_jid) {
                 looking_for_jid = message->to_jid->barejid;
             }

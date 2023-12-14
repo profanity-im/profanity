@@ -42,8 +42,8 @@ typedef void (*ProfIqFreeCallback)(void* userdata);
 void iq_handlers_init(void);
 void iq_send_stanza(xmpp_stanza_t* const stanza);
 void iq_id_handler_add(const char* const id, ProfIqCallback func, ProfIqFreeCallback free_func, void* userdata);
-void iq_disco_info_request_onconnect(gchar* jid);
-void iq_disco_items_request_onconnect(gchar* jid);
+void iq_disco_info_request_onconnect(const char* jid);
+void iq_disco_items_request_onconnect(const char* jid);
 void iq_send_caps_request(const char* const to, const char* const id, const char* const node, const char* const ver);
 void iq_send_caps_request_for_jid(const char* const to, const char* const id, const char* const node,
                                   const char* const ver);

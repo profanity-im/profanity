@@ -373,9 +373,8 @@ win_get_title(ProfWin* window)
         assert(vcardwin->memcheck == PROFVCARDWIN_MEMCHECK);
 
         GString* title = g_string_new("vCard ");
-        auto_char char* jid = connection_get_barejid();
 
-        g_string_append(title, jid);
+        g_string_append(title, connection_get_barejid());
 
         if (vcardwin->vcard->modified) {
             g_string_append(title, " *");

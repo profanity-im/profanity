@@ -295,19 +295,7 @@ chatwin_recipient_gone(ProfChatWin* chatwin)
 {
     assert(chatwin != NULL);
 
-    const char* display_usr = NULL;
-    PContact contact = roster_get_contact(chatwin->barejid);
-    if (contact) {
-        if (p_contact_name(contact)) {
-            display_usr = p_contact_name(contact);
-        } else {
-            display_usr = chatwin->barejid;
-        }
-    } else {
-        display_usr = chatwin->barejid;
-    }
-
-    win_println((ProfWin*)chatwin, THEME_GONE, "!", "<- %s has left the conversation.", display_usr);
+    win_println((ProfWin*)chatwin, THEME_GONE, "!", "<- %s has left the conversation.", roster_get_display_name(chatwin->barejid));
 }
 
 void
@@ -427,7 +415,7 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, 
 
     auto_char char* enc_char = get_enc_char(enc_mode, chatwin->outgoing_char);
 
-    auto_jid Jid* myjid = jid_create(connection_get_fulljid());
+    const Jid* myjid = connection_get_jid();
     auto_char char* display_message = plugins_pre_chat_message_display(myjid->barejid, myjid->resourcepart, strdup(message));
 
     if (request_receipt && id) {

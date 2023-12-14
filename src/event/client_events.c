@@ -86,8 +86,7 @@ cl_ev_connect_account(ProfAccount* account)
 void
 cl_ev_disconnect(void)
 {
-    auto_char char* mybarejid = connection_get_barejid();
-    cons_show("%s logged out successfully.", mybarejid);
+    cons_show("%s logged out successfully.", connection_get_barejid());
 
     ui_close_all_wins();
     ev_disconnect_cleanup();
@@ -123,8 +122,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs
     char* account_name = session_get_account_name();
     ProfAccount* account = accounts_get_account(account_name);
     if (account->pgp_keyid) {
-        char* msg = connection_get_presence_msg();
-        signed_status = p_gpg_sign(msg, account->pgp_keyid);
+        signed_status = p_gpg_sign(connection_get_presence_msg(), account->pgp_keyid);
     }
     account_free(account);
 #endif

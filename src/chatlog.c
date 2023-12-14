@@ -85,8 +85,7 @@ void
 chat_log_msg_out(const char* const barejid, const char* const msg, const char* const resource)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
-        _chat_log_chat(mybarejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
+        _chat_log_chat(connection_get_barejid(), barejid, msg, PROF_OUT_LOG, NULL, resource);
     }
 }
 
@@ -94,7 +93,7 @@ void
 chat_log_otr_msg_out(const char* const barejid, const char* const msg, const char* const resource)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
+        const char* mybarejid = connection_get_barejid();
         auto_gchar gchar* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (strcmp(pref_otr_log, "on") == 0) {
             _chat_log_chat(mybarejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
@@ -108,7 +107,7 @@ void
 chat_log_pgp_msg_out(const char* const barejid, const char* const msg, const char* const resource)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
+        const char* mybarejid = connection_get_barejid();
         auto_gchar gchar* pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
             _chat_log_chat(mybarejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
@@ -122,7 +121,7 @@ void
 chat_log_omemo_msg_out(const char* const barejid, const char* const msg, const char* const resource)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
+        const char* mybarejid = connection_get_barejid();
         auto_gchar gchar* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         if (strcmp(pref_omemo_log, "on") == 0) {
             _chat_log_chat(mybarejid, barejid, msg, PROF_OUT_LOG, NULL, resource);
@@ -136,7 +135,7 @@ void
 chat_log_otr_msg_in(ProfMessage* message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
+        const char* mybarejid = connection_get_barejid();
         auto_gchar gchar* pref_otr_log = prefs_get_string(PREF_OTR_LOG);
         if (message->enc == PROF_MSG_ENC_NONE || (strcmp(pref_otr_log, "on") == 0)) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
@@ -158,7 +157,7 @@ void
 chat_log_pgp_msg_in(ProfMessage* message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
+        const char* mybarejid = connection_get_barejid();
         auto_gchar gchar* pref_pgp_log = prefs_get_string(PREF_PGP_LOG);
         if (strcmp(pref_pgp_log, "on") == 0) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
@@ -180,7 +179,7 @@ void
 chat_log_omemo_msg_in(ProfMessage* message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
+        const char* mybarejid = connection_get_barejid();
         auto_gchar gchar* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         if (strcmp(pref_omemo_log, "on") == 0) {
             if (message->type == PROF_MSG_TYPE_MUCPM) {
@@ -202,7 +201,7 @@ void
 chat_log_msg_in(ProfMessage* message)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
+        const char* mybarejid = connection_get_barejid();
 
         if (message->type == PROF_MSG_TYPE_MUCPM) {
             _chat_log_chat(mybarejid, message->from_jid->barejid, message->plain, PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
@@ -308,9 +307,8 @@ void
 groupchat_log_msg_out(const gchar* const room, const gchar* const msg)
 {
     if (prefs_get_boolean(PREF_GRLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
         char* mynick = muc_nick(room);
-        _groupchat_log_chat(mybarejid, room, mynick, msg);
+        _groupchat_log_chat(connection_get_barejid(), room, mynick, msg);
     }
 }
 
@@ -318,8 +316,7 @@ void
 groupchat_log_msg_in(const gchar* const room, const gchar* const nick, const gchar* const msg)
 {
     if (prefs_get_boolean(PREF_GRLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
-        _groupchat_log_chat(mybarejid, room, nick, msg);
+        _groupchat_log_chat(connection_get_barejid(), room, nick, msg);
     }
 }
 
@@ -327,7 +324,7 @@ void
 groupchat_log_omemo_msg_out(const gchar* const room, const gchar* const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
+        const char* mybarejid = connection_get_barejid();
         auto_gchar gchar* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
         char* mynick = muc_nick(room);
 
@@ -343,7 +340,7 @@ void
 groupchat_log_omemo_msg_in(const gchar* const room, const gchar* const nick, const gchar* const msg)
 {
     if (prefs_get_boolean(PREF_CHLOG)) {
-        auto_char char* mybarejid = connection_get_barejid();
+        const char* mybarejid = connection_get_barejid();
         auto_gchar gchar* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
 
         if (strcmp(pref_omemo_log, "on") == 0) {

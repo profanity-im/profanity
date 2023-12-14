@@ -252,9 +252,7 @@ plugins_load(const char* const name, GString* error_message)
     if (plugin) {
         g_hash_table_insert(plugins, strdup(name), plugin);
         if (connection_get_status() == JABBER_CONNECTED) {
-            const char* account_name = session_get_account_name();
-            const char* fulljid = connection_get_fulljid();
-            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, account_name, fulljid);
+            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, session_get_account_name(), connection_get_fulljid());
         } else {
             plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
         }

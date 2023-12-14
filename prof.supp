@@ -16,6 +16,14 @@
   ...
 }
 
+{
+  gtk_init_check
+  Memcheck:Leak
+  ...
+  fun:gtk_init_check
+  ...
+}
+
 # glib
 
 {
@@ -26,7 +34,16 @@
   fun:clone
 }
 
-## glib 2.60.4 suppressions file:
+# gcrypt initialization
+{
+  gcry_rngcsprng_randomize
+  Memcheck:Leak
+  fun:malloc
+  ...
+  fun:omemo_crypto_init
+  ...
+}
+
 
 # GLib Valgrind suppressions file
 #
@@ -52,6 +69,7 @@
 {
 	gnutls-init-calloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:gtls_gnutls_init
@@ -60,6 +78,7 @@
 {
 	gnutls-init-realloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:realloc
 	...
 	fun:gtls_gnutls_init
@@ -68,6 +87,7 @@
 {
 	g-tls-backend-gnutls-init
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:g_once_impl
 	fun:g_tls_backend_gnutls_init
 }
@@ -75,6 +95,7 @@
 {
 	p11-tokens-init
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:create_tokens_inlock
@@ -85,6 +106,7 @@
 {
 	g-local-vfs-getpwnam
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:getpwnam
@@ -94,50 +116,52 @@
 {
 	glib-init-malloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:g_quark_init
-	...
-	fun:glib_init_ctor
 }
 
 {
 	glib-init-calloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:g_quark_init
-	...
-	fun:glib_init_ctor
 }
 
 {
 	gobject-init-malloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
-	fun:gobject_init_ctor
+	fun:gobject_init*
 }
 
 {
 	gobject-init-realloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:realloc
 	...
-	fun:gobject_init_ctor
+	fun:gobject_init*
 }
 
 {
 	gobject-init-calloc
 	Memcheck:Leak
+	match-leak-kinds:possible,reachable
 	fun:calloc
 	...
-	fun:gobject_init_ctor
+	fun:gobject_init*
 }
 
 {
 	g-type-register-dynamic
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:g_type_register_dynamic
@@ -146,6 +170,7 @@
 {
 	g-type-register-static
 	Memcheck:Leak
+	match-leak-kinds:possible,reachable
 	fun:malloc
 	...
 	fun:g_type_register_static
@@ -154,6 +179,7 @@
 {
 	g-type-register-static-realloc
 	Memcheck:Leak
+	match-leak-kinds:possible,reachable
 	fun:realloc
 	...
 	fun:g_type_register_static
@@ -162,14 +188,34 @@
 {
 	g-type-register-static-calloc
 	Memcheck:Leak
+	match-leak-kinds:possible,reachable
 	fun:calloc
 	...
 	fun:g_type_register_static
 }
 
 {
+	g-type-register-fundamental
+	Memcheck:Leak
+	match-leak-kinds:possible,reachable
+	fun:malloc
+	...
+	fun:g_type_register_fundamental
+}
+
+{
+	g-type-register-fundamental-calloc
+	Memcheck:Leak
+	match-leak-kinds:possible,reachable
+	fun:calloc
+	...
+	fun:g_type_register_fundamental
+}
+
+{
 	g-type-add-interface-dynamic
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:g_type_add_interface_dynamic
@@ -178,7 +224,26 @@
 {
 	g-type-add-interface-static
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
+	...
+	fun:g_type_add_interface_static
+}
+
+{
+	g-type-add-interface-static-realloc
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:realloc
+	...
+	fun:g_type_add_interface_static
+}
+
+{
+	g-type-add-interface-static-calloc
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:calloc
 	...
 	fun:g_type_add_interface_static
 }
@@ -186,6 +251,7 @@
 {
 	g-test-rand-init
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:g_rand_new_with_seed_array
@@ -195,20 +261,20 @@
 }
 
 {
-	g-test-rand-init2
+	g-rand-init2
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:g_rand_new_with_seed_array
 	...
 	fun:get_global_random
-	...
-	fun:g_test_init
 }
 
 {
 	g-quark-table-new
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:g_hash_table_new
 	...
 	fun:quark_new
@@ -217,6 +283,8 @@
 {
 	g-quark-table-resize
 	Memcheck:Leak
+	match-leak-kinds:reachable
+	...
 	fun:g_hash_table_resize
 	...
 	fun:quark_new
@@ -225,6 +293,7 @@
 {
 	g-type-interface-init
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:type_iface_vtable_base_init_Wm
@@ -233,9 +302,8 @@
 {
 	g-type-class-init-calloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
-	...
-	fun:g_type_create_instance
 	...
 	fun:type_class_init_Wm
 }
@@ -243,14 +311,122 @@
 {
 	g-type-class-init
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:g_type_create_instance
 	...
 	fun:type_class_init_Wm
 }
 
 {
+	g-object-do-class-init-signals
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	...
+	fun:g_signal_new
+	...
+	fun:type_class_init_Wm
+}
+
+{
+	g-type-prerequisites
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:realloc
+	...
+	fun:type_iface_add_prerequisite_W
+}
+
+{
+	g-type-add-interface-check
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:malloc
+	...
+	fun:g_type_add_interface_check
+	...
+	fun:type_class_init_Wm
+}
+
+{
+	g-type-add-interface-check-realloc
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:realloc
+	...
+	fun:g_type_add_interface_check
+	...
+	fun:type_class_init_Wm
+}
+
+{
+	g-object-class-install-property
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:malloc
+	...
+	fun:validate_and_install_class_property
+	...
+	fun:type_class_init_Wm
+}
+
+{
+	g-param-spec-pool-new
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:malloc
+	...
+	fun:g_param_spec_pool_new
+	...
+	fun:type_class_init_Wm
+}
+
+# weak_locations_lock in gobject.c
+{
+	g-weak-ref-lock
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:malloc
+	...
+	fun:g_rw_lock_get_impl
+	...
+	fun:g_weak_ref_set
+}
+
+{
+	g-object-base-class-init-construct-pproperties
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:malloc
+	...
+	fun:g_slist_copy
+	fun:g_object_base_class_init
+	fun:type_class_init_Wm
+}
+
+{
+        g-type-class-ref
+        Memcheck:Leak
+        fun:calloc
+        ...
+        fun:type_class_init_Wm
+        ...
+        fun:g_type_class_ref
+}
+
+{
+	g-type-class-ref-inlined
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:UnknownInlinedFun
+	...
+	fun:g_type_class_ref
+}
+
+{
 	g-io-module-default-singleton-malloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:g_type_create_instance
@@ -261,6 +437,7 @@
 {
 	g-io-module-default-singleton-calloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:g_type_create_instance
@@ -273,6 +450,7 @@
 {
 	g-io-module-default-singleton
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:g_type_create_instance
 	...
 	fun:_g_io_module_get_default
@@ -281,6 +459,7 @@
 {
 	g-io-module-default-singleton-module
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:g_module_open
@@ -291,6 +470,7 @@
 {
 	g-io-module-default-singleton-name
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:g_strdup
@@ -299,8 +479,17 @@
 }
 
 {
+	g-io-module-default-singleton-weak-ref
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:_g_io_module_get_default
+}
+
+{
 	g-get-language-names-malloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:g_get_language_names
@@ -309,14 +498,43 @@
 {
 	g-get-language-names-calloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:g_get_language_names
 }
 
 {
+        g-get-language_names-with-category-malloc
+        Memcheck:Leak
+        match-leak-kinds:possible,reachable,definite
+        fun:malloc
+        ...
+        fun:g_get_language_names_with_category
+}
+
+{
+        g-get-language_names-with-category-calloc
+        Memcheck:Leak
+        match-leak-kinds:possible,reachable,definite
+        fun:calloc
+        ...
+        fun:g_get_language_names_with_category
+}
+
+{
+        g-get-language_names-with-category-realloc
+        Memcheck:Leak
+        match-leak-kinds:possible,reachable,definite
+        fun:realloc
+        ...
+        fun:g_get_language_names_with_category
+}
+
+{
 	g-static-mutex
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:g_static_mutex_get_mutex_impl
@@ -325,14 +543,47 @@
 {
 	g-system-thread-init
 	Memcheck:Leak
+	match-leak-kinds:possible,reachable
 	fun:calloc
 	...
 	fun:g_system_thread_new
 }
 
 {
+	g-system-thread-init-malloc
+	Memcheck:Leak
+	match-leak-kinds:possible,reachable,definite
+	fun:malloc
+	...
+	fun:g_system_thread_new
+}
+
+{
+	g-task-thread-pool-init
+	Memcheck:Leak
+	match-leak-kinds:possible,reachable,definite
+	fun:malloc
+	...
+	fun:g_thread_new
+	...
+	fun:g_task_thread_pool_init
+}
+
+{
+	g-task-thread-pool-new-full
+	Memcheck:Leak
+	match-leak-kinds:possible,reachable,definite
+	fun:malloc
+	...
+	fun:g_thread_new
+	...
+	fun:g_thread_pool_new_full
+}
+
+{
 	g-io-module-default-proxy-resolver-gnome
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:g_proxy_resolver_gnome_init
@@ -344,6 +595,7 @@
 {
 	g-threaded-resolver-getaddrinfo-config
 	Memcheck:Leak
+	match-leak-kinds:reachable,definite
 	fun:malloc
 	...
 	fun:__resolv_conf_allocate
@@ -355,11 +607,11 @@
 # memcheck checks that the third argument to ioctl() is a valid pointer, but
 # some ioctls use that argument as an integer
 {
-   ioctl-with-non-pointer-param
-   Memcheck:Param
-   ioctl(generic)
-   fun:ioctl
-   fun:btrfs_reflink_with_progress
+	ioctl-with-non-pointer-param
+	Memcheck:Param
+	ioctl(generic)
+	fun:ioctl
+	fun:btrfs_reflink_with_progress
 }
 
 {
@@ -506,7 +758,7 @@
 	fun:g_inet_address_get_type
 }
 
-# From: https://github.com/fredericgermain/valgrind/blob/master/glibc-2.X-drd.supp
+# From: https://github.com/fredericgermain/valgrind/blob/HEAD/glibc-2.X-drd.supp
 {
 	drd-libc-stdio
 	drd:ConflictingAccess
@@ -623,9 +875,11 @@
 }
 
 # g_set_user_dirs() deliberately leaks the previous cached g_get_user_*() values.
+# These will not all be reachable on exit.
 {
 	g_set_user_dirs_str
 	Memcheck:Leak
+	match-leak-kinds:definite,reachable
 	fun:malloc
 	...
 	fun:set_str_if_different
@@ -633,19 +887,45 @@
 }
 
 # g_set_user_dirs() deliberately leaks the previous cached g_get_user_*() values.
+# These will not all be reachable on exit.
 {
 	g_set_user_dirs_strv
 	Memcheck:Leak
+	match-leak-kinds:definite,reachable
 	fun:malloc
 	...
 	fun:set_strv_if_different
 	fun:g_set_user_dirs
 }
 
+# _g_unset_cached_tmp_dir() deliberately leaks the previous cached g_get_tmp_dir() values.
+# These will not all be reachable on exit.
+{
+	g_get_tmp_dir_test_init
+	Memcheck:Leak
+	match-leak-kinds:definite,reachable
+	fun:malloc
+	...
+	fun:g_get_tmp_dir
+	...
+	fun:g_test_init
+}
+
+# g_get_tmp_dir() caches a one-time allocation
+{
+	g_get_tmp_dir
+	Memcheck:Leak
+	match-leak-kinds:definite,reachable
+	fun:malloc
+	...
+	fun:g_get_tmp_dir
+}
+
 # g_get_system_data_dirs() caches a one-time allocation
 {
 	g_get_system_data_dirs
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:g_build_system_data_dirs
@@ -656,16 +936,29 @@
 {
 	g_get_user_data_dir
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:realloc
 	...
 	fun:g_build_user_data_dir
 	fun:g_get_user_data_dir
 }
 
+# g_get_home_dir() caches a one-time allocation
+{
+	g_get_home_dir
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:malloc
+	...
+	fun:g_build_home_dir
+	fun:g_get_home_dir
+}
+
 # gdesktopappinfo.c caches a one-time allocation global table of @desktop_file_dirs.
 {
 	desktop_file_dirs_malloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:desktop_file_dirs_lock
@@ -675,6 +968,7 @@
 {
 	desktop_file_dirs_realloc
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:realloc
 	...
 	fun:desktop_file_dirs_lock
@@ -684,16 +978,138 @@
 {
 	desktop_file_dir_unindexed_setup_search
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:desktop_file_dir_unindexed_setup_search
 	fun:desktop_file_dir_unindexed_setup_search
 }
 
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_user_data_dir
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:malloc
+	...
+	fun:g_build_user_data_dir
+}
+
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_filename
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:malloc
+	...
+	fun:g_build_filename
+}
+
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_home_dir
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:malloc
+	...
+	fun:g_build_home_dir
+}
+
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_path
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:malloc
+	...
+	fun:g_build_path
+}
+
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_system_config_dirs
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:realloc
+	...
+	fun:g_build_system_config_dirs
+}
+
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_system_data_dir
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:malloc
+	...
+	fun:g_build_system_data_dir
+}
+
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_system_data_dirs
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:realloc
+	...
+	fun:g_build_system_data_dirs
+}
+
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_user_cache_dir
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:malloc
+	...
+	fun:g_build_user_cache_dir
+}
+
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_user_config_dir
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:malloc
+	...
+	fun:g_build_user_config_dir
+}
+
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_user_data_dir
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:malloc
+	...
+	fun:g_build_user_data_dir
+}
+
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_user_runtime_dir
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:malloc
+	...
+	fun:g_build_user_runtime_dir
+}
+
+#gutils.c caches system and user dirs and may need to replace them during tests.
+{
+	g_build_user_state_dir
+	Memcheck:Leak
+	match-leak-kinds:definite
+	fun:malloc
+	...
+	fun:g_build_user_state_dir
+}
+
 # g_io_extension_point_register() caches a one-time allocation global table of @extension_points.
 {
 	g_io_extension_point_register
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:g_io_extension_point_register
@@ -703,6 +1119,7 @@
 {
 	g_strerror
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:g_locale_to_utf8
@@ -713,6 +1130,7 @@
 {
 	g_socket_connection_factory_register_type
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:g_socket_connection_factory_register_type
@@ -722,25 +1140,55 @@
 {
 	g_dbus_error_quark
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:g_dbus_error_register_error_domain
 	fun:g_dbus_error_quark
 }
 
+# g_win32_registry_get_os_dirs_w*() caches an array of strings that is allocated only once.
+{
+	g_win32_registry_get_os_dirs
+	Memcheck:Leak
+	match-leak-kinds:reachable,definite
+	fun:malloc
+	...
+	fun:g_win32_registry_get_os_dirs*
+}
+
 # Thread-private data allocated once per thread
 {
 	g_private_set_alloc0
 	Memcheck:Leak
+	match-leak-kinds:definite,reachable
 	fun:malloc
 	...
 	fun:g_private_set_alloc0
+}
+{
+	g_private_set_alloc0-calloc
+	Memcheck:Leak
+	match-leak-kinds:definite,reachable
+	fun:calloc
+	...
+	fun:g_private_set_alloc0
+}
+
+# Keys for thread-private data
+{
+	g_private_key
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:malloc
+	fun:g_private_impl_new
 }
 
 # Thread-private GMainContext stack
 {
 	g_main_context_push_thread_default
 	Memcheck:Leak
+	match-leak-kinds:definite,reachable
 	fun:malloc
 	...
 	fun:g_queue_new
@@ -751,6 +1199,7 @@
 {
 	g_file_info_attribute_cache
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:ensure_attribute_hash
@@ -760,6 +1209,7 @@
 {
 	g_file_info_attribute_cache2
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:ensure_attribute_hash
@@ -769,6 +1219,7 @@
 {
 	g_file_info_attribute_cache3
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:malloc
 	...
 	fun:lookup_namespace
@@ -778,6 +1229,7 @@
 {
 	g_file_info_attribute_cache4
 	Memcheck:Leak
+	match-leak-kinds:reachable
 	fun:calloc
 	...
 	fun:lookup_namespace
@@ -785,7 +1237,95 @@
 	fun:g_file_*
 }
 
-## python suppressions file:
+# Cached charset
+{
+	g_get_charset
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:malloc
+	...
+	fun:g_get_charset
+}
+
+{
+	g_get_charset_calloc
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:calloc
+	...
+	fun:g_get_charset
+}
+
+# Global unused thread queue
+{
+	g_thread_pool_unused_thread_queue
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:malloc
+	...
+	fun:g_async_queue_new_full
+	...
+	fun:g_thread_pool_new
+}
+
+# One-time program name storage
+{
+	g_set_prgname
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:malloc
+	...
+	fun:g_set_prgname
+}
+
+# Error domains hash
+{
+	g_error_init
+	Memcheck:Leak
+	match-leak-kinds: reachable
+	fun:malloc
+	...
+	fun:g_hash_table_new_full
+	fun:g_error_init
+}
+
+# Error domain static registration
+{
+	g_error_domain_register_static
+	Memcheck:Leak
+	match-leak-kinds: reachable
+	fun:malloc
+	...
+	fun:g_hash_table_insert
+	fun:error_domain_register
+	fun:g_error_domain_register_static
+}
+
+{
+	new_quark
+	Memcheck:Leak
+	match-leak-kinds:reachable
+	fun:malloc
+	...
+	fun:g_hash_table_insert
+	fun:quark_new
+}
+
+{
+	xdg_mime_init_malloc
+	Memcheck:Leak
+	fun:malloc
+	...
+	fun:xdg_mime_init
+}
+
+{
+	xdg_mime_init_calloc
+	Memcheck:Leak
+	fun:calloc
+	...
+	fun:xdg_mime_init
+}
 #
 # This is a valgrind suppression file that should be used when using valgrind.
 #
@@ -793,13 +1333,13 @@
 #
 #	cd python/dist/src
 #	valgrind --tool=memcheck --suppressions=Misc/valgrind-python.supp \
-#		./python -E -tt ./Lib/test/regrtest.py -u bsddb,network
+#		./python -E ./Lib/test/regrtest.py -u gui,network
 #
 # You must edit Objects/obmalloc.c and uncomment Py_USING_MEMORY_DEBUGGER
-# to use the preferred suppressions with Py_ADDRESS_IN_RANGE.
+# to use the preferred suppressions with address_in_range.
 #
 # If you do not want to recompile Python, you can uncomment
-# suppressions for PyObject_Free and PyObject_Realloc.
+# suppressions for _PyObject_Free and _PyObject_Realloc.
 #
 # See Misc/README.valgrind for more information.
 
@@ -807,25 +1347,25 @@
 {
    ADDRESS_IN_RANGE/Invalid read of size 4
    Memcheck:Addr4
-   fun:Py_ADDRESS_IN_RANGE
+   fun:address_in_range
 }
 
 {
    ADDRESS_IN_RANGE/Invalid read of size 4
    Memcheck:Value4
-   fun:Py_ADDRESS_IN_RANGE
+   fun:address_in_range
 }
 
 {
    ADDRESS_IN_RANGE/Invalid read of size 8 (x86_64 aka amd64)
    Memcheck:Value8
-   fun:Py_ADDRESS_IN_RANGE
+   fun:address_in_range
 }
 
 {
    ADDRESS_IN_RANGE/Conditional jump or move depends on uninitialised value
    Memcheck:Cond
-   fun:Py_ADDRESS_IN_RANGE
+   fun:address_in_range
 }
 
 #
@@ -833,14 +1373,6 @@
 #    Hmmm, I wonder if this masks some real leaks.  I think it does.
 #    Will need to fix that.
 #
-
-{
-   Suppress leaking the GIL.  Happens once per process, see comment in ceval.c.
-   Memcheck:Leak
-   fun:malloc
-   fun:PyThread_allocate_lock
-   fun:PyEval_InitThreads
-}
 
 {
    Suppress leaking the GIL after a fork.
@@ -915,37 +1447,61 @@
 ###{
 ###   ADDRESS_IN_RANGE/Invalid read of size 4
 ###   Memcheck:Addr4
-###   fun:PyObject_Free
+###   fun:_PyObject_Free
 ###}
 ###
 ###{
 ###   ADDRESS_IN_RANGE/Invalid read of size 4
 ###   Memcheck:Value4
-###   fun:PyObject_Free
+###   fun:_PyObject_Free
+###}
+###
+###{
+###   ADDRESS_IN_RANGE/Use of uninitialised value of size 8
+###   Memcheck:Addr8
+###   fun:_PyObject_Free
+###}
+###
+###{
+###   ADDRESS_IN_RANGE/Use of uninitialised value of size 8
+###   Memcheck:Value8
+###   fun:_PyObject_Free
 ###}
 ###
 ###{
 ###   ADDRESS_IN_RANGE/Conditional jump or move depends on uninitialised value
 ###   Memcheck:Cond
-###   fun:PyObject_Free
+###   fun:_PyObject_Free
 ###}
 
 ###{
 ###   ADDRESS_IN_RANGE/Invalid read of size 4
 ###   Memcheck:Addr4
-###   fun:PyObject_Realloc
+###   fun:_PyObject_Realloc
 ###}
 ###
 ###{
 ###   ADDRESS_IN_RANGE/Invalid read of size 4
 ###   Memcheck:Value4
-###   fun:PyObject_Realloc
+###   fun:_PyObject_Realloc
+###}
+###
+###{
+###   ADDRESS_IN_RANGE/Use of uninitialised value of size 8
+###   Memcheck:Addr8
+###   fun:_PyObject_Realloc
+###}
+###
+###{
+###   ADDRESS_IN_RANGE/Use of uninitialised value of size 8
+###   Memcheck:Value8
+###   fun:_PyObject_Realloc
 ###}
 ###
 ###{
 ###   ADDRESS_IN_RANGE/Conditional jump or move depends on uninitialised value
 ###   Memcheck:Cond
-###   fun:PyObject_Realloc
+###   fun:_PyObject_Realloc
 ###}
 
 ###
@@ -1028,6 +1584,14 @@
 }
 
 {
+   Uninitialised byte(s) false alarm, see bpo-35561
+   Memcheck:Param
+   epoll_ctl(event)
+   fun:epoll_ctl
+   fun:pyepoll_internal_ctl
+}
+
+{
    ZLIB problems, see test_gzip
    Memcheck:Cond
    obj:/lib/libz.so.1.2.3
@@ -1046,6 +1610,17 @@
    obj:/lib/libreadline.so.4.3
    fun:rl_initialize
 }
+
+# Valgrind emits "Conditional jump or move depends on uninitialised value(s)"
+# false alarms on GCC builtin strcmp() function. The GCC code is correct.
+#
+# Valgrind bug: https://bugs.kde.org/show_bug.cgi?id=264936
+{
+   bpo-38118: Valgrind emits false alarm on GCC builtin strcmp()
+   Memcheck:Cond
+   fun:PyUnicode_Decode
+}
+
 
 ###
 ### These occur from somewhere within the SSL, when running
@@ -1073,6 +1648,38 @@
 ###   Memcheck:Value4
 ###   fun:MD5_Update
 ###}
+
+# Fedora's package "openssl-1.0.1-0.1.beta2.fc17.x86_64" on x86_64
+# See http://bugs.python.org/issue14171
+{
+   openssl 1.0.1 prng 1
+   Memcheck:Cond
+   fun:bcmp
+   fun:fips_get_entropy
+   fun:FIPS_drbg_instantiate
+   fun:RAND_init_fips
+   fun:OPENSSL_init_library
+   fun:SSL_library_init
+   fun:init_hashlib
+}
+
+{
+   openssl 1.0.1 prng 2
+   Memcheck:Cond
+   fun:fips_get_entropy
+   fun:FIPS_drbg_instantiate
+   fun:RAND_init_fips
+   fun:OPENSSL_init_library
+   fun:SSL_library_init
+   fun:init_hashlib
+}
+
+{
+   openssl 1.0.1 prng 3
+   Memcheck:Value8
+   fun:_x86_64_AES_encrypt_compact
+   fun:AES_encrypt
+}
 
 #
 # All of these problems come from using test_socket_ssl
@@ -1176,13 +1783,641 @@
    fun:SHA1_Update
 }
 
-
-# gcrypt initialization
 {
-  gcry_rngcsprng_randomize
+   test_buffer_non_debug
+   Memcheck:Addr4
+   fun:PyUnicodeUCS2_FSConverter
+}
+
+{
+   test_buffer_non_debug
+   Memcheck:Addr4
+   fun:PyUnicode_FSConverter
+}
+
+{
+   wcscmp_false_positive
+   Memcheck:Addr8
+   fun:wcscmp
+   fun:_PyOS_GetOpt
+   fun:Py_Main
+   fun:main
+}
+
+# Additional suppressions for the unified decimal tests:
+{
+   test_decimal
+   Memcheck:Addr4
+   fun:PyUnicodeUCS2_FSConverter
+}
+
+{
+   test_decimal2
+   Memcheck:Addr4
+   fun:PyUnicode_FSConverter
+}
+
+# Actual GTK things
+{
+  GtkWidgetClass action GPtrArray
+  Memcheck:Leak
+  fun:malloc
+  fun:g_malloc
+  fun:g_slice_alloc
+  fun:g_ptr_array_sized_new
+  fun:g_ptr_array_new
+  fun:gtk_widget_class_add_action
+}
+
+{
+   GTK media extension gio modules
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:g_malloc
+   fun:g_slice_alloc
+   fun:g_slice_alloc0
+   fun:g_type_create_instance
+   fun:g_object_new_internal
+   fun:g_object_new_with_properties
+   fun:g_object_new
+   fun:g_io_module_new
+   fun:g_io_modules_scan_all_in_directory_with_scope
+   fun:gtk_media_file_extension_init
+}
+
+{
+   gtk-style-context
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:g_malloc
+   ...
+   fun:gtk_css_node_declaration_make_writable
+   ...
+   fun:gtk_style_constructed
+}
+
+{
+   gtk-style-context2
+   Memcheck:Leak
+   match-leak-kinds: possible
+   fun:malloc
+   fun:g_malloc
+   ...
+   fun:gtk_css_node_declaration_make_writable_resize
+   ...
+   fun:gtk_style_constructed
+}
+
+# AMD driver
+{
+  radeonsi_dri general
+  Memcheck:Leak
+  fun:calloc
+  ...
+  obj:/usr/lib*/dri/radeonsi_dri.so
+}
+
+# mesa driver stuff
+{
+   i965 addr4
+   Memcheck:Addr4
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   i965 addr8
+   Memcheck:Addr8
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   i965 memcpy
+   Memcheck:Addr8
+   fun:memcpy*
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   i965 memcpy
+   Memcheck:Addr2
+   fun:memcpy*
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   mesa memcmp 8
+   Memcheck:Addr8
+   fun:*memcmp*
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   mesa memcmp 1
+   Memcheck:Addr1
+   fun:*memcmp*
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   mesa memset 8
+   Memcheck:Addr8
+   fun:*memset*
+   obj:/usr/lib*/dri/i965_dri.so
+}
+
+{
+   mesa realpath
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:realpath@@GLIBC_2.3
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_eglInitialize_global_rewrite_ptr
+}
+
+{
+   mesa calloc
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_eglInitialize_global_rewrite_ptr
+}
+
+{
+   mesa malloc
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   mesa glReadPixels
+   Memcheck:Addr16
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_glReadPixels_global_rewrite_ptr
+}
+
+{
+   epoxy glxQueryServerString 1
+   Memcheck:Leak
+   fun:malloc
+   fun:XextAddDisplay
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_glXQueryServerString_global_rewrite_ptr
+
+}
+
+{
+   epoxy glxQueryServerString 2
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:realpath*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_glXQueryServerString_global_rewrite_ptr
+}
+
+{
+   epoxy glGetTexImage
+   Memcheck:Addr16
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_glGetTexImage_global_rewrite_ptr
+}
+
+
+
+
+# Fontconfig
+{
+   FcFontSetList
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   obj:/usr/lib*/libfontconfig.so*
+   obj:/usr/lib*/libfontconfig.so*
+   fun:FcFontSetList
+}
+
+{
+   FcFontRenderPrepare
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:realloc
+   obj:/usr/lib*/libfontconfig.so*
+   obj:/usr/lib*/libfontconfig.so*
+   fun:FcFontRenderPrepare
+}
+
+{
+   FcDefaultSubstitute
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:realloc
+   obj:/usr/lib*/libfontconfig.so*
+   obj:/usr/lib*/libfontconfig.so*
+   fun:FcDefaultSubstitute
+}
+
+# Pixman
+{
+   pixman_image_composite32
+   Memcheck:Cond
+   obj:/usr/lib*/libpixman-1.so*
+   obj:/usr/lib*/libpixman-1.so*
+   fun:pixman_image_composite32
+}
+
+# Pango
+{
+   pango 1
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:realloc
+   obj:/usr/lib*/libfontconfig.so*
+   obj:/usr/lib*/libfontconfig.so*
+   obj:/usr/lib*/libcairo.so*
+   fun:pango_cairo_fc_font_map_fontset_key_substitute
+}
+
+{
+  pango 2
+  Memcheck:Leak
+  fun:realloc
+  obj:/usr/lib*/libfontconfig.so*
+  obj:/usr/lib*/libfontconfig.so*
+  fun:_cairo_ft_font_options_substitute
+}
+
+# GLib
+{
+  glib 1
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  fun:g_malloc
+  fun:g_quark_init
+}
+# Actual GTK things
+{
+  GtkWidgetClass action GPtrArray
+  Memcheck:Leak
+  fun:malloc
+  fun:g_malloc
+  fun:g_slice_alloc
+  fun:g_ptr_array_sized_new
+  fun:g_ptr_array_new
+  fun:gtk_widget_class_add_action
+}
+
+{
+   GIO modules
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   ...
+   fun:_g_io_module_get_default
+}
+
+{
+   GTK media extension gio modules
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   ...
+   fun:g_io_module_new
+   ...
+   fun:gtk_media_file_extension_init
+}
+
+# AMD driver
+{
+  radeonsi_dri general
+  Memcheck:Leak
+  fun:calloc
+  ...
+  obj:/usr/lib*/dri/radeonsi_dri.so
+}
+{
+  radeonsi_dri general
   Memcheck:Leak
   fun:malloc
   ...
-  fun:omemo_crypto_init
+  obj:/usr/lib*/dri/radeonsi_dri.so
+}
+
+# mesa driver stuff
+{
+   i965 addr4
+   Memcheck:Addr4
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   i965 addr8
+   Memcheck:Addr8
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   i965 memcpy
+   Memcheck:Addr8
+   fun:memcpy*
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   i965 memcpy
+   Memcheck:Addr2
+   fun:memcpy*
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   mesa memcmp 8
+   Memcheck:Addr8
+   fun:*memcmp*
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   mesa memcmp 1
+   Memcheck:Addr1
+   fun:*memcmp*
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   mesa memset 8
+   Memcheck:Addr8
+   fun:*memset*
+   obj:/usr/lib*/dri/i965_dri.so
+}
+
+{
+   mesa realpath
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:realpath@@GLIBC_2.3
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_eglInitialize_global_rewrite_ptr
+}
+
+{
+   mesa calloc
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:calloc
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_eglInitialize_global_rewrite_ptr
+}
+
+{
+   epoxy strncmp
+   Memcheck:Addr8
+   fun:strncmp
+   ...
+   fun:epoxy_eglInitialize_global_rewrite_ptr
+}
+
+{
+   mesa malloc
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   obj:/usr/lib*/dri/i965_dri.so*
+}
+
+{
+   mesa glReadPixels
+   Memcheck:Addr16
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_glReadPixels_global_rewrite_ptr
+}
+
+{
+   epoxy glxQueryServerString 1
+   Memcheck:Leak
+   fun:malloc
+   fun:XextAddDisplay
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_glXQueryServerString_global_rewrite_ptr
+
+}
+
+{
+   epoxy glxQueryServerString 2
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:realpath*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_glXQueryServerString_global_rewrite_ptr
+}
+
+{
+   epoxy glGetTexImage
+   Memcheck:Addr16
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   obj:*
+   fun:epoxy_glGetTexImage_global_rewrite_ptr
+}
+
+
+
+
+# Fontconfig
+{
+   FcFontSetList
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   obj:/usr/lib*/libfontconfig.so*
+   obj:/usr/lib*/libfontconfig.so*
+   fun:FcFontSetList
+}
+
+{
+   FcPatternObjectInsertElt
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:FcPatternObjectInsertElt
+}
+
+{
+   FcFontRenderPrepare
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:realloc
+   obj:/usr/lib*/libfontconfig.so*
+   obj:/usr/lib*/libfontconfig.so*
+   fun:FcFontRenderPrepare
+}
+
+{
+   FcDefaultSubstitute
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:realloc
+   obj:/usr/lib*/libfontconfig.so*
+   obj:/usr/lib*/libfontconfig.so*
+   fun:FcDefaultSubstitute
+}
+
+# Pixman
+{
+   pixman_image_composite32
+   Memcheck:Cond
+   obj:/usr/lib*/libpixman-1.so*
+   obj:/usr/lib*/libpixman-1.so*
+   fun:pixman_image_composite32
+}
+
+# Pango
+{
+   pango 1
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:realloc
+   obj:/usr/lib*/libfontconfig.so*
+   obj:/usr/lib*/libfontconfig.so*
+   obj:/usr/lib*/libcairo.so*
+   fun:pango_cairo_fc_font_map_fontset_key_substitute
+}
+
+{
+  pango 2
+  Memcheck:Leak
+  fun:realloc
+  obj:/usr/lib*/libfontconfig.so*
+  obj:/usr/lib*/libfontconfig.so*
+  fun:_cairo_ft_font_options_substitute
+}
+
+# GLib
+{
+  glib GQuark
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
   ...
+  fun:g_quark_*
+}
+{
+  glib GQuark
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  ...
+  fun:g_intern_static_string
+}
+{
+  glib GQuark
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  ...
+  fun:g_intern_string
+}
+{
+  xdg-mime init
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  ...
+  fun:xdg_mime_init*
+}
+{
+  xdg-mime init
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:calloc
+  ...
+  fun:xdg_mime_init*
+}
+{
+  glib init
+  Memcheck:Leak
+  match-leak-kinds: definite
+  fun:malloc
+  ...
+  fun:glib_init_ctor
+}
+
+# Threads
+{
+   pthread
+   Memcheck:Leak
+   fun:calloc
+   fun:_dl_allocate_tls
 }

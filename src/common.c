@@ -652,7 +652,7 @@ format_call_external_argv(const char* template, const char* url, const char* fil
     return argv;
 }
 
-gchar*
+static gchar*
 _unique_filename(const char* filename)
 {
     gchar* unique = g_strdup(filename);
@@ -676,7 +676,7 @@ _unique_filename(const char* filename)
     return unique;
 }
 
-bool
+static bool
 _has_directory_suffix(const char* path)
 {
     return (g_str_has_suffix(path, ".")
@@ -772,13 +772,6 @@ unique_filename_from_url(const char* url, const char* path)
     g_object_unref(target);
 
     return unique_filename;
-}
-
-void
-glib_hash_table_free(GHashTable* hash_table)
-{
-    g_hash_table_remove_all(hash_table);
-    g_hash_table_unref(hash_table);
 }
 
 /* build profanity version string.

@@ -53,8 +53,7 @@ gchar*
 vcardwin_get_string(ProfVcardWin* vcardwin)
 {
     GString* string = g_string_new("vCard: ");
-    auto_char char* jid = connection_get_barejid();
-    g_string_append(string, jid);
+    g_string_append(string, connection_get_barejid());
 
     if (vcardwin->vcard && vcardwin->vcard->modified) {
         g_string_append(string, " (modified)");

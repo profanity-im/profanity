@@ -43,7 +43,7 @@
 GHashTable*
 session_store_new(void)
 {
-    return g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)glib_hash_table_free);
+    return g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
 }
 
 GHashTable*
@@ -61,7 +61,7 @@ signed_pre_key_store_new(void)
 void
 identity_key_store_new(identity_key_store_t* identity_key_store)
 {
-    identity_key_store->trusted = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)glib_hash_table_free);
+    identity_key_store->trusted = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
     identity_key_store->private = NULL;
     identity_key_store->public = NULL;
 }
@@ -71,7 +71,7 @@ identity_key_store_destroy(identity_key_store_t* identity_key_store)
 {
     signal_buffer_bzero_free(identity_key_store->private);
     signal_buffer_bzero_free(identity_key_store->public);
-    glib_hash_table_free(identity_key_store->trusted);
+    g_hash_table_destroy(identity_key_store->trusted);
 }
 
 int
