@@ -50,23 +50,29 @@
 #include <curses.h>
 #endif
 
+#include "log.h"
 #include "ui/window.h"
 #include "ui/buffer.h"
 
-#define BUFF_SIZE 200
+#define MAX_BUFFER_SIZE     200
+#define STRDUP_OR_NULL(str) ((str) ? strdup(str) : NULL)
 
 struct prof_buff_t
 {
     GSList* entries;
+    int lines;
 };
 
 static void _free_entry(ProfBuffEntry* entry);
+static ProfBuffEntry* _create_entry(const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos);
+static void _buffer_add(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos, gboolean append);
 
 ProfBuff
 buffer_create(void)
 {
     ProfBuff new_buff = malloc(sizeof(struct prof_buff_t));
     new_buff->entries = NULL;
+    new_buff->lines = 0;
     return new_buff;
 }
 
@@ -84,58 +90,37 @@ buffer_free(ProfBuff buffer)
 }
 
 void
-buffer_append(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id)
+buffer_append(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos)
 {
-    ProfBuffEntry* e = malloc(sizeof(struct prof_buff_entry_t));
-    e->show_char = strdup(show_char);
-    e->pad_indent = pad_indent;
-    e->flags = flags;
-    e->theme_item = theme_item;
-    e->time = g_date_time_ref(time);
-    e->display_from = display_from ? strdup(display_from) : NULL;
-    e->from_jid = from_jid ? strdup(from_jid) : NULL;
-    e->message = strdup(message);
-    e->receipt = receipt;
-    if (id) {
-        e->id = strdup(id);
-    } else {
-        e->id = NULL;
-    }
-
-    if (g_slist_length(buffer->entries) == BUFF_SIZE) {
-        _free_entry(buffer->entries->data);
-        buffer->entries = g_slist_delete_link(buffer->entries, buffer->entries);
-    }
-
-    buffer->entries = g_slist_append(buffer->entries, e);
+    _buffer_add(buffer, show_char, pad_indent, time, flags, theme_item, display_from, from_jid, message, receipt, id, y_start_pos, y_end_pos, TRUE);
 }
 
 void
-buffer_prepend(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id)
+buffer_prepend(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos)
 {
-    ProfBuffEntry* e = malloc(sizeof(struct prof_buff_entry_t));
-    e->show_char = strdup(show_char);
-    e->pad_indent = pad_indent;
-    e->flags = flags;
-    e->theme_item = theme_item;
-    e->time = g_date_time_ref(time);
-    e->display_from = display_from ? strdup(display_from) : NULL;
-    e->from_jid = from_jid ? strdup(from_jid) : NULL;
-    e->message = strdup(message);
-    e->receipt = receipt;
-    if (id) {
-        e->id = strdup(id);
-    } else {
-        e->id = NULL;
+    _buffer_add(buffer, show_char, pad_indent, time, flags, theme_item, display_from, from_jid, message, receipt, id, y_start_pos, y_end_pos, FALSE);
+}
+
+static void
+_buffer_add(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos, gboolean append)
+{
+    ProfBuffEntry* e = _create_entry(show_char, pad_indent, time, flags, theme_item, display_from, from_jid, message, receipt, id, y_start_pos, y_end_pos);
+
+    buffer->lines += e->_lines;
+
+    while (g_slist_length(buffer->entries) >= MAX_BUFFER_SIZE) {
+        GSList* buffer_entry_to_delete = append ? buffer->entries : g_slist_last(buffer->entries);
+        ProfBuffEntry* entry_to_delete = (ProfBuffEntry*)buffer_entry_to_delete->data;
+        buffer->lines -= entry_to_delete->_lines;
+        _free_entry(entry_to_delete);
+        buffer->entries = g_slist_delete_link(buffer->entries, buffer_entry_to_delete);
     }
 
-    if (g_slist_length(buffer->entries) == BUFF_SIZE) {
-        GSList* last = g_slist_last(buffer->entries);
-        _free_entry(last->data);
-        buffer->entries = g_slist_delete_link(buffer->entries, last);
+    if (from_jid && y_end_pos == y_start_pos) {
+        log_warning("Ncurses Overflow! From: %s, pos: %d, ID: %s, message: %s", from_jid, y_end_pos, id, message);
     }
 
-    buffer->entries = g_slist_prepend(buffer->entries, e);
+    buffer->entries = append ? g_slist_append(buffer->entries, e) : g_slist_prepend(buffer->entries, e);
 }
 
 void
@@ -145,6 +130,7 @@ buffer_remove_entry_by_id(ProfBuff buffer, const char* const id)
     while (entries) {
         ProfBuffEntry* entry = entries->data;
         if (entry->id && (g_strcmp0(entry->id, id) == 0)) {
+            buffer->lines -= entry->_lines;
             _free_entry(entry);
             buffer->entries = g_slist_delete_link(buffer->entries, entries);
             break;
@@ -157,6 +143,8 @@ void
 buffer_remove_entry(ProfBuff buffer, int entry)
 {
     GSList* node = g_slist_nth(buffer->entries, entry);
+    ProfBuffEntry* e = node->data;
+    buffer->lines -= e->_lines;
     _free_entry(node->data);
     buffer->entries = g_slist_delete_link(buffer->entries, node);
 }
@@ -199,6 +187,27 @@ buffer_get_entry_by_id(ProfBuff buffer, const char* const id)
     }
 
     return NULL;
+}
+
+static ProfBuffEntry*
+_create_entry(const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos)
+{
+    ProfBuffEntry* e = malloc(sizeof(struct prof_buff_entry_t));
+    e->show_char = STRDUP_OR_NULL(show_char);
+    e->pad_indent = pad_indent;
+    e->flags = flags;
+    e->theme_item = theme_item;
+    e->time = g_date_time_ref(time);
+    e->display_from = STRDUP_OR_NULL(display_from);
+    e->from_jid = STRDUP_OR_NULL(from_jid);
+    e->message = STRDUP_OR_NULL(message);
+    e->receipt = receipt;
+    e->id = STRDUP_OR_NULL(id);
+    e->y_start_pos = y_start_pos;
+    e->y_end_pos = y_end_pos;
+    e->_lines = e->y_end_pos - e->y_start_pos;
+
+    return e;
 }
 
 static void
