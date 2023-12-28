@@ -108,7 +108,7 @@ prof_run(char* log_level, char* account_name, char* config_file, char* log_file,
     session_init_activity();
 
     mainloop = g_main_loop_new(NULL, TRUE);
-    g_timeout_add(1000/60, _main_update, NULL);
+    g_timeout_add(1000 / 60, _main_update, NULL);
     inp_add_watch();
     g_main_loop_run(mainloop);
 }
@@ -133,6 +133,7 @@ _main_update(gpointer data)
     session_process_events();
     iq_autoping_check();
     ui_update();
+    chat_state_idle();
 #ifdef HAVE_GTK
     tray_update();
 #endif

@@ -172,18 +172,19 @@ create_input_window(void)
 }
 
 static gboolean
-_inp_callback(GIOChannel *source, GIOCondition condition, gpointer data)
+_inp_callback(GIOChannel* source, GIOCondition condition, gpointer data)
 {
     rl_callback_read_char();
+
+    if (rl_line_buffer && rl_line_buffer[0] != '/' && rl_line_buffer[0] != '\0' && rl_line_buffer[0] != '\n') {
+        chat_state_activity();
+    }
 
     ui_reset_idle_time();
     if (!get_password) {
         // Update the input buffer on screen
         _inp_write(rl_line_buffer, rl_point);
     }
-    // TODO set idle or activity with a timeout
-    //chat_state_idle();
-    //chat_state_activity();
 
     if (inp_line) {
         ProfWin* window = wins_get_current();
