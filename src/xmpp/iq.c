@@ -2539,7 +2539,6 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
     if (g_strcmp0(id, "discoitemsreq") == 0) {
         cons_show_disco_items(items, from);
     } else if (g_strcmp0(id, "discoitemsreq_onconnect") == 0) {
-        received_disco_items = TRUE;
         connection_set_disco_items(items);
 
         while (late_delivery_windows) {
@@ -2552,6 +2551,12 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
     }
 
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);
+}
+
+void
+iq_feature_retrieval_complete_handler(void)
+{
+    received_disco_items = TRUE;
 }
 
 void

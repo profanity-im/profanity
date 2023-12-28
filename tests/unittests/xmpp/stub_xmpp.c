@@ -451,6 +451,11 @@ iq_mam_request(ProfChatWin* win, GDateTime* enddate)
 }
 
 void
+iq_feature_retrieval_complete_handler(void)
+{
+}
+
+void
 publish_user_mood(const char* const mood, const char* const text)
 {
 }
