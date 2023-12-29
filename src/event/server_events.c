@@ -58,6 +58,7 @@
 #include "ui/window.h"
 #include "tools/bookmark_ignore.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/iq.h"
 #include "xmpp/muc.h"
 #include "xmpp/chat_session.h"
 #include "xmpp/roster_list.h"
@@ -196,6 +197,7 @@ sv_ev_roster_received(void)
 void
 sv_ev_connection_features_received(void)
 {
+    iq_feature_retrieval_complete_handler();
 #ifdef HAVE_OMEMO
     omemo_publish_crypto_materials();
 #endif
