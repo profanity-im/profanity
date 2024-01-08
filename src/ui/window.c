@@ -629,16 +629,14 @@ win_free(ProfWin* window)
 void
 win_page_up(ProfWin* window, int scroll_size)
 {
-    int rows = getmaxy(stdscr);
-    int total_rows = getcury(window->layout->win);
-    int page_space = rows - 4;
     int* page_start = &(window->layout->y_pos);
     int page_start_initial = *page_start;
+    int total_rows = getcury(window->layout->win);
+    int page_space = getmaxy(stdscr) - 4;
     if (scroll_size == 0)
         scroll_size = page_space;
     win_scroll_state_t* scroll_state = &window->scroll_state;
     *scroll_state = (*scroll_state == WIN_SCROLL_REACHED_BOTTOM) ? WIN_SCROLL_INNER : *scroll_state;
-
     *page_start -= scroll_size;
 
     if (*page_start == -scroll_size && window->type == WIN_CHAT) {
@@ -655,14 +653,21 @@ win_page_up(ProfWin* window, int scroll_size)
                 win_print_loading_history(window);
                 iq_mam_request_older(chatwin);
             }
+
+            int buff_size = buffer_size(window->layout->buffer);
+            int offset_entry_id = buff_size > 10 ? 10 : buff_size - 1;
+            int offset = buffer_get_entry(window->layout->buffer, offset_entry_id)->y_end_pos;
+            *page_start = offset - page_space;
         }
     }
 
     // went past beginning, show first page
-    if (*page_start < 0)
+    if (*page_start < 0) {
         *page_start = 0;
+    }
 
     window->layout->paged = 1;
+
     // update only if position has changed
     if (page_start_initial != *page_start) {
         win_update_virtual(window);
@@ -677,10 +682,9 @@ win_page_up(ProfWin* window, int scroll_size)
 void
 win_page_down(ProfWin* window, int scroll_size)
 {
-    int rows = getmaxy(stdscr);
-    int* page_start = &(window->layout->y_pos);
     int total_rows = getcury(window->layout->win);
-    int page_space = rows - 4;
+    int* page_start = &(window->layout->y_pos);
+    int page_space = getmaxy(stdscr) - 4;
     int page_start_initial = *page_start;
     if (scroll_size == 0)
         scroll_size = page_space;
@@ -693,17 +697,22 @@ win_page_down(ProfWin* window, int scroll_size)
     if ((*page_start == total_rows || (*page_start == page_space && *page_start >= total_rows)) && window->type == WIN_CHAT) {
         int bf_size = buffer_size(window->layout->buffer);
         if (bf_size > 0) {
-            auto_gchar gchar* start = g_date_time_format_iso8601(buffer_get_entry(window->layout->buffer, bf_size - 1)->time);
+            ProfBuffEntry* last_entry = buffer_get_entry(window->layout->buffer, bf_size - 1);
+            auto_gchar gchar* start = g_date_time_format_iso8601(last_entry->time);
             GDateTime* now = g_date_time_new_now_local();
-            gchar* end = g_date_time_format_iso8601(now);
-            // end is free'd inside
-            if (*scroll_state != WIN_SCROLL_REACHED_BOTTOM && !chatwin_db_history((ProfChatWin*)window, start, end, FALSE)) {
+            gchar* end_date = g_date_time_format_iso8601(now);
+            if (*scroll_state != WIN_SCROLL_REACHED_BOTTOM && !chatwin_db_history((ProfChatWin*)window, start, end_date, FALSE)) {
                 *scroll_state = WIN_SCROLL_REACHED_BOTTOM;
             }
 
             g_date_time_unref(now);
+
+            int offset = last_entry->y_end_pos - 1;
+            *page_start = offset;
         }
     }
+
+    total_rows = getcury(window->layout->win);
 
     // only got half a screen, show full screen
     if ((total_rows - (*page_start)) < page_space)
@@ -714,6 +723,7 @@ win_page_down(ProfWin* window, int scroll_size)
         *page_start = total_rows - page_space - 1;
 
     window->layout->paged = 1;
+
     // update only if position has changed
     if (page_start_initial != *page_start) {
         win_update_virtual(window);
@@ -1486,10 +1496,11 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
     auto_gchar gchar* display_name = get_display_name(message, &flags);
     auto_char char* ch = get_show_char(message->enc);
 
-    buffer_append(window->layout->buffer, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
     wins_add_urls_ac(window, message, FALSE);
     wins_add_quotes_ac(window, message->plain, FALSE);
+    int y_start_pos = getcury(window->layout->win);
     _win_print_internal(window, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
+    buffer_append(window->layout->buffer, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->from_jid->barejid, message->plain, NULL, message->id, y_start_pos, getcury(window->layout->win));
 
     inp_nonblocking(TRUE);
     g_date_time_unref(message->timestamp);
@@ -1505,10 +1516,11 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
 
     auto_char char* ch = get_show_char(message->enc);
 
-    buffer_prepend(window->layout->buffer, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, NULL, message->plain, NULL, NULL);
+    int y_start_pos = getcury(window->layout->win);
     wins_add_urls_ac(window, message, TRUE);
     wins_add_quotes_ac(window, message->plain, TRUE);
     _win_print_internal(window, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
+    buffer_prepend(window->layout->buffer, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->from_jid->barejid, message->plain, NULL, message->id, y_start_pos, getcury(window->layout->win));
 
     inp_nonblocking(TRUE);
     g_date_time_unref(message->timestamp);
@@ -1521,8 +1533,9 @@ win_println_va_internal(ProfWin* window, theme_item_t theme_item, int pad, int f
 
     auto_gchar gchar* msg = g_strdup_vprintf(message, arg);
 
-    buffer_append(window->layout->buffer, show_char, pad, timestamp, flags, theme_item, "", NULL, msg, NULL, NULL);
+    int y_start_pos = getcury(window->layout->win);
     _win_print_internal(window, show_char, pad, timestamp, flags, theme_item, "", msg, NULL);
+    buffer_append(window->layout->buffer, show_char, pad, timestamp, flags, theme_item, "", NULL, msg, NULL, NULL, y_start_pos, getcury(window->layout->win));
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
@@ -1615,8 +1628,9 @@ win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const ch
     if (_win_correct(window, message, id, replace_id, myjid)) {
         free(receipt); // TODO: probably we should use this in _win_correct()
     } else {
-        buffer_append(window->layout->buffer, show_char, 0, time, 0, THEME_TEXT_ME, from, myjid, message, receipt, id);
+        int y_start_pos = getcury(window->layout->win);
         _win_print_internal(window, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
+        buffer_append(window->layout->buffer, show_char, 0, time, 0, THEME_TEXT_ME, from, myjid, message, receipt, id, y_start_pos, getcury(window->layout->win));
     }
 
     // TODO: cross-reference.. this should be replaced by a real event-based system
@@ -1675,8 +1689,9 @@ _win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* t
 
     auto_gchar gchar* msg = g_strdup_vprintf(message, arg);
 
-    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, msg, NULL, message_id);
+    int y_start_pos = getcury(window->layout->win);
     _win_print_internal(window, show_char, pad_indent, timestamp, flags, theme_item, display_from, msg, NULL);
+    buffer_append(window->layout->buffer, show_char, pad_indent, timestamp, flags, theme_item, display_from, from_jid, msg, NULL, message_id, y_start_pos, getcury(window->layout->win));
 
     inp_nonblocking(TRUE);
     g_date_time_unref(timestamp);
@@ -1955,13 +1970,13 @@ win_print_trackbar(ProfWin* window)
 void
 win_redraw(ProfWin* window)
 {
-    int size;
+    int size = buffer_size(window->layout->buffer);
     werase(window->layout->win);
-    size = buffer_size(window->layout->buffer);
 
     for (int i = 0; i < size; i++) {
         ProfBuffEntry* e = buffer_get_entry(window->layout->buffer, i);
 
+        e->y_start_pos = getcury(window->layout->win);
         if (e->display_from == NULL && e->message && e->message[0] == '-') {
             // just an indicator to print the trackbar/separator not the actual message
             win_print_trackbar(window);
@@ -1969,6 +1984,7 @@ win_redraw(ProfWin* window)
             // regular thing to print
             _win_print_internal(window, e->show_char, e->pad_indent, e->time, e->flags, e->theme_item, e->display_from, e->message, e->receipt);
         }
+        e->y_end_pos = getcury(window->layout->win);
     }
 }
 
@@ -1984,7 +2000,8 @@ win_print_loading_history(ProfWin* window)
         timestamp = g_date_time_new_now_local();
     }
 
-    buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE, THEME_ROOMINFO, NULL, NULL, LOADING_MESSAGE, NULL, NULL);
+    int cur_y = getcury(window->layout->win);
+    buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE, THEME_ROOMINFO, NULL, NULL, LOADING_MESSAGE, NULL, NULL, cur_y, cur_y + 1);
 
     if (is_buffer_empty)
         g_date_time_unref(timestamp);
@@ -2202,7 +2219,8 @@ win_insert_last_read_position_marker(ProfWin* window, char* id)
     // the trackbar/separator will actually be print in win_redraw().
     // this only puts it in the buffer and win_redraw() will interpret it.
     // so that we have the correct length even when resizing.
-    buffer_append(window->layout->buffer, " ", 0, time, 0, THEME_TEXT, NULL, NULL, "-", NULL, id);
+    int y_start_pos = getcury(window->layout->win);
+    buffer_append(window->layout->buffer, " ", 0, time, 0, THEME_TEXT, NULL, NULL, "-", NULL, id, y_start_pos, getcury(window->layout->win));
     win_redraw(window);
 
     g_date_time_unref(time);

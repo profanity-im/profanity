@@ -52,6 +52,9 @@ typedef struct prof_buff_entry_t
     // pointer because it could be a unicode symbol as well
     gchar* show_char;
     int pad_indent;
+    int y_start_pos;
+    int y_end_pos;
+    int _lines;
     GDateTime* time;
     int flags;
     theme_item_t theme_item;
@@ -69,8 +72,8 @@ typedef struct prof_buff_t* ProfBuff;
 
 ProfBuff buffer_create();
 void buffer_free(ProfBuff buffer);
-void buffer_append(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const barejid, const char* const message, DeliveryReceipt* receipt, const char* const id);
-void buffer_prepend(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const barejid, const char* const message, DeliveryReceipt* receipt, const char* const id);
+void buffer_append(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const barejid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos);
+void buffer_prepend(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const barejid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos);
 void buffer_remove_entry_by_id(ProfBuff buffer, const char* const id);
 void buffer_remove_entry(ProfBuff buffer, int entry);
 int buffer_size(ProfBuff buffer);

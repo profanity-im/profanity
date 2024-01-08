@@ -333,7 +333,7 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
     auto_gchar gchar* end_date_fmt = end_time ? end_time : g_date_time_format_iso8601(now);
     auto_sqlite gchar* query = sqlite3_mprintf("SELECT * FROM ("
                                                "SELECT COALESCE(B.`message`, A.`message`) AS message, "
-                                               "A.`timestamp`, A.`from_jid`, A.`to_jid`, A.`type`, A.`encryption` FROM `ChatLogs` AS A "
+                                               "A.`timestamp`, A.`from_jid`, A.`to_jid`, A.`type`, A.`encryption`, A.`stanza_id` FROM `ChatLogs` AS A "
                                                "LEFT JOIN `ChatLogs` AS B ON (A.`replaced_by_db_id` = B.`id` AND A.`from_jid` = B.`from_jid`) "
                                                "WHERE (A.`replaces_db_id` IS NULL) "
                                                "AND ((A.`from_jid` = %Q AND A.`to_jid` = %Q) OR (A.`from_jid` = %Q AND A.`to_jid` = %Q)) "
@@ -365,8 +365,10 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
         char* to_jid = (char*)sqlite3_column_text(stmt, 3);
         char* type = (char*)sqlite3_column_text(stmt, 4);
         char* encryption = (char*)sqlite3_column_text(stmt, 5);
+        char* id = (char*)sqlite3_column_text(stmt, 6);
 
         ProfMessage* msg = message_init();
+        msg->id = id ? strdup(id) : NULL;
         msg->from_jid = jid_create(from);
         msg->to_jid = jid_create(to_jid);
         msg->plain = strdup(message ?: "");
