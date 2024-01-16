@@ -43,6 +43,7 @@
 #include <signal.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <glib.h>
 
@@ -60,6 +61,7 @@
 #include "command/cmd_defs.h"
 #include "plugins/plugins.h"
 #include "event/client_events.h"
+#include "ui/inputwin.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/resource.h"
@@ -86,15 +88,15 @@
 static void _init(char* log_level, char* config_file, char* log_file, char* theme_name);
 static void _shutdown(void);
 static void _connect_default(const char* const account);
+static gboolean _main_update(gpointer data);
 
 pthread_mutex_t lock;
 static gboolean force_quit = FALSE;
+GMainLoop* mainloop = NULL;
 
 void
 prof_run(char* log_level, char* account_name, char* config_file, char* log_file, char* theme_name)
 {
-    gboolean cont = TRUE;
-
     _init(log_level, config_file, log_file, theme_name);
     plugins_on_start();
     _connect_default(account_name);
@@ -105,39 +107,39 @@ prof_run(char* log_level, char* account_name, char* config_file, char* log_file,
 
     session_init_activity();
 
-    char* line = NULL;
-    while (cont && !force_quit) {
-        log_stderr_handler();
-        session_check_autoaway();
-
-        line = inp_readline();
-        if (line) {
-            ProfWin* window = wins_get_current();
-            cont = cmd_process_input(window, line);
-            free(line);
-            line = NULL;
-        } else {
-            cont = TRUE;
-        }
-
-#ifdef HAVE_LIBOTR
-        otr_poll();
-#endif
-        plugins_run_timed();
-        notify_remind();
-        session_process_events();
-        iq_autoping_check();
-        ui_update();
-#ifdef HAVE_GTK
-        tray_update();
-#endif
-    }
+    mainloop = g_main_loop_new(NULL, TRUE);
+    g_timeout_add(1000 / 60, _main_update, NULL);
+    inp_add_watch();
+    g_main_loop_run(mainloop);
 }
 
 void
 prof_set_quit(void)
 {
     force_quit = TRUE;
+}
+
+static gboolean
+_main_update(gpointer data)
+{
+    log_stderr_handler();
+    session_check_autoaway();
+
+#ifdef HAVE_LIBOTR
+    otr_poll();
+#endif
+    plugins_run_timed();
+    notify_remind();
+    session_process_events();
+    iq_autoping_check();
+    ui_update();
+    chat_state_idle();
+#ifdef HAVE_GTK
+    tray_update();
+#endif
+
+    // Always repeat
+    return TRUE;
 }
 
 static void
