@@ -6182,11 +6182,6 @@ cmd_statusbar(ProfWin* window, const char* const command, gchar** args)
         auto_char char* err_msg = NULL;
         gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
         if (res) {
-            if (intval < 0 || intval > 10) {
-                cons_bad_cmd_usage(command);
-                return TRUE;
-            }
-
             prefs_set_statusbartabs(intval);
             if (intval == 0) {
                 cons_show("Status bar tabs disabled.");

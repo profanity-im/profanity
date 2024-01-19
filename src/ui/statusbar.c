@@ -77,8 +77,10 @@ typedef struct _status_bar_t
 static GTimeZone* tz;
 static StatusBar* statusbar;
 static WINDOW* statusbar_win;
+static int left_part_size;
 
 void _get_range_bounds(int* start, int* end, gboolean is_static);
+static int _get_max_tabs();
 static int _status_bar_draw_time(int pos);
 static int _status_bar_draw_maintext(int pos);
 static int _status_bar_draw_bracket(gboolean current, int pos, const char* ch);
@@ -285,11 +287,14 @@ status_bar_draw(void)
     werase(statusbar_win);
     wbkgd(statusbar_win, theme_attrs(THEME_STATUS_TEXT));
 
-    gint max_tabs = prefs_get_statusbartabs();
+    gint max_tabs = _get_max_tabs();
     int pos = 1;
 
     pos = _status_bar_draw_time(pos);
     pos = _status_bar_draw_maintext(pos);
+
+    left_part_size = pos;
+
     if (max_tabs != 0)
         pos = _status_bar_draw_tabs(pos);
 
@@ -367,7 +372,7 @@ _status_bar_draw_tabs(int pos)
 static gboolean
 _has_new_msgs_beyond_range_on_side(gboolean left_side, int display_tabs_start, int display_tabs_end)
 {
-    gint max_tabs = prefs_get_statusbartabs();
+    gint max_tabs = _get_max_tabs();
     int tabs_count = g_hash_table_size(statusbar->tabs);
     if (tabs_count <= max_tabs) {
         return FALSE;
@@ -389,7 +394,7 @@ _has_new_msgs_beyond_range_on_side(gboolean left_side, int display_tabs_start, i
 static int
 _status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end, gboolean is_static)
 {
-    gint max_tabs = prefs_get_statusbartabs();
+    gint max_tabs = _get_max_tabs();
     if (max_tabs == 0) {
         return pos;
     }
@@ -620,7 +625,7 @@ _tabs_width(int start, int end)
     gboolean show_number = prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER);
     gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
     gboolean show_read = prefs_get_boolean(PREF_STATUSBAR_SHOW_READ);
-    gint max_tabs = prefs_get_statusbartabs();
+    gint max_tabs = _get_max_tabs();
     guint opened_tabs = g_hash_table_size(statusbar->tabs);
 
     int width = start < 2 ? 1 : 4;
@@ -718,7 +723,7 @@ void
 _get_range_bounds(int* start, int* end, gboolean is_static)
 {
     int current_tab = statusbar->current_tab;
-    gint display_range = prefs_get_statusbartabs();
+    gint display_range = _get_max_tabs();
     int total_tabs = g_hash_table_size(statusbar->tabs);
     int side_range = display_range / 2;
 
@@ -765,4 +770,10 @@ _count_digits_in_range(int start, int end)
     }
 
     return total_digits;
+}
+
+static int
+_get_max_tabs()
+{
+    return MIN(prefs_get_statusbartabs(), (getmaxx(stdscr) - left_part_size) / 3);
 }
