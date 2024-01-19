@@ -181,10 +181,6 @@ _inp_callback(GIOChannel* source, GIOCondition condition, gpointer data)
     }
 
     ui_reset_idle_time();
-    if (!get_password) {
-        // Update the input buffer on screen
-        _inp_write(rl_line_buffer, rl_point);
-    }
 
     if (inp_line) {
         ProfWin* window = wins_get_current();
