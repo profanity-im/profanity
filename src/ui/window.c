@@ -694,7 +694,7 @@ win_page_down(ProfWin* window, int scroll_size)
     *page_start += scroll_size;
 
     // Scrolled down after reaching the bottom of the page
-    if ((*page_start == total_rows || (*page_start == page_space && *page_start >= total_rows)) && window->type == WIN_CHAT) {
+    if ((*page_start > total_rows - page_space || (*page_start == page_space && *page_start >= total_rows)) && window->type == WIN_CHAT) {
         int bf_size = buffer_size(window->layout->buffer);
         if (bf_size > 0) {
             ProfBuffEntry* last_entry = buffer_get_entry(window->layout->buffer, bf_size - 1);
@@ -708,19 +708,19 @@ win_page_down(ProfWin* window, int scroll_size)
             g_date_time_unref(now);
 
             int offset = last_entry->y_end_pos - 1;
-            *page_start = offset;
+            *page_start = offset - page_space + scroll_size;
         }
     }
 
     total_rows = getcury(window->layout->win);
 
-    // only got half a screen, show full screen
-    if ((total_rows - (*page_start)) < page_space)
+    // near the end, but will display only part of the page space, move a bit back to show full page
+    if ((total_rows - *page_start) < page_space) {
         *page_start = total_rows - page_space;
-
-    // went past end, show full screen
-    else if (*page_start >= total_rows)
+        // went past end, show last page
+    } else if (*page_start >= total_rows) {
         *page_start = total_rows - page_space - 1;
+    }
 
     window->layout->paged = 1;
 
@@ -730,7 +730,7 @@ win_page_down(ProfWin* window, int scroll_size)
     }
 
     // switch off page if last line and space line visible
-    if ((total_rows) - *page_start == page_space) {
+    if (total_rows - *page_start == page_space) {
         window->layout->paged = 0;
     }
 }
