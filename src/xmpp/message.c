@@ -477,8 +477,7 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
 
     xmpp_stanza_t* message = NULL;
 #ifdef HAVE_LIBGPGME
-    char* account_name = session_get_account_name();
-    ProfAccount* account = accounts_get_account(account_name);
+    ProfAccount* account = accounts_get_account(session_get_account_name());
     if (account->pgp_keyid) {
         auto_jid Jid* jidp = jid_create(jid);
         auto_char char* encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
@@ -540,8 +539,7 @@ message_send_chat_ox(const char* const barejid, const char* const msg, gboolean 
 
     xmpp_stanza_t* message = NULL;
 
-    char* account_name = session_get_account_name();
-    ProfAccount* account = accounts_get_account(account_name);
+    ProfAccount* account = accounts_get_account(session_get_account_name());
 
     message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
     xmpp_message_set_body(message, "This message is encrypted (XEP-0373: OpenPGP for XMPP).");

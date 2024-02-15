@@ -179,8 +179,7 @@ bookmark_join(const char* jid)
         return FALSE;
     }
 
-    char* account_name = session_get_account_name();
-    ProfAccount* account = accounts_get_account(account_name);
+    ProfAccount* account = accounts_get_account(session_get_account_name());
     if (!muc_active(bookmark->barejid)) {
         char* nick = bookmark->nick;
         if (!nick) {

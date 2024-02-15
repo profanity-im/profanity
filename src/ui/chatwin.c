@@ -67,8 +67,7 @@ gboolean
 _pgp_automatic_start(const char* const recipient)
 {
     gboolean result = FALSE;
-    char* account_name = session_get_account_name();
-    ProfAccount* account = accounts_get_account(account_name);
+    ProfAccount* account = accounts_get_account(session_get_account_name());
 
     if (g_list_find_custom(account->pgp_enabled, recipient, (GCompareFunc)g_strcmp0)) {
         result = TRUE;
@@ -82,8 +81,7 @@ gboolean
 _ox_automatic_start(const char* const recipient)
 {
     gboolean result = FALSE;
-    char* account_name = session_get_account_name();
-    ProfAccount* account = accounts_get_account(account_name);
+    ProfAccount* account = accounts_get_account(session_get_account_name());
 
     if (g_list_find_custom(account->ox_enabled, recipient, (GCompareFunc)g_strcmp0)) {
         result = TRUE;

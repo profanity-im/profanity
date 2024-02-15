@@ -185,7 +185,7 @@ jabber_conn_status_t session_connect_with_account(const ProfAccount* const accou
 void session_disconnect(void);
 void session_shutdown(void);
 void session_process_events(void);
-char* session_get_account_name(void);
+const char* session_get_account_name(void);
 void session_reconnect_now(void);
 
 void connection_disconnect(void);

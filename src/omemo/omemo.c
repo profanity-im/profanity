@@ -1365,8 +1365,7 @@ gboolean
 omemo_automatic_start(const char* const recipient)
 {
     gboolean result = FALSE;
-    char* account_name = session_get_account_name();
-    ProfAccount* account = accounts_get_account(account_name);
+    ProfAccount* account = accounts_get_account(session_get_account_name());
     prof_omemopolicy_t policy;
 
     if (account->omemo_policy) {

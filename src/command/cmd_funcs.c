@@ -943,8 +943,7 @@ _account_set_presence_priority(char* account_name, char* presence, char* priorit
 
     jabber_conn_status_t conn_status = connection_get_status();
     if (conn_status == JABBER_CONNECTED) {
-        char* connected_account = session_get_account_name();
-        resource_presence_t last_presence = accounts_get_last_presence(connected_account);
+        resource_presence_t last_presence = accounts_get_last_presence(session_get_account_name());
         if (presence_type == last_presence) {
             cl_ev_presence_send(last_presence, 0);
         }
@@ -3560,8 +3559,7 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (args[0] == NULL) {
-        char* account_name = session_get_account_name();
-        ProfAccount* account = accounts_get_account(account_name);
+        ProfAccount* account = accounts_get_account(session_get_account_name());
         if (account && account->muc_service) {
             char* uuid = connection_create_uuid();
             auto_gchar gchar* room_str = g_strdup_printf("private-chat-%s@%s", uuid, account->muc_service);
@@ -3587,8 +3585,7 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
     auto_gchar gchar* room = NULL;
     char* nick = NULL;
     char* passwd = NULL;
-    char* account_name = session_get_account_name();
-    ProfAccount* account = accounts_get_account(account_name);
+    ProfAccount* account = accounts_get_account(session_get_account_name());
 
     // full room jid supplied (room@server)
     if (room_arg->localpart) {

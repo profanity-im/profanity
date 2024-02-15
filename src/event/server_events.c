@@ -146,7 +146,7 @@ sv_ev_roster_received(void)
         ui_show_roster();
     }
 
-    char* account_name = session_get_account_name();
+    const char* account_name = session_get_account_name();
 
 #ifdef HAVE_LIBGPGME
     // check pgp key valid if specified
@@ -275,8 +275,7 @@ sv_ev_room_history(ProfMessage* message)
     if (prefs_get_boolean(PREF_NOTIFY_ROOM_OFFLINE)) {
         // check if this message was sent while we were offline.
         // if so, treat it as a new message rather than a history event.
-        char* account_name = session_get_account_name();
-        auto_gchar gchar* last_activity = accounts_get_last_activity(account_name);
+        auto_gchar gchar* last_activity = accounts_get_last_activity(session_get_account_name());
         int msg_is_new = 0;
 
         if (last_activity) {
@@ -1302,8 +1301,7 @@ sv_ev_bookmark_autojoin(Bookmark* bookmark)
     if (bookmark->nick) {
         nick = strdup(bookmark->nick);
     } else {
-        char* account_name = session_get_account_name();
-        ProfAccount* account = accounts_get_account(account_name);
+        ProfAccount* account = accounts_get_account(session_get_account_name());
         nick = strdup(account->muc_nick);
         account_free(account);
     }

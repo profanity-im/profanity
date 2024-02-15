@@ -2885,8 +2885,7 @@ cons_privacy_setting(void)
     }
 
     if (connection_get_status() == JABBER_CONNECTED) {
-        char* account_name = session_get_account_name();
-        ProfAccount* account = accounts_get_account(account_name);
+        ProfAccount* account = accounts_get_account(session_get_account_name());
 
         if (account->client) {
             cons_show("Client name (/account set <account> clientid)              : %s", account->client);

@@ -128,7 +128,7 @@ connection_get_presence_msg(void)
     return mock_ptr_type(const char*);
 }
 
-char*
+const char*
 session_get_account_name(void)
 {
     return mock_ptr_type(char*);
