@@ -183,6 +183,19 @@ _inp_callback(GIOChannel* source, GIOCondition condition, gpointer data)
     ui_reset_idle_time();
 
     if (inp_line) {
+        if (!get_password && prefs_get_boolean(PREF_SLASH_GUARD)) {
+            // ignore quoted messages
+            if (strlen(inp_line) > 1 && inp_line[0] != '>') {
+                char* res = (char*)memchr(inp_line + 1, '/', 3);
+                if (res) {
+                    cons_show("Your text contains a slash in the first 4 characters");
+                    free(inp_line);
+                    inp_line = NULL;
+                    return TRUE;
+                }
+            }
+        }
+
         ProfWin* window = wins_get_current();
 
         if (!cmd_process_input(window, inp_line))
@@ -242,16 +255,6 @@ inp_readline(void)
     }
 
     if (inp_line) {
-        if (!get_password && prefs_get_boolean(PREF_SLASH_GUARD)) {
-            // ignore quoted messages
-            if (strlen(inp_line) > 1 && inp_line[0] != '>') {
-                char* res = (char*)memchr(inp_line + 1, '/', 3);
-                if (res) {
-                    cons_show("Your text contains a slash in the first 4 characters");
-                    return NULL;
-                }
-            }
-        }
         return strdup(inp_line);
     } else {
         return NULL;
