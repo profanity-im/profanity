@@ -130,7 +130,6 @@ unittest_sources = \
 	tests/unittests/xmpp/stub_xmpp.c \
 	tests/unittests/xmpp/stub_message.c \
 	tests/unittests/ui/stub_ui.c tests/unittests/ui/stub_ui.h \
-	tests/unittests/ui/stub_inputwin.c tests/unittests/ui/stub_inputwin.h \
 	tests/unittests/ui/stub_vcardwin.c \
 	tests/unittests/log/stub_log.c \
 	tests/unittests/chatlog/stub_chatlog.c \

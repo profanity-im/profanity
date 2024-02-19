@@ -44,6 +44,5 @@ void prof_run(char* log_level, char* account_name, char* config_file, char* log_
 void prof_set_quit(void);
 
 extern pthread_mutex_t lock;
-extern GMainLoop* mainloop;
 
 #endif
