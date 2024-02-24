@@ -110,6 +110,7 @@ aesgcm_file_get(void* userdata)
     http_dl->url = strdup(https_url);
     http_dl->filename = strdup(tmpname);
     http_dl->cmd_template = NULL;
+    http_dl->silent = FALSE;
     aesgcm_dl->http_dl = http_dl;
 
     http_file_get(http_dl); // TODO(wstrm): Verify result.
