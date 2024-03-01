@@ -9447,6 +9447,7 @@ _url_http_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* p
     download->filename = strdup(filename);
     download->id = strdup(id);
     download->cmd_template = cmd_template ? strdup(cmd_template) : NULL;
+    download->silent = FALSE;
 
     pthread_create(&(download->worker), NULL, &http_file_get, download);
     http_download_add_download(download);
