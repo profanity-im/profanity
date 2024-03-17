@@ -16,7 +16,7 @@ accounts_close(void)
 }
 
 char*
-accounts_find_all(char* prefix)
+accounts_find_all(const char* const prefix, gboolean previous, void* context)
 {
     return NULL;
 }
