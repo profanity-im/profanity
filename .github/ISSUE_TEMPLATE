@@ -31,4 +31,6 @@
 * If you could not yet build profanity, mention the revision you try to build from
 * Operating System/Distribution
 * glib version
+* libstrophe version
+* Some bugs might be due to specific implementation in the server. `/serversoftware example.domain` can be helpful
 
