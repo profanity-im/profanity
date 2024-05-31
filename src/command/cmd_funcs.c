@@ -3077,6 +3077,12 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
         if (!res) {
             cons_show("User %s already blocked.", args[1]);
         }
+
+        // remove the subscription as well
+        if (presence_sub_request_exists(jid)) {
+            presence_subscription(jid, PRESENCE_UNSUBSCRIBED);
+        }
+
         return TRUE;
     }
 
