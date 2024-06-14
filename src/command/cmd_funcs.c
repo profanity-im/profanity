@@ -8688,6 +8688,11 @@ cmd_omemo_start(ProfWin* window, const char* const command, gchar** args)
         ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
+        if (mucwin->is_omemo) {
+            win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "You are already in an OMEMO session.");
+            return TRUE;
+        }
+
         if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS
             && muc_member_type(mucwin->roomjid) == MUC_MEMBER_TYPE_MEMBERS_ONLY) {
             accounts_add_omemo_state(session_get_account_name(), mucwin->roomjid, TRUE);
