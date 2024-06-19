@@ -565,17 +565,15 @@ _status_bar_draw_maintext(int pos)
     }
 
     if (statusbar->fulljid) {
-        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_SELF);
-
-        if (g_strcmp0(pref, "off") == 0) {
+        if (g_strcmp0(self, "off") == 0) {
             return pos;
         }
-        if (g_strcmp0(pref, "user") == 0) {
+        if (g_strcmp0(self, "user") == 0) {
             auto_jid Jid* jidp = jid_create(statusbar->fulljid);
             mvwprintw(statusbar_win, 0, pos, "%s", jidp->localpart);
             return pos;
         }
-        if (g_strcmp0(pref, "barejid") == 0) {
+        if (g_strcmp0(self, "barejid") == 0) {
             auto_jid Jid* jidp = jid_create(statusbar->fulljid);
             mvwprintw(statusbar_win, 0, pos, "%s", jidp->barejid);
             return pos;
