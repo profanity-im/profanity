@@ -145,7 +145,7 @@ buffer_remove_entry(ProfBuff buffer, int entry)
     GSList* node = g_slist_nth(buffer->entries, entry);
     ProfBuffEntry* e = node->data;
     buffer->lines -= e->_lines;
-    _free_entry(node->data);
+    _free_entry(e);
     buffer->entries = g_slist_delete_link(buffer->entries, node);
 }
 
