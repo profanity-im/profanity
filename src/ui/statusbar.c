@@ -549,37 +549,20 @@ _status_bar_draw_maintext(int pos)
         return pos;
     }
 
-    if (statusbar->fulljid) {
-        jidp = jid_create(statusbar->fulljid);
-        if (g_strcmp0(self, "user") == 0) {
-            maintext = jidp->localpart;
-        } else if (g_strcmp0(self, "barejid") == 0) {
-            maintext = jidp->barejid;
-        } else {
-            maintext = statusbar->fulljid;
-        }
-    }
-
-    if (maintext == NULL) {
+    if (statusbar->fulljid == NULL) {
         return pos;
     }
 
-    if (statusbar->fulljid) {
-        if (g_strcmp0(self, "off") == 0) {
-            return pos;
-        }
-        if (g_strcmp0(self, "user") == 0) {
-            auto_jid Jid* jidp = jid_create(statusbar->fulljid);
-            mvwprintw(statusbar_win, 0, pos, "%s", jidp->localpart);
-            return pos;
-        }
-        if (g_strcmp0(self, "barejid") == 0) {
-            auto_jid Jid* jidp = jid_create(statusbar->fulljid);
-            mvwprintw(statusbar_win, 0, pos, "%s", jidp->barejid);
-            return pos;
-        }
+    jidp = jid_create(statusbar->fulljid);
+    if (!jidp)
+        return pos;
 
-        mvwprintw(statusbar_win, 0, pos, "%s", statusbar->fulljid);
+    if (g_strcmp0(self, "user") == 0) {
+        maintext = jidp->localpart;
+    } else if (g_strcmp0(self, "barejid") == 0) {
+        maintext = jidp->barejid;
+    } else {
+        maintext = statusbar->fulljid;
     }
 
     gboolean actlist_tabmode = _tabmode_is_actlist();
