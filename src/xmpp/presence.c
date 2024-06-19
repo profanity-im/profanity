@@ -247,7 +247,7 @@ presence_send(const resource_presence_t presence_type, const int idle, char* sig
         last = STANZA_TEXT_ONLINE;
     }
 
-    char* account = session_get_account_name();
+    const char* account = session_get_account_name();
     accounts_set_last_presence(account, last);
     accounts_set_last_status(account, msg);
 }

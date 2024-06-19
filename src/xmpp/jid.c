@@ -164,15 +164,7 @@ char*
 create_fulljid(const char* const barejid, const char* const resource)
 {
     auto_gchar gchar* barejidlower = g_utf8_strdown(barejid, -1);
-    GString* full_jid = g_string_new(barejidlower);
-    g_string_append(full_jid, "/");
-    g_string_append(full_jid, resource);
-
-    char* result = strdup(full_jid->str);
-
-    g_string_free(full_jid, TRUE);
-
-    return result;
+    return g_strdup_printf("%s/%s", barejidlower, resource);
 }
 
 /*

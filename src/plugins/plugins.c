@@ -313,8 +313,7 @@ plugins_unload(const char* const name)
         caps_reset_ver();
         // resend presence to update server's disco info data for this client
         if (connection_get_status() == JABBER_CONNECTED) {
-            char* account_name = session_get_account_name();
-            resource_presence_t last_presence = accounts_get_last_presence(account_name);
+            resource_presence_t last_presence = accounts_get_last_presence(session_get_account_name());
             cl_ev_presence_send(last_presence, 0);
         }
         return TRUE;

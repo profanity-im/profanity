@@ -119,8 +119,7 @@ cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs
     auto_char char* signed_status = NULL;
 
 #ifdef HAVE_LIBGPGME
-    char* account_name = session_get_account_name();
-    ProfAccount* account = accounts_get_account(account_name);
+    ProfAccount* account = accounts_get_account(session_get_account_name());
     if (account->pgp_keyid) {
         signed_status = p_gpg_sign(connection_get_presence_msg(), account->pgp_keyid);
     }

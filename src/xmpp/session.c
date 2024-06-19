@@ -272,7 +272,7 @@ session_process_events(void)
     }
 }
 
-char*
+const char*
 session_get_account_name(void)
 {
     return saved_account.name;
@@ -417,7 +417,7 @@ session_check_autoaway(void)
     int away_time_ms = away_time * 60000;
     int xa_time_ms = xa_time * 60000;
 
-    char* account = session_get_account_name();
+    const char* account = session_get_account_name();
     resource_presence_t curr_presence = accounts_get_last_presence(account);
     auto_char char* curr_status = accounts_get_last_status(account);
 
