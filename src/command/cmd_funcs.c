@@ -8639,7 +8639,7 @@ cmd_omemo_start(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (!omemo_loaded()) {
-        win_println(window, THEME_DEFAULT, "!", "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
+        win_println(window, THEME_DEFAULT, "!", "You have not generated or loaded cryptographic materials, use '/omemo gen'");
         return TRUE;
     }
 
@@ -8848,7 +8848,7 @@ cmd_omemo_fingerprint(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (!omemo_loaded()) {
-        win_println(window, THEME_DEFAULT, "!", "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
+        win_println(window, THEME_DEFAULT, "!", "You have not generated or loaded cryptographic materials, use '/omemo gen'");
         return TRUE;
     }
 
@@ -8919,7 +8919,7 @@ cmd_omemo_trust(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (!omemo_loaded()) {
-        win_println(window, THEME_DEFAULT, "!", "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
+        win_println(window, THEME_DEFAULT, "!", "You have not generated or loaded cryptographic materials, use '/omemo gen'");
         return TRUE;
     }
 
@@ -8986,7 +8986,7 @@ cmd_omemo_untrust(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (!omemo_loaded()) {
-        win_println(window, THEME_DEFAULT, "!", "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
+        win_println(window, THEME_DEFAULT, "!", "You have not generated or loaded cryptographic materials, use '/omemo gen'");
         return TRUE;
     }
 
@@ -9089,7 +9089,7 @@ cmd_omemo_qrcode(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (!omemo_loaded()) {
-        win_println(window, THEME_DEFAULT, "!", "You have not generated or loaded a cryptographic materials, use '/omemo gen'");
+        win_println(window, THEME_DEFAULT, "!", "You have not generated or loaded cryptographic materials, use '/omemo gen'");
         return TRUE;
     }
 
