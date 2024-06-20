@@ -9391,10 +9391,26 @@ cmd_slashguard(ProfWin* window, const char* const command, gchar** args)
 }
 
 gchar*
-_prepare_filename(gchar* url, gchar* path)
+_prepare_filename(ProfWin* window, gchar* url, gchar* path)
 {
+    char* jid = NULL;
+
+    // lets skip private windows and put those files in general download folder
+    switch (window->type) {
+    case WIN_CHAT:
+        ProfChatWin* chatwin = (ProfChatWin*)window;
+        jid = chatwin->barejid;
+        break;
+    case WIN_MUC:
+        ProfMucWin* mucwin = (ProfMucWin*)window;
+        jid = mucwin->roomjid;
+        break;
+    default:
+        break;
+    }
+
     // Ensure that the downloads directory exists for saving cleartexts.
-    auto_gchar gchar* downloads_dir = path ? get_expanded_path(path) : files_get_data_path(DIR_DOWNLOADS);
+    auto_gchar gchar* downloads_dir = path ? get_expanded_path(path) : files_get_download_path(jid);
     if (g_mkdir_with_parents(downloads_dir, S_IRWXU) != 0) {
         cons_show_error("Failed to create download directory "
                         "at '%s' with error '%s'",
@@ -9411,7 +9427,7 @@ _prepare_filename(gchar* url, gchar* path)
 void
 _url_aesgcm_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* path)
 {
-    auto_gchar gchar* filename = _prepare_filename(url, path);
+    auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return;
     auto_char char* id = get_random_string(4);
@@ -9434,7 +9450,7 @@ _url_aesgcm_method(ProfWin* window, const char* cmd_template, gchar* url, gchar*
 static gboolean
 _download_install_plugin(ProfWin* window, gchar* url, gchar* path)
 {
-    auto_gchar gchar* filename = _prepare_filename(url, path);
+    auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return FALSE;
     HTTPDownload* download = malloc(sizeof(HTTPDownload));
@@ -9452,7 +9468,7 @@ _download_install_plugin(ProfWin* window, gchar* url, gchar* path)
 void
 _url_http_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* path)
 {
-    auto_gchar gchar* filename = _prepare_filename(url, path);
+    auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return;
     auto_char char* id = get_random_string(4);
@@ -9556,7 +9572,7 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
         _url_aesgcm_method(window, cmd_template, url, path);
 #endif
     } else if (cmd_template != NULL) {
-        auto_gchar gchar* filename = _prepare_filename(url, NULL);
+        auto_gchar gchar* filename = _prepare_filename(window, url, NULL);
         if (!filename)
             return TRUE;
         _url_external_method(cmd_template, url, filename);
