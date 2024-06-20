@@ -83,7 +83,7 @@ static int _status_bar_draw_time(int pos);
 static int _status_bar_draw_maintext(int pos);
 static int _status_bar_draw_bracket(gboolean current, int pos, const char* ch);
 static int _status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end, gboolean is_static);
-static int _status_bar_draw_tab(StatusBarTab* tab, int pos, int num);
+static int _status_bar_draw_tab(StatusBarTab* tab, int pos, int num, gboolean include_brackets);
 static int _status_bar_draw_tabs(int pos);
 static void _destroy_tab(StatusBarTab* tab);
 static int _tabs_width(int start, int end);
@@ -317,7 +317,7 @@ _status_bar_draw_tabs(int pos)
         for (int i = start; i <= end; i++) {
             StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
-                pos = _status_bar_draw_tab(tab, pos, i);
+                pos = _status_bar_draw_tab(tab, pos, i, TRUE);
             }
         }
 
@@ -342,14 +342,9 @@ _status_bar_draw_tabs(int pos)
             for (guint i = 1; i <= tabnum && print_act; ++i) {
                 StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
                 if (tab && tab->highlight) {
-                    if (print_act == 1) {
-                        mvwprintw(statusbar_win, 0, pos, "%d", i);
-                        pos++;
-                    } else {
-                        mvwprintw(statusbar_win, 0, pos, "%d,", i);
-                        pos += 2;
-                    }
-                    for (guint limit = 10; i >= limit; limit *= 10) {
+                    pos = _status_bar_draw_tab(tab, pos, i, FALSE);
+                    if (print_act > 1) {
+                        mvwprintw(statusbar_win, 0, pos, ",");
                         pos++;
                     }
                     print_act--;
@@ -429,7 +424,7 @@ _status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end, gbo
 }
 
 static int
-_status_bar_draw_tab(StatusBarTab* tab, int pos, int num)
+_status_bar_draw_tab(StatusBarTab* tab, int pos, int num, gboolean include_brackets)
 {
     gboolean is_current = num == statusbar->current_tab;
 
@@ -441,7 +436,9 @@ _status_bar_draw_tab(StatusBarTab* tab, int pos, int num)
     if (!show_read && !is_current && !tab->highlight)
         return pos;
 
-    pos = _status_bar_draw_bracket(is_current, pos, "[");
+    if (include_brackets) {
+        pos = _status_bar_draw_bracket(is_current, pos, "[");
+    }
 
     int status_attrs;
     if (is_current) {
@@ -468,7 +465,9 @@ _status_bar_draw_tab(StatusBarTab* tab, int pos, int num)
     }
     wattroff(statusbar_win, status_attrs);
 
-    pos = _status_bar_draw_bracket(is_current, pos, "]");
+    if (include_brackets) {
+        pos = _status_bar_draw_bracket(is_current, pos, "]");
+    }
 
     return pos;
 }
@@ -550,39 +549,20 @@ _status_bar_draw_maintext(int pos)
         return pos;
     }
 
-    if (statusbar->fulljid) {
-        jidp = jid_create(statusbar->fulljid);
-        if (g_strcmp0(self, "user") == 0) {
-            maintext = jidp->localpart;
-        } else if (g_strcmp0(self, "barejid") == 0) {
-            maintext = jidp->barejid;
-        } else {
-            maintext = statusbar->fulljid;
-        }
-    }
-
-    if (maintext == NULL) {
+    if (statusbar->fulljid == NULL) {
         return pos;
     }
 
-    if (statusbar->fulljid) {
-        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_SELF);
+    jidp = jid_create(statusbar->fulljid);
+    if (!jidp)
+        return pos;
 
-        if (g_strcmp0(pref, "off") == 0) {
-            return pos;
-        }
-        if (g_strcmp0(pref, "user") == 0) {
-            auto_jid Jid* jidp = jid_create(statusbar->fulljid);
-            mvwprintw(statusbar_win, 0, pos, "%s", jidp->localpart);
-            return pos;
-        }
-        if (g_strcmp0(pref, "barejid") == 0) {
-            auto_jid Jid* jidp = jid_create(statusbar->fulljid);
-            mvwprintw(statusbar_win, 0, pos, "%s", jidp->barejid);
-            return pos;
-        }
-
-        mvwprintw(statusbar_win, 0, pos, "%s", statusbar->fulljid);
+    if (g_strcmp0(self, "user") == 0) {
+        maintext = jidp->localpart;
+    } else if (g_strcmp0(self, "barejid") == 0) {
+        maintext = jidp->barejid;
+    } else {
+        maintext = statusbar->fulljid;
     }
 
     gboolean actlist_tabmode = _tabmode_is_actlist();
