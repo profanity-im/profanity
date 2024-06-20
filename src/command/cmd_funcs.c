@@ -569,6 +569,12 @@ cmd_account_remove(ProfWin* window, const char* const command, gchar** args)
     }
     cons_show("");
 
+    auto_gchar gchar* autocon_account = prefs_get_string(PREF_CONNECT_ACCOUNT);
+    if (g_strcmp0(account_name, autocon_account) == 0) {
+        prefs_set_string(PREF_CONNECT_ACCOUNT, NULL);
+        cons_show("Autoconnect account reset because the corresponding account was removed.");
+    }
+
     return TRUE;
 }
 
