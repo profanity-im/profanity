@@ -57,6 +57,7 @@ We will then pull from your repository and merge manually.
 ## Hints and Pitfalls
 
 * When adding a new hotkey/shortcut make sure it's not registered in Profanity already. And also that it's not a default shortcut of readline.
+* We ship a `.git-blame-ignore-revs` file containing banal commits which you will most likely want to ignore when using `git blame`. In case you are using vim and fugitive `command Gblame Git blame --ignore-revs-file=.git-blame-ignore-revs` might be helpful in your vimrc.
 
 ## Coding style
 Follow the style already present ;-)
