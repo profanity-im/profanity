@@ -271,7 +271,11 @@ omemo_on_disconnect(void)
     free_keyfile(&omemo_ctx.identity);
 
     signal_protocol_store_context_destroy(omemo_ctx.store);
+    ec_public_key* pub = ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair);
+    ec_private_key* priv = ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair);
     ratchet_identity_key_pair_destroy((signal_type_base*)omemo_ctx.identity_key_pair);
+    ec_private_key_destroy((signal_type_base*)priv);
+    ec_public_key_destroy((signal_type_base*)pub);
 
     signal_context_destroy(omemo_ctx.signal);
     memset(&omemo_ctx, 0, sizeof(omemo_ctx));
@@ -1466,8 +1470,6 @@ _load_identity(void)
     ec_private_key* private_key;
     curve_decode_private_point(&private_key, identity_key_private, identity_key_private_len, omemo_ctx.signal);
     ratchet_identity_key_pair_create(&omemo_ctx.identity_key_pair, public_key, private_key);
-    ec_private_key_destroy((signal_type_base*)private_key);
-    ec_public_key_destroy((signal_type_base*)public_key);
 
     char** keys = NULL;
     int i;
