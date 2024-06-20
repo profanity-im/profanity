@@ -2572,7 +2572,7 @@ static const struct cmd_t command_defs[] = {
               "Open or save URLs. This works with OMEMO encrypted files as well.")
       CMD_ARGS(
               { "open", "Open URL with predefined executable." },
-              { "save", "Save URL to optional path, default path is current directory." })
+              { "save", "Save URL to optional path. The location is displayed after successful download." })
       CMD_EXAMPLES(
               "/url open https://profanity-im.github.io",
               "/url save https://profanity-im.github.io/guide/latest/userguide.html /home/user/Download/")
