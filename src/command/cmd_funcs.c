@@ -9398,13 +9398,17 @@ _prepare_filename(ProfWin* window, gchar* url, gchar* path)
     // lets skip private windows and put those files in general download folder
     switch (window->type) {
     case WIN_CHAT:
+    {
         ProfChatWin* chatwin = (ProfChatWin*)window;
         jid = chatwin->barejid;
         break;
+    }
     case WIN_MUC:
+    {
         ProfMucWin* mucwin = (ProfMucWin*)window;
         jid = mucwin->roomjid;
         break;
+    }
     default:
         break;
     }
