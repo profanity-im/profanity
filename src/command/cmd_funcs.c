@@ -8618,6 +8618,7 @@ cmd_omemo_gen(ProfWin* window, const char* const command, gchar** args)
     ui_update();
     ProfAccount* account = accounts_get_account(session_get_account_name());
     omemo_generate_crypto_materials(account);
+    account_free(account);
     cons_show("OMEMO cryptographic materials generated. Your Device ID is %d.", omemo_device_id());
     return TRUE;
 #else

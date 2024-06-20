@@ -391,16 +391,16 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted)
 
     xmpp_stanza_t* payload = xmpp_stanza_get_child_by_name(encrypted, "payload");
     if (!payload) {
-        return NULL;
+        goto quit;
     }
     payload_text = xmpp_stanza_get_text(payload);
     if (!payload_text) {
-        return NULL;
+        goto quit;
     }
     size_t payload_len;
     payload_raw = g_base64_decode(payload_text, &payload_len);
     if (!payload_raw) {
-        return NULL;
+        goto quit;
     }
 
     xmpp_stanza_t* key_stanza;
@@ -444,6 +444,7 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted)
         g_list_free_full(keys, (GDestroyNotify)omemo_key_free);
     }
 
+quit:
     g_free(iv_raw);
     g_free(payload_raw);
     g_free(iv_text);
