@@ -33,7 +33,7 @@ file_mime_type(const char* const file_name)
 }
 
 off_t
-file_size(const char* const file_name)
+file_size(int filedes)
 {
     return 0;
 }
