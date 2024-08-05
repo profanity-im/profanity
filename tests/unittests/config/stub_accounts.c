@@ -22,7 +22,7 @@ accounts_find_all(const char* const prefix, gboolean previous, void* context)
 }
 
 char*
-accounts_find_enabled(char* prefix, void* context)
+accounts_find_enabled(const char* const prefix, gboolean previous, void* context)
 {
     return NULL;
 }
@@ -37,7 +37,7 @@ accounts_reset_enabled_search(void)
 }
 
 void
-accounts_add(const char* jid, const char* altdomain, const int port)
+accounts_add(const char* jid, const char* altdomain, const int port, const char* const tls_policy, const char* const auth_policy)
 {
     check_expected(jid);
     check_expected(altdomain);
