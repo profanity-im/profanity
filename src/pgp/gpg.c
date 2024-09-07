@@ -860,7 +860,8 @@ out:
 static ProfPGPKey*
 _gpgme_key_to_ProfPGPKey(gpgme_key_t key)
 {
-    if (key == NULL) {
+    if (key == NULL || key->uids == NULL
+        || key->subkeys == NULL || key->uids->uid == NULL) {
         return NULL;
     }
 
