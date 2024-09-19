@@ -2587,7 +2587,7 @@ static const struct cmd_t command_defs[] = {
               "/mam <on>|<off>")
       CMD_DESC(
               "Enable/Disable Message Archive Management (XEP-0313) "
-              "Currently MAM in groupchats (MUCs) is not supported."
+              "Currently MAM in groupchats (MUCs) is not supported. "
               "Use the PG UP key to load more history.")
       CMD_ARGS(
               { "on|off", "Enable or disable MAM" })
