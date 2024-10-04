@@ -2608,7 +2608,7 @@ static int
 _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
     ProfChatWin* chatwin = (ProfChatWin*)userdata;
-    // Remove the "Loading messages …" message
+    // Remove the "Loading messages…" message
     buffer_remove_entry(((ProfWin*)chatwin)->layout->buffer, 0);
     chatwin_db_history(chatwin, NULL, NULL, TRUE);
     return 0;
