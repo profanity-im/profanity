@@ -7,3 +7,7 @@ The main goal of this MarkDown is to organize the ideas for this feature that ha
 
 Further ideas:
 - [ ] (optional) create a background around OMEMO messages.
+- [ ] opaqueness of non-OMEMO messages?
+
+DISCLAIMER
+This is an open source project. This feature is not about me, it is about us. Please, feel free to contribute by sharing ideas, developing code, commenting etc. :)
