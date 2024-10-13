@@ -2307,7 +2307,8 @@ static const struct cmd_t command_defs[] = {
             { "char", cmd_omemo_char },
             { "policy", cmd_omemo_policy },
             { "clear_device_list", cmd_omemo_clear_device_list },
-            { "qrcode", cmd_omemo_qrcode })
+            { "qrcode", cmd_omemo_qrcode },
+            { "colors", cmd_omemo_colors })
         CMD_TAGS(
             CMD_TAG_CHAT,
             CMD_TAG_UI)
@@ -2323,7 +2324,7 @@ static const struct cmd_t command_defs[] = {
             "/omemo policy manual|automatic|always",
             "/omemo clear_device_list",
             "/omemo qrcode",
-            "/omemo color on | off")
+            "/omemo colors on|off")
         CMD_DESC(
             "OMEMO commands to manage keys, and perform encryption during chat sessions.")
         CMD_ARGS(
@@ -2342,7 +2343,7 @@ static const struct cmd_t command_defs[] = {
             { "policy always",           "Set the global OMEMO policy to always, an error will be displayed if an OMEMO session cannot be initiated upon starting a conversation." },
             { "clear_device_list",       "Clear your own device list on server side. Each client will reannounce itself when connected back."},
             { "qrcode",                  "Display QR code of your OMEMO fingerprint"},
-            { "color on|off",            "Enable or disable coloring of OMEMO messages. Default: off." })
+            { "colors on|off",            "Enable or disable coloring of OMEMO messages. Default: off." })
         CMD_EXAMPLES(
             "/omemo gen",
             "/omemo start odin@valhalla.edda",
