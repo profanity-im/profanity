@@ -45,6 +45,12 @@ RUN make install
 WORKDIR /usr/src/profanity
 COPY . .
 
+#WORKDIR /usr/src/stabber
+#RUN ./bootstrap.sh
+#RUN ./configure --prefix=/usr --disable-dependency-tracking
+#RUN make
+#RUN make install
+
 RUN ./bootstrap.sh
 RUN ./configure --prefix=/usr  
 RUN make
