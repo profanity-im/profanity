@@ -73,6 +73,7 @@ toc_fragment.html
 
 # valgrind files
 valgrind.out
+my-prof.supp
 
 # Generate docs
 apidocs/python/_build/
