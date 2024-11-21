@@ -110,6 +110,12 @@ We provide a suppressions file `prof.supp`. It is a combination of the suppressi
 
 `G_DEBUG=gc-friendly G_SLICE=always-malloc valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --num-callers=30 --show-leak-kinds=definite --log-file=profval --suppressions=prof.supp ./profanity`
 
+There's also the option to create a "personalized" suppression file with the up-to-date glib2 and python suppressions.
+
+`make my-prof.supp`
+
+After executing this, you can replace the `--suppressions=prof.supp` argument in the above call, by `--suppressions=my-prof.supp`.
+
 ### clang
 
 Running the clang static code analyzer helps improving the quality too.

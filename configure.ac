@@ -237,7 +237,8 @@ AS_IF([test "x$PLATFORM" = xosx],
 dnl feature: icons-and-clipboard
 AS_IF([test "x$enable_icons_and_clipboard" != xno],
     [PKG_CHECK_MODULES([GTK], [gtk+-3.0 >= 3.24.0],
-        [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
+        [AC_DEFINE([HAVE_GTK], [1], [libgtk module])
+         GTK_VERSION=`pkg-config --modversion gtk+-3.0`],
         [AS_IF([test "x$enable_icons_and_clipboard" = xyes],
                [PKG_CHECK_MODULES([GTK], [gtk+-2.0 >= 2.24.10],
                                   [AC_DEFINE([HAVE_GTK], [1], [libgtk module])],
@@ -389,6 +390,7 @@ LIBS="$glib_LIBS $gio_LIBS $PTHREAD_LIBS $curl_LIBS $libnotify_LIBS $python_LIBS
 AC_SUBST(AM_LDFLAGS)
 AC_SUBST(AM_CFLAGS)
 AC_SUBST(AM_CPPFLAGS)
+AC_SUBST(GTK_VERSION)
 
 ## Output
 AC_CONFIG_FILES([Makefile])
@@ -397,6 +399,7 @@ AC_OUTPUT
 AC_MSG_NOTICE([Summary of build options:
 PLATFORM                   : $target_os
 PACKAGE_STATUS             : $PACKAGE_STATUS
+GTK_VERSION                : $GTK_VERSION
 LIBS                       : $LIBS
 Install themes             : $THEMES_INSTALL
 Themes path                : $THEMES_PATH

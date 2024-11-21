@@ -343,6 +343,14 @@ clean-local:
 	rm -f $(git_include) $(git_include).in
 endif
 
+.PHONY: my-prof.supp
+my-prof.supp:
+	@sed '/^# AUTO-GENERATED START/q' prof.supp > $@
+	@cat /usr/share/glib-2.0/valgrind/glib.supp >> $@
+	@wget -O- https://raw.githubusercontent.com/python/cpython/refs/tags/v`python3 --version | cut -d' ' -f2`/Misc/valgrind-python.supp >> $@
+	@test -z "@GTK_VERSION@" || wget -O- https://raw.githubusercontent.com/GNOME/gtk/refs/tags/@GTK_VERSION@/gtk.supp >> $@
+	@test -z "@GTK_VERSION@" || cat /usr/share/gtk-3.0/valgrind/gtk.supp >> $@
+
 check-unit: tests/unittests/unittests
 	tests/unittests/unittests
 

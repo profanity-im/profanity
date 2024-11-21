@@ -23,6 +23,13 @@
   fun:gtk_init_check
   ...
 }
+{
+  gtk_module_init
+  Memcheck:Leak
+  ...
+  fun:gtk_module_init
+  ...
+}
 
 # glib
 
@@ -43,7 +50,61 @@
   fun:omemo_crypto_init
   ...
 }
+{
+  gcry_mpi_scan
+  Memcheck:Leak
+  ...
+  fun:gcry_mpi_scan
+  ...
+}
 
+# libreadline related
+{
+    leak readline
+    Memcheck:Leak
+    ...
+    fun:readline
+}
+{
+    leak add_history
+    Memcheck:Leak
+    ...
+    fun:add_history
+}
+{
+    leak rl_make_bare_keymap
+    Memcheck:Leak
+    ...
+    fun:rl_make_bare_keymap
+}
+{
+    leak rl_add_funmap_entry
+    Memcheck:Leak
+    ...
+    fun:rl_add_funmap_entry
+}
+{
+    leak rl_initialize
+    Memcheck:Leak
+    ...
+    fun:rl_initialize
+}
+
+# Python related
+{
+   Handle PyMalloc confusing valgrind (possibly leaked)
+   Memcheck:Leak
+   ...
+   fun:_PyObject_GC_New
+}
+{
+   Handle PyMalloc confusing valgrind (possibly leaked)
+   Memcheck:Leak
+   ...
+   fun:PyType_Ready
+}
+
+# AUTO-GENERATED START
 
 # GLib Valgrind suppressions file
 #
