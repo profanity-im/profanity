@@ -64,6 +64,8 @@
 #include "xmpp/connection.h"
 #include "database.h"
 
+#define PAD_SIZE        1000
+#define LOADING_MESSAGE "Loading older messages…"
 #define CONS_WIN_TITLE "Profanity. Type /help for help information."
 #define XML_WIN_TITLE  "XML Console"
 
