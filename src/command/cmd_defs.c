@@ -2882,6 +2882,7 @@ void
 cmd_uninit(void)
 {
     cmd_ac_uninit();
+    g_hash_table_destroy(commands);
     g_hash_table_destroy(search_index);
 }
 

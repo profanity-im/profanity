@@ -84,6 +84,12 @@ presence_sub_requests_init(void)
 }
 
 void
+presence_sub_requests_destroy(void)
+{
+    autocomplete_free(sub_requests_ac);
+}
+
+void
 presence_handlers_init(void)
 {
     xmpp_conn_t* const conn = connection_get_conn();

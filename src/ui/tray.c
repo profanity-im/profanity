@@ -187,6 +187,7 @@ tray_shutdown(void)
     }
     g_string_free(icon_filename, TRUE);
     g_string_free(icon_msg_filename, TRUE);
+    gtk_main_quit();
 }
 
 void

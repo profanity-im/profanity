@@ -194,6 +194,7 @@ otr_shutdown(void)
         free(jid);
         jid = NULL;
     }
+    otrlib_shutdown();
 }
 
 void

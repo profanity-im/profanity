@@ -61,5 +61,7 @@ int color_pair_cache_hash_str(const char* str, color_profile profile);
 int color_pair_cache_get(const char* pair_name);
 /* clear cache */
 void color_pair_cache_reset(void);
+/* free cache */
+void color_pair_cache_free(void);
 
 #endif

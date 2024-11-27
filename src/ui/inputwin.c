@@ -273,6 +273,7 @@ void
 inp_close(void)
 {
     rl_callback_handler_remove();
+    delwin(inp_win);
     fclose(discard);
 }
 
