@@ -167,6 +167,8 @@ void
 connection_shutdown(void)
 {
     connection_clear_data();
+    g_hash_table_destroy(conn.requested_features);
+    g_hash_table_destroy(conn.available_resources);
     if (conn.xmpp_conn) {
         xmpp_conn_release(conn.xmpp_conn);
         conn.xmpp_conn = NULL;

@@ -44,6 +44,7 @@ void otrlib_init_ops(OtrlMessageAppOps* ops);
 
 void otrlib_init_timer(void);
 void otrlib_poll(void);
+void otrlib_shutdown(void);
 
 ConnContext* otrlib_context_find(OtrlUserState user_state, const char* const recipient, char* jid);
 

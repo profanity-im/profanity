@@ -233,7 +233,7 @@ session_shutdown(void)
     _session_free_internals();
 
     chat_sessions_clear();
-    presence_clear_sub_requests();
+    presence_sub_requests_destroy();
 
     connection_shutdown();
     if (saved_status) {
