@@ -134,10 +134,12 @@ prof_run(char* log_level, char* account_name, char* config_file, char* log_file,
     }
 }
 
-void
+gboolean
 prof_set_quit(void)
 {
+    gboolean ret = force_quit;
     force_quit = TRUE;
+    return ret;
 }
 
 static void
