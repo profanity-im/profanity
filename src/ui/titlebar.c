@@ -86,6 +86,12 @@ create_title_bar(void)
 }
 
 void
+free_title_bar(void)
+{
+    delwin(win);
+}
+
+void
 title_bar_update_virtual(void)
 {
     ProfWin* window = wins_get_current();

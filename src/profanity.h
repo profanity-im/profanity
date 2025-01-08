@@ -41,7 +41,7 @@
 #include <glib.h>
 
 void prof_run(char* log_level, char* account_name, char* config_file, char* log_file, char* theme_name);
-void prof_set_quit(void);
+gboolean prof_set_quit(void);
 
 extern pthread_mutex_t lock;
 

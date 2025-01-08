@@ -81,6 +81,7 @@
 static int inp_size;
 static gboolean perform_resize = FALSE;
 static GTimer* ui_idle_time;
+static WINDOW* main_scr;
 
 #ifdef HAVE_LIBXSS
 static Display* display;
@@ -92,7 +93,7 @@ void
 ui_init(void)
 {
     log_info("Initialising UI");
-    initscr();
+    main_scr = initscr();
     nonl();
     cbreak();
     noecho();
@@ -182,12 +183,16 @@ ui_reset_idle_time(void)
 void
 ui_close(void)
 {
+    g_timer_destroy(ui_idle_time);
+    endwin();
     notifier_uninit();
     cons_clear_alerts();
     wins_destroy();
     inp_close();
     status_bar_close();
-    endwin();
+    free_title_bar();
+    delwin(main_scr);
+    delscreen(set_term(NULL));
 }
 
 void

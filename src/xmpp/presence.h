@@ -38,6 +38,7 @@
 
 void presence_handlers_init(void);
 void presence_sub_requests_init(void);
+void presence_sub_requests_destroy(void);
 void presence_clear_sub_requests(void);
 
 #endif

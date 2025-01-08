@@ -430,13 +430,18 @@ out:
 }
 
 void
-color_pair_cache_reset(void)
+color_pair_cache_free(void)
 {
     if (cache.pairs) {
         free(cache.pairs);
         memset(&cache, 0, sizeof(cache));
     }
+}
 
+void
+color_pair_cache_reset(void)
+{
+    color_pair_cache_free();
     /*
      * COLOR_PAIRS is actually not a macro and is thus not a
      * compile-time constant

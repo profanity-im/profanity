@@ -63,6 +63,12 @@ otrlib_init_timer(void)
 }
 
 void
+otrlib_shutdown(void)
+{
+    g_timer_destroy(timer);
+}
+
+void
 otrlib_poll(void)
 {
     gdouble elapsed = g_timer_elapsed(timer, NULL);

@@ -61,11 +61,11 @@
 #include "ui/screen.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
-#include "xmpp/connection.h"
-#include "database.h"
 
-#define CONS_WIN_TITLE "Profanity. Type /help for help information."
-#define XML_WIN_TITLE  "XML Console"
+static const int PAD_SIZE = 100;
+static const char* LOADING_MESSAGE = "Loading older messages…";
+static const char* CONS_WIN_TITLE = "Profanity. Type /help for help information.";
+static const char* XML_WIN_TITLE = "XML Console";
 
 #define CEILING(X) (X - (int)(X) > 0 ? (int)(X + 1) : (int)(X))
 

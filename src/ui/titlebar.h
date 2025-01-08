@@ -37,6 +37,7 @@
 #define UI_TITLEBAR_H
 
 void create_title_bar(void);
+void free_title_bar(void);
 void title_bar_update_virtual(void);
 void title_bar_resize(void);
 void title_bar_console(void);

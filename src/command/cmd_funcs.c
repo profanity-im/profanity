@@ -1328,7 +1328,8 @@ gboolean
 cmd_quit(ProfWin* window, const char* const command, gchar** args)
 {
     log_info("Profanity is shutting down…");
-    exit(0);
+    if (prof_set_quit())
+        exit(0);
     return FALSE;
 }
 
