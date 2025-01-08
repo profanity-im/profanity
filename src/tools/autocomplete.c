@@ -57,7 +57,7 @@ struct autocomplete_t
     gchar* search_str;
 };
 
-static gchar* _search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction);
+static gchar* _search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction, gboolean substring);
 
 Autocomplete
 autocomplete_new(void)
@@ -245,7 +245,7 @@ autocomplete_contains(Autocomplete ac, const char* value)
 }
 
 gchar*
-autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, gboolean previous)
+_autocomplete_complete_internal(Autocomplete ac, const gchar* search_str, gboolean quote, gboolean previous, gboolean substring)
 {
     gchar* found = NULL;
 
@@ -266,7 +266,7 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
         }
 
         ac->search_str = strdup(search_str);
-        found = _search(ac, ac->items, quote, NEXT);
+        found = _search(ac, ac->items, quote, NEXT, substring);
 
         return found;
 
@@ -274,13 +274,13 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
     } else {
         if (previous) {
             // search from here-1 to beginning
-            found = _search(ac, g_list_previous(ac->last_found), quote, PREVIOUS);
+            found = _search(ac, g_list_previous(ac->last_found), quote, PREVIOUS, substring);
             if (found) {
                 return found;
             }
         } else {
             // search from here+1 to end
-            found = _search(ac, g_list_next(ac->last_found), quote, NEXT);
+            found = _search(ac, g_list_next(ac->last_found), quote, NEXT, substring);
             if (found) {
                 return found;
             }
@@ -288,13 +288,13 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
 
         if (previous) {
             // search from end
-            found = _search(ac, g_list_last(ac->items), quote, PREVIOUS);
+            found = _search(ac, g_list_last(ac->items), quote, PREVIOUS, substring);
             if (found) {
                 return found;
             }
         } else {
             // search from beginning
-            found = _search(ac, ac->items, quote, NEXT);
+            found = _search(ac, ac->items, quote, NEXT, substring);
             if (found) {
                 return found;
             }
@@ -305,6 +305,18 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
 
         return NULL;
     }
+}
+
+gchar*
+autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, gboolean previous)
+{
+    return _autocomplete_complete_internal(ac, search_str, quote, previous, FALSE);
+}
+
+gchar*
+autocomplete_complete_substring(Autocomplete ac, const gchar* search_str, gboolean quote, gboolean previous)
+{
+    return _autocomplete_complete_internal(ac, search_str, quote, previous, TRUE);
 }
 
 // autocomplete_func func is used -> autocomplete_param_with_func
@@ -399,7 +411,7 @@ autocomplete_remove_older_than_max_reverse(Autocomplete ac, int maxsize)
 }
 
 static gchar*
-_search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction)
+_search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction, gboolean substring)
 {
     auto_gchar gchar* search_str_ascii = g_str_to_ascii(ac->search_str, NULL);
     auto_gchar gchar* search_str_lower = g_ascii_strdown(search_str_ascii, -1);
@@ -408,9 +420,18 @@ _search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction
         auto_gchar gchar* curr_ascii = g_str_to_ascii(curr->data, NULL);
         auto_gchar gchar* curr_lower = g_ascii_strdown(curr_ascii, -1);
 
-        // match found
-        if (strncmp(curr_lower, search_str_lower, strlen(search_str_lower)) == 0) {
+        gboolean found = FALSE;
 
+        if (!substring && (strncmp(curr_lower, search_str_lower, strlen(search_str_lower)) == 0)) {
+            // if we want to start from beginning (prefix)
+            found = TRUE;
+        } else if (substring && (strstr(curr_lower, search_str_lower) != 0)) {
+            // if we only are looking for a substring
+            found = TRUE;
+        }
+
+        // match found
+        if (found) {
             // set pointer to last found
             ac->last_found = curr;
 
