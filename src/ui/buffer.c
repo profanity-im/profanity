@@ -213,12 +213,12 @@ _create_entry(const char* show_char, int pad_indent, GDateTime* time, int flags,
 static void
 _free_entry(ProfBuffEntry* entry)
 {
-    free(entry->show_char);
-    free(entry->message);
-    free(entry->display_from);
-    free(entry->from_jid);
     free(entry->id);
-    free(entry->receipt);
+    free(entry->message);
+    free(entry->from_jid);
+    free(entry->display_from);
     g_date_time_unref(entry->time);
+    free(entry->show_char);
+    free(entry->receipt);
     free(entry);
 }
