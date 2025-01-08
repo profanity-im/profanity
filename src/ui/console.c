@@ -2271,6 +2271,9 @@ cons_show_omemo_prefs(void)
     auto_gchar gchar* ch = prefs_get_omemo_char();
     cons_show("OMEMO char (/omemo char)     : %s", ch);
 
+    auto_gchar gchar* colors_value = prefs_get_string(PREF_OMEMO_COLORS);
+    cons_show("OMEMO colors (/omemo colors) : %s", colors_value);
+
     cons_alert(NULL);
 }
 

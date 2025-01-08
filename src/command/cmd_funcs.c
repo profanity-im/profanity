@@ -8800,6 +8800,30 @@ cmd_omemo_log(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_omemo_colors(ProfWin* window, const char* const command, gchar** args)
+{
+#ifdef HAVE_OMEMO
+    char* choice = args[1];
+    if (g_strcmp0(choice, "on") == 0) { 
+        prefs_set_string(PREF_OMEMO_COLORS, "on");
+        cons_show("Received OMEMO messages will be darker white.");
+    } else if (g_strcmp0(choice, "off") == 0) {
+        prefs_set_string(PREF_OMEMO_COLORS, "off");
+        cons_show("Received OMEMO messages will be the default color.");
+    }
+    else
+    {
+        cons_bad_cmd_usage(command);
+    }
+
+    return TRUE;
+#else
+    cons_show("This version of Profanity has not been built with OMEMO support enabled");
+    return TRUE;
+#endif
+}
+
+gboolean
 cmd_omemo_end(ProfWin* window, const char* const command, gchar** args)
 {
 #ifdef HAVE_OMEMO
