@@ -4633,7 +4633,7 @@ cmd_bookmark(ProfWin* window, const char* const command, gchar** args)
         // default to current nickname, password, and autojoin "on"
         ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        char* nick = muc_nick(mucwin->roomjid);
+        const char* const nick = muc_nick(mucwin->roomjid);
         char* password = muc_password(mucwin->roomjid);
         gboolean added = bookmark_add(mucwin->roomjid, nick, password, "on", NULL);
         if (added) {

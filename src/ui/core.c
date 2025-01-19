@@ -778,7 +778,7 @@ ui_room_join(const char* const roomjid, gboolean focus)
     }
     ProfWin* window = (ProfWin*)mucwin;
 
-    char* nick = muc_nick(roomjid);
+    const char* const nick = muc_nick(roomjid);
     win_print(window, THEME_ROOMINFO, "!", "-> You have joined the room as %s", nick);
     if (prefs_get_boolean(PREF_MUC_PRIVILEGES)) {
         char* role = muc_role_str(roomjid);

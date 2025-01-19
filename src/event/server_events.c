@@ -114,7 +114,7 @@ sv_ev_login_account_success(char* account_name, gboolean secured)
     GList* curr = rooms;
     while (curr) {
         char* password = muc_password(curr->data);
-        char* nick = muc_nick(curr->data);
+        const char* const nick = muc_nick(curr->data);
         presence_join_room(curr->data, nick, password);
         curr = g_list_next(curr);
     }
@@ -336,7 +336,7 @@ sv_ev_room_message(ProfMessage* message)
         return;
     }
 
-    char* mynick = muc_nick(mucwin->roomjid);
+    const char* const mynick = muc_nick(mucwin->roomjid);
 
     // only log message not coming from this client (but maybe same account, different client)
     // our messages are logged when outgoing
