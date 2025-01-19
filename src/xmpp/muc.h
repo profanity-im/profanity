@@ -94,7 +94,7 @@ GList* muc_rooms(void);
 
 void muc_set_features(const char* const room, GSList* features);
 
-char* muc_nick(const char* const room);
+const char* const muc_nick(const char* const room);
 char* muc_password(const char* const room);
 
 void muc_nick_change_start(const char* const room, const char* const new_nick);
