@@ -368,7 +368,7 @@ mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message)
     assert(mucwin != NULL);
 
     char* nick = message->from_jid->resourcepart;
-    char* mynick = muc_nick(mucwin->roomjid);
+    const char* const mynick = muc_nick(mucwin->roomjid);
     GSList* mentions = get_mentions(prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD), prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE), message->plain, mynick);
     GList* triggers = prefs_message_get_triggers(message->plain);
 
@@ -512,7 +512,7 @@ mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* c
     assert(mucwin != NULL);
 
     ProfWin* window = (ProfWin*)mucwin;
-    char* mynick = muc_nick(mucwin->roomjid);
+    const char* const mynick = muc_nick(mucwin->roomjid);
 
     // displayed message char
     auto_char char* ch = get_enc_char(enc_mode, mucwin->message_char);
@@ -548,7 +548,7 @@ mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList
     }
 
     ProfWin* window = (ProfWin*)mucwin;
-    char* mynick = muc_nick(mucwin->roomjid);
+    const char* const mynick = muc_nick(mucwin->roomjid);
 
     auto_char char* ch = get_enc_char(message->enc, mucwin->message_char);
 

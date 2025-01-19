@@ -259,7 +259,7 @@ _send_room_presence(xmpp_stanza_t* presence)
     GList* curr = rooms;
     while (curr) {
         const char* room = curr->data;
-        const char* nick = muc_nick(room);
+        const char* const nick = muc_nick(room);
 
         if (nick) {
             auto_char char* full_room_jid = create_fulljid(room, nick);
@@ -327,7 +327,7 @@ presence_leave_chat_room(const char* const room_jid)
 {
     assert(room_jid != NULL);
 
-    char* nick = muc_nick(room_jid);
+    const char* const nick = muc_nick(room_jid);
     if (!nick) {
         log_error("Could not get nickname for room: %s", room_jid);
         return;

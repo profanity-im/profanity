@@ -307,7 +307,7 @@ void
 groupchat_log_msg_out(const gchar* const room, const gchar* const msg)
 {
     if (prefs_get_boolean(PREF_GRLOG)) {
-        char* mynick = muc_nick(room);
+        const char* const mynick = muc_nick(room);
         _groupchat_log_chat(connection_get_barejid(), room, mynick, msg);
     }
 }
@@ -326,7 +326,7 @@ groupchat_log_omemo_msg_out(const gchar* const room, const gchar* const msg)
     if (prefs_get_boolean(PREF_CHLOG)) {
         const char* mybarejid = connection_get_barejid();
         auto_gchar gchar* pref_omemo_log = prefs_get_string(PREF_OMEMO_LOG);
-        char* mynick = muc_nick(room);
+        const char* const mynick = muc_nick(room);
 
         if (strcmp(pref_omemo_log, "on") == 0) {
             _groupchat_log_chat(mybarejid, room, mynick, msg);

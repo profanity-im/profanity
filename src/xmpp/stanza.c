@@ -1384,7 +1384,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t* const stanza,
     if (from) {
         auto_jid Jid* from_jid = jid_create(from);
         if (muc_active(from_jid->barejid)) {
-            char* nick = muc_nick(from_jid->barejid);
+            const char* const nick = muc_nick(from_jid->barejid);
             if (g_strcmp0(from_jid->resourcepart, nick) == 0) {
                 return TRUE;
             }
@@ -1394,7 +1394,7 @@ stanza_is_muc_self_presence(xmpp_stanza_t* const stanza,
         if (muc_nick_change_pending(from_jid->barejid)) {
             char* new_nick = from_jid->resourcepart;
             if (new_nick) {
-                char* nick = muc_nick(from_jid->barejid);
+                const char* const nick = muc_nick(from_jid->barejid);
                 char* old_nick = muc_old_nick(from_jid->barejid, new_nick);
                 if (g_strcmp0(old_nick, nick) == 0) {
                     return TRUE;
