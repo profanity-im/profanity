@@ -435,7 +435,9 @@ python_api_get_current_nick(PyObject* self, PyObject* args)
     char* nick = api_get_current_nick();
     disable_python_threads();
     if (nick) {
-        return Py_BuildValue("s", nick);
+        PyObject* obj = Py_BuildValue("s", nick);
+        free(nick);
+        return obj;
     } else {
         Py_RETURN_NONE;
     }

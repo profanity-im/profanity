@@ -231,7 +231,8 @@ api_get_current_nick(void)
     if (current->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)current;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        return muc_nick(mucwin->roomjid);
+        const char* const nick = muc_nick(mucwin->roomjid);
+        return nick ? strdup(nick) : NULL;
     } else {
         return NULL;
     }
@@ -286,7 +287,9 @@ api_current_win_is_console(void)
 char*
 api_get_room_nick(const char* barejid)
 {
-    return muc_nick(barejid);
+    const char* const nick = muc_nick(barejid);
+
+    return nick ? strdup(nick) : NULL;
 }
 
 void
