@@ -1609,7 +1609,9 @@ python_init_prof(void)
 #ifdef PY_IS_PYTHON3
     PyImport_AppendInittab("prof", python_api_init);
     Py_Initialize();
+#if PY_VERSION_HEX < 0x03070000
     PyEval_InitThreads();
+#endif
 #else
     Py_Initialize();
     PyEval_InitThreads();

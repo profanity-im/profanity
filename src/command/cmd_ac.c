@@ -297,6 +297,159 @@ static Autocomplete vcard_set_param_ac;
 static Autocomplete vcard_togglable_param_ac;
 static Autocomplete vcard_address_type_ac;
 
+static Autocomplete* all_acs[] = {
+    &commands_ac,
+    &who_room_ac,
+    &who_roster_ac,
+    &help_ac,
+    &help_commands_ac,
+    &notify_ac,
+    &notify_chat_ac,
+    &notify_room_ac,
+    &notify_typing_ac,
+    &notify_mention_ac,
+    &notify_trigger_ac,
+    &prefs_ac,
+    &sub_ac,
+    &log_ac,
+    &log_level_ac,
+    &autoaway_ac,
+    &autoaway_mode_ac,
+    &autoaway_presence_ac,
+    &autoconnect_ac,
+    &wintitle_ac,
+    &theme_ac,
+    &account_ac,
+    &account_set_ac,
+    &account_clear_ac,
+    &account_default_ac,
+    &account_status_ac,
+    &disco_ac,
+    &wins_ac,
+    &roster_ac,
+    &roster_show_ac,
+    &roster_by_ac,
+    &roster_count_ac,
+    &roster_order_ac,
+    &roster_header_ac,
+    &roster_contact_ac,
+    &roster_resource_ac,
+    &roster_presence_ac,
+    &roster_char_ac,
+    &roster_remove_all_ac,
+    &roster_room_ac,
+    &roster_room_title_ac,
+    &roster_room_position_ac,
+    &roster_room_by_ac,
+    &roster_room_order_ac,
+    &roster_unread_ac,
+    &roster_private_ac,
+    &group_ac,
+    &bookmark_ac,
+    &bookmark_property_ac,
+    &bookmark_ignore_ac,
+#ifdef HAVE_LIBOTR
+    &otr_ac,
+    &otr_log_ac,
+    &otr_policy_ac,
+#endif
+#ifdef HAVE_OMEMO
+    &omemo_ac,
+    &omemo_log_ac,
+    &omemo_policy_ac,
+    &omemo_trustmode_ac,
+#endif
+    &connect_property_ac,
+    &tls_property_ac,
+    &auth_property_ac,
+    &alias_ac,
+    &aliases_ac,
+    &join_property_ac,
+    &room_ac,
+    &rooms_all_ac,
+    &rooms_list_ac,
+    &rooms_cache_ac,
+    &affiliation_ac,
+    &role_ac,
+    &affiliation_cmd_ac,
+    &role_cmd_ac,
+    &subject_ac,
+    &form_ac,
+    &form_field_multi_ac,
+    &occupants_ac,
+    &occupants_default_ac,
+    &occupants_show_ac,
+    &occupants_header_ac,
+    &occupants_header_char_ac,
+    &occupants_char_ac,
+    &time_ac,
+    &time_format_ac,
+    &resource_ac,
+    &inpblock_ac,
+    &receipts_ac,
+    &reconnect_ac,
+#ifdef HAVE_LIBGPGME
+    &pgp_ac,
+    &pgp_log_ac,
+    &ox_ac,
+    &ox_log_ac,
+#endif
+    &tls_ac,
+    &titlebar_ac,
+    &titlebar_room_ac,
+    &titlebar_room_title_ac,
+    &titlebar_show_ac,
+    &tls_certpath_ac,
+    &script_ac,
+    &console_ac,
+    &console_msg_ac,
+    &autoping_ac,
+    &plugins_ac,
+    &filepath_ac,
+    &blocked_ac,
+    &tray_ac,
+    &presence_ac,
+    &presence_setting_ac,
+    &winpos_ac,
+    &statusbar_ac,
+    &statusbar_self_ac,
+    &statusbar_chat_ac,
+    &statusbar_room_ac,
+    &statusbar_room_title_ac,
+    &statusbar_show_ac,
+    &statusbar_tabmode_ac,
+    &clear_ac,
+    &invite_ac,
+    &status_ac,
+    &status_state_ac,
+    &logging_ac,
+    &logging_group_ac,
+    &privacy_ac,
+    &privacy_log_ac,
+    &color_ac,
+    &correction_ac,
+    &avatar_ac,
+    &url_ac,
+    &executable_ac,
+    &executable_param_ac,
+    &intype_ac,
+    &mood_ac,
+    &mood_type_ac,
+    &strophe_ac,
+    &strophe_sm_ac,
+    &strophe_verbosity_ac,
+    &adhoc_cmd_ac,
+    &lastactivity_ac,
+    &vcard_ac,
+    &vcard_photo_ac,
+    &vcard_element_ac,
+    &vcard_set_ac,
+    &vcard_name_ac,
+    &vcard_set_param_ac,
+    &vcard_togglable_param_ac,
+    &vcard_address_type_ac,
+};
+
 static GHashTable* ac_funcs = NULL;
 
 /*!
@@ -309,16 +462,16 @@ static GHashTable* ac_funcs = NULL;
 void
 cmd_ac_init(void)
 {
-    commands_ac = autocomplete_new();
-    aliases_ac = autocomplete_new();
+    size_t n;
+    for (n = 0; n < ARRAY_SIZE(all_acs); ++n) {
+        *(all_acs[n]) = autocomplete_new();
+    }
 
-    help_ac = autocomplete_new();
     autocomplete_add(help_ac, "commands");
     autocomplete_add(help_ac, "navigation");
     autocomplete_add(help_ac, "search_all");
     autocomplete_add(help_ac, "search_any");
 
-    help_commands_ac = autocomplete_new();
     autocomplete_add(help_commands_ac, "chat");
     autocomplete_add(help_commands_ac, "groupchat");
     autocomplete_add(help_commands_ac, "roster");
@@ -328,7 +481,6 @@ cmd_ac_init(void)
     autocomplete_add(help_commands_ac, "ui");
     autocomplete_add(help_commands_ac, "plugins");
 
-    prefs_ac = autocomplete_new();
     autocomplete_add(prefs_ac, "ui");
     autocomplete_add(prefs_ac, "desktop");
     autocomplete_add(prefs_ac, "chat");
@@ -346,7 +498,6 @@ cmd_ac_init(void)
     autocomplete_add(prefs_ac, "omemo");
 #endif
 
-    notify_ac = autocomplete_new();
     autocomplete_add(notify_ac, "chat");
     autocomplete_add(notify_ac, "room");
     autocomplete_add(notify_ac, "typing");
@@ -359,13 +510,11 @@ cmd_ac_init(void)
     autocomplete_add(notify_ac, "trigger");
     autocomplete_add(notify_ac, "reset");
 
-    notify_chat_ac = autocomplete_new();
     autocomplete_add(notify_chat_ac, "on");
     autocomplete_add(notify_chat_ac, "off");
     autocomplete_add(notify_chat_ac, "current");
     autocomplete_add(notify_chat_ac, "text");
 
-    notify_room_ac = autocomplete_new();
     autocomplete_add(notify_room_ac, "on");
     autocomplete_add(notify_room_ac, "off");
     autocomplete_add(notify_room_ac, "mention");
@@ -374,12 +523,10 @@ cmd_ac_init(void)
     autocomplete_add(notify_room_ac, "text");
     autocomplete_add(notify_room_ac, "trigger");
 
-    notify_typing_ac = autocomplete_new();
     autocomplete_add(notify_typing_ac, "on");
     autocomplete_add(notify_typing_ac, "off");
     autocomplete_add(notify_typing_ac, "current");
 
-    notify_mention_ac = autocomplete_new();
     autocomplete_add(notify_mention_ac, "on");
     autocomplete_add(notify_mention_ac, "off");
     autocomplete_add(notify_mention_ac, "case_sensitive");
@@ -387,14 +534,12 @@ cmd_ac_init(void)
     autocomplete_add(notify_mention_ac, "word_whole");
     autocomplete_add(notify_mention_ac, "word_part");
 
-    notify_trigger_ac = autocomplete_new();
     autocomplete_add(notify_trigger_ac, "add");
     autocomplete_add(notify_trigger_ac, "remove");
     autocomplete_add(notify_trigger_ac, "list");
     autocomplete_add(notify_trigger_ac, "on");
     autocomplete_add(notify_trigger_ac, "off");
 
-    sub_ac = autocomplete_new();
     autocomplete_add(sub_ac, "request");
     autocomplete_add(sub_ac, "allow");
     autocomplete_add(sub_ac, "deny");
@@ -402,54 +547,44 @@ cmd_ac_init(void)
     autocomplete_add(sub_ac, "sent");
     autocomplete_add(sub_ac, "received");
 
-    wintitle_ac = autocomplete_new();
     autocomplete_add(wintitle_ac, "show");
     autocomplete_add(wintitle_ac, "goodbye");
 
-    log_ac = autocomplete_new();
     autocomplete_add(log_ac, "maxsize");
     autocomplete_add(log_ac, "rotate");
     autocomplete_add(log_ac, "shared");
     autocomplete_add(log_ac, "where");
     autocomplete_add(log_ac, "level");
 
-    log_level_ac = autocomplete_new();
     autocomplete_add(log_level_ac, "WARN");
     autocomplete_add(log_level_ac, "INFO");
     autocomplete_add(log_level_ac, "DEBUG");
     autocomplete_add(log_level_ac, "ERROR");
 
-    autoaway_ac = autocomplete_new();
     autocomplete_add(autoaway_ac, "mode");
     autocomplete_add(autoaway_ac, "time");
     autocomplete_add(autoaway_ac, "message");
     autocomplete_add(autoaway_ac, "check");
 
-    autoaway_mode_ac = autocomplete_new();
     autocomplete_add(autoaway_mode_ac, "away");
     autocomplete_add(autoaway_mode_ac, "idle");
     autocomplete_add(autoaway_mode_ac, "off");
 
-    autoaway_presence_ac = autocomplete_new();
     autocomplete_add(autoaway_presence_ac, "away");
     autocomplete_add(autoaway_presence_ac, "xa");
 
-    autoconnect_ac = autocomplete_new();
     autocomplete_add(autoconnect_ac, "set");
     autocomplete_add(autoconnect_ac, "off");
 
-    theme_ac = autocomplete_new();
     autocomplete_add(theme_ac, "load");
     autocomplete_add(theme_ac, "full-load");
     autocomplete_add(theme_ac, "list");
     autocomplete_add(theme_ac, "colours");
     autocomplete_add(theme_ac, "properties");
 
-    disco_ac = autocomplete_new();
     autocomplete_add(disco_ac, "info");
     autocomplete_add(disco_ac, "items");
 
-    account_ac = autocomplete_new();
     autocomplete_add(account_ac, "list");
     autocomplete_add(account_ac, "show");
     autocomplete_add(account_ac, "add");
@@ -461,7 +596,6 @@ cmd_ac_init(void)
     autocomplete_add(account_ac, "set");
     autocomplete_add(account_ac, "clear");
 
-    account_set_ac = autocomplete_new();
     autocomplete_add(account_set_ac, "jid");
     autocomplete_add(account_set_ac, "server");
     autocomplete_add(account_set_ac, "port");
@@ -485,7 +619,6 @@ cmd_ac_init(void)
     autocomplete_add(account_set_ac, "theme");
     autocomplete_add(account_set_ac, "session_alarm");
 
-    account_clear_ac = autocomplete_new();
     autocomplete_add(account_clear_ac, "password");
     autocomplete_add(account_clear_ac, "eval_password");
     autocomplete_add(account_clear_ac, "server");
@@ -499,11 +632,9 @@ cmd_ac_init(void)
     autocomplete_add(account_clear_ac, "resource");
     autocomplete_add(account_clear_ac, "session_alarm");
 
-    account_default_ac = autocomplete_new();
     autocomplete_add(account_default_ac, "set");
     autocomplete_add(account_default_ac, "off");
 
-    account_status_ac = autocomplete_new();
     autocomplete_add(account_status_ac, "online");
     autocomplete_add(account_status_ac, "chat");
     autocomplete_add(account_status_ac, "away");
@@ -511,13 +642,11 @@ cmd_ac_init(void)
     autocomplete_add(account_status_ac, "dnd");
     autocomplete_add(account_status_ac, "last");
 
-    wins_ac = autocomplete_new();
     autocomplete_add(wins_ac, "unread");
     autocomplete_add(wins_ac, "attention");
     autocomplete_add(wins_ac, "prune");
     autocomplete_add(wins_ac, "swap");
 
-    roster_ac = autocomplete_new();
     autocomplete_add(roster_ac, "add");
     autocomplete_add(roster_ac, "online");
     autocomplete_add(roster_ac, "nick");
@@ -541,31 +670,24 @@ cmd_ac_init(void)
     autocomplete_add(roster_ac, "private");
     autocomplete_add(roster_ac, "group");
 
-    roster_private_ac = autocomplete_new();
     autocomplete_add(roster_private_ac, "room");
     autocomplete_add(roster_private_ac, "group");
     autocomplete_add(roster_private_ac, "off");
     autocomplete_add(roster_private_ac, "char");
 
-    roster_header_ac = autocomplete_new();
     autocomplete_add(roster_header_ac, "char");
 
-    roster_contact_ac = autocomplete_new();
     autocomplete_add(roster_contact_ac, "char");
     autocomplete_add(roster_contact_ac, "indent");
 
-    roster_resource_ac = autocomplete_new();
     autocomplete_add(roster_resource_ac, "char");
     autocomplete_add(roster_resource_ac, "indent");
     autocomplete_add(roster_resource_ac, "join");
 
-    roster_presence_ac = autocomplete_new();
     autocomplete_add(roster_presence_ac, "indent");
 
-    roster_char_ac = autocomplete_new();
     autocomplete_add(roster_char_ac, "none");
 
-    roster_show_ac = autocomplete_new();
     autocomplete_add(roster_show_ac, "offline");
     autocomplete_add(roster_show_ac, "resource");
     autocomplete_add(roster_show_ac, "presence");
@@ -576,27 +698,22 @@ cmd_ac_init(void)
     autocomplete_add(roster_show_ac, "unsubscribed");
     autocomplete_add(roster_show_ac, "rooms");
 
-    roster_by_ac = autocomplete_new();
     autocomplete_add(roster_by_ac, "group");
     autocomplete_add(roster_by_ac, "presence");
     autocomplete_add(roster_by_ac, "none");
 
-    roster_count_ac = autocomplete_new();
     autocomplete_add(roster_count_ac, "unread");
     autocomplete_add(roster_count_ac, "items");
     autocomplete_add(roster_count_ac, "off");
     autocomplete_add(roster_count_ac, "zero");
 
-    roster_order_ac = autocomplete_new();
     autocomplete_add(roster_order_ac, "name");
     autocomplete_add(roster_order_ac, "presence");
 
-    roster_unread_ac = autocomplete_new();
     autocomplete_add(roster_unread_ac, "before");
     autocomplete_add(roster_unread_ac, "after");
     autocomplete_add(roster_unread_ac, "off");
 
-    roster_room_ac = autocomplete_new();
     autocomplete_add(roster_room_ac, "char");
     autocomplete_add(roster_room_ac, "position");
     autocomplete_add(roster_room_ac, "by");
@@ -605,28 +722,22 @@ cmd_ac_init(void)
     autocomplete_add(roster_room_ac, "private");
     autocomplete_add(roster_room_ac, "title");
 
-    roster_room_by_ac = autocomplete_new();
     autocomplete_add(roster_room_by_ac, "service");
     autocomplete_add(roster_room_by_ac, "none");
 
-    roster_room_title_ac = autocomplete_new();
     autocomplete_add(roster_room_title_ac, "bookmark");
     autocomplete_add(roster_room_title_ac, "jid");
     autocomplete_add(roster_room_title_ac, "localpart");
     autocomplete_add(roster_room_title_ac, "name");
 
-    roster_room_order_ac = autocomplete_new();
     autocomplete_add(roster_room_order_ac, "name");
     autocomplete_add(roster_room_order_ac, "unread");
 
-    roster_room_position_ac = autocomplete_new();
     autocomplete_add(roster_room_position_ac, "first");
     autocomplete_add(roster_room_position_ac, "last");
 
-    roster_remove_all_ac = autocomplete_new();
     autocomplete_add(roster_remove_all_ac, "contacts");
 
-    group_ac = autocomplete_new();
     autocomplete_add(group_ac, "show");
     autocomplete_add(group_ac, "add");
     autocomplete_add(group_ac, "remove");
@@ -636,7 +747,6 @@ cmd_ac_init(void)
     plugins_unload_ac = NULL;
     plugins_reload_ac = NULL;
 
-    who_roster_ac = autocomplete_new();
     autocomplete_add(who_roster_ac, "chat");
     autocomplete_add(who_roster_ac, "online");
     autocomplete_add(who_roster_ac, "away");
@@ -647,7 +757,6 @@ cmd_ac_init(void)
     autocomplete_add(who_roster_ac, "unavailable");
     autocomplete_add(who_roster_ac, "any");
 
-    who_room_ac = autocomplete_new();
     autocomplete_add(who_room_ac, "chat");
     autocomplete_add(who_room_ac, "online");
     autocomplete_add(who_room_ac, "away");
@@ -663,7 +772,6 @@ cmd_ac_init(void)
     autocomplete_add(who_room_ac, "member");
     autocomplete_add(who_room_ac, "none");
 
-    bookmark_ac = autocomplete_new();
     autocomplete_add(bookmark_ac, "list");
     autocomplete_add(bookmark_ac, "add");
     autocomplete_add(bookmark_ac, "update");
@@ -672,18 +780,16 @@ cmd_ac_init(void)
     autocomplete_add(bookmark_ac, "invites");
     autocomplete_add(bookmark_ac, "ignore");
 
-    bookmark_property_ac = autocomplete_new();
     autocomplete_add(bookmark_property_ac, "nick");
     autocomplete_add(bookmark_property_ac, "password");
     autocomplete_add(bookmark_property_ac, "autojoin");
     autocomplete_add(bookmark_property_ac, "name");
 
-    bookmark_ignore_ac = autocomplete_new();
     autocomplete_add(bookmark_ignore_ac, "add");
     autocomplete_add(bookmark_ignore_ac, "remove");
 
 #ifdef HAVE_LIBOTR
-    otr_ac = autocomplete_new();
+
     autocomplete_add(otr_ac, "gen");
     autocomplete_add(otr_ac, "start");
     autocomplete_add(otr_ac, "end");
@@ -700,19 +806,17 @@ cmd_ac_init(void)
     autocomplete_add(otr_ac, "char");
     autocomplete_add(otr_ac, "sendfile");
 
-    otr_log_ac = autocomplete_new();
     autocomplete_add(otr_log_ac, "on");
     autocomplete_add(otr_log_ac, "off");
     autocomplete_add(otr_log_ac, "redact");
 
-    otr_policy_ac = autocomplete_new();
     autocomplete_add(otr_policy_ac, "manual");
     autocomplete_add(otr_policy_ac, "opportunistic");
     autocomplete_add(otr_policy_ac, "always");
 #endif
 
 #ifdef HAVE_OMEMO
-    omemo_ac = autocomplete_new();
+
     autocomplete_add(omemo_ac, "gen");
     autocomplete_add(omemo_ac, "log");
     autocomplete_add(omemo_ac, "start");
@@ -726,92 +830,76 @@ cmd_ac_init(void)
     autocomplete_add(omemo_ac, "char");
     autocomplete_add(omemo_ac, "qrcode");
 
-    omemo_log_ac = autocomplete_new();
     autocomplete_add(omemo_log_ac, "on");
     autocomplete_add(omemo_log_ac, "off");
     autocomplete_add(omemo_log_ac, "redact");
 
-    omemo_policy_ac = autocomplete_new();
     autocomplete_add(omemo_policy_ac, "manual");
     autocomplete_add(omemo_policy_ac, "automatic");
     autocomplete_add(omemo_policy_ac, "always");
 
     // Autocomplete OMEMO trustmode
-    omemo_trustmode_ac = autocomplete_new();
+
     autocomplete_add(omemo_trustmode_ac, "manual");
     autocomplete_add(omemo_trustmode_ac, "firstusage");
     autocomplete_add(omemo_trustmode_ac, "blind");
 #endif
 
-    connect_property_ac = autocomplete_new();
     autocomplete_add(connect_property_ac, "auth");
     autocomplete_add(connect_property_ac, "server");
     autocomplete_add(connect_property_ac, "port");
     autocomplete_add(connect_property_ac, "tls");
 
-    tls_property_ac = autocomplete_new();
     autocomplete_add(tls_property_ac, "force");
     autocomplete_add(tls_property_ac, "allow");
     autocomplete_add(tls_property_ac, "trust");
     autocomplete_add(tls_property_ac, "legacy");
     autocomplete_add(tls_property_ac, "disable");
 
-    auth_property_ac = autocomplete_new();
     autocomplete_add(auth_property_ac, "default");
     autocomplete_add(auth_property_ac, "legacy");
 
-    join_property_ac = autocomplete_new();
     autocomplete_add(join_property_ac, "nick");
     autocomplete_add(join_property_ac, "password");
 
-    alias_ac = autocomplete_new();
     autocomplete_add(alias_ac, "add");
     autocomplete_add(alias_ac, "remove");
     autocomplete_add(alias_ac, "list");
 
-    room_ac = autocomplete_new();
     autocomplete_add(room_ac, "accept");
     autocomplete_add(room_ac, "destroy");
     autocomplete_add(room_ac, "config");
 
-    rooms_all_ac = autocomplete_new();
     autocomplete_add(rooms_all_ac, "service");
     autocomplete_add(rooms_all_ac, "filter");
     autocomplete_add(rooms_all_ac, "cache");
 
-    rooms_list_ac = autocomplete_new();
     autocomplete_add(rooms_list_ac, "service");
     autocomplete_add(rooms_list_ac, "filter");
 
-    rooms_cache_ac = autocomplete_new();
     autocomplete_add(rooms_cache_ac, "on");
     autocomplete_add(rooms_cache_ac, "off");
     autocomplete_add(rooms_cache_ac, "clear");
 
-    affiliation_ac = autocomplete_new();
     autocomplete_add(affiliation_ac, "owner");
     autocomplete_add(affiliation_ac, "admin");
     autocomplete_add(affiliation_ac, "member");
     autocomplete_add(affiliation_ac, "none");
     autocomplete_add(affiliation_ac, "outcast");
 
-    role_ac = autocomplete_new();
     autocomplete_add(role_ac, "moderator");
     autocomplete_add(role_ac, "participant");
     autocomplete_add(role_ac, "visitor");
     autocomplete_add(role_ac, "none");
 
-    affiliation_cmd_ac = autocomplete_new();
     autocomplete_add(affiliation_cmd_ac, "list");
     autocomplete_add(affiliation_cmd_ac, "request");
     autocomplete_add(affiliation_cmd_ac, "register");
     autocomplete_add(affiliation_cmd_ac, "set");
 
-    role_cmd_ac = autocomplete_new();
     autocomplete_add(role_cmd_ac, "list");
     autocomplete_add(role_cmd_ac, "set");
 
-    subject_ac = autocomplete_new();
     autocomplete_add(subject_ac, "set");
     autocomplete_add(subject_ac, "edit");
     autocomplete_add(subject_ac, "editor");
@@ -819,17 +907,14 @@ cmd_ac_init(void)
     autocomplete_add(subject_ac, "append");
     autocomplete_add(subject_ac, "clear");
 
-    form_ac = autocomplete_new();
     autocomplete_add(form_ac, "submit");
     autocomplete_add(form_ac, "cancel");
     autocomplete_add(form_ac, "show");
     autocomplete_add(form_ac, "help");
 
-    form_field_multi_ac = autocomplete_new();
     autocomplete_add(form_field_multi_ac, "add");
     autocomplete_add(form_field_multi_ac, "remove");
 
-    occupants_ac = autocomplete_new();
     autocomplete_add(occupants_ac, "show");
     autocomplete_add(occupants_ac, "hide");
     autocomplete_add(occupants_ac, "default");
@@ -840,24 +925,18 @@ cmd_ac_init(void)
     autocomplete_add(occupants_ac, "char");
     autocomplete_add(occupants_ac, "color");
 
-    occupants_default_ac = autocomplete_new();
     autocomplete_add(occupants_default_ac, "show");
     autocomplete_add(occupants_default_ac, "hide");
 
-    occupants_show_ac = autocomplete_new();
     autocomplete_add(occupants_show_ac, "jid");
     autocomplete_add(occupants_show_ac, "offline");
 
-    occupants_char_ac = autocomplete_new();
     autocomplete_add(occupants_char_ac, "none");
 
-    occupants_header_ac = autocomplete_new();
     autocomplete_add(occupants_header_ac, "char");
 
-    occupants_header_char_ac = autocomplete_new();
     autocomplete_add(occupants_header_char_ac, "none");
 
-    time_ac = autocomplete_new();
     autocomplete_add(time_ac, "console");
     autocomplete_add(time_ac, "chat");
     autocomplete_add(time_ac, "muc");
@@ -868,29 +947,24 @@ cmd_ac_init(void)
     autocomplete_add(time_ac, "lastactivity");
     autocomplete_add(time_ac, "all");
 
-    time_format_ac = autocomplete_new();
     autocomplete_add(time_format_ac, "set");
     autocomplete_add(time_format_ac, "off");
 
-    resource_ac = autocomplete_new();
     autocomplete_add(resource_ac, "set");
     autocomplete_add(resource_ac, "off");
     autocomplete_add(resource_ac, "title");
     autocomplete_add(resource_ac, "message");
 
-    inpblock_ac = autocomplete_new();
     autocomplete_add(inpblock_ac, "timeout");
     autocomplete_add(inpblock_ac, "dynamic");
 
-    receipts_ac = autocomplete_new();
     autocomplete_add(receipts_ac, "send");
     autocomplete_add(receipts_ac, "request");
 
-    reconnect_ac = autocomplete_new();
     autocomplete_add(reconnect_ac, "now");
 
 #ifdef HAVE_LIBGPGME
-    pgp_ac = autocomplete_new();
+
     autocomplete_add(pgp_ac, "keys");
     autocomplete_add(pgp_ac, "contacts");
     autocomplete_add(pgp_ac, "setkey");
@@ -903,12 +977,10 @@ cmd_ac_init(void)
     autocomplete_add(pgp_ac, "sendpub");
     autocomplete_add(pgp_ac, "autoimport");
 
-    pgp_log_ac = autocomplete_new();
     autocomplete_add(pgp_log_ac, "on");
     autocomplete_add(pgp_log_ac, "off");
     autocomplete_add(pgp_log_ac, "redact");
 
-    ox_ac = autocomplete_new();
     autocomplete_add(ox_ac, "keys");
     autocomplete_add(ox_ac, "contacts");
     autocomplete_add(ox_ac, "start");
@@ -919,13 +991,11 @@ cmd_ac_init(void)
     autocomplete_add(ox_ac, "discover");
     autocomplete_add(ox_ac, "request");
 
-    ox_log_ac = autocomplete_new();
     autocomplete_add(ox_log_ac, "on");
     autocomplete_add(ox_log_ac, "off");
     autocomplete_add(ox_log_ac, "redact");
 #endif
 
-    tls_ac = autocomplete_new();
     autocomplete_add(tls_ac, "allow");
     autocomplete_add(tls_ac, "always");
     autocomplete_add(tls_ac, "deny");
@@ -935,56 +1005,46 @@ cmd_ac_init(void)
     autocomplete_add(tls_ac, "revoke");
     autocomplete_add(tls_ac, "certpath");
 
-    titlebar_ac = autocomplete_new();
     autocomplete_add(titlebar_ac, "up");
     autocomplete_add(titlebar_ac, "down");
     autocomplete_add(titlebar_ac, "show");
     autocomplete_add(titlebar_ac, "hide");
     autocomplete_add(titlebar_ac, "room");
 
-    titlebar_room_ac = autocomplete_new();
     autocomplete_add(titlebar_room_ac, "title");
 
-    titlebar_room_title_ac = autocomplete_new();
     autocomplete_add(titlebar_room_title_ac, "bookmark");
     autocomplete_add(titlebar_room_title_ac, "jid");
     autocomplete_add(titlebar_room_title_ac, "localpart");
     autocomplete_add(titlebar_room_title_ac, "name");
 
-    titlebar_show_ac = autocomplete_new();
     autocomplete_add(titlebar_show_ac, "tls");
     autocomplete_add(titlebar_show_ac, "encwarn");
     autocomplete_add(titlebar_show_ac, "resource");
     autocomplete_add(titlebar_show_ac, "presence");
 
-    tls_certpath_ac = autocomplete_new();
     autocomplete_add(tls_certpath_ac, "set");
     autocomplete_add(tls_certpath_ac, "clear");
     autocomplete_add(tls_certpath_ac, "default");
 
-    script_ac = autocomplete_new();
     autocomplete_add(script_ac, "run");
     autocomplete_add(script_ac, "list");
     autocomplete_add(script_ac, "show");
 
     script_show_ac = NULL;
 
-    console_ac = autocomplete_new();
     autocomplete_add(console_ac, "chat");
     autocomplete_add(console_ac, "muc");
     autocomplete_add(console_ac, "private");
 
-    console_msg_ac = autocomplete_new();
     autocomplete_add(console_msg_ac, "all");
     autocomplete_add(console_msg_ac, "first");
     autocomplete_add(console_msg_ac, "mention");
     autocomplete_add(console_msg_ac, "none");
 
-    autoping_ac = autocomplete_new();
     autocomplete_add(autoping_ac, "set");
     autocomplete_add(autoping_ac, "timeout");
 
-    plugins_ac = autocomplete_new();
     autocomplete_add(plugins_ac, "install");
     autocomplete_add(plugins_ac, "update");
     autocomplete_add(plugins_ac, "uninstall");
@@ -993,39 +1053,30 @@ cmd_ac_init(void)
     autocomplete_add(plugins_ac, "reload");
     autocomplete_add(plugins_ac, "python_version");
 
-    filepath_ac = autocomplete_new();
-
-    blocked_ac = autocomplete_new();
     autocomplete_add(blocked_ac, "add");
     autocomplete_add(blocked_ac, "remove");
     autocomplete_add(blocked_ac, "report-abuse");
     autocomplete_add(blocked_ac, "report-spam");
 
-    clear_ac = autocomplete_new();
     autocomplete_add(clear_ac, "persist_history");
 
-    tray_ac = autocomplete_new();
     autocomplete_add(tray_ac, "on");
     autocomplete_add(tray_ac, "off");
     autocomplete_add(tray_ac, "read");
     autocomplete_add(tray_ac, "timer");
 
-    presence_ac = autocomplete_new();
     autocomplete_add(presence_ac, "titlebar");
     autocomplete_add(presence_ac, "console");
     autocomplete_add(presence_ac, "chat");
     autocomplete_add(presence_ac, "room");
 
-    presence_setting_ac = autocomplete_new();
     autocomplete_add(presence_setting_ac, "all");
     autocomplete_add(presence_setting_ac, "online");
     autocomplete_add(presence_setting_ac, "none");
 
-    winpos_ac = autocomplete_new();
     autocomplete_add(winpos_ac, "up");
     autocomplete_add(winpos_ac, "down");
 
-    statusbar_ac = autocomplete_new();
     autocomplete_add(statusbar_ac, "up");
     autocomplete_add(statusbar_ac, "down");
     autocomplete_add(statusbar_ac, "show");
@@ -1037,125 +1088,103 @@ cmd_ac_init(void)
     autocomplete_add(statusbar_ac, "chat");
     autocomplete_add(statusbar_ac, "room");
 
-    invite_ac = autocomplete_new();
     autocomplete_add(invite_ac, "send");
     autocomplete_add(invite_ac, "list");
     autocomplete_add(invite_ac, "decline");
 
-    statusbar_self_ac = autocomplete_new();
     autocomplete_add(statusbar_self_ac, "user");
     autocomplete_add(statusbar_self_ac, "barejid");
     autocomplete_add(statusbar_self_ac, "fulljid");
     autocomplete_add(statusbar_self_ac, "off");
 
-    statusbar_chat_ac = autocomplete_new();
     autocomplete_add(statusbar_chat_ac, "user");
     autocomplete_add(statusbar_chat_ac, "jid");
 
-    statusbar_room_ac = autocomplete_new();
     autocomplete_add(statusbar_room_ac, "title");
 
-    statusbar_room_title_ac = autocomplete_new();
     autocomplete_add(statusbar_room_title_ac, "bookmark");
     autocomplete_add(statusbar_room_title_ac, "jid");
     autocomplete_add(statusbar_room_title_ac, "localpart");
     autocomplete_add(statusbar_room_title_ac, "name");
 
-    statusbar_show_ac = autocomplete_new();
     autocomplete_add(statusbar_show_ac, "name");
     autocomplete_add(statusbar_show_ac, "number");
     autocomplete_add(statusbar_show_ac, "read");
 
-    statusbar_tabmode_ac = autocomplete_new();
     autocomplete_add(statusbar_tabmode_ac, "actlist");
     autocomplete_add(statusbar_tabmode_ac, "dynamic");
     autocomplete_add(statusbar_tabmode_ac, "default");
 
-    status_ac = autocomplete_new();
     autocomplete_add(status_ac, "set");
     autocomplete_add(status_ac, "get");
 
-    status_state_ac = autocomplete_new();
     autocomplete_add(status_state_ac, "online");
     autocomplete_add(status_state_ac, "chat");
     autocomplete_add(status_state_ac, "away");
     autocomplete_add(status_state_ac, "xa");
     autocomplete_add(status_state_ac, "dnd");
 
-    logging_ac = autocomplete_new();
     autocomplete_add(logging_ac, "chat");
     autocomplete_add(logging_ac, "group");
 
-    privacy_ac = autocomplete_new();
     autocomplete_add(privacy_ac, "logging");
     autocomplete_add(privacy_ac, "os");
 
-    privacy_log_ac = autocomplete_new();
     autocomplete_add(privacy_log_ac, "on");
     autocomplete_add(privacy_log_ac, "off");
     autocomplete_add(privacy_log_ac, "redact");
 
-    logging_group_ac = autocomplete_new();
     autocomplete_add(logging_group_ac, "on");
     autocomplete_add(logging_group_ac, "off");
     autocomplete_add(logging_group_ac, "color");
 
-    color_ac = autocomplete_new();
     autocomplete_add(color_ac, "on");
     autocomplete_add(color_ac, "off");
     autocomplete_add(color_ac, "redgreen");
     autocomplete_add(color_ac, "blue");
     autocomplete_add(color_ac, "own");
 
-    correction_ac = autocomplete_new();
     autocomplete_add(correction_ac, "on");
     autocomplete_add(correction_ac, "off");
     autocomplete_add(correction_ac, "char");
 
-    avatar_ac = autocomplete_new();
     autocomplete_add(avatar_ac, "set");
     autocomplete_add(avatar_ac, "disable");
     autocomplete_add(avatar_ac, "get");
     autocomplete_add(avatar_ac, "open");
 
-    url_ac = autocomplete_new();
     autocomplete_add(url_ac, "open");
     autocomplete_add(url_ac, "save");
 
-    executable_ac = autocomplete_new();
     autocomplete_add(executable_ac, "avatar");
     autocomplete_add(executable_ac, "urlopen");
     autocomplete_add(executable_ac, "urlsave");
     autocomplete_add(executable_ac, "editor");
     autocomplete_add(executable_ac, "vcard_photo");
 
-    executable_param_ac = autocomplete_new();
     autocomplete_add(executable_param_ac, "set");
     autocomplete_add(executable_param_ac, "default");
 
-    intype_ac = autocomplete_new();
     autocomplete_add(intype_ac, "console");
     autocomplete_add(intype_ac, "titlebar");
 
-    strophe_ac = autocomplete_new();
     autocomplete_add(strophe_ac, "sm");
     autocomplete_add(strophe_ac, "verbosity");
-    strophe_sm_ac = autocomplete_new();
+
     autocomplete_add(strophe_sm_ac, "on");
     autocomplete_add(strophe_sm_ac, "no-resend");
     autocomplete_add(strophe_sm_ac, "off");
-    strophe_verbosity_ac = autocomplete_new();
+
     autocomplete_add(strophe_verbosity_ac, "0");
     autocomplete_add(strophe_verbosity_ac, "1");
     autocomplete_add(strophe_verbosity_ac, "2");
     autocomplete_add(strophe_verbosity_ac, "3");
 
-    mood_ac = autocomplete_new();
     autocomplete_add(mood_ac, "set");
     autocomplete_add(mood_ac, "clear");
     autocomplete_add(mood_ac, "on");
     autocomplete_add(mood_ac, "off");
-    mood_type_ac = autocomplete_new();
+
     autocomplete_add(mood_type_ac, "afraid");
     autocomplete_add(mood_type_ac, "amazed");
     autocomplete_add(mood_type_ac, "angry");
@@ -1237,15 +1266,12 @@ cmd_ac_init(void)
     autocomplete_add(mood_type_ac, "weak");
     autocomplete_add(mood_type_ac, "worried");
 
-    adhoc_cmd_ac = autocomplete_new();
     autocomplete_add(adhoc_cmd_ac, "list");
     autocomplete_add(adhoc_cmd_ac, "exec");
 
-    lastactivity_ac = autocomplete_new();
     autocomplete_add(lastactivity_ac, "set");
     autocomplete_add(lastactivity_ac, "get");
 
-    vcard_ac = autocomplete_new();
     autocomplete_add(vcard_ac, "get");
     autocomplete_add(vcard_ac, "photo");
     autocomplete_add(vcard_ac, "set");
@@ -1253,11 +1279,9 @@ cmd_ac_init(void)
     autocomplete_add(vcard_ac, "remove");
     autocomplete_add(vcard_ac, "save");
 
-    vcard_photo_ac = autocomplete_new();
     autocomplete_add(vcard_photo_ac, "open");
     autocomplete_add(vcard_photo_ac, "save");
 
-    vcard_element_ac = autocomplete_new();
     autocomplete_add(vcard_element_ac, "nickname");
     autocomplete_add(vcard_element_ac, "birthday");
     autocomplete_add(vcard_element_ac, "address");
@@ -1269,18 +1293,15 @@ cmd_ac_init(void)
     autocomplete_add(vcard_element_ac, "note");
     autocomplete_add(vcard_element_ac, "url");
 
-    vcard_set_ac = autocomplete_new();
     autocomplete_add(vcard_set_ac, "fullname");
     autocomplete_add(vcard_set_ac, "name");
 
-    vcard_name_ac = autocomplete_new();
     autocomplete_add(vcard_name_ac, "family");
     autocomplete_add(vcard_name_ac, "given");
     autocomplete_add(vcard_name_ac, "middle");
     autocomplete_add(vcard_name_ac, "prefix");
     autocomplete_add(vcard_name_ac, "suffix");
 
-    vcard_set_param_ac = autocomplete_new();
     autocomplete_add(vcard_set_param_ac, "pobox");
     autocomplete_add(vcard_set_param_ac, "extaddr");
     autocomplete_add(vcard_set_param_ac, "street");
@@ -1304,7 +1325,6 @@ cmd_ac_init(void)
     autocomplete_add(vcard_set_param_ac, "preferred");
     autocomplete_add(vcard_set_param_ac, "x400");
 
-    vcard_togglable_param_ac = autocomplete_new();
     autocomplete_add(vcard_togglable_param_ac, "home");
     autocomplete_add(vcard_togglable_param_ac, "work");
     autocomplete_add(vcard_togglable_param_ac, "voice");
@@ -1320,7 +1340,6 @@ cmd_ac_init(void)
     autocomplete_add(vcard_togglable_param_ac, "preferred");
     autocomplete_add(vcard_togglable_param_ac, "x400");
 
-    vcard_address_type_ac = autocomplete_new();
     autocomplete_add(vcard_address_type_ac, "domestic");
     autocomplete_add(vcard_address_type_ac, "international");
 
@@ -1568,28 +1587,10 @@ cmd_ac_reset(ProfWin* window)
 #ifdef HAVE_OMEMO
     omemo_fingerprint_autocomplete_reset();
 #endif
-    autocomplete_reset(help_ac);
-    autocomplete_reset(help_commands_ac);
-    autocomplete_reset(notify_ac);
-    autocomplete_reset(notify_chat_ac);
-    autocomplete_reset(notify_room_ac);
-    autocomplete_reset(notify_typing_ac);
-    autocomplete_reset(notify_mention_ac);
-    autocomplete_reset(notify_trigger_ac);
-    autocomplete_reset(sub_ac);
-    autocomplete_reset(filepath_ac);
-
-    autocomplete_reset(who_room_ac);
-    autocomplete_reset(who_roster_ac);
-    autocomplete_reset(prefs_ac);
-    autocomplete_reset(log_ac);
-    autocomplete_reset(log_level_ac);
-    autocomplete_reset(commands_ac);
-    autocomplete_reset(autoaway_ac);
-    autocomplete_reset(autoaway_mode_ac);
-    autocomplete_reset(autoaway_presence_ac);
-    autocomplete_reset(autoconnect_ac);
-    autocomplete_reset(theme_ac);
+    size_t n;
+    for (n = ARRAY_SIZE(all_acs); n > 0; --n) {
+        autocomplete_reset(*(all_acs[n - 1]));
+    }
     if (theme_load_ac) {
         autocomplete_free(theme_load_ac);
         theme_load_ac = NULL;
@@ -1606,138 +1607,6 @@ cmd_ac_reset(ProfWin* window)
         autocomplete_free(plugins_reload_ac);
         plugins_reload_ac = NULL;
     }
-    autocomplete_reset(account_ac);
-    autocomplete_reset(account_set_ac);
-    autocomplete_reset(account_clear_ac);
-    autocomplete_reset(account_default_ac);
-    autocomplete_reset(account_status_ac);
-    autocomplete_reset(disco_ac);
-    autocomplete_reset(wins_ac);
-    autocomplete_reset(roster_ac);
-    autocomplete_reset(roster_header_ac);
-    autocomplete_reset(roster_contact_ac);
-    autocomplete_reset(roster_resource_ac);
-    autocomplete_reset(roster_presence_ac);
-    autocomplete_reset(roster_char_ac);
-    autocomplete_reset(roster_show_ac);
-    autocomplete_reset(roster_by_ac);
-    autocomplete_reset(roster_count_ac);
-    autocomplete_reset(roster_order_ac);
-    autocomplete_reset(roster_room_ac);
-    autocomplete_reset(roster_room_title_ac);
-    autocomplete_reset(roster_room_by_ac);
-    autocomplete_reset(roster_unread_ac);
-    autocomplete_reset(roster_room_position_ac);
-    autocomplete_reset(roster_room_order_ac);
-    autocomplete_reset(roster_remove_all_ac);
-    autocomplete_reset(roster_private_ac);
-    autocomplete_reset(group_ac);
-    autocomplete_reset(wintitle_ac);
-    autocomplete_reset(bookmark_ac);
-    autocomplete_reset(bookmark_property_ac);
-    autocomplete_reset(bookmark_ignore_ac);
-#ifdef HAVE_LIBOTR
-    autocomplete_reset(otr_ac);
-    autocomplete_reset(otr_log_ac);
-    autocomplete_reset(otr_policy_ac);
-#endif
-#ifdef HAVE_OMEMO
-    autocomplete_reset(omemo_ac);
-    autocomplete_reset(omemo_log_ac);
-    autocomplete_reset(omemo_policy_ac);
-    autocomplete_reset(omemo_trustmode_ac);
-#endif
-    autocomplete_reset(connect_property_ac);
-    autocomplete_reset(tls_property_ac);
-    autocomplete_reset(auth_property_ac);
-    autocomplete_reset(alias_ac);
-    autocomplete_reset(aliases_ac);
-    autocomplete_reset(join_property_ac);
-    autocomplete_reset(room_ac);
-    autocomplete_reset(rooms_all_ac);
-    autocomplete_reset(rooms_list_ac);
-    autocomplete_reset(rooms_cache_ac);
-    autocomplete_reset(affiliation_ac);
-    autocomplete_reset(role_ac);
-    autocomplete_reset(affiliation_cmd_ac);
-    autocomplete_reset(role_cmd_ac);
-    autocomplete_reset(subject_ac);
-    autocomplete_reset(form_ac);
-    autocomplete_reset(form_field_multi_ac);
-    autocomplete_reset(occupants_ac);
-    autocomplete_reset(occupants_char_ac);
-    autocomplete_reset(occupants_default_ac);
-    autocomplete_reset(occupants_show_ac);
-    autocomplete_reset(occupants_header_ac);
-    autocomplete_reset(occupants_header_char_ac);
-    autocomplete_reset(time_ac);
-    autocomplete_reset(time_format_ac);
-    autocomplete_reset(resource_ac);
-    autocomplete_reset(inpblock_ac);
-    autocomplete_reset(receipts_ac);
-    autocomplete_reset(reconnect_ac);
-#ifdef HAVE_LIBGPGME
-    autocomplete_reset(pgp_ac);
-    autocomplete_reset(pgp_log_ac);
-    autocomplete_reset(ox_ac);
-    autocomplete_reset(ox_log_ac);
-#endif
-    autocomplete_reset(tls_ac);
-    autocomplete_reset(titlebar_ac);
-    autocomplete_reset(titlebar_room_ac);
-    autocomplete_reset(titlebar_room_title_ac);
-    autocomplete_reset(titlebar_show_ac);
-    autocomplete_reset(tls_certpath_ac);
-    autocomplete_reset(console_ac);
-    autocomplete_reset(console_msg_ac);
-    autocomplete_reset(autoping_ac);
-    autocomplete_reset(plugins_ac);
-    autocomplete_reset(blocked_ac);
-    autocomplete_reset(tray_ac);
-    autocomplete_reset(presence_ac);
-    autocomplete_reset(presence_setting_ac);
-    autocomplete_reset(winpos_ac);
-    autocomplete_reset(statusbar_ac);
-    autocomplete_reset(statusbar_self_ac);
-    autocomplete_reset(statusbar_chat_ac);
-    autocomplete_reset(statusbar_room_ac);
-    autocomplete_reset(statusbar_room_title_ac);
-    autocomplete_reset(statusbar_show_ac);
-    autocomplete_reset(statusbar_tabmode_ac);
-    autocomplete_reset(clear_ac);
-    autocomplete_reset(invite_ac);
-    autocomplete_reset(status_ac);
-    autocomplete_reset(status_state_ac);
-    autocomplete_reset(logging_ac);
-    autocomplete_reset(logging_group_ac);
-    autocomplete_reset(privacy_ac);
-    autocomplete_reset(privacy_log_ac);
-    autocomplete_reset(color_ac);
-    autocomplete_reset(correction_ac);
-    autocomplete_reset(avatar_ac);
-    autocomplete_reset(url_ac);
-    autocomplete_reset(executable_ac);
-    autocomplete_reset(executable_param_ac);
-    autocomplete_reset(intype_ac);
-    autocomplete_reset(mood_ac);
-    autocomplete_reset(mood_type_ac);
-    autocomplete_reset(strophe_verbosity_ac);
-    autocomplete_reset(strophe_sm_ac);
-    autocomplete_reset(strophe_ac);
-    autocomplete_reset(adhoc_cmd_ac);
-
-    autocomplete_reset(vcard_ac);
-    autocomplete_reset(vcard_photo_ac);
-    autocomplete_reset(vcard_element_ac);
-    autocomplete_reset(vcard_set_ac);
-    autocomplete_reset(vcard_name_ac);
-    autocomplete_reset(vcard_set_param_ac);
-    autocomplete_reset(vcard_togglable_param_ac);
-    autocomplete_reset(vcard_address_type_ac);
-
-    autocomplete_reset(script_ac);
-    autocomplete_reset(lastactivity_ac);
-
     if (script_show_ac) {
         autocomplete_free(script_show_ac);
         script_show_ac = NULL;
@@ -1769,155 +1638,15 @@ cmd_ac_reset(ProfWin* window)
 void
 cmd_ac_uninit(void)
 {
-    autocomplete_free(commands_ac);
-    autocomplete_free(who_room_ac);
-    autocomplete_free(who_roster_ac);
-    autocomplete_free(help_ac);
-    autocomplete_free(help_commands_ac);
-    autocomplete_free(notify_ac);
-    autocomplete_free(notify_chat_ac);
-    autocomplete_free(notify_room_ac);
-    autocomplete_free(notify_typing_ac);
-    autocomplete_free(notify_mention_ac);
-    autocomplete_free(notify_trigger_ac);
-    autocomplete_free(sub_ac);
-    autocomplete_free(wintitle_ac);
-    autocomplete_free(log_ac);
-    autocomplete_free(log_level_ac);
-    autocomplete_free(prefs_ac);
-    autocomplete_free(autoaway_ac);
-    autocomplete_free(autoaway_mode_ac);
-    autocomplete_free(autoaway_presence_ac);
-    autocomplete_free(autoconnect_ac);
-    autocomplete_free(theme_ac);
+    size_t n;
+    for (n = ARRAY_SIZE(all_acs); n > 0; --n) {
+        autocomplete_free(*(all_acs[n - 1]));
+    }
     autocomplete_free(theme_load_ac);
-    autocomplete_free(account_ac);
-    autocomplete_free(account_set_ac);
-    autocomplete_free(account_clear_ac);
-    autocomplete_free(account_default_ac);
-    autocomplete_free(account_status_ac);
-    autocomplete_free(disco_ac);
-    autocomplete_free(wins_ac);
-    autocomplete_free(roster_ac);
-    autocomplete_free(roster_header_ac);
-    autocomplete_free(roster_contact_ac);
-    autocomplete_free(roster_resource_ac);
-    autocomplete_free(roster_presence_ac);
-    autocomplete_free(roster_char_ac);
-    autocomplete_free(roster_show_ac);
-    autocomplete_free(roster_by_ac);
-    autocomplete_free(roster_count_ac);
-    autocomplete_free(roster_order_ac);
-    autocomplete_free(roster_room_ac);
-    autocomplete_free(roster_room_title_ac);
-    autocomplete_free(roster_room_by_ac);
-    autocomplete_free(roster_unread_ac);
-    autocomplete_free(roster_room_position_ac);
-    autocomplete_free(roster_room_order_ac);
-    autocomplete_free(roster_remove_all_ac);
-    autocomplete_free(roster_private_ac);
-    autocomplete_free(group_ac);
-    autocomplete_free(bookmark_ac);
-    autocomplete_free(bookmark_property_ac);
-    autocomplete_free(bookmark_ignore_ac);
-#ifdef HAVE_LIBOTR
-    autocomplete_free(otr_ac);
-    autocomplete_free(otr_log_ac);
-    autocomplete_free(otr_policy_ac);
-#endif
-#ifdef HAVE_OMEMO
-    autocomplete_free(omemo_ac);
-    autocomplete_free(omemo_log_ac);
-    autocomplete_free(omemo_policy_ac);
-    autocomplete_free(omemo_trustmode_ac);
-#endif
-    autocomplete_free(connect_property_ac);
-    autocomplete_free(tls_property_ac);
-    autocomplete_free(auth_property_ac);
-    autocomplete_free(alias_ac);
-    autocomplete_free(aliases_ac);
-    autocomplete_free(join_property_ac);
-    autocomplete_free(room_ac);
-    autocomplete_free(rooms_all_ac);
-    autocomplete_free(rooms_list_ac);
-    autocomplete_free(rooms_cache_ac);
-    autocomplete_free(affiliation_ac);
-    autocomplete_free(role_ac);
-    autocomplete_free(affiliation_cmd_ac);
-    autocomplete_free(role_cmd_ac);
-    autocomplete_free(subject_ac);
-    autocomplete_free(form_ac);
-    autocomplete_free(form_field_multi_ac);
-    autocomplete_free(occupants_ac);
-    autocomplete_free(occupants_char_ac);
-    autocomplete_free(occupants_default_ac);
-    autocomplete_free(occupants_show_ac);
-    autocomplete_free(occupants_header_ac);
-    autocomplete_free(time_ac);
-    autocomplete_free(time_format_ac);
-    autocomplete_free(resource_ac);
-    autocomplete_free(inpblock_ac);
-    autocomplete_free(receipts_ac);
-    autocomplete_free(reconnect_ac);
-#ifdef HAVE_LIBGPGME
-    autocomplete_free(pgp_ac);
-    autocomplete_free(pgp_log_ac);
-    autocomplete_free(ox_ac);
-    autocomplete_free(ox_log_ac);
-#endif
-    autocomplete_free(tls_ac);
-    autocomplete_free(titlebar_ac);
-    autocomplete_free(titlebar_room_ac);
-    autocomplete_free(titlebar_room_title_ac);
-    autocomplete_free(titlebar_show_ac);
-    autocomplete_free(tls_certpath_ac);
-    autocomplete_free(script_ac);
-    autocomplete_free(script_show_ac);
-    autocomplete_free(console_ac);
-    autocomplete_free(console_msg_ac);
-    autocomplete_free(autoping_ac);
-    autocomplete_free(plugins_ac);
     autocomplete_free(plugins_load_ac);
     autocomplete_free(plugins_unload_ac);
     autocomplete_free(plugins_reload_ac);
-    autocomplete_free(filepath_ac);
-    autocomplete_free(blocked_ac);
-    autocomplete_free(tray_ac);
-    autocomplete_free(presence_ac);
-    autocomplete_free(presence_setting_ac);
-    autocomplete_free(winpos_ac);
-    autocomplete_free(statusbar_ac);
-    autocomplete_free(statusbar_self_ac);
-    autocomplete_free(statusbar_chat_ac);
-    autocomplete_free(statusbar_room_ac);
-    autocomplete_free(statusbar_room_title_ac);
-    autocomplete_free(statusbar_show_ac);
-    autocomplete_free(statusbar_tabmode_ac);
-    autocomplete_free(clear_ac);
-    autocomplete_free(invite_ac);
-    autocomplete_free(status_ac);
-    autocomplete_free(status_state_ac);
-    autocomplete_free(logging_ac);
-    autocomplete_free(logging_group_ac);
-    autocomplete_free(privacy_ac);
-    autocomplete_free(privacy_log_ac);
-    autocomplete_free(color_ac);
-    autocomplete_free(correction_ac);
-    autocomplete_free(avatar_ac);
-    autocomplete_free(url_ac);
-    autocomplete_free(executable_ac);
-    autocomplete_free(executable_param_ac);
-    autocomplete_free(intype_ac);
-    autocomplete_free(adhoc_cmd_ac);
-    autocomplete_free(lastactivity_ac);
-    autocomplete_free(vcard_ac);
-    autocomplete_free(vcard_photo_ac);
-    autocomplete_free(vcard_element_ac);
-    autocomplete_free(vcard_set_ac);
-    autocomplete_free(vcard_name_ac);
-    autocomplete_free(vcard_set_param_ac);
-    autocomplete_free(vcard_togglable_param_ac);
-    autocomplete_free(vcard_address_type_ac);
+    autocomplete_free(script_show_ac);
 }
 
 static void

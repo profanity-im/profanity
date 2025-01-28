@@ -251,6 +251,7 @@ theme_list(void)
 void
 theme_close(void)
 {
+    color_pair_cache_free();
     if (theme) {
         g_key_file_free(theme);
         theme = NULL;
