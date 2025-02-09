@@ -1143,22 +1143,10 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
         message->timestamp = oldest_delay;
     }
 
-    //1390 Bug fix explained
-    /*
-    Previously the code from 1136 to 1145 looked like this
-    bool is_muc_history = FALSE;
-    if (message->timestamp != NULL) {
-        is_muc_history = TRUE;
-        g_date_time_unref(message->timestamp);
-        message->timestamp = NULL;
-    }
+    //1938 Bug fix explained
+    //Instead of discarding the timestamp associated with the message without checking it
+    //First we check if we have an older delay, at which point we replace the time stamp with that.
 
-    // we want to display the oldest delay
-    message->timestamp = stanza_get_oldest_delay(stanza);
-
-    However, this is discarding a possibly correct timestamp instead of checking
-    it against the oldest delay. This could be a server quirk in that it doesn't work.
-    */
 
     // now this has nothing to do with MUC history
     // it's just setting the time to the received time so upon displaying we can use this time
