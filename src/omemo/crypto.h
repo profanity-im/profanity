@@ -34,7 +34,7 @@
  */
 #include <stdio.h>
 #include <stdbool.h>
-#include <signal/signal_protocol_types.h>
+#include <omemo/signal_protocol_types.h>
 #include <gcrypt.h>
 
 #define AES128_GCM_KEY_LENGTH 16

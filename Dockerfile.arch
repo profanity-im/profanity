@@ -19,7 +19,7 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   libgcrypt \
   libmicrohttpd \
   libnotify \
-  libsignal-protocol-c \
+  libomemo-c \
   libotr \
   libtool \
   libxss \

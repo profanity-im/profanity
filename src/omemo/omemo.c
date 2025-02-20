@@ -44,7 +44,7 @@
 #include <pthread.h>
 #include <signal/key_helper.h>
 #include <signal/protocol.h>
-#include <signal/signal_protocol.h>
+#include <omemo/signal_protocol.h>
 #include <signal/session_builder.h>
 #include <signal/session_cipher.h>
 

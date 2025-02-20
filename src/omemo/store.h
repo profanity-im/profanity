@@ -32,7 +32,7 @@
  * source files in the program, then also delete it here.
  *
  */
-#include <signal/signal_protocol.h>
+#include <omemo/signal_protocol.h>
 
 #include "config.h"
 
