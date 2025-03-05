@@ -382,6 +382,10 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         if (show_message) {
             win_print_incoming(window, display_name, message);
         }
+
+	if (notify) {
+	     notify_message(display_name, num, message->plain);
+	}
     }
 
     if (!message->is_mam) {
@@ -391,10 +395,6 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         if (prefs_get_boolean(PREF_BEEP)) {
             beep();
         }
-    }
-
-    if (notify) {
-        notify_message(display_name, num, message->plain);
     }
 
     plugins_post_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
