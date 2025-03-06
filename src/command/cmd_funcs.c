@@ -4917,8 +4917,6 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         goto out;
     }
 
-    FILE* fh = fdopen(fd, "rb");
-
     gboolean omemo_enabled = FALSE;
     gboolean sendfile_enabled = TRUE;
 
@@ -4951,6 +4949,8 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         win_println(window, THEME_ERROR, "-", "Sending encrypted files via http_upload is not possible yet.");
         goto out;
     }
+
+    FILE* fh = fdopen(fd, "rb");
 
     if (omemo_enabled) {
 #ifdef HAVE_OMEMO
