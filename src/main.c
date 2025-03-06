@@ -55,16 +55,17 @@
 #include "common.h"
 #include "command/cmd_defs.h"
 
-static gboolean version = FALSE;
-static char* log = NULL;
-static char* log_file = NULL;
-static char* account_name = NULL;
-static char* config_file = NULL;
-static char* theme_name = NULL;
-
 int
 main(int argc, char** argv)
 {
+    gboolean version = FALSE;
+    auto_gchar gchar* log = NULL;
+    auto_gchar gchar* log_file = NULL;
+    auto_gchar gchar* account_name = NULL;
+    auto_gchar gchar* config_file = NULL;
+    auto_gchar gchar* theme_name = NULL;
+    auto_gcharv gchar** commands = NULL;
+
     if (argc == 2 && g_strcmp0(PACKAGE_STATUS, "development") == 0) {
         if (g_strcmp0(argv[1], "docgen") == 0) {
             command_docgen();
@@ -75,13 +76,14 @@ main(int argc, char** argv)
         }
     }
 
-    static GOptionEntry entries[] = {
+    GOptionEntry entries[] = {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
         { "account", 'a', 0, G_OPTION_ARG_STRING, &account_name, "Auto connect to an account on startup" },
         { "log", 'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO, WARN (default), ERROR", "LEVEL" },
         { "config", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Use an alternative configuration file", NULL },
         { "logfile", 'f', 0, G_OPTION_ARG_STRING, &log_file, "Specify log file", NULL },
         { "theme", 't', 0, G_OPTION_ARG_STRING, &theme_name, "Specify theme name", NULL },
+        { "cmd", 'r', 0, G_OPTION_ARG_STRING_ARRAY, &commands, "First commands to run", NULL },
         { NULL }
     };
 
@@ -171,14 +173,7 @@ main(int argc, char** argv)
     }
 
     /* Default logging WARN */
-    prof_run(log ? log : "WARN", account_name, config_file, log_file, theme_name);
-
-    /* Free resources allocated by GOptionContext */
-    g_free(log);
-    g_free(account_name);
-    g_free(config_file);
-    g_free(log_file);
-    g_free(theme_name);
+    prof_run(log ? log : "WARN", account_name, config_file, log_file, theme_name, commands);
 
     return 0;
 }

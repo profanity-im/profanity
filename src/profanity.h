@@ -40,7 +40,7 @@
 #include <pthread.h>
 #include <glib.h>
 
-void prof_run(char* log_level, char* account_name, char* config_file, char* log_file, char* theme_name);
+void prof_run(gchar* log_level, gchar* account_name, gchar* config_file, gchar* log_file, gchar* theme_name, gchar** commands);
 gboolean prof_set_quit(void);
 
 extern pthread_mutex_t lock;
