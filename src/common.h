@@ -104,6 +104,14 @@ void auto_free_guchar(guchar** str);
  */
 #define auto_guchar __attribute__((__cleanup__(auto_free_guchar)))
 
+#define auto_gfd __attribute__((__cleanup__(auto_close_gfd)))
+
+void auto_close_gfd(gint* fd);
+
+#define auto_FILE __attribute__((__cleanup__(auto_close_FILE)))
+
+void auto_close_FILE(FILE** fd);
+
 #if defined(__OpenBSD__)
 #define STR_MAYBE_NULL(p) (p) ?: "(null)"
 #else
