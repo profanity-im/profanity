@@ -17,6 +17,7 @@ compile_commands.json
 .project
 .settings/
 .vscode/
+*.plist/
 
 # autotools
 .libs/
