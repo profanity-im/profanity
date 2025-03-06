@@ -57,8 +57,6 @@
 #include "ui/window.h"
 #include "common.h"
 
-#define FALLBACK_MSG ""
-
 void*
 aesgcm_file_get(void* userdata)
 {
