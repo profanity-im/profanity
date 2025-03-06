@@ -122,6 +122,9 @@ aesgcm_file_get(void* userdata)
                                    "temporary file at '%s' for reading (%s).",
                                    aesgcm_dl->url, tmpname,
                                    g_strerror(errno));
+        if (fclose(outfh) == EOF) {
+            cons_show_error(g_strerror(errno));
+        }
         return NULL;
     }
 
