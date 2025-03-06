@@ -389,13 +389,6 @@ sv_ev_room_message(ProfMessage* message)
         if (triggers) {
             mucwin->unread_triggers = TRUE;
         }
-
-	if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL)) {
-	     auto_jid Jid* jidp = jid_create(mucwin->roomjid);
-	     if (jidp) {
-		  notify_room_message(message->from_jid->resourcepart, jidp->localpart, num, message->plain);
-	     }
-	}
     }
 
     // save timestamp of last received muc message
@@ -404,6 +397,12 @@ sv_ev_room_message(ProfMessage* message)
     }
     mucwin->last_msg_timestamp = g_date_time_new_now_local();
 
+    if ((prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL) && !wins_is_current(window)) || ui_get_idle_time() > 1000) {
+        auto_jid Jid* jidp = jid_create(mucwin->roomjid);
+        if (jidp) {
+            notify_room_message(message->from_jid->resourcepart, jidp->localpart, num, message->plain);
+        }
+    }
 
     if (triggers) {
         g_list_free_full(triggers, free);
