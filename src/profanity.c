@@ -298,7 +298,10 @@ _call_and_free_shutdown_routine(struct shutdown_routine* r)
 void
 prof_shutdown(void)
 {
-    g_list_free_full(shutdown_routines, (GDestroyNotify)_call_and_free_shutdown_routine);
+    if (shutdown_routines) {
+        g_list_free_full(shutdown_routines, (GDestroyNotify)_call_and_free_shutdown_routine);
+        shutdown_routines = NULL;
+    }
 }
 
 static void

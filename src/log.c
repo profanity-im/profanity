@@ -54,6 +54,8 @@
 
 #define PROF "prof"
 
+static void _log_msg(log_level_t level, const char* const area, const char* const msg);
+
 static FILE* logp;
 static gchar* mainlogfile = NULL;
 static gboolean user_provided_log = FALSE;
@@ -121,14 +123,22 @@ _log_abbreviation_string_from_level(log_level_t level)
     }
 }
 
+static gboolean
+_should_log(log_level_t level)
+{
+    return level >= level_filter && logp;
+}
+
 void
 log_debug(const char* const msg, ...)
 {
+    if (!_should_log(PROF_LEVEL_DEBUG))
+        return;
     va_list arg;
     va_start(arg, msg);
     GString* fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    log_msg(PROF_LEVEL_DEBUG, PROF, fmt_msg->str);
+    _log_msg(PROF_LEVEL_DEBUG, PROF, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
@@ -136,11 +146,13 @@ log_debug(const char* const msg, ...)
 void
 log_info(const char* const msg, ...)
 {
+    if (!_should_log(PROF_LEVEL_INFO))
+        return;
     va_list arg;
     va_start(arg, msg);
     GString* fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    log_msg(PROF_LEVEL_INFO, PROF, fmt_msg->str);
+    _log_msg(PROF_LEVEL_INFO, PROF, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
@@ -148,11 +160,13 @@ log_info(const char* const msg, ...)
 void
 log_warning(const char* const msg, ...)
 {
+    if (!_should_log(PROF_LEVEL_WARN))
+        return;
     va_list arg;
     va_start(arg, msg);
     GString* fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    log_msg(PROF_LEVEL_WARN, PROF, fmt_msg->str);
+    _log_msg(PROF_LEVEL_WARN, PROF, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
@@ -160,11 +174,13 @@ log_warning(const char* const msg, ...)
 void
 log_error(const char* const msg, ...)
 {
+    if (!_should_log(PROF_LEVEL_ERROR))
+        return;
     va_list arg;
     va_start(arg, msg);
     GString* fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    log_msg(PROF_LEVEL_ERROR, PROF, fmt_msg->str);
+    _log_msg(PROF_LEVEL_ERROR, PROF, fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 }
@@ -206,28 +222,34 @@ log_close(void)
     }
 }
 
+static void
+_log_msg(log_level_t level, const char* const area, const char* const msg)
+{
+    GDateTime* dt = g_date_time_new_now_local();
+
+    char* level_str = _log_abbreviation_string_from_level(level);
+
+    auto_gchar gchar* date_fmt = g_date_time_format_iso8601(dt);
+
+    fprintf(logp, "%s: %s: %s: %s\n", date_fmt, area, level_str, msg);
+    g_date_time_unref(dt);
+
+    fflush(logp);
+
+    if (prefs_get_boolean(PREF_LOG_ROTATE) && !user_provided_log) {
+        long result = ftell(logp);
+        if (result != -1 && result >= prefs_get_max_log_size()) {
+            _rotate_log_file();
+        }
+    }
+}
+
 void
 log_msg(log_level_t level, const char* const area, const char* const msg)
 {
-    if (level >= level_filter && logp) {
-        GDateTime* dt = g_date_time_new_now_local();
-
-        char* level_str = _log_abbreviation_string_from_level(level);
-
-        auto_gchar gchar* date_fmt = g_date_time_format_iso8601(dt);
-
-        fprintf(logp, "%s: %s: %s: %s\n", date_fmt, area, level_str, msg);
-        g_date_time_unref(dt);
-
-        fflush(logp);
-
-        if (prefs_get_boolean(PREF_LOG_ROTATE) && !user_provided_log) {
-            long result = ftell(logp);
-            if (result != -1 && result >= prefs_get_max_log_size()) {
-                _rotate_log_file();
-            }
-        }
-    }
+    if (!_should_log(level))
+        return;
+    _log_msg(level, area, msg);
 }
 
 int

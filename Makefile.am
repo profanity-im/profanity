@@ -357,6 +357,9 @@ check-unit: tests/unittests/unittests
 format: $(all_c_sources)
 	clang-format -i $(all_c_sources)
 
+format-sources: $(core_sources) $(main_source)
+	clang-format -i $^
+
 spell:
 	codespell
 

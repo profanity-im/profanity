@@ -99,9 +99,10 @@ _ui_close(void)
     inp_close();
     status_bar_close();
     free_title_bar();
-    delwin(main_scr);
-    delscreen(set_term(NULL));
     endwin();
+    delwin(main_scr);
+    main_scr = NULL;
+    delscreen(set_term(NULL));
 }
 
 void

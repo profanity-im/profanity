@@ -164,7 +164,6 @@ create_input_window(void)
 
     inp_win = newpad(1, INP_WIN_MAX);
     wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));
-    ;
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
 
@@ -274,7 +273,9 @@ inp_close(void)
 {
     rl_callback_handler_remove();
     delwin(inp_win);
+    inp_win = NULL;
     fclose(discard);
+    discard = NULL;
 }
 
 char*

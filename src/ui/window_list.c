@@ -1226,8 +1226,11 @@ void
 wins_destroy(void)
 {
     g_hash_table_destroy(windows);
+    windows = NULL;
     autocomplete_free(wins_ac);
+    wins_ac = NULL;
     autocomplete_free(wins_close_ac);
+    wins_close_ac = NULL;
 }
 
 ProfWin*

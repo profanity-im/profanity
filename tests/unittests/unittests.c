@@ -57,6 +57,9 @@ main(int argc, char* argv[])
     printf("  MB_CUR_MAX: %d\n", (int)MB_CUR_MAX);
     printf("  MB_LEN_MAX: %d\n", (int)MB_LEN_MAX);
 
+    if (argc > 1)
+        cmocka_set_test_filter(argv[1]);
+
     const struct CMUnitTest all_tests[] = {
 
         cmocka_unit_test(replace_one_substr),
@@ -460,7 +463,9 @@ main(int argc, char* argv[])
         cmocka_unit_test_setup_teardown(handle_offline_removes_chat_session,
                                         load_preferences,
                                         close_preferences),
-        cmocka_unit_test(lost_connection_clears_chat_sessions),
+        cmocka_unit_test_setup_teardown(lost_connection_clears_chat_sessions,
+                                        load_preferences,
+                                        close_preferences),
 
         cmocka_unit_test(cmd_alias_add_shows_usage_when_no_args),
         cmocka_unit_test(cmd_alias_add_shows_usage_when_no_value),
@@ -623,8 +628,12 @@ main(int argc, char* argv[])
         cmocka_unit_test(prof_whole_occurrences_tests),
         cmocka_unit_test(prof_occurrences_of_large_message_tests),
 
-        cmocka_unit_test(returns_no_commands),
-        cmocka_unit_test(returns_commands),
+        cmocka_unit_test_setup_teardown(returns_no_commands,
+                                        load_preferences,
+                                        close_preferences),
+        cmocka_unit_test_setup_teardown(returns_commands,
+                                        load_preferences,
+                                        close_preferences),
 
         cmocka_unit_test(returns_empty_list_when_none),
         cmocka_unit_test(returns_added_feature),
@@ -634,6 +643,5 @@ main(int argc, char* argv[])
         cmocka_unit_test(removes_plugin_features),
         cmocka_unit_test(does_not_remove_feature_when_more_than_one_reference),
     };
-
     return cmocka_run_group_tests(all_tests, NULL, NULL);
 }

@@ -216,8 +216,6 @@ cmd_bookmark_uses_roomjid_in_room(void** state)
 
     gboolean result = cmd_bookmark(&muc_win.window, CMD_BOOKMARK, args);
     assert_true(result);
-
-    muc_close();
 }
 
 void
@@ -243,8 +241,6 @@ cmd_bookmark_add_uses_roomjid_in_room(void** state)
 
     gboolean result = cmd_bookmark(&muc_win.window, CMD_BOOKMARK, args);
     assert_true(result);
-
-    muc_close();
 }
 
 void
@@ -271,8 +267,6 @@ cmd_bookmark_add_uses_supplied_jid_in_room(void** state)
 
     gboolean result = cmd_bookmark(&muc_win.window, CMD_BOOKMARK, args);
     assert_true(result);
-
-    muc_close();
 }
 
 void
@@ -401,8 +395,6 @@ cmd_bookmark_remove_uses_roomjid_in_room(void** state)
 
     gboolean result = cmd_bookmark(&muc_win.window, CMD_BOOKMARK, args);
     assert_true(result);
-
-    muc_close();
 }
 
 void
@@ -426,6 +418,4 @@ cmd_bookmark_remove_uses_supplied_jid_in_room(void** state)
 
     gboolean result = cmd_bookmark(&muc_win.window, CMD_BOOKMARK, args);
     assert_true(result);
-
-    muc_close();
 }

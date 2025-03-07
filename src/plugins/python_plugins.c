@@ -69,12 +69,6 @@ disable_python_threads()
     PyEval_RestoreThread(thread_state);
 }
 
-static void
-_unref_module(PyObject* module)
-{
-    Py_XDECREF(module);
-}
-
 const char*
 python_get_version_string(void)
 {
@@ -95,14 +89,15 @@ python_get_version_number(void)
 void
 python_env_init(void)
 {
-    loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_unref_module);
+    loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)Py_XDECREF);
 
     python_init_prof();
 
     auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
     auto_gchar gchar* path = g_strdup_printf(
-          "import sys\n"
-          "sys.path.append(\"%s/\")\n", plugins_dir);
+        "import sys\n"
+        "sys.path.append(\"%s/\")\n",
+        plugins_dir);
 
     PyRun_SimpleString(path);
     python_check_error();

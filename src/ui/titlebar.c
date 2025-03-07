@@ -89,6 +89,7 @@ void
 free_title_bar(void)
 {
     delwin(win);
+    win = NULL;
 }
 
 void

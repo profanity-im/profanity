@@ -16,9 +16,6 @@ returns_no_commands(void** state)
     GList* commands = plugins_get_command_names();
 
     assert_true(commands == NULL);
-
-    callbacks_close();
-    g_list_free(commands);
 }
 
 void
@@ -26,15 +23,15 @@ returns_commands(void** state)
 {
     callbacks_init();
 
-    PluginCommand* command1 = malloc(sizeof(PluginCommand));
+    PluginCommand* command1 = calloc(1, sizeof(PluginCommand));
     command1->command_name = strdup("command1");
     callbacks_add_command("plugin1", command1);
 
-    PluginCommand* command2 = malloc(sizeof(PluginCommand));
+    PluginCommand* command2 = calloc(1, sizeof(PluginCommand));
     command2->command_name = strdup("command2");
     callbacks_add_command("plugin1", command2);
 
-    PluginCommand* command3 = malloc(sizeof(PluginCommand));
+    PluginCommand* command3 = calloc(1, sizeof(PluginCommand));
     command3->command_name = strdup("command3");
     callbacks_add_command("plugin2", command3);
 
@@ -61,6 +58,4 @@ returns_commands(void** state)
     assert_true(foundCommand1 && foundCommand2 && foundCommand3);
 
     g_list_free(names);
-    // TODO: why does this make the test fail?
-    // callbacks_close();
 }

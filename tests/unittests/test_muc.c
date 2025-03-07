@@ -16,7 +16,6 @@ muc_before_test(void** state)
 int
 muc_after_test(void** state)
 {
-    muc_close();
     return 0;
 }
 
