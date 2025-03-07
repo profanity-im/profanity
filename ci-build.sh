@@ -65,6 +65,7 @@ case "$ARCH" in
         "--without-xscreensaver"
         "--disable-gdk-pixbuf"
         "")
+        source /etc/profile.d/debuginfod.sh 2>/dev/null || true
         ;;
     darwin*)
         tests=(
@@ -127,7 +128,7 @@ case "$ARCH" in
         ./configure ${tests[0]} --enable-valgrind $*
 
         $MAKE CC="${CC}"
-        $MAKE check-valgrind
+        $MAKE check-valgrind || log_content ./test-suite-memcheck.log
         $MAKE distclean
         ;;
 esac

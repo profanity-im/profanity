@@ -9,6 +9,7 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   cmake \
   cmocka \
   curl \
+  debuginfod \
   doxygen \
   expat \
   gcc \
