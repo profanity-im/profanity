@@ -173,8 +173,6 @@ create_input_window(void)
 char*
 inp_readline(void)
 {
-    free(inp_line);
-    inp_line = NULL;
     p_rl_timeout.tv_sec = inp_timeout / 1000;
     p_rl_timeout.tv_usec = inp_timeout % 1000 * 1000;
     FD_ZERO(&fds);
@@ -216,7 +214,9 @@ inp_readline(void)
                 }
             }
         }
-        return strdup(inp_line);
+        char* ret = inp_line;
+        inp_line = NULL;
+        return ret;
     } else {
         return NULL;
     }

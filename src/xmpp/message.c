@@ -1575,7 +1575,7 @@ _send_message_stanza(xmpp_stanza_t* const stanza)
     if (plugin_text) {
         xmpp_send_raw_string(conn, "%s", plugin_text);
     } else {
-        xmpp_send_raw_string(conn, "%s", text);
+        xmpp_send_raw(conn, text, text_size);
     }
     xmpp_free(connection_get_ctx(), text);
 }

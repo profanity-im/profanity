@@ -56,6 +56,9 @@
 #include "xmpp/muc.h"
 
 static GTimer* remind_timer;
+#ifdef HAVE_LIBNOTIFY
+static NotifyNotification* notification;
+#endif
 
 void
 notifier_initialise(void)
@@ -67,6 +70,8 @@ void
 notifier_uninit(void)
 {
 #ifdef HAVE_LIBNOTIFY
+    g_object_unref(G_OBJECT(notification));
+    notification = NULL;
     if (notify_is_initted()) {
         notify_uninit();
     }
@@ -208,7 +213,8 @@ notify(const char* const message, int timeout, const char* const category)
     notify_init("Profanity");
 
     if (notify_is_initted()) {
-        NotifyNotification* notification;
+        if (notification)
+            g_object_unref(G_OBJECT(notification));
         notification = notify_notification_new("Profanity", message, NULL);
         notify_notification_set_timeout(notification, timeout);
         notify_notification_set_category(notification, category);

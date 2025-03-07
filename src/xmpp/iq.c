@@ -183,7 +183,7 @@ _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const us
     xmpp_stanza_to_text(stanza, &text, &text_size);
     gboolean cont = plugins_on_iq_stanza_receive(text);
     xmpp_free(connection_get_ctx(), text);
-    if (!cont) {
+    if (!cont || !id_handlers) {
         return 1;
     }
 
@@ -261,7 +261,6 @@ iq_handlers_init(void)
     }
     received_disco_items = FALSE;
 
-    iq_rooms_cache_clear();
     iq_handlers_clear();
 
     id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_iq_id_handler_free);
@@ -288,6 +287,18 @@ _win_find(char* key,
     }
 }
 
+static void
+_free_late_delivery_userdata(LateDeliveryUserdata* d)
+{
+    if (!d)
+        return;
+    if (d->enddate)
+        g_date_time_unref(d->enddate);
+    if (d->startdate)
+        g_date_time_unref(d->startdate);
+    free(d);
+}
+
 void
 iq_handlers_remove_win(ProfWin* window)
 {
@@ -298,9 +309,11 @@ iq_handlers_remove_win(ProfWin* window)
     while (cur) {
         LateDeliveryUserdata* del_data = cur->data;
         next = g_slist_next(cur);
-        if (del_data->win == (void*)window)
+        if (del_data->win == (void*)window) {
             late_delivery_windows = g_slist_delete_link(late_delivery_windows,
                                                         cur);
+            _free_late_delivery_userdata(del_data);
+        }
         cur = next;
     }
     struct iq_win_finder st = { 0 };
@@ -319,9 +332,14 @@ iq_handlers_remove_win(ProfWin* window)
 void
 iq_handlers_clear(void)
 {
+    iq_rooms_cache_clear();
     if (id_handlers) {
         g_hash_table_destroy(id_handlers);
         id_handlers = NULL;
+    }
+    if (late_delivery_windows) {
+        g_slist_free_full(late_delivery_windows, (GDestroyNotify)_free_late_delivery_userdata);
+        late_delivery_windows = NULL;
     }
 }
 
@@ -2569,8 +2587,7 @@ iq_send_stanza(xmpp_stanza_t* const stanza)
     if (plugin_text) {
         xmpp_send_raw_string(conn, "%s", plugin_text);
     } else {
-        /* libstrophe does the strlen for us, so simply always pass SIZE_MAX */
-        xmpp_send_raw(conn, text, SIZE_MAX);
+        xmpp_send_raw(conn, text, text_size);
     }
     xmpp_free(connection_get_ctx(), text);
 }
@@ -2716,7 +2733,7 @@ void
 iq_mam_request(ProfChatWin* win, GDateTime* enddate)
 {
     ProfMessage* last_msg = log_database_get_limits_info(win->barejid, TRUE);
-    GDateTime* startdate = g_date_time_add_seconds(last_msg->timestamp, 0);
+    GDateTime* startdate = g_date_time_ref(last_msg->timestamp);
     message_free(last_msg);
 
     // Save request for later if disco items haven't been received yet

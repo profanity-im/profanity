@@ -102,6 +102,10 @@ static void _session_free_saved_details(void);
 static void
 _session_shutdown(void)
 {
+    if (reconnect_timer) {
+        g_timer_destroy(reconnect_timer);
+        reconnect_timer = NULL;
+    }
     _session_free_internals();
 
     chat_sessions_clear();
@@ -228,7 +232,6 @@ session_disconnect(void)
 
         accounts_set_last_activity(session_get_account_name());
 
-        iq_rooms_cache_clear();
         iq_handlers_clear();
 
         connection_disconnect();

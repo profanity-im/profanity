@@ -174,6 +174,10 @@ _otr_shutdown(void)
         free(jid);
         jid = NULL;
     }
+    if (user_state) {
+        otrl_userstate_free(user_state);
+        user_state = NULL;
+    }
     otrlib_shutdown();
 }
 
