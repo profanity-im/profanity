@@ -94,14 +94,14 @@ static void _occupant_free(Occupant* occupant);
 static void
 _muc_close(void)
 {
-    autocomplete_free(invite_ac);
-    autocomplete_free(confservers_ac);
-    g_hash_table_destroy(rooms);
     g_hash_table_destroy(invite_passwords);
-    rooms = NULL;
     invite_passwords = NULL;
-    invite_ac = NULL;
+    g_hash_table_destroy(rooms);
+    rooms = NULL;
+    autocomplete_free(confservers_ac);
     confservers_ac = NULL;
+    autocomplete_free(invite_ac);
+    invite_ac = NULL;
 }
 
 void

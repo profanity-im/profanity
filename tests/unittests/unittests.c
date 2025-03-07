@@ -39,6 +39,8 @@
 #include "test_callbacks.h"
 #include "test_plugins_disco.h"
 
+#define muc_unit_test(f) cmocka_unit_test_setup_teardown(f, muc_before_test, muc_after_test)
+
 int
 main(int argc, char* argv[])
 {
@@ -501,11 +503,11 @@ main(int argc, char* argv[])
         cmocka_unit_test(cmd_bookmark_list_shows_bookmarks),
         cmocka_unit_test(cmd_bookmark_add_shows_message_when_invalid_jid),
         cmocka_unit_test(cmd_bookmark_add_adds_bookmark_with_jid),
-        cmocka_unit_test(cmd_bookmark_uses_roomjid_in_room),
-        cmocka_unit_test(cmd_bookmark_add_uses_roomjid_in_room),
-        cmocka_unit_test(cmd_bookmark_add_uses_supplied_jid_in_room),
-        cmocka_unit_test(cmd_bookmark_remove_uses_roomjid_in_room),
-        cmocka_unit_test(cmd_bookmark_remove_uses_supplied_jid_in_room),
+        muc_unit_test(cmd_bookmark_uses_roomjid_in_room),
+        muc_unit_test(cmd_bookmark_add_uses_roomjid_in_room),
+        muc_unit_test(cmd_bookmark_add_uses_supplied_jid_in_room),
+        muc_unit_test(cmd_bookmark_remove_uses_roomjid_in_room),
+        muc_unit_test(cmd_bookmark_remove_uses_supplied_jid_in_room),
         cmocka_unit_test(cmd_bookmark_add_adds_bookmark_with_jid_nick),
         cmocka_unit_test(cmd_bookmark_add_adds_bookmark_with_jid_autojoin),
         cmocka_unit_test(cmd_bookmark_add_adds_bookmark_with_jid_nick_autojoin),
@@ -576,10 +578,10 @@ main(int argc, char* argv[])
         cmocka_unit_test(cmd_join_shows_message_when_connecting),
         cmocka_unit_test(cmd_join_shows_message_when_disconnected),
         cmocka_unit_test(cmd_join_shows_error_message_when_invalid_room_jid),
-        cmocka_unit_test(cmd_join_uses_account_mucservice_when_no_service_specified),
-        cmocka_unit_test(cmd_join_uses_supplied_nick),
-        cmocka_unit_test(cmd_join_uses_account_nick_when_not_supplied),
-        cmocka_unit_test(cmd_join_uses_password_when_supplied),
+        muc_unit_test(cmd_join_uses_account_mucservice_when_no_service_specified),
+        muc_unit_test(cmd_join_uses_supplied_nick),
+        muc_unit_test(cmd_join_uses_account_nick_when_not_supplied),
+        muc_unit_test(cmd_join_uses_password_when_supplied),
 
         cmocka_unit_test(cmd_roster_shows_message_when_disconnecting),
         cmocka_unit_test(cmd_roster_shows_message_when_connecting),

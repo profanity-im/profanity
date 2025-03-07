@@ -70,6 +70,12 @@ AC_ARG_ENABLE([gdk-pixbuf],
 AC_ARG_ENABLE([omemo-qrcode],
     [AS_HELP_STRING([--enable-omemo-qrcode], [enable ability to display omemo qr code])])
 
+m4_include([m4/ax_valgrind_check.m4])
+AX_VALGRIND_DFLT([drd], [off])
+AX_VALGRIND_DFLT([helgrind], [off])
+AX_VALGRIND_DFLT([sgcheck], [off])
+AX_VALGRIND_CHECK
+
 # Required dependencies
 
 AC_CHECK_FUNCS([atexit memset strdup strstr])

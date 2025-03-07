@@ -12,7 +12,7 @@
 void
 returns_no_commands(void** state)
 {
-    callbacks_init();
+    plugins_init();
     GList* commands = plugins_get_command_names();
 
     assert_true(commands == NULL);
@@ -21,8 +21,7 @@ returns_no_commands(void** state)
 void
 returns_commands(void** state)
 {
-    callbacks_init();
-
+    plugins_init();
     PluginCommand* command1 = calloc(1, sizeof(PluginCommand));
     command1->command_name = strdup("command1");
     callbacks_add_command("plugin1", command1);

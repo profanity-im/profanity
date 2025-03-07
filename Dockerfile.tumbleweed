@@ -33,6 +33,7 @@ RUN zypper --non-interactive in --no-recommends \
   python310-devel \
   readline-devel \
   sqlite3-devel \
+  valgrind \
   gdk-pixbuf-devel \
   qrencode-devel
 

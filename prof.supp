@@ -252,6 +252,27 @@
    fun:Py_InitializeEx
    fun:python_env_init
 }
+{
+   Custom Inittab can only be cleaned by calling PyMain, which we don't do
+   Memcheck:Leak
+   ...
+   fun:PyImport_ExtendInittab
+   fun:PyImport_AppendInittab
+   fun:python_init_prof
+   ...
+}
+
+# Specific for unit test issues
+{
+   Libc TLS allocation
+   Memcheck:Leak
+   ...
+   fun:allocate_dtv
+   fun:_dl_allocate_tls
+   ...
+   fun:unique_filename_from_url
+   ...
+}
 
 # AUTO-GENERATED START
 
