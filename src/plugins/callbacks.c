@@ -177,9 +177,9 @@ callbacks_remove(const char* const plugin_name)
 void
 callbacks_close(void)
 {
-    g_hash_table_destroy(p_commands);
-    g_hash_table_destroy(p_timed_functions);
     g_hash_table_destroy(p_window_callbacks);
+    g_hash_table_destroy(p_timed_functions);
+    g_hash_table_destroy(p_commands);
 }
 
 void

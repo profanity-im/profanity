@@ -160,12 +160,11 @@ cons_bad_cmd_usage(const char* const cmd)
 void
 cons_show_error(const char* const msg, ...)
 {
-    ProfWin* console = wins_get_console();
     va_list arg;
     va_start(arg, msg);
     GString* fmt_msg = g_string_new(NULL);
     g_string_vprintf(fmt_msg, msg, arg);
-    win_println(console, THEME_ERROR, "-", "%s", fmt_msg->str);
+    win_println(wins_get_console(), THEME_ERROR, "-", "%s", fmt_msg->str);
     g_string_free(fmt_msg, TRUE);
     va_end(arg);
 

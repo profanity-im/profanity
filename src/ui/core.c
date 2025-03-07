@@ -93,7 +93,6 @@ static void
 _ui_close(void)
 {
     g_timer_destroy(ui_idle_time);
-    endwin();
     notifier_uninit();
     cons_clear_alerts();
     wins_destroy();
@@ -102,6 +101,7 @@ _ui_close(void)
     free_title_bar();
     delwin(main_scr);
     delscreen(set_term(NULL));
+    endwin();
 }
 
 void

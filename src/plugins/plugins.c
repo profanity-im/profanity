@@ -95,9 +95,9 @@ _plugins_shutdown(void)
     c_shutdown();
 #endif
 
-    autocompleters_destroy();
-    plugin_themes_close();
     plugin_settings_close();
+    plugin_themes_close();
+    autocompleters_destroy();
     callbacks_close();
     disco_close();
     g_hash_table_destroy(plugins);
@@ -399,7 +399,7 @@ plugins_reload(const char* const name, GString* error_message)
     return res;
 }
 
-void
+static void
 _plugins_unloaded_list_dir(const gchar* const dir, GSList** result)
 {
     GDir* plugins_dir = g_dir_open(dir, 0, NULL);

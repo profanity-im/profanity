@@ -69,8 +69,8 @@ static void
 _chat_session_free(ChatSession* session)
 {
     if (session) {
-        free(session->barejid);
         free(session->resource);
+        free(session->barejid);
         free(session);
     }
 }

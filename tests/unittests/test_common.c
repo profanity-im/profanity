@@ -546,7 +546,7 @@ prof_occurrences_of_large_message_tests(void** state)
     char* haystack = malloc(haystack_sz);
     const char needle[] = "needle ";
     while (haystack_sz - haystack_cur > sizeof(needle)) {
-        memcpy(&haystack[haystack_cur], needle, sizeof(needle) - 1);
+        memcpy(&haystack[haystack_cur], needle, sizeof(needle));
         expected = g_slist_append(expected, GINT_TO_POINTER(haystack_cur));
         haystack_cur += sizeof(needle) - 1;
     }

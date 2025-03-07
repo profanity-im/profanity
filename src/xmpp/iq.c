@@ -2571,7 +2571,8 @@ iq_send_stanza(xmpp_stanza_t* const stanza)
     if (plugin_text) {
         xmpp_send_raw_string(conn, "%s", plugin_text);
     } else {
-        xmpp_send_raw_string(conn, "%s", text);
+        /* libstrophe does the strlen for us, so simply always pass SIZE_MAX */
+        xmpp_send_raw(conn, text, SIZE_MAX);
     }
     xmpp_free(connection_get_ctx(), text);
 }
