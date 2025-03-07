@@ -6,10 +6,6 @@ void
 p_gpg_init(void)
 {
 }
-void
-p_gpg_close(void)
-{
-}
 
 GHashTable*
 p_gpg_list_keys(void)

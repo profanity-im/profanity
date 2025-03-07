@@ -7,10 +7,6 @@ void
 omemo_init(void)
 {
 }
-void
-omemo_close(void)
-{
-}
 
 char*
 omemo_fingerprint_autocomplete(const char* const search_str, gboolean previous)

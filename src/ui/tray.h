@@ -39,7 +39,6 @@
 #ifdef HAVE_GTK
 void tray_init(void);
 void tray_update(void);
-void tray_shutdown(void);
 
 void tray_enable(void);
 void tray_disable(void);

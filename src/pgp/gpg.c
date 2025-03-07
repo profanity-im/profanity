@@ -111,25 +111,8 @@ _p_gpg_passphrase_cb(void* hook, const char* uid_hint, const char* passphrase_in
     return 0;
 }
 
-void
-p_gpg_init(void)
-{
-    libversion = gpgme_check_version(NULL);
-    log_debug("GPG: Found gpgme version: %s", libversion);
-    gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
-
-    pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_p_gpg_free_pubkeyid);
-
-    key_ac = autocomplete_new();
-    GHashTable* keys = p_gpg_list_keys();
-    p_gpg_free_keys(keys);
-
-    passphrase = NULL;
-    passphrase_attempt = NULL;
-}
-
-void
-p_gpg_close(void)
+static void
+_p_gpg_close(void)
 {
     if (pubkeys) {
         g_hash_table_destroy(pubkeys);
@@ -151,6 +134,25 @@ p_gpg_close(void)
         free(passphrase_attempt);
         passphrase_attempt = NULL;
     }
+}
+
+void
+p_gpg_init(void)
+{
+    libversion = gpgme_check_version(NULL);
+    log_debug("GPG: Found gpgme version: %s", libversion);
+    gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
+
+    prof_add_shutdown_routine(_p_gpg_close);
+
+    pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_p_gpg_free_pubkeyid);
+
+    key_ac = autocomplete_new();
+    GHashTable* keys = p_gpg_list_keys();
+    p_gpg_free_keys(keys);
+
+    passphrase = NULL;
+    passphrase_attempt = NULL;
 }
 
 void
@@ -208,7 +210,7 @@ p_gpg_on_connect(const char* const barejid)
 void
 p_gpg_on_disconnect(void)
 {
-    p_gpg_close();
+    _p_gpg_close();
     pubkeys = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_p_gpg_free_pubkeyid);
     key_ac = autocomplete_new();
 }

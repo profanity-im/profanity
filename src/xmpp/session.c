@@ -99,10 +99,25 @@ static char* saved_status;
 static void _session_free_internals(void);
 static void _session_free_saved_details(void);
 
+static void
+_session_shutdown(void)
+{
+    _session_free_internals();
+
+    chat_sessions_clear();
+    presence_sub_requests_destroy();
+
+    connection_shutdown();
+    if (saved_status) {
+        free(saved_status);
+    }
+}
+
 void
 session_init(void)
 {
     log_info("Initialising XMPP");
+    prof_add_shutdown_routine(_session_shutdown);
     connection_init();
     presence_sub_requests_init();
     caps_init();
@@ -225,20 +240,6 @@ session_disconnect(void)
     }
 
     connection_set_disconnected();
-}
-
-void
-session_shutdown(void)
-{
-    _session_free_internals();
-
-    chat_sessions_clear();
-    presence_sub_requests_destroy();
-
-    connection_shutdown();
-    if (saved_status) {
-        free(saved_status);
-    }
 }
 
 void

@@ -82,7 +82,6 @@ typedef struct _muc_occupant_t
 } Occupant;
 
 void muc_init(void);
-void muc_close(void);
 
 void muc_join(const char* const room, const char* const nick, const char* const password, gboolean autojoin);
 void muc_leave(const char* const room);

@@ -153,9 +153,21 @@ _tray_change_icon(gpointer data)
     return TRUE;
 }
 
+static void
+_tray_shutdown(void)
+{
+    if (gtk_ready && prefs_get_boolean(PREF_TRAY)) {
+        tray_disable();
+    }
+    g_string_free(icon_filename, TRUE);
+    g_string_free(icon_msg_filename, TRUE);
+    gtk_main_quit();
+}
+
 void
 tray_init(void)
 {
+    prof_add_shutdown_routine(_tray_shutdown);
     _get_icons();
     gtk_ready = gtk_init_check(0, NULL);
     log_debug("Env is GTK-ready: %s", gtk_ready ? "true" : "false");
@@ -177,17 +189,6 @@ tray_update(void)
     if (gtk_ready) {
         gtk_main_iteration_do(FALSE);
     }
-}
-
-void
-tray_shutdown(void)
-{
-    if (gtk_ready && prefs_get_boolean(PREF_TRAY)) {
-        tray_disable();
-    }
-    g_string_free(icon_filename, TRUE);
-    g_string_free(icon_msg_filename, TRUE);
-    gtk_main_quit();
 }
 
 void

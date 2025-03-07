@@ -78,10 +78,6 @@ log_stderr_init(log_level_t level)
 {
 }
 void
-log_stderr_close(void)
-{
-}
-void
 log_stderr_handler(void)
 {
 }

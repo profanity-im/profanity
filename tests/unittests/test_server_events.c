@@ -17,6 +17,9 @@
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
 
+
+void prof_shutdown(void);
+
 void
 console_shows_online_presence_when_set_online(void** state)
 {
@@ -35,7 +38,7 @@ console_shows_online_presence_when_set_online(void** state)
     sv_ev_contact_online(barejid, resource, NULL, NULL);
 
     roster_destroy();
-    plugins_shutdown();
+    prof_shutdown();
 }
 
 void
@@ -56,7 +59,7 @@ console_shows_online_presence_when_set_all(void** state)
     sv_ev_contact_online(barejid, resource, NULL, NULL);
 
     roster_destroy();
-    plugins_shutdown();
+    prof_shutdown();
 }
 
 void
@@ -77,7 +80,7 @@ console_shows_dnd_presence_when_set_all(void** state)
     sv_ev_contact_online(barejid, resource, NULL, NULL);
 
     roster_destroy();
-    plugins_shutdown();
+    prof_shutdown();
 }
 
 void
@@ -103,7 +106,7 @@ handle_offline_removes_chat_session(void** state)
 
     roster_destroy();
     chat_sessions_clear();
-    plugins_shutdown();
+    prof_shutdown();
 }
 
 void

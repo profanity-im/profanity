@@ -183,7 +183,6 @@ jabber_conn_status_t session_connect_with_details(const char* const jid, const c
 jabber_conn_status_t session_connect_with_account(const ProfAccount* const account);
 
 void session_disconnect(void);
-void session_shutdown(void);
 void session_process_events(void);
 const char* session_get_account_name(void);
 void session_reconnect_now(void);
@@ -275,7 +274,6 @@ void iq_muc_register_nick(const char* const roomjid);
 void autoping_timer_extend(void);
 
 EntityCapabilities* caps_lookup(const char* const jid);
-void caps_close(void);
 void caps_destroy(EntityCapabilities* caps);
 void caps_reset_ver(void);
 void caps_add_feature(char* feature);

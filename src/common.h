@@ -196,5 +196,6 @@ gchar* get_expanded_path(const char* path);
 char* basename_from_url(const char* url);
 
 gchar* prof_get_version(void);
+void prof_add_shutdown_routine(void (*routine)(void));
 
 #endif

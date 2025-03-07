@@ -63,10 +63,6 @@ ui_update(void)
 {
 }
 void
-ui_close(void)
-{
-}
-void
 ui_redraw(void)
 {
 }

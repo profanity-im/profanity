@@ -73,12 +73,25 @@ static void _chat_log_chat(const char* const login, const char* const other, con
                            chat_log_direction_t direction, GDateTime* timestamp, const char* const resourcepart);
 static void _groupchat_log_chat(const gchar* const login, const gchar* const room, const gchar* const nick,
                                 const gchar* const msg);
+
 void
-chat_log_init(void)
+_chatlog_close(void)
+{
+    g_hash_table_destroy(logs);
+    g_hash_table_destroy(groupchat_logs);
+}
+
+void
+chatlog_init(void)
 {
     log_info("Initialising chat logs");
+
+    prof_add_shutdown_routine(_chatlog_close);
+
     logs = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, free,
                                  (GDestroyNotify)_free_chat_log);
+    groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, free,
+                                           (GDestroyNotify)_free_chat_log);
 }
 
 void
@@ -296,14 +309,6 @@ _chat_log_chat(const char* const login, const char* const other, const char* msg
 }
 
 void
-groupchat_log_init(void)
-{
-    log_info("Initialising groupchat logs");
-    groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, free,
-                                           (GDestroyNotify)_free_chat_log);
-}
-
-void
 groupchat_log_msg_out(const gchar* const room, const gchar* const msg)
 {
     if (prefs_get_boolean(PREF_GRLOG)) {
@@ -389,13 +394,6 @@ _groupchat_log_chat(const gchar* const login, const gchar* const room, const gch
     }
 
     g_date_time_unref(dt_tmp);
-}
-
-void
-chat_log_close(void)
-{
-    g_hash_table_destroy(logs);
-    g_hash_table_destroy(groupchat_logs);
 }
 
 static char*

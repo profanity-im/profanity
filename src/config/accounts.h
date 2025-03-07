@@ -42,7 +42,6 @@
 #include "config/account.h"
 
 void accounts_load(void);
-void accounts_close(void);
 
 char* accounts_find_all(const char* const prefix, gboolean previous, void* context);
 char* accounts_find_enabled(const char* const prefix, gboolean previous, void* context);

@@ -66,6 +66,28 @@ static void _theme_list_dir(const gchar* const dir, GSList** result);
 static GString* _theme_find(const char* const theme_name);
 static gboolean _theme_load_file(const char* const theme_name);
 
+static void
+_theme_close(void)
+{
+    color_pair_cache_free();
+    if (theme) {
+        g_key_file_free(theme);
+        theme = NULL;
+    }
+    if (theme_loc) {
+        g_string_free(theme_loc, TRUE);
+        theme_loc = NULL;
+    }
+    if (bold_items) {
+        g_hash_table_destroy(bold_items);
+        bold_items = NULL;
+    }
+    if (defaults) {
+        g_hash_table_destroy(defaults);
+        defaults = NULL;
+    }
+}
+
 void
 theme_init(const char* const theme_name)
 {
@@ -76,6 +98,8 @@ theme_init(const char* const theme_name)
             log_error("Theme initialisation failed.");
         }
     }
+
+    prof_add_shutdown_routine(_theme_close);
 
     defaults = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
 
@@ -246,28 +270,6 @@ theme_list(void)
 #endif
 
     return result;
-}
-
-void
-theme_close(void)
-{
-    color_pair_cache_free();
-    if (theme) {
-        g_key_file_free(theme);
-        theme = NULL;
-    }
-    if (theme_loc) {
-        g_string_free(theme_loc, TRUE);
-        theme_loc = NULL;
-    }
-    if (bold_items) {
-        g_hash_table_destroy(bold_items);
-        bold_items = NULL;
-    }
-    if (defaults) {
-        g_hash_table_destroy(defaults);
-        defaults = NULL;
-    }
 }
 
 void

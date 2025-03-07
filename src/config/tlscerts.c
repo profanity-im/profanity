@@ -56,10 +56,25 @@ static Autocomplete certs_ac;
 
 static char* current_fp;
 
+static void
+_tlscerts_close(void)
+{
+    free_keyfile(&tlscerts_prof_keyfile);
+    tlscerts = NULL;
+
+    free(current_fp);
+    current_fp = NULL;
+
+    autocomplete_free(certs_ac);
+}
+
 void
 tlscerts_init(void)
 {
     log_info("Loading TLS certificates");
+
+    prof_add_shutdown_routine(_tlscerts_close);
+
     load_data_keyfile(&tlscerts_prof_keyfile, FILE_TLSCERTS);
     tlscerts = tlscerts_prof_keyfile.keyfile;
 
@@ -354,18 +369,6 @@ tlscerts_free(TLSCertificate* cert)
 
         free(cert);
     }
-}
-
-void
-tlscerts_close(void)
-{
-    free_keyfile(&tlscerts_prof_keyfile);
-    tlscerts = NULL;
-
-    free(current_fp);
-    current_fp = NULL;
-
-    autocomplete_free(certs_ac);
 }
 
 static void

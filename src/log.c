@@ -313,6 +313,21 @@ log_stderr_nonblock_set(int fd)
     return rc;
 }
 
+static void
+_log_stderr_close(void)
+{
+    if (!stderr_inited)
+        return;
+
+    /* handle remaining logs before close */
+    log_stderr_handler();
+    stderr_inited = 0;
+    free(stderr_buf);
+    g_string_free(stderr_msg, TRUE);
+    close(stderr_pipe[0]);
+    close(stderr_pipe[1]);
+}
+
 void
 log_stderr_init(log_level_t level)
 {
@@ -337,6 +352,8 @@ log_stderr_init(log_level_t level)
     stderr_level = level;
     stderr_inited = 1;
 
+    prof_add_shutdown_routine(_log_stderr_close);
+
     if (stderr_buf == NULL || stderr_msg == NULL) {
         errno = ENOMEM;
         goto err_free;
@@ -353,19 +370,4 @@ err_close:
 err:
     stderr_inited = 0;
     log_error("Unable to init stderr log handler: %s", strerror(errno));
-}
-
-void
-log_stderr_close(void)
-{
-    if (!stderr_inited)
-        return;
-
-    /* handle remaining logs before close */
-    log_stderr_handler();
-    stderr_inited = 0;
-    free(stderr_buf);
-    g_string_free(stderr_msg, TRUE);
-    close(stderr_pipe[0]);
-    close(stderr_pipe[1]);
 }

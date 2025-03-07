@@ -42,7 +42,6 @@
 #include "ui/ui.h"
 
 void cmd_init(void);
-void cmd_uninit(void);
 
 Command* cmd_get(const char* const command);
 GList* cmd_get_ordered(const char* const tag);

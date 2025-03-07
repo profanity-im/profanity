@@ -66,7 +66,6 @@ OtrlMessageAppOps* otr_messageops(void);
 GHashTable* otr_smpinitators(void);
 
 void otr_init(void);
-void otr_shutdown(void);
 char* otr_libotr_version(void);
 char* otr_start_query(void);
 void otr_poll(void);

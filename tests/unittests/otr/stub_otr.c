@@ -33,10 +33,6 @@ void
 otr_init(void)
 {
 }
-void
-otr_shutdown(void)
-{
-}
 
 char*
 otr_libotr_version(void)

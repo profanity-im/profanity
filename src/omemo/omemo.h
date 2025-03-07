@@ -61,7 +61,6 @@ typedef struct omemo_key
 } omemo_key_t;
 
 void omemo_init(void);
-void omemo_close(void);
 void omemo_on_connect(ProfAccount* account);
 void omemo_on_disconnect(void);
 void omemo_generate_crypto_materials(ProfAccount* account);

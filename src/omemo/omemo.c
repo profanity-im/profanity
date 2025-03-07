@@ -116,10 +116,23 @@ static struct omemo_static_data
     GHashTable* fingerprint_ac;
 } omemo_static_data;
 
+static void
+_omemo_close(void)
+{
+    if (omemo_static_data.fingerprint_ac) {
+        g_hash_table_destroy(omemo_static_data.fingerprint_ac);
+        omemo_static_data.fingerprint_ac = NULL;
+    }
+    pthread_mutex_destroy(&omemo_static_data.lock);
+}
+
 void
 omemo_init(void)
 {
     log_info("[OMEMO] initialising");
+
+    prof_add_shutdown_routine(_omemo_close);
+
     if (omemo_crypto_init() != 0) {
         cons_show("Error initializing OMEMO crypto: gcry_check_version() failed");
     }
@@ -129,16 +142,6 @@ omemo_init(void)
     pthread_mutex_init(&omemo_static_data.lock, &omemo_static_data.attr);
 
     omemo_static_data.fingerprint_ac = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)autocomplete_free);
-}
-
-void
-omemo_close(void)
-{
-    if (omemo_static_data.fingerprint_ac) {
-        g_hash_table_destroy(omemo_static_data.fingerprint_ac);
-        omemo_static_data.fingerprint_ac = NULL;
-    }
-    pthread_mutex_destroy(&omemo_static_data.lock);
 }
 
 void

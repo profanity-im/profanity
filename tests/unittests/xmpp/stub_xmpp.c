@@ -47,10 +47,6 @@ session_disconnect(void)
 {
 }
 void
-session_shutdown(void)
-{
-}
-void
 session_process_events(void)
 {
 }
@@ -475,11 +471,6 @@ EntityCapabilities*
 caps_lookup(const char* const jid)
 {
     return NULL;
-}
-
-void
-caps_close(void)
-{
 }
 
 void

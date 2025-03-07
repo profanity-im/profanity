@@ -96,6 +96,4 @@ char* tlscerts_complete(const char* const prefix, gboolean previous, void* conte
 
 void tlscerts_reset_ac(void);
 
-void tlscerts_close(void);
-
 #endif

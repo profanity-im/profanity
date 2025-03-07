@@ -65,9 +65,49 @@
 
 static GHashTable* plugins;
 
+static void
+_plugins_shutdown(void)
+{
+    GList* values = g_hash_table_get_values(plugins);
+    GList *curr = values, *next;
+
+    while (curr) {
+        next = g_list_next(curr);
+#ifdef HAVE_PYTHON
+        if (curr && ((ProfPlugin*)curr->data)->lang == LANG_PYTHON) {
+            python_plugin_destroy(curr->data);
+            curr = NULL;
+        }
+#endif
+#ifdef HAVE_C
+        if (curr && ((ProfPlugin*)curr->data)->lang == LANG_C) {
+            c_plugin_destroy(curr->data);
+            curr = NULL;
+        }
+#endif
+        curr = next;
+    }
+    g_list_free(values);
+#ifdef HAVE_PYTHON
+    python_shutdown();
+#endif
+#ifdef HAVE_C
+    c_shutdown();
+#endif
+
+    autocompleters_destroy();
+    plugin_themes_close();
+    plugin_settings_close();
+    callbacks_close();
+    disco_close();
+    g_hash_table_destroy(plugins);
+    plugins = NULL;
+}
+
 void
 plugins_init(void)
 {
+    prof_add_shutdown_routine(_plugins_shutdown);
     plugins = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
     callbacks_init();
     autocompleters_init();
@@ -421,27 +461,28 @@ plugins_close_win(const char* const plugin_name, const char* const tag)
     callbacks_remove_win(plugin_name, tag);
 }
 
-void
-plugins_on_start(void)
-{
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
-    while (curr) {
-        ProfPlugin* plugin = curr->data;
-        plugin->on_start_func(plugin);
-        curr = g_list_next(curr);
-    }
-    g_list_free(values);
-}
-
-void
-plugins_on_shutdown(void)
+static void
+_plugins_on_shutdown(void)
 {
     GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         plugin->on_shutdown_func(plugin);
+        curr = g_list_next(curr);
+    }
+    g_list_free(values);
+}
+
+void
+plugins_on_start(void)
+{
+    prof_add_shutdown_routine(_plugins_on_shutdown);
+    GList* values = g_hash_table_get_values(plugins);
+    GList* curr = values;
+    while (curr) {
+        ProfPlugin* plugin = curr->data;
+        plugin->on_start_func(plugin);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -923,43 +964,4 @@ GList*
 plugins_get_disco_features(void)
 {
     return disco_get_features();
-}
-
-void
-plugins_shutdown(void)
-{
-    GList* values = g_hash_table_get_values(plugins);
-    GList *curr = values, *next;
-
-    while (curr) {
-        next = g_list_next(curr);
-#ifdef HAVE_PYTHON
-        if (curr && ((ProfPlugin*)curr->data)->lang == LANG_PYTHON) {
-            python_plugin_destroy(curr->data);
-            curr = NULL;
-        }
-#endif
-#ifdef HAVE_C
-        if (curr && ((ProfPlugin*)curr->data)->lang == LANG_C) {
-            c_plugin_destroy(curr->data);
-            curr = NULL;
-        }
-#endif
-        curr = next;
-    }
-    g_list_free(values);
-#ifdef HAVE_PYTHON
-    python_shutdown();
-#endif
-#ifdef HAVE_C
-    c_shutdown();
-#endif
-
-    autocompleters_destroy();
-    plugin_themes_close();
-    plugin_settings_close();
-    callbacks_close();
-    disco_close();
-    g_hash_table_destroy(plugins);
-    plugins = NULL;
 }
