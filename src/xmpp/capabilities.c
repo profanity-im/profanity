@@ -72,6 +72,7 @@ static EntityCapabilities* _caps_copy(EntityCapabilities* caps);
 static void
 _caps_close(void)
 {
+    caps_reset_ver();
     free_keyfile(&caps_prof_keyfile);
     cache = NULL;
     g_hash_table_destroy(jid_to_ver);

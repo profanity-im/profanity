@@ -1647,6 +1647,7 @@ cmd_ac_uninit(void)
     autocomplete_free(plugins_unload_ac);
     autocomplete_free(plugins_reload_ac);
     autocomplete_free(script_show_ac);
+    g_hash_table_destroy(ac_funcs);
 }
 
 static void

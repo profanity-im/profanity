@@ -347,19 +347,9 @@ message_handlers_init(void)
 ProfMessage*
 message_init(void)
 {
-    ProfMessage* message = malloc(sizeof(ProfMessage));
+    ProfMessage* message = calloc(1, sizeof(ProfMessage));
 
-    message->from_jid = NULL;
-    message->to_jid = NULL;
-    message->id = NULL;
-    message->originid = NULL;
-    message->stanzaid = NULL;
-    message->replace_id = NULL;
-    message->body = NULL;
-    message->encrypted = NULL;
-    message->plain = NULL;
     message->enc = PROF_MSG_ENC_NONE;
-    message->timestamp = NULL;
     message->trusted = true;
     message->type = PROF_MSG_TYPE_UNINITIALIZED;
 

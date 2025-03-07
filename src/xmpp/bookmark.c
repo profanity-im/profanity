@@ -66,9 +66,19 @@ static int _bookmark_result_id_handler(xmpp_stanza_t* const stanza, void* const 
 static void _bookmark_destroy(Bookmark* bookmark);
 static void _send_bookmarks(void);
 
+static void
+_bookmark_shutdown(void)
+{
+    if (bookmarks) {
+        g_hash_table_destroy(bookmarks);
+    }
+    autocomplete_free(bookmark_ac);
+}
+
 void
 bookmark_request(void)
 {
+    prof_add_shutdown_routine(_bookmark_shutdown);
     if (bookmarks) {
         g_hash_table_destroy(bookmarks);
     }

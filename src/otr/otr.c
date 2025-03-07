@@ -169,6 +169,7 @@ otr_start_query(void)
 static void
 _otr_shutdown(void)
 {
+    g_hash_table_destroy(smp_initiators);
     if (jid) {
         free(jid);
         jid = NULL;
