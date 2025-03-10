@@ -38,6 +38,10 @@
 
 #include <glib.h>
 
+#define PROF_TMPVAR__(n, l) n##l
+#define PROF_TMPVAR_(n, l)  PROF_TMPVAR__(n, l)
+#define PROF_TMPVAR(n)      PROF_TMPVAR_(PROF_##n##_, __LINE__)
+
 // log levels
 typedef enum {
     PROF_LEVEL_DEBUG,
@@ -57,6 +61,17 @@ void log_error(const char* const msg, ...);
 void log_msg(log_level_t level, const char* const area, const char* const msg);
 int log_level_from_string(char* log_level, log_level_t* level);
 const char* log_string_from_level(log_level_t level);
+
+#define _log_Xtype_once(type, ...)                 \
+    do {                                           \
+        static gboolean PROF_TMPVAR(once) = FALSE; \
+        if (!PROF_TMPVAR(once)) {                  \
+            log_##type(__VA_ARGS__);               \
+            PROF_TMPVAR(once) = TRUE;              \
+        }                                          \
+    } while (0)
+
+#define log_error_once(...) _log_Xtype_once(error, __VA_ARGS__)
 
 void log_stderr_init(log_level_t level);
 void log_stderr_handler(void);

@@ -56,8 +56,139 @@
 #include "xmpp/muc.h"
 
 static GTimer* remind_timer;
+
 #ifdef HAVE_LIBNOTIFY
 static NotifyNotification* notification;
+
+static void
+_notifier_uninit(void)
+{
+    if (notify_is_initted()) {
+        g_object_unref(G_OBJECT(notification));
+        notification = NULL;
+        notify_uninit();
+    }
+}
+#else
+static void
+_notifier_uninit(void)
+{
+}
+#endif
+
+#ifdef HAVE_LIBNOTIFY
+static void
+_notify(const char* const message, int timeout, const char* const category)
+{
+    log_debug("Attempting notification: %s", message);
+    if (notify_is_initted()) {
+        log_debug("Reinitialising libnotify");
+        notify_uninit();
+    } else {
+        log_debug("Initialising libnotify");
+    }
+    notify_init("Profanity");
+
+    if (notify_is_initted()) {
+        if (notification)
+            g_object_unref(G_OBJECT(notification));
+        notification = notify_notification_new("Profanity", message, NULL);
+        notify_notification_set_timeout(notification, timeout);
+        notify_notification_set_category(notification, category);
+        notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
+
+        GError* error = NULL;
+        gboolean notify_success = notify_notification_show(notification, &error);
+
+        if (!notify_success) {
+            log_error("Error sending desktop notification:");
+            log_error("  -> Message : %s", message);
+            log_error("  -> Error   : %s", error->message);
+            g_error_free(error);
+        } else {
+            log_debug("Notification sent.");
+        }
+    } else {
+        log_error("Libnotify not initialised.");
+    }
+}
+#elif defined(PLATFORM_CYGWIN)
+static void
+_notify(const char* const message, int timeout, const char* const category)
+{
+    NOTIFYICONDATA nid;
+    memset(&nid, 0, sizeof(nid));
+    nid.cbSize = sizeof(NOTIFYICONDATA);
+    // nid.hWnd = hWnd;
+    nid.uID = 100;
+    nid.uVersion = NOTIFYICON_VERSION;
+    // nid.uCallbackMessage = WM_MYMESSAGE;
+    nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
+    strcpy(nid.szTip, "Tray Icon");
+    nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
+    Shell_NotifyIcon(NIM_ADD, &nid);
+
+    // For a Ballon Tip
+    nid.uFlags = NIF_INFO;
+    strcpy(nid.szInfoTitle, "Profanity");                 // Title
+    strncpy(nid.szInfo, message, sizeof(nid.szInfo) - 1); // Copy Tip
+    nid.uTimeout = timeout;                               // 3 Seconds
+    nid.dwInfoFlags = NIIF_INFO;
+
+    Shell_NotifyIcon(NIM_MODIFY, &nid);
+}
+#elif defined(HAVE_OSXNOTIFY)
+static void
+_notify(const char* const message, int timeout, const char* const category)
+{
+    GString* notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message '");
+
+    auto_char char* escaped_single = str_replace(message, "'", "'\\''");
+
+    if (escaped_single[0] == '<') {
+        g_string_append(notify_command, "\\<");
+        g_string_append(notify_command, &escaped_single[1]);
+    } else if (escaped_single[0] == '[') {
+        g_string_append(notify_command, "\\[");
+        g_string_append(notify_command, &escaped_single[1]);
+    } else if (escaped_single[0] == '(') {
+        g_string_append(notify_command, "\\(");
+        g_string_append(notify_command, &escaped_single[1]);
+    } else if (escaped_single[0] == '{') {
+        g_string_append(notify_command, "\\{");
+        g_string_append(notify_command, &escaped_single[1]);
+    } else {
+        g_string_append(notify_command, escaped_single);
+    }
+
+    g_string_append(notify_command, "'");
+
+    char* term_name = getenv("TERM_PROGRAM");
+    char* app_id = NULL;
+    if (g_strcmp0(term_name, "Apple_Terminal") == 0) {
+        app_id = "com.apple.Terminal";
+    } else if (g_strcmp0(term_name, "iTerm.app") == 0) {
+        app_id = "com.googlecode.iterm2";
+    }
+
+    if (app_id) {
+        g_string_append(notify_command, " -sender ");
+        g_string_append(notify_command, app_id);
+    }
+
+    int res = system(notify_command->str);
+    if (res == -1) {
+        log_error("Could not send desktop notification.");
+    }
+
+    g_string_free(notify_command, TRUE);
+}
+#else
+static void
+_notify(const char* const message, int timeout, const char* const category)
+{
+    log_error_once("Notification backend missing");
+}
 #endif
 
 void
@@ -69,13 +200,7 @@ notifier_initialise(void)
 void
 notifier_uninit(void)
 {
-#ifdef HAVE_LIBNOTIFY
-    g_object_unref(G_OBJECT(notification));
-    notification = NULL;
-    if (notify_is_initted()) {
-        notify_uninit();
-    }
-#endif
+    _notifier_uninit();
     g_timer_destroy(remind_timer);
 }
 
@@ -202,102 +327,6 @@ notify_remind(void)
 void
 notify(const char* const message, int timeout, const char* const category)
 {
-#ifdef HAVE_LIBNOTIFY
     log_debug("Attempting notification: %s", message);
-    if (notify_is_initted()) {
-        log_debug("Reinitialising libnotify");
-        notify_uninit();
-    } else {
-        log_debug("Initialising libnotify");
-    }
-    notify_init("Profanity");
-
-    if (notify_is_initted()) {
-        if (notification)
-            g_object_unref(G_OBJECT(notification));
-        notification = notify_notification_new("Profanity", message, NULL);
-        notify_notification_set_timeout(notification, timeout);
-        notify_notification_set_category(notification, category);
-        notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
-
-        GError* error = NULL;
-        gboolean notify_success = notify_notification_show(notification, &error);
-
-        if (!notify_success) {
-            log_error("Error sending desktop notification:");
-            log_error("  -> Message : %s", message);
-            log_error("  -> Error   : %s", error->message);
-            g_error_free(error);
-        } else {
-            log_debug("Notification sent.");
-        }
-    } else {
-        log_error("Libnotify not initialised.");
-    }
-#endif
-#ifdef PLATFORM_CYGWIN
-    NOTIFYICONDATA nid;
-    memset(&nid, 0, sizeof(nid));
-    nid.cbSize = sizeof(NOTIFYICONDATA);
-    // nid.hWnd = hWnd;
-    nid.uID = 100;
-    nid.uVersion = NOTIFYICON_VERSION;
-    // nid.uCallbackMessage = WM_MYMESSAGE;
-    nid.hIcon = LoadIcon(NULL, IDI_APPLICATION);
-    strcpy(nid.szTip, "Tray Icon");
-    nid.uFlags = NIF_MESSAGE | NIF_ICON | NIF_TIP;
-    Shell_NotifyIcon(NIM_ADD, &nid);
-
-    // For a Ballon Tip
-    nid.uFlags = NIF_INFO;
-    strcpy(nid.szInfoTitle, "Profanity");                 // Title
-    strncpy(nid.szInfo, message, sizeof(nid.szInfo) - 1); // Copy Tip
-    nid.uTimeout = timeout;                               // 3 Seconds
-    nid.dwInfoFlags = NIIF_INFO;
-
-    Shell_NotifyIcon(NIM_MODIFY, &nid);
-#endif
-#ifdef HAVE_OSXNOTIFY
-    GString* notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message '");
-
-    auto_char char* escaped_single = str_replace(message, "'", "'\\''");
-
-    if (escaped_single[0] == '<') {
-        g_string_append(notify_command, "\\<");
-        g_string_append(notify_command, &escaped_single[1]);
-    } else if (escaped_single[0] == '[') {
-        g_string_append(notify_command, "\\[");
-        g_string_append(notify_command, &escaped_single[1]);
-    } else if (escaped_single[0] == '(') {
-        g_string_append(notify_command, "\\(");
-        g_string_append(notify_command, &escaped_single[1]);
-    } else if (escaped_single[0] == '{') {
-        g_string_append(notify_command, "\\{");
-        g_string_append(notify_command, &escaped_single[1]);
-    } else {
-        g_string_append(notify_command, escaped_single);
-    }
-
-    g_string_append(notify_command, "'");
-
-    char* term_name = getenv("TERM_PROGRAM");
-    char* app_id = NULL;
-    if (g_strcmp0(term_name, "Apple_Terminal") == 0) {
-        app_id = "com.apple.Terminal";
-    } else if (g_strcmp0(term_name, "iTerm.app") == 0) {
-        app_id = "com.googlecode.iterm2";
-    }
-
-    if (app_id) {
-        g_string_append(notify_command, " -sender ");
-        g_string_append(notify_command, app_id);
-    }
-
-    int res = system(notify_command->str);
-    if (res == -1) {
-        log_error("Could not send desktop notification.");
-    }
-
-    g_string_free(notify_command, TRUE);
-#endif
+    _notify(message, timeout, category);
 }
