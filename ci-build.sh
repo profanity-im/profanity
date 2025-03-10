@@ -128,7 +128,11 @@ case "$ARCH" in
         ./configure ${tests[0]} --enable-valgrind $*
 
         $MAKE CC="${CC}"
-        $MAKE check-valgrind || log_content ./test-suite-memcheck.log
+        if grep '^ID=' /etc/os-release | grep -q -e debian; then
+            $MAKE check-valgrind
+        else
+            $MAKE check-valgrind || log_content ./test-suite-memcheck.log
+        fi
         $MAKE distclean
         ;;
 esac
