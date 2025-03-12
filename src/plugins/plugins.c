@@ -517,10 +517,14 @@ plugins_on_disconnect(const char* const account_name, const char* const fulljid)
 char*
 plugins_pre_chat_message_display(const char* const barejid, const char* const resource, char* message)
 {
+    GList* values = g_hash_table_get_values(plugins);
+    if (!values) {
+        return message;
+    }
+
     char* new_message = NULL;
     char* curr_message = message;
 
-    GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
@@ -552,10 +556,14 @@ plugins_post_chat_message_display(const char* const barejid, const char* const r
 char*
 plugins_pre_chat_message_send(const char* const barejid, const char* message)
 {
+    GList* values = g_hash_table_get_values(plugins);
+    if (!values) {
+        return NULL;
+    }
+
     char* new_message = NULL;
     char* curr_message = strdup(message);
 
-    GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
@@ -595,10 +603,14 @@ plugins_post_chat_message_send(const char* const barejid, const char* message)
 char*
 plugins_pre_room_message_display(const char* const barejid, const char* const nick, const char* message)
 {
+    GList* values = g_hash_table_get_values(plugins);
+    if (!values) {
+        return NULL;
+    }
+
     char* new_message = NULL;
     char* curr_message = strdup(message);
 
-    GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
@@ -631,10 +643,14 @@ plugins_post_room_message_display(const char* const barejid, const char* const n
 char*
 plugins_pre_room_message_send(const char* const barejid, const char* message)
 {
+    GList* values = g_hash_table_get_values(plugins);
+    if (!values) {
+        return NULL;
+    }
+
     char* new_message = NULL;
     char* curr_message = strdup(message);
 
-    GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
@@ -697,11 +713,15 @@ plugins_on_room_history_message(const char* const barejid, const char* const nic
 char*
 plugins_pre_priv_message_display(const char* const fulljid, const char* message)
 {
+    GList* values = g_hash_table_get_values(plugins);
+    if (!values) {
+        return NULL;
+    }
+
     auto_jid Jid* jidp = jid_create(fulljid);
     char* new_message = NULL;
     char* curr_message = strdup(message);
 
-    GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
@@ -735,11 +755,15 @@ plugins_post_priv_message_display(const char* const fulljid, const char* message
 char*
 plugins_pre_priv_message_send(const char* const fulljid, const char* const message)
 {
+    GList* values = g_hash_table_get_values(plugins);
+    if (!values) {
+        return NULL;
+    }
+
     auto_jid Jid* jidp = jid_create(fulljid);
     char* new_message = NULL;
     char* curr_message = strdup(message);
 
-    GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
@@ -782,10 +806,14 @@ plugins_post_priv_message_send(const char* const fulljid, const char* const mess
 char*
 plugins_on_message_stanza_send(const char* const text)
 {
+    GList* values = g_hash_table_get_values(plugins);
+    if (!values) {
+        return NULL;
+    }
+
     char* new_stanza = NULL;
     char* curr_stanza = strdup(text);
 
-    GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
@@ -825,10 +853,14 @@ plugins_on_message_stanza_receive(const char* const text)
 char*
 plugins_on_presence_stanza_send(const char* const text)
 {
+    GList* values = g_hash_table_get_values(plugins);
+    if (!values) {
+        return NULL;
+    }
+
     char* new_stanza = NULL;
     char* curr_stanza = strdup(text);
 
-    GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
@@ -868,10 +900,14 @@ plugins_on_presence_stanza_receive(const char* const text)
 char*
 plugins_on_iq_stanza_send(const char* const text)
 {
+    GList* values = g_hash_table_get_values(plugins);
+    if (!values) {
+        return NULL;
+    }
+
     char* new_stanza = NULL;
     char* curr_stanza = strdup(text);
 
-    GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
