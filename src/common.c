@@ -130,6 +130,36 @@ auto_free_char(char** str)
     free(*str);
 }
 
+/**
+ * Closes the file descriptor.
+ *
+ * @param fd file descriptor handle. If NULL, no action is taken.
+ */
+void
+auto_close_gfd(gint* fd)
+{
+    if (fd == NULL)
+        return;
+
+    if (close(*fd) == EOF)
+        log_error(g_strerror(errno));
+}
+
+/**
+ * Closes file stream
+ *
+ * @param fd file descriptor handle opened with fopen. If NULL, no action is taken.
+ */
+void
+auto_close_FILE(FILE** fd)
+{
+    if (fd == NULL)
+        return;
+
+    if (fclose(*fd) == EOF)
+        log_error(g_strerror(errno));
+}
+
 static gboolean
 _load_keyfile(prof_keyfile_t* keyfile)
 {

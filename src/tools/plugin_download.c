@@ -57,8 +57,6 @@
 #include "ui/window.h"
 #include "common.h"
 
-#define FALLBACK_MSG ""
-
 void*
 plugin_download_install(void* userdata)
 {

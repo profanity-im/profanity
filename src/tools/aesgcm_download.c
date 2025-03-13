@@ -57,15 +57,13 @@
 #include "ui/window.h"
 #include "common.h"
 
-#define FALLBACK_MSG ""
-
 void*
 aesgcm_file_get(void* userdata)
 {
     AESGCMDownload* aesgcm_dl = (AESGCMDownload*)userdata;
 
-    char* https_url = NULL;
-    char* fragment = NULL;
+    auto_char char* https_url = NULL;
+    auto_char char* fragment = NULL;
 
     // Convert the aesgcm:// URL to a https:// URL and extract the encoded key
     // and tag stored in the URL fragment.
@@ -79,8 +77,8 @@ aesgcm_file_get(void* userdata)
 
     // Create a temporary file used for storing the ciphertext that is to be
     // retrieved from the https:// URL.
-    gchar* tmpname = NULL;
-    gint tmpfd;
+    auto_gchar char* tmpname = NULL;
+    auto_gfd gint tmpfd = 0;
     if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
                                    "Downloading '%s' failed: Unable to create "
@@ -91,7 +89,7 @@ aesgcm_file_get(void* userdata)
     }
 
     // Open the target file for storing the cleartext.
-    FILE* outfh = fopen(aesgcm_dl->filename, "wb");
+    auto_FILE FILE* outfh = fopen(aesgcm_dl->filename, "wb");
     if (outfh == NULL) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
                                    "Downloading '%s' failed: Unable to open "
@@ -115,7 +113,7 @@ aesgcm_file_get(void* userdata)
 
     http_file_get(http_dl); // TODO(wstrm): Verify result.
 
-    FILE* tmpfh = fopen(tmpname, "rb");
+    auto_FILE FILE* tmpfh = fopen(tmpname, "rb");
     if (tmpfh == NULL) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
                                    "Downloading '%s' failed: Unable to open "
@@ -129,11 +127,6 @@ aesgcm_file_get(void* userdata)
     crypt_res = omemo_decrypt_file(tmpfh, outfh,
                                    http_dl->bytes_received, fragment);
 
-    if (fclose(tmpfh) == EOF) {
-        cons_show_error(g_strerror(errno));
-    }
-
-    close(tmpfd);
     remove(tmpname);
     g_free(tmpname);
 
@@ -143,13 +136,6 @@ aesgcm_file_get(void* userdata)
                                    "file (%s).",
                                    https_url, gcry_strerror(crypt_res));
     }
-
-    if (fclose(outfh) == EOF) {
-        cons_show_error(g_strerror(errno));
-    }
-
-    free(https_url);
-    free(fragment);
 
     if (aesgcm_dl->cmd_template != NULL) {
         gchar** argv = format_call_external_argv(aesgcm_dl->cmd_template,
