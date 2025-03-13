@@ -571,8 +571,7 @@ plugins_pre_chat_message_send(const char* const barejid, const char* message)
             new_message = plugin->pre_chat_message_send(plugin, barejid, curr_message);
             if (new_message) {
                 free(curr_message);
-                curr_message = strdup(new_message);
-                free(new_message);
+                curr_message = new_message;
             } else {
                 free(curr_message);
                 g_list_free(values);
@@ -617,8 +616,7 @@ plugins_pre_room_message_display(const char* const barejid, const char* const ni
         new_message = plugin->pre_room_message_display(plugin, barejid, nick, curr_message);
         if (new_message) {
             free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
+            curr_message = new_message;
         }
         curr = g_list_next(curr);
     }
@@ -658,8 +656,7 @@ plugins_pre_room_message_send(const char* const barejid, const char* message)
             new_message = plugin->pre_room_message_send(plugin, barejid, curr_message);
             if (new_message) {
                 free(curr_message);
-                curr_message = strdup(new_message);
-                free(new_message);
+                curr_message = new_message;
             } else {
                 free(curr_message);
                 g_list_free(values);
@@ -728,8 +725,7 @@ plugins_pre_priv_message_display(const char* const fulljid, const char* message)
         new_message = plugin->pre_priv_message_display(plugin, jidp->barejid, jidp->resourcepart, curr_message);
         if (new_message) {
             free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
+            curr_message = new_message;
         }
         curr = g_list_next(curr);
     }
@@ -771,8 +767,7 @@ plugins_pre_priv_message_send(const char* const fulljid, const char* const messa
             new_message = plugin->pre_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, curr_message);
             if (new_message) {
                 free(curr_message);
-                curr_message = strdup(new_message);
-                free(new_message);
+                curr_message = new_message;
             } else {
                 free(curr_message);
                 g_list_free(values);
@@ -820,8 +815,7 @@ plugins_on_message_stanza_send(const char* const text)
         new_stanza = plugin->on_message_stanza_send(plugin, curr_stanza);
         if (new_stanza) {
             free(curr_stanza);
-            curr_stanza = strdup(new_stanza);
-            free(new_stanza);
+            curr_stanza = new_stanza;
         }
         curr = g_list_next(curr);
     }
@@ -867,8 +861,7 @@ plugins_on_presence_stanza_send(const char* const text)
         new_stanza = plugin->on_presence_stanza_send(plugin, curr_stanza);
         if (new_stanza) {
             free(curr_stanza);
-            curr_stanza = strdup(new_stanza);
-            free(new_stanza);
+            curr_stanza = new_stanza;
         }
         curr = g_list_next(curr);
     }
@@ -914,8 +907,7 @@ plugins_on_iq_stanza_send(const char* const text)
         new_stanza = plugin->on_iq_stanza_send(plugin, curr_stanza);
         if (new_stanza) {
             free(curr_stanza);
-            curr_stanza = strdup(new_stanza);
-            free(new_stanza);
+            curr_stanza = new_stanza;
         }
         curr = g_list_next(curr);
     }
