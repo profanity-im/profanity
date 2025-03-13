@@ -69,10 +69,27 @@ static EntityCapabilities* _caps_by_ver(const char* const ver);
 static EntityCapabilities* _caps_by_jid(const char* const jid);
 static EntityCapabilities* _caps_copy(EntityCapabilities* caps);
 
+static void
+_caps_close(void)
+{
+    caps_reset_ver();
+    free_keyfile(&caps_prof_keyfile);
+    cache = NULL;
+    g_hash_table_destroy(jid_to_ver);
+    g_hash_table_destroy(jid_to_caps);
+    g_free(cache_loc);
+    cache_loc = NULL;
+    g_hash_table_destroy(prof_features);
+    prof_features = NULL;
+}
+
 void
 caps_init(void)
 {
     log_info("Loading capabilities cache");
+
+    prof_add_shutdown_routine(_caps_close);
+
     load_data_keyfile(&caps_prof_keyfile, FILE_CAPSCACHE);
     cache = caps_prof_keyfile.keyfile;
 
@@ -337,19 +354,6 @@ caps_reset_ver(void)
         g_free(my_sha1);
         my_sha1 = NULL;
     }
-}
-
-void
-caps_close(void)
-{
-    free_keyfile(&caps_prof_keyfile);
-    cache = NULL;
-    g_hash_table_destroy(jid_to_ver);
-    g_hash_table_destroy(jid_to_caps);
-    g_free(cache_loc);
-    cache_loc = NULL;
-    g_hash_table_destroy(prof_features);
-    prof_features = NULL;
 }
 
 static EntityCapabilities*

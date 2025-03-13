@@ -15,6 +15,37 @@
   fun:_dl_init
   ...
 }
+{
+  libfreetype
+  Memcheck:Leak
+  ...
+  obj:*/libfreetype*
+  ...
+  obj:*/libpango*
+  ...
+}
+{
+  libfontconfig
+  Memcheck:Leak
+  ...
+  obj:*/libfontconfig*
+}
+{
+  libncurses
+  Memcheck:Leak
+  ...
+  obj:*/libncurses*
+  ...
+}
+{
+  otrl_init
+  Memcheck:Leak
+  ...
+  fun:otrl_init
+  ...
+}
+
+# gtk
 
 {
   gtk_init_check
@@ -30,8 +61,31 @@
   fun:gtk_module_init
   ...
 }
+{
+  gtk_widget_get_preferred_height
+  Memcheck:Leak
+  ...
+  fun:gtk_widget_get_preferred_height
+  ...
+}
+{
+  gtk_main_iteration_do
+  Memcheck:Leak
+  ...
+  fun:gtk_main_iteration_do
+  ...
+}
+{
+  tray_enable
+  Memcheck:Leak
+  ...
+  fun:g_object_new
+  ...
+  fun:tray_enable
+  ...
+}
 
-# glib
+# glib/gtk
 
 {
   glib
@@ -39,6 +93,94 @@
   ...
   fun:start_thread
   fun:clone
+}
+{
+  g_date_time_new_now_ variants
+  Memcheck:Leak
+  ...
+  fun:g_time_zone_new_identifier
+  ...
+  fun:g_date_time_new_now_*
+  ...
+}
+{
+  g_date_time_new_from_ variants
+  Memcheck:Leak
+  ...
+  fun:g_time_zone_new_identifier
+  ...
+  fun:g_date_time_new_from_*
+  ...
+}
+{
+  g_strerror/g_hash_table_new_full
+  Memcheck:Leak
+  ...
+  fun:g_hash_table_new_full
+  fun:g_strerror
+  ...
+}
+{
+  g_strerror/g_hash_table_insert
+  Memcheck:Leak
+  ...
+  fun:g_hash_table_insert
+  fun:g_strerror
+  ...
+}
+{
+  g_intern_string
+  Memcheck:Leak
+  ...
+  fun:g_intern_string
+  ...
+}
+{
+  g_rw_lock_reader_lock
+  Memcheck:Leak
+  ...
+  fun:g_rw_lock_reader_lock
+  ...
+}
+{
+  g_type_create_instance
+  Memcheck:Leak
+  ...
+  fun:g_type_create_instance
+}
+{
+  g_object_new
+  Memcheck:Leak
+  ...
+  fun:g_object_new
+}
+{
+  libgtk
+  Memcheck:Leak
+  ...
+  obj:*/libgtk*
+}
+{
+  libgdk
+  Memcheck:Leak
+  ...
+  obj:*/libgdk*
+}
+{
+  libgobject
+  Memcheck:Leak
+  ...
+  obj:*/libgobject*
+}
+
+# fontconfig
+
+{
+  FcConfigSubstituteWithPat
+  Memcheck:Leak
+  ...
+  fun:FcConfigSubstituteWithPat
+  ...
 }
 
 # gcrypt initialization
@@ -102,6 +244,34 @@
    Memcheck:Leak
    ...
    fun:PyType_Ready
+}
+{
+   Handle PyMalloc confusing valgrind (possibly leaked)
+   Memcheck:Leak
+   ...
+   fun:Py_InitializeEx
+   fun:python_env_init
+}
+{
+   Custom Inittab can only be cleaned by calling PyMain, which we don't do
+   Memcheck:Leak
+   ...
+   fun:PyImport_ExtendInittab
+   fun:PyImport_AppendInittab
+   fun:python_init_prof
+   ...
+}
+
+# Specific for unit test issues
+{
+   Libc TLS allocation
+   Memcheck:Leak
+   ...
+   fun:allocate_dtv
+   fun:_dl_allocate_tls
+   ...
+   fun:unique_filename_from_url
+   ...
 }
 
 # AUTO-GENERATED START

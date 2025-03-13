@@ -2840,6 +2840,16 @@ cmd_search_index_all(char* term)
     return results;
 }
 
+static void
+_cmd_uninit(void)
+{
+    cmd_ac_uninit();
+    g_hash_table_destroy(commands);
+    commands = NULL;
+    g_hash_table_destroy(search_index);
+    search_index = NULL;
+}
+
 /*
  * Initialise command autocompleter and history
  */
@@ -2847,6 +2857,8 @@ void
 cmd_init(void)
 {
     log_info("Initialising commands");
+
+    prof_add_shutdown_routine(_cmd_uninit);
 
     cmd_ac_init();
 
@@ -2876,14 +2888,6 @@ cmd_init(void)
         curr = g_list_next(curr);
     }
     prefs_free_aliases(aliases);
-}
-
-void
-cmd_uninit(void)
-{
-    cmd_ac_uninit();
-    g_hash_table_destroy(commands);
-    g_hash_table_destroy(search_index);
 }
 
 gboolean

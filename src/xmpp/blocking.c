@@ -57,9 +57,19 @@ static int _block_remove_result_handler(xmpp_stanza_t* const stanza, void* const
 static GList* blocked;
 static Autocomplete blocked_ac;
 
+static void
+_blocking_shutdown(void)
+{
+    if (blocked) {
+        g_list_free_full(blocked, free);
+    }
+    autocomplete_free(blocked_ac);
+}
+
 void
 blocking_request(void)
 {
+    prof_add_shutdown_routine(_blocking_shutdown);
     if (blocked) {
         g_list_free_full(blocked, free);
         blocked = NULL;

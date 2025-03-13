@@ -113,7 +113,6 @@ GSList* plugins_unloaded_list(void);
 GList* plugins_loaded_list(void);
 char* plugins_autocomplete(const char* const input, gboolean previous);
 void plugins_reset_autocomplete(void);
-void plugins_shutdown(void);
 
 void plugins_free_install_result(PluginsInstallResult* result);
 
@@ -129,7 +128,6 @@ gboolean plugins_reload(const char* const name, GString* error_message);
 void plugins_reload_all(void);
 
 void plugins_on_start(void);
-void plugins_on_shutdown(void);
 
 void plugins_on_connect(const char* const account_name, const char* const fulljid);
 void plugins_on_disconnect(const char* const account_name, const char* const fulljid);

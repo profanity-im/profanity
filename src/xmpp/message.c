@@ -320,13 +320,9 @@ _handle_form(xmpp_stanza_t* const stanza)
     return TRUE;
 }
 
-void
-message_handlers_init(void)
+static void
+_message_handlers_cleanup(void)
 {
-    xmpp_conn_t* const conn = connection_get_conn();
-    xmpp_ctx_t* const ctx = connection_get_ctx();
-    xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
-
     if (pubsub_event_handlers) {
         GList* keys = g_hash_table_get_keys(pubsub_event_handlers);
         GList* curr = keys;
@@ -340,26 +336,26 @@ message_handlers_init(void)
         g_list_free(keys);
         g_hash_table_destroy(pubsub_event_handlers);
     }
+    pubsub_event_handlers = NULL;
+}
 
+void
+message_handlers_init(void)
+{
+    prof_add_shutdown_routine(_message_handlers_cleanup);
+    xmpp_conn_t* const conn = connection_get_conn();
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
+    _message_handlers_cleanup();
     pubsub_event_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
 }
 
 ProfMessage*
 message_init(void)
 {
-    ProfMessage* message = malloc(sizeof(ProfMessage));
+    ProfMessage* message = calloc(1, sizeof(ProfMessage));
 
-    message->from_jid = NULL;
-    message->to_jid = NULL;
-    message->id = NULL;
-    message->originid = NULL;
-    message->stanzaid = NULL;
-    message->replace_id = NULL;
-    message->body = NULL;
-    message->encrypted = NULL;
-    message->plain = NULL;
     message->enc = PROF_MSG_ENC_NONE;
-    message->timestamp = NULL;
     message->trusted = true;
     message->type = PROF_MSG_TYPE_UNINITIALIZED;
 
@@ -1579,7 +1575,7 @@ _send_message_stanza(xmpp_stanza_t* const stanza)
     if (plugin_text) {
         xmpp_send_raw_string(conn, "%s", plugin_text);
     } else {
-        xmpp_send_raw_string(conn, "%s", text);
+        xmpp_send_raw(conn, text, text_size);
     }
     xmpp_free(connection_get_ctx(), text);
 }

@@ -345,7 +345,9 @@ sv_ev_room_message(ProfMessage* message)
     }
 
     char* old_plain = message->plain;
-    message->plain = plugins_pre_room_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
+    auto_char char* plugin_msg = plugins_pre_room_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
+    if (plugin_msg)
+        message->plain = plugin_msg;
 
     GSList* mentions = get_mentions(prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD), prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE), message->plain, mynick);
     gboolean mention = g_slist_length(mentions) > 0;
@@ -409,55 +411,44 @@ sv_ev_room_message(ProfMessage* message)
     rosterwin_roster();
 
     plugins_post_room_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
-    free(message->plain);
+    message->plain = old_plain;
+}
+
+static void
+_sv_ev_private_message(ProfMessage* message)
+{
+    char* old_plain = message->plain;
+    auto_char char* plugin_msg = plugins_pre_priv_message_display(message->from_jid->fulljid, message->plain);
+    if (plugin_msg)
+        message->plain = plugin_msg;
+
+    ProfPrivateWin* privatewin = wins_get_private(message->from_jid->fulljid);
+    if (privatewin == NULL) {
+        ProfWin* window = wins_new_private(message->from_jid->fulljid);
+        privatewin = (ProfPrivateWin*)window;
+    }
+
+    _clean_incoming_message(message);
+    privwin_incoming_msg(privatewin, message);
+    // Intentionally skipping log to DB because we can't authenticate the sender
+    chat_log_msg_in(message);
+
+    plugins_post_priv_message_display(message->from_jid->fulljid, message->plain);
+
     message->plain = old_plain;
 }
 
 void
 sv_ev_incoming_private_message(ProfMessage* message)
 {
-    char* old_plain = message->plain;
-    message->plain = plugins_pre_priv_message_display(message->from_jid->fulljid, message->plain);
-
-    ProfPrivateWin* privatewin = wins_get_private(message->from_jid->fulljid);
-    if (privatewin == NULL) {
-        ProfWin* window = wins_new_private(message->from_jid->fulljid);
-        privatewin = (ProfPrivateWin*)window;
-    }
-
-    _clean_incoming_message(message);
-    privwin_incoming_msg(privatewin, message);
-    // Intentionally skipping log to DB because we can't authenticate the sender
-    chat_log_msg_in(message);
-
-    plugins_post_priv_message_display(message->from_jid->fulljid, message->plain);
-
-    free(message->plain);
-    message->plain = old_plain;
+    _sv_ev_private_message(message);
     rosterwin_roster();
 }
 
 void
 sv_ev_delayed_private_message(ProfMessage* message)
 {
-    char* old_plain = message->plain;
-    message->plain = plugins_pre_priv_message_display(message->from_jid->fulljid, message->plain);
-
-    ProfPrivateWin* privatewin = wins_get_private(message->from_jid->fulljid);
-    if (privatewin == NULL) {
-        ProfWin* window = wins_new_private(message->from_jid->fulljid);
-        privatewin = (ProfPrivateWin*)window;
-    }
-
-    _clean_incoming_message(message);
-    privwin_incoming_msg(privatewin, message);
-    // Intentionally skipping log to DB because we can't authenticate the sender
-    chat_log_msg_in(message);
-
-    plugins_post_priv_message_display(message->from_jid->fulljid, message->plain);
-
-    free(message->plain);
-    message->plain = old_plain;
+    _sv_ev_private_message(message);
 }
 
 void
@@ -646,7 +637,7 @@ sv_ev_incoming_message(ProfMessage* message)
 
         if (prefs_get_boolean(PREF_MAM)) {
             win_print_loading_history(window);
-            iq_mam_request(chatwin, g_date_time_add_seconds(message->timestamp, 0)); // copy timestamp
+            iq_mam_request(chatwin, g_date_time_ref(message->timestamp)); // copy timestamp
         }
 
 #ifdef HAVE_OMEMO

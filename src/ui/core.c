@@ -89,10 +89,27 @@ static Display* display;
 
 static void _ui_draw_term_title(void);
 
+static void
+_ui_close(void)
+{
+    g_timer_destroy(ui_idle_time);
+    notifier_uninit();
+    cons_clear_alerts();
+    wins_destroy();
+    inp_close();
+    status_bar_close();
+    free_title_bar();
+    endwin();
+    delwin(main_scr);
+    main_scr = NULL;
+    delscreen(set_term(NULL));
+}
+
 void
 ui_init(void)
 {
     log_info("Initialising UI");
+    prof_add_shutdown_routine(_ui_close);
     main_scr = initscr();
     nonl();
     cbreak();
@@ -178,21 +195,6 @@ void
 ui_reset_idle_time(void)
 {
     g_timer_start(ui_idle_time);
-}
-
-void
-ui_close(void)
-{
-    g_timer_destroy(ui_idle_time);
-    endwin();
-    notifier_uninit();
-    cons_clear_alerts();
-    wins_destroy();
-    inp_close();
-    status_bar_close();
-    free_title_bar();
-    delwin(main_scr);
-    delscreen(set_term(NULL));
 }
 
 void

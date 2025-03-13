@@ -164,11 +164,6 @@ http_file_put(void* userdata)
     FILE* fh = NULL;
 
     auto_char char* err = NULL;
-    gchar* content_type_header;
-    // Optional headers
-    gchar* auth_header = NULL;
-    gchar* cookie_header = NULL;
-    gchar* expires_header = NULL;
 
     CURL* curl;
     CURLcode res;
@@ -177,15 +172,14 @@ http_file_put(void* userdata)
     upload->bytes_sent = 0;
 
     pthread_mutex_lock(&lock);
-    gchar* msg = g_strdup_printf("Uploading '%s': 0%%", upload->filename);
+    auto_gchar gchar* msg = g_strdup_printf("Uploading '%s': 0%%", upload->filename);
     if (!msg) {
         msg = g_strdup(FALLBACK_MSG);
     }
     win_print_http_transfer(upload->window, msg, upload->put_url);
-    g_free(msg);
 
     auto_gchar gchar* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
-    gchar* cafile = cafile_get_name();
+    auto_gchar gchar* cafile = cafile_get_name();
     gboolean insecure = FALSE;
     ProfAccount* account = accounts_get_account(session_get_account_name());
     if (account) {
@@ -201,7 +195,7 @@ http_file_put(void* userdata)
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, "PUT");
 
     struct curl_slist* headers = NULL;
-    content_type_header = g_strdup_printf("Content-Type: %s", upload->mime_type);
+    auto_gchar gchar* content_type_header = g_strdup_printf("Content-Type: %s", upload->mime_type);
     if (!content_type_header) {
         content_type_header = g_strdup(FALLBACK_CONTENTTYPE_HEADER);
     }
@@ -209,6 +203,7 @@ http_file_put(void* userdata)
     headers = curl_slist_append(headers, "Expect:");
 
     // Optional headers
+    auto_gchar gchar* auth_header = NULL;
     if (upload->authorization) {
         auth_header = g_strdup_printf("Authorization: %s", upload->authorization);
         if (!auth_header) {
@@ -216,6 +211,7 @@ http_file_put(void* userdata)
         }
         headers = curl_slist_append(headers, auth_header);
     }
+    auto_gchar gchar* cookie_header = NULL;
     if (upload->cookie) {
         cookie_header = g_strdup_printf("Cookie: %s", upload->cookie);
         if (!cookie_header) {
@@ -223,6 +219,7 @@ http_file_put(void* userdata)
         }
         headers = curl_slist_append(headers, cookie_header);
     }
+    auto_gchar gchar* expires_header = NULL;
     if (upload->expires) {
         expires_header = g_strdup_printf("Expires: %s", upload->expires);
         if (!expires_header) {
@@ -297,13 +294,8 @@ http_file_put(void* userdata)
         fclose(fh);
     }
     free(output.buffer);
-    g_free(content_type_header);
-    g_free(auth_header);
-    g_free(cookie_header);
-    g_free(expires_header);
 
     pthread_mutex_lock(&lock);
-    g_free(cafile);
 
     if (err) {
         gchar* msg;

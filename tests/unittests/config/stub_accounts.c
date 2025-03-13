@@ -10,10 +10,6 @@ void
 accounts_load(void)
 {
 }
-void
-accounts_close(void)
-{
-}
 
 char*
 accounts_find_all(const char* const prefix, gboolean previous, void* context)

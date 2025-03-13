@@ -77,22 +77,30 @@ _free_avatar_data(avatar_metadata* data)
     }
 }
 
+static void
+_avatar_cleanup(void)
+{
+    if (looking_for) {
+        g_hash_table_destroy(looking_for);
+    }
+    if (shall_open) {
+        g_hash_table_destroy(shall_open);
+    }
+    looking_for = NULL;
+    shall_open = NULL;
+}
+
 void
 avatar_pep_subscribe(void)
 {
+    prof_add_shutdown_routine(_avatar_cleanup);
     message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_METADATA, _avatar_metadata_handler, NULL, NULL);
     message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_DATA, _avatar_metadata_handler, NULL, NULL);
 
     // caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 
-    if (looking_for) {
-        g_hash_table_destroy(looking_for);
-    }
+    _avatar_cleanup();
     looking_for = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
-
-    if (shall_open) {
-        g_hash_table_destroy(shall_open);
-    }
     shall_open = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 }
 

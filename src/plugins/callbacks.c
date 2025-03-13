@@ -104,7 +104,8 @@ _free_command(PluginCommand* command)
     }
     free(command->command_name);
 
-    _free_command_help(command->help);
+    if (command->help)
+        _free_command_help(command->help);
 
     free(command);
 }
@@ -118,6 +119,8 @@ _free_command_hash(GHashTable* command_hash)
 static void
 _free_timed_function(PluginTimedFunction* timed_function)
 {
+    if (!timed_function)
+        return;
     if (timed_function->callback_destroy) {
         timed_function->callback_destroy(timed_function->callback);
     }
@@ -177,9 +180,12 @@ callbacks_remove(const char* const plugin_name)
 void
 callbacks_close(void)
 {
-    g_hash_table_destroy(p_commands);
-    g_hash_table_destroy(p_timed_functions);
     g_hash_table_destroy(p_window_callbacks);
+    p_window_callbacks = NULL;
+    g_hash_table_destroy(p_timed_functions);
+    p_timed_functions = NULL;
+    g_hash_table_destroy(p_commands);
+    p_commands = NULL;
 }
 
 void

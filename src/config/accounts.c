@@ -61,10 +61,22 @@ static Autocomplete enabled_ac;
 
 static void _save_accounts(void);
 
+static void
+_accounts_close(void)
+{
+    autocomplete_free(all_ac);
+    autocomplete_free(enabled_ac);
+    free_keyfile(&accounts_prof_keyfile);
+    accounts = NULL;
+}
+
 void
 accounts_load(void)
 {
     log_info("Loading accounts");
+
+    prof_add_shutdown_routine(_accounts_close);
+
     all_ac = autocomplete_new();
     enabled_ac = autocomplete_new();
     load_data_keyfile(&accounts_prof_keyfile, FILE_ACCOUNTS);
@@ -80,15 +92,6 @@ accounts_load(void)
             autocomplete_add(enabled_ac, account_names[i]);
         }
     }
-}
-
-void
-accounts_close(void)
-{
-    autocomplete_free(all_ac);
-    autocomplete_free(enabled_ac);
-    free_keyfile(&accounts_prof_keyfile);
-    accounts = NULL;
 }
 
 char*

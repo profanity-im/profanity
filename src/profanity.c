@@ -34,6 +34,7 @@
  *
  */
 #include "config.h"
+#include <unistd.h>
 
 #ifdef HAVE_GTK
 #include "ui/tray.h"
@@ -83,6 +84,8 @@
 #include "omemo/omemo.h"
 #endif
 
+static unsigned int min_runtime = 5;
+
 static void _init(char* log_level, char* config_file, char* log_file, char* theme_name);
 static void _shutdown(void);
 static void _connect_default(const char* const account);
@@ -91,7 +94,7 @@ pthread_mutex_t lock;
 static gboolean force_quit = FALSE;
 
 void
-prof_run(char* log_level, char* account_name, char* config_file, char* log_file, char* theme_name)
+prof_run(gchar* log_level, gchar* account_name, gchar* config_file, gchar* log_file, gchar* theme_name, gchar** commands)
 {
     gboolean cont = TRUE;
 
@@ -105,17 +108,50 @@ prof_run(char* log_level, char* account_name, char* config_file, char* log_file,
 
     session_init_activity();
 
+    GTimer* runtime = g_timer_new();
+
     char* line = NULL;
+    GTimer* waittimer = g_timer_new();
+    g_timer_stop(waittimer);
+    int waittime;
     while (cont && !force_quit) {
         log_stderr_handler();
         session_check_autoaway();
 
-        line = inp_readline();
-        if (line) {
+        line = commands ? *commands : inp_readline();
+        if (commands && line && memcmp(line, "/sleep", 6) == 0) {
+            if (!g_timer_is_active(waittimer)) {
+                gchar* err_msg;
+                if (strtoi_range(line + 7, &waittime, 0, 300, &err_msg)) {
+                    g_timer_start(waittimer);
+                    /* Increase the minimal runtime by the waiting time
+                     * so we can be sure there's runtime left after executing
+                     * the last command.
+                     */
+                    min_runtime += waittime;
+                } else {
+                    log_error(err_msg);
+                    g_free(err_msg);
+                    commands = NULL;
+                }
+            } else if (g_timer_elapsed(waittimer, NULL) >= waittime) {
+                g_timer_stop(waittimer);
+                commands++;
+                if (!(*commands))
+                    commands = NULL;
+            }
+            cont = TRUE;
+        } else if (line) {
             ProfWin* window = wins_get_current();
             cont = cmd_process_input(window, line);
-            free(line);
-            line = NULL;
+            if (commands) {
+                commands++;
+                if (!(*commands))
+                    commands = NULL;
+            } else {
+                free(line);
+                line = NULL;
+            }
         } else {
             cont = TRUE;
         }
@@ -132,6 +168,9 @@ prof_run(char* log_level, char* account_name, char* config_file, char* log_file,
         tray_update();
 #endif
     }
+    g_timer_destroy(waittimer);
+    g_timer_elapsed(runtime, NULL) < min_runtime ? sleep(min_runtime) : (void)NULL;
+    g_timer_destroy(runtime);
 }
 
 gboolean
@@ -181,8 +220,7 @@ _init(char* log_level, char* config_file, char* log_file, char* theme_name)
     auto_gchar gchar* prof_version = prof_get_version();
     log_info("Starting Profanity (%s)…", prof_version);
 
-    chat_log_init();
-    groupchat_log_init();
+    chatlog_init();
     accounts_load();
 
     if (theme_name) {
@@ -222,6 +260,50 @@ _init(char* log_level, char* config_file, char* log_file, char* theme_name)
     ui_resize();
 }
 
+static GList* shutdown_routines = NULL;
+
+/* We have to encapsulate the function pointer, since the C standard does not guarantee
+ * that a void* can be converted to a function* and vice-versa.
+ */
+struct shutdown_routine
+{
+    void (*routine)(void);
+};
+
+static gint
+_cmp_shutdown_routine(const struct shutdown_routine* a, const struct shutdown_routine* b)
+{
+    return a->routine != b->routine;
+}
+
+void
+prof_add_shutdown_routine(void (*routine)(void))
+{
+    struct shutdown_routine this = { .routine = routine };
+    if (g_list_find_custom(shutdown_routines, &this, (GCompareFunc)_cmp_shutdown_routine)) {
+        return;
+    }
+    struct shutdown_routine* r = malloc(sizeof *r);
+    r->routine = routine;
+    shutdown_routines = g_list_prepend(shutdown_routines, r);
+}
+
+static void
+_call_and_free_shutdown_routine(struct shutdown_routine* r)
+{
+    r->routine();
+    free(r);
+}
+
+void
+prof_shutdown(void)
+{
+    if (shutdown_routines) {
+        g_list_free_full(shutdown_routines, (GDestroyNotify)_call_and_free_shutdown_routine);
+        shutdown_routines = NULL;
+    }
+}
+
 static void
 _shutdown(void)
 {
@@ -237,30 +319,9 @@ _shutdown(void)
     if (conn_status == JABBER_CONNECTED) {
         cl_ev_disconnect();
     }
-#ifdef HAVE_GTK
-    tray_shutdown();
-#endif
-    session_shutdown();
-    plugins_on_shutdown();
-    muc_close();
-    caps_close();
-#ifdef HAVE_LIBOTR
-    otr_shutdown();
-#endif
-#ifdef HAVE_LIBGPGME
-    p_gpg_close();
-#endif
-#ifdef HAVE_OMEMO
-    omemo_close();
-#endif
-    chat_log_close();
-    theme_close();
-    accounts_close();
-    tlscerts_close();
-    log_stderr_close();
-    plugins_shutdown();
-    cmd_uninit();
-    ui_close();
+    prof_shutdown();
+    /* Prefs and logs have to be closed in swapped order, so they're no using the automatic
+     * shutdown mechanism. */
     prefs_close();
     log_close();
 }

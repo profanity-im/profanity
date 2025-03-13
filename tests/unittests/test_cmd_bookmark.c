@@ -196,8 +196,6 @@ cmd_bookmark_add_adds_bookmark_with_jid(void** state)
 void
 cmd_bookmark_uses_roomjid_in_room(void** state)
 {
-    muc_init();
-
     gchar* args[] = { NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
@@ -216,15 +214,11 @@ cmd_bookmark_uses_roomjid_in_room(void** state)
 
     gboolean result = cmd_bookmark(&muc_win.window, CMD_BOOKMARK, args);
     assert_true(result);
-
-    muc_close();
 }
 
 void
 cmd_bookmark_add_uses_roomjid_in_room(void** state)
 {
-    muc_init();
-
     gchar* args[] = { "add", NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
@@ -243,15 +237,11 @@ cmd_bookmark_add_uses_roomjid_in_room(void** state)
 
     gboolean result = cmd_bookmark(&muc_win.window, CMD_BOOKMARK, args);
     assert_true(result);
-
-    muc_close();
 }
 
 void
 cmd_bookmark_add_uses_supplied_jid_in_room(void** state)
 {
-    muc_init();
-
     char* jid = "room1@conf.server";
     gchar* args[] = { "add", jid, NULL };
     ProfMucWin muc_win;
@@ -271,8 +261,6 @@ cmd_bookmark_add_uses_supplied_jid_in_room(void** state)
 
     gboolean result = cmd_bookmark(&muc_win.window, CMD_BOOKMARK, args);
     assert_true(result);
-
-    muc_close();
 }
 
 void
@@ -384,8 +372,6 @@ cmd_bookmark_remove_shows_message_when_no_bookmark(void** state)
 void
 cmd_bookmark_remove_uses_roomjid_in_room(void** state)
 {
-    muc_init();
-
     gchar* args[] = { "remove", NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
@@ -401,15 +387,11 @@ cmd_bookmark_remove_uses_roomjid_in_room(void** state)
 
     gboolean result = cmd_bookmark(&muc_win.window, CMD_BOOKMARK, args);
     assert_true(result);
-
-    muc_close();
 }
 
 void
 cmd_bookmark_remove_uses_supplied_jid_in_room(void** state)
 {
-    muc_init();
-
     char* jid = "room1@conf.server";
     gchar* args[] = { "remove", jid, NULL };
     ProfMucWin muc_win;
@@ -426,6 +408,4 @@ cmd_bookmark_remove_uses_supplied_jid_in_room(void** state)
 
     gboolean result = cmd_bookmark(&muc_win.window, CMD_BOOKMARK, args);
     assert_true(result);
-
-    muc_close();
 }

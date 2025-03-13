@@ -153,9 +153,24 @@ _tray_change_icon(gpointer data)
     return TRUE;
 }
 
+static void
+_tray_shutdown(void)
+{
+    tray_disable();
+    if (icon_filename) {
+        g_string_free(icon_filename, TRUE);
+        icon_filename = NULL;
+    }
+    if (icon_msg_filename) {
+        g_string_free(icon_msg_filename, TRUE);
+        icon_msg_filename = NULL;
+    }
+}
+
 void
 tray_init(void)
 {
+    prof_add_shutdown_routine(_tray_shutdown);
     _get_icons();
     gtk_ready = gtk_init_check(0, NULL);
     log_debug("Env is GTK-ready: %s", gtk_ready ? "true" : "false");
@@ -180,20 +195,11 @@ tray_update(void)
 }
 
 void
-tray_shutdown(void)
-{
-    if (gtk_ready && prefs_get_boolean(PREF_TRAY)) {
-        tray_disable();
-    }
-    g_string_free(icon_filename, TRUE);
-    g_string_free(icon_msg_filename, TRUE);
-    gtk_main_quit();
-}
-
-void
 tray_set_timer(int interval)
 {
-    g_source_remove(timer);
+    if (timer) {
+        g_source_remove(timer);
+    }
     _tray_change_icon(NULL);
     timer = g_timeout_add(interval * 1000, _tray_change_icon, NULL);
 }
@@ -218,7 +224,10 @@ void
 tray_disable(void)
 {
     shutting_down = TRUE;
-    g_source_remove(timer);
+    if (timer) {
+        g_source_remove(timer);
+        timer = 0;
+    }
     if (prof_tray) {
         g_clear_object(&prof_tray);
         prof_tray = NULL;

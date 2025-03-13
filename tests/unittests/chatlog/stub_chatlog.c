@@ -27,7 +27,7 @@
 #include <xmpp/xmpp.h>
 
 void
-chat_log_init(void)
+chatlog_init(void)
 {
 }
 
@@ -62,11 +62,6 @@ chat_log_pgp_msg_in(ProfMessage* message)
 }
 void
 chat_log_omemo_msg_in(ProfMessage* message)
-{
-}
-
-void
-chat_log_close(void)
 {
 }
 

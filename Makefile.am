@@ -354,8 +354,14 @@ my-prof.supp:
 check-unit: tests/unittests/unittests
 	tests/unittests/unittests
 
+@VALGRIND_CHECK_RULES@
+VALGRIND_SUPPRESSIONS_FILES=prof.supp
+
 format: $(all_c_sources)
 	clang-format -i $(all_c_sources)
+
+format-sources: $(core_sources) $(main_source)
+	clang-format -i $^
 
 spell:
 	codespell

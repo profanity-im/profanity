@@ -13,6 +13,7 @@ error_handler()
 
     log_content ./config.log
     log_content ./test-suite.log
+    log_content ./test-suite-memcheck.log
 
     echo
     echo "Error ${ERR_CODE} with command '${BASH_COMMAND}' on line ${BASH_LINENO[0]}. Exiting."
@@ -39,7 +40,9 @@ tests=()
 MAKE="make --quiet -j$(num_cores)"
 CC="gcc"
 
-case $(uname | tr '[:upper:]' '[:lower:]') in
+ARCH="$(uname | tr '[:upper:]' '[:lower:]')"
+
+case "$ARCH" in
     linux*)
         tests=(
         "--enable-notifications --enable-icons-and-clipboard --enable-otr --enable-pgp
@@ -62,6 +65,7 @@ case $(uname | tr '[:upper:]' '[:lower:]') in
         "--without-xscreensaver"
         "--disable-gdk-pixbuf"
         "")
+        source /etc/profile.d/debuginfod.sh 2>/dev/null || true
         ;;
     darwin*)
         tests=(
@@ -114,14 +118,33 @@ case $(uname | tr '[:upper:]' '[:lower:]') in
         ;;
 esac
 
+case "$ARCH" in
+    linux*)
+         echo
+         echo "--> Building with ./configure ${tests[0]} --enable-valgrind $*"
+         echo
+
+         # shellcheck disable=SC2086
+        ./configure ${tests[0]} --enable-valgrind $*
+
+        $MAKE CC="${CC}"
+        if grep '^ID=' /etc/os-release | grep -q -e debian; then
+            $MAKE check-valgrind
+        else
+            $MAKE check-valgrind || log_content ./test-suite-memcheck.log
+        fi
+        $MAKE distclean
+        ;;
+esac
+
 for features in "${tests[@]}"
 do
     echo
-    echo "--> Building with ./configure ${features}"
+    echo "--> Building with ./configure ${features} $*"
     echo
 
     # shellcheck disable=SC2086
-    ./configure $features
+    ./configure $features $*
 
     $MAKE CC="${CC}"
     $MAKE check

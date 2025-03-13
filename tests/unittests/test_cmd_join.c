@@ -73,8 +73,6 @@ cmd_join_uses_account_mucservice_when_no_service_specified(void** state)
     ProfAccount* account = account_new(account_name, g_strdup("user@server.org"), NULL, NULL,
                                        TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, account_service, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 
-    muc_init();
-
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(session_get_account_name, account_name);
 
@@ -87,8 +85,6 @@ cmd_join_uses_account_mucservice_when_no_service_specified(void** state)
 
     gboolean result = cmd_join(NULL, CMD_JOIN, args);
     assert_true(result);
-
-    muc_close();
 }
 
 void
@@ -100,8 +96,6 @@ cmd_join_uses_supplied_nick(void** state)
     gchar* args[] = { room, "nick", nick, NULL };
     ProfAccount* account = account_new(account_name, g_strdup("user@server.org"), NULL, NULL,
                                        TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-
-    muc_init();
 
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(session_get_account_name, account_name);
@@ -115,8 +109,6 @@ cmd_join_uses_supplied_nick(void** state)
 
     gboolean result = cmd_join(NULL, CMD_JOIN, args);
     assert_true(result);
-
-    muc_close();
 }
 
 void
@@ -128,8 +120,6 @@ cmd_join_uses_account_nick_when_not_supplied(void** state)
     gchar* args[] = { room, NULL };
     ProfAccount* account = account_new(account_name, g_strdup("user@server.org"), NULL, NULL,
                                        TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, NULL, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
-
-    muc_init();
 
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(session_get_account_name, account_name);
@@ -143,8 +133,6 @@ cmd_join_uses_account_nick_when_not_supplied(void** state)
 
     gboolean result = cmd_join(NULL, CMD_JOIN, args);
     assert_true(result);
-
-    muc_close();
 }
 
 void
@@ -160,8 +148,6 @@ cmd_join_uses_password_when_supplied(void** state)
     ProfAccount* account = account_new(account_name, g_strdup("user@server.org"), NULL, NULL,
                                        TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, account_service, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 
-    muc_init();
-
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(session_get_account_name, account_name);
 
@@ -174,6 +160,4 @@ cmd_join_uses_password_when_supplied(void** state)
 
     gboolean result = cmd_join(NULL, CMD_JOIN, args);
     assert_true(result);
-
-    muc_close();
 }

@@ -6,6 +6,8 @@
 
 #include "xmpp/muc.h"
 
+void prof_shutdown(void);
+
 int
 muc_before_test(void** state)
 {
@@ -16,7 +18,7 @@ muc_before_test(void** state)
 int
 muc_after_test(void** state)
 {
-    muc_close();
+    prof_shutdown();
     return 0;
 }
 

@@ -111,7 +111,7 @@ api_register_command(const char* const plugin_name, const char* command_name, in
                      char** synopsis, const char* description, char* arguments[][2], char** examples,
                      void* callback, void (*callback_exec)(PluginCommand* command, gchar** args), void (*callback_destroy)(void* callback))
 {
-    PluginCommand* command = malloc(sizeof(PluginCommand));
+    PluginCommand* command = calloc(1, sizeof(PluginCommand));
     command->command_name = strdup(command_name);
     command->min_args = min_args;
     command->max_args = max_args;
@@ -119,28 +119,22 @@ api_register_command(const char* const plugin_name, const char* command_name, in
     command->callback_exec = callback_exec;
     command->callback_destroy = callback_destroy;
 
-    CommandHelp* help = malloc(sizeof(CommandHelp));
-
-    help->tags[0] = NULL;
+    CommandHelp* help = calloc(1, sizeof(CommandHelp));
 
     int i;
     for (i = 0; synopsis[i] != NULL; i++) {
         help->synopsis[i] = strdup(synopsis[i]);
     }
-    help->synopsis[i] = NULL;
 
     help->desc = strdup(description);
     for (i = 0; arguments[i][0] != NULL; i++) {
         help->args[i][0] = strdup(arguments[i][0]);
         help->args[i][1] = strdup(arguments[i][1]);
     }
-    help->args[i][0] = NULL;
-    help->args[i][1] = NULL;
 
     for (i = 0; examples[i] != NULL; i++) {
         help->examples[i] = strdup(examples[i]);
     }
-    help->examples[i] = NULL;
 
     command->help = help;
 

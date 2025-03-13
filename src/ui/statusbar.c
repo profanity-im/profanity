@@ -120,6 +120,7 @@ void
 status_bar_close(void)
 {
     delwin(statusbar_win);
+    statusbar_win = NULL;
     if (statusbar) {
         if (statusbar->time) {
             g_free(statusbar->time);
@@ -133,10 +134,11 @@ status_bar_close(void)
         if (statusbar->tabs) {
             g_hash_table_destroy(statusbar->tabs);
         }
-        free(statusbar);
+        FREE_SET_NULL(statusbar);
     }
     if (tz) {
         g_time_zone_unref(tz);
+        tz = NULL;
     }
 }
 

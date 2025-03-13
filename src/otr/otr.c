@@ -166,11 +166,28 @@ otr_start_query(void)
     return otrlib_start_query();
 }
 
+static void
+_otr_shutdown(void)
+{
+    g_hash_table_destroy(smp_initiators);
+    if (jid) {
+        free(jid);
+        jid = NULL;
+    }
+    if (user_state) {
+        otrl_userstate_free(user_state);
+        user_state = NULL;
+    }
+    otrlib_shutdown();
+}
+
 void
 otr_init(void)
 {
     log_info("Initialising OTR");
     OTRL_INIT;
+
+    prof_add_shutdown_routine(_otr_shutdown);
 
     jid = NULL;
 
@@ -185,16 +202,6 @@ otr_init(void)
     smp_initiators = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 
     data_loaded = FALSE;
-}
-
-void
-otr_shutdown(void)
-{
-    if (jid) {
-        free(jid);
-        jid = NULL;
-    }
-    otrlib_shutdown();
 }
 
 void

@@ -11,6 +11,9 @@
 #include "helpers.h"
 #include "config/preferences.h"
 #include "xmpp/chat_session.h"
+#include "command/cmd_defs.h"
+
+void prof_shutdown(void);
 
 void
 create_config_dir(void** state)
@@ -51,18 +54,24 @@ load_preferences(void** state)
     FILE* f = fopen("./tests/files/xdg_config_home/profanity/profrc", "ab+");
     if (f) {
         prefs_load(NULL);
+    } else {
+        return 1;
     }
     fclose(f);
+    cmd_init();
+    chat_sessions_init();
     return 0;
 }
 
 int
 close_preferences(void** state)
 {
+    chat_sessions_clear();
     prefs_close();
     remove("./tests/files/xdg_config_home/profanity/profrc");
     remove_config_dir(state);
     rmdir("./tests/files");
+    prof_shutdown();
     return 0;
 }
 
@@ -79,6 +88,7 @@ close_chat_sessions(void** state)
 {
     chat_sessions_clear();
     close_preferences(NULL);
+    prof_shutdown();
     return 0;
 }
 

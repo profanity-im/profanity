@@ -45,7 +45,7 @@ typedef enum {
     PROF_OUT_LOG
 } chat_log_direction_t;
 
-void chat_log_init(void);
+void chatlog_init(void);
 
 void chat_log_msg_out(const char* const barejid, const char* const msg, const char* resource);
 void chat_log_otr_msg_out(const char* const barejid, const char* const msg, const char* resource);
@@ -56,8 +56,6 @@ void chat_log_msg_in(ProfMessage* message);
 void chat_log_otr_msg_in(ProfMessage* message);
 void chat_log_pgp_msg_in(ProfMessage* message);
 void chat_log_omemo_msg_in(ProfMessage* message);
-
-void chat_log_close(void);
 
 void groupchat_log_init(void);
 

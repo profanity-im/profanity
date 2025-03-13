@@ -36,6 +36,13 @@ may be set to DEBUG, INFO (the default), WARN or ERROR.
 .BI "\-f, \-\-logfile"
 Specify a different logfile
 .TP
+.BI "\-r, \-\-cmd"
+Specify the commands that should be run right after starting up.
+This can be given multiple times, e.g.
+.EX
+profanity --cmd /foo --cmd "/sleep 10" --cmd /quit
+.EE
+.TP
 .BI "\-t, \-\-theme "THEME
 Specify which theme to use.
 .I THEME

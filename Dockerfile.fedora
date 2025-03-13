@@ -33,6 +33,7 @@ RUN dnf install -y \
   readline-devel \
   openssl-devel \
   sqlite-devel \
+  valgrind \
   gdk-pixbuf2-devel \
   qrencode-devel
 

@@ -55,7 +55,6 @@ typedef struct pgp_pubkeyid_t
 } ProfPGPPubKeyId;
 
 void p_gpg_init(void);
-void p_gpg_close(void);
 void p_gpg_on_connect(const char* const barejid);
 void p_gpg_on_disconnect(void);
 GHashTable* p_gpg_list_keys(void);

@@ -84,7 +84,6 @@ cmd_alias_add_shows_message_when_exists(void** state)
 {
     gchar* args[] = { "add", "hc", "/help commands", NULL };
 
-    cmd_init();
     prefs_add_alias("hc", "/help commands");
     cmd_ac_add("/hc");
 

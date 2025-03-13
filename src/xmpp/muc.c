@@ -91,26 +91,27 @@ static Occupant* _muc_occupant_new(const char* const nick, const char* const jid
                                    muc_affiliation_t affiliation, resource_presence_t presence, const char* const status);
 static void _occupant_free(Occupant* occupant);
 
+static void
+_muc_close(void)
+{
+    g_hash_table_destroy(invite_passwords);
+    invite_passwords = NULL;
+    g_hash_table_destroy(rooms);
+    rooms = NULL;
+    autocomplete_free(confservers_ac);
+    confservers_ac = NULL;
+    autocomplete_free(invite_ac);
+    invite_ac = NULL;
+}
+
 void
 muc_init(void)
 {
+    prof_add_shutdown_routine(_muc_close);
     invite_ac = autocomplete_new();
     confservers_ac = autocomplete_new();
     rooms = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_room);
     invite_passwords = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
-}
-
-void
-muc_close(void)
-{
-    autocomplete_free(invite_ac);
-    autocomplete_free(confservers_ac);
-    g_hash_table_destroy(rooms);
-    g_hash_table_destroy(invite_passwords);
-    rooms = NULL;
-    invite_passwords = NULL;
-    invite_ac = NULL;
-    confservers_ac = NULL;
 }
 
 void

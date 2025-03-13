@@ -9,6 +9,7 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   cmake \
   cmocka \
   curl \
+  debuginfod \
   doxygen \
   expat \
   gcc \
@@ -28,6 +29,7 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   python \
   wget \
   sqlite \
+  valgrind \
   gdk-pixbuf2 \
   qrencode
 

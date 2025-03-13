@@ -164,7 +164,6 @@ create_input_window(void)
 
     inp_win = newpad(1, INP_WIN_MAX);
     wbkgd(inp_win, theme_attrs(THEME_INPUT_TEXT));
-    ;
     keypad(inp_win, TRUE);
     wmove(inp_win, 0, 0);
 
@@ -174,8 +173,6 @@ create_input_window(void)
 char*
 inp_readline(void)
 {
-    free(inp_line);
-    inp_line = NULL;
     p_rl_timeout.tv_sec = inp_timeout / 1000;
     p_rl_timeout.tv_usec = inp_timeout % 1000 * 1000;
     FD_ZERO(&fds);
@@ -217,7 +214,9 @@ inp_readline(void)
                 }
             }
         }
-        return strdup(inp_line);
+        char* ret = inp_line;
+        inp_line = NULL;
+        return ret;
     } else {
         return NULL;
     }
@@ -274,7 +273,9 @@ inp_close(void)
 {
     rl_callback_handler_remove();
     delwin(inp_win);
+    inp_win = NULL;
     fclose(discard);
+    discard = NULL;
 }
 
 char*
