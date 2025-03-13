@@ -515,15 +515,15 @@ plugins_on_disconnect(const char* const account_name, const char* const fulljid)
 }
 
 char*
-plugins_pre_chat_message_display(const char* const barejid, const char* const resource, char* message)
+plugins_pre_chat_message_display(const char* const barejid, const char* const resource, const char* message)
 {
     GList* values = g_hash_table_get_values(plugins);
     if (!values) {
-        return message;
+        return NULL;
     }
 
     char* new_message = NULL;
-    char* curr_message = message;
+    char* curr_message = strdup(message);
 
     GList* curr = values;
     while (curr) {
