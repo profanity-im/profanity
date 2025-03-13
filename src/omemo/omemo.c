@@ -42,11 +42,11 @@
 #include <errno.h>
 #include <glib.h>
 #include <pthread.h>
-#include <signal/key_helper.h>
-#include <signal/protocol.h>
+#include <omemo/key_helper.h>
+#include <omemo/protocol.h>
 #include <omemo/signal_protocol.h>
-#include <signal/session_builder.h>
-#include <signal/session_cipher.h>
+#include <omemo/session_builder.h>
+#include <omemo/session_cipher.h>
 
 #include "config/account.h"
 #include "config/files.h"
