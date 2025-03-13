@@ -403,7 +403,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
 }
 
 void
-chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, prof_enc_t enc_mode,
+chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, const char* id, prof_enc_t enc_mode,
                      gboolean request_receipt, const char* const replace_id)
 {
     assert(chatwin != NULL);

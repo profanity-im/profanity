@@ -127,7 +127,7 @@ ProfChatWin* chatwin_new(const char* const barejid);
 void chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_created);
 void chatwin_receipt_received(ProfChatWin* chatwin, const char* const id);
 void chatwin_recipient_gone(ProfChatWin* chatwin);
-void chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, prof_enc_t enc_mode, gboolean request_receipt, const char* const replace_id);
+void chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, const char* id, prof_enc_t enc_mode, gboolean request_receipt, const char* const replace_id);
 void chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message);
 void chatwin_contact_online(ProfChatWin* chatwin, Resource* resource, GDateTime* last_activity);
 void chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status);
