@@ -569,11 +569,10 @@ plugins_pre_chat_message_send(const char* const barejid, const char* message)
         ProfPlugin* plugin = curr->data;
         if (plugin->contains_hook(plugin, "prof_pre_chat_message_send")) {
             new_message = plugin->pre_chat_message_send(plugin, barejid, curr_message);
+            free(curr_message);
             if (new_message) {
-                free(curr_message);
                 curr_message = new_message;
             } else {
-                free(curr_message);
                 g_list_free(values);
 
                 return NULL;
@@ -654,11 +653,10 @@ plugins_pre_room_message_send(const char* const barejid, const char* message)
         ProfPlugin* plugin = curr->data;
         if (plugin->contains_hook(plugin, "prof_pre_room_message_send")) {
             new_message = plugin->pre_room_message_send(plugin, barejid, curr_message);
+            free(curr_message);
             if (new_message) {
-                free(curr_message);
                 curr_message = new_message;
             } else {
-                free(curr_message);
                 g_list_free(values);
 
                 return NULL;
@@ -765,11 +763,10 @@ plugins_pre_priv_message_send(const char* const fulljid, const char* const messa
         ProfPlugin* plugin = curr->data;
         if (plugin->contains_hook(plugin, "prof_pre_priv_message_send")) {
             new_message = plugin->pre_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, curr_message);
+            free(curr_message);
             if (new_message) {
-                free(curr_message);
                 curr_message = new_message;
             } else {
-                free(curr_message);
                 g_list_free(values);
 
                 return NULL;
