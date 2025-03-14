@@ -515,15 +515,15 @@ plugins_on_disconnect(const char* const account_name, const char* const fulljid)
 }
 
 char*
-plugins_pre_chat_message_display(const char* const barejid, const char* const resource, char* message)
+plugins_pre_chat_message_display(const char* const barejid, const char* const resource, const char* message)
 {
     GList* values = g_hash_table_get_values(plugins);
     if (!values) {
-        return message;
+        return NULL;
     }
 
     char* new_message = NULL;
-    char* curr_message = message;
+    char* curr_message = strdup(message);
 
     GList* curr = values;
     while (curr) {
@@ -569,12 +569,10 @@ plugins_pre_chat_message_send(const char* const barejid, const char* message)
         ProfPlugin* plugin = curr->data;
         if (plugin->contains_hook(plugin, "prof_pre_chat_message_send")) {
             new_message = plugin->pre_chat_message_send(plugin, barejid, curr_message);
+            free(curr_message);
             if (new_message) {
-                free(curr_message);
-                curr_message = strdup(new_message);
-                free(new_message);
+                curr_message = new_message;
             } else {
-                free(curr_message);
                 g_list_free(values);
 
                 return NULL;
@@ -617,8 +615,7 @@ plugins_pre_room_message_display(const char* const barejid, const char* const ni
         new_message = plugin->pre_room_message_display(plugin, barejid, nick, curr_message);
         if (new_message) {
             free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
+            curr_message = new_message;
         }
         curr = g_list_next(curr);
     }
@@ -656,12 +653,10 @@ plugins_pre_room_message_send(const char* const barejid, const char* message)
         ProfPlugin* plugin = curr->data;
         if (plugin->contains_hook(plugin, "prof_pre_room_message_send")) {
             new_message = plugin->pre_room_message_send(plugin, barejid, curr_message);
+            free(curr_message);
             if (new_message) {
-                free(curr_message);
-                curr_message = strdup(new_message);
-                free(new_message);
+                curr_message = new_message;
             } else {
-                free(curr_message);
                 g_list_free(values);
 
                 return NULL;
@@ -728,8 +723,7 @@ plugins_pre_priv_message_display(const char* const fulljid, const char* message)
         new_message = plugin->pre_priv_message_display(plugin, jidp->barejid, jidp->resourcepart, curr_message);
         if (new_message) {
             free(curr_message);
-            curr_message = strdup(new_message);
-            free(new_message);
+            curr_message = new_message;
         }
         curr = g_list_next(curr);
     }
@@ -769,12 +763,10 @@ plugins_pre_priv_message_send(const char* const fulljid, const char* const messa
         ProfPlugin* plugin = curr->data;
         if (plugin->contains_hook(plugin, "prof_pre_priv_message_send")) {
             new_message = plugin->pre_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, curr_message);
+            free(curr_message);
             if (new_message) {
-                free(curr_message);
-                curr_message = strdup(new_message);
-                free(new_message);
+                curr_message = new_message;
             } else {
-                free(curr_message);
                 g_list_free(values);
 
                 return NULL;
@@ -820,8 +812,7 @@ plugins_on_message_stanza_send(const char* const text)
         new_stanza = plugin->on_message_stanza_send(plugin, curr_stanza);
         if (new_stanza) {
             free(curr_stanza);
-            curr_stanza = strdup(new_stanza);
-            free(new_stanza);
+            curr_stanza = new_stanza;
         }
         curr = g_list_next(curr);
     }
@@ -867,8 +858,7 @@ plugins_on_presence_stanza_send(const char* const text)
         new_stanza = plugin->on_presence_stanza_send(plugin, curr_stanza);
         if (new_stanza) {
             free(curr_stanza);
-            curr_stanza = strdup(new_stanza);
-            free(new_stanza);
+            curr_stanza = new_stanza;
         }
         curr = g_list_next(curr);
     }
@@ -914,8 +904,7 @@ plugins_on_iq_stanza_send(const char* const text)
         new_stanza = plugin->on_iq_stanza_send(plugin, curr_stanza);
         if (new_stanza) {
             free(curr_stanza);
-            curr_stanza = strdup(new_stanza);
-            free(new_stanza);
+            curr_stanza = new_stanza;
         }
         curr = g_list_next(curr);
     }

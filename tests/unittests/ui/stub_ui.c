@@ -277,7 +277,7 @@ chatwin_recipient_gone(ProfChatWin* chatwin)
 }
 
 void
-chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, char* id, prof_enc_t enc_mode, gboolean request_receipt, const char* const replace_id)
+chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, const char* id, prof_enc_t enc_mode, gboolean request_receipt, const char* const replace_id)
 {
 }
 void

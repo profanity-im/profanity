@@ -1617,7 +1617,7 @@ win_print_http_transfer(ProfWin* window, const char* const message, char* id)
 }
 
 void
-win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const char* const from, const char* const message, char* id, const char* const replace_id)
+win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const char* const from, const char* const message, const char* id, const char* const replace_id)
 {
     GDateTime* time = g_date_time_new_now_local();
 
