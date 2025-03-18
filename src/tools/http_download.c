@@ -236,9 +236,9 @@ out:
     download_processes = g_slist_remove(download_processes, download);
     pthread_mutex_unlock(&lock);
 
-    free(download->id);
-    free(download->url);
     free(download->filename);
+    free(download->url);
+    free(download->id);
     free(download);
 
     return NULL;

@@ -9435,17 +9435,16 @@ _url_aesgcm_method(ProfWin* window, const char* cmd_template, gchar* url, gchar*
     auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return;
-    auto_char char* id = get_random_string(4);
-    AESGCMDownload* download = malloc(sizeof(AESGCMDownload));
-    download->window = window;
+    AESGCMDownload* download = calloc(1, sizeof(AESGCMDownload));
+    download->id = get_random_string(4);
     download->url = strdup(url);
     download->filename = strdup(filename);
-    download->id = strdup(id);
     if (cmd_template != NULL) {
         download->cmd_template = strdup(cmd_template);
     } else {
         download->cmd_template = NULL;
     }
+    download->window = window;
 
     pthread_create(&(download->worker), NULL, &aesgcm_file_get, download);
     aesgcm_download_add_download(download);
@@ -9458,38 +9457,38 @@ _download_install_plugin(ProfWin* window, gchar* url, gchar* path)
     auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return FALSE;
-    HTTPDownload* download = malloc(sizeof(HTTPDownload));
-    download->window = window;
+    HTTPDownload* download = calloc(1, sizeof(HTTPDownload));
+    download->id = get_random_string(4);
     download->url = strdup(url);
     download->filename = strdup(filename);
-    download->id = get_random_string(4);
     download->cmd_template = NULL;
+    download->window = window;
+    download->silent = TRUE;
 
     pthread_create(&(download->worker), NULL, &plugin_download_install, download);
     plugin_download_add_download(download);
     return TRUE;
 }
 
-void
+static void
 _url_http_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* path)
 {
     auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return;
-    auto_char char* id = get_random_string(4);
-    HTTPDownload* download = malloc(sizeof(HTTPDownload));
-    download->window = window;
+    HTTPDownload* download = calloc(1, sizeof(HTTPDownload));
+    download->id = get_random_string(4);
     download->url = strdup(url);
     download->filename = strdup(filename);
-    download->id = strdup(id);
     download->cmd_template = cmd_template ? strdup(cmd_template) : NULL;
+    download->window = window;
     download->silent = FALSE;
 
     pthread_create(&(download->worker), NULL, &http_file_get, download);
     http_download_add_download(download);
 }
 
-void
+static void
 _url_external_method(const char* cmd_template, const char* url, gchar* filename)
 {
     auto_gcharv gchar** argv = format_call_external_argv(cmd_template, url, filename);
