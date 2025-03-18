@@ -119,7 +119,7 @@ aesgcm_file_get(void* userdata)
     ssize_t bytes_received = *p_bytes_received;
     free(p_bytes_received);
 
-    auto_FILE FILE* tmpfh = fopen(tmpname, "rb");
+    FILE* tmpfh = fopen(tmpname, "rb");
     if (tmpfh == NULL) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
                                    "Downloading '%s' failed: Unable to open "
@@ -132,7 +132,7 @@ aesgcm_file_get(void* userdata)
     gcry_error_t crypt_res;
     crypt_res = omemo_decrypt_file(tmpfh, outfh,
                                    bytes_received, fragment);
-
+    fclose(tmpfh);
     remove(tmpname);
 
     if (crypt_res != GPG_ERR_NO_ERROR) {
