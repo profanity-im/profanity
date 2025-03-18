@@ -109,9 +109,15 @@ aesgcm_file_get(void* userdata)
     http_dl->filename = strdup(tmpname);
     http_dl->cmd_template = NULL;
     http_dl->silent = FALSE;
+    http_dl->return_bytes_received = TRUE;
     aesgcm_dl->http_dl = http_dl;
 
-    http_file_get(http_dl); // TODO(wstrm): Verify result.
+    ssize_t* p_bytes_received = http_file_get(http_dl);
+    if (!p_bytes_received) {
+        return NULL;
+    }
+    ssize_t bytes_received = *p_bytes_received;
+    free(p_bytes_received);
 
     auto_FILE FILE* tmpfh = fopen(tmpname, "rb");
     if (tmpfh == NULL) {
@@ -125,7 +131,7 @@ aesgcm_file_get(void* userdata)
 
     gcry_error_t crypt_res;
     crypt_res = omemo_decrypt_file(tmpfh, outfh,
-                                   http_dl->bytes_received, fragment);
+                                   bytes_received, fragment);
 
     remove(tmpname);
 

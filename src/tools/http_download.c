@@ -105,6 +105,7 @@ void*
 http_file_get(void* userdata)
 {
     HTTPDownload* download = (HTTPDownload*)userdata;
+    ssize_t* ret = NULL;
 
     char* err = NULL;
 
@@ -208,6 +209,10 @@ http_file_get(void* userdata)
                                        "Downloading '%s': done\nSaved to '%s'",
                                        download->url, download->filename);
             win_mark_received(download->window, download->id);
+            if (download->return_bytes_received) {
+                ret = malloc(sizeof(*ret));
+                *ret = download->bytes_received;
+            }
         }
     }
 
@@ -241,7 +246,7 @@ out:
     free(download->id);
     free(download);
 
-    return NULL;
+    return ret;
 }
 
 void
