@@ -49,16 +49,25 @@ int
 omemo_crypto_init(void)
 {
     if (!gcry_check_version(GCRYPT_VERSION)) {
-        return -1;
+        return GPG_ERR_UNKNOWN_VERSION;
     }
 
-    gcry_control(GCRYCTL_SUSPEND_SECMEM_WARN);
+    gcry_error_t ret;
+    ret = gcry_control(GCRYCTL_SUSPEND_SECMEM_WARN);
+    if (ret != 0)
+        return ret;
 
-    gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0);
+    ret = gcry_control(GCRYCTL_INIT_SECMEM, 16384, 0);
+    if (ret != 0)
+        return ret;
 
-    gcry_control(GCRYCTL_RESUME_SECMEM_WARN);
+    ret = gcry_control(GCRYCTL_RESUME_SECMEM_WARN);
+    if (ret != 0)
+        return ret;
 
-    gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
+    ret = gcry_control(GCRYCTL_INITIALIZATION_FINISHED, 0);
+    if (ret != 0)
+        return ret;
 
     /* Ask for a first random buffer to ensure CSPRNG is initialized.
      * Thus we control the memleak produced by gcrypt initialization and we can

@@ -77,7 +77,7 @@ aesgcm_file_get(void* userdata)
 
     // Create a temporary file used for storing the ciphertext that is to be
     // retrieved from the https:// URL.
-    auto_gchar char* tmpname = NULL;
+    auto_gchar gchar* tmpname = NULL;
     auto_gfd gint tmpfd = 0;
     if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
@@ -101,7 +101,7 @@ aesgcm_file_get(void* userdata)
 
     // We wrap the HTTPDownload tool and use it for retrieving the ciphertext
     // and storing it in the temporary file previously opened.
-    HTTPDownload* http_dl = malloc(sizeof(HTTPDownload));
+    HTTPDownload* http_dl = calloc(1, sizeof(HTTPDownload));
     http_dl->window = aesgcm_dl->window;
     http_dl->worker = aesgcm_dl->worker;
     http_dl->id = strdup(aesgcm_dl->id);
@@ -109,11 +109,17 @@ aesgcm_file_get(void* userdata)
     http_dl->filename = strdup(tmpname);
     http_dl->cmd_template = NULL;
     http_dl->silent = FALSE;
+    http_dl->return_bytes_received = TRUE;
     aesgcm_dl->http_dl = http_dl;
 
-    http_file_get(http_dl); // TODO(wstrm): Verify result.
+    ssize_t* p_bytes_received = http_file_get(http_dl);
+    if (!p_bytes_received) {
+        return NULL;
+    }
+    ssize_t bytes_received = *p_bytes_received;
+    free(p_bytes_received);
 
-    auto_FILE FILE* tmpfh = fopen(tmpname, "rb");
+    FILE* tmpfh = fopen(tmpname, "rb");
     if (tmpfh == NULL) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
                                    "Downloading '%s' failed: Unable to open "
@@ -125,10 +131,9 @@ aesgcm_file_get(void* userdata)
 
     gcry_error_t crypt_res;
     crypt_res = omemo_decrypt_file(tmpfh, outfh,
-                                   http_dl->bytes_received, fragment);
-
+                                   bytes_received, fragment);
+    fclose(tmpfh);
     remove(tmpname);
-    g_free(tmpname);
 
     if (crypt_res != GPG_ERR_NO_ERROR) {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
