@@ -58,6 +58,7 @@ typedef struct http_download_t
     pthread_t worker;
     int cancel;
     gboolean silent;
+    gboolean return_bytes_received;
 } HTTPDownload;
 
 void* http_file_get(void* userdata);

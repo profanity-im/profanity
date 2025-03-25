@@ -133,8 +133,9 @@ omemo_init(void)
 
     prof_add_shutdown_routine(_omemo_close);
 
-    if (omemo_crypto_init() != 0) {
-        cons_show("Error initializing OMEMO crypto: gcry_check_version() failed");
+    gcry_error_t crypt_res = omemo_crypto_init();
+    if (crypt_res != 0) {
+        cons_show("Error initializing OMEMO crypto: %s", gcry_strerror(crypt_res));
     }
 
     pthread_mutexattr_init(&omemo_static_data.attr);

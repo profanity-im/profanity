@@ -298,39 +298,36 @@ http_file_put(void* userdata)
     pthread_mutex_lock(&lock);
 
     if (err) {
-        gchar* msg;
+        auto_gchar gchar* err_msg = NULL;
         if (upload->cancel) {
-            msg = g_strdup_printf("Uploading '%s' failed: Upload was canceled", upload->filename);
-            if (!msg) {
-                msg = g_strdup(FALLBACK_MSG);
+            err_msg = g_strdup_printf("Uploading '%s' failed: Upload was canceled", upload->filename);
+            if (!err_msg) {
+                err_msg = g_strdup(FALLBACK_MSG);
             }
         } else {
-            msg = g_strdup_printf("Uploading '%s' failed: %s", upload->filename, err);
-            if (!msg) {
-                msg = g_strdup(FALLBACK_MSG);
+            err_msg = g_strdup_printf("Uploading '%s' failed: %s", upload->filename, err);
+            if (!err_msg) {
+                err_msg = g_strdup(FALLBACK_MSG);
             }
-            win_update_entry_message(upload->window, upload->put_url, msg);
+            win_update_entry_message(upload->window, upload->put_url, err_msg);
         }
-        cons_show_error(msg);
-        g_free(msg);
+        cons_show_error(err_msg);
     } else {
         if (!upload->cancel) {
-            msg = g_strdup_printf("Uploading '%s': 100%%", upload->filename);
-            if (!msg) {
-                msg = g_strdup(FALLBACK_MSG);
+            auto_gchar gchar* status_msg = g_strdup_printf("Uploading '%s': 100%%", upload->filename);
+            if (!status_msg) {
+                status_msg = g_strdup(FALLBACK_MSG);
             }
-            win_update_entry_message(upload->window, upload->put_url, msg);
+            win_update_entry_message(upload->window, upload->put_url, status_msg);
             win_mark_received(upload->window, upload->put_url);
-            g_free(msg);
 
             char* url = NULL;
             if (format_alt_url(upload->get_url, upload->alt_scheme, upload->alt_fragment, &url) != 0) {
-                gchar* msg = g_strdup_printf("Uploading '%s' failed: Bad URL ('%s')", upload->filename, upload->get_url);
-                if (!msg) {
-                    msg = g_strdup(FALLBACK_MSG);
+                auto_gchar gchar* fail_msg = g_strdup_printf("Uploading '%s' failed: Bad URL ('%s')", upload->filename, upload->get_url);
+                if (!fail_msg) {
+                    fail_msg = g_strdup(FALLBACK_MSG);
                 }
-                cons_show_error(msg);
-                g_free(msg);
+                cons_show_error(fail_msg);
             } else {
                 switch (upload->window->type) {
                 case WIN_CHAT:
