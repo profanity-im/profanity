@@ -1,0 +1,41 @@
+.TH man 1 "2025-03-27" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/disco
+
+.SH DESCRIPTION
+Find out information about an entities supported services. Calling with no arguments will query the server you are currently connected to. This includes discovering contact addresses for XMPP services (XEP-0157).
+
+.SH SYNOPSIS
+/disco info [<jid>]
+
+.LP
+/disco items [<jid>]
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBinfo [<jid>]\fR
+.RS 4
+List protocols and features supported by an entity.
+.RE
+.PP
+\fBitems [<jid>]\fR
+.RS 4
+List items associated with an entity.
+.RE
+
+.SH EXAMPLES
+/disco info
+
+.LP
+/disco items myserver.org
+
+.LP
+/disco items conference.jabber.org
+
+.LP
+/disco info odin@valhalla.edda/laptop
+
+.LP

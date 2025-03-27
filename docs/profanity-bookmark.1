@@ -1,0 +1,124 @@
+.TH man 1 "2025-03-27" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/bookmark
+
+.SH DESCRIPTION
+Manage bookmarks and join bookmarked rooms. If you are in a chat room and no arguments are supplied to `/bookmark add`, autojoin is set to "on". There is also an autojoin ignore list in case you want to autojoin in many clients but not on Profanity. 
+
+.SH SYNOPSIS
+/bookmark
+
+.LP
+/bookmark list [<jid>]
+
+.LP
+/bookmark add [<room>] [nick <nick>] [password <password>] [name <roomname>] [autojoin on|off]
+
+.LP
+/bookmark update <room> [nick <nick>] [password <password>] [name <roomname>] [autojoin on|off]
+
+.LP
+/bookmark remove [<room>]
+
+.LP
+/bookmark join <room>
+
+.LP
+/bookmark invites on|off
+
+.LP
+/bookmark ignore
+
+.LP
+/bookmark ignore add <jid>
+
+.LP
+/bookmark ignore remove <jid>
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBlist [<jid>]\fR
+.RS 4
+List all bookmarks. Or the details of one.
+.RE
+.PP
+\fBadd [<room>]\fR
+.RS 4
+Add a bookmark, passing no room will bookmark the current room, setting autojoin to "on".
+.RE
+.PP
+\fBremove [<room>]\fR
+.RS 4
+Remove a bookmark, passing no room will remove the bookmark for the current room, if one exists.
+.RE
+.PP
+\fBupdate <room>\fR
+.RS 4
+Update the properties associated with a bookmark.
+.RE
+.PP
+\fBnick <nick>\fR
+.RS 4
+Nickname used when joining the chat room.
+.RE
+.PP
+\fBpassword <password>\fR
+.RS 4
+Password if required, may be stored in plaintext on your server.
+.RE
+.PP
+\fBname <roomname>\fR
+.RS 4
+Optional name for the bookmark. By default localpart of the JID will be used.
+.RE
+.PP
+\fBautojoin on|off\fR
+.RS 4
+Whether to join the room automatically on login.
+.RE
+.PP
+\fBjoin <room>\fR
+.RS 4
+Join room using the properties associated with the bookmark.
+.RE
+.PP
+\fBinvites on|off\fR
+.RS 4
+Whether or not to bookmark accepted room invites, defaults to 'on'.
+.RE
+.PP
+\fBignore add <barejid>\fR
+.RS 4
+Add a bookmark to the autojoin ignore list.
+.RE
+.PP
+\fBignore remove <barejid>\fR
+.RS 4
+Remove a bookmark from the autojoin ignore list.
+.RE
+
+.SH EXAMPLES
+/bookmark add room@example.com nick YOURNICK
+
+.LP
+/bookmark join room@example.com
+
+.LP
+/bookmark update room@example.com nick NEWNICK autojoin on
+
+.LP
+/bookmark ignore room@example.com
+
+.LP
+/bookmark list
+
+.LP
+/bookmark list room@example.com
+
+.LP
+/bookmark remove room@example.com
+
+.LP

@@ -1,0 +1,27 @@
+.TH man 1 "2025-03-27" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/role
+
+.SH DESCRIPTION
+Manage room roles. Role may be one of moderator, participant, visitor or none.
+
+.SH SYNOPSIS
+/role set <role> <nick> [<reason>]
+
+.LP
+/role list [<role>]
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBset <role> <nick> [<reason>]\fR
+.RS 4
+Set the role of occupant with nick, with an optional reason.
+.RE
+.PP
+\fBlist [<role>]\fR
+.RS 4
+List all occupants with the specified role, or all if none specified.
+.RE

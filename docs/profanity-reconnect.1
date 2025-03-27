@@ -1,0 +1,27 @@
+.TH man 1 "2025-03-27" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/reconnect
+
+.SH DESCRIPTION
+Set the reconnect attempt interval for when the connection is lost or immediately trigger a reconnect.
+
+.SH SYNOPSIS
+/reconnect <seconds>
+
+.LP
+/reconnect now
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fB<seconds>\fR
+.RS 4
+Number of seconds before attempting to reconnect, a value of 0 disables reconnect.
+.RE
+.PP
+\fBnow\fR
+.RS 4
+Immediately trigger a reconnect.
+.RE

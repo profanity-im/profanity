@@ -1,0 +1,124 @@
+.TH man 1 "2025-03-27" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/statusbar
+
+.SH DESCRIPTION
+Manage statusbar display preferences.
+
+.SH SYNOPSIS
+/statusbar show name|number|read
+
+.LP
+/statusbar hide name|number|read
+
+.LP
+/statusbar maxtabs <value>
+
+.LP
+/statusbar tablen <value>
+
+.LP
+/statusbar tabmode default|dynamic|actlist
+
+.LP
+/statusbar self user|barejid|fulljid|off
+
+.LP
+/statusbar chat user|jid
+
+.LP
+/statusbar room title bookmark|jid|localpart|name
+
+.LP
+/statusbar up
+
+.LP
+/statusbar down
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBmaxtabs <value>\fR
+.RS 4
+Set the maximum number of tabs to display, <value> must be between 0 and 10.
+.RE
+.PP
+\fBtablen <value>\fR
+.RS 4
+Set the maximum number of characters to show as the tab name, 0 sets to unlimited.
+.RE
+.PP
+\fBtabmode default|dynamic|actlist\fR
+.RS 4
+Set the mode tabs are shown. `dynamic` is a mode that displays tabs conveniently around current tab, thus providing proper pagination. `actlist` setting shows only active tabs. `default` setting always shows tabs in 1 to max_tabs range.
+.RE
+.PP
+\fBshow|hide name\fR
+.RS 4
+Show or hide names in tabs.
+.RE
+.PP
+\fBshow|hide number\fR
+.RS 4
+Show or hide numbers in tabs.
+.RE
+.PP
+\fBshow|hide read\fR
+.RS 4
+Show or hide inactive tabs.
+.RE
+.PP
+\fBself user|barejid|fulljid\fR
+.RS 4
+Show account user name, barejid, fulljid as status bar title.
+.RE
+.PP
+\fBself off\fR
+.RS 4
+Disable showing self as status bar title.
+.RE
+.PP
+\fBchat user|jid\fR
+.RS 4
+Show users name, or fulljid. Change needs a redraw/restart to take effect.
+.RE
+.PP
+\fBroom title bookmark|jid|localpart|name\fR
+.RS 4
+Display the bookmark name, JID, JID localpart, or room name as the title for MUC tabs.
+.RE
+.PP
+\fBup\fR
+.RS 4
+Move the status bar up the screen.
+.RE
+.PP
+\fBdown\fR
+.RS 4
+Move the status bar down the screen.
+.RE
+
+.SH EXAMPLES
+/statusbar maxtabs 8
+
+.LP
+/statusbar tablen 5
+
+.LP
+/statusbar tabmode actlist
+
+.LP
+/statusbar self user
+
+.LP
+/statusbar chat jid
+
+.LP
+/statusbar hide read
+
+.LP
+/statusbar hide name
+
+.LP

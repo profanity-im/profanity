@@ -1,3 +1,68 @@
+0.15.0 (2025-03-27)
+===================
+
+9 people contributed to this release: @DebXWoody, @H3rnand3zzz, @ike08, @mdosch,
+@rodarima, @sjaeckel, @tjsweetblack, @ventosus and @jubalh.
+
+Thanks a lot to our sponsors: @mdosch, @LeSpocky, and two anonymous sponsors.
+If you want to support us too: https://profanity-im.github.io/donate.html
+
+This release depends on libstrophe >= 0.12.3. But we recommend to use the latest version.
+
+Changes:
+- Don't use xscreensaver on wayland (#1876)
+- Correctly recognize ox encrypted carbons (#1878)
+- Don't crash when using /plugins install disconnected (#1880, #1882)
+- Unify loading of keyfile (#1886)
+- Fix detection of some URLs (#1877, #1883)
+- Improve MUC title behaviour for roster, statusbar, and titlebar (#1892)
+- Improve logging of DB messages (#1893)
+- Fix crash on reconnect (#1894, #1896)
+- Check sender for LMC messages (#1893, #1898)
+- Fix /plugins reload error message (2ab9a3)
+- Add parameter support for aliases (#1900)
+- Add section on how to use Profanity to man page (#1904)
+- Improve history paging performance (#1905)
+- Fix loading of encryption type (#1906)
+- Refactor tests to use the new cmocka test runner (#1908)
+- Add unicode support for correction char (#1909)
+- Show encryption for messages from history (#1910)
+- Fix /omemo fingerprint crashing in a MUC (#1913)
+- Change DB structure (#1902)
+- Allow redirects for /plugins install via URLs (#1922)
+- Fix error message for /executable subcommands (#1921)
+- Do not check for unique stanza-id for MAM messages (#1926)
+- Handle alt+enter as newline char (#1927)
+- Fix unintended exits on some commands (#1924)
+- Introduce /redraw command (#1931)
+- Fix prof_pre_chat_message_display does not replace sent messages (#1918)
+- Add new dynamic mode for statusbar tab behaviour (#1912)
+  `/statusbar tabmode default|dynamic|actlist`
+- Smooth scrolling support (+mouse wheel scrolling in some terminals) (#1824)
+- Fix scrolling (#1937, #1935, #1952)
+- Remove unnecessary input win redisplay (#1948)
+- Fix unable to download item twice (#1958)
+- Check whether we are already in an omemo session for MUCs as well (#1973)
+- Remove subscription when reporting spam/abuse (#1970, #1972)
+- Make statusbar actlist respect the /statusbar show setting (#1974, #1978)
+- Fix statusbar display of active tab (#1980)
+- Reset autoconnect account when the account gets removed (#1976, #1982)
+- Change default download location (#1983)
+  `/url save $someurl` will now download to `~/.local/share/profanity/downloads/from_jid/date/filename`
+  instead of `~/.local/share/profanity/downloads`.
+- Fix outdated types in tests (#1992, #1993)
+- Fix crash on startup when using sequoia-pgp (#1995)
+- Remove plenking (#1998)
+- Add valgrind checks to CI (#2023)
+- Add --cmd option (#2023)
+  This allows to kind of automate what profanity should do as first jobs,
+  e.g. `--cmd /foo --cmd /bar --cmd /quit`
+- Fix download of encrypted file (#1994, #2026)
+- Improve documentation (beeddda, a8ba8af, 7e0338b
+- Cleanup (#1885, #1884, #1897, #1914, #1923, #1920, #1930, #1933, #1941, #1942, #1981, 8a62d8e,
+  c32aac7, cee92b0, #2014, #2007, 996a1fd)
+- Memory related fixes (#1891, #1915, #1916, #1919, #1932, b04650f, d341705, #1979, 07900e9, #2022)
+
 0.14.0 (2023-08-03)
 ===================
 

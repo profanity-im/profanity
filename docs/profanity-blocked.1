@@ -1,0 +1,57 @@
+.TH man 1 "2025-03-27" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/blocked
+
+.SH DESCRIPTION
+Manage blocked users (XEP-0191), calling with no arguments shows the current list of blocked users. To blog a certain user in a MUC use the following as jid: room@conference.example.org/spammy-userIt is also possible to block and report (XEP-0377) a user with the report-abuse and report-spam commands.
+
+.SH SYNOPSIS
+/blocked
+
+.LP
+/blocked add [<jid>]
+
+.LP
+/blocked report-abuse [<jid>] [<message>]
+
+.LP
+/blocked report-spam [<jid>] [<message>]
+
+.LP
+/blocked remove <jid>
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBadd [<jid>]\fR
+.RS 4
+Block the specified Jabber ID. If in a chat window and no jid is specified, the current recipient will be blocked.
+.RE
+.PP
+\fBremove <jid>\fR
+.RS 4
+Remove the specified Jabber ID from the blocked list.
+.RE
+.PP
+\fBreport-abuse <jid> [<message>]\fR
+.RS 4
+Report the jid as abuse with an optional message to the service operator.
+.RE
+.PP
+\fBreport-spam <jid> [<message>]\fR
+.RS 4
+Report the jid as spam with an optional message to the service operator.
+.RE
+
+.SH EXAMPLES
+/blocked add hel@helheim.edda
+
+.LP
+/blocked report-spam hel@helheim.edda Very annoying guy
+
+.LP
+/blocked add profanity@rooms.dismail.de/spammy-user
+
+.LP
