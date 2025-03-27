@@ -1,0 +1,27 @@
+.TH man 1 "2025-03-27" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/inpblock
+
+.SH DESCRIPTION
+How long to wait for keyboard input before checking for new messages or checking for state changes such as 'idle'.
+
+.SH SYNOPSIS
+/inpblock timeout <millis>
+
+.LP
+/inpblock dynamic on|off
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBtimeout <millis>\fR
+.RS 4
+Time to wait (1-1000) in milliseconds before reading input from the terminal buffer, default: 1000.
+.RE
+.PP
+\fBdynamic on|off\fR
+.RS 4
+Start with 0 millis and dynamically increase up to timeout when no activity, default: on.
+.RE

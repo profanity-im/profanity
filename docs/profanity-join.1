@@ -1,0 +1,49 @@
+.TH man 1 "2025-03-27" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/join
+
+.SH DESCRIPTION
+Join a chat room at the conference server. If no room is supplied, a generated name will be used with the format private-chat-[UUID]. If the domain part is not included in the room name, the account preference 'muc.service' will be used. If no nickname is specified the account preference 'muc.nick' will be used which by default is the localpart of your JID. If the room doesn't exist, and the server allows it, a new one will be created. If you join to a room often, you might also want to add a bookmark (see `/help bookmark`), which also allows to set a default nickname. In this case, you should use `/bookmark join`.
+
+.SH SYNOPSIS
+/join
+
+.LP
+/join <room> [nick <nick>] [password <password>]
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fB<room>\fR
+.RS 4
+The chat room to join.
+.RE
+.PP
+\fBnick <nick>\fR
+.RS 4
+Nickname to use in the room.
+.RE
+.PP
+\fBpassword <password>\fR
+.RS 4
+Password if the room requires one.
+.RE
+
+.SH EXAMPLES
+/join
+
+.LP
+/join profanity@rooms.dismail.de
+
+.LP
+/join profanity@rooms.dismail.de nick mynick
+
+.LP
+/join private@conference.jabber.org nick mynick password mypassword
+
+.LP
+/join mychannel
+
+.LP

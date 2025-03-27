@@ -1,0 +1,51 @@
+.TH man 1 "2025-03-27" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/msg
+
+.SH DESCRIPTION
+Send a one to one chat message, or a private message to a chat room occupant. If the message is omitted, a new chat window will be opened without sending a message. Use quotes if the nickname includes spaces.
+
+.SH SYNOPSIS
+/msg <contact> [<message>]
+
+.LP
+/msg <nick> [<message>]
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fB<contact>\fR
+.RS 4
+Open chat window with contact, by JID or nickname.
+.RE
+.PP
+\fB<contact> [<message>]\fR
+.RS 4
+Send message to contact, by JID or nickname.
+.RE
+.PP
+\fB<nick>\fR
+.RS 4
+Open private chat window with chat room occupant.
+.RE
+.PP
+\fB<nick> [<message>]\fR
+.RS 4
+Send a private message to a chat room occupant.
+.RE
+
+.SH EXAMPLES
+/msg thor@valhalla.edda Hey, here's a message!
+
+.LP
+/msg heimdall@valhalla.edda
+
+.LP
+/msg Thor Here is a private message
+
+.LP
+/msg "My Friend" Hi, how are you?
+
+.LP
