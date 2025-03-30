@@ -367,3 +367,5 @@ spell:
 	codespell
 
 doublecheck: format check spell
+
+ACLOCAL_AMFLAGS = -I m4
