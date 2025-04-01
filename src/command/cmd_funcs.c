@@ -5326,7 +5326,20 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
             auto_gchar gchar* format = prefs_get_string(tp->pref);
             cons_show("%s time format: '%s'.", tp->description, format);
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(tp->pref, args[2]);
+            const struct format_strings
+            {
+                const char *name, *format;
+            } format_strings[] = {
+                { .name = "iso8601", .format = "%Y-%m-%dT%H:%M:%S" },
+            };
+            const gchar* set_arg = args[2];
+            for (size_t m = 0; m < ARRAY_SIZE(format_strings); ++m) {
+                if (g_strcmp0(args[2], format_strings[m].name) == 0) {
+                    set_arg = format_strings[m].format;
+                    break;
+                }
+            }
+            prefs_set_string(tp->pref, set_arg);
             cons_show("%s time format set to '%s'.", tp->description, args[2]);
             redraw = TRUE;
         } else if (g_strcmp0(args[1], "off") == 0) {
