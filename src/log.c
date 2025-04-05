@@ -72,6 +72,9 @@ enum {
     STDERR_RETRY_NR = 5,
 };
 
+/**
+ * Rotate the current log file when the configured size threshold is exceeded.
+ */
 static void
 _rotate_log_file(void)
 {
@@ -105,6 +108,9 @@ _rotate_log_file(void)
     log_info("Log has been rotated");
 }
 
+/**
+ * Return a short string abbreviation (e.g., "ERR", "DBG") for a log level.
+ */
 // abbreviation string is the prefix that's used in the log file
 static char*
 _log_abbreviation_string_from_level(log_level_t level)
@@ -123,12 +129,19 @@ _log_abbreviation_string_from_level(log_level_t level)
     }
 }
 
+
+/**
+ * Check whether a message should be logged based on the current filter level and log file status.
+ */
 static gboolean
 _should_log(log_level_t level)
 {
     return level >= level_filter && logp;
 }
 
+/**
+ * Write a debug-level message to the log file.
+ */
 void
 log_debug(const char* const msg, ...)
 {
@@ -143,6 +156,9 @@ log_debug(const char* const msg, ...)
     va_end(arg);
 }
 
+/**
+ * Write an info-level message to the log file.
+ */
 void
 log_info(const char* const msg, ...)
 {
@@ -157,6 +173,9 @@ log_info(const char* const msg, ...)
     va_end(arg);
 }
 
+/**
+ * Write a warning-level message to the log file.
+ */
 void
 log_warning(const char* const msg, ...)
 {
@@ -171,6 +190,9 @@ log_warning(const char* const msg, ...)
     va_end(arg);
 }
 
+/**
+ * Write an error-level message to the log file.
+ */
 void
 log_error(const char* const msg, ...)
 {
@@ -185,6 +207,9 @@ log_error(const char* const msg, ...)
     va_end(arg);
 }
 
+/**
+ * Initialize the logging system with the specified filter level and log file.
+ */
 void
 log_init(log_level_t filter, char* log_file)
 {
@@ -200,18 +225,28 @@ log_init(log_level_t filter, char* log_file)
     g_chmod(mainlogfile, S_IRUSR | S_IWUSR);
 }
 
+/**
+ * Get the file path of the current log file.
+ */
 const gchar*
 get_log_file_location(void)
 {
     return mainlogfile;
 }
 
+
+/**
+ * Get the current active logging level filter.
+ */
 log_level_t
 log_get_filter(void)
 {
     return level_filter;
 }
 
+/**
+ * Close the current log file and free its associated resources.
+ */
 void
 log_close(void)
 {
@@ -222,6 +257,9 @@ log_close(void)
     }
 }
 
+/**
+ * Internal helper to write a formatted message with timestamp to the log file.
+ */
 static void
 _log_msg(log_level_t level, const char* const area, const char* const msg)
 {
@@ -244,6 +282,9 @@ _log_msg(log_level_t level, const char* const area, const char* const msg)
     }
 }
 
+/**
+ * Write a log message with specified level and area.
+ */
 void
 log_msg(log_level_t level, const char* const area, const char* const msg)
 {
@@ -252,6 +293,10 @@ log_msg(log_level_t level, const char* const area, const char* const msg)
     _log_msg(level, area, msg);
 }
 
+/**
+ * Convert a log level string to the corresponding enum value.
+ * Returns -1 if invalid string.
+ */
 int
 log_level_from_string(char* log_level, log_level_t* level)
 {
@@ -273,6 +318,9 @@ log_level_from_string(char* log_level, log_level_t* level)
     return ret;
 }
 
+/**
+ * Convert a log level enum value to its string representation.
+ */
 const char*
 log_string_from_level(log_level_t level)
 {
@@ -290,6 +338,9 @@ log_string_from_level(log_level_t level)
     }
 }
 
+/**
+ * Process and log any buffered stderr output captured through the logging system.
+ */
 void
 log_stderr_handler(void)
 {
@@ -323,6 +374,9 @@ log_stderr_handler(void)
     }
 }
 
+/**
+ * Set a file descriptor to non-blocking mode.
+ */
 static int
 log_stderr_nonblock_set(int fd)
 {
@@ -335,6 +389,9 @@ log_stderr_nonblock_set(int fd)
     return rc;
 }
 
+/**
+ * Finalize the stderr logging system and release all associated resources.
+ */
 static void
 _log_stderr_close(void)
 {
@@ -350,6 +407,9 @@ _log_stderr_close(void)
     close(stderr_pipe[1]);
 }
 
+/**
+ * Initialize the stderr logging system by redirecting stderr to the Profanity log system.
+ */
 void
 log_stderr_init(log_level_t level)
 {

@@ -65,6 +65,9 @@ static gboolean _check_available_space_for_db_migration(char* path_to_db);
 
 static const int latest_version = 2;
 
+/**
+ * Duplicate a string safely, returning NULL if input is NULL.
+ */
 static char*
 _db_strdup(const char* str)
 {
@@ -73,6 +76,9 @@ _db_strdup(const char* str)
 
 #define auto_sqlite __attribute__((__cleanup__(auto_free_sqlite)))
 
+/**
+ * Free memory allocated by SQLite (cleanup helper).
+ */
 static void
 auto_free_sqlite(gchar** str)
 {
@@ -81,12 +87,18 @@ auto_free_sqlite(gchar** str)
     sqlite3_free(*str);
 }
 
+/**
+ * Get the database file path for the specified account.
+ */
 static char*
 _get_db_filename(ProfAccount* account)
 {
     return files_file_in_account_data_path(DIR_DATABASE, account->jid, "chatlog.db");
 }
 
+/**
+ * Initialize the SQLite chat log database and create required tables and indexes.
+ */
 gboolean
 log_database_init(ProfAccount* account)
 {
@@ -219,6 +231,9 @@ out:
     return FALSE;
 }
 
+/**
+ * Close and shut down the SQLite chat log database.
+ */
 void
 log_database_close(void)
 {
@@ -229,6 +244,9 @@ log_database_close(void)
     }
 }
 
+/**
+ * Add an incoming message to the chat log database.
+ */
 void
 log_database_add_incoming(ProfMessage* message)
 {
@@ -239,6 +257,10 @@ log_database_add_incoming(ProfMessage* message)
     }
 }
 
+
+/**
+ * Internal function to log an outgoing message into the database.
+ */
 static void
 _log_database_add_outgoing(char* type, const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
 {
@@ -256,18 +278,28 @@ _log_database_add_outgoing(char* type, const char* const id, const char* const b
     message_free(msg);
 }
 
+/**
+ * Add an outgoing one-to-one chat message to the database.
+ */
 void
 log_database_add_outgoing_chat(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
 {
     _log_database_add_outgoing("chat", id, barejid, message, replace_id, enc);
 }
 
+/**
+ * Add an outgoing groupchat message to the database.
+ */
 void
 log_database_add_outgoing_muc(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
 {
     _log_database_add_outgoing("muc", id, barejid, message, replace_id, enc);
 }
 
+
+/**
+ * Add an outgoing MUC private message to the database.
+ */
 void
 log_database_add_outgoing_muc_pm(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
 {
@@ -385,6 +417,10 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
     return history;
 }
 
+
+/**
+ * Convert prof_msg_type_t to its string representation.
+ */
 static const char*
 _get_message_type_str(prof_msg_type_t type)
 {
@@ -401,6 +437,9 @@ _get_message_type_str(prof_msg_type_t type)
     return NULL;
 }
 
+/**
+ * Convert string type to enum prof_msg_type_t.
+ */
 static prof_msg_type_t
 _get_message_type_type(const char* const type)
 {
@@ -414,7 +453,9 @@ _get_message_type_type(const char* const type)
         return PROF_MSG_TYPE_UNINITIALIZED;
     }
 }
-
+/**
+ * Convert prof_enc_t to its string representation.
+ */
 static const char*
 _get_message_enc_str(prof_enc_t enc)
 {
@@ -434,6 +475,9 @@ _get_message_enc_str(prof_enc_t enc)
     return "none";
 }
 
+/**
+ * Convert string encryption type to enum prof_enc_t.
+ */
 static prof_enc_t
 _get_message_enc_type(const char* const encstr)
 {
@@ -450,6 +494,9 @@ _get_message_enc_type(const char* const encstr)
     return PROF_MSG_ENC_NONE;
 }
 
+/**
+ * Add a message entry to the ChatLogs table, with support for redaction, LMC, and deduplication.
+ */
 static void
 _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Jid* const to_jid)
 {
@@ -588,6 +635,9 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     }
 }
 
+/**
+ * Get the internal database schema version.
+ */
 static int
 _get_db_version(void)
 {

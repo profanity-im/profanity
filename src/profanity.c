@@ -93,6 +93,9 @@ static void _connect_default(const char* const account);
 pthread_mutex_t lock;
 static gboolean force_quit = FALSE;
 
+/**
+ * Runs the main Profanity event loop, handling startup, commands, and shutdown.
+ */
 void
 prof_run(gchar* log_level, gchar* account_name, gchar* config_file, gchar* log_file, gchar* theme_name, gchar** commands)
 {
@@ -173,6 +176,9 @@ prof_run(gchar* log_level, gchar* account_name, gchar* config_file, gchar* log_f
     g_timer_destroy(runtime);
 }
 
+/**
+ * Signals Profanity to quit and returns the previous quit state.
+ */
 gboolean
 prof_set_quit(void)
 {
@@ -181,6 +187,9 @@ prof_set_quit(void)
     return ret;
 }
 
+/**
+ * Connects to the default account or to the specified one if provided.
+ */
 static void
 _connect_default(const char* const account)
 {
@@ -195,6 +204,9 @@ _connect_default(const char* const account)
     }
 }
 
+/**
+ * Initializes the Profanity application environment including logging, UI, and modules.
+ */
 static void
 _init(char* log_level, char* config_file, char* log_file, char* theme_name)
 {
@@ -276,6 +288,9 @@ _cmp_shutdown_routine(const struct shutdown_routine* a, const struct shutdown_ro
     return a->routine != b->routine;
 }
 
+/**
+ * Adds a shutdown routine to be called when Profanity exits.
+ */
 void
 prof_add_shutdown_routine(void (*routine)(void))
 {
@@ -288,6 +303,9 @@ prof_add_shutdown_routine(void (*routine)(void))
     shutdown_routines = g_list_prepend(shutdown_routines, r);
 }
 
+/**
+ * Calls and frees a shutdown routine struct during shutdown cleanup.
+ */
 static void
 _call_and_free_shutdown_routine(struct shutdown_routine* r)
 {
@@ -295,6 +313,9 @@ _call_and_free_shutdown_routine(struct shutdown_routine* r)
     free(r);
 }
 
+/**
+ * Executes all registered shutdown routines and clears the list.
+ */
 void
 prof_shutdown(void)
 {
@@ -304,6 +325,9 @@ prof_shutdown(void)
     }
 }
 
+/**
+ * Final shutdown process for Profanity: handles UI, disconnect, and cleanup of preferences and logs.
+ */
 static void
 _shutdown(void)
 {

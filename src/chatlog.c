@@ -1,5 +1,5 @@
 /*
- * log.c
+ * chatlog.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
@@ -74,6 +74,9 @@ static void _chat_log_chat(const char* const login, const char* const other, con
 static void _groupchat_log_chat(const gchar* const login, const gchar* const room, const gchar* const nick,
                                 const gchar* const msg);
 
+/**
+ * Close and clean up all chat log hash tables on shutdown.
+ */
 void
 _chatlog_close(void)
 {
@@ -81,6 +84,9 @@ _chatlog_close(void)
     g_hash_table_destroy(groupchat_logs);
 }
 
+/**
+ * Initialize chat logging system and register shutdown cleanup.
+ */
 void
 chatlog_init(void)
 {
@@ -94,6 +100,9 @@ chatlog_init(void)
                                            (GDestroyNotify)_free_chat_log);
 }
 
+/**
+ * Log an outgoing message to a contact (unencrypted).
+ */
 void
 chat_log_msg_out(const char* const barejid, const char* const msg, const char* const resource)
 {
@@ -102,6 +111,9 @@ chat_log_msg_out(const char* const barejid, const char* const msg, const char* c
     }
 }
 
+/**
+ * Log an outgoing OTR-encrypted message, optionally redacted.
+ */
 void
 chat_log_otr_msg_out(const char* const barejid, const char* const msg, const char* const resource)
 {
@@ -116,6 +128,9 @@ chat_log_otr_msg_out(const char* const barejid, const char* const msg, const cha
     }
 }
 
+/**
+ * Log an outgoing PGP-encrypted message, optionally redacted.
+ */
 void
 chat_log_pgp_msg_out(const char* const barejid, const char* const msg, const char* const resource)
 {
@@ -130,6 +145,9 @@ chat_log_pgp_msg_out(const char* const barejid, const char* const msg, const cha
     }
 }
 
+/**
+ * Log an outgoing OMEMO-encrypted message, optionally redacted.
+ */
 void
 chat_log_omemo_msg_out(const char* const barejid, const char* const msg, const char* const resource)
 {
@@ -144,6 +162,9 @@ chat_log_omemo_msg_out(const char* const barejid, const char* const msg, const c
     }
 }
 
+/**
+ * Log an incoming OTR message, optionally redacted depending on settings.
+ */
 void
 chat_log_otr_msg_in(ProfMessage* message)
 {
@@ -166,6 +187,9 @@ chat_log_otr_msg_in(ProfMessage* message)
     }
 }
 
+/**
+ * Log an incoming PGP message, optionally redacted depending on settings.
+ */
 void
 chat_log_pgp_msg_in(ProfMessage* message)
 {
@@ -188,6 +212,9 @@ chat_log_pgp_msg_in(ProfMessage* message)
     }
 }
 
+/**
+ * Log an incoming OMEMO message, optionally redacted depending on settings.
+ */
 void
 chat_log_omemo_msg_in(ProfMessage* message)
 {
@@ -210,6 +237,9 @@ chat_log_omemo_msg_in(ProfMessage* message)
     }
 }
 
+/**
+ * Log an incoming message without encryption.
+ */
 void
 chat_log_msg_in(ProfMessage* message)
 {
@@ -224,6 +254,9 @@ chat_log_msg_in(ProfMessage* message)
     }
 }
 
+/**
+ * Internal function to log a message between two contacts with timestamp and direction.
+ */
 static void
 _chat_log_chat(const char* const login, const char* const other, const char* msg,
                chat_log_direction_t direction, GDateTime* timestamp, const char* const resourcepart)
@@ -308,6 +341,9 @@ _chat_log_chat(const char* const login, const char* const other, const char* msg
     g_date_time_unref(timestamp);
 }
 
+/**
+ * Log an outgoing groupchat message.
+ */
 void
 groupchat_log_msg_out(const gchar* const room, const gchar* const msg)
 {
@@ -317,6 +353,9 @@ groupchat_log_msg_out(const gchar* const room, const gchar* const msg)
     }
 }
 
+/**
+ * Log an incoming groupchat message.
+ */
 void
 groupchat_log_msg_in(const gchar* const room, const gchar* const nick, const gchar* const msg)
 {
@@ -325,6 +364,9 @@ groupchat_log_msg_in(const gchar* const room, const gchar* const nick, const gch
     }
 }
 
+/**
+ * Log an outgoing OMEMO-encrypted groupchat message, optionally redacted.
+ */
 void
 groupchat_log_omemo_msg_out(const gchar* const room, const gchar* const msg)
 {
@@ -341,6 +383,9 @@ groupchat_log_omemo_msg_out(const gchar* const room, const gchar* const msg)
     }
 }
 
+/**
+ * Log an incoming OMEMO-encrypted groupchat message, optionally redacted.
+ */
 void
 groupchat_log_omemo_msg_in(const gchar* const room, const gchar* const nick, const gchar* const msg)
 {
@@ -356,6 +401,9 @@ groupchat_log_omemo_msg_in(const gchar* const room, const gchar* const nick, con
     }
 }
 
+/**
+ * Internal function to log a groupchat message to file.
+ */
 void
 _groupchat_log_chat(const gchar* const login, const gchar* const room, const gchar* const nick,
                     const gchar* const msg)
@@ -396,6 +444,9 @@ _groupchat_log_chat(const gchar* const login, const gchar* const room, const gch
     g_date_time_unref(dt_tmp);
 }
 
+/**
+ * Generate the path to the log file for a contact or groupchat.
+ */
 static char*
 _get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean is_room)
 {
@@ -412,6 +463,9 @@ _get_log_filename(const char* const other, const char* const login, GDateTime* d
     return logfile_path;
 }
 
+/**
+ * Create and return a new chat log struct for a contact.
+ */
 static struct dated_chat_log*
 _create_chatlog(const char* const other, const char* const login)
 {
@@ -425,6 +479,9 @@ _create_chatlog(const char* const other, const char* const login)
     return new_log;
 }
 
+/**
+ * Create and return a new chat log struct for a groupchat.
+ */
 static struct dated_chat_log*
 _create_groupchat_log(const char* const room, const char* const login)
 {
@@ -438,6 +495,9 @@ _create_groupchat_log(const char* const room, const char* const login)
     return new_log;
 }
 
+/**
+ * Determine whether a log file should be rolled (i.e., a new one created).
+ */
 static gboolean
 _log_roll_needed(struct dated_chat_log* dated_log)
 {
@@ -451,6 +511,9 @@ _log_roll_needed(struct dated_chat_log* dated_log)
     return result;
 }
 
+/**
+ * Free memory and resources associated with a chat log struct.
+ */
 static void
 _free_chat_log(struct dated_chat_log* dated_log)
 {
@@ -467,6 +530,9 @@ _free_chat_log(struct dated_chat_log* dated_log)
     }
 }
 
+/**
+ * Compare two string keys for equality (used for hash table lookups).
+ */
 static gboolean
 _key_equals(void* key1, void* key2)
 {
