@@ -1858,6 +1858,7 @@ _get_group(preference_t pref)
     case PREF_ROOM_LIST_CACHE:
         return PREF_GROUP_MUC;
     case PREF_OMEMO_LOG:
+    case PREF_OMEMO_COLORS:
     case PREF_OMEMO_POLICY:
     case PREF_OMEMO_TRUST_MODE:
         return PREF_GROUP_OMEMO;
@@ -2114,6 +2115,8 @@ _get_key(preference_t pref)
         return "statusbar.tabmode";
     case PREF_OMEMO_LOG:
         return "log";
+    case PREF_OMEMO_COLORS:
+        return "colors";
     case PREF_OMEMO_POLICY:
         return "policy";
     case PREF_OMEMO_TRUST_MODE:
@@ -2281,6 +2284,8 @@ _get_default_string(preference_t pref)
         return "name";
     case PREF_OMEMO_LOG:
         return "on";
+    case PREF_OMEMO_COLORS:
+        return "off";
     case PREF_OMEMO_POLICY:
         return "automatic";
     case PREF_OMEMO_TRUST_MODE:
