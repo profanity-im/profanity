@@ -1,10 +1,7 @@
-# 📚 Profanity Source Code Documentation
-
-This document provides concise, structured documentation for major source files in the Profanity XMPP client. It describes the purpose and usage of each function documented so far.
-
+# 📚 Profanity
 ---
 
-## 🗂 File: `profanity.c`
+## File: `profanity.c`
 
 | Function | Description |
 |---------|-------------|
@@ -19,7 +16,7 @@ This document provides concise, structured documentation for major source files 
 
 ---
 
-## 🗂 File: `chatlog.c`
+## File: `chatlog.c`
 
 | Function | Description |
 |---------|-------------|
@@ -53,7 +50,7 @@ This document provides concise, structured documentation for major source files 
 
 ---
 
-## 🗂 File: `common.c`
+## File: `common.c`
 
 | Function | Description |
 |---------|-------------|
@@ -86,7 +83,7 @@ This document provides concise, structured documentation for major source files 
 
 ---
 
-## 🗂 File: `database.c`
+## File: `database.c`
 
 | Function | Description |
 |---------|-------------|
