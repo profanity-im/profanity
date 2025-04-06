@@ -61,6 +61,17 @@ struct p_contact_t
     Autocomplete resource_ac;
 };
 
+/**
+ * @brief Create a new contact structure.
+ *
+ * @param barejid Bare JID of the contact.
+ * @param name Display name or nickname (optional).
+ * @param groups List of groups (GSList of strings).
+ * @param subscription Subscription status ("to", "from", "both", "none").
+ * @param offline_message Message to display when contact is offline.
+ * @param pending_out Whether a subscription request was sent but not yet approved.
+ * @return A new PContact instance.
+ */
 PContact
 p_contact_new(const char* const barejid, const char* const name,
               GSList* groups, const char* const subscription,
@@ -101,6 +112,9 @@ p_contact_new(const char* const barejid, const char* const name,
     return contact;
 }
 
+/**
+ * @brief Set or update the contact's display name.
+ */
 void
 p_contact_set_name(const PContact contact, const char* const name)
 {
@@ -112,6 +126,10 @@ p_contact_set_name(const PContact contact, const char* const name)
     }
 }
 
+
+/**
+ * @brief Set the list of groups the contact belongs to.
+ */
 void
 p_contact_set_groups(const PContact contact, GSList* groups)
 {
@@ -123,6 +141,9 @@ p_contact_set_groups(const PContact contact, GSList* groups)
     contact->groups = groups;
 }
 
+/**
+ * @brief Get the list of groups the contact belongs to.
+ */
 gboolean
 p_contact_in_group(const PContact contact, const char* const group)
 {
@@ -137,12 +158,19 @@ p_contact_in_group(const PContact contact, const char* const group)
     return FALSE;
 }
 
+/**
+ * @brief Check if contact belongs to a given group.
+ */
 GSList*
 p_contact_groups(const PContact contact)
 {
     return contact->groups;
 }
 
+
+/**
+ * @brief Remove a resource from the contact.
+ */
 gboolean
 p_contact_remove_resource(PContact contact, const char* const resource)
 {
@@ -152,6 +180,9 @@ p_contact_remove_resource(PContact contact, const char* const resource)
     return result;
 }
 
+/**
+ * @brief Free a contact and all of its internal resources.
+ */
 void
 p_contact_free(PContact contact)
 {
@@ -203,6 +234,9 @@ p_contact_name_collate_key(const PContact contact)
     return contact->name_collate_key;
 }
 
+/**
+ * @brief Get contact's display name or fallback to barejid if name is not set.
+ */
 const char*
 p_contact_name_or_jid(const PContact contact)
 {
@@ -213,6 +247,9 @@ p_contact_name_or_jid(const PContact contact)
     }
 }
 
+/**
+ * @brief Create a display string combining contact name and resource (if not default).
+ */
 char*
 p_contact_create_display_string(const PContact contact, const char* const resource)
 {
@@ -289,6 +326,9 @@ _get_most_available_resource(PContact contact)
     return highest;
 }
 
+/**
+ * @brief Get the current presence string of the contact ("online", "away", etc.).
+ */
 const char*
 p_contact_presence(const PContact contact)
 {
@@ -304,6 +344,10 @@ p_contact_presence(const PContact contact)
     return string_from_resource_presence(resource->presence);
 }
 
+
+/**
+ * @brief Get the status message of the most available resource or offline message.
+ */
 const char*
 p_contact_status(const PContact contact)
 {
@@ -319,12 +363,19 @@ p_contact_status(const PContact contact)
     return resource->status;
 }
 
+/**
+ * @brief Get the current subscription value.
+ */
 const char*
 p_contact_subscription(const PContact contact)
 {
     return contact->subscription;
 }
 
+
+/**
+ * @brief Returns TRUE if subscription is "to" or "both".
+ */
 gboolean
 p_contact_subscribed(const PContact contact)
 {
@@ -339,24 +390,38 @@ p_contact_subscribed(const PContact contact)
     }
 }
 
+
+/**
+ * @brief Get the resource object with the given name.
+ */
 Resource*
 p_contact_get_resource(const PContact contact, const char* const resource)
 {
     return g_hash_table_lookup(contact->available_resources, resource);
 }
 
+/**
+ * @brief Check if subscription is pending outbound (request sent).
+ */
 gboolean
 p_contact_pending_out(const PContact contact)
 {
     return contact->pending_out;
 }
 
+/**
+ * @brief Get the last recorded activity time.
+ */
 GDateTime*
 p_contact_last_activity(const PContact contact)
 {
     return contact->last_activity;
 }
 
+
+/**
+ * @brief Get all available resources sorted by presence availability.
+ */
 GList*
 p_contact_get_available_resources(const PContact contact)
 {
@@ -376,6 +441,9 @@ p_contact_get_available_resources(const PContact contact)
     return ordered;
 }
 
+/**
+ * @brief Check if contact is available (most available resource is online or chat).
+ */
 gboolean
 p_contact_is_available(const PContact contact)
 {
@@ -393,12 +461,19 @@ p_contact_is_available(const PContact contact)
     }
 }
 
+
+/**
+ * @brief Returns TRUE if any resources are currently available.
+ */
 gboolean
 p_contact_has_available_resource(const PContact contact)
 {
     return (g_hash_table_size(contact->available_resources) > 0);
 }
 
+/**
+ * @brief Set or update a resource for this contact.
+ */
 void
 p_contact_set_presence(const PContact contact, Resource* resource)
 {
@@ -406,6 +481,9 @@ p_contact_set_presence(const PContact contact, Resource* resource)
     autocomplete_add(contact->resource_ac, resource->name);
 }
 
+/**
+ * @brief Set the contact's subscription status.
+ */
 void
 p_contact_set_subscription(const PContact contact, const char* const subscription)
 {
@@ -415,12 +493,18 @@ p_contact_set_subscription(const PContact contact, const char* const subscriptio
     }
 }
 
+/**
+ * @brief Set the pending outbound subscription flag.
+ */
 void
 p_contact_set_pending_out(const PContact contact, gboolean pending_out)
 {
     contact->pending_out = pending_out;
 }
 
+/**
+ * @brief Set the last activity time.
+ */
 void
 p_contact_set_last_activity(const PContact contact, GDateTime* last_activity)
 {
@@ -434,12 +518,18 @@ p_contact_set_last_activity(const PContact contact, GDateTime* last_activity)
     }
 }
 
+/**
+ * @brief Get the contact's autocomplete context for available resources.
+ */
 Autocomplete
 p_contact_resource_ac(const PContact contact)
 {
     return contact->resource_ac;
 }
 
+/**
+ * @brief Reset the autocomplete list for the contact's resources.
+ */
 void
 p_contact_resource_ac_reset(const PContact contact)
 {

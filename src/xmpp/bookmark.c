@@ -66,6 +66,10 @@ static int _bookmark_result_id_handler(xmpp_stanza_t* const stanza, void* const 
 static void _bookmark_destroy(Bookmark* bookmark);
 static void _send_bookmarks(void);
 
+/**
+ * @brief Shutdown handler for bookmarks.
+ * Frees memory used by bookmarks and autocomplete data.
+ */
 static void
 _bookmark_shutdown(void)
 {
@@ -75,6 +79,9 @@ _bookmark_shutdown(void)
     autocomplete_free(bookmark_ac);
 }
 
+/**
+ * @brief Send an IQ request to fetch stored bookmarks.
+ */
 void
 bookmark_request(void)
 {
@@ -98,6 +105,17 @@ bookmark_request(void)
     xmpp_stanza_release(iq);
 }
 
+
+/**
+ * @brief Add a new bookmark for a MUC room.
+ *
+ * @param jid        Room JID.
+ * @param nick       Optional nickname to use in the room.
+ * @param password   Optional room password.
+ * @param autojoin_str "on"/"off" for autojoin flag.
+ * @param name       Optional display name for the bookmark.
+ * @return TRUE if added, FALSE if already exists.
+ */
 gboolean
 bookmark_add(const char* jid, const char* nick, const char* password, const char* autojoin_str, const char* name)
 {
@@ -145,6 +163,16 @@ bookmark_add(const char* jid, const char* nick, const char* password, const char
     return TRUE;
 }
 
+/**
+ * @brief Update an existing bookmark.
+ *
+ * @param jid        Room JID.
+ * @param nick       Updated nickname.
+ * @param password   Updated password.
+ * @param autojoin_str "on"/"off" for autojoin flag.
+ * @param name       Updated name.
+ * @return TRUE if updated, FALSE if bookmark not found.
+ */
 gboolean
 bookmark_update(const char* jid, const char* nick, const char* password, const char* autojoin_str, const char* name)
 {
@@ -179,6 +207,13 @@ bookmark_update(const char* jid, const char* nick, const char* password, const c
     return TRUE;
 }
 
+
+/**
+ * @brief Join a bookmarked MUC room using the saved details.
+ *
+ * @param jid Room JID.
+ * @return TRUE if join initiated, FALSE otherwise.
+ */
 gboolean
 bookmark_join(const char* jid)
 {
@@ -209,6 +244,12 @@ bookmark_join(const char* jid)
     return TRUE;
 }
 
+/**
+ * @brief Remove a bookmark by room JID.
+ *
+ * @param jid Room JID.
+ * @return TRUE if removed, FALSE if not found.
+ */
 gboolean
 bookmark_remove(const char* jid)
 {
@@ -227,6 +268,12 @@ bookmark_remove(const char* jid)
     return TRUE;
 }
 
+
+/**
+ * @brief Get a bookmark struct by room JID.
+ * @param jid Room JID.
+ * @return Pointer to Bookmark or NULL.
+ */
 Bookmark*
 bookmark_get_by_jid(const char* jid)
 {
@@ -234,18 +281,33 @@ bookmark_get_by_jid(const char* jid)
     return bookmark;
 }
 
+/**
+ * @brief Get a list of all current bookmarks.
+ * @return GList* of Bookmark*.
+ */
 GList*
 bookmark_get_list(void)
 {
     return g_hash_table_get_values(bookmarks);
 }
 
+/**
+ * @brief Find a bookmark match via autocomplete.
+ *
+ * @param search_str String to search.
+ * @param previous Direction flag.
+ * @param context   Optional user context (unused).
+ * @return Matching bookmark JID string.
+ */
 char*
 bookmark_find(const char* const search_str, gboolean previous, void* context)
 {
     return autocomplete_complete(bookmark_ac, search_str, TRUE, previous);
 }
 
+/**
+ * @brief Reset bookmark autocomplete state.
+ */
 void
 bookmark_autocomplete_reset(void)
 {
@@ -254,12 +316,27 @@ bookmark_autocomplete_reset(void)
     }
 }
 
+/**
+ * @brief Check if a bookmark exists for a given JID.
+ * @param room Room JID.
+ * @return TRUE if found.
+ */
 gboolean
 bookmark_exists(const char* const room)
 {
     return g_hash_table_contains(bookmarks, room);
 }
 
+
+/**
+ * @brief Internal handler for IQ result containing stored bookmarks.
+ *
+ * Parses the result and updates the local bookmarks table.
+ *
+ * @param stanza Received IQ stanza.
+ * @param userdata Unused.
+ * @return Always returns 0.
+ */
 static int
 _bookmark_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
@@ -353,6 +430,10 @@ _bookmark_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
     return 0;
 }
 
+/**
+ * @brief Free all memory associated with a Bookmark object.
+ * @param bookmark Pointer to Bookmark.
+ */
 static void
 _bookmark_destroy(Bookmark* bookmark)
 {
@@ -365,6 +446,9 @@ _bookmark_destroy(Bookmark* bookmark)
     }
 }
 
+/**
+ * @brief Send updated bookmarks to the XMPP server for storage.
+ */
 static void
 _send_bookmarks(void)
 {

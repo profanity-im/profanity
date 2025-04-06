@@ -49,6 +49,14 @@
 
 static GHashTable* sessions;
 
+/**
+ * @brief Create a new chat session object and insert into the session hash table.
+ *
+ * @param barejid Bare JID of the contact.
+ * @param resource Resource identifier.
+ * @param resource_override Whether to override automatic resource updates.
+ * @param send_states Whether to send chat state notifications.
+ */
 static void
 _chat_session_new(const char* const barejid, const char* const resource, gboolean resource_override,
                   gboolean send_states)
@@ -65,6 +73,11 @@ _chat_session_new(const char* const barejid, const char* const resource, gboolea
     g_hash_table_replace(sessions, strdup(barejid), new_session);
 }
 
+/**
+ * @brief Free memory allocated for a ChatSession struct.
+ *
+ * @param session Pointer to ChatSession struct.
+ */
 static void
 _chat_session_free(ChatSession* session)
 {
@@ -75,6 +88,9 @@ _chat_session_free(ChatSession* session)
     }
 }
 
+/**
+ * @brief Initialize the chat session hash table.
+ */
 void
 chat_sessions_init(void)
 {
@@ -85,6 +101,9 @@ chat_sessions_init(void)
     sessions = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_chat_session_free);
 }
 
+/**
+ * @brief Clear all chat sessions and free memory.
+ */
 void
 chat_sessions_clear(void)
 {
@@ -94,18 +113,41 @@ chat_sessions_clear(void)
     }
 }
 
+
+/**
+ * @brief Forcefully override the resource used for a session.
+ *
+ * Useful when a specific resource must be locked (e.g., for encrypted chats).
+ *
+ * @param barejid The bare JID of the contact.
+ * @param resource The resource to use for future communication.
+ */
 void
 chat_session_resource_override(const char* const barejid, const char* const resource)
 {
     _chat_session_new(barejid, resource, TRUE, TRUE);
 }
 
+/**
+ * @brief Get the current ChatSession for a given bare JID.
+ *
+ * @param barejid The bare JID to look up.
+ * @return Pointer to ChatSession or NULL if not found.
+ */
 ChatSession*
 chat_session_get(const char* const barejid)
 {
     return sessions ? g_hash_table_lookup(sessions, barejid) : NULL;
 }
 
+/**
+ * @brief Get the full JID (bare + resource) for a contact.
+ *
+ * If no session exists, returns the bare JID.
+ *
+ * @param barejid The bare JID of the contact.
+ * @return Newly allocated full JID string.
+ */
 char*
 chat_session_get_jid(const char* const barejid)
 {
@@ -121,6 +163,14 @@ chat_session_get_jid(const char* const barejid)
     return jid;
 }
 
+/**
+ * @brief Determine whether to send a chat state for a contact.
+ *
+ * Returns "active" if states are enabled and should be sent.
+ *
+ * @param barejid The bare JID of the contact.
+ * @return A constant string representing the chat state ("active") or NULL.
+ */
 const char*
 chat_session_get_state(const char* const barejid)
 {
@@ -139,6 +189,14 @@ chat_session_get_state(const char* const barejid)
     return state;
 }
 
+/**
+ * @brief Mark a contact as having gone offline (resource no longer available).
+ *
+ * If the session has no override, it will be removed.
+ *
+ * @param barejid The bare JID of the contact.
+ * @param resource The resource that went offline.
+ */
 void
 chat_session_recipient_gone(const char* const barejid, const char* const resource)
 {
@@ -153,24 +211,52 @@ chat_session_recipient_gone(const char* const barejid, const char* const resourc
     }
 }
 
+/**
+ * @brief Mark a contact as currently typing.
+ *
+ * @param barejid The bare JID of the contact.
+ * @param resource The resource sending the typing notification.
+ */
 void
 chat_session_recipient_typing(const char* const barejid, const char* const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
+/**
+ * @brief Mark a contact as having paused typing.
+ *
+ * @param barejid The bare JID of the contact.
+ * @param resource The resource sending the paused notification.
+ */
 void
 chat_session_recipient_paused(const char* const barejid, const char* const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
+
+/**
+ * @brief Mark a contact as inactive (not typing).
+ *
+ * @param barejid The bare JID of the contact.
+ * @param resource The resource sending the inactive notification.
+ */
 void
 chat_session_recipient_inactive(const char* const barejid, const char* const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
+/**
+ * @brief Mark a contact as active, optionally updating their chat state setting.
+ *
+ * This is used internally by the above functions to unify state updates.
+ *
+ * @param barejid The bare JID of the contact.
+ * @param resource The resource sending presence/chat state.
+ * @param send_states Whether we should send chat states to this contact.
+ */
 void
 chat_session_recipient_active(const char* const barejid, const char* const resource,
                               gboolean send_states)
@@ -194,6 +280,11 @@ chat_session_recipient_active(const char* const barejid, const char* const resou
     }
 }
 
+/**
+ * @brief Remove a specific chat session by bare JID.
+ *
+ * @param barejid The bare JID (user@domain) of the contact.
+ */
 void
 chat_session_remove(const char* const barejid)
 {

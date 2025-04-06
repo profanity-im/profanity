@@ -83,6 +83,9 @@ _caps_close(void)
     prof_features = NULL;
 }
 
+/**
+ * @brief Initialize the capabilities subsystem and load cache.
+ */
 void
 caps_init(void)
 {
@@ -122,6 +125,11 @@ caps_init(void)
     my_sha1 = NULL;
 }
 
+/**
+ * @brief Add a supported feature to our capabilities list.
+ *
+ * @param feature The namespace URI of the feature to add.
+ */
 void
 caps_add_feature(char* feature)
 {
@@ -140,6 +148,11 @@ caps_add_feature(char* feature)
     }
 }
 
+/**
+ * @brief Remove a feature from our capabilities list.
+ *
+ * @param feature The namespace URI of the feature to remove.
+ */
 void
 caps_remove_feature(char* feature)
 {
@@ -158,6 +171,11 @@ caps_remove_feature(char* feature)
     }
 }
 
+/**
+ * @brief Get a list of our own advertised features (including plugin features).
+ *
+ * @return GList* of strdup'd feature strings.
+ */
 GList*
 caps_get_features(void)
 {
@@ -183,6 +201,19 @@ caps_get_features(void)
     return result;
 }
 
+/**
+ * @brief Create a new EntityCapabilities structure.
+ *
+ * @param category Identity category.
+ * @param type Identity type.
+ * @param name Identity name.
+ * @param software Software name.
+ * @param software_version Software version string.
+ * @param os Operating system name.
+ * @param os_version OS version string.
+ * @param features List of supported features.
+ * @return Allocated EntityCapabilities*.
+ */
 EntityCapabilities*
 caps_create(const char* const category, const char* const type, const char* const name,
             const char* const software, const char* const software_version,
@@ -222,6 +253,12 @@ caps_create(const char* const category, const char* const type, const char* cons
     return result;
 }
 
+/**
+ * @brief Add capabilities to the in-memory and persistent cache by verification string.
+ *
+ * @param ver Verification string (hash).
+ * @param caps Entity capabilities.
+ */
 void
 caps_add_by_ver(const char* const ver, EntityCapabilities* caps)
 {
@@ -278,24 +315,48 @@ caps_add_by_ver(const char* const ver, EntityCapabilities* caps)
     _save_cache();
 }
 
+/**
+ * @brief Add capabilities directly by JID (in-memory only).
+ *
+ * @param jid Bare JID of entity.
+ * @param caps Entity capabilities.
+ */
 void
 caps_add_by_jid(const char* const jid, EntityCapabilities* caps)
 {
     g_hash_table_insert(jid_to_caps, strdup(jid), caps);
 }
 
+/**
+ * @brief Map a JID to a capabilities verification string (hash).
+ *
+ * @param jid Bare JID.
+ * @param ver Verification string.
+ */
 void
 caps_map_jid_to_ver(const char* const jid, const char* const ver)
 {
     g_hash_table_insert(jid_to_ver, strdup(jid), strdup(ver));
 }
 
+/**
+ * @brief Check whether a given capabilities verification string exists in cache.
+ *
+ * @param ver Verification string.
+ * @return TRUE if found.
+ */
 gboolean
 caps_cache_contains(const char* const ver)
 {
     return (g_key_file_has_group(cache, ver));
 }
 
+/**
+ * @brief Lookup the capabilities for a specific JID.
+ *
+ * @param jid Bare JID.
+ * @return Capabilities struct (copied), or NULL if not found.
+ */
 EntityCapabilities*
 caps_lookup(const char* const jid)
 {
@@ -318,6 +379,13 @@ caps_lookup(const char* const jid)
     return NULL;
 }
 
+/**
+ * @brief Check if a JID supports a given feature.
+ *
+ * @param jid Bare JID.
+ * @param feature Feature namespace.
+ * @return TRUE if supported.
+ */
 gboolean
 caps_jid_has_feature(const char* const jid, const char* const feature)
 {
@@ -335,6 +403,12 @@ caps_jid_has_feature(const char* const jid, const char* const feature)
     return result;
 }
 
+/**
+ * @brief Get or compute our capabilities SHA-1 verification string.
+ *
+ * @param ctx XMPP context.
+ * @return Allocated string (static).
+ */
 char*
 caps_get_my_sha1(xmpp_ctx_t* const ctx)
 {
@@ -347,6 +421,9 @@ caps_get_my_sha1(xmpp_ctx_t* const ctx)
     return my_sha1;
 }
 
+/**
+ * @brief Reset the stored verification string so it will be recalculated.
+ */
 void
 caps_reset_ver(void)
 {
@@ -356,6 +433,12 @@ caps_reset_ver(void)
     }
 }
 
+/**
+ * @brief Lookup capabilities by verification string.
+ *
+ * @param ver The verification string.
+ * @return EntityCapabilities*, or NULL.
+ */
 static EntityCapabilities*
 _caps_by_ver(const char* const ver)
 {
@@ -391,12 +474,24 @@ _caps_by_ver(const char* const ver)
     return result;
 }
 
+/**
+ * @brief Lookup capabilities by JID (in-memory only).
+ *
+ * @param jid Bare JID.
+ * @return EntityCapabilities*, or NULL.
+ */
 static EntityCapabilities*
 _caps_by_jid(const char* const jid)
 {
     return g_hash_table_lookup(jid_to_caps, jid);
 }
 
+/**
+ * @brief Copy a capabilities struct (deep copy).
+ *
+ * @param caps Original capabilities.
+ * @return New EntityCapabilities*.
+ */
 static EntityCapabilities*
 _caps_copy(EntityCapabilities* caps)
 {
@@ -416,6 +511,11 @@ _caps_copy(EntityCapabilities* caps)
     return caps_create(categoty, type, name, software, software_version, os, os_version, caps->features);
 }
 
+/**
+ * @brief Free memory of a DiscoIdentity struct.
+ *
+ * @param disco_identity Pointer to identity.
+ */
 static void
 _disco_identity_destroy(DiscoIdentity* disco_identity)
 {
@@ -427,6 +527,11 @@ _disco_identity_destroy(DiscoIdentity* disco_identity)
     }
 }
 
+/**
+ * @brief Free memory of a SoftwareVersion struct.
+ *
+ * @param software_version Pointer to version struct.
+ */
 static void
 _software_version_destroy(SoftwareVersion* software_version)
 {
@@ -439,6 +544,11 @@ _software_version_destroy(SoftwareVersion* software_version)
     }
 }
 
+/**
+ * @brief Destroy a capabilities structure and free its memory.
+ *
+ * @param caps Pointer to capabilities struct.
+ */
 void
 caps_destroy(EntityCapabilities* caps)
 {
@@ -452,6 +562,10 @@ caps_destroy(EntityCapabilities* caps)
     }
 }
 
+
+/**
+ * @brief Save the current capabilities cache to disk.
+ */
 static void
 _save_cache(void)
 {

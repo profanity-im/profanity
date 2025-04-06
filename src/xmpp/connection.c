@@ -125,6 +125,9 @@ static xmpp_log_t prof_log = {
     _xmpp_file_logger, NULL
 };
 
+/**
+ * @brief Initialize the XMPP connection context and related data structures.
+ */
 void
 connection_init(void)
 {
@@ -155,6 +158,9 @@ connection_init(void)
     _random_bytes_init();
 }
 
+/**
+ * @brief Poll XMPP events (non-blocking).
+ */
 void
 connection_check_events(void)
 {
@@ -163,6 +169,10 @@ connection_check_events(void)
     conn.xmpp_in_event_loop = FALSE;
 }
 
+
+/**
+ * @brief Shutdown the XMPP connection and release all related resources.
+ */
 void
 connection_shutdown(void)
 {
@@ -261,6 +271,17 @@ _conn_apply_settings(const char* const jid, const char* const passwd, const char
     return TRUE;
 }
 
+/**
+ * @brief Attempt to connect to an XMPP server using provided credentials and configuration.
+ *
+ * @param jid Full JID for login.
+ * @param passwd Password for authentication.
+ * @param altdomain Optional alternate domain.
+ * @param port Port number to connect to.
+ * @param tls_policy TLS connection policy.
+ * @param auth_policy SASL authentication policy.
+ * @return Connection status.
+ */
 jabber_conn_status_t
 connection_connect(const char* const jid, const char* const passwd, const char* const altdomain, int port,
                    const char* const tls_policy, const char* const auth_policy)
@@ -511,6 +532,16 @@ _register_handler(xmpp_conn_t* xmpp_conn,
     }
 }
 
+/**
+ * @brief Attempt to register a new account using in-band registration.
+ *
+ * @param altdomain Server domain.
+ * @param port Port number to connect to.
+ * @param tls_policy TLS policy.
+ * @param username Desired username.
+ * @param password Desired password.
+ * @return Connection status.
+ */
 jabber_conn_status_t
 connection_register(const char* const altdomain, int port, const char* const tls_policy,
                     const char* const username, const char* const password)
@@ -544,6 +575,10 @@ connection_register(const char* const altdomain, int port, const char* const tls
     return conn.conn_status;
 }
 
+
+/**
+ * @brief Disconnect from the XMPP server.
+ */
 void
 connection_disconnect(void)
 {
@@ -575,6 +610,9 @@ connection_disconnect(void)
     conn.jid = NULL;
 }
 
+/**
+ * @brief Set the internal connection state to disconnected.
+ */
 void
 connection_set_disconnected(void)
 {
@@ -583,6 +621,9 @@ connection_set_disconnected(void)
     conn.conn_status = JABBER_DISCONNECTED;
 }
 
+/**
+ * @brief Clear feature/resource tracking tables.
+ */
 void
 connection_clear_data(void)
 {
@@ -600,6 +641,9 @@ connection_clear_data(void)
     }
 }
 
+/**
+ * @brief Get the TLS certificate for the current peer.
+ */
 TLSCertificate*
 connection_get_tls_peer_cert(void)
 {
@@ -610,6 +654,9 @@ connection_get_tls_peer_cert(void)
     return cert;
 }
 
+/**
+ * @brief Check if the current connection is secured via TLS.
+ */
 gboolean
 connection_is_secured(void)
 {
@@ -620,6 +667,9 @@ connection_is_secured(void)
     }
 }
 
+/**
+ * @brief Send a raw XMPP stanza.
+ */
 gboolean
 connection_send_stanza(const char* const stanza)
 {
@@ -631,6 +681,9 @@ connection_send_stanza(const char* const stanza)
     }
 }
 
+/**
+ * @brief Check if any discovered entity supports a given feature.
+ */
 gboolean
 connection_supports(const char* const feature)
 {
@@ -654,6 +707,9 @@ connection_supports(const char* const feature)
     return ret;
 }
 
+/**
+ * @brief Get the JID that supports a given feature, if any.
+ */
 const char*
 connection_jid_for_feature(const char* const feature)
 {
@@ -680,6 +736,9 @@ connection_jid_for_feature(const char* const feature)
     return NULL;
 }
 
+/**
+ * @brief Initiate discovery info request for features.
+ */
 void
 connection_request_features(void)
 {
@@ -688,6 +747,9 @@ connection_request_features(void)
     iq_disco_info_request_onconnect(conn.domain);
 }
 
+/**
+ * @brief Set the discovered disco items to track and request features for.
+ */
 void
 connection_set_disco_items(GSList* items)
 {
@@ -704,24 +766,37 @@ connection_set_disco_items(GSList* items)
     }
 }
 
+/**
+ * @brief Get the current connection status.
+ */
 jabber_conn_status_t
 connection_get_status(void)
 {
     return conn.conn_status;
 }
 
+/**
+ * @brief Get the libstrophe connection object.
+ */
 xmpp_conn_t*
 connection_get_conn(void)
 {
     return conn.xmpp_conn;
 }
 
+
+/**
+ * @brief Get the libstrophe context.
+ */
 xmpp_ctx_t*
 connection_get_ctx(void)
 {
     return conn.xmpp_ctx;
 }
 
+/**
+ * @brief Get the full bound JID (with resource).
+ */
 const char*
 connection_get_fulljid(void)
 {
@@ -735,6 +810,9 @@ connection_get_fulljid(void)
     }
 }
 
+/**
+ * @brief Get the internal JID object used across the connection.
+ */
 const Jid*
 connection_get_jid(void)
 {
@@ -759,24 +837,36 @@ connection_get_jid(void)
     return conn.jid;
 }
 
+/**
+ * @brief Get the bare JID.
+ */
 const char*
 connection_get_barejid(void)
 {
     return connection_get_jid()->barejid;
 }
 
+/**
+ * @brief Check whether the given bare JID is the user's.
+ */
 gboolean
 equals_our_barejid(const char* cmp)
 {
     return g_strcmp0(connection_get_jid()->barejid, cmp) == 0;
 }
 
+/**
+ * @brief Get the username (localpart) of the current user.
+ */
 const char*
 connection_get_user(void)
 {
     return connection_get_jid()->localpart;
 }
 
+/**
+ * @brief Mark that feature discovery for a JID has been completed.
+ */
 void
 connection_features_received(const char* const jid)
 {
@@ -786,42 +876,63 @@ connection_features_received(const char* const jid)
     }
 }
 
+/**
+ * @brief Get the feature hash table for a given JID.
+ */
 GHashTable*
 connection_get_features(const char* const jid)
 {
     return g_hash_table_lookup(conn.features_by_jid, jid);
 }
 
+/**
+ * @brief Get a list of all available resources.
+ */
 GList*
 connection_get_available_resources(void)
 {
     return g_hash_table_get_values(conn.available_resources);
 }
 
+/**
+ * @brief Get the number of currently available resources.
+ */
 int
 connection_count_available_resources(void)
 {
     return g_hash_table_size(conn.available_resources);
 }
 
+/**
+ * @brief Add a new available resource.
+ */
 void
 connection_add_available_resource(Resource* resource)
 {
     g_hash_table_replace(conn.available_resources, strdup(resource->name), resource);
 }
 
+/**
+ * @brief Remove an available resource.
+ */
 void
 connection_remove_available_resource(const char* const resource)
 {
     g_hash_table_remove(conn.available_resources, resource);
 }
 
+/**
+ * @brief Generate a UUID.
+ */
 char*
 connection_create_uuid(void)
 {
     return xmpp_uuid_gen(conn.xmpp_ctx);
 }
 
+/**
+ * @brief Free a previously created UUID.
+ */
 void
 connection_free_uuid(char* uuid)
 {
@@ -830,6 +941,9 @@ connection_free_uuid(char* uuid)
     }
 }
 
+/**
+ * @brief Create a unique stanza ID using instance HMAC.
+ */
 char*
 connection_create_stanza_id(void)
 {
@@ -849,12 +963,19 @@ connection_get_domain(void)
     return conn.domain;
 }
 
+/**
+ * @brief Get the user's current presence message.
+ */
 const char*
 connection_get_presence_msg(void)
 {
     return conn.presence_message;
 }
 
+
+/**
+ * @brief Set the user's current presence message.
+ */
 void
 connection_set_presence_msg(const char* const message)
 {
@@ -864,6 +985,9 @@ connection_set_presence_msg(const char* const message)
     }
 }
 
+/**
+ * @brief Set the presence priority value for the current session.
+ */
 void
 connection_set_priority(const int priority)
 {
@@ -1158,6 +1282,9 @@ _compute_identifier(const char* barejid)
                                                 barejid, strlen(barejid));
 }
 
+/**
+ * @brief Get the unique identifier for this instance of Profanity.
+ */
 const char*
 connection_get_profanity_identifier(void)
 {

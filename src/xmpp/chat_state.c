@@ -52,6 +52,11 @@
 
 static void _send_if_supported(const char* const barejid, void (*send_func)(const char* const));
 
+/**
+ * @brief Allocate and initialize a new ChatState structure.
+ *
+ * @return Pointer to a newly allocated ChatState.
+ */
 ChatState*
 chat_state_new(void)
 {
@@ -62,6 +67,11 @@ chat_state_new(void)
     return new_state;
 }
 
+/**
+ * @brief Free memory used by a ChatState object.
+ *
+ * @param state Pointer to the ChatState to be freed.
+ */
 void
 chat_state_free(ChatState* state)
 {
@@ -71,6 +81,14 @@ chat_state_free(ChatState* state)
     free(state);
 }
 
+/**
+ * @brief Handle idle timeout and manage state transitions based on elapsed time.
+ *
+ * Transitions through COMPOSING -> PAUSED -> INACTIVE -> GONE based on defined timeouts.
+ *
+ * @param barejid The bare JID of the contact.
+ * @param state Pointer to the current ChatState structure.
+ */
 void
 chat_state_handle_idle(const char* const barejid, ChatState* state)
 {
@@ -122,6 +140,12 @@ chat_state_handle_idle(const char* const barejid, ChatState* state)
     }
 }
 
+/**
+ * @brief Handle typing activity and transition to COMPOSING state.
+ *
+ * @param barejid The bare JID of the contact.
+ * @param state Pointer to the current ChatState structure.
+ */
 void
 chat_state_handle_typing(const char* const barejid, ChatState* state)
 {
@@ -135,6 +159,11 @@ chat_state_handle_typing(const char* const barejid, ChatState* state)
     }
 }
 
+/**
+ * @brief Transition to ACTIVE state.
+ *
+ * @param state Pointer to the current ChatState structure.
+ */
 void
 chat_state_active(ChatState* state)
 {
@@ -142,6 +171,12 @@ chat_state_active(ChatState* state)
     g_timer_start(state->timer);
 }
 
+/**
+ * @brief Transition to GONE state and send notification if enabled.
+ *
+ * @param barejid The bare JID of the contact.
+ * @param state Pointer to the current ChatState structure.
+ */
 void
 chat_state_gone(const char* const barejid, ChatState* state)
 {
@@ -154,6 +189,11 @@ chat_state_gone(const char* const barejid, ChatState* state)
     }
 }
 
+/**
+ * @brief Trigger idle handling for all open chat windows.
+ *
+ * Called periodically to check whether chat states should be updated.
+ */
 void
 chat_state_idle(void)
 {
@@ -175,6 +215,10 @@ chat_state_idle(void)
     }
 }
 
+
+/**
+ * @brief Trigger typing (activity) event for the currently focused chat window.
+ */
 void
 chat_state_activity(void)
 {
@@ -188,6 +232,14 @@ chat_state_activity(void)
     }
 }
 
+/**
+ * @brief Send a chat state stanza if supported by the current session.
+ *
+ * Appends the resource if `send_states` is true, otherwise skips sending.
+ *
+ * @param barejid The bare JID of the contact.
+ * @param send_func Function pointer to the appropriate chat state send function.
+ */
 static void
 _send_if_supported(const char* const barejid, void (*send_func)(const char* const))
 {
@@ -208,4 +260,11 @@ _send_if_supported(const char* const barejid, void (*send_func)(const char* cons
     }
 
     g_string_free(jid, TRUE);
-}
+}/**
+ * @brief Send a chat state stanza if supported by the current session.
+ *
+ * Appends the resource if `send_states` is true, otherwise skips sending.
+ *
+ * @param barejid The bare JID of the contact.
+ * @param send_func Function pointer to the appropriate chat state send function.
+ */
