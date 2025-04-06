@@ -68,6 +68,12 @@ static void _avatar_request_item_by_id(const char* jid, avatar_metadata* data);
 static int _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const userdata);
 
+
+/**
+ * @brief Frees memory allocated for avatar metadata struct.
+ *
+ * @param data Pointer to the avatar_metadata to free.
+ */
 static void
 _free_avatar_data(avatar_metadata* data)
 {
@@ -77,6 +83,13 @@ _free_avatar_data(avatar_metadata* data)
     }
 }
 
+
+/**
+ * @brief Cleanup routine for avatar system on shutdown.
+ *
+ * Destroys internal hash tables used for tracking avatar requests and
+ * display flags.
+ */
 static void
 _avatar_cleanup(void)
 {
@@ -90,6 +103,12 @@ _avatar_cleanup(void)
     shall_open = NULL;
 }
 
+/**
+ * @brief Subscribe to XMPP PEP events related to avatars.
+ *
+ * Registers metadata and data handlers for avatar notifications,
+ * initializes internal tracking tables, and adds shutdown cleanup hook.
+ */
 void
 avatar_pep_subscribe(void)
 {
@@ -104,6 +123,15 @@ avatar_pep_subscribe(void)
     shall_open = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 }
 
+/**
+ * @brief Publish a user avatar from a local image file.
+ *
+ * Scales image if larger than MAX_PIXEL and converts to PNG before publishing
+ * both metadata and data via PEP.
+ *
+ * @param path Path to the avatar image file.
+ * @return TRUE on success, FALSE on failure.
+ */
 #ifdef HAVE_PIXBUF
 gboolean
 avatar_set(const char* path)
@@ -156,6 +184,12 @@ avatar_set(const char* path)
 }
 #endif
 
+/**
+ * @brief Disable avatar publishing via PEP.
+ *
+ * Sends an XMPP IQ stanza disabling avatar publishing for the current user.
+ * @return TRUE on successful IQ dispatch.
+ */
 gboolean
 avatar_publishing_disable()
 {
@@ -167,6 +201,16 @@ avatar_publishing_disable()
     return TRUE;
 }
 
+/**
+ * @brief Request avatar of a remote contact by nickname.
+ *
+ * Adds the contact to the `looking_for` list to track metadata response,
+ * and optionally adds them to `shall_open` to open the avatar once received.
+ *
+ * @param nick The bare JID or nickname of the contact.
+ * @param open Whether to open the image after saving.
+ * @return TRUE if request setup was successful.
+ */
 gboolean
 avatar_get_by_nick(const char* nick, gboolean open)
 {
@@ -186,6 +230,15 @@ avatar_get_by_nick(const char* nick, gboolean open)
     return TRUE;
 }
 
+/**
+ * @brief Handles incoming avatar metadata notification or query result.
+ *
+ * Extracts avatar ID and type and initiates retrieval of avatar data.
+ *
+ * @param stanza The received stanza.
+ * @param userdata Unused.
+ * @return Always returns 1 to continue processing.
+ */
 static int
 _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
@@ -251,6 +304,14 @@ _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
     return 1;
 }
 
+/**
+ * @brief Requests avatar image data by ID from the given JID.
+ *
+ * Sends an IQ request for the avatar data item using pubsub.
+ *
+ * @param jid The sender JID to fetch the avatar from.
+ * @param data Avatar metadata (type and id).
+ */
 static void
 _avatar_request_item_by_id(const char* jid, avatar_metadata* data)
 {
@@ -267,6 +328,15 @@ _avatar_request_item_by_id(const char* jid, avatar_metadata* data)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Handles the IQ result containing avatar image data.
+ *
+ * Decodes the base64 data, writes it to a file, and optionally opens the file.
+ *
+ * @param stanza The IQ result stanza.
+ * @param userdata The avatar metadata used to construct the request.
+ * @return Always returns 1 to indicate handler completion.
+ */
 static int
 _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {

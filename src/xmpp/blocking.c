@@ -57,6 +57,9 @@ static int _block_remove_result_handler(xmpp_stanza_t* const stanza, void* const
 static GList* blocked;
 static Autocomplete blocked_ac;
 
+/**
+ * @brief Shutdown handler for cleaning up blocklist and autocomplete structures.
+ */
 static void
 _blocking_shutdown(void)
 {
@@ -66,6 +69,12 @@ _blocking_shutdown(void)
     autocomplete_free(blocked_ac);
 }
 
+/**
+ * @brief Request the current list of blocked JIDs from the server.
+ *
+ * Sends an IQ stanza to retrieve the blocklist. Resets the internal list and
+ * autocomplete table. Registers a shutdown cleanup routine.
+ */
 void
 blocking_request(void)
 {
@@ -91,18 +100,33 @@ blocking_request(void)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Retrieve the current local blocklist.
+ * @return GList of blocked JIDs (strings).
+ */
 GList*
 blocked_list(void)
 {
     return blocked;
 }
 
+/**
+ * @brief Search for autocomplete match within blocked JIDs.
+ *
+ * @param search_str Input string to search.
+ * @param previous Whether to search backwards.
+ * @param context Optional user context (unused).
+ * @return Matching blocked JID or NULL.
+ */
 char*
 blocked_ac_find(const char* const search_str, gboolean previous, void* context)
 {
     return autocomplete_complete(blocked_ac, search_str, TRUE, previous);
 }
 
+/**
+ * @brief Reset the blocked autocomplete search state.
+ */
 void
 blocked_ac_reset(void)
 {
@@ -111,6 +135,17 @@ blocked_ac_reset(void)
     }
 }
 
+
+/**
+ * @brief Add a JID to the blocklist with optional spam/abuse reporting.
+ *
+ * Sends an IQ stanza to block the given JID. Reports can be sent with a message.
+ *
+ * @param jid JID to block.
+ * @param reportkind Type of report to attach (spam/abuse/none).
+ * @param message Optional report message.
+ * @return TRUE if request was initiated, FALSE if JID already blocked.
+ */
 gboolean
 blocked_add(char* jid, blocked_report reportkind, const char* const message)
 {
@@ -172,6 +207,14 @@ blocked_add(char* jid, blocked_report reportkind, const char* const message)
     return TRUE;
 }
 
+/**
+ * @brief Remove a JID from the blocklist.
+ *
+ * Sends an IQ stanza to unblock the specified JID.
+ *
+ * @param jid JID to unblock.
+ * @return TRUE if request was initiated, FALSE if JID not found in blocklist.
+ */
 gboolean
 blocked_remove(char* jid)
 {
@@ -207,6 +250,14 @@ blocked_remove(char* jid)
     return TRUE;
 }
 
+/**
+ * @brief Handler for incoming server stanza notifying block or unblock updates.
+ *
+ * Updates the internal blocklist and autocomplete table.
+ *
+ * @param stanza Incoming stanza.
+ * @return Always returns 1 to continue stanza processing.
+ */
 int
 blocked_set_handler(xmpp_stanza_t* stanza)
 {
@@ -255,6 +306,15 @@ blocked_set_handler(xmpp_stanza_t* stanza)
     return 1;
 }
 
+/**
+ * @brief Handler for IQ result confirming a successful block.
+ *
+ * Logs the result and shows confirmation in the UI.
+ *
+ * @param stanza Received stanza.
+ * @param userdata Pointer to the blocked JID string.
+ * @return Always returns 0.
+ */
 static int
 _block_add_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
@@ -276,6 +336,15 @@ _block_add_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
     return 0;
 }
 
+/**
+ * @brief Handler for IQ result confirming a successful unblock.
+ *
+ * Logs the result and shows confirmation in the UI.
+ *
+ * @param stanza Received stanza.
+ * @param userdata Pointer to the unblocked JID string.
+ * @return Always returns 0.
+ */
 static int
 _block_remove_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
@@ -297,6 +366,15 @@ _block_remove_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
     return 0;
 }
 
+/**
+ * @brief Handler for IQ result returning the user's full blocklist.
+ *
+ * Parses blocklist items and populates the local list and autocomplete table.
+ *
+ * @param stanza Received stanza.
+ * @param userdata Unused.
+ * @return Always returns 0.
+ */
 static int
 _blocklist_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
