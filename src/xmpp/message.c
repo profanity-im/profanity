@@ -769,6 +769,12 @@ message_send_groupchat(const char* const roomjid, const char* const msg, const c
     return id;
 }
 
+/**
+ * @brief Send a new subject (topic) for a MUC (Multi-User Chat) room.
+ *
+ * @param roomjid The JID of the chat room.
+ * @param subject The new subject to set for the room.
+ */
 void
 message_send_groupchat_subject(const char* const roomjid, const char* const subject)
 {
@@ -779,6 +785,15 @@ message_send_groupchat_subject(const char* const roomjid, const char* const subj
     xmpp_stanza_release(message);
 }
 
+/**
+ * @brief Send an invitation to join a MUC room.
+ *
+ * Depending on the MUC's configuration, the function will send either a direct or mediated invite.
+ *
+ * @param roomjid The JID of the room.
+ * @param contact The JID of the user to invite.
+ * @param reason Optional reason for the invitation.
+ */
 void
 message_send_invite(const char* const roomjid, const char* const contact,
                     const char* const reason)
@@ -800,6 +815,11 @@ message_send_invite(const char* const roomjid, const char* const contact,
     xmpp_stanza_release(stanza);
 }
 
+/**
+ * @brief Send a chat state notification indicating the user is typing.
+ *
+ * @param jid The full JID of the chat recipient.
+ */
 void
 message_send_composing(const char* const jid)
 {
@@ -810,6 +830,11 @@ message_send_composing(const char* const jid)
     xmpp_stanza_release(stanza);
 }
 
+/**
+ * @brief Send a chat state notification indicating the user has paused typing.
+ *
+ * @param jid The full JID of the chat recipient.
+ */
 void
 message_send_paused(const char* const jid)
 {
@@ -819,6 +844,11 @@ message_send_paused(const char* const jid)
     xmpp_stanza_release(stanza);
 }
 
+/**
+ * @brief Send a chat state notification indicating the user has gone inactive.
+ *
+ * @param jid The full JID of the chat recipient.
+ */
 void
 message_send_inactive(const char* const jid)
 {
@@ -829,6 +859,11 @@ message_send_inactive(const char* const jid)
     xmpp_stanza_release(stanza);
 }
 
+/**
+ * @brief Send a chat state notification indicating the user has left the conversation.
+ *
+ * @param jid The full JID of the chat recipient.
+ */
 void
 message_send_gone(const char* const jid)
 {
@@ -838,6 +873,13 @@ message_send_gone(const char* const jid)
     xmpp_stanza_release(stanza);
 }
 
+/**
+ * @brief Handle incoming error message stanzas.
+ *
+ * Logs the error, updates the UI, and removes the chat session if the error type is "cancel".
+ *
+ * @param stanza The error stanza to handle.
+ */
 static void
 _handle_error(xmpp_stanza_t* const stanza)
 {
@@ -885,6 +927,13 @@ _handle_error(xmpp_stanza_t* const stanza)
     }
 }
 
+/**
+ * @brief Handle mediated MUC invites as defined by XEP-0045.
+ *
+ * Parses invite information from the stanza and dispatches a `sv_ev_room_invite()` event.
+ *
+ * @param stanza The stanza containing the MUC user invite.
+ */
 static void
 _handle_muc_user(xmpp_stanza_t* const stanza)
 {
@@ -940,6 +989,13 @@ _handle_muc_user(xmpp_stanza_t* const stanza)
     }
 }
 
+/**
+ * @brief Handle direct MUC invitations (XEP-0249).
+ *
+ * Extracts invitation details and triggers the `sv_ev_room_invite()` callback.
+ *
+ * @param stanza The stanza containing the direct invitation.
+ */
 static void
 _handle_conference(xmpp_stanza_t* const stanza)
 {
@@ -971,6 +1027,13 @@ _handle_conference(xmpp_stanza_t* const stanza)
     }
 }
 
+/**
+ * @brief Handle CAPTCHA challenges (XEP-0158) sent via MUC messages.
+ *
+ * Displays the challenge text as a room broadcast message.
+ *
+ * @param stanza The stanza containing the CAPTCHA form and body.
+ */
 static void
 _handle_captcha(xmpp_stanza_t* const stanza)
 {
@@ -992,7 +1055,15 @@ _handle_captcha(xmpp_stanza_t* const stanza)
     xmpp_free(ctx, message);
 }
 
-// Handle changes to muc configuration
+/**
+ * @brief Handle disco#info results for MUC room configuration changes.
+ *
+ * Updates the room name and available features.
+ *
+ * @param stanza The stanza containing the room's disco#info result.
+ * @param userdata Unused.
+ * @return Always returns 0.
+ */
 static int
 _room_config_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
@@ -1008,6 +1079,14 @@ _room_config_handler(xmpp_stanza_t* const stanza, void* const userdata)
     return 0;
 }
 
+/**
+ * @brief Handle incoming groupchat messages (XEP-0045).
+ *
+ * Handles subject messages, broadcast messages, and actual chat messages in rooms.
+ * Also processes history messages and OMEMO-encrypted messages.
+ *
+ * @param stanza The incoming message stanza from the room.
+ */
 static void
 _handle_groupchat(xmpp_stanza_t* const stanza)
 {
@@ -1165,6 +1244,15 @@ out:
     message_free(message);
 }
 
+/**
+ * @brief Send a delivery receipt in response to a message (XEP-0184).
+ *
+ * Constructs a message stanza with a `<received>` tag referencing the original
+ * message ID and sends it to the sender.
+ *
+ * @param fulljid The full JID of the message sender.
+ * @param message_id The ID of the original message being acknowledged.
+ */
 static void
 _message_send_receipt(const char* const fulljid, const char* const message_id)
 {
@@ -1185,6 +1273,14 @@ _message_send_receipt(const char* const fulljid, const char* const message_id)
     xmpp_stanza_release(message);
 }
 
+/**
+ * @brief Handle incoming receipt confirmation messages (XEP-0184).
+ *
+ * Extracts the message ID and triggers the `sv_ev_message_receipt()` event
+ * for UI or log updates.
+ *
+ * @param stanza The stanza containing the receipt confirmation.
+ */
 static void
 _handle_receipt_received(xmpp_stanza_t* const stanza)
 {
@@ -1214,6 +1310,14 @@ _handle_receipt_received(xmpp_stanza_t* const stanza)
     }
 }
 
+/**
+ * @brief Handle receipt requests from incoming messages (XEP-0184).
+ *
+ * Checks for presence of `<request xmlns='urn:xmpp:receipts'>` and sends a
+ * receipt if the preference to send receipts is enabled.
+ *
+ * @param stanza The incoming message stanza with potential receipt request.
+ */
 static void
 _receipt_request_handler(xmpp_stanza_t* const stanza)
 {
@@ -1245,6 +1349,14 @@ _receipt_request_handler(xmpp_stanza_t* const stanza)
     }
 }
 
+/**
+ * @brief Handle private messages sent from within a MUC room.
+ *
+ * Parses the message stanza, including OMEMO decryption and delay timestamps,
+ * and dispatches the appropriate UI event.
+ *
+ * @param stanza The stanza representing the private message from a MUC participant.
+ */
 static void
 _handle_muc_private_message(xmpp_stanza_t* const stanza)
 {
@@ -1298,6 +1410,15 @@ out:
     message_free(message);
 }
 
+/**
+ * @brief Parse a message carbon (XEP-0280) and extract the forwarded message.
+ *
+ * Only supports `<sent>` and `<received>` carbon elements, ignores `<private>`.
+ * Ensures the forwarded stanza is valid and not duplicated.
+ *
+ * @param stanza The stanza containing the carbon wrapper.
+ * @return The actual forwarded `<message>` stanza or NULL if invalid.
+ */
 static xmpp_stanza_t*
 _handle_carbons(xmpp_stanza_t* const stanza)
 {
@@ -1339,6 +1460,19 @@ _handle_carbons(xmpp_stanza_t* const stanza)
     return message_stanza;
 }
 
+/**
+ * @brief Handle incoming chat messages (direct, carbon, or MAM).
+ *
+ * Parses the incoming `<message>` stanza, extracts metadata like `from`, `to`,
+ * encryption info (OMEMO, OX), timestamps, and message IDs. Dispatches events
+ * based on message type and source (carbon, archive, etc.).
+ *
+ * @param stanza The chat message stanza to process.
+ * @param is_mam TRUE if the message is from a MAM archive (XEP-0313).
+ * @param is_carbon TRUE if the message is a carbon copy (XEP-0280).
+ * @param result_id Optional result ID for MAM results (from <result id="">).
+ * @param timestamp Optional GDateTime to use as message timestamp.
+ */
 static void
 _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, const char* result_id, GDateTime* timestamp)
 {
@@ -1477,6 +1611,17 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
     message_free(message);
 }
 
+/**
+ * @brief Decrypt and handle OpenPGP-encrypted chat messages (XEP-0373).
+ *
+ * If a valid `<openpgp>` stanza is present, decrypts the message using GPG and
+ * stores the plaintext in the ProfMessage. If decryption fails, fallback to
+ * using the message body.
+ *
+ * @param stanza The original chat stanza.
+ * @param message The ProfMessage object to populate with decrypted content.
+ * @param is_mam TRUE if the message is from a MAM archive.
+ */
 static void
 _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_mam)
 {
@@ -1518,6 +1663,15 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
 #endif // HAVE_LIBGPGME
 }
 
+/**
+ * @brief Handle Message Archive Management (MAM) result stanzas (XEP-0313).
+ *
+ * Extracts the `<forwarded>` child, timestamp, and wrapped `<message>`, and
+ * calls `_handle_chat()` to process the message as a historical one.
+ *
+ * @param stanza The stanza containing a MAM result.
+ * @return TRUE if a valid MAM message was processed, FALSE otherwise.
+ */
 static gboolean
 _handle_mam(xmpp_stanza_t* const stanza)
 {
@@ -1545,6 +1699,16 @@ _handle_mam(xmpp_stanza_t* const stanza)
     return TRUE;
 }
 
+/**
+ * @brief Handle incoming PubSub events (XEP-0060).
+ *
+ * This function looks up a registered handler for the given PubSub node
+ * and dispatches the stanza to that callback. If the callback returns 0,
+ * the handler is removed.
+ *
+ * @param stanza The original message stanza containing the PubSub event.
+ * @param event The <event> child stanza from the PubSub namespace.
+ */
 static void
 _handle_pubsub(xmpp_stanza_t* const stanza, xmpp_stanza_t* const event)
 {
@@ -1563,6 +1727,14 @@ _handle_pubsub(xmpp_stanza_t* const stanza, xmpp_stanza_t* const event)
     }
 }
 
+/**
+ * @brief Send a message stanza, optionally modified by plugins.
+ *
+ * Converts the stanza to raw text, passes it to plugin hooks, and then
+ * sends it over the active connection.
+ *
+ * @param stanza The fully constructed stanza to send.
+ */
 static void
 _send_message_stanza(xmpp_stanza_t* const stanza)
 {
@@ -1580,6 +1752,14 @@ _send_message_stanza(xmpp_stanza_t* const stanza)
     xmpp_free(connection_get_ctx(), text);
 }
 
+/**
+ * @brief Send a message stanza, optionally modified by plugins.
+ *
+ * Converts the stanza to raw text, passes it to plugin hooks, and then
+ * sends it over the active connection.
+ *
+ * @param stanza The fully constructed stanza to send.
+ */
 /* ckeckOID = true: check origin-id
  * checkOID = false: check regular id
  */
@@ -1621,6 +1801,17 @@ message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
     return ret;
 }
 
+/**
+ * @brief Create an OpenPGP signcrypt stanza for XEP-0373.
+ *
+ * Constructs a <signcrypt> stanza with the recipient's JID, timestamp,
+ * random padding, and encrypted payload using the provided plaintext.
+ *
+ * @param ctx The XMPP context for stanza creation.
+ * @param to The recipient JID.
+ * @param text The message body to encrypt.
+ * @return A pointer to the created <signcrypt> stanza.
+ */
 #ifdef HAVE_LIBGPGME
 static xmpp_stanza_t*
 _ox_openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text)
@@ -1686,6 +1877,13 @@ _ox_openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const t
 }
 #endif // HAVE_LIBGPGME
 
+/**
+ * @brief Request voice privileges in a MUC (XEP-0045).
+ *
+ * Sends an IQ stanza to request membership/voice in the specified room.
+ *
+ * @param roomjid The JID of the MUC room.
+ */
 void
 message_request_voice(const char* const roomjid)
 {
@@ -1698,6 +1896,14 @@ message_request_voice(const char* const roomjid)
     xmpp_stanza_release(stanza);
 }
 
+/**
+ * @brief Handle Jingle Message Initiation (XEP-0353).
+ *
+ * Checks for a <propose> element indicating an incoming call offer.
+ *
+ * @param stanza The message stanza to inspect.
+ * @return TRUE if a Jingle message was handled, FALSE otherwise.
+ */
 static gboolean
 _handle_jingle_message(xmpp_stanza_t* const stanza)
 {
@@ -1715,6 +1921,16 @@ _handle_jingle_message(xmpp_stanza_t* const stanza)
     return FALSE;
 }
 
+/**
+ * @brief Determine if a message should be ignored due to silence settings.
+ *
+ * If the preference to silence messages from non-roster contacts is enabled,
+ * this function checks the sender's presence in the roster and decides
+ * whether to ignore the message.
+ *
+ * @param stanza The message stanza to inspect.
+ * @return TRUE if the message should be ignored, FALSE otherwise.
+ */
 static gboolean
 _should_ignore_based_on_silence(xmpp_stanza_t* const stanza)
 {

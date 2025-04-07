@@ -545,6 +545,11 @@ iq_enable_carbons(void)
 
 
 /**
+ * @brief Send a request to disable Message Carbons (XEP-0280).
+ *
+ * Stops the forwarding of messages to other connected clients.
+ */
+/**
  * @brief Disable Message Carbons (XEP-0280).
  *
  * Sends an IQ request to the server to disable message carbons.
@@ -902,6 +907,11 @@ iq_request_room_config_form(const char* const room_jid)
  *
  * Sends the completed data form to update room settings.
  *
+/**
+ * @brief Send a request to disable Message Carbons (XEP-0280).
+ *
+ * Stops the forwarding of messages to other connected clients.
+ */
  * @param[in] confwin  Pointer to the conference window containing the form.
  */
 void
@@ -1070,6 +1080,13 @@ iq_room_role_list(const char* const room, char* role)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Send a manual XMPP ping to a given target (XEP-0199).
+ *
+ * Used to measure round-trip time and check if a contact is responsive.
+ *
+ * @param[in] target  Full JID or bare JID of the entity to ping.
+ */
 void
 iq_send_ping(const char* const target)
 {
@@ -1084,6 +1101,13 @@ iq_send_ping(const char* const target)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Request a list of executable ad-hoc commands from a given JID (XEP-0050).
+ *
+ * Used to discover the available commands supported by a contact or service.
+ *
+ * @param[in] target  Full or bare JID of the entity.
+ */
 void
 iq_command_list(const char* const target)
 {
@@ -1097,6 +1121,14 @@ iq_command_list(const char* const target)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Send a request to execute an ad-hoc command (XEP-0050).
+ *
+ * Begins the execution of a discovered command on the target.
+ *
+ * @param[in] target   JID of the entity.
+ * @param[in] command  Command node identifier.
+ */
 void
 iq_command_exec(const char* const target, const char* const command)
 {
@@ -1110,6 +1142,13 @@ iq_command_exec(const char* const target, const char* const command)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Submit a filled configuration form for an ad-hoc command (XEP-0050).
+ *
+ * Completes or advances an ad-hoc command that requires user input (form-based).
+ *
+ * @param[in] confwin  The configuration window containing the form and metadata.
+ */
 void
 iq_submit_command_config(ProfConfWin* confwin)
 {
@@ -1127,6 +1166,14 @@ iq_submit_command_config(ProfConfWin* confwin)
     free(data);
 }
 
+
+/**
+ * @brief Cancel a previously initiated ad-hoc command execution (XEP-0050).
+ *
+ * Sends a cancellation stanza to terminate the current command session.
+ *
+ * @param[in] confwin  The configuration window containing session metadata.
+ */
 void
 iq_cancel_command_config(ProfConfWin* confwin)
 {
@@ -3097,6 +3144,12 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
     return 0;
 }
 
+/**
+ * @brief Change the account password using in-band registration (XEP-0077).
+ *
+ * @param[in] user      The username.
+ * @param[in] password  The new password.
+ */
 void
 iq_register_change_password(const char* const user, const char* const password)
 {
@@ -3248,6 +3301,12 @@ iq_muc_register_nick(const char* const roomjid)
     xmpp_stanza_release(query);
 }
 
+/**
+ * @brief Publish the user's current mood via pubsub.
+ *
+ * @param[in] mood  The mood string (e.g., "happy").
+ * @param[in] text  An optional description for the mood.
+ */
 void
 publish_user_mood(const char* const mood, const char* const text)
 {
