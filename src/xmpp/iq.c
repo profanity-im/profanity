@@ -248,6 +248,12 @@ _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const us
     return 1;
 }
 
+/**
+ * @brief Initialize IQ stanza handlers.
+ *
+ * Registers a global handler for IQ stanzas and timed autoping handler (if enabled).
+ * Also clears any existing handlers and initializes handler hash tables and caches.
+ */
 void
 iq_handlers_init(void)
 {
@@ -299,6 +305,15 @@ _free_late_delivery_userdata(LateDeliveryUserdata* d)
     free(d);
 }
 
+
+/**
+ * @brief Remove all IQ handlers and data associated with a specific window.
+ *
+ * This function is called when a window is closed to clean up IQ handlers
+ * and pending data that references the window.
+ *
+ * @param[in] window The window being removed.
+ */
 void
 iq_handlers_remove_win(ProfWin* window)
 {
@@ -329,6 +344,12 @@ iq_handlers_remove_win(ProfWin* window)
     g_free(st.to_be_removed);
 }
 
+/**
+ * @brief Clear all IQ stanza handlers and cached data.
+ *
+ * Destroys the hash tables used to store IQ stanza handlers and clears
+ * the list of late delivery windows.
+ */
 void
 iq_handlers_clear(void)
 {
@@ -343,6 +364,13 @@ iq_handlers_clear(void)
     }
 }
 
+/**
+ * @brief Free memory used by an IQ ID handler.
+ *
+ * Frees the function pointers and user data associated with a single IQ handler.
+ *
+ * @param[in] handler The handler to free.
+ */
 static void
 _iq_id_handler_free(ProfIqHandler* handler)
 {
@@ -355,6 +383,17 @@ _iq_id_handler_free(ProfIqHandler* handler)
     free(handler);
 }
 
+/**
+ * @brief Add a handler function for a specific IQ stanza ID.
+ *
+ * Stores a callback and optional cleanup function to be invoked when an IQ stanza
+ * with the specified ID is received.
+ *
+ * @param[in] id         The unique ID to match against incoming IQ stanzas.
+ * @param[in] func       Callback function to invoke.
+ * @param[in] free_func  Optional cleanup function for user data.
+ * @param[in] userdata   Custom data passed to the handler.
+ */
 void
 iq_id_handler_add(const char* const id, ProfIqCallback func, ProfIqFreeCallback free_func, void* userdata)
 {
@@ -368,6 +407,11 @@ iq_id_handler_add(const char* const id, ProfIqCallback func, ProfIqFreeCallback 
     }
 }
 
+/**
+ * @brief Cancel the active autoping timer.
+ *
+ * Destroys the timer and resets the `autoping_wait` flag.
+ */
 void
 iq_autoping_timer_cancel(void)
 {
@@ -378,6 +422,12 @@ iq_autoping_timer_cancel(void)
     }
 }
 
+
+/**
+ * @brief Check for autoping response timeout.
+ *
+ * Disconnects the session if no pong response is received in the configured timeout period.
+ */
 void
 iq_autoping_check(void)
 {
@@ -404,6 +454,13 @@ iq_autoping_check(void)
     }
 }
 
+/**
+ * @brief Set the autoping interval.
+ *
+ * Registers or removes the autoping timed handler depending on the specified interval.
+ *
+ * @param[in] seconds  The interval in seconds between autoping requests. Set to 0 to disable.
+ */
 void
 iq_set_autoping(const int seconds)
 {
@@ -423,6 +480,11 @@ iq_set_autoping(const int seconds)
     xmpp_timed_handler_add(conn, _autoping_timed_send, millis, ctx);
 }
 
+/**
+ * @brief Clear the cached room list.
+ *
+ * Frees and destroys the internal hash table storing cached room stanzas.
+ */
 void
 iq_rooms_cache_clear(void)
 {
@@ -432,6 +494,15 @@ iq_rooms_cache_clear(void)
     }
 }
 
+/**
+ * @brief Request a list of chat rooms from a MUC service.
+ *
+ * If a cached response is available, it will be reused. Otherwise, a new IQ disco items
+ * request is sent to the specified MUC service JID.
+ *
+ * @param[in] conferencejid  The JID of the MUC service (e.g., conference.example.com).
+ * @param[in] filter         Optional string filter to match room names or JIDs.
+ */
 void
 iq_room_list_request(const char* conferencejid, char* filter)
 {
@@ -453,6 +524,12 @@ iq_room_list_request(const char* conferencejid, char* filter)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Enable Message Carbons (XEP-0280).
+ *
+ * Sends an IQ request to the server to enable message carbons, which allow
+ * message copies to be forwarded between a user's multiple connected resources.
+ */
 void
 iq_enable_carbons(void)
 {
@@ -466,6 +543,12 @@ iq_enable_carbons(void)
     xmpp_stanza_release(iq);
 }
 
+
+/**
+ * @brief Disable Message Carbons (XEP-0280).
+ *
+ * Sends an IQ request to the server to disable message carbons.
+ */
 void
 iq_disable_carbons(void)
 {
@@ -479,6 +562,14 @@ iq_disable_carbons(void)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Send an HTTP file upload slot request (XEP-0363).
+ *
+ * Sends an IQ request to request upload slots for a file. On success, this will
+ * initiate a background worker thread that uploads the file using the received slot URLs.
+ *
+ * @param[in,out] upload  Pointer to an HTTPUpload struct containing file details.
+ */
 void
 iq_http_upload_request(HTTPUpload* upload)
 {
@@ -499,6 +590,13 @@ iq_http_upload_request(HTTPUpload* upload)
     return;
 }
 
+/**
+ * @brief Request service discovery information (XEP-0030) from a JID.
+ *
+ * Sends an IQ-get request to the specified JID to retrieve its identity and supported features.
+ *
+ * @param[in] jid  Target JID to query for disco info.
+ */
 void
 iq_disco_info_request(const char* jid)
 {
@@ -512,6 +610,13 @@ iq_disco_info_request(const char* jid)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Request service discovery info after initial connection.
+ *
+ * Sends a disco info request and stores the response for feature negotiation during startup.
+ *
+ * @param[in] jid  Target JID to query.
+ */
 void
 iq_disco_info_request_onconnect(const char* jid)
 {
@@ -525,6 +630,13 @@ iq_disco_info_request_onconnect(const char* jid)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Request last activity from a contact (XEP-0012).
+ *
+ * Sends an IQ-get query asking how long a contact has been idle.
+ *
+ * @param[in] jid  Target JID to query for idle time.
+ */
 void
 iq_last_activity_request(const char* jid)
 {
@@ -538,6 +650,14 @@ iq_last_activity_request(const char* jid)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Request information about a MUC room via service discovery.
+ *
+ * Sends a disco#info query to the room JID and optionally displays the result in the UI.
+ *
+ * @param[in] room             Room JID to query.
+ * @param[in] display_result   Whether to show the result in the UI.
+ */
 void
 iq_room_info_request(const char* const room, gboolean display_result)
 {
@@ -557,6 +677,17 @@ iq_room_info_request(const char* const room, gboolean display_result)
     }
 }
 
+
+/**
+ * @brief Send a capabilities query tied to a specific JID (XEP-0115).
+ *
+ * Associates capabilities directly with a JID after retrieving their identity.
+ *
+ * @param[in] to    JID to query.
+ * @param[in] id    IQ stanza ID.
+ * @param[in] node  Capability node string.
+ * @param[in] ver   Capability version hash.
+ */
 void
 iq_send_caps_request_for_jid(const char* const to, const char* const id,
                              const char* const node, const char* const ver)
@@ -583,6 +714,16 @@ iq_send_caps_request_for_jid(const char* const to, const char* const id,
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Send a capabilities query to a JID for a specific node and version (XEP-0115).
+ *
+ * Used when the node and ver are known and need to be validated.
+ *
+ * @param[in] to    JID to query.
+ * @param[in] id    IQ stanza ID.
+ * @param[in] node  Capability node string.
+ * @param[in] ver   Capability version hash.
+ */
 void
 iq_send_caps_request(const char* const to, const char* const id,
                      const char* const node, const char* const ver)
@@ -609,6 +750,16 @@ iq_send_caps_request(const char* const to, const char* const id,
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Send a legacy capabilities request (pre-hash verification) to a JID.
+ *
+ * Used when the JID doesn't advertise capabilities using hashed identifiers.
+ *
+ * @param[in] to    JID to query.
+ * @param[in] id    IQ stanza ID.
+ * @param[in] node  Capability node string.
+ * @param[in] ver   Capability version string (unverified).
+ */
 void
 iq_send_caps_request_legacy(const char* const to, const char* const id,
                             const char* const node, const char* const ver)
@@ -633,6 +784,14 @@ iq_send_caps_request_legacy(const char* const to, const char* const id,
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Request discovery items from a JID (XEP-0030).
+ *
+ * Sends a Disco#items request to a JID. The response may list available rooms,
+ * services, or components hosted by the target entity.
+ *
+ * @param[in] jid  JID to send the request to.
+ */
 void
 iq_disco_items_request(const char* jid)
 {
@@ -642,6 +801,14 @@ iq_disco_items_request(const char* jid)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Request discovery items from a JID after connection is established.
+ *
+ * This variant is automatically invoked upon session establishment.
+ * Uses a fixed stanza ID for internal handling of post-connect state.
+ *
+ * @param[in] jid  JID to send the request to.
+ */
 void
 iq_disco_items_request_onconnect(const char* jid)
 {
@@ -651,6 +818,14 @@ iq_disco_items_request_onconnect(const char* jid)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Send a software version request to a full JID (XEP-0092).
+ *
+ * Used to determine the client name, version, and operating system of another user.
+ * The result is displayed in the UI.
+ *
+ * @param[in] fulljid  Full JID to query.
+ */
 void
 iq_send_software_version(const char* const fulljid)
 {
@@ -664,6 +839,13 @@ iq_send_software_version(const char* const fulljid)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Confirm instant room creation (XEP-0045).
+ *
+ * Sends a request to immediately create a MUC room without a configuration form.
+ *
+ * @param[in] room_jid  Full JID of the MUC room.
+ */
 void
 iq_confirm_instant_room(const char* const room_jid)
 {
@@ -673,6 +855,14 @@ iq_confirm_instant_room(const char* const room_jid)
     xmpp_stanza_release(iq);
 }
 
+
+/**
+ * @brief Destroy an existing MUC room (XEP-0045).
+ *
+ * Sends a request to delete a MUC room. Typically used by the room owner.
+ *
+ * @param[in] room_jid  Full JID of the MUC room to be destroyed.
+ */
 void
 iq_destroy_room(const char* const room_jid)
 {
@@ -686,6 +876,13 @@ iq_destroy_room(const char* const room_jid)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Request the configuration form of a MUC room (XEP-0045).
+ *
+ * Used to retrieve a room's configurable options as a data form.
+ *
+ * @param[in] room_jid  Full JID of the MUC room.
+ */
 void
 iq_request_room_config_form(const char* const room_jid)
 {
@@ -699,6 +896,14 @@ iq_request_room_config_form(const char* const room_jid)
     xmpp_stanza_release(iq);
 }
 
+
+/**
+ * @brief Submit a MUC room configuration form (XEP-0045).
+ *
+ * Sends the completed data form to update room settings.
+ *
+ * @param[in] confwin  Pointer to the conference window containing the form.
+ */
 void
 iq_submit_room_config(ProfConfWin* confwin)
 {
@@ -712,6 +917,14 @@ iq_submit_room_config(ProfConfWin* confwin)
     xmpp_stanza_release(iq);
 }
 
+
+/**
+ * @brief Cancel an ongoing room configuration session.
+ *
+ * Notifies the server that the configuration session should be aborted.
+ *
+ * @param[in] confwin  Pointer to the conference window.
+ */
 void
 iq_room_config_cancel(ProfConfWin* confwin)
 {
@@ -721,6 +934,16 @@ iq_room_config_cancel(ProfConfWin* confwin)
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Request a list of JIDs with a specific affiliation in a room (XEP-0045).
+ *
+ * Sends a request to retrieve all occupants in a MUC room that match the given affiliation
+ * (e.g., member, admin, owner).
+ *
+ * @param[in] room              Full JID of the MUC room.
+ * @param[in] affiliation       Affiliation type to query (e.g., "member").
+ * @param[in] show_ui_message   Whether to display the result in the UI.
+ */
 void
 iq_room_affiliation_list(const char* const room, char* affiliation, bool show_ui_message)
 {
@@ -741,6 +964,16 @@ iq_room_affiliation_list(const char* const room, char* affiliation, bool show_ui
     }
 }
 
+
+/**
+ * @brief Kick a user from a MUC room (XEP-0045).
+ *
+ * Sends a request to remove an occupant from a room.
+ *
+ * @param[in] room     Full JID of the MUC room.
+ * @param[in] nick     Nickname of the occupant to kick.
+ * @param[in] reason   Optional reason for the kick.
+ */
 void
 iq_room_kick_occupant(const char* const room, const char* const nick, const char* const reason)
 {
@@ -754,6 +987,16 @@ iq_room_kick_occupant(const char* const room, const char* const nick, const char
     xmpp_stanza_release(iq);
 }
 
+/**
+ * @brief Set a user's affiliation in a MUC room (XEP-0045).
+ *
+ * Grants or removes affiliation (e.g., owner, member, admin) to a specified user JID.
+ *
+ * @param[in] room         Full JID of the MUC room.
+ * @param[in] jid          Bare JID of the user.
+ * @param[in] affiliation  New affiliation to apply (e.g., "owner").
+ * @param[in] reason       Optional reason for the change.
+ */
 void
 iq_room_affiliation_set(const char* const room, const char* const jid, char* affiliation,
                         const char* const reason)
@@ -775,6 +1018,16 @@ iq_room_affiliation_set(const char* const room, const char* const jid, char* aff
     }
 }
 
+/**
+ * @brief Set the role of a MUC room occupant (XEP-0045).
+ *
+ * Assigns a temporary role (e.g., moderator, participant, visitor) to a user currently in the room.
+ *
+ * @param[in] room     Full JID of the MUC room.
+ * @param[in] nick     Nickname of the occupant.
+ * @param[in] role     Role to assign (e.g., "moderator").
+ * @param[in] reason   Optional reason for the change.
+ */
 void
 iq_room_role_set(const char* const room, const char* const nick, char* role,
                  const char* const reason)
@@ -796,6 +1049,14 @@ iq_room_role_set(const char* const room, const char* const nick, char* role,
     }
 }
 
+/**
+ * @brief Request a list of occupants with a specific role in a room (XEP-0045).
+ *
+ * Retrieves all users currently assigned a certain role in the room (e.g., moderator).
+ *
+ * @param[in] room  Full JID of the MUC room.
+ * @param[in] role  Role to filter by.
+ */
 void
 iq_room_role_list(const char* const room, char* role)
 {
@@ -1455,6 +1716,11 @@ _autoping_timed_send(xmpp_conn_t* const conn, void* const userdata)
     return 1;
 }
 
+/**
+ * @brief Extend or reset the autoping timer.
+ *
+ * Useful when any IQ activity is detected, to postpone the timeout.
+ */
 void
 autoping_timer_extend(void)
 {

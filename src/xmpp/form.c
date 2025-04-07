@@ -163,6 +163,12 @@ _get_field_type(const char* const type)
     return FIELD_UNKNOWN;
 }
 
+/**
+ * @brief Parse a <x xmlns="jabber:x:data"> stanza and return a DataForm structure.
+ *
+ * @param form_stanza The form stanza to parse.
+ * @return A new DataForm instance or NULL if parsing fails.
+ */
 DataForm*
 form_create(xmpp_stanza_t* const form_stanza)
 {
@@ -260,6 +266,12 @@ form_create(xmpp_stanza_t* const form_stanza)
     return form;
 }
 
+/**
+ * @brief Create a stanza representing a completed form submission.
+ *
+ * @param form The data form to convert to a submission stanza.
+ * @return A new <x type='submit'/> stanza containing user data.
+ */
 xmpp_stanza_t*
 form_create_submission(DataForm* form)
 {
@@ -366,6 +378,9 @@ _free_field(FormField* field)
     }
 }
 
+/**
+ * @brief Free the memory allocated for a DataForm and its contents.
+ */
 void
 form_destroy(DataForm* form)
 {
@@ -387,6 +402,9 @@ _field_compare_by_var(FormField* a, FormField* b)
     return g_strcmp0(a->var, b->var);
 }
 
+:/**
+ * @brief Return a sorted list of non-"FORM_TYPE" fields (alphabetically by var).
+ */
 GSList*
 form_get_non_form_type_fields_sorted(DataForm* form)
 {
@@ -403,6 +421,10 @@ form_get_non_form_type_fields_sorted(DataForm* form)
     return sorted;
 }
 
+
+/**
+ * @brief Return sorted field values (alphabetically).
+ */
 GSList*
 form_get_field_values_sorted(FormField* field)
 {
@@ -419,6 +441,9 @@ form_get_field_values_sorted(FormField* field)
     return sorted;
 }
 
+/**
+ * @brief Return the value of the special "FORM_TYPE" hidden field, if present.
+ */
 char*
 form_get_form_type_field(DataForm* form)
 {
@@ -434,6 +459,9 @@ form_get_form_type_field(DataForm* form)
     return NULL;
 }
 
+/**
+ * @brief Check if a form contains a specific tag.
+ */
 gboolean
 form_tag_exists(DataForm* form, const char* const tag)
 {
@@ -451,6 +479,9 @@ form_tag_exists(DataForm* form, const char* const tag)
     return FALSE;
 }
 
+/**
+ * @brief Get the field type of a given tag.
+ */
 form_field_type_t
 form_get_field_type(DataForm* form, const char* const tag)
 {
@@ -468,6 +499,9 @@ form_get_field_type(DataForm* form, const char* const tag)
     return FIELD_UNKNOWN;
 }
 
+/**
+ * @brief Set or replace the value of a form field.
+ */
 void
 form_set_value(DataForm* form, const char* const tag, char* value)
 {
@@ -493,6 +527,10 @@ form_set_value(DataForm* form, const char* const tag, char* value)
     }
 }
 
+
+/**
+ * @brief Append a new value to a multi-value form field.
+ */
 void
 form_add_value(DataForm* form, const char* const tag, char* value)
 {
@@ -518,6 +556,11 @@ form_add_value(DataForm* form, const char* const tag, char* value)
     }
 }
 
+/**
+ * @brief Append a new value to a multi-value field if not already present.
+ *
+ * @return TRUE if the value was added, FALSE if it was a duplicate.
+ */
 gboolean
 form_add_unique_value(DataForm* form, const char* const tag, char* value)
 {
@@ -549,6 +592,11 @@ form_add_unique_value(DataForm* form, const char* const tag, char* value)
     return FALSE;
 }
 
+/**
+ * @brief Remove a specific value from a multi-value field.
+ *
+ * @return TRUE if removed, FALSE if not found.
+ */
 gboolean
 form_remove_value(DataForm* form, const char* const tag, char* value)
 {
@@ -579,6 +627,10 @@ form_remove_value(DataForm* form, const char* const tag, char* value)
     return FALSE;
 }
 
+
+/**
+ * @brief Remove a value from a multi-line text field by index (1-based).
+ */
 gboolean
 form_remove_text_multi_value(DataForm* form, const char* const tag, int index)
 {
@@ -611,6 +663,9 @@ form_remove_text_multi_value(DataForm* form, const char* const tag, int index)
     return FALSE;
 }
 
+/**
+ * @brief Get the number of values stored in a given field.
+ */
 int
 form_get_value_count(DataForm* form, const char* const tag)
 {
@@ -633,6 +688,9 @@ form_get_value_count(DataForm* form, const char* const tag)
     return 0;
 }
 
+/**
+ * @brief Check if a list field contains a specific option value.
+ */
 gboolean
 form_field_contains_option(DataForm* form, const char* const tag, char* value)
 {
@@ -658,6 +716,9 @@ form_field_contains_option(DataForm* form, const char* const tag, char* value)
     return FALSE;
 }
 
+/**
+ * @brief Return the FormField structure matching the tag, or NULL if not found.
+ */
 FormField*
 form_get_field_by_tag(DataForm* form, const char* const tag)
 {
@@ -675,6 +736,9 @@ form_get_field_by_tag(DataForm* form, const char* const tag)
     return NULL;
 }
 
+/**
+ * @brief Retrieve the autocomplete object for a field’s values by tag.
+ */
 Autocomplete
 form_get_value_ac(DataForm* form, const char* const tag)
 {
@@ -692,6 +756,9 @@ form_get_value_ac(DataForm* form, const char* const tag)
     return NULL;
 }
 
+/**
+ * @brief Reset autocomplete suggestions for all tags and field values.
+ */
 void
 form_reset_autocompleters(DataForm* form)
 {
