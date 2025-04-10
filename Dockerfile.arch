@@ -1,6 +1,6 @@
 FROM archlinux
 
-RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
+RUN pacman -Syu --noconfirm && pacman -Sy --needed --noconfirm \
   autoconf \
   autoconf-archive \
   automake \
@@ -19,7 +19,7 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   libgcrypt \
   libmicrohttpd \
   libnotify \
-  libsignal-protocol-c \
+  libomemo-c \
   libotr \
   libtool \
   libxss \
