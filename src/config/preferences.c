@@ -600,7 +600,7 @@ prefs_get_string_with_locale(preference_t pref, gchar* locale)
  * @param new_value The new string value to set. Pass NULL to remove the key.
  */
 void
-prefs_set_string(preference_t pref, gchar* new_value)
+prefs_set_string(preference_t pref, const gchar* new_value)
 {
     const char* group = _get_group(pref);
     const char* key = _get_key(pref);

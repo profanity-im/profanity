@@ -1190,7 +1190,8 @@ static const struct cmd_t command_defs[] = {
               "Time formats are strings supported by g_date_time_format. "
               "See https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format for more details. "
               "Setting the format to an unsupported string, will display the string. "
-              "If the format contains spaces, it must be surrounded with double quotes.")
+              "If the format contains spaces, it must be surrounded with double quotes. "
+              "It is possible to pass format as 'iso8601' in order to set the time format according to ISO-8601 (only local time, without Time zone designator).")
       CMD_ARGS(
               { "console set <format>", "Set time format for console window." },
               { "console off", "Do not show time in console window." },
@@ -1216,7 +1217,8 @@ static const struct cmd_t command_defs[] = {
               "/time xml off",
               "/time statusbar set %H:%M",
               "/time lastactivity set \"%d-%m-%y %H:%M:%S\"",
-              "/time all set \"%d-%m-%y %H:%M:%S\"")
+              "/time all set \"%d-%m-%y %H:%M:%S\"",
+              "/time all set iso8601")
     },
 
     { CMD_PREAMBLE("/inpblock",

@@ -701,11 +701,12 @@ win_page_down(ProfWin* window, int scroll_size)
             auto_gchar gchar* start = g_date_time_format_iso8601(last_entry->time);
             GDateTime* now = g_date_time_new_now_local();
             gchar* end_date = g_date_time_format_iso8601(now);
+            g_date_time_unref(now);
             if (*scroll_state != WIN_SCROLL_REACHED_BOTTOM && !chatwin_db_history((ProfChatWin*)window, start, end_date, FALSE)) {
                 *scroll_state = WIN_SCROLL_REACHED_BOTTOM;
+            } else if (*scroll_state == WIN_SCROLL_REACHED_BOTTOM) {
+                g_free(end_date);
             }
-
-            g_date_time_unref(now);
 
             int offset = last_entry->y_end_pos - 1;
             *page_start = offset - page_space + scroll_size;

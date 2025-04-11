@@ -5297,217 +5297,67 @@ cmd_wrap(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_time(ProfWin* window, const char* const command, gchar** args)
 {
-    if (g_strcmp0(args[0], "lastactivity") == 0) {
+    const struct time_preferences
+    {
+        preference_t pref;
+        const char *name, *description;
+    } time_prefs[] = {
+        { .pref = PREF_TIME_LASTACTIVITY, .name = "lastactivity", .description = "Last activity" },
+        { .pref = PREF_TIME_CONSOLE, .name = "console", .description = "Console" },
+        { .pref = PREF_TIME_STATUSBAR, .name = "statusbar", .description = "Status bar" },
+        { .pref = PREF_TIME_CHAT, .name = "chat", .description = "Chat" },
+        { .pref = PREF_TIME_MUC, .name = "muc", .description = "MUC" },
+        { .pref = PREF_TIME_CONFIG, .name = "config", .description = "Config" },
+        { .pref = PREF_TIME_PRIVATE, .name = "private", .description = "Private chat" },
+        { .pref = PREF_TIME_XMLCONSOLE, .name = "xml", .description = "XML Console" },
+        { .pref = PREF_TIME_VCARD, .name = "vcard", .description = "vCard" },
+    };
+    gboolean redraw = FALSE;
+    gboolean set_all = g_strcmp0(args[0], "all") == 0;
+    for (size_t n = 0; n < ARRAY_SIZE(time_prefs); ++n) {
+        if (!set_all && g_strcmp0(args[0], time_prefs[n].name) != 0)
+            continue;
+        const struct time_preferences* tp = &time_prefs[n];
         if (args[1] == NULL) {
-            auto_gchar gchar* format = prefs_get_string(PREF_TIME_LASTACTIVITY);
-            cons_show("Last activity time format: '%s'.", format);
-            return TRUE;
+            if (set_all) {
+                cons_time_setting();
+                return TRUE;
+            }
+            auto_gchar gchar* format = prefs_get_string(tp->pref);
+            cons_show("%s time format: '%s'.", tp->description, format);
         } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(PREF_TIME_LASTACTIVITY, args[2]);
-            cons_show("Last activity time format set to '%s'.", args[2]);
-            ui_redraw();
-            return TRUE;
+            const struct format_strings
+            {
+                const char *name, *format;
+            } format_strings[] = {
+                { .name = "iso8601", .format = "%Y-%m-%dT%H:%M:%S" },
+            };
+            const gchar* set_arg = args[2];
+            for (size_t m = 0; m < ARRAY_SIZE(format_strings); ++m) {
+                if (g_strcmp0(args[2], format_strings[m].name) == 0) {
+                    set_arg = format_strings[m].format;
+                    break;
+                }
+            }
+            prefs_set_string(tp->pref, set_arg);
+            cons_show("%s time format set to '%s'.", tp->description, args[2]);
+            redraw = TRUE;
         } else if (g_strcmp0(args[1], "off") == 0) {
-            cons_show("Last activity time cannot be disabled.");
-            ui_redraw();
-            return TRUE;
+            if (tp->pref == PREF_TIME_LASTACTIVITY) {
+                cons_show("%s time display cannot be disabled.", tp->description);
+            } else {
+                prefs_set_string(tp->pref, "off");
+                cons_show("%s time display disabled.", tp->description);
+                redraw = TRUE;
+            }
         } else {
             cons_bad_cmd_usage(command);
             return TRUE;
         }
-    } else if (g_strcmp0(args[0], "statusbar") == 0) {
-        if (args[1] == NULL) {
-            auto_gchar gchar* format = prefs_get_string(PREF_TIME_STATUSBAR);
-            cons_show("Status bar time format: '%s'.", format);
-            return TRUE;
-        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(PREF_TIME_STATUSBAR, args[2]);
-            cons_show("Status bar time format set to '%s'.", args[2]);
-            ui_redraw();
-            return TRUE;
-        } else if (g_strcmp0(args[1], "off") == 0) {
-            prefs_set_string(PREF_TIME_STATUSBAR, "off");
-            cons_show("Status bar time display disabled.");
-            ui_redraw();
-            return TRUE;
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-    } else if (g_strcmp0(args[0], "console") == 0) {
-        if (args[1] == NULL) {
-            auto_gchar gchar* format = prefs_get_string(PREF_TIME_CONSOLE);
-            cons_show("Console time format: '%s'.", format);
-            return TRUE;
-        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(PREF_TIME_CONSOLE, args[2]);
-            cons_show("Console time format set to '%s'.", args[2]);
-            wins_resize_all();
-            return TRUE;
-        } else if (g_strcmp0(args[1], "off") == 0) {
-            prefs_set_string(PREF_TIME_CONSOLE, "off");
-            cons_show("Console time display disabled.");
-            wins_resize_all();
-            return TRUE;
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-    } else if (g_strcmp0(args[0], "chat") == 0) {
-        if (args[1] == NULL) {
-            auto_gchar gchar* format = prefs_get_string(PREF_TIME_CHAT);
-            cons_show("Chat time format: '%s'.", format);
-            return TRUE;
-        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(PREF_TIME_CHAT, args[2]);
-            cons_show("Chat time format set to '%s'.", args[2]);
-            wins_resize_all();
-            return TRUE;
-        } else if (g_strcmp0(args[1], "off") == 0) {
-            prefs_set_string(PREF_TIME_CHAT, "off");
-            cons_show("Chat time display disabled.");
-            wins_resize_all();
-            return TRUE;
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-    } else if (g_strcmp0(args[0], "muc") == 0) {
-        if (args[1] == NULL) {
-            auto_gchar gchar* format = prefs_get_string(PREF_TIME_MUC);
-            cons_show("MUC time format: '%s'.", format);
-            return TRUE;
-        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(PREF_TIME_MUC, args[2]);
-            cons_show("MUC time format set to '%s'.", args[2]);
-            wins_resize_all();
-            return TRUE;
-        } else if (g_strcmp0(args[1], "off") == 0) {
-            prefs_set_string(PREF_TIME_MUC, "off");
-            cons_show("MUC time display disabled.");
-            wins_resize_all();
-            return TRUE;
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-    } else if (g_strcmp0(args[0], "config") == 0) {
-        if (args[1] == NULL) {
-            auto_gchar gchar* format = prefs_get_string(PREF_TIME_CONFIG);
-            cons_show("config time format: '%s'.", format);
-            return TRUE;
-        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(PREF_TIME_CONFIG, args[2]);
-            cons_show("config time format set to '%s'.", args[2]);
-            wins_resize_all();
-            return TRUE;
-        } else if (g_strcmp0(args[1], "off") == 0) {
-            prefs_set_string(PREF_TIME_CONFIG, "off");
-            cons_show("config time display disabled.");
-            wins_resize_all();
-            return TRUE;
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-    } else if (g_strcmp0(args[0], "private") == 0) {
-        if (args[1] == NULL) {
-            auto_gchar gchar* format = prefs_get_string(PREF_TIME_PRIVATE);
-            cons_show("Private chat time format: '%s'.", format);
-            return TRUE;
-        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(PREF_TIME_PRIVATE, args[2]);
-            cons_show("Private chat time format set to '%s'.", args[2]);
-            wins_resize_all();
-            return TRUE;
-        } else if (g_strcmp0(args[1], "off") == 0) {
-            prefs_set_string(PREF_TIME_PRIVATE, "off");
-            cons_show("Private chat time display disabled.");
-            wins_resize_all();
-            return TRUE;
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-    } else if (g_strcmp0(args[0], "xml") == 0) {
-        if (args[1] == NULL) {
-            auto_gchar gchar* format = prefs_get_string(PREF_TIME_XMLCONSOLE);
-            cons_show("XML Console time format: '%s'.", format);
-            return TRUE;
-        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(PREF_TIME_XMLCONSOLE, args[2]);
-            cons_show("XML Console time format set to '%s'.", args[2]);
-            wins_resize_all();
-            return TRUE;
-        } else if (g_strcmp0(args[1], "off") == 0) {
-            prefs_set_string(PREF_TIME_XMLCONSOLE, "off");
-            cons_show("XML Console time display disabled.");
-            wins_resize_all();
-            return TRUE;
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-    } else if (g_strcmp0(args[0], "all") == 0) {
-        if (args[1] == NULL) {
-            cons_time_setting();
-            return TRUE;
-        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(PREF_TIME_CONSOLE, args[2]);
-            cons_show("Console time format set to '%s'.", args[2]);
-            prefs_set_string(PREF_TIME_CHAT, args[2]);
-            cons_show("Chat time format set to '%s'.", args[2]);
-            prefs_set_string(PREF_TIME_MUC, args[2]);
-            cons_show("MUC time format set to '%s'.", args[2]);
-            prefs_set_string(PREF_TIME_CONFIG, args[2]);
-            cons_show("config time format set to '%s'.", args[2]);
-            prefs_set_string(PREF_TIME_PRIVATE, args[2]);
-            cons_show("Private chat time format set to '%s'.", args[2]);
-            prefs_set_string(PREF_TIME_XMLCONSOLE, args[2]);
-            cons_show("XML Console time format set to '%s'.", args[2]);
-            wins_resize_all();
-            return TRUE;
-        } else if (g_strcmp0(args[1], "off") == 0) {
-            prefs_set_string(PREF_TIME_CONSOLE, "off");
-            cons_show("Console time display disabled.");
-            prefs_set_string(PREF_TIME_CHAT, "off");
-            cons_show("Chat time display disabled.");
-            prefs_set_string(PREF_TIME_MUC, "off");
-            cons_show("MUC time display disabled.");
-            prefs_set_string(PREF_TIME_CONFIG, "off");
-            cons_show("config time display disabled.");
-            prefs_set_string(PREF_TIME_PRIVATE, "off");
-            cons_show("config time display disabled.");
-            prefs_set_string(PREF_TIME_XMLCONSOLE, "off");
-            cons_show("XML Console time display disabled.");
-            ui_redraw();
-            return TRUE;
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-    } else if (g_strcmp0(args[0], "vcard") == 0) {
-        if (args[1] == NULL) {
-            auto_gchar gchar* format = prefs_get_string(PREF_TIME_VCARD);
-            cons_show("vCard time format: %s", format);
-            return TRUE;
-        } else if (g_strcmp0(args[1], "set") == 0 && args[2] != NULL) {
-            prefs_set_string(PREF_TIME_VCARD, args[2]);
-            cons_show("vCard time format set to '%s'.", args[2]);
-            ui_redraw();
-            return TRUE;
-        } else if (g_strcmp0(args[1], "off") == 0) {
-            cons_show("vCard time cannot be disabled.");
-            ui_redraw();
-            return TRUE;
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-    } else {
-        cons_bad_cmd_usage(command);
-        return TRUE;
     }
+    if (redraw)
+        ui_redraw();
+    return TRUE;
 }
 
 gboolean
