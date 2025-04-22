@@ -841,7 +841,8 @@ static const struct cmd_t command_defs[] = {
       CMD_SYN(
               "/sendfile <file>")
       CMD_DESC(
-              "Send a file using XEP-0363 HTTP file transfer.")
+              "Send a file using XEP-0363 HTTP file transfer. "
+              "If you are in an OMEMO session then the file will be encrypted (XEP-0454) as well.")
       CMD_ARGS(
               { "<file>", "Path to the file." })
       CMD_EXAMPLES(
