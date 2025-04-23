@@ -258,22 +258,20 @@ GList*
 wins_get_private_chats(const char* const roomjid)
 {
     GList* result = NULL;
-    GString* prefix = g_string_new(roomjid);
-    g_string_append(prefix, "/");
+    auto_gchar gchar* prefix = g_strdup_printf("%s/", roomjid);
     GList* curr = values;
 
     while (curr) {
         ProfWin* window = curr->data;
         if (window->type == WIN_PRIVATE) {
             ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
-            if (roomjid == NULL || g_str_has_prefix(privatewin->fulljid, prefix->str)) {
+            if (roomjid == NULL || g_str_has_prefix(privatewin->fulljid, prefix)) {
                 result = g_list_append(result, privatewin);
             }
         }
         curr = g_list_next(curr);
     }
 
-    g_string_free(prefix, TRUE);
     return result;
 }
 
@@ -1067,19 +1065,13 @@ wins_create_summary(gboolean unread)
     while (curr) {
         ProfWin* window = g_hash_table_lookup(windows, curr->data);
         if (!unread || (unread && win_unread(window) > 0)) {
-            GString* line = g_string_new("");
-
             int ui_index = GPOINTER_TO_INT(curr->data);
             auto_gchar gchar* winstring = win_to_string(window);
             if (!winstring) {
-                g_string_free(line, TRUE);
                 continue;
             }
-
-            g_string_append_printf(line, "%d: %s", ui_index, winstring);
-
-            result = g_slist_append(result, strdup(line->str));
-            g_string_free(line, TRUE);
+            gchar* line = g_strdup_printf("%d: %s", ui_index, winstring);
+            result = g_slist_append(result, line);
         }
 
         curr = g_list_next(curr);
@@ -1108,19 +1100,13 @@ wins_create_summary_attention()
             has_attention = mucwin->has_attention;
         }
         if (has_attention) {
-            GString* line = g_string_new("");
-
             int ui_index = GPOINTER_TO_INT(curr->data);
             auto_gchar gchar* winstring = win_to_string(window);
             if (!winstring) {
-                g_string_free(line, TRUE);
                 continue;
             }
-
-            g_string_append_printf(line, "%d: %s", ui_index, winstring);
-
-            result = g_slist_append(result, strdup(line->str));
-            g_string_free(line, TRUE);
+            gchar* line = g_strdup_printf("%d: %s", ui_index, winstring);
+            result = g_slist_append(result, line);
         }
         curr = g_list_next(curr);
     }
