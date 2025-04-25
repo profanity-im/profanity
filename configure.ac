@@ -331,13 +331,13 @@ dnl feature: omemo
 AM_CONDITIONAL([BUILD_OMEMO], [false])
 if test "x$enable_omemo" != xno; then
     OMEMO_LIBS=""
-    PKG_CHECK_MODULES([libsignal], [libsignal-protocol-c >= 2.3.2],
-        [OMEMO_LIBS="-lsignal-protocol-c"
+    PKG_CHECK_MODULES([libomemo], [libomemo-c],
+        [OMEMO_LIBS="-lomemo-c"
          AC_CHECK_LIB([gcrypt], [gcry_md_extract],
              [OMEMO_LIBS="-lgcrypt $OMEMO_LIBS"
               AM_CONDITIONAL([BUILD_OMEMO], [true])],
              [AC_MSG_NOTICE([gcrypt >= 1.7.0 not found, OMEMO support not enabled])])],
-        [AC_MSG_NOTICE([libsignal-protocol-c >= 2.3.2 not found, OMEMO support not enabled])])
+        [AC_MSG_NOTICE([libomemo-c not found, OMEMO support not enabled])])
 
     AM_COND_IF([BUILD_OMEMO],
         [AC_DEFINE([HAVE_OMEMO], [1], [Have OMEMO])
