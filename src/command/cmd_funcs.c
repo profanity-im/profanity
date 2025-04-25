@@ -5233,54 +5233,43 @@ cmd_console(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_presence(ProfWin* window, const char* const command, gchar** args)
 {
-    if (strcmp(args[0], "console") != 0 && strcmp(args[0], "chat") != 0 && strcmp(args[0], "room") != 0 && strcmp(args[0], "titlebar") != 0) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
     if (strcmp(args[0], "titlebar") == 0) {
         _cmd_set_boolean_preference(args[1], "Contact presence", PREF_PRESENCE);
         return TRUE;
     }
 
-    if (strcmp(args[1], "all") != 0 && strcmp(args[1], "online") != 0 && strcmp(args[1], "none") != 0) {
+    const struct presence_preferences
+    {
+        preference_t pref;
+        const char *name, *description;
+    } presence_prefs[] = {
+        { .pref = PREF_STATUSES_CONSOLE, .name = "console", .description = "the console" },
+        { .pref = PREF_STATUSES_CHAT, .name = "chat", .description = "chat windows" },
+        { .pref = PREF_STATUSES_MUC, .name = "room", .description = "chat room windows" },
+    };
+    size_t n = 0;
+    for (; n < ARRAY_SIZE(presence_prefs); ++n) {
+        const struct presence_preferences* pp = &presence_prefs[n];
+        if (g_strcmp0(args[0], pp->name) != 0)
+            continue;
+        if (strcmp(args[1], "all") == 0) {
+            cons_show("All presence updates will appear in %s.", pp->description);
+        } else if (strcmp(args[1], "online") == 0) {
+            cons_show("Only %s presence updates will appear in %s.",
+                      pp->pref == PREF_STATUSES_MUC ? "join/leave" : "online/offline",
+                      pp->description);
+        } else if (strcmp(args[1], "none") == 0) {
+            cons_show("Presence updates will not appear in %s.", pp->description);
+        } else {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+        prefs_set_string(pp->pref, args[1]);
+        break;
+    }
+    if (n == ARRAY_SIZE(presence_prefs)) {
         cons_bad_cmd_usage(command);
-        return TRUE;
     }
-
-    if (strcmp(args[0], "console") == 0) {
-        prefs_set_string(PREF_STATUSES_CONSOLE, args[1]);
-        if (strcmp(args[1], "all") == 0) {
-            cons_show("All presence updates will appear in the console.");
-        } else if (strcmp(args[1], "online") == 0) {
-            cons_show("Only online/offline presence updates will appear in the console.");
-        } else {
-            cons_show("Presence updates will not appear in the console.");
-        }
-    }
-
-    if (strcmp(args[0], "chat") == 0) {
-        prefs_set_string(PREF_STATUSES_CHAT, args[1]);
-        if (strcmp(args[1], "all") == 0) {
-            cons_show("All presence updates will appear in chat windows.");
-        } else if (strcmp(args[1], "online") == 0) {
-            cons_show("Only online/offline presence updates will appear in chat windows.");
-        } else {
-            cons_show("Presence updates will not appear in chat windows.");
-        }
-    }
-
-    if (strcmp(args[0], "room") == 0) {
-        prefs_set_string(PREF_STATUSES_MUC, args[1]);
-        if (strcmp(args[1], "all") == 0) {
-            cons_show("All presence updates will appear in chat room windows.");
-        } else if (strcmp(args[1], "online") == 0) {
-            cons_show("Only join/leave presence updates will appear in chat room windows.");
-        } else {
-            cons_show("Presence updates will not appear in chat room windows.");
-        }
-    }
-
     return TRUE;
 }
 
