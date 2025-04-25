@@ -5314,7 +5314,8 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
     };
     gboolean redraw = FALSE;
     gboolean set_all = g_strcmp0(args[0], "all") == 0;
-    for (size_t n = 0; n < ARRAY_SIZE(time_prefs); ++n) {
+    size_t n = 0;
+    for (; n < ARRAY_SIZE(time_prefs); ++n) {
         if (!set_all && g_strcmp0(args[0], time_prefs[n].name) != 0)
             continue;
         const struct time_preferences* tp = &time_prefs[n];
@@ -5354,6 +5355,9 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+    }
+    if (!set_all && n == ARRAY_SIZE(time_prefs)) {
+        cons_bad_cmd_usage(command);
     }
     if (redraw)
         ui_redraw();
