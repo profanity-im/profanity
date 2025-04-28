@@ -275,7 +275,7 @@ roster_remove(const char* const name, const char* const barejid)
     if (contact) {
         GList* resources = p_contact_get_available_resources(contact);
         while (resources) {
-            auto_gchar gchar* fulljid = g_strdup_printf("%s/%s", barejid, resources->data);
+            auto_gchar gchar* fulljid = g_strdup_printf("%s/%s", barejid, (char*)resources->data);
             autocomplete_remove(roster->fulljid_ac, fulljid);
             resources = g_list_next(resources);
         }
