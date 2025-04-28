@@ -140,6 +140,9 @@ aesgcm_file_get(void* userdata)
                                    "Downloading '%s' failed: Failed to decrypt "
                                    "file (%s).",
                                    https_url, gcry_strerror(crypt_res));
+    } else {
+        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
+                                   "Decrypted file saved to '%s'", aesgcm_dl->filename);
     }
 
     if (aesgcm_dl->cmd_template != NULL) {
