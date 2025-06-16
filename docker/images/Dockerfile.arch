@@ -1,0 +1,13 @@
+FROM archlinux
+
+# Severely simplified call. Compilation steps, build issues, etc., have already
+# been dealt with by either Arch devs or community it would seem.
+# 
+# This may not be the goal of this build system (for profanity devs), but included
+# for thoroughness. 
+RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
+  profanity 
+
+# Standard final CMD format. 
+CMD ["/usr/bin/profanity"]
+

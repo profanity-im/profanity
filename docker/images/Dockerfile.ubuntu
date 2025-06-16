@@ -1,0 +1,58 @@
+FROM ubuntu:latest
+
+ENV DEBIAN_FRONTEND="noninteractive"
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+  autoconf \
+  autoconf-archive \
+  automake \
+  expect \
+  gcc \
+  git \
+  libcmocka-dev \
+  libcurl3-dev \
+  libgcrypt-dev \
+  libglib2.0-dev \
+  libgpgme11-dev \
+  libgtk2.0-dev \
+  libmicrohttpd-dev \
+  libncursesw5-dev \
+  libnotify-dev \
+  libotr5-dev \
+  libreadline-dev \
+  libsignal-protocol-c-dev \
+  libssl-dev \
+  libtool \
+  libxss-dev \
+  make \
+  pkg-config \
+  python3-dev \
+  python-dev-is-python3 \
+  valgrind \
+  libsqlite3-dev \
+  libgdk-pixbuf-2.0-dev \
+  libqrencode-dev
+
+# Start in a logical home
+WORKDIR /usr/src
+
+# Run clone commands at the same time to minimize WORKDIR shifts later.
+# Cluster run steps with && where possible. 
+RUN git clone -c http.sslverify=false https://github.com/strophe/libstrophe libstrophe && \
+  git clone -c http.sslverify=false https://github.com/profanity-im/profanity.git profanity
+
+WORKDIR /usr/src/libstrophe
+RUN ./bootstrap.sh && ./configure --prefix=/usr && make && make install
+
+WORKDIR /usr/src/profanity
+RUN ./bootstrap.sh && ./configure --prefix=/usr && make && make install
+
+# Source can be deleted obviously, after install
+WORKDIR /usr/src
+RUN rm -rf libstrophe profanity /usr/share/doc /usr/share/man
+
+# Allows the user to execute the external command: 
+#   docker(/podman) run -it profanity
+CMD ["/usr/bin/profanity"]
+
+
