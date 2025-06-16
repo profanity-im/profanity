@@ -35,9 +35,10 @@ docker buildx build -t profanity.debian -f ./Dockerfile.debian .
 **Podman build vs. Buildah**
 
 Notes 
-	podman has moved sub-functions of the "build" sub-command to builah. This is to
+	podman has moved sub-functions of the "build" sub-command to buildah. This is to
 	separate domains of function to their respective code bases: Podman starts .. 
-	images, therefore it should not build them also. 
+	images, therefore it should not build them also. That said, the classic command 
+    provided as an example: 
 
 podman build -t profanity.debian -f ./Dockerfile.debian .
 
@@ -47,4 +48,5 @@ buildah build -t profanity.debian -f ./Dockerfile.debian .
 
 ## Run the image
 
-Please refer to the folder "../run-scripts" for example scripts and README.md. 
+Please refer to the folder "../run-scripts" for example run script and README.md.
+
