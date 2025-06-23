@@ -484,7 +484,7 @@ cons_show_wins(gboolean unread)
         }
         curr = g_slist_next(curr);
     }
-    g_slist_free_full(window_strings, free);
+    g_slist_free_full(window_strings, g_free);
 
     cons_alert(NULL);
 }
@@ -505,7 +505,7 @@ cons_show_wins_attention()
         }
         curr = g_slist_next(curr);
     }
-    g_slist_free_full(window_strings, free);
+    g_slist_free_full(window_strings, g_free);
 
     cons_alert(NULL);
 }
