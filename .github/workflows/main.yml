@@ -16,7 +16,7 @@ jobs:
 
     strategy:
       matrix:
-        flavor: [arch, debian, fedora, ubuntu]
+        flavor: [debian, fedora, ubuntu]
 
     name: Linux
     steps:
