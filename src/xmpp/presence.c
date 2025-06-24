@@ -621,7 +621,7 @@ _available_handler(xmpp_stanza_t* const stanza)
         }
         return;
     } else {
-        char* jid = jid_fulljid_or_barejid(xmpp_presence->jid);
+        const char* jid = jid_fulljid_or_barejid(xmpp_presence->jid);
         log_debug("Presence available handler fired for: %s", jid);
     }
 
@@ -632,7 +632,7 @@ _available_handler(xmpp_stanza_t* const stanza)
     XMPPCaps* caps = stanza_parse_caps(stanza);
     if ((g_strcmp0(my_jid->fulljid, xmpp_presence->jid->fulljid) != 0) && caps) {
         log_debug("Presence contains capabilities.");
-        char* jid = jid_fulljid_or_barejid(xmpp_presence->jid);
+        const char* jid = jid_fulljid_or_barejid(xmpp_presence->jid);
         _handle_caps(jid, caps);
     }
     stanza_free_caps(caps);

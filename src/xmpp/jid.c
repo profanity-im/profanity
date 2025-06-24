@@ -190,7 +190,7 @@ get_nick_from_full_jid(const char* const full_room_jid)
 /*
  * get the fulljid, fall back to the barejid
  */
-char*
+const char*
 jid_fulljid_or_barejid(Jid* jid)
 {
     if (jid->fulljid) {
