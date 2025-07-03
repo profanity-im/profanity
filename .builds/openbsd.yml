@@ -20,7 +20,7 @@ packages:
   - libassuan
   - libgpg-error
   - libgcrypt
-  - libsignal-protocol-c
+  - libomemo-c
   - sqlite3
 
 sources:
