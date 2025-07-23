@@ -76,6 +76,7 @@ static char* _add_header_footer(const char* const str, const char* const header,
 static char* _gpgme_data_to_char(gpgme_data_t data);
 static void _save_pubkeys(void);
 static ProfPGPKey* _gpgme_key_to_ProfPGPKey(gpgme_key_t key);
+static const char* _gpgme_key_get_email(gpgme_key_t key);
 
 void
 _p_gpg_free_pubkeyid(ProfPGPPubKeyId* pubkeyid)
@@ -656,7 +657,7 @@ p_gpg_decrypt(const char* const cipher)
             error = gpgme_get_key(ctx, recipient->keyid, &key, 1);
 
             if (!error && key) {
-                const char* addr = gpgme_key_get_string_attr(key, GPGME_ATTR_EMAIL, NULL, 0);
+                const char* addr = _gpgme_key_get_email(key);
                 if (addr) {
                     g_string_append(recipients_str, addr);
                 }
@@ -886,6 +887,40 @@ _gpgme_key_to_ProfPGPKey(gpgme_key_t key)
         sub = sub->next;
     }
     return p_pgpkey;
+}
+
+/**
+ * Extract the first email address from a gpgme_key_t object.
+ * This function provides backwards compatibility for both old and new GPGME versions.
+ * - GPGME < 2.0.0: Uses gpgme_key_get_string_attr (if available)
+ * - GPGME >= 2.0.0: Uses modern key->uids->email API
+ *
+ * @param key The gpgme_key_t object to extract email from.
+ * @return The first email address found in the key's user IDs, or NULL if none found.
+ *         The returned string should not be freed as it points to internal gpgme memory.
+ */
+static const char*
+_gpgme_key_get_email(gpgme_key_t key)
+{
+    if (!key) {
+        return NULL;
+    }
+
+#ifdef GPGME_ATTR_EMAIL
+    /* Use deprecated function if available (GPGME < 2.0.0) */
+    return gpgme_key_get_string_attr(key, GPGME_ATTR_EMAIL, NULL, 0);
+#else
+    /* Use modern API for GPGME >= 2.0.0 */
+    gpgme_user_id_t uid = key->uids;
+    while (uid) {
+        if (uid->email && strlen(uid->email) > 0) {
+            return uid->email;
+        }
+        uid = uid->next;
+    }
+
+    return NULL;
+#endif
 }
 
 /**
