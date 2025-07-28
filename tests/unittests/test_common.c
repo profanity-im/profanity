@@ -5,6 +5,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 void
 replace_one_substr(void** state)

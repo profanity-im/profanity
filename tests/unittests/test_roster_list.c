@@ -5,6 +5,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "xmpp/contact.h"
 #include "xmpp/roster_list.h"
