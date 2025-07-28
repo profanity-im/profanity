@@ -8565,19 +8565,20 @@ cmd_omemo_trust_mode(ProfWin* window, const char* const command, gchar** args)
 {
 #ifdef HAVE_OMEMO
 
+    auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
     if (!args[1]) {
-        cons_show("Current trust mode is %s", prefs_get_string(PREF_OMEMO_TRUST_MODE));
+        cons_show("Current trust mode is %s", trust_mode);
         return TRUE;
     }
 
     if (g_strcmp0(args[1], "manual") == 0) {
-        cons_show("Current trust mode is %s - setting to %s", prefs_get_string(PREF_OMEMO_TRUST_MODE), args[1]);
+        cons_show("Current trust mode is %s - setting to %s", trust_mode, args[1]);
         cons_show("You need to trust all OMEMO fingerprints manually");
     } else if (g_strcmp0(args[1], "firstusage") == 0) {
-        cons_show("Current trust mode is %s - setting to %s", prefs_get_string(PREF_OMEMO_TRUST_MODE), args[1]);
+        cons_show("Current trust mode is %s - setting to %s", trust_mode, args[1]);
         cons_show("The first seen OMEMO fingerprints will be trusted automatically - new keys must be trusted manually");
     } else if (g_strcmp0(args[1], "blind") == 0) {
-        cons_show("Current trust mode is %s - setting to %s", prefs_get_string(PREF_OMEMO_TRUST_MODE), args[1]);
+        cons_show("Current trust mode is %s - setting to %s", trust_mode, args[1]);
         cons_show("ALL OMEMO fingerprints will be trusted automatically");
     } else {
         cons_bad_cmd_usage(command);
