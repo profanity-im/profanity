@@ -346,9 +346,13 @@ endif
 .PHONY: my-prof.supp
 my-prof.supp:
 	@sed '/^# AUTO-GENERATED START/q' prof.supp > $@
+	@printf "\n\n# glib\n" >> $@
 	@cat /usr/share/glib-2.0/valgrind/glib.supp >> $@
+	@printf "\n\n# Python\n" >> $@
 	@wget -O- https://raw.githubusercontent.com/python/cpython/refs/tags/v`python3 --version | cut -d' ' -f2`/Misc/valgrind-python.supp >> $@
+	@printf "\n\n# gtk\n" >> $@
 	@test -z "@GTK_VERSION@" || wget -O- https://raw.githubusercontent.com/GNOME/gtk/refs/tags/@GTK_VERSION@/gtk.supp >> $@
+	@printf "\n\n# more gtk\n" >> $@
 	@test -z "@GTK_VERSION@" || cat /usr/share/gtk-3.0/valgrind/gtk.supp >> $@
 
 check-unit: tests/unittests/unittests
