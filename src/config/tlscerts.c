@@ -75,7 +75,8 @@ tlscerts_init(void)
 
     prof_add_shutdown_routine(_tlscerts_close);
 
-    load_data_keyfile(&tlscerts_prof_keyfile, FILE_TLSCERTS);
+    auto_gchar gchar* loc = files_get_data_path(FILE_TLSCERTS);
+    load_custom_keyfile_quiet(&tlscerts_prof_keyfile, loc, TRUE);
     tlscerts = tlscerts_prof_keyfile.keyfile;
 
     certs_ac = autocomplete_new();
