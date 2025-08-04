@@ -433,7 +433,7 @@ static const struct cmd_t command_defs[] = {
               { "<contact>", "The contact you wish to view information about." },
               { "<nick>", "When in a chat room, the occupant you wish to view information about." })
       CMD_EXAMPLES(
-              "/info thor@aasgard.server.org",
+              "/info thor@asgard.server.org",
               "/info heimdall")
     },
 
