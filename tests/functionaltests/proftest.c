@@ -3,10 +3,8 @@
 #include <glib.h>
 
 #include <setjmp.h>
-#include <stdarg.h>
-#include <stddef.h>
 #include <stdlib.h>
-#include <cmocka.h>
+#include "prof_cmocka.h"
 #include <stdio.h>
 #include <unistd.h>
 #include <errno.h>
