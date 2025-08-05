@@ -1662,7 +1662,7 @@ char*
 cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean previous)
 {
     unsigned int output_off = 0;
-    char* tmp;
+    char* tmp = NULL;
 
     // strip command
     char* inpcp = (char*)input + strlen(startstr);
@@ -1674,38 +1674,36 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
 
     // strip quotes
     if (*inpcp == '"') {
-        tmp = strchr(inpcp + 1, '"');
+        tmp = strrchr(inpcp + 1, '"');
         if (tmp) {
             *tmp = '\0';
         }
         tmp = strdup(inpcp + 1);
         free(inpcp);
         inpcp = tmp;
+        tmp = NULL;
     }
 
     // expand ~ to $HOME
     if (inpcp[0] == '~' && inpcp[1] == '/') {
-        tmp = g_strdup_printf("%s/%sfoo", getenv("HOME"), inpcp + 2);
-        if (!tmp) {
+        char* home = getenv("HOME");
+        if (!home) {
             free(inpcp);
             return NULL;
         }
-        output_off = strlen(getenv("HOME")) + 1;
+        tmp = g_strdup_printf("%s/%sfoo", home, inpcp + 2);
+        output_off = strlen(home) + 1;
     } else {
         tmp = g_strdup_printf("%sfoo", inpcp);
-        if (!tmp) {
-            free(inpcp);
-            return NULL;
-        }
     }
     free(inpcp);
-    inpcp = tmp;
+    if (!tmp) {
+        return NULL;
+    }
 
-    char* inpcp2 = strdup(inpcp);
-    char* foofile = strdup(basename(inpcp2));
-    char* directory = strdup(dirname(inpcp));
-    free(inpcp);
-    free(inpcp2);
+    char* foofile = strdup(basename(tmp));
+    char* directory = strdup(dirname(tmp));
+    g_free(tmp);
 
     GArray* files = g_array_new(TRUE, FALSE, sizeof(char*));
     g_array_set_clear_func(files, (GDestroyNotify)_filepath_item_free);
@@ -1724,40 +1722,26 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
                 continue;
             }
 
-            char* acstring;
+            char* acstring = NULL;
             if (output_off) {
                 tmp = g_strdup_printf("%s/%s", directory, dir->d_name);
-                if (!tmp) {
-                    free(directory);
-                    free(foofile);
-                    return NULL;
+                if (tmp) {
+                    acstring = g_strdup_printf("~/%s", tmp + output_off);
+                    g_free(tmp);
                 }
-                acstring = g_strdup_printf("~/%s", tmp + output_off);
-                if (!acstring) {
-                    free(directory);
-                    free(foofile);
-                    return NULL;
-                }
-                free(tmp);
             } else if (strcmp(directory, "/") == 0) {
                 acstring = g_strdup_printf("/%s", dir->d_name);
-                if (!acstring) {
-                    free(directory);
-                    free(foofile);
-                    return NULL;
-                }
             } else {
                 acstring = g_strdup_printf("%s/%s", directory, dir->d_name);
-                if (!acstring) {
-                    free(directory);
-                    free(foofile);
-                    return NULL;
-                }
+            }
+            if (!acstring) {
+                g_array_free(files, TRUE);
+                free(foofile);
+                free(directory);
+                return NULL;
             }
 
-            char* acstring_cpy = strdup(acstring);
-            g_array_append_val(files, acstring_cpy);
-            free(acstring);
+            g_array_append_val(files, acstring);
         }
         closedir(d);
     }
