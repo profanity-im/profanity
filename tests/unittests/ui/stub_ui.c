@@ -3,8 +3,7 @@
 #include <glib.h>
 #include <wchar.h>
 
-#include <setjmp.h>
-#include <cmocka.h>
+#include "prof_cmocka.h"
 
 #include "ui/window.h"
 #include "ui/ui.h"
