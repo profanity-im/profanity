@@ -4,6 +4,7 @@
 #include <setjmp.h>
 #include <cmocka.h>
 #include <stdlib.h>
+#include <stdint.h>
 
 #include "xmpp/chat_session.h"
 
