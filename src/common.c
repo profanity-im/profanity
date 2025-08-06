@@ -161,7 +161,7 @@ auto_close_FILE(FILE** fd)
 }
 
 static gboolean
-_load_keyfile(prof_keyfile_t* keyfile)
+_load_keyfile(prof_keyfile_t* keyfile, gboolean suppress_missing_warnings)
 {
     GError* error = NULL;
     keyfile->keyfile = g_key_file_new();
@@ -172,7 +172,12 @@ _load_keyfile(prof_keyfile_t* keyfile)
         log_warning("[Keyfile] error loading %s: %s", keyfile->filename, error->message);
         g_error_free(error);
     } else {
-        log_warning("[Keyfile] no such file: %s", keyfile->filename);
+        // Only log missing file warning if not suppressed
+        if (!suppress_missing_warnings) {
+            log_warning("[Keyfile] no such file: %s", keyfile->filename);
+        } else {
+            log_debug("[Keyfile] no such file: %s", keyfile->filename);
+        }
         g_error_free(error);
     }
     return FALSE;
@@ -195,13 +200,19 @@ load_config_keyfile(prof_keyfile_t* keyfile, const char* filename)
 gboolean
 load_custom_keyfile(prof_keyfile_t* keyfile, gchar* filename)
 {
+    return load_custom_keyfile_quiet(keyfile, filename, FALSE);
+}
+
+gboolean
+load_custom_keyfile_quiet(prof_keyfile_t* keyfile, gchar* filename, gboolean suppress_missing_warnings)
+{
     keyfile->filename = filename;
 
     if (g_file_test(keyfile->filename, G_FILE_TEST_EXISTS)) {
         g_chmod(keyfile->filename, S_IRUSR | S_IWUSR);
     }
 
-    return _load_keyfile(keyfile);
+    return _load_keyfile(keyfile, suppress_missing_warnings);
 }
 
 gboolean

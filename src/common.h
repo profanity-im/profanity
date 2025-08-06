@@ -131,6 +131,8 @@ load_config_keyfile(prof_keyfile_t* keyfile, const char* filename);
 gboolean
 load_custom_keyfile(prof_keyfile_t* keyfile, gchar* filename);
 gboolean
+load_custom_keyfile_quiet(prof_keyfile_t* keyfile, gchar* filename, gboolean suppress_missing_warnings);
+gboolean
 save_keyfile(prof_keyfile_t* keyfile);
 void
 free_keyfile(prof_keyfile_t* keyfile);

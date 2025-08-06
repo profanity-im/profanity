@@ -53,7 +53,8 @@ static gchar* account_jid = NULL;
 static void
 _bookmark_ignore_load()
 {
-    load_data_keyfile(&bookmark_ignore_prof_keyfile, FILE_BOOKMARK_AUTOJOIN_IGNORE);
+    auto_gchar gchar* loc = files_get_data_path(FILE_BOOKMARK_AUTOJOIN_IGNORE);
+    load_custom_keyfile_quiet(&bookmark_ignore_prof_keyfile, loc, TRUE);
     bookmark_ignore_keyfile = bookmark_ignore_prof_keyfile.keyfile;
 }
 
