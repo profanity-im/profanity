@@ -59,6 +59,8 @@ void autocomplete_add_unsorted(Autocomplete ac, const char* item, const gboolean
 
 // find the next item prefixed with search string
 gchar* autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, gboolean previous);
+// find the next item containing search string
+gchar* autocomplete_complete_substring(Autocomplete ac, const gchar* search_str, gboolean quote, gboolean previous);
 
 GList* autocomplete_create_list(Autocomplete ac);
 gint autocomplete_length(Autocomplete ac);

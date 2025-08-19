@@ -64,6 +64,7 @@ GSList* roster_get_contacts(roster_ord_t order);
 GSList* roster_get_contacts_online(void);
 gboolean roster_has_pending_subscriptions(void);
 char* roster_contact_autocomplete(const char* const search_str, gboolean previous, void* context);
+char* roster_contact_autocomplete_substring(const char* const search_str, gboolean previous, void* context);
 char* roster_fulljid_autocomplete(const char* const search_str, gboolean previous, void* context);
 GSList* roster_get_group(const char* const group, roster_ord_t order);
 GList* roster_get_groups(void);
