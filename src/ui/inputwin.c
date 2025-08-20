@@ -180,11 +180,15 @@ _inp_slashguard_check(void)
         return false;
     if (!prefs_get_boolean(PREF_SLASH_GUARD))
         return false;
-    if (memchr(inp_line + 1, '/', 3)) {
-        cons_show("Your text contains a slash in the first 4 characters");
-        free(inp_line);
-        inp_line = NULL;
-        return true;
+    size_t n = 1;
+    while (inp_line[n] != '\0' && n < 4) {
+        if (inp_line[n] == '/') {
+            cons_show("Your text contains a slash in the first 4 characters");
+            free(inp_line);
+            inp_line = NULL;
+            return true;
+        }
+        n++;
     }
     return false;
 }
