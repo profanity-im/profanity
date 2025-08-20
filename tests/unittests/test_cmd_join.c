@@ -1,7 +1,4 @@
-#include <stdarg.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
+#include "prof_cmocka.h"
 #include <stdlib.h>
 #include <string.h>
 #include <glib.h>

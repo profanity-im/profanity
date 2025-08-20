@@ -1,8 +1,4 @@
-#include <stdarg.h>
-#include <stddef.h>
-#include <stdint.h>
-#include <setjmp.h>
-#include <cmocka.h>
+#include "prof_cmocka.h"
 #include <stdlib.h>
 
 #include "xmpp/jid.h"

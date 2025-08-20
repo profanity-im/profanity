@@ -1,10 +1,7 @@
-#include <stdarg.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
+#include "prof_cmocka.h"
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <locale.h>

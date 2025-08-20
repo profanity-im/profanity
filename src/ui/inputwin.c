@@ -170,6 +170,29 @@ create_input_window(void)
     _inp_win_update_virtual();
 }
 
+static gboolean
+_inp_slashguard_check(void)
+{
+    if (get_password)
+        return false;
+    /* ignore empty and quoted messages */
+    if (inp_line == NULL || inp_line[0] == '\0' || inp_line[0] == '>')
+        return false;
+    if (!prefs_get_boolean(PREF_SLASH_GUARD))
+        return false;
+    size_t n = 1;
+    while (inp_line[n] != '\0' && n < 4) {
+        if (inp_line[n] == '/') {
+            cons_show("Your text contains a slash in the first 4 characters");
+            free(inp_line);
+            inp_line = NULL;
+            return true;
+        }
+        n++;
+    }
+    return false;
+}
+
 char*
 inp_readline(void)
 {
@@ -203,17 +226,7 @@ inp_readline(void)
         chat_state_idle();
     }
 
-    if (inp_line) {
-        if (!get_password && prefs_get_boolean(PREF_SLASH_GUARD)) {
-            // ignore quoted messages
-            if (strlen(inp_line) > 1 && inp_line[0] != '>') {
-                char* res = (char*)memchr(inp_line + 1, '/', 3);
-                if (res) {
-                    cons_show("Your text contains a slash in the first 4 characters");
-                    return NULL;
-                }
-            }
-        }
+    if (inp_line && !_inp_slashguard_check()) {
         char* ret = inp_line;
         inp_line = NULL;
         return ret;

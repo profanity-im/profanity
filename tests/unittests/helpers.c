@@ -1,8 +1,5 @@
-#include <setjmp.h>
-#include <stdarg.h>
-#include <stddef.h>
 #include <stdlib.h>
-#include <cmocka.h>
+#include "prof_cmocka.h"
 #include <glib.h>
 #include <stdio.h>
 #include <unistd.h>

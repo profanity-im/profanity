@@ -20,10 +20,8 @@
  *
  */
 
-#include <stdint.h>
 #include <glib.h>
-#include <setjmp.h>
-#include <cmocka.h>
+#include "prof_cmocka.h"
 
 #include "log.h"
 
