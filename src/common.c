@@ -45,6 +45,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 #include <curl/curl.h>
 #include <curl/easy.h>
@@ -199,6 +200,10 @@ load_custom_keyfile(prof_keyfile_t* keyfile, gchar* filename)
 
     if (g_file_test(keyfile->filename, G_FILE_TEST_EXISTS)) {
         g_chmod(keyfile->filename, S_IRUSR | S_IWUSR);
+    } else {
+        int fno = g_creat(keyfile->filename, S_IRUSR | S_IWUSR);
+        if (fno != -1)
+            g_close(fno, NULL);
     }
 
     return _load_keyfile(keyfile);
