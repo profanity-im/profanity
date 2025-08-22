@@ -1,0 +1,27 @@
+.TH man 1 "2025-08-22" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/sendfile
+
+.SH DESCRIPTION
+Send a file using XEP-0363 HTTP file transfer. If you are in an OMEMO session then the file will be encrypted (XEP-0454) as well.
+
+.SH SYNOPSIS
+/sendfile <file>
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fB<file>\fR
+.RS 4
+Path to the file.
+.RE
+
+.SH EXAMPLES
+/sendfile /etc/hosts
+
+.LP
+/sendfile ~/images/sweet_cat.jpg
+
+.LP

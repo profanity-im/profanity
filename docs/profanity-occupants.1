@@ -1,0 +1,125 @@
+.TH man 1 "2025-08-22" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/occupants
+
+.SH DESCRIPTION
+Show or hide room occupants, and occupants panel display settings.
+
+.SH SYNOPSIS
+/occupants show|hide [jid|offline]
+
+.LP
+/occupants char <char>|none
+
+.LP
+/occupants color on|off
+
+.LP
+/occupants default show|hide [jid|offline]
+
+.LP
+/occupants size [<percent>]
+
+.LP
+/occupants indent <indent>
+
+.LP
+/occupants header char <char>|none
+
+.LP
+/occupants wrap on|off
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBshow\fR
+.RS 4
+Show the occupants panel in current room.
+.RE
+.PP
+\fBchar <char>\fR
+.RS 4
+Prefix occupants with specified character.
+.RE
+.PP
+\fBchar none\fR
+.RS 4
+Remove occupants character prefix.
+.RE
+.PP
+\fBcolor on\fR
+.RS 4
+Enable generated color names (XEP-0392) for occupants
+.RE
+.PP
+\fBcolor off\fR
+.RS 4
+Disable generated color names (XEP-0392) for occupants
+.RE
+.PP
+\fBhide\fR
+.RS 4
+Hide the occupants panel in current room.
+.RE
+.PP
+\fBshow jid\fR
+.RS 4
+Show jid in the occupants panel in current room.
+.RE
+.PP
+\fBhide jid\fR
+.RS 4
+Hide jid in the occupants panel in current room.
+.RE
+.PP
+\fBshow offline\fR
+.RS 4
+Show offline occupants panel in current room.
+.RE
+.PP
+\fBhide offline\fR
+.RS 4
+Hide offline occupants panel in current room.
+.RE
+.PP
+\fBdefault show|hide\fR
+.RS 4
+Whether occupants are shown by default in new rooms.
+.RE
+.PP
+\fBdefault show|hide jid\fR
+.RS 4
+Whether occupants jids are shown by default in new rooms.
+.RE
+.PP
+\fBdefault show|hide offline\fR
+.RS 4
+Whether offline occupants are shown by default in new rooms.
+.RE
+.PP
+\fBsize <percent>\fR
+.RS 4
+Percentage of the screen taken by the occupants list in rooms (1-99).
+.RE
+.PP
+\fBindent <indent>\fR
+.RS 4
+Indent contact line by <indent> spaces (0 to 10).
+.RE
+.PP
+\fBheader char <char>\fR
+.RS 4
+Prefix occupants headers with specified character.
+.RE
+.PP
+\fBheader char none\fR
+.RS 4
+Remove occupants header character prefix.
+.RE
+.PP
+\fBwrap on|off\fR
+.RS 4
+Enable or disable line wrapping in occupants panel.
+.RE

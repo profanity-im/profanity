@@ -1,0 +1,41 @@
+.TH man 1 "2025-08-22" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/color
+
+.SH DESCRIPTION
+Settings for consistent color generation for nicks (XEP-0392). Including corrections for Color Vision Deficiencies. Your terminal needs to support 256 colors.
+
+.SH SYNOPSIS
+/color on|off|redgreen|blue
+
+.LP
+/color own on|off
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBon|off|redgreen|blue\fR
+.RS 4
+Enable or disable nick colorization for MUC nicks. 'redgreen' is for people with red/green blindness and 'blue' for people with blue blindness.
+.RE
+.PP
+\fBown on|off\fR
+.RS 4
+Enable color generation for own nick. If disabled the color from the color from the theme ('me') will get used.
+.RE
+
+.SH EXAMPLES
+/color off
+
+.LP
+/color on
+
+.LP
+/color blue
+
+.LP
+/color own off
+
+.LP

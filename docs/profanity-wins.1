@@ -1,0 +1,46 @@
+.TH man 1 "2025-08-22" "0.15.0" "Profanity XMPP client"
+
+.SH NAME
+/wins
+
+.SH DESCRIPTION
+Manage windows. Passing no argument will list all currently active windows and information about their usage.
+
+.SH SYNOPSIS
+/wins
+
+.LP
+/wins unread
+
+.LP
+/wins attention
+
+.LP
+/wins prune
+
+.LP
+/wins swap <source> <target>
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBunread\fR
+.RS 4
+List windows with unread messages.
+.RE
+.PP
+\fBattention\fR
+.RS 4
+List windows that have been marked with the attention flag (alt+v). You can toggle between marked windows with alt+m.
+.RE
+.PP
+\fBprune\fR
+.RS 4
+Close all windows with no unread messages.
+.RE
+.PP
+\fBswap <source> <target>\fR
+.RS 4
+Swap windows, target may be an empty position.
+.RE
