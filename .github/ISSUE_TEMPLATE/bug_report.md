@@ -1,3 +1,12 @@
+---
+name: Bug report
+about: Create a report
+title: ''
+labels: bug
+assignees: ''
+
+---
+
 <!--- Provide a general summary of the issue in the Title above -->
 
 <!--- More than 50 issues open? Please don't file any new feature requests -->
@@ -33,4 +42,3 @@
 * glib version
 * libstrophe version
 * Some bugs might be due to specific implementation in the server. `/serversoftware example.domain` can be helpful
-

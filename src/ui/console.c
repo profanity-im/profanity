@@ -3,7 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
- * Copyright (C) 2019 - 2024 Michael Vetter <jubalh@iodoru.org>
+ * Copyright (C) 2019 - 2025 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -391,7 +391,7 @@ cons_about(void)
     }
 
     win_println(console, THEME_DEFAULT, "-", "Copyright (C) 2012 - 2019 James Booth <boothj5web@gmail.com>.");
-    win_println(console, THEME_DEFAULT, "-", "Copyright (C) 2019 - 2024 Michael Vetter <jubalh@iodoru.org>.");
+    win_println(console, THEME_DEFAULT, "-", "Copyright (C) 2019 - 2025 Michael Vetter <jubalh@iodoru.org>.");
     win_println(console, THEME_DEFAULT, "-", "License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>");
     win_println(console, THEME_DEFAULT, "-", "");
     win_println(console, THEME_DEFAULT, "-", "This is free software; you are free to change and redistribute it.");
@@ -484,7 +484,7 @@ cons_show_wins(gboolean unread)
         }
         curr = g_slist_next(curr);
     }
-    g_slist_free_full(window_strings, free);
+    g_slist_free_full(window_strings, g_free);
 
     cons_alert(NULL);
 }
@@ -505,7 +505,7 @@ cons_show_wins_attention()
         }
         curr = g_slist_next(curr);
     }
-    g_slist_free_full(window_strings, free);
+    g_slist_free_full(window_strings, g_free);
 
     cons_alert(NULL);
 }

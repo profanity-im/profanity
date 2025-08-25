@@ -3,7 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
- * Copyright (C) 2019 - 2024 Michael Vetter <jubalh@iodoru.org>
+ * Copyright (C) 2019 - 2025 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -600,7 +600,7 @@ prefs_get_string_with_locale(preference_t pref, gchar* locale)
  * @param new_value The new string value to set. Pass NULL to remove the key.
  */
 void
-prefs_set_string(preference_t pref, gchar* new_value)
+prefs_set_string(preference_t pref, const gchar* new_value)
 {
     const char* group = _get_group(pref);
     const char* key = _get_key(pref);

@@ -201,7 +201,7 @@ roster_set_handler(xmpp_stanza_t* const stanza)
 
     // if from attribute exists and it is not current users barejid, ignore push
     const char* from = xmpp_stanza_get_from(stanza);
-    if (!equals_our_barejid(from)) {
+    if (from && !equals_our_barejid(from)) {
         log_warning("Received alleged roster push from: %s", from);
         return;
     }

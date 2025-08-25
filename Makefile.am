@@ -124,6 +124,7 @@ unittest_sources = \
 	src/event/server_events.c src/event/server_events.h \
 	src/event/client_events.c src/event/client_events.h \
 	src/ui/tray.h src/ui/tray.c \
+	tests/prof_cmocka.h \
 	tests/unittests/xmpp/stub_vcard.c \
 	tests/unittests/xmpp/stub_avatar.c \
 	tests/unittests/xmpp/stub_ox.c \
@@ -169,6 +170,7 @@ unittest_sources = \
 	tests/unittests/unittests.c
 
 functionaltest_sources = \
+	tests/prof_cmocka.h \
 	tests/functionaltests/proftest.c tests/functionaltests/proftest.h \
 	tests/functionaltests/test_connect.c tests/functionaltests/test_connect.h \
 	tests/functionaltests/test_ping.c tests/functionaltests/test_ping.h \
@@ -283,6 +285,7 @@ endif
 
 TESTS = tests/unittests/unittests
 check_PROGRAMS = tests/unittests/unittests
+tests_unittests_unittests_CPPFLAGS = -Itests/
 tests_unittests_unittests_SOURCES = $(unittest_sources)
 tests_unittests_unittests_LDADD = -lcmocka
 
@@ -346,9 +349,13 @@ endif
 .PHONY: my-prof.supp
 my-prof.supp:
 	@sed '/^# AUTO-GENERATED START/q' prof.supp > $@
+	@printf "\n\n# glib\n" >> $@
 	@cat /usr/share/glib-2.0/valgrind/glib.supp >> $@
+	@printf "\n\n# Python\n" >> $@
 	@wget -O- https://raw.githubusercontent.com/python/cpython/refs/tags/v`python3 --version | cut -d' ' -f2`/Misc/valgrind-python.supp >> $@
+	@printf "\n\n# gtk\n" >> $@
 	@test -z "@GTK_VERSION@" || wget -O- https://raw.githubusercontent.com/GNOME/gtk/refs/tags/@GTK_VERSION@/gtk.supp >> $@
+	@printf "\n\n# more gtk\n" >> $@
 	@test -z "@GTK_VERSION@" || cat /usr/share/gtk-3.0/valgrind/gtk.supp >> $@
 
 check-unit: tests/unittests/unittests

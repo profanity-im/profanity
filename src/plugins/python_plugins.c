@@ -86,10 +86,16 @@ python_get_version_number(void)
     return version_number;
 }
 
+static void
+_unref_module(PyObject* module)
+{
+    Py_XDECREF(module);
+}
+
 void
 python_env_init(void)
 {
-    loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)Py_XDECREF);
+    loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_unref_module);
 
     python_init_prof();
 

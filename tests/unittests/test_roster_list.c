@@ -1,9 +1,6 @@
 #include <glib.h>
-#include <stdarg.h>
 #include <string.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
+#include "prof_cmocka.h"
 #include <stdlib.h>
 
 #include "xmpp/contact.h"

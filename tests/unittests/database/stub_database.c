@@ -1,7 +1,7 @@
 /*
  * stub_database.c
  *
- * Copyright (C) 2020 - 2023 Michael Vetter <jubalh@iodoru.org>
+ * Copyright (C) 2020 - 2025 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -21,8 +21,7 @@
  */
 
 #include <glib.h>
-#include <setjmp.h>
-#include <cmocka.h>
+#include "prof_cmocka.h"
 
 #include "database.h"
 

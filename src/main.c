@@ -3,7 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
- * Copyright (C) 2019 - 2024 Michael Vetter <jubalh@iodoru.org>
+ * Copyright (C) 2019 - 2025 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -107,7 +107,7 @@ main(int argc, char** argv)
 
         // lets use fixed email instead of PACKAGE_BUGREPORT
         g_print("Copyright (C) 2012 - 2019 James Booth <boothj5web@gmail.com>.\n");
-        g_print("Copyright (C) 2019 - 2024 Michael Vetter <jubalh@iodoru.org>.\n");
+        g_print("Copyright (C) 2019 - 2025 Michael Vetter <jubalh@iodoru.org>.\n");
         g_print("License GPLv3+: GNU GPL version 3 or later <https://www.gnu.org/licenses/gpl.html>\n");
         g_print("\n");
         g_print("This is free software; you are free to change and redistribute it.\n");

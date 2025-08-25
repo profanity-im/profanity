@@ -1,7 +1,4 @@
-#include <stdarg.h>
-#include <stddef.h>
-#include <setjmp.h>
-#include <cmocka.h>
+#include "prof_cmocka.h"
 
 #include "common.h"
 #include "config/account.h"

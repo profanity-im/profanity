@@ -3,7 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
- * Copyright (C) 2019 - 2024 Michael Vetter <jubalh@iodoru.org>
+ * Copyright (C) 2019 - 2025 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
@@ -433,7 +433,7 @@ static const struct cmd_t command_defs[] = {
               { "<contact>", "The contact you wish to view information about." },
               { "<nick>", "When in a chat room, the occupant you wish to view information about." })
       CMD_EXAMPLES(
-              "/info thor@aasgard.server.org",
+              "/info thor@asgard.server.org",
               "/info heimdall")
     },
 
@@ -841,7 +841,8 @@ static const struct cmd_t command_defs[] = {
       CMD_SYN(
               "/sendfile <file>")
       CMD_DESC(
-              "Send a file using XEP-0363 HTTP file transfer.")
+              "Send a file using XEP-0363 HTTP file transfer. "
+              "If you are in an OMEMO session then the file will be encrypted (XEP-0454) as well.")
       CMD_ARGS(
               { "<file>", "Path to the file." })
       CMD_EXAMPLES(
@@ -1190,7 +1191,8 @@ static const struct cmd_t command_defs[] = {
               "Time formats are strings supported by g_date_time_format. "
               "See https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format for more details. "
               "Setting the format to an unsupported string, will display the string. "
-              "If the format contains spaces, it must be surrounded with double quotes.")
+              "If the format contains spaces, it must be surrounded with double quotes. "
+              "It is possible to pass format as 'iso8601' in order to set the time format according to ISO-8601 (only local time, without Time zone designator).")
       CMD_ARGS(
               { "console set <format>", "Set time format for console window." },
               { "console off", "Do not show time in console window." },
@@ -1216,7 +1218,8 @@ static const struct cmd_t command_defs[] = {
               "/time xml off",
               "/time statusbar set %H:%M",
               "/time lastactivity set \"%d-%m-%y %H:%M:%S\"",
-              "/time all set \"%d-%m-%y %H:%M:%S\"")
+              "/time all set \"%d-%m-%y %H:%M:%S\"",
+              "/time all set iso8601")
     },
 
     { CMD_PREAMBLE("/inpblock",

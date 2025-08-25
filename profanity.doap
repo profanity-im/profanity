@@ -477,6 +477,16 @@
 
     <release>
       <Version>
+        <revision>0.15.1</revision>
+        <created>2024-08-22</created>
+		<file-release rdf:resource='https://profanity-im.github.io/tarballs/profanity-0.15.1.tar.gz'/>
+      </Version>
+      <Version>
+        <revision>0.15.0</revision>
+        <created>2024-03-27</created>
+		<file-release rdf:resource='https://profanity-im.github.io/tarballs/profanity-0.15.0.tar.gz'/>
+      </Version>
+	  <Version>
         <revision>0.14.0</revision>
         <created>2023-08-03</created>
 		<file-release rdf:resource='https://profanity-im.github.io/tarballs/profanity-0.14.0.tar.gz'/>
