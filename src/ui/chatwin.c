@@ -393,7 +393,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         }
     }
 
-    if ((notify && !wins_is_current(window)) || ui_get_idle_time() > 1000) {
+    if (notify && (!wins_is_current(window) || ui_get_idle_time() > 1000))
         notify_message(display_name, num, message->plain);
     }
     plugins_post_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
