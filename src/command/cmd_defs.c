@@ -1368,7 +1368,8 @@ static const struct cmd_t command_defs[] = {
               "/notify typing on|off",
               "/notify typing current on|off",
               "/notify invite on|off",
-              "/notify sub on|off")
+              "/notify sub on|off",
+	      "/notify idle <seconds>")
       CMD_DESC(
               "Configure desktop notifications. "
               "To configure presence update messages in the console, chat and chat room windows, see '/help presence'.")
@@ -1397,7 +1398,8 @@ static const struct cmd_t command_defs[] = {
               { "typing on|off", "Notifications when contacts are typing." },
               { "typing current on|off", "Whether typing notifications are triggered for the current window." },
               { "invite on|off", "Notifications for chat room invites." },
-              { "sub on|off", "Notifications for subscription requests." })
+              { "sub on|off", "Notifications for subscription requests." },
+	          { "idle <seconds>", "Notification idle period before a notification can be sent."})
       CMD_EXAMPLES(
               "/notify chat on",
               "/notify chat text on",
