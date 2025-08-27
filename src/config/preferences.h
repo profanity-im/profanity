@@ -187,6 +187,7 @@ typedef enum {
     PREF_STROPHE_SM_RESEND,
     PREF_VCARD_PHOTO_CMD,
     PREF_STATUSBAR_TABMODE,
+    PREF_NOTIFY_IDLE
 } preference_t;
 
 typedef struct prof_alias_t
@@ -246,6 +247,8 @@ gint prefs_get_autoaway_time(void);
 void prefs_set_autoaway_time(gint value);
 gint prefs_get_autoxa_time(void);
 void prefs_set_autoxa_time(gint value);
+gint prefs_get_notify_idle(void);
+void prefs_set_notify_idle(gint value);
 
 gchar** prefs_get_plugins(void);
 void prefs_add_plugin(const char* const name);

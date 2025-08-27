@@ -397,7 +397,7 @@ sv_ev_room_message(ProfMessage* message)
     }
     mucwin->last_msg_timestamp = g_date_time_new_now_local();
 
-    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL)) {
+    if ((prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL) && !wins_is_current(window)) || ui_get_idle_time() > prefs_get_notify_idle()) {
         auto_jid Jid* jidp = jid_create(mucwin->roomjid);
         if (jidp) {
             notify_room_message(message->from_jid->resourcepart, jidp->localpart, num, message->plain);
