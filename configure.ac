@@ -95,7 +95,7 @@ PKG_CHECK_MODULES([curl], [libcurl >= 7.62.0], [],
 PKG_CHECK_MODULES([SQLITE], [sqlite3 >= 3.22.0], [],
     [AC_MSG_ERROR([sqlite3 3.22.0 or higher is required])])
 
-ACX_PTHREAD([], [AC_MSG_ERROR([pthread is required])])
+AX_PTHREAD
 AS_IF([test "x$PTHREAD_CC" != x], [ CC="$PTHREAD_CC" ])
 
 ### plugins
