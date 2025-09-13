@@ -20,7 +20,7 @@ jobs:
 
     name: Linux
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Run tests
         run: |
           docker build -f Dockerfile.${{ matrix.flavor }} -t profanity .
@@ -31,7 +31,7 @@ jobs:
     name: Check coding style
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       # if this check fails, you have to update the number of auto types known and the list of auto types in the check below
       - name: Check auto types are up-to-date
         run: |
@@ -50,7 +50,7 @@ jobs:
     name: Check spelling
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: install dependencies
         run: |
           sudo apt update
