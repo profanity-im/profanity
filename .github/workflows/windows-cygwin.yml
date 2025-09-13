@@ -1,0 +1,33 @@
+name: Windows (Cygwin) build
+
+on:
+  push:
+    branches: [ "**" ]   # run for any branch; change if you want to limit
+  pull_request:
+  workflow_dispatch:      # allows manual run from Actions tab
+
+jobs:
+  build-cygwin:
+    runs-on: windows-latest
+
+    steps:
+      - name: Normalize line endings
+        run: git config --global core.autocrlf input
+
+      - uses: actions/checkout@v4
+
+      - name: Install Cygwin with required packages
+        uses: cygwin/cygwin-install-action@master
+        with:
+          packages: >
+            autoconf automake libtool make gcc-core pkg-config autoconf-archive
+            libglib2.0-devel libcurl-devel libsqlite3-devel libreadline-devel
+            libncursesw-devel libstrophe-devel libssl-devel libexpat-devel
+
+      - name: Build (autoreconf, configure, make)
+        shell: C:\cygwin\bin\bash.exe --login -o igncr {0}
+        run: |
+          set -euxo pipefail
+          autoreconf -fi
+          ./configure
+          make -j
