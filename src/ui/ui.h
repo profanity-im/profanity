@@ -288,7 +288,7 @@ void cons_show_disco_info(const char* from, GSList* identities, GSList* features
 
 void cons_show_disco_contact_information(GHashTable* addresses);
 
-void cons_show_qrcode();
+void cons_show_qrcode(const char* const text);
 
 void cons_show_room_invite(const char* const invitor, const char* const room, const char* const reason);
 void cons_check_version(gboolean not_available_msg);
