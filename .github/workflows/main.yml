@@ -2,59 +2,85 @@ name: CI
 
 on:
   push:
-    branches: [master]
+    branches: [ master ]
   pull_request:
-    branches: [master]
+    branches: [ master ]
+  workflow_dispatch:
 
+# Keep only one run per ref/PR active
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
+# Least-privilege default token
+permissions:
+  contents: read
+
 jobs:
   linux:
+    name: Linux (${{ matrix.flavor }})
     runs-on: ubuntu-latest
-
     strategy:
+      fail-fast: false
       matrix:
-        flavor: [arch, debian, fedora, ubuntu]
-
-    name: Linux
+        flavor: [ arch, debian, fedora, ubuntu ]
     steps:
-      - uses: actions/checkout@v4
-      - name: Run tests
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build
+        env:
+          DOCKER_BUILDKIT: "1"
         run: |
-          docker build -f Dockerfile.${{ matrix.flavor }} -t profanity .
-          docker run profanity ./ci-build.sh
+          docker build -f Dockerfile.${{ matrix.flavor }} -t profanity:${{ matrix.flavor }} .
+      - name: Run CI build script inside container
+        run: |
+          docker run --rm -t profanity:${{ matrix.flavor }} ./ci-build.sh
 
   code-style:
-    runs-on: ubuntu-22.04
     name: Check coding style
+    runs-on: ubuntu-22.04
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-      # if this check fails, you have to update the number of auto types known and the list of auto types in the check below
-      - name: Check auto types are up-to-date
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # If this check fails, update the expected count or list accordingly.
+      - name: Check auto types are up-to-date (count)
+        shell: bash
         run: |
-          [[ "$(find src -type f -name '*.[ch]' -exec awk '/^#define auto_[\W]*/ {print $2}' '{}' \; | sort -u | wc -l)" == "8" ]] || exit -1
-      - name: Check auto types are initialized
+          set -euo pipefail
+          COUNT="$(find src -type f -name '*.[ch]' -exec awk '/^#define auto_[[:alnum:]_]*\b/ {print $2}' '{}' \; | sort -u | wc -l)"
+          test "$COUNT" -eq 8
+
+      - name: Check auto types are initialized (no raw declarations)
+        shell: bash
         run: |
-          grep -P 'auto_(char|gchar|gcharv|guchar|jid|sqlite|gfd|FILE)[\w *]*;$' -r src && exit -1 || true
-      - name: Run clang-format
+          set -euo pipefail
+          if grep -P 'auto_(char|gchar|gcharv|guchar|jid|sqlite|gfd|FILE)[\w *]*;$' -r src ; then
+            exit 1
+          fi
+
+      - name: Run clang-format (check only)
         uses: jidicula/clang-format-action@v4.11.0
         with:
           clang-format-version: '16'
           check-path: 'src'
 
   spell-check:
-    runs-on: ubuntu-22.04
     name: Check spelling
+    runs-on: ubuntu-22.04
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v4
-      - name: install dependencies
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install codespell
         run: |
-          sudo apt update
-          sudo apt install -y --no-install-recommends codespell
-      - name: Check spelling
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends codespell
+
+      - name: Run codespell
         run: |
-          codespell
+          # Adjust -S to skip build artifacts or vendored dirs if needed
+          codespell -q 3 -S "build,*.min.js" .
