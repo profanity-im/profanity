@@ -1,0 +1,120 @@
+name: Cygwin
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  cygwin-build:
+    runs-on: windows-latest
+    env:
+      CYGWIN: winsymlinks:nativestrict
+
+    # Use a wrapper that:
+    #  - converts the temp step path ({0}) and the workspace to POSIX with cygpath
+    #  - strips CRLF from the temporary script
+    #  - sets igncr and runs the script under Cygwin bash
+    defaults:
+      run:
+        shell: >
+          C:\tools\cygwin\bin\bash.EXE --login -eo pipefail -c
+          "p=$(/usr/bin/cygpath -au '{0}');
+           w=$(/usr/bin/cygpath -au '${{ github.workspace }}');
+           /usr/bin/sed -i 's/\r$//' \"$p\" || true;
+           set -o igncr;
+           cd \"$w\" || (/usr/bin/pwd; /usr/bin/ls -la; exit 2);
+           /usr/bin/bash -leo pipefail \"$p\""
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Cygwin with build dependencies
+        uses: egor-tensin/setup-cygwin@v4
+        with:
+          packages: >-
+            autoconf
+            automake
+            libtool
+            make
+            pkg-config
+            autoconf-archive
+            gcc-core
+            gettext-devel
+            git
+            libncursesw-devel
+            libglib2.0-devel
+            libcurl-devel
+            libreadline-devel
+            libsqlite3-devel
+            libexpat-devel
+
+      - name: Build and install libstrophe from source
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p deps && cd deps
+          git clone --depth 1 https://github.com/strophe/libstrophe.git
+          cd libstrophe
+          autoreconf -i
+          ./configure --prefix=$PWD/install
+          make -j2 install
+        # explicit shell to be extra-safe for this step
+        shell: >
+          C:\tools\cygwin\bin\bash.EXE --login -eo pipefail -c
+          "p=$(/usr/bin/cygpath -au '{0}');
+           w=$(/usr/bin/cygpath -au '${{ github.workspace }}');
+           /usr/bin/sed -i 's/\r$//' \"$p\" || true;
+           set -o igncr;
+           cd \"$w\" || (/usr/bin/pwd; /usr/bin/ls -la; exit 2);
+           /usr/bin/bash -leo pipefail \"$p\""
+
+      - name: Check repo state
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          pwd
+          ls -la
+          test -f configure.ac && echo "configure.ac present" || (echo "configure.ac missing"; exit 1)
+
+      - name: Autotools bootstrap
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          # don't fail if git is not present inside Cygwin
+          git config --global core.autocrlf false || true
+          [ -f ./bootstrap.sh ] && sed -i 's/\r$//' ./bootstrap.sh || true
+
+          if [ -x ./bootstrap.sh ]; then
+            ./bootstrap.sh
+          else
+            autoreconf -fi
+          fi
+
+      - name: Configure
+        env:
+          # ensure pkg-config can find libstrophe we built above
+          PKG_CONFIG_PATH: ${{ github.workspace }}/deps/libstrophe/install/lib/pkgconfig:$PKG_CONFIG_PATH
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          ./configure
+
+      - name: Build
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          make -j2
+
+      # Optional: non-blocking tests + upload logs for inspection (recommended while tests are unstable)
+      # - name: Run tests (collect logs)
+      #   continue-on-error: true
+      #   run: |
+      #     cd "$GITHUB_WORKSPACE"
+      #     mkdir -p test-logs
+      #     make check > test-logs/make-check.log 2>&1 || true
+      #
+      # - name: Upload test logs
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: cygwin-make-check-logs
+      #     path: test-logs/
