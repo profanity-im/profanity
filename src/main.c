@@ -93,9 +93,9 @@ main(int argc, char** argv)
     context = g_option_context_new(NULL);
     g_option_context_add_main_entries(context, entries, NULL);
     if (!g_option_context_parse(context, &argc, &argv, &error)) {
-        g_print("%s\n", error->message);
+        g_print("%s\n", PROF_GERROR_MESSAGE(error));
         g_option_context_free(context);
-        g_error_free(error);
+        PROF_GERROR_FREE(error);
         return 1;
     }
 

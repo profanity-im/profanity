@@ -81,7 +81,7 @@ _get_icons(void)
 
     auto_gchar gchar* icons_dir_s = files_get_config_path(DIR_ICONS);
     icons_dir = g_string_new(icons_dir_s);
-    GError* err = NULL;
+    auto_gerror GError* err = NULL;
 
     if (!g_file_test(icons_dir->str, G_FILE_TEST_IS_DIR)) {
         return;
@@ -109,8 +109,7 @@ _get_icons(void)
         }
         g_string_free(name, TRUE);
     } else {
-        log_error("Unable to open dir: %s", err->message);
-        g_error_free(err);
+        log_error("Unable to open dir: %s", PROF_GERROR_MESSAGE(err));
     }
     g_dir_close(dir);
     g_string_free(icons_dir, TRUE);

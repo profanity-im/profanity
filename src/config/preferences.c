@@ -89,7 +89,7 @@ _prefs_load(void)
     log_maxsize = g_key_file_get_integer(prefs, PREF_GROUP_LOGGING, "maxsize", &err);
     if (err) {
         log_maxsize = 0;
-        g_error_free(err);
+        PROF_GERROR_FREE(err);
     }
 
     // move pre 0.5.0 autoaway.time to autoaway.awaytime

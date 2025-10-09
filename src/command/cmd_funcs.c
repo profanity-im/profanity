@@ -7040,20 +7040,16 @@ cmd_plugins(ProfWin* window, const char* const command, gchar** args)
     GDir* global_cp_dir = NULL;
 
     if (access(GLOBAL_PYTHON_PLUGINS_PATH, R_OK) == 0) {
-        GError* error = NULL;
-        global_pyp_dir = g_dir_open(GLOBAL_PYTHON_PLUGINS_PATH, 0, &error);
-        if (error) {
+        global_pyp_dir = g_dir_open(GLOBAL_PYTHON_PLUGINS_PATH, 0, NULL);
+        if (global_pyp_dir == NULL) {
             log_warning("Error when trying to open global plugins path: %s", GLOBAL_PYTHON_PLUGINS_PATH);
-            g_error_free(error);
             return TRUE;
         }
     }
     if (access(GLOBAL_C_PLUGINS_PATH, R_OK) == 0) {
-        GError* error = NULL;
-        global_cp_dir = g_dir_open(GLOBAL_C_PLUGINS_PATH, 0, &error);
-        if (error) {
+        global_cp_dir = g_dir_open(GLOBAL_C_PLUGINS_PATH, 0, NULL);
+        if (global_cp_dir == NULL) {
             log_warning("Error when trying to open global plugins path: %s", GLOBAL_C_PLUGINS_PATH);
-            g_error_free(error);
             return TRUE;
         }
     }

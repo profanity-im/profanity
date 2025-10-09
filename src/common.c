@@ -161,20 +161,27 @@ auto_close_FILE(FILE** fd)
         log_error(g_strerror(errno));
 }
 
+void
+auto_free_gerror(GError** err)
+{
+    if (err == NULL)
+        return;
+
+    PROF_GERROR_FREE(*err);
+}
+
 static gboolean
 _load_keyfile(prof_keyfile_t* keyfile)
 {
-    GError* error = NULL;
+    auto_gerror GError* error = NULL;
     keyfile->keyfile = g_key_file_new();
 
     if (g_key_file_load_from_file(keyfile->keyfile, keyfile->filename, G_KEY_FILE_KEEP_COMMENTS | G_KEY_FILE_KEEP_TRANSLATIONS, &error)) {
         return TRUE;
-    } else if (error->code != G_FILE_ERROR_NOENT) {
+    } else if (error && error->code != G_FILE_ERROR_NOENT) {
         log_warning("[Keyfile] error loading %s: %s", keyfile->filename, error->message);
-        g_error_free(error);
     } else {
         log_warning("[Keyfile] no such file: %s", keyfile->filename);
-        g_error_free(error);
     }
     return FALSE;
 }
@@ -212,10 +219,9 @@ load_custom_keyfile(prof_keyfile_t* keyfile, gchar* filename)
 gboolean
 save_keyfile(prof_keyfile_t* keyfile)
 {
-    GError* error = NULL;
+    auto_gerror GError* error = NULL;
     if (!g_key_file_save_to_file(keyfile->keyfile, keyfile->filename, &error)) {
-        log_error("[Keyfile]: saving file %s failed! %s", keyfile->filename, error->message);
-        g_error_free(error);
+        log_error("[Keyfile]: saving file %s failed! %s", STR_MAYBE_NULL(keyfile->filename), PROF_GERROR_MESSAGE(error));
         return FALSE;
     }
     g_chmod(keyfile->filename, S_IRUSR | S_IWUSR);
@@ -254,11 +260,8 @@ copy_file(const char* const sourcepath, const char* const targetpath, const gboo
 {
     GFile* source = g_file_new_for_path(sourcepath);
     GFile* dest = g_file_new_for_path(targetpath);
-    GError* error = NULL;
     GFileCopyFlags flags = overwrite_existing ? G_FILE_COPY_OVERWRITE : G_FILE_COPY_NONE;
-    gboolean success = g_file_copy(source, dest, flags, NULL, NULL, NULL, &error);
-    if (error != NULL)
-        g_error_free(error);
+    gboolean success = g_file_copy(source, dest, flags, NULL, NULL, NULL, NULL);
     g_object_unref(source);
     g_object_unref(dest);
     return success;
@@ -634,7 +637,7 @@ get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const mes
 gboolean
 call_external(gchar** argv)
 {
-    GError* spawn_error;
+    auto_gerror GError* spawn_error = NULL;
     gboolean is_successful;
 
     GSpawnFlags flags = G_SPAWN_SEARCH_PATH | G_SPAWN_STDOUT_TO_DEV_NULL | G_SPAWN_STDERR_TO_DEV_NULL;
@@ -647,9 +650,7 @@ call_external(gchar** argv)
                                   &spawn_error);
     if (!is_successful) {
         auto_gchar gchar* cmd = g_strjoinv(" ", argv);
-        log_error("Spawning '%s' failed with error '%s'", cmd, spawn_error ? spawn_error->message : "Unknown, spawn_error is NULL");
-
-        g_error_free(spawn_error);
+        log_error("Spawning '%s' failed with error '%s'", cmd, PROF_GERROR_MESSAGE(spawn_error));
     }
 
     return is_successful;
