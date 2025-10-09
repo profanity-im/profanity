@@ -73,7 +73,7 @@ bookmark_ignore_on_connect(const char* const barejid)
 }
 
 void
-bookmark_ignore_on_disconnect()
+bookmark_ignore_on_disconnect(void)
 {
     free_keyfile(&bookmark_ignore_prof_keyfile);
     bookmark_ignore_keyfile = NULL;

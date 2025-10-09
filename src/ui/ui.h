@@ -268,7 +268,7 @@ void cons_show_contacts(GSList* list);
 void cons_show_roster(GSList* list);
 void cons_show_roster_group(const char* const group, GSList* list);
 void cons_show_wins(gboolean unread);
-void cons_show_wins_attention();
+void cons_show_wins_attention(void);
 gchar* cons_get_string(ProfConsoleWin* conswin);
 void cons_show_status(const char* const barejid);
 void cons_show_info(PContact pcontact);
