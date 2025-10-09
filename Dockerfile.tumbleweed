@@ -24,7 +24,7 @@ RUN zypper --non-interactive in --no-recommends \
   libmicrohttpd-devel \
   libnotify-devel \
   libotr-devel \
-  libsignal-protocol-c-devel \
+  libomemo-c-devel \
   libtool \
   libuuid-devel \
   make \
