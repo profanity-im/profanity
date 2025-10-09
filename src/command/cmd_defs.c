@@ -199,16 +199,16 @@ static const struct cmd_t command_defs[] = {
               "/tls certpath clear",
               "/tls certpath default")
       CMD_DESC(
-              "Handle TLS certificates. ")
+              "Handle TLS certificates. Certificate fingerprints use SHA256 checksums for enhanced security.")
       CMD_ARGS(
               { "allow", "Allow connection to continue with TLS certificate." },
               { "always", "Always allow connections with TLS certificate." },
               { "deny", "Abort connection." },
-              { "cert", "Show the current TLS certificate." },
-              { "cert <fingerprint>", "Show details of trusted certificate." },
+              { "cert", "Show the current TLS certificate with SHA256 fingerprint." },
+              { "cert <fingerprint>", "Show details of trusted certificate by its SHA256 fingerprint." },
               { "trust", "Add the current TLS certificate to manually trusted certificates." },
-              { "trusted", "List summary of manually trusted certificates (with '/tls always' or '/tls trust')." },
-              { "revoke <fingerprint>", "Remove a manually trusted certificate." },
+              { "trusted", "List summary of manually trusted certificates with SHA256 checksums (with '/tls always' or '/tls trust')." },
+              { "revoke <fingerprint>", "Remove a manually trusted certificate by its SHA256 fingerprint." },
               { "certpath", "Show the trusted certificate path." },
               { "certpath set <path>", "Specify filesystem path containing trusted certificates." },
               { "certpath clear", "Clear the trusted certificate path." },

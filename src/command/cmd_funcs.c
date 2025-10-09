@@ -292,11 +292,11 @@ cmd_tls_trust(ProfWin* window, const char* const command, gchar** args)
     }
     cafile_add(cert);
     if (tlscerts_exists(cert->fingerprint)) {
-        cons_show("Certificate %s already trusted.", cert->fingerprint);
+        cons_show("Certificate with SHA256 fingerprint %s already trusted.", cert->fingerprint);
         tlscerts_free(cert);
         return TRUE;
     }
-    cons_show("Adding %s to trusted certificates.", cert->fingerprint);
+    cons_show("Adding certificate with SHA256 fingerprint %s to trusted certificates.", cert->fingerprint);
     tlscerts_add(cert);
     tlscerts_free(cert);
     return TRUE;
@@ -332,9 +332,9 @@ cmd_tls_revoke(ProfWin* window, const char* const command, gchar** args)
     } else {
         gboolean res = tlscerts_revoke(args[1]);
         if (res) {
-            cons_show("Trusted certificate revoked: %s", args[1]);
+            cons_show("Trusted certificate with SHA256 fingerprint revoked: %s", args[1]);
         } else {
-            cons_show("Could not find certificate: %s", args[1]);
+            cons_show("Could not find certificate with SHA256 fingerprint: %s", args[1]);
         }
     }
     return TRUE;

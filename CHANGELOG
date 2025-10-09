@@ -1,3 +1,12 @@
+0.15.2 (TBD)
+============
+
+Changes:
+- Use SHA256 fingerprints for TLS certificate trust instead of deprecated SHA1
+  Improves security of certificate pinning and TOFU (Trust On First Use)
+- Update TLS certificate UI messages to indicate SHA256 checksums
+- Add comprehensive TLS security documentation to README
+
 0.15.1 (2025-08-22)
 ===================
 

@@ -178,9 +178,9 @@ cons_show_tlscert_summary(const TLSCertificate* cert)
         return;
     }
 
-    cons_show("Subject     : %s", cert->subject_commonname);
-    cons_show("Issuer      : %s", cert->issuer_commonname);
-    cons_show("Fingerprint : %s", cert->fingerprint);
+    cons_show("Subject            : %s", cert->subject_commonname);
+    cons_show("Issuer             : %s", cert->issuer_commonname);
+    cons_show("Fingerprint (SHA256): %s", cert->fingerprint);
 }
 
 void
@@ -260,7 +260,7 @@ cons_show_tlscert(const TLSCertificate* cert)
     cons_show("  Start               : %s", cert->notbefore);
     cons_show("  End                 : %s", cert->notafter);
 
-    cons_show("  Fingerprint         : %s", cert->fingerprint);
+    cons_show("  Fingerprint (SHA256): %s", cert->fingerprint);
 }
 
 void

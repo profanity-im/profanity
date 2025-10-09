@@ -1084,8 +1084,17 @@ _xmppcert_to_profcert(const xmpp_tlscert_t* xmpptlscert)
 {
     int version = (int)strtol(
         xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_VERSION), NULL, 10);
+    
+    // Use SHA256 fingerprint for better security (SHA1 is deprecated)
+    const char* fingerprint = xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_FINGERPRINT_SHA256);
+    
+    // Fallback to SHA1 if SHA256 is not available (for older libstrophe versions)
+    if (!fingerprint) {
+        fingerprint = xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_FINGERPRINT_SHA1);
+    }
+    
     return tlscerts_new(
-        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_FINGERPRINT_SHA1),
+        fingerprint,
         version,
         xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_SERIALNUMBER),
         xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_SUBJECT),
