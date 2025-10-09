@@ -490,7 +490,7 @@ cons_show_wins(gboolean unread)
 }
 
 void
-cons_show_wins_attention()
+cons_show_wins_attention(void)
 {
     ProfWin* console = wins_get_console();
     cons_show("");
