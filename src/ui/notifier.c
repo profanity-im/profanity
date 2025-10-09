@@ -97,14 +97,13 @@ _notify(const char* const message, int timeout, const char* const category)
         notify_notification_set_category(notification, category);
         notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
 
-        GError* error = NULL;
+        auto_gerror GError* error = NULL;
         gboolean notify_success = notify_notification_show(notification, &error);
 
         if (!notify_success) {
             log_error("Error sending desktop notification:");
             log_error("  -> Message : %s", message);
-            log_error("  -> Error   : %s", error->message);
-            g_error_free(error);
+            log_error("  -> Error   : %s", PROF_GERROR_MESSAGE(error));
         } else {
             log_debug("Notification sent.");
         }

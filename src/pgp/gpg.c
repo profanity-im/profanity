@@ -186,7 +186,7 @@ p_gpg_on_connect(const char* const barejid)
         auto_gchar gchar* keyid = g_key_file_get_string(pubkeyfile, jid, "keyid", &gerr);
         if (gerr) {
             log_error("Error loading PGP key id for %s", jid);
-            g_error_free(gerr);
+            PROF_GERROR_FREE(gerr);
         } else {
             gpgme_key_t key = NULL;
             error = gpgme_get_key(ctx, keyid, &key, 0);

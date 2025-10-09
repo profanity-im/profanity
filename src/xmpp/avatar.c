@@ -110,11 +110,11 @@ avatar_set(const char* path)
 {
     auto_char char* expanded_path = get_expanded_path(path);
 
-    GError* err = NULL;
+    auto_gerror GError* err = NULL;
     GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(expanded_path, &err);
 
     if (pixbuf == NULL) {
-        cons_show_error("An error occurred while opening %s: %s.", expanded_path, err ? err->message : "No error message given");
+        cons_show_error("An error occurred while opening %s: %s.", expanded_path, PROF_GERROR_MESSAGE(err));
         return FALSE;
     }
 
@@ -138,7 +138,7 @@ avatar_set(const char* path)
     gsize len = -1;
 
     if (!gdk_pixbuf_save_to_buffer(pixbuf, &img_data, &len, "png", &err, NULL)) {
-        cons_show_error("Unable to scale and convert avatar.");
+        cons_show_error("Unable to scale and convert avatar: %s.", PROF_GERROR_MESSAGE(err));
         return FALSE;
     }
 
@@ -342,11 +342,10 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
         g_string_append(filename, ".webp");
     }
 
-    GError* err = NULL;
+    auto_gerror GError* err = NULL;
     if (g_file_set_contents(filename->str, de, size, &err) == FALSE) {
         log_error("Unable to save picture: %s", err->message);
         cons_show("Unable to save picture %s", err->message);
-        g_error_free(err);
     } else {
         cons_show("Avatar saved as %s", filename->str);
     }

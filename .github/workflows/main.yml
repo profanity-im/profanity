@@ -35,10 +35,10 @@ jobs:
       # if this check fails, you have to update the number of auto types known and the list of auto types in the check below
       - name: Check auto types are up-to-date
         run: |
-          [[ "$(find src -type f -name '*.[ch]' -exec awk '/^#define auto_[\W]*/ {print $2}' '{}' \; | sort -u | wc -l)" == "8" ]] || exit -1
+          [[ "$(find src -type f -name '*.[ch]' -exec awk '/^#define auto_[\W]*/ {print $2}' '{}' \; | sort -u | wc -l)" == "9" ]] || exit -1
       - name: Check auto types are initialized
         run: |
-          grep -P 'auto_(char|gchar|gcharv|guchar|jid|sqlite|gfd|FILE)[\w *]*;$' -r src && exit -1 || true
+          grep -P 'auto_(char|gchar|gcharv|gerror|guchar|jid|sqlite|gfd|FILE)[\w *]*;$' -r src && exit -1 || true
       - name: Run clang-format
         uses: jidicula/clang-format-action@v4.11.0
         with:

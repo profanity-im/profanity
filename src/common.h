@@ -112,11 +112,21 @@ void auto_close_gfd(gint* fd);
 
 void auto_close_FILE(FILE** fd);
 
+void auto_free_gerror(GError** err);
+#define auto_gerror __attribute__((__cleanup__(auto_free_gerror)))
+
 #if defined(__OpenBSD__)
 #define STR_MAYBE_NULL(p) (p) ?: "(null)"
 #else
 #define STR_MAYBE_NULL(p) (p)
 #endif
+
+#define PROF_GERROR_MESSAGE(err) (err) ? (err)->message : "error message missing"
+#define PROF_GERROR_FREE(err)  \
+    do {                       \
+        if (err)               \
+            g_error_free(err); \
+    } while (0)
 
 typedef struct prof_keyfile_t
 {

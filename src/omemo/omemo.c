@@ -1426,11 +1426,10 @@ omemo_automatic_start(const char* const recipient)
 static gboolean
 _load_identity(void)
 {
-    GError* error = NULL;
+    auto_gerror GError* error = NULL;
     log_info("[OMEMO] Loading OMEMO identity");
 
     /* Device ID */
-    error = NULL;
     omemo_ctx.device_id = g_key_file_get_uint64(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, &error);
     if (error != NULL) {
         log_error("[OMEMO] cannot load device id: %s", error->message);
@@ -1439,7 +1438,6 @@ _load_identity(void)
     log_debug("[OMEMO] device id: %d", omemo_ctx.device_id);
 
     /* Registration ID */
-    error = NULL;
     omemo_ctx.registration_id = g_key_file_get_uint64(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, &error);
     if (error != NULL) {
         log_error("[OMEMO] cannot load registration id: %s", error->message);
@@ -1447,10 +1445,9 @@ _load_identity(void)
     }
 
     /* Identity key */
-    error = NULL;
     auto_gchar gchar* identity_key_public_b64 = g_key_file_get_string(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC, &error);
     if (!identity_key_public_b64) {
-        log_error("[OMEMO] cannot load identity public key: %s", error->message);
+        log_error("[OMEMO] cannot load identity public key: %s", PROF_GERROR_MESSAGE(error));
         return FALSE;
     }
 
@@ -1458,10 +1455,9 @@ _load_identity(void)
     auto_guchar guchar* identity_key_public = g_base64_decode(identity_key_public_b64, &identity_key_public_len);
     omemo_ctx.identity_key_store.public = signal_buffer_create(identity_key_public, identity_key_public_len);
 
-    error = NULL;
     auto_gchar gchar* identity_key_private_b64 = g_key_file_get_string(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PRIVATE, &error);
     if (!identity_key_private_b64) {
-        log_error("[OMEMO] cannot load identity private key: %s", error->message);
+        log_error("[OMEMO] cannot load identity private key: %s", PROF_GERROR_MESSAGE(error));
         return FALSE;
     }
 
