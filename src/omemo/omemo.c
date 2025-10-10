@@ -145,6 +145,32 @@ omemo_init(void)
     omemo_static_data.fingerprint_ac = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)autocomplete_free);
 }
 
+static gboolean
+_omemo_finalize_identity_load(ProfAccount* account)
+{
+    auto_gchar gchar* omemo_dir = files_file_in_account_data_path(DIR_OMEMO, account->jid, NULL);
+    if (!omemo_dir) {
+        log_error("[OMEMO] failed creating directory");
+        return FALSE;
+    }
+
+    if (load_custom_keyfile(&omemo_ctx.trust, g_strdup_printf("%s/%s", omemo_dir, "trust.txt"))) {
+        _load_trust();
+    }
+
+    if (load_custom_keyfile(&omemo_ctx.sessions, g_strdup_printf("%s/%s", omemo_dir, "sessions.txt"))) {
+        _load_sessions();
+    }
+
+    if (load_custom_keyfile(&omemo_ctx.knowndevices, g_strdup_printf("%s/%s", omemo_dir, "known_devices.txt"))) {
+        _load_known_devices();
+    }
+
+    omemo_devicelist_subscribe();
+
+    return TRUE;
+}
+
 void
 omemo_on_connect(ProfAccount* account)
 {
@@ -243,19 +269,7 @@ omemo_on_connect(ProfAccount* account)
             return;
     }
 
-    if (load_custom_keyfile(&omemo_ctx.trust, g_strdup_printf("%s/%s", omemo_dir, "trust.txt"))) {
-        _load_trust();
-    }
-
-    if (load_custom_keyfile(&omemo_ctx.sessions, g_strdup_printf("%s/%s", omemo_dir, "sessions.txt"))) {
-        _load_sessions();
-    }
-
-    if (load_custom_keyfile(&omemo_ctx.knowndevices, g_strdup_printf("%s/%s", omemo_dir, "known_devices.txt"))) {
-        _load_known_devices();
-    }
-
-    omemo_devicelist_subscribe();
+    _omemo_finalize_identity_load(account);
 }
 
 void
@@ -323,7 +337,8 @@ omemo_generate_crypto_materials(ProfAccount* account)
 
     omemo_identity_keyfile_save();
 
-    omemo_ctx.loaded = TRUE;
+    if ((omemo_ctx.loaded = _omemo_finalize_identity_load(account)) == FALSE)
+        return;
 
     omemo_publish_crypto_materials();
     omemo_start_sessions();
@@ -340,7 +355,7 @@ omemo_publish_crypto_materials(void)
         return;
     }
 
-    omemo_bundle_publish(true);
+    omemo_bundle_publish(TRUE);
 }
 
 static void
