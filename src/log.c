@@ -60,6 +60,7 @@ static FILE* logp;
 static gchar* mainlogfile = NULL;
 static gboolean user_provided_log = FALSE;
 static log_level_t level_filter;
+static pid_t prof_pid;
 
 static int stderr_inited;
 static log_level_t stderr_level;
@@ -198,6 +199,8 @@ log_init(log_level_t filter, char* log_file)
 
     logp = fopen(mainlogfile, "a");
     g_chmod(mainlogfile, S_IRUSR | S_IWUSR);
+
+    prof_pid = getpid();
 }
 
 const gchar*
@@ -231,7 +234,7 @@ _log_msg(log_level_t level, const char* const area, const char* const msg)
 
     auto_gchar gchar* date_fmt = g_date_time_format_iso8601(dt);
 
-    fprintf(logp, "%s: %s: %s: %s\n", date_fmt, area, level_str, msg);
+    fprintf(logp, "%s: %08d: %s: %s: %s\n", date_fmt, prof_pid, area, level_str, msg);
     g_date_time_unref(dt);
 
     fflush(logp);
