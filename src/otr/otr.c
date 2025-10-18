@@ -296,7 +296,8 @@ otr_on_message_recv(const char* const barejid, const char* const resource, const
     // check for OTR whitespace (opportunistic or always)
     if (policy == PROF_OTRPOLICY_OPPORTUNISTIC || policy == PROF_OTRPOLICY_ALWAYS) {
         if (whitespace_base) {
-            if (strstr(message, OTRL_MESSAGE_TAG_V2) || strstr(message, OTRL_MESSAGE_TAG_V1)) {
+            char* tag_position = whitespace_base + strlen(OTRL_MESSAGE_TAG_BASE);
+            if (strncmp(tag_position, OTRL_MESSAGE_TAG_V2, strlen(OTRL_MESSAGE_TAG_V2)) == 0 || strncmp(tag_position, OTRL_MESSAGE_TAG_V1, strlen(OTRL_MESSAGE_TAG_V1)) == 0) {
                 // Remove whitespace pattern for proper display in UI
                 // Handle both BASE+TAGV1/2(16+8) and BASE+TAGV1+TAGV2(16+8+8)
                 int tag_length = 24;
