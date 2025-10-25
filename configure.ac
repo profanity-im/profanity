@@ -39,7 +39,11 @@ AC_DEFINE_UNQUOTED([PACKAGE_STATUS], ["$PACKAGE_STATUS"], [Status of this build]
 AS_IF([test "x$PLATFORM" = xcygwin],
     [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
 AS_IF([test "x$PLATFORM" = xosx],
-    [AC_DEFINE([PLATFORM_OSX], [1], [OSx])])
+    [AC_DEFINE([PLATFORM_OSX], [1], [OSx])
+     # Apple silicon homebrew flags
+     AC_CHECK_FILE([/opt/homebrew/include],
+        [AM_CFLAGS="$AM_CFLAGS -I/opt/homebrew/include"
+         AM_LDFLAGS="$AM_LDFLAGS -L/opt/homebrew/lib"])])
 
 ## Environment variables
 AC_ARG_VAR([PYTHON_FRAMEWORK], [Set base directory for Python Framework])
