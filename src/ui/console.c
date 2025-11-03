@@ -2856,13 +2856,15 @@ cons_strophe_setting(void)
         }
     }
     cons_show("XEP-0198 Stream-Management                : %s", sm_setting);
-    cons_show("libstrophe Verbosity                      : %s", prefs_get_string(PREF_STROPHE_VERBOSITY));
+    auto_gchar gchar* verbosity = prefs_get_string(PREF_STROPHE_VERBOSITY);
+    cons_show("libstrophe Verbosity                      : %s", verbosity);
 }
 
 void
 cons_privacy_setting(void)
 {
-    cons_show("Database logging                                           : %s", prefs_get_string(PREF_DBLOG));
+    auto_gchar gchar* dblog = prefs_get_string(PREF_DBLOG);
+    cons_show("Database logging                                           : %s", dblog);
 
     if (prefs_get_boolean(PREF_CHLOG)) {
         cons_show("Chat logging (/logging chat)                               : ON");

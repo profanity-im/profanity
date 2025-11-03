@@ -127,7 +127,7 @@ tlscerts_list(void)
     auto_gcharv gchar** groups = g_key_file_get_groups(tlscerts, &len);
 
     for (int i = 0; i < g_strv_length(groups); i++) {
-        char* fingerprint = strdup(groups[i]);
+        char* fingerprint = groups[i];
         int version = g_key_file_get_integer(tlscerts, fingerprint, "version", NULL);
         auto_gchar gchar* serialnumber = g_key_file_get_string(tlscerts, fingerprint, "serialnumber", NULL);
         auto_gchar gchar* subjectname = g_key_file_get_string(tlscerts, fingerprint, "subjectname", NULL);
