@@ -234,6 +234,7 @@ gboolean cmd_omemo_policy(ProfWin* window, const char* const command, gchar** ar
 gboolean cmd_omemo_clear_device_list(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_omemo_qrcode(ProfWin* window, const char* const command, gchar** args);
 
+gboolean cmd_changes(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_save(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_reload(ProfWin* window, const char* const command, gchar** args);
 
