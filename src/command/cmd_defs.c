@@ -2352,6 +2352,15 @@ static const struct cmd_t command_defs[] = {
             "/omemo char *")
     },
 
+    { CMD_PREAMBLE("/changes",
+                   parse_args, 0, 0, NULL)
+      CMD_MAINFUNC(cmd_changes)
+      CMD_SYN(
+              "/changes")
+      CMD_DESC(
+              "Show changes from saved configuration file.")
+    },
+
     { CMD_PREAMBLE("/save",
                    parse_args, 0, 0, NULL)
       CMD_MAINFUNC(cmd_save)

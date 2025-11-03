@@ -8949,6 +8949,14 @@ cmd_omemo_qrcode(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_changes(ProfWin* window, const char* const command, gchar** args)
+{
+    cons_show("Show changes from saved configuration file.");
+    prefs_changes();
+    return TRUE;
+}
+
+gboolean
 cmd_save(ProfWin* window, const char* const command, gchar** args)
 {
     log_info("Saving preferences to configuration file");
