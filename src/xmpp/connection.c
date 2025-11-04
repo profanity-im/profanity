@@ -1082,6 +1082,10 @@ _connection_certfail_cb(const xmpp_tlscert_t* xmpptlscert, const char* errormsg)
 TLSCertificate*
 _xmppcert_to_profcert(const xmpp_tlscert_t* xmpptlscert)
 {
+    const char* pubkey_fp = NULL;
+#ifdef HAVE_XMPP_CERT_PUBKEY_FINGERPRINT_SHA256
+    pubkey_fp = xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_PUBKEY_FINGERPRINT_SHA256);
+#endif
     int version = (int)strtol(
         xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_VERSION), NULL, 10);
     return tlscerts_new(
@@ -1094,7 +1098,9 @@ _xmppcert_to_profcert(const xmpp_tlscert_t* xmpptlscert)
         xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_NOTAFTER),
         xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_KEYALG),
         xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_SIGALG),
-        xmpp_tlscert_get_pem(xmpptlscert));
+        xmpp_tlscert_get_pem(xmpptlscert),
+        xmpp_tlscert_get_string(xmpptlscert, XMPP_CERT_FINGERPRINT_SHA256),
+        pubkey_fp);
 }
 
 static void

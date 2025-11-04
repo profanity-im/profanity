@@ -63,16 +63,19 @@ typedef struct tls_cert_t
     char* notbefore;
     char* notafter;
     char* fingerprint_sha1;
+    char* fingerprint_sha256;
     char* key_alg;
     char* signature_alg;
     char* pem;
+    char* pubkey_fingerprint;
 } TLSCertificate;
 
 void tlscerts_init(void);
 
 TLSCertificate* tlscerts_new(const char* fingerprint_sha1, int version, const char* serialnumber, const char* subjectname,
                              const char* issuername, const char* notbefore, const char* notafter,
-                             const char* key_alg, const char* signature_alg, const char* pem);
+                             const char* key_alg, const char* signature_alg, const char* pem,
+                             const char* fingerprint_sha256, const char* pubkey_fingerprint);
 
 void tlscerts_set_current(const TLSCertificate* cert);
 
