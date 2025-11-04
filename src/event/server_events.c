@@ -1157,14 +1157,13 @@ int
 sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert)
 {
     // check profanity trusted certs
-    if (tlscerts_exists(cert->fingerprint)) {
+    if (tlscerts_exists(cert)) {
         cafile_add(cert);
         return 1;
     }
 
     // check current cert
-    char* current_fp = tlscerts_get_current();
-    if (current_fp && g_strcmp0(current_fp, cert->fingerprint) == 0) {
+    if (tlscerts_current_fingerprint_equals(cert)) {
         return 1;
     }
 
@@ -1195,11 +1194,11 @@ sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert)
 
     if (g_strcmp0(cmd, "/tls allow") == 0) {
         cons_show("Continuing with connection.");
-        tlscerts_set_current(cert->fingerprint);
+        tlscerts_set_current(cert);
         return 1;
     } else if (g_strcmp0(cmd, "/tls always") == 0) {
-        cons_show("Adding %s to trusted certificates.", cert->fingerprint);
-        if (!tlscerts_exists(cert->fingerprint)) {
+        cons_show("Adding %s to trusted certificates.", cert->fingerprint_sha1);
+        if (!tlscerts_exists(cert)) {
             tlscerts_add(cert);
             cafile_add(cert);
         }

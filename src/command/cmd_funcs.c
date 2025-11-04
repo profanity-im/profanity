@@ -291,12 +291,12 @@ cmd_tls_trust(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
     cafile_add(cert);
-    if (tlscerts_exists(cert->fingerprint)) {
-        cons_show("Certificate %s already trusted.", cert->fingerprint);
+    if (tlscerts_exists(cert)) {
+        cons_show("Certificate %s already trusted.", cert->fingerprint_sha1);
         tlscerts_free(cert);
         return TRUE;
     }
-    cons_show("Adding %s to trusted certificates.", cert->fingerprint);
+    cons_show("Adding %s to trusted certificates.", cert->fingerprint_sha1);
     tlscerts_add(cert);
     tlscerts_free(cert);
     return TRUE;
