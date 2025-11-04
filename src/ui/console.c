@@ -90,6 +90,13 @@ cons_show(const char* const msg, ...)
     va_end(arg);
 }
 
+#define cons_show_if_set(fmt, elmnt) \
+    do {                             \
+        if (elmnt) {                 \
+            cons_show(fmt, elmnt);   \
+        }                            \
+    } while (0)
+
 void
 cons_show_padded(int pad, const char* const msg, ...)
 {
@@ -260,7 +267,9 @@ cons_show_tlscert(const TLSCertificate* cert)
     cons_show("  Start               : %s", cert->notbefore);
     cons_show("  End                 : %s", cert->notafter);
 
-    cons_show("  Fingerprint         : %s", cert->fingerprint_sha1);
+    cons_show_if_set("  Fingerprint SHA1    : %s", cert->fingerprint_sha1);
+    cons_show_if_set("  Fingerprint SHA256  : %s", cert->fingerprint_sha256);
+    cons_show_if_set("  Pubkey Fingerprint  : %s", cert->pubkey_fingerprint);
 }
 
 void

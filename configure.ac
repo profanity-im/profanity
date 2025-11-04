@@ -173,6 +173,19 @@ AC_LINK_IFELSE([AC_LANG_SOURCE([[
     [AC_MSG_RESULT([yes])],
     [AC_MSG_ERROR([libstrophe is broken, check config.log for details])])
 
+AC_MSG_CHECKING([whether libstrophe has XMPP_CERT_PUBKEY_FINGERPRINT_SHA256 support])
+AC_LINK_IFELSE([AC_LANG_SOURCE([[
+    #include <strophe.h>
+
+    int main() {
+        xmpp_tlscert_get_string(NULL, XMPP_CERT_PUBKEY_FINGERPRINT_SHA256);
+        return 1;
+    }
+    ]])],
+    [AC_MSG_RESULT([yes])
+     AC_DEFINE([HAVE_XMPP_CERT_PUBKEY_FINGERPRINT_SHA256], [1], [Have XMPP_CERT_PUBKEY_FINGERPRINT_SHA256])],
+    [AC_MSG_RESULT(no)])
+
 ## Check for curses library
 PKG_CHECK_MODULES([ncursesw], [ncursesw],
     [NCURSES_CFLAGS="$ncursesw_CFLAGS"; NCURSES_LIBS="$ncursesw_LIBS"; CURSES="ncursesw"],

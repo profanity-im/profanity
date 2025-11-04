@@ -138,7 +138,7 @@ tlscerts_list(void)
         auto_gchar gchar* signaturealg = g_key_file_get_string(tlscerts, fingerprint, "signaturealg", NULL);
 
         TLSCertificate* cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
-                                            notafter, keyalg, signaturealg, NULL);
+                                            notafter, keyalg, signaturealg, NULL, NULL, NULL);
 
         res = g_list_append(res, cert);
     }
@@ -149,12 +149,16 @@ tlscerts_list(void)
 TLSCertificate*
 tlscerts_new(const char* fingerprint_sha1, int version, const char* serialnumber, const char* subjectname,
              const char* issuername, const char* notbefore, const char* notafter,
-             const char* key_alg, const char* signature_alg, const char* pem)
+             const char* key_alg, const char* signature_alg, const char* pem,
+             const char* fingerprint_sha256, const char* pubkey_fingerprint)
 {
     TLSCertificate* cert = calloc(1, sizeof(TLSCertificate));
 
     if (fingerprint_sha1) {
         cert->fingerprint_sha1 = strdup(fingerprint_sha1);
+    }
+    if (fingerprint_sha256) {
+        cert->fingerprint_sha256 = strdup(fingerprint_sha256);
     }
     cert->version = version;
     if (serialnumber) {
@@ -180,6 +184,9 @@ tlscerts_new(const char* fingerprint_sha1, int version, const char* serialnumber
     }
     if (pem) {
         cert->pem = strdup(pem);
+    }
+    if (pubkey_fingerprint) {
+        cert->pubkey_fingerprint = strdup(pubkey_fingerprint);
     }
 
     auto_gcharv gchar** fields = g_strsplit(subjectname, "/", 0);
@@ -315,9 +322,8 @@ tlscerts_get_trusted(const char* fingerprint)
     auto_gchar gchar* keyalg = g_key_file_get_string(tlscerts, fingerprint, "keyalg", NULL);
     auto_gchar gchar* signaturealg = g_key_file_get_string(tlscerts, fingerprint, "signaturealg", NULL);
 
-    TLSCertificate* cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
-                                        notafter, keyalg, signaturealg, NULL);
-    return cert;
+    return tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
+                        notafter, keyalg, signaturealg, NULL, NULL, NULL);
 }
 
 char*
@@ -361,6 +367,8 @@ tlscerts_free(TLSCertificate* cert)
         free(cert->notbefore);
         free(cert->notafter);
         free(cert->fingerprint_sha1);
+        free(cert->fingerprint_sha256);
+        free(cert->pubkey_fingerprint);
 
         free(cert->key_alg);
         free(cert->signature_alg);
