@@ -346,19 +346,6 @@ void
 tlscerts_free(TLSCertificate* cert)
 {
     if (cert) {
-        free(cert->serialnumber);
-
-        free(cert->subjectname);
-        free(cert->subject_country);
-        free(cert->subject_state);
-        free(cert->subject_distinguishedname);
-        free(cert->subject_serialnumber);
-        free(cert->subject_commonname);
-        free(cert->subject_organisation);
-        free(cert->subject_organisation_unit);
-        free(cert->subject_email);
-
-        free(cert->issuername);
         free(cert->issuer_country);
         free(cert->issuer_state);
         free(cert->issuer_distinguishedname);
@@ -368,16 +355,26 @@ tlscerts_free(TLSCertificate* cert)
         free(cert->issuer_organisation_unit);
         free(cert->issuer_email);
 
-        free(cert->notbefore);
+        free(cert->subject_country);
+        free(cert->subject_state);
+        free(cert->subject_distinguishedname);
+        free(cert->subject_serialnumber);
+        free(cert->subject_commonname);
+        free(cert->subject_organisation);
+        free(cert->subject_organisation_unit);
+        free(cert->subject_email);
+
+        free(cert->pubkey_fingerprint);
+        free(cert->pem);
+        free(cert->signature_alg);
+        free(cert->key_alg);
         free(cert->notafter);
+        free(cert->notbefore);
+        free(cert->issuername);
+        free(cert->subjectname);
+        free(cert->serialnumber);
         free(cert->fingerprint_sha1);
         free(cert->fingerprint_sha256);
-        free(cert->pubkey_fingerprint);
-
-        free(cert->key_alg);
-        free(cert->signature_alg);
-
-        free(cert->pem);
 
         free(cert);
     }
