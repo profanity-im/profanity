@@ -187,7 +187,7 @@ cons_show_tlscert_summary(const TLSCertificate* cert)
 
     cons_show("Subject     : %s", cert->subject_commonname);
     cons_show("Issuer      : %s", cert->issuer_commonname);
-    cons_show("Fingerprint : %s", cert->fingerprint_sha1);
+    cons_show("Fingerprint : %s", cert->fingerprint);
 }
 
 void

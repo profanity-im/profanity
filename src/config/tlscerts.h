@@ -41,6 +41,7 @@
 typedef struct tls_cert_t
 {
     int version;
+    const char* fingerprint;
     char* serialnumber;
     char* subjectname;
     char* subject_country;
