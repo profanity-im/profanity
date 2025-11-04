@@ -95,13 +95,13 @@ tlscerts_set_current(const TLSCertificate* cert)
     if (current_fp) {
         free(current_fp);
     }
-    current_fp = strdup(cert->fingerprint_sha1);
+    current_fp = strdup(cert->fingerprint);
 }
 
 gboolean
 tlscerts_current_fingerprint_equals(const TLSCertificate* cert)
 {
-    return g_strcmp0(current_fp, cert->fingerprint_sha1) == 0;
+    return g_strcmp0(current_fp, cert->fingerprint) == 0;
 }
 
 void
@@ -116,7 +116,7 @@ tlscerts_clear_current(void)
 gboolean
 tlscerts_exists(const TLSCertificate* cert)
 {
-    return g_key_file_has_group(tlscerts, cert->fingerprint_sha1);
+    return g_key_file_has_group(tlscerts, cert->fingerprint);
 }
 
 GList*
@@ -154,11 +154,15 @@ tlscerts_new(const char* fingerprint_sha1, int version, const char* serialnumber
 {
     TLSCertificate* cert = calloc(1, sizeof(TLSCertificate));
 
-    if (fingerprint_sha1) {
-        cert->fingerprint_sha1 = strdup(fingerprint_sha1);
-    }
     if (fingerprint_sha256) {
         cert->fingerprint_sha256 = strdup(fingerprint_sha256);
+        cert->fingerprint = cert->fingerprint_sha256;
+    }
+    if (fingerprint_sha1) {
+        cert->fingerprint_sha1 = strdup(fingerprint_sha1);
+        if (!cert->fingerprint) {
+            cert->fingerprint = cert->fingerprint_sha1;
+        }
     }
     cert->version = version;
     if (serialnumber) {
@@ -261,33 +265,33 @@ tlscerts_add(const TLSCertificate* cert)
         return;
     }
 
-    if (!cert->fingerprint_sha1) {
+    if (!cert->fingerprint) {
         return;
     }
 
-    autocomplete_add(certs_ac, cert->fingerprint_sha1);
+    autocomplete_add(certs_ac, cert->fingerprint);
 
-    g_key_file_set_integer(tlscerts, cert->fingerprint_sha1, "version", cert->version);
+    g_key_file_set_integer(tlscerts, cert->fingerprint, "version", cert->version);
     if (cert->serialnumber) {
-        g_key_file_set_string(tlscerts, cert->fingerprint_sha1, "serialnumber", cert->serialnumber);
+        g_key_file_set_string(tlscerts, cert->fingerprint, "serialnumber", cert->serialnumber);
     }
     if (cert->subjectname) {
-        g_key_file_set_string(tlscerts, cert->fingerprint_sha1, "subjectname", cert->subjectname);
+        g_key_file_set_string(tlscerts, cert->fingerprint, "subjectname", cert->subjectname);
     }
     if (cert->issuername) {
-        g_key_file_set_string(tlscerts, cert->fingerprint_sha1, "issuername", cert->issuername);
+        g_key_file_set_string(tlscerts, cert->fingerprint, "issuername", cert->issuername);
     }
     if (cert->notbefore) {
-        g_key_file_set_string(tlscerts, cert->fingerprint_sha1, "start", cert->notbefore);
+        g_key_file_set_string(tlscerts, cert->fingerprint, "start", cert->notbefore);
     }
     if (cert->notafter) {
-        g_key_file_set_string(tlscerts, cert->fingerprint_sha1, "end", cert->notafter);
+        g_key_file_set_string(tlscerts, cert->fingerprint, "end", cert->notafter);
     }
     if (cert->key_alg) {
-        g_key_file_set_string(tlscerts, cert->fingerprint_sha1, "keyalg", cert->key_alg);
+        g_key_file_set_string(tlscerts, cert->fingerprint, "keyalg", cert->key_alg);
     }
     if (cert->signature_alg) {
-        g_key_file_set_string(tlscerts, cert->fingerprint_sha1, "signaturealg", cert->signature_alg);
+        g_key_file_set_string(tlscerts, cert->fingerprint, "signaturealg", cert->signature_alg);
     }
 
     _save_tlscerts();

@@ -1197,7 +1197,7 @@ sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert)
         tlscerts_set_current(cert);
         return 1;
     } else if (g_strcmp0(cmd, "/tls always") == 0) {
-        cons_show("Adding %s to trusted certificates.", cert->fingerprint_sha1);
+        cons_show("Adding %s to trusted certificates.", cert->fingerprint);
         if (!tlscerts_exists(cert)) {
             tlscerts_add(cert);
             cafile_add(cert);
