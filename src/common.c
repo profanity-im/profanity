@@ -64,6 +64,7 @@
 #include "log.h"
 #include "common.h"
 #include "config/files.h"
+#include "ui/ui.h"
 
 #ifdef HAVE_GIT_VERSION
 #include "gitversion.h"
@@ -359,6 +360,66 @@ strtoi_range(const char* str, int* saveptr, int min, int max, gchar** err_msg)
     *saveptr = val;
 
     return TRUE;
+}
+
+gboolean
+string_matches_one_of(const char* what, const char* is, gboolean is_can_be_null, const char* first, ...)
+{
+    gboolean ret = FALSE;
+    va_list ap;
+    const char* cur = first;
+    if (!is)
+        return is_can_be_null;
+
+    va_start(ap, first);
+    while (cur != NULL) {
+        if (g_strcmp0(is, cur) == 0) {
+            ret = TRUE;
+            break;
+        }
+        cur = va_arg(ap, const char*);
+    }
+    va_end(ap);
+    if (!ret && what) {
+        cons_show("Invalid %s: '%s'", what, is);
+        char errmsg[256] = { 0 };
+        size_t sz = 0;
+        int s = snprintf(errmsg, sizeof(errmsg) - sz, "%s must be one of:", what);
+        if (s < 0 || s + sz >= sizeof(errmsg))
+            return ret;
+        sz += s;
+
+        cur = first;
+        va_start(ap, first);
+        while (cur != NULL) {
+            const char* next = va_arg(ap, const char*);
+            if (next) {
+                s = snprintf(errmsg + sz, sizeof(errmsg) - sz, " '%s',", cur);
+            } else {
+                /* remove last ',' */
+                sz--;
+                errmsg[sz] = '\0';
+                s = snprintf(errmsg + sz, sizeof(errmsg) - sz, " or '%s'.", cur);
+            }
+            if (s < 0 || s + sz >= sizeof(errmsg)) {
+                log_debug("Error message too long or some other error occurred (%d).", s);
+                s = -1;
+                break;
+            }
+            sz += s;
+            cur = next;
+        }
+        va_end(ap);
+        if (s > 0)
+            cons_show(errmsg);
+    }
+    return ret;
+}
+
+gboolean
+valid_tls_policy_option(const char* is)
+{
+    return string_matches_one_of("TLS policy", is, TRUE, "force", "allow", "trust", "disable", "legacy", "direct", NULL);
 }
 
 int

@@ -285,7 +285,7 @@ endif
 
 TESTS = tests/unittests/unittests
 check_PROGRAMS = tests/unittests/unittests
-tests_unittests_unittests_CPPFLAGS = -Itests/
+tests_unittests_unittests_CPPFLAGS = -I$(srcdir)/tests/
 tests_unittests_unittests_SOURCES = $(unittest_sources)
 tests_unittests_unittests_LDADD = -lcmocka
 
@@ -348,7 +348,7 @@ endif
 
 .PHONY: my-prof.supp
 my-prof.supp:
-	@sed '/^# AUTO-GENERATED START/q' prof.supp > $@
+	@sed '/^# AUTO-GENERATED START/q' $(srcdir)/prof.supp > $@
 	@printf "\n\n# glib\n" >> $@
 	@cat /usr/share/glib-2.0/valgrind/glib.supp >> $@
 	@printf "\n\n# Python\n" >> $@

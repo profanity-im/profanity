@@ -662,11 +662,9 @@ otr_get_policy(const char* const recipient)
         prof_otrpolicy_t result = PROF_OTRPOLICY_MANUAL;
         if (g_strcmp0(account->otr_policy, "manual") == 0) {
             result = PROF_OTRPOLICY_MANUAL;
-        }
-        if (g_strcmp0(account->otr_policy, "opportunistic") == 0) {
+        } else if (g_strcmp0(account->otr_policy, "opportunistic") == 0) {
             result = PROF_OTRPOLICY_OPPORTUNISTIC;
-        }
-        if (g_strcmp0(account->otr_policy, "always") == 0) {
+        } else if (g_strcmp0(account->otr_policy, "always") == 0) {
             result = PROF_OTRPOLICY_ALWAYS;
         }
         account_free(account);

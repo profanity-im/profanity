@@ -53,8 +53,7 @@ _cafile_name(void)
     if (!create_dir(certs_dir)) {
         return NULL;
     }
-    gchar* filename = g_strdup_printf("%s/CAfile.pem", certs_dir);
-    return filename;
+    return g_strdup_printf("%s/CAfile.pem", certs_dir);
 }
 
 void
