@@ -189,6 +189,9 @@ char* str_replace(const char* string, const char* substr, const char* replacemen
 gboolean strtoi_range(const char* str, int* saveptr, int min, int max, char** err_msg);
 int utf8_display_len(const char* const str);
 
+gboolean string_matches_one_of(const char* what, const char* is, gboolean is_can_be_null, const char* first, ...) __attribute__((sentinel));
+gboolean valid_tls_policy_option(const char* is);
+
 char* release_get_latest(void);
 gboolean release_is_new(char* found_version);
 

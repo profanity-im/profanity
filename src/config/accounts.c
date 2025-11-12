@@ -322,7 +322,7 @@ accounts_get_account(const char* const name)
         }
 
         gchar* tls_policy = g_key_file_get_string(accounts, name, "tls.policy", NULL);
-        if (tls_policy && ((g_strcmp0(tls_policy, "force") != 0) && (g_strcmp0(tls_policy, "allow") != 0) && (g_strcmp0(tls_policy, "trust") != 0) && (g_strcmp0(tls_policy, "disable") != 0) && (g_strcmp0(tls_policy, "legacy") != 0))) {
+        if (tls_policy && !valid_tls_policy_option(tls_policy)) {
             g_free(tls_policy);
             tls_policy = NULL;
         }

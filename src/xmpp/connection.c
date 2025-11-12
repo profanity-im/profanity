@@ -215,7 +215,7 @@ _conn_apply_settings(const char* const jid, const char* const passwd, const char
         flags |= XMPP_CONN_FLAG_TRUST_TLS;
     } else if (g_strcmp0(tls_policy, "disable") == 0) {
         flags |= XMPP_CONN_FLAG_DISABLE_TLS;
-    } else if (g_strcmp0(tls_policy, "legacy") == 0) {
+    } else if (g_strcmp0(tls_policy, "direct") == 0 || g_strcmp0(tls_policy, "legacy") == 0) {
         flags |= XMPP_CONN_FLAG_LEGACY_SSL;
     }
 
