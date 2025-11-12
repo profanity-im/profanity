@@ -131,12 +131,12 @@ static gboolean _cmd_execute(ProfWin* window, const char* const command, const c
 static gboolean _cmd_execute_default(ProfWin* window, const char* inp);
 static gboolean _cmd_execute_alias(ProfWin* window, const char* const inp, gboolean* ran);
 static gboolean
-_string_matches_one_of(const char* what, const char* is, bool is_can_be_null, const char* first, ...) __attribute__((sentinel));
+_string_matches_one_of(const char* what, const char* is, gboolean is_can_be_null, const char* first, ...) __attribute__((sentinel));
 static gboolean
 _download_install_plugin(ProfWin* window, gchar* url, gchar* path);
 
 static gboolean
-_string_matches_one_of(const char* what, const char* is, bool is_can_be_null, const char* first, ...)
+_string_matches_one_of(const char* what, const char* is, gboolean is_can_be_null, const char* first, ...)
 {
     gboolean ret = FALSE;
     va_list ap;
@@ -475,7 +475,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
 
             // no account password setting, prompt
         } else {
-            account->password = ui_ask_password(false);
+            account->password = ui_ask_password(FALSE);
             conn_status = cl_ev_connect_account(account);
             free(account->password);
             account->password = NULL;
@@ -487,7 +487,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
         // connect with JID
     } else {
         jid = g_utf8_strdown(user, -1);
-        auto_char char* passwd = ui_ask_password(false);
+        auto_char char* passwd = ui_ask_password(FALSE);
         conn_status = cl_ev_connect_jid(jid, passwd, altdomain, port, tls_policy, auth_policy);
     }
 
@@ -853,7 +853,7 @@ _account_set_theme(char* account_name, char* theme)
         ProfAccount* account = accounts_get_account(session_get_account_name());
         if (account) {
             if (g_strcmp0(account->name, account_name) == 0) {
-                theme_load(theme, false);
+                theme_load(theme, FALSE);
                 ui_load_colours();
                 if (prefs_get_boolean(PREF_ROSTER)) {
                     ui_show_roster();
@@ -3637,9 +3637,9 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
     if (!muc_active(room)) {
         presence_join_room(room, nick, passwd);
         muc_join(room, nick, passwd, FALSE);
-        iq_room_affiliation_list(room, "member", false);
-        iq_room_affiliation_list(room, "admin", false);
-        iq_room_affiliation_list(room, "owner", false);
+        iq_room_affiliation_list(room, "member", FALSE);
+        iq_room_affiliation_list(room, "admin", FALSE);
+        iq_room_affiliation_list(room, "owner", FALSE);
     } else if (muc_roster_complete(room)) {
         ui_switch_to_room(room);
     }
@@ -4187,14 +4187,14 @@ cmd_affiliation(ProfWin* window, const char* const command, gchar** args)
 
     if (g_strcmp0(cmd, "list") == 0) {
         if (!affiliation) {
-            iq_room_affiliation_list(mucwin->roomjid, "owner", true);
-            iq_room_affiliation_list(mucwin->roomjid, "admin", true);
-            iq_room_affiliation_list(mucwin->roomjid, "member", true);
-            iq_room_affiliation_list(mucwin->roomjid, "outcast", true);
+            iq_room_affiliation_list(mucwin->roomjid, "owner", TRUE);
+            iq_room_affiliation_list(mucwin->roomjid, "admin", TRUE);
+            iq_room_affiliation_list(mucwin->roomjid, "member", TRUE);
+            iq_room_affiliation_list(mucwin->roomjid, "outcast", TRUE);
         } else if (g_strcmp0(affiliation, "none") == 0) {
             win_println(window, THEME_DEFAULT, "!", "Cannot list users with no affiliation.");
         } else {
-            iq_room_affiliation_list(mucwin->roomjid, affiliation, true);
+            iq_room_affiliation_list(mucwin->roomjid, affiliation, TRUE);
         }
         return TRUE;
     }
@@ -9090,12 +9090,12 @@ cmd_color(ProfWin* window, const char* const command, gchar** args)
 
     auto_gchar gchar* theme = prefs_get_string(PREF_THEME);
     if (theme) {
-        gboolean res = theme_load(theme, false);
+        gboolean res = theme_load(theme, FALSE);
 
         if (res) {
             cons_show("Theme reloaded: %s", theme);
         } else {
-            theme_load("default", false);
+            theme_load("default", FALSE);
         }
     }
 
@@ -9125,9 +9125,9 @@ cmd_avatar(ProfWin* window, const char* const command, gchar** args)
             cons_show("Profanity has not been built with GDK Pixbuf support enabled which is needed to scale the avatar when uploading.");
 #endif
         } else if (g_strcmp0(args[0], "get") == 0) {
-            avatar_get_by_nick(args[1], false);
+            avatar_get_by_nick(args[1], FALSE);
         } else if (g_strcmp0(args[0], "open") == 0) {
-            avatar_get_by_nick(args[1], true);
+            avatar_get_by_nick(args[1], TRUE);
         } else {
             cons_bad_cmd_usage(command);
         }
@@ -9510,8 +9510,8 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    auto_char char* passwd = ui_ask_password(false);
-    auto_char char* confirm_passwd = ui_ask_password(true);
+    auto_char char* passwd = ui_ask_password(FALSE);
+    auto_char char* confirm_passwd = ui_ask_password(TRUE);
 
     if (g_strcmp0(passwd, confirm_passwd) == 0) {
         iq_register_change_password(connection_get_user(), passwd);
@@ -9621,8 +9621,8 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
     char* username = args[0];
     char* server = args[1];
 
-    auto_char char* passwd = ui_ask_password(false);
-    auto_char char* confirm_passwd = ui_ask_password(true);
+    auto_char char* passwd = ui_ask_password(FALSE);
+    auto_char char* confirm_passwd = ui_ask_password(TRUE);
 
     if (g_strcmp0(passwd, confirm_passwd) == 0) {
         log_info("Attempting to register account %s on server %s.", username, server);
