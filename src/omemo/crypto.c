@@ -389,7 +389,7 @@ out:
 
 gcry_error_t
 aes256gcm_crypt_file(FILE* in, FILE* out, off_t file_size,
-                     unsigned char key[], unsigned char nonce[], bool encrypt)
+                     unsigned char key[], unsigned char nonce[], gboolean encrypt)
 {
 
     if (!gcry_control(GCRYCTL_INITIALIZATION_FINISHED_P)) {

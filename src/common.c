@@ -712,7 +712,7 @@ _unique_filename(const char* filename)
     return unique;
 }
 
-static bool
+static gboolean
 _has_directory_suffix(const char* path)
 {
     return (g_str_has_suffix(path, ".")

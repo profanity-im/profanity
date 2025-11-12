@@ -50,7 +50,7 @@ typedef struct
     signal_buffer* private;
     uint32_t registration_id;
     GHashTable* trusted;
-    bool recv;
+    gboolean recv;
 } identity_key_store_t;
 
 GHashTable* session_store_new(void);

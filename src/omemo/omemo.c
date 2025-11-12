@@ -749,7 +749,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 
     GList* device_ids_iter;
 
-    omemo_ctx.identity_key_store.recv = false;
+    omemo_ctx.identity_key_store.recv = FALSE;
 
     // Encrypt keys for the recipients
     GList* recipients_iter;
@@ -952,14 +952,14 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         ec_public_key* their_identity_key;
         signal_buffer* identity_buffer = NULL;
 
-        omemo_ctx.identity_key_store.recv = true;
+        omemo_ctx.identity_key_store.recv = TRUE;
 
         pre_key_signal_message_deserialize(&message, key->data, key->length, omemo_ctx.signal);
         their_identity_key = pre_key_signal_message_get_identity_key(message);
 
         res = session_cipher_decrypt_pre_key_signal_message(cipher, message, NULL, &plaintext_key);
 
-        omemo_ctx.identity_key_store.recv = false;
+        omemo_ctx.identity_key_store.recv = FALSE;
 
         /* Perform a real check of the identity */
         ec_public_key_serialize(&identity_buffer, their_identity_key);
@@ -977,7 +977,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         SIGNAL_UNREF(new_pre_key);
         SIGNAL_UNREF(message);
         SIGNAL_UNREF(ec_pair);
-        omemo_bundle_publish(true);
+        omemo_bundle_publish(TRUE);
 
         if (res == 0) {
             /* Start a new session */
@@ -994,7 +994,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
             log_error("[OMEMO][RECV] cannot deserialize message");
         } else {
             res = session_cipher_decrypt_signal_message(cipher, message, NULL, &plaintext_key);
-            *trusted = true;
+            *trusted = TRUE;
             SIGNAL_UNREF(message);
         }
     }
@@ -1699,7 +1699,7 @@ omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res)
     gcry_create_nonce(nonce, OMEMO_AESGCM_NONCE_LENGTH);
 
     char* fragment = aes256gcm_create_secure_fragment(key, nonce);
-    *gcry_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, true);
+    *gcry_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, TRUE);
 
     if (*gcry_res != GPG_ERR_NO_ERROR) {
         gcry_free(fragment);
@@ -1758,7 +1758,7 @@ omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char* fragment)
                     key, OMEMO_AESGCM_KEY_LENGTH);
 
     gcry_error_t crypt_res;
-    crypt_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, false);
+    crypt_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, FALSE);
 
     gcry_free(key);
 

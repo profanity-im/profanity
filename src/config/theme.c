@@ -532,7 +532,7 @@ _theme_find(const char* const theme_name)
         g_string_append(path, "/");
         g_string_append(path, theme_name);
         if (!g_file_test(path->str, G_FILE_TEST_EXISTS)) {
-            g_string_free(path, true);
+            g_string_free(path, TRUE);
             path = NULL;
         }
     }
