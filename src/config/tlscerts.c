@@ -54,7 +54,7 @@ static void _save_tlscerts(void);
 
 static Autocomplete certs_ac;
 
-static char* current_fp;
+static gchar* current_fp;
 
 static void
 _tlscerts_close(void)
@@ -62,7 +62,7 @@ _tlscerts_close(void)
     free_keyfile(&tlscerts_prof_keyfile);
     tlscerts = NULL;
 
-    free(current_fp);
+    g_free(current_fp);
     current_fp = NULL;
 
     autocomplete_free(certs_ac);
@@ -93,9 +93,9 @@ void
 tlscerts_set_current(const TLSCertificate* cert)
 {
     if (current_fp) {
-        free(current_fp);
+        g_free(current_fp);
     }
-    current_fp = strdup(cert->fingerprint);
+    current_fp = g_strdup(cert->fingerprint);
 }
 
 gboolean
@@ -108,7 +108,7 @@ void
 tlscerts_clear_current(void)
 {
     if (current_fp) {
-        free(current_fp);
+        g_free(current_fp);
         current_fp = NULL;
     }
 }
@@ -119,6 +119,89 @@ tlscerts_exists(const TLSCertificate* cert)
     return g_key_file_has_group(tlscerts, cert->fingerprint);
 }
 
+#define _name_to_tlscert_name(in, cert, which)            \
+    do {                                                  \
+        _name_to_tlscert_name_(in, &cert->which, #which); \
+    } while (0)
+static void
+_name_to_tlscert_name_(const char* in, tls_cert_name_t* out, const char* name);
+
+static TLSCertificate*
+_tlscerts_new(gchar* fingerprint_sha1, int version, gchar* serialnumber, gchar* subjectname,
+              gchar* issuername, gchar* notbefore, gchar* notafter,
+              gchar* key_alg, gchar* signature_alg, gchar* pem,
+              gchar* fingerprint_sha256, gchar* pubkey_fingerprint)
+{
+    TLSCertificate* cert = calloc(1, sizeof(TLSCertificate));
+
+    if (fingerprint_sha256 && fingerprint_sha1) {
+        cert->fingerprint_sha256 = fingerprint_sha256;
+        cert->fingerprint_sha1 = fingerprint_sha1;
+        cert->fingerprint = cert->fingerprint_sha256;
+    } else {
+        if (fingerprint_sha256) {
+            size_t s = strlen(fingerprint_sha256);
+            switch (s) {
+            case 40:
+                cert->fingerprint_sha1 = fingerprint_sha256;
+                cert->fingerprint = cert->fingerprint_sha1;
+                break;
+            case 64:
+                cert->fingerprint_sha256 = fingerprint_sha256;
+                cert->fingerprint = cert->fingerprint_sha256;
+                break;
+            default:
+                log_error("fingerprint_sha256 of length %d unexpected: %s", s, fingerprint_sha256);
+            }
+        } else {
+            cert->fingerprint_sha1 = fingerprint_sha1;
+            cert->fingerprint = cert->fingerprint_sha1;
+        }
+    }
+
+    cert->version = version;
+    cert->serialnumber = serialnumber;
+    cert->subjectname = subjectname;
+    cert->issuername = issuername;
+    cert->notbefore = notbefore;
+    cert->notafter = notafter;
+    cert->key_alg = key_alg;
+    cert->signature_alg = signature_alg;
+    cert->pem = pem;
+    cert->pubkey_fingerprint = pubkey_fingerprint;
+
+    /* Do this check after assigning all values, in order to not leak them,
+     * even though the situation is most likely already FUBAR */
+    if (!fingerprint_sha256 && !fingerprint_sha1) {
+        log_error("No TLSCertificate w/o fingerprint");
+        tlscerts_free(cert);
+        return NULL;
+    }
+
+    _name_to_tlscert_name(subjectname, cert, subject);
+    _name_to_tlscert_name(issuername, cert, issuer);
+
+    return cert;
+}
+
+static TLSCertificate*
+_get_TLSCertificate(const gchar* fingerprint)
+{
+    int version = g_key_file_get_integer(tlscerts, fingerprint, "version", NULL);
+    gchar* serialnumber = g_key_file_get_string(tlscerts, fingerprint, "serialnumber", NULL);
+    gchar* subjectname = g_key_file_get_string(tlscerts, fingerprint, "subjectname", NULL);
+    gchar* issuername = g_key_file_get_string(tlscerts, fingerprint, "issuername", NULL);
+    gchar* notbefore = g_key_file_get_string(tlscerts, fingerprint, "start", NULL);
+    gchar* notafter = g_key_file_get_string(tlscerts, fingerprint, "end", NULL);
+    gchar* keyalg = g_key_file_get_string(tlscerts, fingerprint, "keyalg", NULL);
+    gchar* signaturealg = g_key_file_get_string(tlscerts, fingerprint, "signaturealg", NULL);
+    gchar* fingerprint_sha1 = g_key_file_get_string(tlscerts, fingerprint, "fingerprint_sha1", NULL);
+    gchar* pubkey_fingerprint = g_key_file_get_string(tlscerts, fingerprint, "pubkey_fingerprint", NULL);
+
+    return _tlscerts_new(fingerprint_sha1, version, serialnumber, subjectname, issuername, notbefore,
+                         notafter, keyalg, signaturealg, NULL, g_strdup(fingerprint), pubkey_fingerprint);
+}
+
 GList*
 tlscerts_list(void)
 {
@@ -126,24 +209,66 @@ tlscerts_list(void)
     gsize len = 0;
     auto_gcharv gchar** groups = g_key_file_get_groups(tlscerts, &len);
 
-    for (int i = 0; i < g_strv_length(groups); i++) {
-        char* fingerprint = groups[i];
-        int version = g_key_file_get_integer(tlscerts, fingerprint, "version", NULL);
-        auto_gchar gchar* serialnumber = g_key_file_get_string(tlscerts, fingerprint, "serialnumber", NULL);
-        auto_gchar gchar* subjectname = g_key_file_get_string(tlscerts, fingerprint, "subjectname", NULL);
-        auto_gchar gchar* issuername = g_key_file_get_string(tlscerts, fingerprint, "issuername", NULL);
-        auto_gchar gchar* notbefore = g_key_file_get_string(tlscerts, fingerprint, "start", NULL);
-        auto_gchar gchar* notafter = g_key_file_get_string(tlscerts, fingerprint, "end", NULL);
-        auto_gchar gchar* keyalg = g_key_file_get_string(tlscerts, fingerprint, "keyalg", NULL);
-        auto_gchar gchar* signaturealg = g_key_file_get_string(tlscerts, fingerprint, "signaturealg", NULL);
-
-        TLSCertificate* cert = tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
-                                            notafter, keyalg, signaturealg, NULL, NULL, NULL);
-
-        res = g_list_append(res, cert);
+    for (gsize i = 0; i < len; i++) {
+        res = g_list_append(res, _get_TLSCertificate(groups[i]));
     }
 
     return res;
+}
+
+static void
+_name_to_tlscert_name_(const char* in, tls_cert_name_t* out, const char* name)
+{
+    auto_gcharv gchar** fields = g_strsplit(in, "/", 0);
+    const guint fields_num = g_strv_length(fields);
+    for (guint i = 0; i < fields_num; i++) {
+        auto_gcharv gchar** keyval = g_strsplit(fields[i], "=", 2);
+        if (g_strv_length(keyval) == 2) {
+
+#define tls_cert_name_set(which)                                                \
+    do {                                                                        \
+        if (out->which) {                                                       \
+            log_warning("%s." #which " already set, skip %s", name, keyval[1]); \
+            continue;                                                           \
+        }                                                                       \
+        out->which = g_strdup(keyval[1]);                                       \
+    } while (0)
+
+            if ((g_strcmp0(keyval[0], "C") == 0) || (g_strcmp0(keyval[0], "countryName") == 0)) {
+                tls_cert_name_set(country);
+            }
+            if ((g_strcmp0(keyval[0], "ST") == 0) || (g_strcmp0(keyval[0], "stateOrProvinceName") == 0)) {
+                tls_cert_name_set(state);
+            }
+            if (g_strcmp0(keyval[0], "dnQualifier") == 0) {
+                tls_cert_name_set(distinguishedname);
+            }
+            if (g_strcmp0(keyval[0], "serialnumber") == 0) {
+                tls_cert_name_set(serialnumber);
+            }
+            if ((g_strcmp0(keyval[0], "CN") == 0) || (g_strcmp0(keyval[0], "commonName") == 0)) {
+                tls_cert_name_set(commonname);
+            }
+            if ((g_strcmp0(keyval[0], "O") == 0) || (g_strcmp0(keyval[0], "organizationName") == 0)) {
+                tls_cert_name_set(organisation);
+            }
+            if ((g_strcmp0(keyval[0], "OU") == 0) || (g_strcmp0(keyval[0], "organizationalUnitName") == 0)) {
+                tls_cert_name_set(organisation_unit);
+            }
+            if (g_strcmp0(keyval[0], "emailAddress") == 0) {
+                tls_cert_name_set(email);
+            }
+#undef tls_cert_name_set
+        }
+    }
+}
+
+static gchar*
+_checked_g_strdup(const char* in)
+{
+    if (in == NULL)
+        return NULL;
+    return g_strdup(in);
 }
 
 TLSCertificate*
@@ -152,110 +277,21 @@ tlscerts_new(const char* fingerprint_sha1, int version, const char* serialnumber
              const char* key_alg, const char* signature_alg, const char* pem,
              const char* fingerprint_sha256, const char* pubkey_fingerprint)
 {
-    TLSCertificate* cert = calloc(1, sizeof(TLSCertificate));
+    return _tlscerts_new(_checked_g_strdup(fingerprint_sha1), version, _checked_g_strdup(serialnumber), _checked_g_strdup(subjectname),
+                         _checked_g_strdup(issuername), _checked_g_strdup(notbefore), _checked_g_strdup(notafter),
+                         _checked_g_strdup(key_alg), _checked_g_strdup(signature_alg), _checked_g_strdup(pem),
+                         _checked_g_strdup(fingerprint_sha256), _checked_g_strdup(pubkey_fingerprint));
+}
 
-    if (fingerprint_sha256) {
-        cert->fingerprint_sha256 = strdup(fingerprint_sha256);
-        cert->fingerprint = cert->fingerprint_sha256;
-    }
-    if (fingerprint_sha1) {
-        cert->fingerprint_sha1 = strdup(fingerprint_sha1);
-        if (!cert->fingerprint) {
-            cert->fingerprint = cert->fingerprint_sha1;
-        }
-    }
-    cert->version = version;
-    if (serialnumber) {
-        cert->serialnumber = strdup(serialnumber);
-    }
-    if (subjectname) {
-        cert->subjectname = strdup(subjectname);
-    }
-    if (issuername) {
-        cert->issuername = strdup(issuername);
-    }
-    if (notbefore) {
-        cert->notbefore = strdup(notbefore);
-    }
-    if (notafter) {
-        cert->notafter = strdup(notafter);
-    }
-    if (key_alg) {
-        cert->key_alg = strdup(key_alg);
-    }
-    if (signature_alg) {
-        cert->signature_alg = strdup(signature_alg);
-    }
-    if (pem) {
-        cert->pem = strdup(pem);
-    }
-    if (pubkey_fingerprint) {
-        cert->pubkey_fingerprint = strdup(pubkey_fingerprint);
-    }
-
-    auto_gcharv gchar** fields = g_strsplit(subjectname, "/", 0);
-    for (int i = 0; i < g_strv_length(fields); i++) {
-        auto_gcharv gchar** keyval = g_strsplit(fields[i], "=", 2);
-        if (g_strv_length(keyval) == 2) {
-            if ((g_strcmp0(keyval[0], "C") == 0) || (g_strcmp0(keyval[0], "countryName") == 0)) {
-                cert->subject_country = strdup(keyval[1]);
-            }
-            if ((g_strcmp0(keyval[0], "ST") == 0) || (g_strcmp0(keyval[0], "stateOrProvinceName") == 0)) {
-                cert->subject_state = strdup(keyval[1]);
-            }
-            if (g_strcmp0(keyval[0], "dnQualifier") == 0) {
-                cert->subject_distinguishedname = strdup(keyval[1]);
-            }
-            if (g_strcmp0(keyval[0], "serialnumber") == 0) {
-                cert->subject_serialnumber = strdup(keyval[1]);
-            }
-            if ((g_strcmp0(keyval[0], "CN") == 0) || (g_strcmp0(keyval[0], "commonName") == 0)) {
-                cert->subject_commonname = strdup(keyval[1]);
-            }
-            if ((g_strcmp0(keyval[0], "O") == 0) || (g_strcmp0(keyval[0], "organizationName") == 0)) {
-                cert->subject_organisation = strdup(keyval[1]);
-            }
-            if ((g_strcmp0(keyval[0], "OU") == 0) || (g_strcmp0(keyval[0], "organizationalUnitName") == 0)) {
-                cert->subject_organisation_unit = strdup(keyval[1]);
-            }
-            if (g_strcmp0(keyval[0], "emailAddress") == 0) {
-                cert->subject_email = strdup(keyval[1]);
-            }
-        }
-    }
-
-    auto_gcharv gchar** fields2 = g_strsplit(issuername, "/", 0);
-    for (int i = 0; i < g_strv_length(fields2); i++) {
-        auto_gcharv gchar** keyval = g_strsplit(fields2[i], "=", 2);
-        if (g_strv_length(keyval) == 2) {
-            if ((g_strcmp0(keyval[0], "C") == 0) || (g_strcmp0(keyval[0], "countryName") == 0)) {
-                cert->issuer_country = strdup(keyval[1]);
-            }
-            if ((g_strcmp0(keyval[0], "ST") == 0) || (g_strcmp0(keyval[0], "stateOrProvinceName") == 0)) {
-                cert->issuer_state = strdup(keyval[1]);
-            }
-            if (g_strcmp0(keyval[0], "dnQualifier") == 0) {
-                cert->issuer_distinguishedname = strdup(keyval[1]);
-            }
-            if (g_strcmp0(keyval[0], "serialnumber") == 0) {
-                cert->issuer_serialnumber = strdup(keyval[1]);
-            }
-            if ((g_strcmp0(keyval[0], "CN") == 0) || (g_strcmp0(keyval[0], "commonName") == 0)) {
-                cert->issuer_commonname = strdup(keyval[1]);
-            }
-            if ((g_strcmp0(keyval[0], "O") == 0) || (g_strcmp0(keyval[0], "organizationName") == 0)) {
-                cert->issuer_organisation = strdup(keyval[1]);
-            }
-            if ((g_strcmp0(keyval[0], "OU") == 0) || (g_strcmp0(keyval[0], "organizationalUnitName") == 0)) {
-                cert->issuer_organisation_unit = strdup(keyval[1]);
-            }
-            if (g_strcmp0(keyval[0], "emailAddress") == 0) {
-                cert->issuer_email = strdup(keyval[1]);
-            }
-        }
-    }
-
-    return cert;
+static void
+_checked_g_key_file_set_string(GKeyFile* key_file,
+                               const gchar* group_name,
+                               const gchar* key,
+                               const gchar* string)
+{
+    if (string == NULL)
+        return;
+    g_key_file_set_string(key_file, group_name, key, string);
 }
 
 void
@@ -272,27 +308,15 @@ tlscerts_add(const TLSCertificate* cert)
     autocomplete_add(certs_ac, cert->fingerprint);
 
     g_key_file_set_integer(tlscerts, cert->fingerprint, "version", cert->version);
-    if (cert->serialnumber) {
-        g_key_file_set_string(tlscerts, cert->fingerprint, "serialnumber", cert->serialnumber);
-    }
-    if (cert->subjectname) {
-        g_key_file_set_string(tlscerts, cert->fingerprint, "subjectname", cert->subjectname);
-    }
-    if (cert->issuername) {
-        g_key_file_set_string(tlscerts, cert->fingerprint, "issuername", cert->issuername);
-    }
-    if (cert->notbefore) {
-        g_key_file_set_string(tlscerts, cert->fingerprint, "start", cert->notbefore);
-    }
-    if (cert->notafter) {
-        g_key_file_set_string(tlscerts, cert->fingerprint, "end", cert->notafter);
-    }
-    if (cert->key_alg) {
-        g_key_file_set_string(tlscerts, cert->fingerprint, "keyalg", cert->key_alg);
-    }
-    if (cert->signature_alg) {
-        g_key_file_set_string(tlscerts, cert->fingerprint, "signaturealg", cert->signature_alg);
-    }
+    _checked_g_key_file_set_string(tlscerts, cert->fingerprint, "serialnumber", cert->serialnumber);
+    _checked_g_key_file_set_string(tlscerts, cert->fingerprint, "subjectname", cert->subjectname);
+    _checked_g_key_file_set_string(tlscerts, cert->fingerprint, "issuername", cert->issuername);
+    _checked_g_key_file_set_string(tlscerts, cert->fingerprint, "start", cert->notbefore);
+    _checked_g_key_file_set_string(tlscerts, cert->fingerprint, "end", cert->notafter);
+    _checked_g_key_file_set_string(tlscerts, cert->fingerprint, "keyalg", cert->key_alg);
+    _checked_g_key_file_set_string(tlscerts, cert->fingerprint, "signaturealg", cert->signature_alg);
+    _checked_g_key_file_set_string(tlscerts, cert->fingerprint, "fingerprint_sha1", cert->fingerprint_sha1);
+    _checked_g_key_file_set_string(tlscerts, cert->fingerprint, "pubkey_fingerprint", cert->pubkey_fingerprint);
 
     _save_tlscerts();
 }
@@ -311,23 +335,20 @@ tlscerts_revoke(const char* fingerprint)
 }
 
 TLSCertificate*
-tlscerts_get_trusted(const char* fingerprint)
+tlscerts_get_trusted(const gchar* fingerprint)
 {
     if (!g_key_file_has_group(tlscerts, fingerprint)) {
+        gsize len = 0;
+        auto_gcharv gchar** groups = g_key_file_get_groups(tlscerts, &len);
+        for (gsize i = 0; i < len; i++) {
+            auto_gchar gchar* fingerprint_sha1 = g_key_file_get_string(tlscerts, groups[i], "fingerprint_sha1", NULL);
+            if (g_strcmp0(fingerprint, fingerprint_sha1) == 0) {
+                return _get_TLSCertificate(fingerprint_sha1);
+            }
+        }
         return NULL;
     }
-
-    int version = g_key_file_get_integer(tlscerts, fingerprint, "version", NULL);
-    auto_gchar gchar* serialnumber = g_key_file_get_string(tlscerts, fingerprint, "serialnumber", NULL);
-    auto_gchar gchar* subjectname = g_key_file_get_string(tlscerts, fingerprint, "subjectname", NULL);
-    auto_gchar gchar* issuername = g_key_file_get_string(tlscerts, fingerprint, "issuername", NULL);
-    auto_gchar gchar* notbefore = g_key_file_get_string(tlscerts, fingerprint, "start", NULL);
-    auto_gchar gchar* notafter = g_key_file_get_string(tlscerts, fingerprint, "end", NULL);
-    auto_gchar gchar* keyalg = g_key_file_get_string(tlscerts, fingerprint, "keyalg", NULL);
-    auto_gchar gchar* signaturealg = g_key_file_get_string(tlscerts, fingerprint, "signaturealg", NULL);
-
-    return tlscerts_new(fingerprint, version, serialnumber, subjectname, issuername, notbefore,
-                        notafter, keyalg, signaturealg, NULL, NULL, NULL);
+    return _get_TLSCertificate(fingerprint);
 }
 
 char*
@@ -342,39 +363,37 @@ tlscerts_reset_ac(void)
     autocomplete_reset(certs_ac);
 }
 
+static void
+_tls_cert_name_free(tls_cert_name_t* name)
+{
+    g_free(name->country);
+    g_free(name->state);
+    g_free(name->distinguishedname);
+    g_free(name->serialnumber);
+    g_free(name->commonname);
+    g_free(name->organisation);
+    g_free(name->organisation_unit);
+    g_free(name->email);
+}
+
 void
 tlscerts_free(TLSCertificate* cert)
 {
     if (cert) {
-        free(cert->issuer_country);
-        free(cert->issuer_state);
-        free(cert->issuer_distinguishedname);
-        free(cert->issuer_serialnumber);
-        free(cert->issuer_commonname);
-        free(cert->issuer_organisation);
-        free(cert->issuer_organisation_unit);
-        free(cert->issuer_email);
+        _tls_cert_name_free(&cert->subject);
+        _tls_cert_name_free(&cert->issuer);
 
-        free(cert->subject_country);
-        free(cert->subject_state);
-        free(cert->subject_distinguishedname);
-        free(cert->subject_serialnumber);
-        free(cert->subject_commonname);
-        free(cert->subject_organisation);
-        free(cert->subject_organisation_unit);
-        free(cert->subject_email);
-
-        free(cert->pubkey_fingerprint);
-        free(cert->pem);
-        free(cert->signature_alg);
-        free(cert->key_alg);
-        free(cert->notafter);
-        free(cert->notbefore);
-        free(cert->issuername);
-        free(cert->subjectname);
-        free(cert->serialnumber);
-        free(cert->fingerprint_sha1);
-        free(cert->fingerprint_sha256);
+        g_free(cert->pubkey_fingerprint);
+        g_free(cert->pem);
+        g_free(cert->signature_alg);
+        g_free(cert->key_alg);
+        g_free(cert->notafter);
+        g_free(cert->notbefore);
+        g_free(cert->issuername);
+        g_free(cert->subjectname);
+        g_free(cert->serialnumber);
+        g_free(cert->fingerprint_sha1);
+        g_free(cert->fingerprint_sha256);
 
         free(cert);
     }
