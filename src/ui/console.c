@@ -185,8 +185,8 @@ cons_show_tlscert_summary(const TLSCertificate* cert)
         return;
     }
 
-    cons_show("Subject     : %s", cert->subject_commonname);
-    cons_show("Issuer      : %s", cert->issuer_commonname);
+    cons_show("Subject     : %s", cert->subject.commonname);
+    cons_show("Issuer      : %s", cert->issuer.commonname);
     cons_show("Fingerprint : %s", cert->fingerprint);
 }
 
@@ -199,73 +199,35 @@ cons_show_tlscert(const TLSCertificate* cert)
 
     cons_show("Certificate:");
 
-    cons_show("  Subject:");
-    if (cert->subject_commonname) {
-        cons_show("    Common name        : %s", cert->subject_commonname);
-    }
-    if (cert->subject_distinguishedname) {
-        cons_show("    Distinguished name : %s", cert->subject_distinguishedname);
-    }
-    if (cert->subject_organisation) {
-        cons_show("    Organisation       : %s", cert->subject_organisation);
-    }
-    if (cert->subject_organisation_unit) {
-        cons_show("    Organisation unit  : %s", cert->subject_organisation_unit);
-    }
-    if (cert->subject_email) {
-        cons_show("    Email              : %s", cert->subject_email);
-    }
-    if (cert->subject_state) {
-        cons_show("    State              : %s", cert->subject_state);
-    }
-    if (cert->subject_country) {
-        cons_show("    Country            : %s", cert->subject_country);
-    }
-    if (cert->subject_serialnumber) {
-        cons_show("    Serial number      : %s", cert->subject_serialnumber);
-    }
-
-    cons_show("  Issuer:");
-    if (cert->issuer_commonname) {
-        cons_show("    Common name        : %s", cert->issuer_commonname);
-    }
-    if (cert->issuer_distinguishedname) {
-        cons_show("    Distinguished name : %s", cert->issuer_distinguishedname);
-    }
-    if (cert->issuer_organisation) {
-        cons_show("    Organisation       : %s", cert->issuer_organisation);
-    }
-    if (cert->issuer_organisation_unit) {
-        cons_show("    Organisation unit  : %s", cert->issuer_organisation_unit);
-    }
-    if (cert->issuer_email) {
-        cons_show("    Email              : %s", cert->issuer_email);
-    }
-    if (cert->issuer_state) {
-        cons_show("    State              : %s", cert->issuer_state);
-    }
-    if (cert->issuer_country) {
-        cons_show("    Country            : %s", cert->issuer_country);
-    }
-    if (cert->issuer_serialnumber) {
-        cons_show("    Serial number      : %s", cert->issuer_serialnumber);
-    }
-
     cons_show("  Version             : %d", cert->version);
 
-    if (cert->serialnumber) {
-        cons_show("  Serial number       : %s", cert->serialnumber);
-    }
+    cons_show("  Subject:");
+    cons_show_if_set("    Common name        : %s", cert->subject.commonname);
+    cons_show_if_set("    Distinguished name : %s", cert->subject.distinguishedname);
+    cons_show_if_set("    Organisation       : %s", cert->subject.organisation);
+    cons_show_if_set("    Organisation unit  : %s", cert->subject.organisation_unit);
+    cons_show_if_set("    Email              : %s", cert->subject.email);
+    cons_show_if_set("    State              : %s", cert->subject.state);
+    cons_show_if_set("    Country            : %s", cert->subject.country);
+    cons_show_if_set("    Serial number      : %s", cert->subject.serialnumber);
 
-    if (cert->key_alg) {
-        cons_show("  Key algorithm       : %s", cert->key_alg);
-    }
-    if (cert->signature_alg) {
-        cons_show("  Signature algorithm : %s", cert->signature_alg);
-    }
+    cons_show("  Issuer:");
+    cons_show_if_set("    Common name        : %s", cert->issuer.commonname);
+    cons_show_if_set("    Distinguished name : %s", cert->issuer.distinguishedname);
+    cons_show_if_set("    Organisation       : %s", cert->issuer.organisation);
+    cons_show_if_set("    Organisation unit  : %s", cert->issuer.organisation_unit);
+    cons_show_if_set("    Email              : %s", cert->issuer.email);
+    cons_show_if_set("    State              : %s", cert->issuer.state);
+    cons_show_if_set("    Country            : %s", cert->issuer.country);
+    cons_show_if_set("    Serial number      : %s", cert->issuer.serialnumber);
 
-    cons_show("  Start               : %s", cert->notbefore);
-    cons_show("  End                 : %s", cert->notafter);
+    cons_show_if_set("  Serial number       : %s", cert->serialnumber);
+
+    cons_show_if_set("  Key algorithm       : %s", cert->key_alg);
+    cons_show_if_set("  Signature algorithm : %s", cert->signature_alg);
+
+    cons_show_if_set("  Validity Start      : %s", cert->notbefore);
+    cons_show_if_set("  Validity End        : %s", cert->notafter);
 
     cons_show_if_set("  Fingerprint SHA1    : %s", cert->fingerprint_sha1);
     cons_show_if_set("  Fingerprint SHA256  : %s", cert->fingerprint_sha256);

@@ -38,37 +38,35 @@
 
 #include <glib.h>
 
+typedef struct tls_cert_name_t
+{
+    gchar* country;
+    gchar* state;
+    gchar* distinguishedname;
+    gchar* serialnumber;
+    gchar* commonname;
+    gchar* organisation;
+    gchar* organisation_unit;
+    gchar* email;
+} tls_cert_name_t;
+
 typedef struct tls_cert_t
 {
     int version;
-    const char* fingerprint;
-    char* serialnumber;
-    char* subjectname;
-    char* subject_country;
-    char* subject_state;
-    char* subject_distinguishedname;
-    char* subject_serialnumber;
-    char* subject_commonname;
-    char* subject_organisation;
-    char* subject_organisation_unit;
-    char* subject_email;
-    char* issuername;
-    char* issuer_country;
-    char* issuer_state;
-    char* issuer_distinguishedname;
-    char* issuer_serialnumber;
-    char* issuer_commonname;
-    char* issuer_organisation;
-    char* issuer_organisation_unit;
-    char* issuer_email;
-    char* notbefore;
-    char* notafter;
-    char* fingerprint_sha1;
-    char* fingerprint_sha256;
-    char* key_alg;
-    char* signature_alg;
-    char* pem;
-    char* pubkey_fingerprint;
+    const gchar* fingerprint;
+    gchar* serialnumber;
+    gchar* subjectname;
+    tls_cert_name_t subject;
+    gchar* issuername;
+    tls_cert_name_t issuer;
+    gchar* notbefore;
+    gchar* notafter;
+    gchar* fingerprint_sha1;
+    gchar* fingerprint_sha256;
+    gchar* key_alg;
+    gchar* signature_alg;
+    gchar* pem;
+    gchar* pubkey_fingerprint;
 } TLSCertificate;
 
 void tlscerts_init(void);
