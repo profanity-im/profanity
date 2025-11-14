@@ -233,6 +233,28 @@ accounts_get_list(void)
     return g_key_file_get_groups(accounts, NULL);
 }
 
+static GList*
+_g_strv_to_glist(gchar** in, gsize length)
+{
+    if (in == NULL)
+        return NULL;
+    GList* out = NULL;
+    for (gsize i = 0; i < length; i++) {
+        out = g_list_append(out, in[i]);
+    }
+    g_free(in);
+    return out;
+}
+
+static GList*
+_accounts_get_glist(const gchar* group_name,
+                    const gchar* key)
+{
+    gsize length = 0;
+    gchar** list = g_key_file_get_string_list(accounts, group_name, key, &length, NULL);
+    return _g_strv_to_glist(list, length);
+}
+
 ProfAccount*
 accounts_get_account(const char* const name)
 {
@@ -278,92 +300,26 @@ accounts_get_account(const char* const name)
         }
         gchar* muc_nick = g_key_file_get_string(accounts, name, "muc.nick", NULL);
 
-        gchar* otr_policy = NULL;
-        if (g_key_file_has_key(accounts, name, "otr.policy", NULL)) {
-            otr_policy = g_key_file_get_string(accounts, name, "otr.policy", NULL);
-        }
+        gchar* otr_policy = g_key_file_get_string(accounts, name, "otr.policy", NULL);
+        GList* otr_manual = _accounts_get_glist(name, "otr.manual");
+        GList* otr_opportunistic = _accounts_get_glist(name, "otr.opportunistic");
+        GList* otr_always = _accounts_get_glist(name, "otr.always");
 
-        gsize length;
-        GList* otr_manual = NULL;
-        auto_gcharv gchar** manual = g_key_file_get_string_list(accounts, name, "otr.manual", &length, NULL);
-        if (manual) {
-            for (int i = 0; i < length; i++) {
-                otr_manual = g_list_append(otr_manual, strdup(manual[i]));
-            }
-        }
+        gchar* omemo_policy = g_key_file_get_string(accounts, name, "omemo.policy", NULL);
+        GList* omemo_enabled = _accounts_get_glist(name, "omemo.enabled");
+        GList* omemo_disabled = _accounts_get_glist(name, "omemo.disabled");
 
-        GList* otr_opportunistic = NULL;
-        auto_gcharv gchar** opportunistic = g_key_file_get_string_list(accounts, name, "otr.opportunistic", &length, NULL);
-        if (opportunistic) {
-            for (int i = 0; i < length; i++) {
-                otr_opportunistic = g_list_append(otr_opportunistic, strdup(opportunistic[i]));
-            }
-        }
+        GList* ox_enabled = _accounts_get_glist(name, "ox.enabled");
 
-        GList* otr_always = NULL;
-        auto_gcharv gchar** always = g_key_file_get_string_list(accounts, name, "otr.always", &length, NULL);
-        if (always) {
-            for (int i = 0; i < length; i++) {
-                otr_always = g_list_append(otr_always, strdup(always[i]));
-            }
-        }
+        GList* pgp_enabled = _accounts_get_glist(name, "pgp.enabled");
 
-        gchar* omemo_policy = NULL;
-        if (g_key_file_has_key(accounts, name, "omemo.policy", NULL)) {
-            omemo_policy = g_key_file_get_string(accounts, name, "omemo.policy", NULL);
-        }
+        gchar* pgp_keyid = g_key_file_get_string(accounts, name, "pgp.keyid", NULL);
 
-        GList* omemo_enabled = NULL;
-        auto_gcharv gchar** omemo_enabled_list = g_key_file_get_string_list(accounts, name, "omemo.enabled", &length, NULL);
-        if (omemo_enabled_list) {
-            for (int i = 0; i < length; i++) {
-                omemo_enabled = g_list_append(omemo_enabled, strdup(omemo_enabled_list[i]));
-            }
-        }
+        gchar* startscript = g_key_file_get_string(accounts, name, "script.start", NULL);
 
-        GList* omemo_disabled = NULL;
-        auto_gcharv gchar** omemo_disabled_list = g_key_file_get_string_list(accounts, name, "omemo.disabled", &length, NULL);
-        if (omemo_disabled_list) {
-            for (int i = 0; i < length; i++) {
-                omemo_disabled = g_list_append(omemo_disabled, strdup(omemo_disabled_list[i]));
-            }
-        }
+        gchar* client = g_key_file_get_string(accounts, name, "client.account_name", NULL);
 
-        GList* ox_enabled = NULL;
-        auto_gcharv gchar** ox_enabled_list = g_key_file_get_string_list(accounts, name, "ox.enabled", &length, NULL);
-        if (ox_enabled_list) {
-            for (int i = 0; i < length; i++) {
-                ox_enabled = g_list_append(ox_enabled, strdup(ox_enabled_list[i]));
-            }
-        }
-
-        GList* pgp_enabled = NULL;
-        auto_gcharv gchar** pgp_enabled_list = g_key_file_get_string_list(accounts, name, "pgp.enabled", &length, NULL);
-        if (pgp_enabled_list) {
-            for (int i = 0; i < length; i++) {
-                pgp_enabled = g_list_append(pgp_enabled, strdup(pgp_enabled_list[i]));
-            }
-        }
-
-        gchar* pgp_keyid = NULL;
-        if (g_key_file_has_key(accounts, name, "pgp.keyid", NULL)) {
-            pgp_keyid = g_key_file_get_string(accounts, name, "pgp.keyid", NULL);
-        }
-
-        gchar* startscript = NULL;
-        if (g_key_file_has_key(accounts, name, "script.start", NULL)) {
-            startscript = g_key_file_get_string(accounts, name, "script.start", NULL);
-        }
-
-        gchar* client = NULL;
-        if (g_key_file_has_key(accounts, name, "client.name", NULL)) {
-            client = g_key_file_get_string(accounts, name, "client.name", NULL);
-        }
-
-        gchar* theme = NULL;
-        if (g_key_file_has_key(accounts, name, "theme", NULL)) {
-            theme = g_key_file_get_string(accounts, name, "theme", NULL);
-        }
+        gchar* theme = g_key_file_get_string(accounts, name, "theme", NULL);
 
         gchar* tls_policy = g_key_file_get_string(accounts, name, "tls.policy", NULL);
         if (tls_policy && !valid_tls_policy_option(tls_policy)) {
@@ -375,15 +331,13 @@ accounts_get_account(const char* const name)
 
         int max_sessions = g_key_file_get_integer(accounts, name, "max.sessions", 0);
 
-        ProfAccount* new_account = account_new(g_strdup(name), jid, password, eval_password, enabled,
-                                               server, port, resource, last_presence, login_presence,
-                                               priority_online, priority_chat, priority_away, priority_xa,
-                                               priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
-                                               otr_opportunistic, otr_always, omemo_policy, omemo_enabled,
-                                               omemo_disabled, ox_enabled, pgp_enabled, pgp_keyid,
-                                               startscript, theme, tls_policy, auth_policy, client, max_sessions);
-
-        return new_account;
+        return account_new(g_strdup(name), jid, password, eval_password, enabled,
+                           server, port, resource, last_presence, login_presence,
+                           priority_online, priority_chat, priority_away, priority_xa,
+                           priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
+                           otr_opportunistic, otr_always, omemo_policy, omemo_enabled,
+                           omemo_disabled, ox_enabled, pgp_enabled, pgp_keyid,
+                           startscript, theme, tls_policy, auth_policy, client, max_sessions);
     }
 }
 
