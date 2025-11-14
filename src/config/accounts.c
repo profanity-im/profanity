@@ -378,45 +378,11 @@ accounts_rename(const char* const account_name, const char* const new_name)
         return FALSE;
     }
 
-    // treat all properties as strings for copy
-    gchar* string_keys[] = {
-        "enabled",
-        "jid",
-        "server",
-        "port",
-        "resource",
-        "password",
-        "eval_password",
-        "presence.last",
-        "presence.laststatus",
-        "presence.login",
-        "priority.online",
-        "priority.chat",
-        "priority.away",
-        "priority.xa",
-        "priority.dnd",
-        "muc.service",
-        "muc.nick",
-        "otr.policy",
-        "otr.manual",
-        "otr.opportunistic",
-        "otr.always",
-        "omemo.policy",
-        "omemo.enabled",
-        "omemo.disabled",
-        "ox.enabled",
-        "pgp.enabled",
-        "pgp.keyid",
-        "last.activity",
-        "script.start",
-        "tls.policy"
-    };
-
-    for (int i = 0; i < ARRAY_SIZE(string_keys); i++) {
-        auto_gchar gchar* value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
-        if (value) {
-            g_key_file_set_string(accounts, new_name, string_keys[i], value);
-        }
+    gsize nkeys;
+    auto_gcharv gchar** keys = g_key_file_get_keys(accounts, account_name, &nkeys, NULL);
+    for (gsize i = 0; i < nkeys; i++) {
+        auto_gchar gchar* new_value = g_key_file_get_value(accounts, account_name, keys[i], NULL);
+        g_key_file_set_value(accounts, new_name, keys[i], new_value);
     }
 
     g_key_file_remove_group(accounts, account_name, NULL);
@@ -424,9 +390,9 @@ accounts_rename(const char* const account_name, const char* const new_name)
     _accounts_save(new_name);
 
     autocomplete_remove(all_ac, account_name);
+    autocomplete_remove(enabled_ac, account_name);
     autocomplete_add(all_ac, new_name);
     if (g_key_file_get_boolean(accounts, new_name, "enabled", NULL)) {
-        autocomplete_remove(enabled_ac, account_name);
         autocomplete_add(enabled_ac, new_name);
     }
 
