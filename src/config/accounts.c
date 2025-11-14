@@ -256,39 +256,39 @@ _accounts_get_glist(const gchar* group_name,
 }
 
 ProfAccount*
-accounts_get_account(const char* const name)
+accounts_get_account(const char* const account_name)
 {
-    if (!_accounts_has_group(name)) {
+    if (!_accounts_has_group(account_name)) {
         return NULL;
     } else {
-        gchar* jid = g_key_file_get_string(accounts, name, "jid", NULL);
+        gchar* jid = g_key_file_get_string(accounts, account_name, "jid", NULL);
 
-        // fix accounts that have no jid property by setting to name
+        // fix accounts that have no jid property by setting to account_name
         if (jid == NULL) {
-            g_key_file_set_string(accounts, name, "jid", name);
-            _accounts_save(name);
+            g_key_file_set_string(accounts, account_name, "jid", account_name);
+            _accounts_save(account_name);
         }
 
-        gchar* password = g_key_file_get_string(accounts, name, "password", NULL);
-        gchar* eval_password = g_key_file_get_string(accounts, name, "eval_password", NULL);
-        gboolean enabled = g_key_file_get_boolean(accounts, name, "enabled", NULL);
+        gchar* password = g_key_file_get_string(accounts, account_name, "password", NULL);
+        gchar* eval_password = g_key_file_get_string(accounts, account_name, "eval_password", NULL);
+        gboolean enabled = g_key_file_get_boolean(accounts, account_name, "enabled", NULL);
 
-        gchar* server = g_key_file_get_string(accounts, name, "server", NULL);
-        gchar* resource = g_key_file_get_string(accounts, name, "resource", NULL);
-        int port = g_key_file_get_integer(accounts, name, "port", NULL);
+        gchar* server = g_key_file_get_string(accounts, account_name, "server", NULL);
+        gchar* resource = g_key_file_get_string(accounts, account_name, "resource", NULL);
+        int port = g_key_file_get_integer(accounts, account_name, "port", NULL);
 
-        gchar* last_presence = g_key_file_get_string(accounts, name, "presence.last", NULL);
-        gchar* login_presence = g_key_file_get_string(accounts, name, "presence.login", NULL);
+        gchar* last_presence = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
+        gchar* login_presence = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
 
-        int priority_online = g_key_file_get_integer(accounts, name, "priority.online", NULL);
-        int priority_chat = g_key_file_get_integer(accounts, name, "priority.chat", NULL);
-        int priority_away = g_key_file_get_integer(accounts, name, "priority.away", NULL);
-        int priority_xa = g_key_file_get_integer(accounts, name, "priority.xa", NULL);
-        int priority_dnd = g_key_file_get_integer(accounts, name, "priority.dnd", NULL);
+        int priority_online = g_key_file_get_integer(accounts, account_name, "priority.online", NULL);
+        int priority_chat = g_key_file_get_integer(accounts, account_name, "priority.chat", NULL);
+        int priority_away = g_key_file_get_integer(accounts, account_name, "priority.away", NULL);
+        int priority_xa = g_key_file_get_integer(accounts, account_name, "priority.xa", NULL);
+        int priority_dnd = g_key_file_get_integer(accounts, account_name, "priority.dnd", NULL);
 
         gchar* muc_service = NULL;
-        if (g_key_file_has_key(accounts, name, "muc.service", NULL)) {
-            muc_service = g_key_file_get_string(accounts, name, "muc.service", NULL);
+        if (g_key_file_has_key(accounts, account_name, "muc.service", NULL)) {
+            muc_service = g_key_file_get_string(accounts, account_name, "muc.service", NULL);
         } else {
             jabber_conn_status_t conn_status = connection_get_status();
             if (conn_status == JABBER_CONNECTED) {
@@ -298,40 +298,40 @@ accounts_get_account(const char* const name)
                 }
             }
         }
-        gchar* muc_nick = g_key_file_get_string(accounts, name, "muc.nick", NULL);
+        gchar* muc_nick = g_key_file_get_string(accounts, account_name, "muc.nick", NULL);
 
-        gchar* otr_policy = g_key_file_get_string(accounts, name, "otr.policy", NULL);
-        GList* otr_manual = _accounts_get_glist(name, "otr.manual");
-        GList* otr_opportunistic = _accounts_get_glist(name, "otr.opportunistic");
-        GList* otr_always = _accounts_get_glist(name, "otr.always");
+        gchar* otr_policy = g_key_file_get_string(accounts, account_name, "otr.policy", NULL);
+        GList* otr_manual = _accounts_get_glist(account_name, "otr.manual");
+        GList* otr_opportunistic = _accounts_get_glist(account_name, "otr.opportunistic");
+        GList* otr_always = _accounts_get_glist(account_name, "otr.always");
 
-        gchar* omemo_policy = g_key_file_get_string(accounts, name, "omemo.policy", NULL);
-        GList* omemo_enabled = _accounts_get_glist(name, "omemo.enabled");
-        GList* omemo_disabled = _accounts_get_glist(name, "omemo.disabled");
+        gchar* omemo_policy = g_key_file_get_string(accounts, account_name, "omemo.policy", NULL);
+        GList* omemo_enabled = _accounts_get_glist(account_name, "omemo.enabled");
+        GList* omemo_disabled = _accounts_get_glist(account_name, "omemo.disabled");
 
-        GList* ox_enabled = _accounts_get_glist(name, "ox.enabled");
+        GList* ox_enabled = _accounts_get_glist(account_name, "ox.enabled");
 
-        GList* pgp_enabled = _accounts_get_glist(name, "pgp.enabled");
+        GList* pgp_enabled = _accounts_get_glist(account_name, "pgp.enabled");
 
-        gchar* pgp_keyid = g_key_file_get_string(accounts, name, "pgp.keyid", NULL);
+        gchar* pgp_keyid = g_key_file_get_string(accounts, account_name, "pgp.keyid", NULL);
 
-        gchar* startscript = g_key_file_get_string(accounts, name, "script.start", NULL);
+        gchar* startscript = g_key_file_get_string(accounts, account_name, "script.start", NULL);
 
-        gchar* client = g_key_file_get_string(accounts, name, "client.account_name", NULL);
+        gchar* client = g_key_file_get_string(accounts, account_name, "client.account_name", NULL);
 
-        gchar* theme = g_key_file_get_string(accounts, name, "theme", NULL);
+        gchar* theme = g_key_file_get_string(accounts, account_name, "theme", NULL);
 
-        gchar* tls_policy = g_key_file_get_string(accounts, name, "tls.policy", NULL);
+        gchar* tls_policy = g_key_file_get_string(accounts, account_name, "tls.policy", NULL);
         if (tls_policy && !valid_tls_policy_option(tls_policy)) {
             g_free(tls_policy);
             tls_policy = NULL;
         }
 
-        gchar* auth_policy = g_key_file_get_string(accounts, name, "auth.policy", NULL);
+        gchar* auth_policy = g_key_file_get_string(accounts, account_name, "auth.policy", NULL);
 
-        int max_sessions = g_key_file_get_integer(accounts, name, "max.sessions", 0);
+        int max_sessions = g_key_file_get_integer(accounts, account_name, "max.sessions", 0);
 
-        return account_new(g_strdup(name), jid, password, eval_password, enabled,
+        return account_new(g_strdup(account_name), jid, password, eval_password, enabled,
                            server, port, resource, last_presence, login_presence,
                            priority_online, priority_chat, priority_away, priority_xa,
                            priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
@@ -342,12 +342,12 @@ accounts_get_account(const char* const name)
 }
 
 gboolean
-accounts_enable(const char* const name)
+accounts_enable(const char* const account_name)
 {
-    if (_accounts_has_group(name)) {
-        g_key_file_set_boolean(accounts, name, "enabled", TRUE);
-        _accounts_save(name);
-        autocomplete_add(enabled_ac, name);
+    if (_accounts_has_group(account_name)) {
+        g_key_file_set_boolean(accounts, account_name, "enabled", TRUE);
+        _accounts_save(account_name);
+        autocomplete_add(enabled_ac, account_name);
         return TRUE;
     } else {
         return FALSE;
@@ -355,12 +355,12 @@ accounts_enable(const char* const name)
 }
 
 gboolean
-accounts_disable(const char* const name)
+accounts_disable(const char* const account_name)
 {
-    if (_accounts_has_group(name)) {
-        g_key_file_set_boolean(accounts, name, "enabled", FALSE);
-        _accounts_save(name);
-        autocomplete_remove(enabled_ac, name);
+    if (_accounts_has_group(account_name)) {
+        g_key_file_set_boolean(accounts, account_name, "enabled", FALSE);
+        _accounts_save(account_name);
+        autocomplete_remove(enabled_ac, account_name);
         return TRUE;
     } else {
         return FALSE;
