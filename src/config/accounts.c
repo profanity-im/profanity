@@ -59,7 +59,48 @@ static GKeyFile* accounts;
 static Autocomplete all_ac;
 static Autocomplete enabled_ac;
 
-static void _save_accounts(void);
+static gboolean
+_accounts_has_group(const char* account_name)
+{
+    if (!account_name || !accounts)
+        return FALSE;
+    return g_key_file_has_group(accounts, account_name);
+}
+
+static void
+_accounts_save(const char* account_name)
+{
+    prof_keyfile_t current;
+
+    if (!load_data_keyfile(&current, FILE_ACCOUNTS)) {
+        log_error("Could not load accounts");
+        return;
+    }
+
+    gsize written = 0;
+    if (_accounts_has_group(account_name)) {
+        gsize naccounts;
+        auto_gcharv gchar** account_names = g_key_file_get_groups(current.keyfile, &naccounts);
+        for (gsize i = 0; i < naccounts; i++) {
+            /* EITHER current already contains the account, OR we're at the end of
+             * the list of accounts and we should add this new one.
+             */
+            if (g_strcmp0(account_name, account_names[i]) && (i != naccounts - 1))
+                continue;
+            gsize nkeys;
+            auto_gcharv gchar** keys = g_key_file_get_keys(accounts_prof_keyfile.keyfile, account_name, &nkeys, NULL);
+            for (gsize j = 0; j < nkeys; ++j) {
+                auto_gchar gchar* new_value = g_key_file_get_value(accounts_prof_keyfile.keyfile, account_name, keys[j], NULL);
+                g_key_file_set_value(current.keyfile, account_name, keys[j], new_value);
+            }
+            written++;
+        }
+    } else {
+        g_key_file_remove_group(current.keyfile, account_name, NULL);
+    }
+    save_keyfile(&current);
+    free_keyfile(&current);
+}
 
 static void
 _accounts_close(void)
@@ -79,7 +120,9 @@ accounts_load(void)
 
     all_ac = autocomplete_new();
     enabled_ac = autocomplete_new();
-    load_data_keyfile(&accounts_prof_keyfile, FILE_ACCOUNTS);
+    if (!load_data_keyfile(&accounts_prof_keyfile, FILE_ACCOUNTS)) {
+        log_error("Could not load accounts");
+    }
     accounts = accounts_prof_keyfile.keyfile;
 
     // create the logins searchable list for autocompletion
@@ -132,7 +175,8 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
         }
     }
 
-    if (g_key_file_has_group(accounts, account_name)) {
+    if (_accounts_has_group(account_name)) {
+        log_error("Can't add account \"%s\", it already exists.", account_name);
         return;
     }
 
@@ -168,7 +212,7 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
     g_key_file_set_integer(accounts, account_name, "priority.xa", 0);
     g_key_file_set_integer(accounts, account_name, "priority.dnd", 0);
 
-    _save_accounts();
+    _accounts_save(account_name);
     autocomplete_add(all_ac, account_name);
     autocomplete_add(enabled_ac, account_name);
 }
@@ -177,7 +221,7 @@ int
 accounts_remove(const char* account_name)
 {
     int r = g_key_file_remove_group(accounts, account_name, NULL);
-    _save_accounts();
+    _accounts_save(account_name);
     autocomplete_remove(all_ac, account_name);
     autocomplete_remove(enabled_ac, account_name);
     return r;
@@ -192,7 +236,7 @@ accounts_get_list(void)
 ProfAccount*
 accounts_get_account(const char* const name)
 {
-    if (!g_key_file_has_group(accounts, name)) {
+    if (!_accounts_has_group(name)) {
         return NULL;
     } else {
         gchar* jid = g_key_file_get_string(accounts, name, "jid", NULL);
@@ -200,7 +244,7 @@ accounts_get_account(const char* const name)
         // fix accounts that have no jid property by setting to name
         if (jid == NULL) {
             g_key_file_set_string(accounts, name, "jid", name);
-            _save_accounts();
+            _accounts_save(name);
         }
 
         gchar* password = g_key_file_get_string(accounts, name, "password", NULL);
@@ -346,9 +390,9 @@ accounts_get_account(const char* const name)
 gboolean
 accounts_enable(const char* const name)
 {
-    if (g_key_file_has_group(accounts, name)) {
+    if (_accounts_has_group(name)) {
         g_key_file_set_boolean(accounts, name, "enabled", TRUE);
-        _save_accounts();
+        _accounts_save(name);
         autocomplete_add(enabled_ac, name);
         return TRUE;
     } else {
@@ -359,9 +403,9 @@ accounts_enable(const char* const name)
 gboolean
 accounts_disable(const char* const name)
 {
-    if (g_key_file_has_group(accounts, name)) {
+    if (_accounts_has_group(name)) {
         g_key_file_set_boolean(accounts, name, "enabled", FALSE);
-        _save_accounts();
+        _accounts_save(name);
         autocomplete_remove(enabled_ac, name);
         return TRUE;
     } else {
@@ -372,11 +416,11 @@ accounts_disable(const char* const name)
 gboolean
 accounts_rename(const char* const account_name, const char* const new_name)
 {
-    if (g_key_file_has_group(accounts, new_name)) {
+    if (_accounts_has_group(new_name)) {
         return FALSE;
     }
 
-    if (!g_key_file_has_group(accounts, account_name)) {
+    if (!_accounts_has_group(account_name)) {
         return FALSE;
     }
 
@@ -422,7 +466,8 @@ accounts_rename(const char* const account_name, const char* const new_name)
     }
 
     g_key_file_remove_group(accounts, account_name, NULL);
-    _save_accounts();
+    _accounts_save(account_name);
+    _accounts_save(new_name);
 
     autocomplete_remove(all_ac, account_name);
     autocomplete_add(all_ac, new_name);
@@ -437,7 +482,7 @@ accounts_rename(const char* const account_name, const char* const new_name)
 gboolean
 accounts_account_exists(const char* const account_name)
 {
-    return g_key_file_has_group(accounts, account_name);
+    return _accounts_has_group(account_name);
 }
 
 void
@@ -445,7 +490,7 @@ accounts_set_jid(const char* const account_name, const char* const value)
 {
     auto_jid Jid* jid = jid_create(value);
     if (jid) {
-        if (accounts_account_exists(account_name)) {
+        if (_accounts_has_group(account_name)) {
             g_key_file_set_string(accounts, account_name, "jid", jid->barejid);
             if (jid->resourcepart) {
                 g_key_file_set_string(accounts, account_name, "resource", jid->resourcepart);
@@ -457,7 +502,7 @@ accounts_set_jid(const char* const account_name, const char* const value)
                 g_key_file_set_string(accounts, account_name, "muc.nick", jid->localpart);
             }
 
-            _save_accounts();
+            _accounts_save(account_name);
         }
     }
 }
@@ -465,9 +510,9 @@ accounts_set_jid(const char* const account_name, const char* const value)
 void
 accounts_set_server(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         g_key_file_set_string(accounts, account_name, "server", value);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
@@ -476,34 +521,34 @@ accounts_set_port(const char* const account_name, const int value)
 {
     if (value != 0) {
         g_key_file_set_integer(accounts, account_name, "port", value);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 static void
 _accounts_set_string_option(const char* account_name, const char* const option, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         g_key_file_set_string(accounts, account_name, option, value ?: "");
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 static void
 _accounts_set_int_option(const char* account_name, const char* const option, int value)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         g_key_file_set_integer(accounts, account_name, option, value);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 static void
 _accounts_clear_string_option(const char* account_name, const char* const option)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         g_key_file_remove_key(accounts, account_name, option, NULL);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
@@ -630,7 +675,7 @@ accounts_clear_max_sessions(const char* const account_name)
 void
 accounts_add_otr_policy(const char* const account_name, const char* const contact_jid, const char* const policy)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         GString* key = g_string_new("otr.");
         g_string_append(key, policy);
         conf_string_list_add(accounts, account_name, key->str, contact_jid);
@@ -650,14 +695,14 @@ accounts_add_otr_policy(const char* const account_name, const char* const contac
             conf_string_list_remove(accounts, account_name, "otr.manual", contact_jid);
         }
 
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 void
 accounts_add_omemo_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         if (enabled) {
             conf_string_list_add(accounts, account_name, "omemo.enabled", contact_jid);
             conf_string_list_remove(accounts, account_name, "omemo.disabled", contact_jid);
@@ -666,28 +711,28 @@ accounts_add_omemo_state(const char* const account_name, const char* const conta
             conf_string_list_remove(accounts, account_name, "omemo.enabled", contact_jid);
         }
 
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 void
 accounts_add_ox_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         if (enabled) {
             conf_string_list_add(accounts, account_name, "ox.enabled", contact_jid);
         } else {
             conf_string_list_remove(accounts, account_name, "ox.enabled", contact_jid);
         }
 
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 void
 accounts_add_pgp_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         if (enabled) {
             conf_string_list_add(accounts, account_name, "pgp.enabled", contact_jid);
             conf_string_list_remove(accounts, account_name, "pgp.disabled", contact_jid);
@@ -696,17 +741,17 @@ accounts_add_pgp_state(const char* const account_name, const char* const contact
             conf_string_list_remove(accounts, account_name, "pgp.enabled", contact_jid);
         }
 
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 void
 accounts_clear_omemo_state(const char* const account_name, const char* const contact_jid)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         conf_string_list_remove(accounts, account_name, "omemo.enabled", contact_jid);
         conf_string_list_remove(accounts, account_name, "omemo.disabled", contact_jid);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
@@ -779,7 +824,7 @@ accounts_set_priority_dnd(const char* const account_name, const gint value)
 void
 accounts_set_priority_all(const char* const account_name, const gint value)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         accounts_set_priority_online(account_name, value);
         accounts_set_priority_chat(account_name, value);
         accounts_set_priority_away(account_name, value);
@@ -833,7 +878,7 @@ accounts_set_last_status(const char* const account_name, const char* const value
 void
 accounts_set_last_activity(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         GDateTime* nowdt = g_date_time_new_now_utc();
         GTimeVal nowtv;
         gboolean res = g_date_time_to_timeval(nowdt, &nowtv);
@@ -842,7 +887,7 @@ accounts_set_last_activity(const char* const account_name)
         if (res) {
             auto_char char* timestr = g_time_val_to_iso8601(&nowtv);
             g_key_file_set_string(accounts, account_name, "last.activity", timestr);
-            _save_accounts();
+            _accounts_save(account_name);
         }
     }
 }
@@ -850,7 +895,7 @@ accounts_set_last_activity(const char* const account_name)
 gchar*
 accounts_get_last_activity(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         return g_key_file_get_string(accounts, account_name, "last.activity", NULL);
     } else {
         return NULL;
@@ -860,7 +905,7 @@ accounts_get_last_activity(const char* const account_name)
 gchar*
 accounts_get_resource(const char* const account_name)
 {
-    if (!accounts_account_exists(account_name)) {
+    if (!_accounts_has_group(account_name)) {
         return NULL;
     }
     return g_key_file_get_string(accounts, account_name, "resource", NULL);
@@ -869,7 +914,7 @@ accounts_get_resource(const char* const account_name)
 int
 accounts_get_max_sessions(const char* const account_name)
 {
-    if (!accounts_account_exists(account_name)) {
+    if (!_accounts_has_group(account_name)) {
         return 0;
     }
     return g_key_file_get_integer(accounts, account_name, "max.sessions", 0);
@@ -878,9 +923,9 @@ accounts_get_max_sessions(const char* const account_name)
 void
 accounts_set_login_presence(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         g_key_file_set_string(accounts, account_name, "presence.login", value);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
@@ -952,10 +997,4 @@ accounts_get_login_status(const char* const account_name)
     }
 
     return status;
-}
-
-static void
-_save_accounts(void)
-{
-    save_keyfile(&accounts_prof_keyfile);
 }
