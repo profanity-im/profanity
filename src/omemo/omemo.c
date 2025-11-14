@@ -316,6 +316,8 @@ omemo_generate_crypto_materials(ProfAccount* account)
 
     /* Identity key */
     signal_protocol_key_helper_generate_identity_key_pair(&omemo_ctx.identity_key_pair, omemo_ctx.signal);
+    SIGNAL_REF(ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair));
+    SIGNAL_REF(ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair));
 
     ec_public_key_serialize(&omemo_ctx.identity_key_store.public, ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair));
     auto_gchar gchar* identity_key_public = g_base64_encode(signal_buffer_data(omemo_ctx.identity_key_store.public), signal_buffer_len(omemo_ctx.identity_key_store.public));
