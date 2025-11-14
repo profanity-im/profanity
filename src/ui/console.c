@@ -2482,137 +2482,122 @@ cons_get_string(ProfConsoleWin* conswin)
     return g_strdup("Console");
 }
 
-void
-_cons_theme_bar_prop(theme_item_t theme, char* prop)
+static void
+_cons_theme_bar_prop(ProfWin* console, theme_item_t theme, char* prop)
 {
-    ProfWin* console = wins_get_console();
+    auto_gchar gchar* propstr = g_strdup_printf("%-24s", prop);
+    win_print(console, THEME_TEXT, "-", "%s", propstr);
 
-    GString* propstr = g_string_new(" ");
-    g_string_append_printf(propstr, "%-24s", prop);
-    win_print(console, THEME_TEXT, "-", "%s", propstr->str);
-    g_string_free(propstr, TRUE);
-
-    GString* valstr = g_string_new(" ");
-    char* setting = theme_get_string(prop);
-    g_string_append_printf(valstr, "%s ", setting);
-    theme_free_string(setting);
-    win_append(console, theme, "%s", valstr->str);
+    auto_gchar gchar* setting = theme_get_string(prop);
+    win_append(console, theme, "%s", setting);
     win_appendln(console, THEME_TEXT, "");
-    g_string_free(valstr, TRUE);
 }
 
-void
-_cons_theme_prop(theme_item_t theme, char* prop)
+static void
+_cons_theme_prop(ProfWin* console, theme_item_t theme, char* prop)
 {
-    ProfWin* console = wins_get_console();
+    auto_gchar gchar* propstr = g_strdup_printf("%-24s", prop);
+    win_print(console, THEME_TEXT, "-", "%s", propstr);
 
-    GString* propstr = g_string_new(" ");
-    g_string_append_printf(propstr, "%-24s", prop);
-    win_print(console, THEME_TEXT, "-", "%s", propstr->str);
-    g_string_free(propstr, TRUE);
-
-    GString* valstr = g_string_new("");
-    char* setting = theme_get_string(prop);
-    g_string_append_printf(valstr, "%s", setting);
-    theme_free_string(setting);
-    win_appendln(console, theme, "%s", valstr->str);
-    g_string_free(valstr, TRUE);
+    auto_gchar gchar* setting = theme_get_string(prop);
+    win_appendln(console, theme, "%s", setting);
 }
 
 void
 cons_theme_properties(void)
 {
+    ProfWin* console = wins_get_console();
     cons_show("Current colours:");
-    _cons_theme_bar_prop(THEME_TITLE_TEXT, "titlebar.text");
-    _cons_theme_bar_prop(THEME_TITLE_BRACKET, "titlebar.brackets");
+    _cons_theme_bar_prop(console, THEME_TITLE_TEXT, "titlebar.text");
+    _cons_theme_bar_prop(console, THEME_TITLE_BRACKET, "titlebar.brackets");
 
-    _cons_theme_bar_prop(THEME_TITLE_SCROLLED, "titlebar.scrolled");
+    _cons_theme_bar_prop(console, THEME_TITLE_SCROLLED, "titlebar.scrolled");
 
-    _cons_theme_bar_prop(THEME_TITLE_UNENCRYPTED, "titlebar.unencrypted");
-    _cons_theme_bar_prop(THEME_TITLE_ENCRYPTED, "titlebar.encrypted");
-    _cons_theme_bar_prop(THEME_TITLE_UNTRUSTED, "titlebar.untrusted");
-    _cons_theme_bar_prop(THEME_TITLE_TRUSTED, "titlebar.trusted");
+    _cons_theme_bar_prop(console, THEME_TITLE_UNENCRYPTED, "titlebar.unencrypted");
+    _cons_theme_bar_prop(console, THEME_TITLE_ENCRYPTED, "titlebar.encrypted");
+    _cons_theme_bar_prop(console, THEME_TITLE_UNTRUSTED, "titlebar.untrusted");
+    _cons_theme_bar_prop(console, THEME_TITLE_TRUSTED, "titlebar.trusted");
 
-    _cons_theme_bar_prop(THEME_TITLE_CHAT, "titlebar.chat");
-    _cons_theme_bar_prop(THEME_TITLE_ONLINE, "titlebar.online");
-    _cons_theme_bar_prop(THEME_TITLE_AWAY, "titlebar.away");
-    _cons_theme_bar_prop(THEME_TITLE_XA, "titlebar.xa");
-    _cons_theme_bar_prop(THEME_TITLE_DND, "titlebar.dnd");
-    _cons_theme_bar_prop(THEME_TITLE_OFFLINE, "titlebar.offline");
+    _cons_theme_bar_prop(console, THEME_TITLE_CHAT, "titlebar.chat");
+    _cons_theme_bar_prop(console, THEME_TITLE_ONLINE, "titlebar.online");
+    _cons_theme_bar_prop(console, THEME_TITLE_AWAY, "titlebar.away");
+    _cons_theme_bar_prop(console, THEME_TITLE_XA, "titlebar.xa");
+    _cons_theme_bar_prop(console, THEME_TITLE_DND, "titlebar.dnd");
+    _cons_theme_bar_prop(console, THEME_TITLE_OFFLINE, "titlebar.offline");
 
-    _cons_theme_bar_prop(THEME_STATUS_TEXT, "statusbar.text");
-    _cons_theme_bar_prop(THEME_STATUS_BRACKET, "statusbar.brackets");
-    _cons_theme_bar_prop(THEME_STATUS_ACTIVE, "statusbar.active");
-    _cons_theme_bar_prop(THEME_STATUS_CURRENT, "statusbar.current");
-    _cons_theme_bar_prop(THEME_STATUS_NEW, "statusbar.new");
-    _cons_theme_bar_prop(THEME_STATUS_TIME, "statusbar.time");
+    _cons_theme_bar_prop(console, THEME_STATUS_TEXT, "statusbar.text");
+    _cons_theme_bar_prop(console, THEME_STATUS_BRACKET, "statusbar.brackets");
+    _cons_theme_bar_prop(console, THEME_STATUS_ACTIVE, "statusbar.active");
+    _cons_theme_bar_prop(console, THEME_STATUS_CURRENT, "statusbar.current");
+    _cons_theme_bar_prop(console, THEME_STATUS_NEW, "statusbar.new");
+    _cons_theme_bar_prop(console, THEME_STATUS_TIME, "statusbar.time");
 
-    _cons_theme_prop(THEME_TIME, "main.time");
-    _cons_theme_prop(THEME_TEXT, "main.text");
-    _cons_theme_prop(THEME_SPLASH, "main.splash");
-    _cons_theme_prop(THEME_ERROR, "error");
-    _cons_theme_prop(THEME_OTR_STARTED_TRUSTED, "otr.started.trusted");
-    _cons_theme_prop(THEME_OTR_STARTED_UNTRUSTED, "otr.started.untrusted");
-    _cons_theme_prop(THEME_OTR_ENDED, "otr.ended");
-    _cons_theme_prop(THEME_OTR_TRUSTED, "otr.trusted");
-    _cons_theme_prop(THEME_OTR_UNTRUSTED, "otr.untrusted");
+    _cons_theme_prop(console, THEME_TIME, "main.time");
+    _cons_theme_prop(console, THEME_TEXT, "main.text");
+    _cons_theme_prop(console, THEME_SPLASH, "main.splash");
+    _cons_theme_prop(console, THEME_ERROR, "error");
+    _cons_theme_prop(console, THEME_OTR_STARTED_TRUSTED, "otr.started.trusted");
+    _cons_theme_prop(console, THEME_OTR_STARTED_UNTRUSTED, "otr.started.untrusted");
+    _cons_theme_prop(console, THEME_OTR_ENDED, "otr.ended");
+    _cons_theme_prop(console, THEME_OTR_TRUSTED, "otr.trusted");
+    _cons_theme_prop(console, THEME_OTR_UNTRUSTED, "otr.untrusted");
 
-    _cons_theme_prop(THEME_ME, "me");
-    _cons_theme_prop(THEME_TEXT_ME, "main.text.me");
-    _cons_theme_prop(THEME_THEM, "them");
-    _cons_theme_prop(THEME_TEXT_THEM, "main.text.them");
-    _cons_theme_prop(THEME_TEXT_HISTORY, "main.text.history");
+    _cons_theme_prop(console, THEME_ME, "me");
+    _cons_theme_prop(console, THEME_TEXT_ME, "main.text.me");
+    _cons_theme_prop(console, THEME_THEM, "them");
+    _cons_theme_prop(console, THEME_TEXT_THEM, "main.text.them");
+    _cons_theme_prop(console, THEME_TEXT_HISTORY, "main.text.history");
 
-    _cons_theme_prop(THEME_CHAT, "chat");
-    _cons_theme_prop(THEME_ONLINE, "online");
-    _cons_theme_prop(THEME_AWAY, "away");
-    _cons_theme_prop(THEME_XA, "xa");
-    _cons_theme_prop(THEME_DND, "dnd");
-    _cons_theme_prop(THEME_OFFLINE, "offline");
-    _cons_theme_prop(THEME_SUBSCRIBED, "subscribed");
-    _cons_theme_prop(THEME_UNSUBSCRIBED, "unsubscribed");
+    _cons_theme_prop(console, THEME_CHAT, "chat");
+    _cons_theme_prop(console, THEME_ONLINE, "online");
+    _cons_theme_prop(console, THEME_AWAY, "away");
+    _cons_theme_prop(console, THEME_XA, "xa");
+    _cons_theme_prop(console, THEME_DND, "dnd");
+    _cons_theme_prop(console, THEME_OFFLINE, "offline");
+    _cons_theme_prop(console, THEME_SUBSCRIBED, "subscribed");
+    _cons_theme_prop(console, THEME_UNSUBSCRIBED, "unsubscribed");
 
-    _cons_theme_prop(THEME_INCOMING, "incoming");
-    _cons_theme_prop(THEME_MENTION, "mention");
-    _cons_theme_prop(THEME_TRIGGER, "trigger");
-    _cons_theme_prop(THEME_TYPING, "typing");
-    _cons_theme_prop(THEME_GONE, "gone");
+    _cons_theme_prop(console, THEME_INCOMING, "incoming");
+    _cons_theme_prop(console, THEME_MENTION, "mention");
+    _cons_theme_prop(console, THEME_TRIGGER, "trigger");
+    _cons_theme_prop(console, THEME_TYPING, "typing");
+    _cons_theme_prop(console, THEME_GONE, "gone");
 
-    _cons_theme_prop(THEME_ROOMINFO, "roominfo");
-    _cons_theme_prop(THEME_ROOMMENTION, "roommention");
-    _cons_theme_prop(THEME_ROOMMENTION_TERM, "roommention.term");
-    _cons_theme_prop(THEME_ROOMTRIGGER, "roomtrigger");
-    _cons_theme_prop(THEME_ROOMTRIGGER_TERM, "roomtrigger.term");
+    _cons_theme_prop(console, THEME_ROOMINFO, "roominfo");
+    _cons_theme_prop(console, THEME_ROOMMENTION, "roommention");
+    _cons_theme_prop(console, THEME_ROOMMENTION_TERM, "roommention.term");
+    _cons_theme_prop(console, THEME_ROOMTRIGGER, "roomtrigger");
+    _cons_theme_prop(console, THEME_ROOMTRIGGER_TERM, "roomtrigger.term");
 
-    _cons_theme_prop(THEME_ROSTER_HEADER, "roster.header");
-    _cons_theme_prop(THEME_ROSTER_CHAT, "roster.chat");
-    _cons_theme_prop(THEME_ROSTER_ONLINE, "roster.online");
-    _cons_theme_prop(THEME_ROSTER_AWAY, "roster.away");
-    _cons_theme_prop(THEME_ROSTER_XA, "roster.xa");
-    _cons_theme_prop(THEME_ROSTER_DND, "roster.dnd");
-    _cons_theme_prop(THEME_ROSTER_OFFLINE, "roster.offline");
-    _cons_theme_prop(THEME_ROSTER_CHAT_ACTIVE, "roster.chat.active");
-    _cons_theme_prop(THEME_ROSTER_ONLINE_ACTIVE, "roster.online.active");
-    _cons_theme_prop(THEME_ROSTER_AWAY_ACTIVE, "roster.away.active");
-    _cons_theme_prop(THEME_ROSTER_XA_ACTIVE, "roster.xa.active");
-    _cons_theme_prop(THEME_ROSTER_DND_ACTIVE, "roster.dnd.active");
-    _cons_theme_prop(THEME_ROSTER_OFFLINE_ACTIVE, "roster.offline.active");
-    _cons_theme_prop(THEME_ROSTER_CHAT_UNREAD, "roster.chat.unread");
-    _cons_theme_prop(THEME_ROSTER_ONLINE_UNREAD, "roster.online.unread");
-    _cons_theme_prop(THEME_ROSTER_AWAY_UNREAD, "roster.away.unread");
-    _cons_theme_prop(THEME_ROSTER_XA_UNREAD, "roster.xa.unread");
-    _cons_theme_prop(THEME_ROSTER_DND_UNREAD, "roster.dnd.unread");
-    _cons_theme_prop(THEME_ROSTER_OFFLINE_UNREAD, "roster.offline.unread");
-    _cons_theme_prop(THEME_ROSTER_ROOM, "roster.room");
-    _cons_theme_prop(THEME_ROSTER_ROOM_UNREAD, "roster.room.unread");
-    _cons_theme_prop(THEME_ROSTER_ROOM_TRIGGER, "roster.room.trigger");
-    _cons_theme_prop(THEME_ROSTER_ROOM_MENTION, "roster.room.mention");
+    _cons_theme_prop(console, THEME_ROSTER_HEADER, "roster.header");
+    _cons_theme_prop(console, THEME_ROSTER_CHAT, "roster.chat");
+    _cons_theme_prop(console, THEME_ROSTER_ONLINE, "roster.online");
+    _cons_theme_prop(console, THEME_ROSTER_AWAY, "roster.away");
+    _cons_theme_prop(console, THEME_ROSTER_XA, "roster.xa");
+    _cons_theme_prop(console, THEME_ROSTER_DND, "roster.dnd");
+    _cons_theme_prop(console, THEME_ROSTER_OFFLINE, "roster.offline");
+    _cons_theme_prop(console, THEME_ROSTER_CHAT_ACTIVE, "roster.chat.active");
+    _cons_theme_prop(console, THEME_ROSTER_ONLINE_ACTIVE, "roster.online.active");
+    _cons_theme_prop(console, THEME_ROSTER_AWAY_ACTIVE, "roster.away.active");
+    _cons_theme_prop(console, THEME_ROSTER_XA_ACTIVE, "roster.xa.active");
+    _cons_theme_prop(console, THEME_ROSTER_DND_ACTIVE, "roster.dnd.active");
+    _cons_theme_prop(console, THEME_ROSTER_OFFLINE_ACTIVE, "roster.offline.active");
+    _cons_theme_prop(console, THEME_ROSTER_CHAT_UNREAD, "roster.chat.unread");
+    _cons_theme_prop(console, THEME_ROSTER_ONLINE_UNREAD, "roster.online.unread");
+    _cons_theme_prop(console, THEME_ROSTER_AWAY_UNREAD, "roster.away.unread");
+    _cons_theme_prop(console, THEME_ROSTER_XA_UNREAD, "roster.xa.unread");
+    _cons_theme_prop(console, THEME_ROSTER_DND_UNREAD, "roster.dnd.unread");
+    _cons_theme_prop(console, THEME_ROSTER_OFFLINE_UNREAD, "roster.offline.unread");
+    _cons_theme_prop(console, THEME_ROSTER_ROOM, "roster.room");
+    _cons_theme_prop(console, THEME_ROSTER_ROOM_UNREAD, "roster.room.unread");
+    _cons_theme_prop(console, THEME_ROSTER_ROOM_TRIGGER, "roster.room.trigger");
+    _cons_theme_prop(console, THEME_ROSTER_ROOM_MENTION, "roster.room.mention");
 
-    _cons_theme_prop(THEME_OCCUPANTS_HEADER, "occupants.header");
+    _cons_theme_prop(console, THEME_OCCUPANTS_HEADER, "occupants.header");
 
-    _cons_theme_prop(THEME_RECEIPT_SENT, "receipt.sent");
+    _cons_theme_prop(console, THEME_RECEIPT_SENT, "receipt.sent");
 
-    _cons_theme_prop(THEME_INPUT_TEXT, "input.text");
+    _cons_theme_prop(console, THEME_INPUT_TEXT, "input.text");
 
     cons_show("");
 }

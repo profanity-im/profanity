@@ -666,22 +666,14 @@ _theme_prep_fgnd(char* setting, GString* lookup_str, gboolean* bold)
     }
 }
 
-char*
+gchar*
 theme_get_string(char* str)
 {
     gchar* res = g_key_file_get_string(theme, "colours", str, NULL);
     if (!res) {
-        return strdup(g_hash_table_lookup(defaults, str));
+        return g_strdup(g_hash_table_lookup(defaults, str));
     } else {
         return res;
-    }
-}
-
-void
-theme_free_string(char* str)
-{
-    if (str) {
-        g_free(str);
     }
 }
 
