@@ -73,7 +73,7 @@ static struct
     char* passwd;
 } saved_account;
 
-static struct
+static struct session_details
 {
     char* name;
     char* jid;
@@ -159,6 +159,18 @@ session_connect_with_account(const ProfAccount* const account)
     return result;
 }
 
+static jabber_conn_status_t
+_session_connect(struct session_details* details)
+{
+    return connection_connect(
+        details->jid,
+        details->passwd,
+        details->altdomain,
+        details->port,
+        details->tls_policy,
+        details->auth_policy);
+}
+
 jabber_conn_status_t
 session_connect_with_details(const char* const jid, const char* const passwd, const char* const altdomain,
                              const int port, const char* const tls_policy, const char* const auth_policy)
@@ -206,13 +218,7 @@ session_connect_with_details(const char* const jid, const char* const passwd, co
     // connect with fulljid
     log_info("Connecting without account, JID: %s", saved_details.jid);
 
-    return connection_connect(
-        saved_details.jid,
-        passwd,
-        saved_details.altdomain,
-        saved_details.port,
-        saved_details.tls_policy,
-        saved_details.auth_policy);
+    return _session_connect(&saved_details);
 }
 
 void
@@ -552,31 +558,35 @@ void
 session_reconnect_now(void)
 {
     // reconnect with account.
-    ProfAccount* account = accounts_get_account(saved_account.name);
-    if (account == NULL) {
-        log_error("Unable to reconnect, account no longer exists: %s", saved_account.name);
-        return;
-    }
+    if (saved_account.name) {
+        ProfAccount* account = accounts_get_account(saved_account.name);
+        if (account == NULL) {
+            log_error("Unable to reconnect, account no longer exists: %s", saved_account.name);
+            return;
+        }
 
-    auto_char char* jid = NULL;
-    if (account->resource) {
-        jid = create_fulljid(account->jid, account->resource);
-    } else {
-        jid = strdup(account->jid);
-    }
-    const char* server;
-    unsigned short port;
-    if (reconnect.altdomain) {
-        server = reconnect.altdomain;
-        port = reconnect.altport;
-    } else {
-        server = account->server;
-        port = account->port;
-    }
+        auto_char char* jid = NULL;
+        if (account->resource) {
+            jid = create_fulljid(account->jid, account->resource);
+        } else {
+            jid = strdup(account->jid);
+        }
+        const char* server;
+        unsigned short port;
+        if (reconnect.altdomain) {
+            server = reconnect.altdomain;
+            port = reconnect.altport;
+        } else {
+            server = account->server;
+            port = account->port;
+        }
 
-    log_debug("Attempting reconnect with account %s", account->name);
-    connection_connect(jid, saved_account.passwd, server, port, account->tls_policy, account->auth_policy);
-    account_free(account);
+        log_debug("Attempting reconnect with account %s", account->name);
+        connection_connect(jid, saved_account.passwd, server, port, account->tls_policy, account->auth_policy);
+        account_free(account);
+    } else {
+        _session_connect(&saved_details);
+    }
     if (reconnect_timer)
         g_timer_start(reconnect_timer);
 }
