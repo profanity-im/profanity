@@ -275,26 +275,23 @@ omemo_on_connect(ProfAccount* account)
 void
 omemo_on_disconnect(void)
 {
-    if (!omemo_ctx.loaded) {
-        return;
+    if (omemo_ctx.loaded) {
+        free_keyfile(&omemo_ctx.knowndevices);
+        free_keyfile(&omemo_ctx.sessions);
+        free_keyfile(&omemo_ctx.trust);
+
+        ec_public_key* pub = ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair);
+        ec_private_key* priv = ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair);
+        ratchet_identity_key_pair_destroy((signal_type_base*)omemo_ctx.identity_key_pair);
+        ec_private_key_destroy((signal_type_base*)priv);
+        ec_public_key_destroy((signal_type_base*)pub);
     }
 
+    free_keyfile(&omemo_ctx.identity);
     g_hash_table_destroy(omemo_ctx.known_devices);
     g_hash_table_destroy(omemo_ctx.device_list_handler);
     g_hash_table_destroy(omemo_ctx.device_list);
-
-    free_keyfile(&omemo_ctx.knowndevices);
-    free_keyfile(&omemo_ctx.sessions);
-    free_keyfile(&omemo_ctx.trust);
-    free_keyfile(&omemo_ctx.identity);
-
     signal_protocol_store_context_destroy(omemo_ctx.store);
-    ec_public_key* pub = ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair);
-    ec_private_key* priv = ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair);
-    ratchet_identity_key_pair_destroy((signal_type_base*)omemo_ctx.identity_key_pair);
-    ec_private_key_destroy((signal_type_base*)priv);
-    ec_public_key_destroy((signal_type_base*)pub);
-
     signal_context_destroy(omemo_ctx.signal);
     memset(&omemo_ctx, 0, sizeof(omemo_ctx));
 }
