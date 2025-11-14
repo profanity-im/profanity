@@ -217,10 +217,10 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
     autocomplete_add(enabled_ac, account_name);
 }
 
-int
+gboolean
 accounts_remove(const char* account_name)
 {
-    int r = g_key_file_remove_group(accounts, account_name, NULL);
+    gboolean r = g_key_file_remove_group(accounts, account_name, NULL);
     _accounts_save(account_name);
     autocomplete_remove(all_ac, account_name);
     autocomplete_remove(enabled_ac, account_name);
@@ -294,7 +294,7 @@ accounts_get_account(const char* const account_name)
             if (conn_status == JABBER_CONNECTED) {
                 const char* conf_jid = connection_jid_for_feature(XMPP_FEATURE_MUC);
                 if (conf_jid) {
-                    muc_service = strdup(conf_jid);
+                    muc_service = g_strdup(conf_jid);
                 }
             }
         }
