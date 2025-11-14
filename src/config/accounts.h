@@ -48,7 +48,7 @@ char* accounts_find_enabled(const char* const prefix, gboolean previous, void* c
 void accounts_reset_all_search(void);
 void accounts_reset_enabled_search(void);
 void accounts_add(const char* jid, const char* altdomain, const int port, const char* const tls_policy, const char* const auth_policy);
-int accounts_remove(const char* jid);
+gboolean accounts_remove(const char* jid);
 gchar** accounts_get_list(void);
 ProfAccount* accounts_get_account(const char* const name);
 gboolean accounts_enable(const char* const name);
