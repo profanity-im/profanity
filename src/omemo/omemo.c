@@ -346,8 +346,6 @@ omemo_generate_crypto_materials(ProfAccount* account)
 void
 omemo_publish_crypto_materials(void)
 {
-    log_debug("[OMEMO] publish crypto materials");
-
     if (omemo_ctx.loaded != TRUE) {
         cons_show("OMEMO: cannot publish crypto materials before they are generated");
         log_error("[OMEMO] cannot publish crypto materials before they are generated");
