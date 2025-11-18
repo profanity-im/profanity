@@ -116,6 +116,11 @@ omemo_devicelist_request(const char* const jid)
 void
 omemo_bundle_publish(gboolean first)
 {
+    if (!connection_supports(XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS)) {
+        cons_show("OMEMO: Cannot publish bundle: no PUBSUB feature announced");
+        log_debug("[OMEMO] Cannot publish bundle: no PUBSUB feature announced");
+        return;
+    }
     log_debug("[OMEMO] publish own OMEMO bundle");
     xmpp_ctx_t* const ctx = connection_get_ctx();
     unsigned char* identity_key = NULL;
@@ -141,14 +146,10 @@ omemo_bundle_publish(gboolean first)
     g_list_free(lengths);
     g_list_free(ids);
 
-    if (connection_supports(XMPP_FEATURE_PUBSUB_PUBLISH_OPTIONS)) {
-        stanza_attach_publish_options_va(ctx, iq,
-                                         4, // 2 * number of key-value pairs
-                                         "pubsub#persist_items", "true",
-                                         "pubsub#access_model", "open");
-    } else {
-        log_debug("[OMEMO] Cannot publish bundle: no PUBSUB feature announced");
-    }
+    stanza_attach_publish_options_va(ctx, iq,
+                                     4, // 2 * number of key-value pairs
+                                     "pubsub#persist_items", "true",
+                                     "pubsub#access_model", "open");
 
     iq_id_handler_add(id, _omemo_bundle_publish_result, NULL, GINT_TO_POINTER(first));
 
