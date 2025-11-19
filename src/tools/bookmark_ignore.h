@@ -36,7 +36,7 @@
 #ifndef BOOKMARK_IGNORE_H
 #define BOOKMARK_IGNORE_H
 
-void bookmark_ignore_on_connect();
+void bookmark_ignore_on_connect(const char* const barejid);
 void bookmark_ignore_on_disconnect();
 gboolean bookmark_ignored(Bookmark* bookmark);
 gchar** bookmark_ignore_list(gsize* len);

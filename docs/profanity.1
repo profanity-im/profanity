@@ -181,7 +181,15 @@ Stands for Mutli-User Chats (XEP-0045) and are also called, groups, group chats,
 The roster is your contact list. By default displayed at the right side on the console window. See RFC6121.
 .TP
 .BR XEP
-XMPP is aa extendable protocol. There are core features and optional features described in XMPP Extension Protocols, short XEPs.
+XMPP is an extendable protocol. There are core features and optional features described in XMPP Extension Protocols, short XEPs.
+.PP
+There are various kind of messages.
+.TP
+1:1 messages are regular messages from one party to another party, from one JID to the other JID. Often you have the other party added to your roster.
+.TP
+MUC messages are messages from one party to a group chat.
+.TP
+MUC PM (MUC private message) are messages from one party to another party which are in the same group chat. You might not have the JID of this person in your roster or don't know their JID at all. Communication is done over the MUC via the nick. Only the two parties can see the message. In the Android client Conversations this is displayed as "whispering". If a user leaves a MUC another user can join the MUC with the same nick unless the nick is registered. Which often isn't the case.
 .SH SEE ALSO
 .B Profanity
 itself has a lot of built\-in help. Check the
