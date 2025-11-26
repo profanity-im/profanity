@@ -1800,7 +1800,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
         // Remove quote character before and after names when doing autocomplete
         char* unquoted = strip_arg_quotes(input);
         for (int i = 0; i < ARRAY_SIZE(contact_choices); i++) {
-            result = autocomplete_param_with_func(unquoted, contact_choices[i], roster_contact_autocomplete, previous, NULL);
+            result = autocomplete_param_with_func(unquoted, contact_choices[i], roster_contact_autocomplete_substring, previous, NULL);
             if (result) {
                 free(unquoted);
                 return result;
