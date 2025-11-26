@@ -131,63 +131,7 @@ static gboolean _cmd_execute(ProfWin* window, const char* const command, const c
 static gboolean _cmd_execute_default(ProfWin* window, const char* inp);
 static gboolean _cmd_execute_alias(ProfWin* window, const char* const inp, gboolean* ran);
 static gboolean
-_string_matches_one_of(const char* what, const char* is, bool is_can_be_null, const char* first, ...) __attribute__((sentinel));
-static gboolean
 _download_install_plugin(ProfWin* window, gchar* url, gchar* path);
-
-static gboolean
-_string_matches_one_of(const char* what, const char* is, bool is_can_be_null, const char* first, ...)
-{
-    gboolean ret = FALSE;
-    va_list ap;
-    const char* cur = first;
-    if (!is)
-        return is_can_be_null;
-
-    va_start(ap, first);
-    while (cur != NULL) {
-        if (g_strcmp0(is, cur) == 0) {
-            ret = TRUE;
-            break;
-        }
-        cur = va_arg(ap, const char*);
-    }
-    va_end(ap);
-    if (!ret && what) {
-        cons_show("Invalid %s: '%s'", what, is);
-        char errmsg[256] = { 0 };
-        size_t sz = 0;
-        int s = snprintf(errmsg, sizeof(errmsg) - sz, "%s must be one of:", what);
-        if (s < 0 || s + sz >= sizeof(errmsg))
-            return ret;
-        sz += s;
-
-        cur = first;
-        va_start(ap, first);
-        while (cur != NULL) {
-            const char* next = va_arg(ap, const char*);
-            if (next) {
-                s = snprintf(errmsg + sz, sizeof(errmsg) - sz, " '%s',", cur);
-            } else {
-                /* remove last ',' */
-                sz--;
-                errmsg[sz] = '\0';
-                s = snprintf(errmsg + sz, sizeof(errmsg) - sz, " or '%s'.", cur);
-            }
-            if (s < 0 || s + sz >= sizeof(errmsg)) {
-                log_debug("Error message too long or some other error occurred (%d).", s);
-                s = -1;
-                break;
-            }
-            sz += s;
-            cur = next;
-        }
-        va_end(ap);
-        if (s > 0)
-            cons_show(errmsg);
-    }
-    return ret;
-}
 
 /**
  * @brief Processes a line of input and determines if profanity should continue.
@@ -210,8 +154,10 @@ cmd_process_input(ProfWin* window, char* inp)
     if (inp[0] == '/') {
         auto_char char* inp_cpy = strdup(inp);
         char* command = strtok(inp_cpy, " ");
+        char* second_word = strtok(NULL, " ");
+        gboolean wants_help = second_word ? strcmp(second_word, "help") == 0 : FALSE;
         char* question_mark = strchr(command, '?');
-        if (question_mark) {
+        if (wants_help || question_mark) {
             *question_mark = '\0';
             auto_gchar gchar* fakeinp = g_strdup_printf("/help %s", command + 1);
             if (fakeinp) {
@@ -291,7 +237,7 @@ cmd_tls_trust(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
     cafile_add(cert);
-    if (tlscerts_exists(cert->fingerprint)) {
+    if (tlscerts_exists(cert)) {
         cons_show("Certificate %s already trusted.", cert->fingerprint);
         tlscerts_free(cert);
         return TRUE;
@@ -397,7 +343,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
     char* altdomain = g_hash_table_lookup(options, "server");
 
     char* tls_policy = g_hash_table_lookup(options, "tls");
-    if (!_string_matches_one_of("TLS policy", tls_policy, TRUE, "force", "allow", "trust", "disable", "legacy", NULL)) {
+    if (!valid_tls_policy_option(tls_policy)) {
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
@@ -405,7 +351,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* auth_policy = g_hash_table_lookup(options, "auth");
-    if (!_string_matches_one_of("Auth policy", auth_policy, TRUE, "default", "legacy", NULL)) {
+    if (!string_matches_one_of("Auth policy", auth_policy, TRUE, "default", "legacy", NULL)) {
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
@@ -475,7 +421,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
 
             // no account password setting, prompt
         } else {
-            account->password = ui_ask_password(false);
+            account->password = ui_ask_password(FALSE);
             conn_status = cl_ev_connect_account(account);
             free(account->password);
             account->password = NULL;
@@ -487,7 +433,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
         // connect with JID
     } else {
         jid = g_utf8_strdown(user, -1);
-        auto_char char* passwd = ui_ask_password(false);
+        auto_char char* passwd = ui_ask_password(FALSE);
         conn_status = cl_ev_connect_jid(jid, passwd, altdomain, port, tls_policy, auth_policy);
     }
 
@@ -785,7 +731,7 @@ _account_set_nick(char* account_name, char* nick)
 gboolean
 _account_set_otr(char* account_name, char* policy)
 {
-    if (_string_matches_one_of("OTR policy", policy, FALSE, "manual", "opportunistic", "always", NULL)) {
+    if (string_matches_one_of("OTR policy", policy, FALSE, "manual", "opportunistic", "always", NULL)) {
         accounts_set_otr_policy(account_name, policy);
         cons_show("Updated OTR policy for account %s: %s", account_name, policy);
         cons_show("");
@@ -853,7 +799,7 @@ _account_set_theme(char* account_name, char* theme)
         ProfAccount* account = accounts_get_account(session_get_account_name());
         if (account) {
             if (g_strcmp0(account->name, account_name) == 0) {
-                theme_load(theme, false);
+                theme_load(theme, FALSE);
                 ui_load_colours();
                 if (prefs_get_boolean(PREF_ROSTER)) {
                     ui_show_roster();
@@ -877,7 +823,7 @@ _account_set_theme(char* account_name, char* theme)
 gboolean
 _account_set_tls(char* account_name, char* policy)
 {
-    if (_string_matches_one_of("TLS policy", policy, FALSE, "force", "allow", "trust", "disable", "legacy", NULL)) {
+    if (valid_tls_policy_option(policy)) {
         accounts_set_tls_policy(account_name, policy);
         cons_show("Updated TLS policy for account %s: %s", account_name, policy);
         cons_show("");
@@ -888,7 +834,7 @@ _account_set_tls(char* account_name, char* policy)
 gboolean
 _account_set_auth(char* account_name, char* policy)
 {
-    if (_string_matches_one_of("Auth policy", policy, FALSE, "default", "legacy", NULL)) {
+    if (string_matches_one_of("Auth policy", policy, FALSE, "default", "legacy", NULL)) {
         accounts_set_auth_policy(account_name, policy);
         cons_show("Updated auth policy for account %s: %s", account_name, policy);
         cons_show("");
@@ -1829,7 +1775,7 @@ _who_room(ProfWin* window, const char* const command, gchar** args)
     }
 
     // bad arg
-    if (!_string_matches_one_of(NULL, args[0], TRUE, "online", "available", "unavailable", "away", "chat", "xa", "dnd", "any", "moderator", "participant", "visitor", "owner", "admin", "member", "outcast", "none", NULL)) {
+    if (!string_matches_one_of(NULL, args[0], TRUE, "online", "available", "unavailable", "away", "chat", "xa", "dnd", "any", "moderator", "participant", "visitor", "owner", "admin", "member", "outcast", "none", NULL)) {
         cons_bad_cmd_usage(command);
         return;
     }
@@ -1838,7 +1784,7 @@ _who_room(ProfWin* window, const char* const command, gchar** args)
     assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
     // presence filter
-    if (_string_matches_one_of(NULL, args[0], TRUE, "online", "available", "unavailable", "away", "chat", "xa", "dnd", "any", NULL)) {
+    if (string_matches_one_of(NULL, args[0], TRUE, "online", "available", "unavailable", "away", "chat", "xa", "dnd", "any", NULL)) {
 
         gchar* presence = args[0];
         GList* occupants = muc_roster(mucwin->roomjid);
@@ -1937,7 +1883,7 @@ _who_roster(ProfWin* window, const char* const command, gchar** args)
     gchar* presence = args[0];
 
     // bad arg
-    if (!_string_matches_one_of(NULL, presence, TRUE, "online", "available", "unavailable", "offline", "away", "chat", "xa", "dnd", "any", NULL)) {
+    if (!string_matches_one_of(NULL, presence, TRUE, "online", "available", "unavailable", "offline", "away", "chat", "xa", "dnd", "any", NULL)) {
         cons_bad_cmd_usage(command);
         return;
     }
@@ -3637,9 +3583,9 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
     if (!muc_active(room)) {
         presence_join_room(room, nick, passwd);
         muc_join(room, nick, passwd, FALSE);
-        iq_room_affiliation_list(room, "member", false);
-        iq_room_affiliation_list(room, "admin", false);
-        iq_room_affiliation_list(room, "owner", false);
+        iq_room_affiliation_list(room, "member", FALSE);
+        iq_room_affiliation_list(room, "admin", FALSE);
+        iq_room_affiliation_list(room, "owner", FALSE);
     } else if (muc_roster_complete(room)) {
         ui_switch_to_room(room);
     }
@@ -3771,7 +3717,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             if (cmd) {
                 value = args[1];
             }
-            if (!_string_matches_one_of(NULL, cmd, FALSE, "add", "remove", NULL)) {
+            if (!string_matches_one_of(NULL, cmd, FALSE, "add", "remove", NULL)) {
                 win_println(window, THEME_DEFAULT, "-", "Invalid command, usage:");
                 confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, "-", "");
@@ -3825,7 +3771,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             if (cmd) {
                 value = args[1];
             }
-            if (!_string_matches_one_of(NULL, cmd, FALSE, "add", "remove", NULL)) {
+            if (!string_matches_one_of(NULL, cmd, FALSE, "add", "remove", NULL)) {
                 win_println(window, THEME_DEFAULT, "-", "Invalid command, usage:");
                 confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, "-", "");
@@ -3876,7 +3822,7 @@ cmd_form_field(ProfWin* window, char* tag, gchar** args)
             if (cmd) {
                 value = args[1];
             }
-            if (!_string_matches_one_of(NULL, cmd, FALSE, "add", "remove", NULL)) {
+            if (!string_matches_one_of(NULL, cmd, FALSE, "add", "remove", NULL)) {
                 win_println(window, THEME_DEFAULT, "-", "Invalid command, usage:");
                 confwin_field_help(confwin, tag);
                 win_println(window, THEME_DEFAULT, "-", "");
@@ -3932,7 +3878,7 @@ cmd_form(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    if (!_string_matches_one_of(NULL, args[0], FALSE, "submit", "cancel", "show", "help", NULL)) {
+    if (!string_matches_one_of(NULL, args[0], FALSE, "submit", "cancel", "show", "help", NULL)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -4177,7 +4123,7 @@ cmd_affiliation(ProfWin* window, const char* const command, gchar** args)
     }
 
     gchar* affiliation = args[1];
-    if (!_string_matches_one_of(NULL, affiliation, TRUE, "owner", "admin", "member", "none", "outcast", NULL)) {
+    if (!string_matches_one_of(NULL, affiliation, TRUE, "owner", "admin", "member", "none", "outcast", NULL)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -4187,14 +4133,14 @@ cmd_affiliation(ProfWin* window, const char* const command, gchar** args)
 
     if (g_strcmp0(cmd, "list") == 0) {
         if (!affiliation) {
-            iq_room_affiliation_list(mucwin->roomjid, "owner", true);
-            iq_room_affiliation_list(mucwin->roomjid, "admin", true);
-            iq_room_affiliation_list(mucwin->roomjid, "member", true);
-            iq_room_affiliation_list(mucwin->roomjid, "outcast", true);
+            iq_room_affiliation_list(mucwin->roomjid, "owner", TRUE);
+            iq_room_affiliation_list(mucwin->roomjid, "admin", TRUE);
+            iq_room_affiliation_list(mucwin->roomjid, "member", TRUE);
+            iq_room_affiliation_list(mucwin->roomjid, "outcast", TRUE);
         } else if (g_strcmp0(affiliation, "none") == 0) {
             win_println(window, THEME_DEFAULT, "!", "Cannot list users with no affiliation.");
         } else {
-            iq_room_affiliation_list(mucwin->roomjid, affiliation, true);
+            iq_room_affiliation_list(mucwin->roomjid, affiliation, TRUE);
         }
         return TRUE;
     }
@@ -4252,7 +4198,7 @@ cmd_role(ProfWin* window, const char* const command, gchar** args)
     }
 
     gchar* role = args[1];
-    if (!_string_matches_one_of(NULL, role, TRUE, "visitor", "participant", "moderator", "none", NULL)) {
+    if (!string_matches_one_of(NULL, role, TRUE, "visitor", "participant", "moderator", "none", NULL)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
@@ -5196,13 +5142,13 @@ cmd_console(ProfWin* window, const char* const command, gchar** args)
 {
     gboolean isMuc = (g_strcmp0(args[0], "muc") == 0);
 
-    if (!_string_matches_one_of(NULL, args[0], FALSE, "chat", "private", NULL) && !isMuc) {
+    if (!string_matches_one_of(NULL, args[0], FALSE, "chat", "private", NULL) && !isMuc) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
 
     gchar* setting = args[1];
-    if (!_string_matches_one_of(NULL, setting, FALSE, "all", "first", "none", NULL)) {
+    if (!string_matches_one_of(NULL, setting, FALSE, "all", "first", "none", NULL)) {
         if (!(isMuc && (g_strcmp0(setting, "mention") == 0))) {
             cons_bad_cmd_usage(command);
             return TRUE;
@@ -6375,12 +6321,12 @@ cmd_ping(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_autoaway(ProfWin* window, const char* const command, gchar** args)
 {
-    if (!_string_matches_one_of("Setting", args[0], FALSE, "mode", "time", "message", "check", NULL)) {
+    if (!string_matches_one_of("Setting", args[0], FALSE, "mode", "time", "message", "check", NULL)) {
         return TRUE;
     }
 
     if (g_strcmp0(args[0], "mode") == 0) {
-        if (_string_matches_one_of("Mode", args[1], FALSE, "idle", "away", "off", NULL)) {
+        if (string_matches_one_of("Mode", args[1], FALSE, "idle", "away", "off", NULL)) {
             prefs_set_string(PREF_AUTOAWAY_MODE, args[1]);
             cons_show("Auto away mode set to: %s.", args[1]);
         }
@@ -7040,20 +6986,16 @@ cmd_plugins(ProfWin* window, const char* const command, gchar** args)
     GDir* global_cp_dir = NULL;
 
     if (access(GLOBAL_PYTHON_PLUGINS_PATH, R_OK) == 0) {
-        GError* error = NULL;
-        global_pyp_dir = g_dir_open(GLOBAL_PYTHON_PLUGINS_PATH, 0, &error);
-        if (error) {
+        global_pyp_dir = g_dir_open(GLOBAL_PYTHON_PLUGINS_PATH, 0, NULL);
+        if (global_pyp_dir == NULL) {
             log_warning("Error when trying to open global plugins path: %s", GLOBAL_PYTHON_PLUGINS_PATH);
-            g_error_free(error);
             return TRUE;
         }
     }
     if (access(GLOBAL_C_PLUGINS_PATH, R_OK) == 0) {
-        GError* error = NULL;
-        global_cp_dir = g_dir_open(GLOBAL_C_PLUGINS_PATH, 0, &error);
-        if (error) {
+        global_cp_dir = g_dir_open(GLOBAL_C_PLUGINS_PATH, 0, NULL);
+        if (global_cp_dir == NULL) {
             log_warning("Error when trying to open global plugins path: %s", GLOBAL_C_PLUGINS_PATH);
-            g_error_free(error);
             return TRUE;
         }
     }
@@ -7729,7 +7671,7 @@ cmd_otr_policy(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* choice = args[1];
-    if (!_string_matches_one_of("OTR policy", choice, FALSE, "manual", "opportunistic", "always", NULL)) {
+    if (!string_matches_one_of("OTR policy", choice, FALSE, "manual", "opportunistic", "always", NULL)) {
         return TRUE;
     }
 
@@ -8915,7 +8857,7 @@ cmd_omemo_policy(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* choice = args[1];
-    if (!_string_matches_one_of("OMEMO policy", choice, FALSE, "manual", "automatic", "always", NULL)) {
+    if (!string_matches_one_of("OMEMO policy", choice, FALSE, "manual", "automatic", "always", NULL)) {
         return TRUE;
     }
 
@@ -8950,6 +8892,14 @@ cmd_omemo_qrcode(ProfWin* window, const char* const command, gchar** args)
     cons_show("This version of Profanity has not been built with OMEMO support enabled");
     return TRUE;
 #endif
+}
+
+gboolean
+cmd_changes(ProfWin* window, const char* const command, gchar** args)
+{
+    cons_show("Show changes from saved configuration file.");
+    prefs_changes();
+    return TRUE;
 }
 
 gboolean
@@ -9086,12 +9036,12 @@ cmd_color(ProfWin* window, const char* const command, gchar** args)
 
     auto_gchar gchar* theme = prefs_get_string(PREF_THEME);
     if (theme) {
-        gboolean res = theme_load(theme, false);
+        gboolean res = theme_load(theme, FALSE);
 
         if (res) {
             cons_show("Theme reloaded: %s", theme);
         } else {
-            theme_load("default", false);
+            theme_load("default", FALSE);
         }
     }
 
@@ -9121,9 +9071,9 @@ cmd_avatar(ProfWin* window, const char* const command, gchar** args)
             cons_show("Profanity has not been built with GDK Pixbuf support enabled which is needed to scale the avatar when uploading.");
 #endif
         } else if (g_strcmp0(args[0], "get") == 0) {
-            avatar_get_by_nick(args[1], false);
+            avatar_get_by_nick(args[1], FALSE);
         } else if (g_strcmp0(args[0], "open") == 0) {
-            avatar_get_by_nick(args[1], true);
+            avatar_get_by_nick(args[1], TRUE);
         } else {
             cons_bad_cmd_usage(command);
         }
@@ -9506,8 +9456,8 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    auto_char char* passwd = ui_ask_password(false);
-    auto_char char* confirm_passwd = ui_ask_password(true);
+    auto_char char* passwd = ui_ask_password(FALSE);
+    auto_char char* confirm_passwd = ui_ask_password(TRUE);
 
     if (g_strcmp0(passwd, confirm_passwd) == 0) {
         iq_register_change_password(connection_get_user(), passwd);
@@ -9593,7 +9543,7 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
     }
 
     char* tls_policy = g_hash_table_lookup(options, "tls");
-    if (!_string_matches_one_of("TLS policy", tls_policy, TRUE, "force", "allow", "trust", "disable", "legacy", NULL)) {
+    if (!valid_tls_policy_option(tls_policy)) {
         cons_bad_cmd_usage(command);
         cons_show("");
         options_destroy(options);
@@ -9617,8 +9567,8 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
     char* username = args[0];
     char* server = args[1];
 
-    auto_char char* passwd = ui_ask_password(false);
-    auto_char char* confirm_passwd = ui_ask_password(true);
+    auto_char char* passwd = ui_ask_password(FALSE);
+    auto_char char* confirm_passwd = ui_ask_password(TRUE);
 
     if (g_strcmp0(passwd, confirm_passwd) == 0) {
         log_info("Attempting to register account %s on server %s.", username, server);

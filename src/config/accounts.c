@@ -59,7 +59,48 @@ static GKeyFile* accounts;
 static Autocomplete all_ac;
 static Autocomplete enabled_ac;
 
-static void _save_accounts(void);
+static gboolean
+_accounts_has_group(const char* account_name)
+{
+    if (!account_name || !accounts)
+        return FALSE;
+    return g_key_file_has_group(accounts, account_name);
+}
+
+static void
+_accounts_save(const char* account_name)
+{
+    prof_keyfile_t current;
+
+    if (!load_data_keyfile(&current, FILE_ACCOUNTS)) {
+        log_error("Could not load accounts");
+        return;
+    }
+
+    gsize written = 0;
+    if (_accounts_has_group(account_name)) {
+        gsize naccounts;
+        auto_gcharv gchar** account_names = g_key_file_get_groups(current.keyfile, &naccounts);
+        for (gsize i = 0; i < naccounts; i++) {
+            /* EITHER current already contains the account, OR we're at the end of
+             * the list of accounts and we should add this new one.
+             */
+            if (g_strcmp0(account_name, account_names[i]) && (i != naccounts - 1))
+                continue;
+            gsize nkeys;
+            auto_gcharv gchar** keys = g_key_file_get_keys(accounts_prof_keyfile.keyfile, account_name, &nkeys, NULL);
+            for (gsize j = 0; j < nkeys; ++j) {
+                auto_gchar gchar* new_value = g_key_file_get_value(accounts_prof_keyfile.keyfile, account_name, keys[j], NULL);
+                g_key_file_set_value(current.keyfile, account_name, keys[j], new_value);
+            }
+            written++;
+        }
+    } else {
+        g_key_file_remove_group(current.keyfile, account_name, NULL);
+    }
+    save_keyfile(&current);
+    free_keyfile(&current);
+}
 
 static void
 _accounts_close(void)
@@ -79,7 +120,9 @@ accounts_load(void)
 
     all_ac = autocomplete_new();
     enabled_ac = autocomplete_new();
-    load_data_keyfile(&accounts_prof_keyfile, FILE_ACCOUNTS);
+    if (!load_data_keyfile(&accounts_prof_keyfile, FILE_ACCOUNTS)) {
+        log_error("Could not load accounts");
+    }
     accounts = accounts_prof_keyfile.keyfile;
 
     // create the logins searchable list for autocompletion
@@ -132,7 +175,8 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
         }
     }
 
-    if (g_key_file_has_group(accounts, account_name)) {
+    if (_accounts_has_group(account_name)) {
+        log_error("Can't add account \"%s\", it already exists.", account_name);
         return;
     }
 
@@ -168,16 +212,16 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
     g_key_file_set_integer(accounts, account_name, "priority.xa", 0);
     g_key_file_set_integer(accounts, account_name, "priority.dnd", 0);
 
-    _save_accounts();
+    _accounts_save(account_name);
     autocomplete_add(all_ac, account_name);
     autocomplete_add(enabled_ac, account_name);
 }
 
-int
+gboolean
 accounts_remove(const char* account_name)
 {
-    int r = g_key_file_remove_group(accounts, account_name, NULL);
-    _save_accounts();
+    gboolean r = g_key_file_remove_group(accounts, account_name, NULL);
+    _accounts_save(account_name);
     autocomplete_remove(all_ac, account_name);
     autocomplete_remove(enabled_ac, account_name);
     return r;
@@ -189,167 +233,121 @@ accounts_get_list(void)
     return g_key_file_get_groups(accounts, NULL);
 }
 
-ProfAccount*
-accounts_get_account(const char* const name)
+static GList*
+_g_strv_to_glist(gchar** in, gsize length)
 {
-    if (!g_key_file_has_group(accounts, name)) {
+    if (in == NULL)
+        return NULL;
+    GList* out = NULL;
+    for (gsize i = 0; i < length; i++) {
+        out = g_list_append(out, in[i]);
+    }
+    g_free(in);
+    return out;
+}
+
+static GList*
+_accounts_get_glist(const gchar* group_name,
+                    const gchar* key)
+{
+    gsize length = 0;
+    gchar** list = g_key_file_get_string_list(accounts, group_name, key, &length, NULL);
+    return _g_strv_to_glist(list, length);
+}
+
+ProfAccount*
+accounts_get_account(const char* const account_name)
+{
+    if (!_accounts_has_group(account_name)) {
         return NULL;
     } else {
-        gchar* jid = g_key_file_get_string(accounts, name, "jid", NULL);
+        gchar* jid = g_key_file_get_string(accounts, account_name, "jid", NULL);
 
-        // fix accounts that have no jid property by setting to name
+        // fix accounts that have no jid property by setting to account_name
         if (jid == NULL) {
-            g_key_file_set_string(accounts, name, "jid", name);
-            _save_accounts();
+            g_key_file_set_string(accounts, account_name, "jid", account_name);
+            _accounts_save(account_name);
         }
 
-        gchar* password = g_key_file_get_string(accounts, name, "password", NULL);
-        gchar* eval_password = g_key_file_get_string(accounts, name, "eval_password", NULL);
-        gboolean enabled = g_key_file_get_boolean(accounts, name, "enabled", NULL);
+        gchar* password = g_key_file_get_string(accounts, account_name, "password", NULL);
+        gchar* eval_password = g_key_file_get_string(accounts, account_name, "eval_password", NULL);
+        gboolean enabled = g_key_file_get_boolean(accounts, account_name, "enabled", NULL);
 
-        gchar* server = g_key_file_get_string(accounts, name, "server", NULL);
-        gchar* resource = g_key_file_get_string(accounts, name, "resource", NULL);
-        int port = g_key_file_get_integer(accounts, name, "port", NULL);
+        gchar* server = g_key_file_get_string(accounts, account_name, "server", NULL);
+        gchar* resource = g_key_file_get_string(accounts, account_name, "resource", NULL);
+        int port = g_key_file_get_integer(accounts, account_name, "port", NULL);
 
-        gchar* last_presence = g_key_file_get_string(accounts, name, "presence.last", NULL);
-        gchar* login_presence = g_key_file_get_string(accounts, name, "presence.login", NULL);
+        gchar* last_presence = g_key_file_get_string(accounts, account_name, "presence.last", NULL);
+        gchar* login_presence = g_key_file_get_string(accounts, account_name, "presence.login", NULL);
 
-        int priority_online = g_key_file_get_integer(accounts, name, "priority.online", NULL);
-        int priority_chat = g_key_file_get_integer(accounts, name, "priority.chat", NULL);
-        int priority_away = g_key_file_get_integer(accounts, name, "priority.away", NULL);
-        int priority_xa = g_key_file_get_integer(accounts, name, "priority.xa", NULL);
-        int priority_dnd = g_key_file_get_integer(accounts, name, "priority.dnd", NULL);
+        int priority_online = g_key_file_get_integer(accounts, account_name, "priority.online", NULL);
+        int priority_chat = g_key_file_get_integer(accounts, account_name, "priority.chat", NULL);
+        int priority_away = g_key_file_get_integer(accounts, account_name, "priority.away", NULL);
+        int priority_xa = g_key_file_get_integer(accounts, account_name, "priority.xa", NULL);
+        int priority_dnd = g_key_file_get_integer(accounts, account_name, "priority.dnd", NULL);
 
         gchar* muc_service = NULL;
-        if (g_key_file_has_key(accounts, name, "muc.service", NULL)) {
-            muc_service = g_key_file_get_string(accounts, name, "muc.service", NULL);
+        if (g_key_file_has_key(accounts, account_name, "muc.service", NULL)) {
+            muc_service = g_key_file_get_string(accounts, account_name, "muc.service", NULL);
         } else {
             jabber_conn_status_t conn_status = connection_get_status();
             if (conn_status == JABBER_CONNECTED) {
                 const char* conf_jid = connection_jid_for_feature(XMPP_FEATURE_MUC);
                 if (conf_jid) {
-                    muc_service = strdup(conf_jid);
+                    muc_service = g_strdup(conf_jid);
                 }
             }
         }
-        gchar* muc_nick = g_key_file_get_string(accounts, name, "muc.nick", NULL);
+        gchar* muc_nick = g_key_file_get_string(accounts, account_name, "muc.nick", NULL);
 
-        gchar* otr_policy = NULL;
-        if (g_key_file_has_key(accounts, name, "otr.policy", NULL)) {
-            otr_policy = g_key_file_get_string(accounts, name, "otr.policy", NULL);
-        }
+        gchar* otr_policy = g_key_file_get_string(accounts, account_name, "otr.policy", NULL);
+        GList* otr_manual = _accounts_get_glist(account_name, "otr.manual");
+        GList* otr_opportunistic = _accounts_get_glist(account_name, "otr.opportunistic");
+        GList* otr_always = _accounts_get_glist(account_name, "otr.always");
 
-        gsize length;
-        GList* otr_manual = NULL;
-        auto_gcharv gchar** manual = g_key_file_get_string_list(accounts, name, "otr.manual", &length, NULL);
-        if (manual) {
-            for (int i = 0; i < length; i++) {
-                otr_manual = g_list_append(otr_manual, strdup(manual[i]));
-            }
-        }
+        gchar* omemo_policy = g_key_file_get_string(accounts, account_name, "omemo.policy", NULL);
+        GList* omemo_enabled = _accounts_get_glist(account_name, "omemo.enabled");
+        GList* omemo_disabled = _accounts_get_glist(account_name, "omemo.disabled");
 
-        GList* otr_opportunistic = NULL;
-        auto_gcharv gchar** opportunistic = g_key_file_get_string_list(accounts, name, "otr.opportunistic", &length, NULL);
-        if (opportunistic) {
-            for (int i = 0; i < length; i++) {
-                otr_opportunistic = g_list_append(otr_opportunistic, strdup(opportunistic[i]));
-            }
-        }
+        GList* ox_enabled = _accounts_get_glist(account_name, "ox.enabled");
 
-        GList* otr_always = NULL;
-        auto_gcharv gchar** always = g_key_file_get_string_list(accounts, name, "otr.always", &length, NULL);
-        if (always) {
-            for (int i = 0; i < length; i++) {
-                otr_always = g_list_append(otr_always, strdup(always[i]));
-            }
-        }
+        GList* pgp_enabled = _accounts_get_glist(account_name, "pgp.enabled");
 
-        gchar* omemo_policy = NULL;
-        if (g_key_file_has_key(accounts, name, "omemo.policy", NULL)) {
-            omemo_policy = g_key_file_get_string(accounts, name, "omemo.policy", NULL);
-        }
+        gchar* pgp_keyid = g_key_file_get_string(accounts, account_name, "pgp.keyid", NULL);
 
-        GList* omemo_enabled = NULL;
-        auto_gcharv gchar** omemo_enabled_list = g_key_file_get_string_list(accounts, name, "omemo.enabled", &length, NULL);
-        if (omemo_enabled_list) {
-            for (int i = 0; i < length; i++) {
-                omemo_enabled = g_list_append(omemo_enabled, strdup(omemo_enabled_list[i]));
-            }
-        }
+        gchar* startscript = g_key_file_get_string(accounts, account_name, "script.start", NULL);
 
-        GList* omemo_disabled = NULL;
-        auto_gcharv gchar** omemo_disabled_list = g_key_file_get_string_list(accounts, name, "omemo.disabled", &length, NULL);
-        if (omemo_disabled_list) {
-            for (int i = 0; i < length; i++) {
-                omemo_disabled = g_list_append(omemo_disabled, strdup(omemo_disabled_list[i]));
-            }
-        }
+        gchar* client = g_key_file_get_string(accounts, account_name, "client.account_name", NULL);
 
-        GList* ox_enabled = NULL;
-        auto_gcharv gchar** ox_enabled_list = g_key_file_get_string_list(accounts, name, "ox.enabled", &length, NULL);
-        if (ox_enabled_list) {
-            for (int i = 0; i < length; i++) {
-                ox_enabled = g_list_append(ox_enabled, strdup(ox_enabled_list[i]));
-            }
-        }
+        gchar* theme = g_key_file_get_string(accounts, account_name, "theme", NULL);
 
-        GList* pgp_enabled = NULL;
-        auto_gcharv gchar** pgp_enabled_list = g_key_file_get_string_list(accounts, name, "pgp.enabled", &length, NULL);
-        if (pgp_enabled_list) {
-            for (int i = 0; i < length; i++) {
-                pgp_enabled = g_list_append(pgp_enabled, strdup(pgp_enabled_list[i]));
-            }
-        }
-
-        gchar* pgp_keyid = NULL;
-        if (g_key_file_has_key(accounts, name, "pgp.keyid", NULL)) {
-            pgp_keyid = g_key_file_get_string(accounts, name, "pgp.keyid", NULL);
-        }
-
-        gchar* startscript = NULL;
-        if (g_key_file_has_key(accounts, name, "script.start", NULL)) {
-            startscript = g_key_file_get_string(accounts, name, "script.start", NULL);
-        }
-
-        gchar* client = NULL;
-        if (g_key_file_has_key(accounts, name, "client.name", NULL)) {
-            client = g_key_file_get_string(accounts, name, "client.name", NULL);
-        }
-
-        gchar* theme = NULL;
-        if (g_key_file_has_key(accounts, name, "theme", NULL)) {
-            theme = g_key_file_get_string(accounts, name, "theme", NULL);
-        }
-
-        gchar* tls_policy = g_key_file_get_string(accounts, name, "tls.policy", NULL);
-        if (tls_policy && ((g_strcmp0(tls_policy, "force") != 0) && (g_strcmp0(tls_policy, "allow") != 0) && (g_strcmp0(tls_policy, "trust") != 0) && (g_strcmp0(tls_policy, "disable") != 0) && (g_strcmp0(tls_policy, "legacy") != 0))) {
+        gchar* tls_policy = g_key_file_get_string(accounts, account_name, "tls.policy", NULL);
+        if (tls_policy && !valid_tls_policy_option(tls_policy)) {
             g_free(tls_policy);
             tls_policy = NULL;
         }
 
-        gchar* auth_policy = g_key_file_get_string(accounts, name, "auth.policy", NULL);
+        gchar* auth_policy = g_key_file_get_string(accounts, account_name, "auth.policy", NULL);
 
-        int max_sessions = g_key_file_get_integer(accounts, name, "max.sessions", 0);
+        int max_sessions = g_key_file_get_integer(accounts, account_name, "max.sessions", 0);
 
-        ProfAccount* new_account = account_new(g_strdup(name), jid, password, eval_password, enabled,
-                                               server, port, resource, last_presence, login_presence,
-                                               priority_online, priority_chat, priority_away, priority_xa,
-                                               priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
-                                               otr_opportunistic, otr_always, omemo_policy, omemo_enabled,
-                                               omemo_disabled, ox_enabled, pgp_enabled, pgp_keyid,
-                                               startscript, theme, tls_policy, auth_policy, client, max_sessions);
-
-        return new_account;
+        return account_new(g_strdup(account_name), jid, password, eval_password, enabled,
+                           server, port, resource, last_presence, login_presence,
+                           priority_online, priority_chat, priority_away, priority_xa,
+                           priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
+                           otr_opportunistic, otr_always, omemo_policy, omemo_enabled,
+                           omemo_disabled, ox_enabled, pgp_enabled, pgp_keyid,
+                           startscript, theme, tls_policy, auth_policy, client, max_sessions);
     }
 }
 
 gboolean
-accounts_enable(const char* const name)
+accounts_enable(const char* const account_name)
 {
-    if (g_key_file_has_group(accounts, name)) {
-        g_key_file_set_boolean(accounts, name, "enabled", TRUE);
-        _save_accounts();
-        autocomplete_add(enabled_ac, name);
+    if (_accounts_has_group(account_name)) {
+        g_key_file_set_boolean(accounts, account_name, "enabled", TRUE);
+        _accounts_save(account_name);
+        autocomplete_add(enabled_ac, account_name);
         return TRUE;
     } else {
         return FALSE;
@@ -357,12 +355,12 @@ accounts_enable(const char* const name)
 }
 
 gboolean
-accounts_disable(const char* const name)
+accounts_disable(const char* const account_name)
 {
-    if (g_key_file_has_group(accounts, name)) {
-        g_key_file_set_boolean(accounts, name, "enabled", FALSE);
-        _save_accounts();
-        autocomplete_remove(enabled_ac, name);
+    if (_accounts_has_group(account_name)) {
+        g_key_file_set_boolean(accounts, account_name, "enabled", FALSE);
+        _accounts_save(account_name);
+        autocomplete_remove(enabled_ac, account_name);
         return TRUE;
     } else {
         return FALSE;
@@ -372,62 +370,29 @@ accounts_disable(const char* const name)
 gboolean
 accounts_rename(const char* const account_name, const char* const new_name)
 {
-    if (g_key_file_has_group(accounts, new_name)) {
+    if (_accounts_has_group(new_name)) {
         return FALSE;
     }
 
-    if (!g_key_file_has_group(accounts, account_name)) {
+    if (!_accounts_has_group(account_name)) {
         return FALSE;
     }
 
-    // treat all properties as strings for copy
-    gchar* string_keys[] = {
-        "enabled",
-        "jid",
-        "server",
-        "port",
-        "resource",
-        "password",
-        "eval_password",
-        "presence.last",
-        "presence.laststatus",
-        "presence.login",
-        "priority.online",
-        "priority.chat",
-        "priority.away",
-        "priority.xa",
-        "priority.dnd",
-        "muc.service",
-        "muc.nick",
-        "otr.policy",
-        "otr.manual",
-        "otr.opportunistic",
-        "otr.always",
-        "omemo.policy",
-        "omemo.enabled",
-        "omemo.disabled",
-        "ox.enabled",
-        "pgp.enabled",
-        "pgp.keyid",
-        "last.activity",
-        "script.start",
-        "tls.policy"
-    };
-
-    for (int i = 0; i < ARRAY_SIZE(string_keys); i++) {
-        auto_gchar gchar* value = g_key_file_get_string(accounts, account_name, string_keys[i], NULL);
-        if (value) {
-            g_key_file_set_string(accounts, new_name, string_keys[i], value);
-        }
+    gsize nkeys;
+    auto_gcharv gchar** keys = g_key_file_get_keys(accounts, account_name, &nkeys, NULL);
+    for (gsize i = 0; i < nkeys; i++) {
+        auto_gchar gchar* new_value = g_key_file_get_value(accounts, account_name, keys[i], NULL);
+        g_key_file_set_value(accounts, new_name, keys[i], new_value);
     }
 
     g_key_file_remove_group(accounts, account_name, NULL);
-    _save_accounts();
+    _accounts_save(account_name);
+    _accounts_save(new_name);
 
     autocomplete_remove(all_ac, account_name);
+    autocomplete_remove(enabled_ac, account_name);
     autocomplete_add(all_ac, new_name);
     if (g_key_file_get_boolean(accounts, new_name, "enabled", NULL)) {
-        autocomplete_remove(enabled_ac, account_name);
         autocomplete_add(enabled_ac, new_name);
     }
 
@@ -437,7 +402,7 @@ accounts_rename(const char* const account_name, const char* const new_name)
 gboolean
 accounts_account_exists(const char* const account_name)
 {
-    return g_key_file_has_group(accounts, account_name);
+    return _accounts_has_group(account_name);
 }
 
 void
@@ -445,7 +410,7 @@ accounts_set_jid(const char* const account_name, const char* const value)
 {
     auto_jid Jid* jid = jid_create(value);
     if (jid) {
-        if (accounts_account_exists(account_name)) {
+        if (_accounts_has_group(account_name)) {
             g_key_file_set_string(accounts, account_name, "jid", jid->barejid);
             if (jid->resourcepart) {
                 g_key_file_set_string(accounts, account_name, "resource", jid->resourcepart);
@@ -457,7 +422,7 @@ accounts_set_jid(const char* const account_name, const char* const value)
                 g_key_file_set_string(accounts, account_name, "muc.nick", jid->localpart);
             }
 
-            _save_accounts();
+            _accounts_save(account_name);
         }
     }
 }
@@ -465,9 +430,9 @@ accounts_set_jid(const char* const account_name, const char* const value)
 void
 accounts_set_server(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         g_key_file_set_string(accounts, account_name, "server", value);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
@@ -476,34 +441,34 @@ accounts_set_port(const char* const account_name, const int value)
 {
     if (value != 0) {
         g_key_file_set_integer(accounts, account_name, "port", value);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 static void
 _accounts_set_string_option(const char* account_name, const char* const option, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         g_key_file_set_string(accounts, account_name, option, value ?: "");
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 static void
 _accounts_set_int_option(const char* account_name, const char* const option, int value)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         g_key_file_set_integer(accounts, account_name, option, value);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 static void
 _accounts_clear_string_option(const char* account_name, const char* const option)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         g_key_file_remove_key(accounts, account_name, option, NULL);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
@@ -630,7 +595,7 @@ accounts_clear_max_sessions(const char* const account_name)
 void
 accounts_add_otr_policy(const char* const account_name, const char* const contact_jid, const char* const policy)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         GString* key = g_string_new("otr.");
         g_string_append(key, policy);
         conf_string_list_add(accounts, account_name, key->str, contact_jid);
@@ -650,14 +615,14 @@ accounts_add_otr_policy(const char* const account_name, const char* const contac
             conf_string_list_remove(accounts, account_name, "otr.manual", contact_jid);
         }
 
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 void
 accounts_add_omemo_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         if (enabled) {
             conf_string_list_add(accounts, account_name, "omemo.enabled", contact_jid);
             conf_string_list_remove(accounts, account_name, "omemo.disabled", contact_jid);
@@ -666,28 +631,28 @@ accounts_add_omemo_state(const char* const account_name, const char* const conta
             conf_string_list_remove(accounts, account_name, "omemo.enabled", contact_jid);
         }
 
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 void
 accounts_add_ox_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         if (enabled) {
             conf_string_list_add(accounts, account_name, "ox.enabled", contact_jid);
         } else {
             conf_string_list_remove(accounts, account_name, "ox.enabled", contact_jid);
         }
 
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 void
 accounts_add_pgp_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         if (enabled) {
             conf_string_list_add(accounts, account_name, "pgp.enabled", contact_jid);
             conf_string_list_remove(accounts, account_name, "pgp.disabled", contact_jid);
@@ -696,17 +661,17 @@ accounts_add_pgp_state(const char* const account_name, const char* const contact
             conf_string_list_remove(accounts, account_name, "pgp.enabled", contact_jid);
         }
 
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
 void
 accounts_clear_omemo_state(const char* const account_name, const char* const contact_jid)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         conf_string_list_remove(accounts, account_name, "omemo.enabled", contact_jid);
         conf_string_list_remove(accounts, account_name, "omemo.disabled", contact_jid);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
@@ -779,7 +744,7 @@ accounts_set_priority_dnd(const char* const account_name, const gint value)
 void
 accounts_set_priority_all(const char* const account_name, const gint value)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         accounts_set_priority_online(account_name, value);
         accounts_set_priority_chat(account_name, value);
         accounts_set_priority_away(account_name, value);
@@ -833,7 +798,7 @@ accounts_set_last_status(const char* const account_name, const char* const value
 void
 accounts_set_last_activity(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         GDateTime* nowdt = g_date_time_new_now_utc();
         GTimeVal nowtv;
         gboolean res = g_date_time_to_timeval(nowdt, &nowtv);
@@ -842,7 +807,7 @@ accounts_set_last_activity(const char* const account_name)
         if (res) {
             auto_char char* timestr = g_time_val_to_iso8601(&nowtv);
             g_key_file_set_string(accounts, account_name, "last.activity", timestr);
-            _save_accounts();
+            _accounts_save(account_name);
         }
     }
 }
@@ -850,7 +815,7 @@ accounts_set_last_activity(const char* const account_name)
 gchar*
 accounts_get_last_activity(const char* const account_name)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         return g_key_file_get_string(accounts, account_name, "last.activity", NULL);
     } else {
         return NULL;
@@ -860,7 +825,7 @@ accounts_get_last_activity(const char* const account_name)
 gchar*
 accounts_get_resource(const char* const account_name)
 {
-    if (!accounts_account_exists(account_name)) {
+    if (!_accounts_has_group(account_name)) {
         return NULL;
     }
     return g_key_file_get_string(accounts, account_name, "resource", NULL);
@@ -869,7 +834,7 @@ accounts_get_resource(const char* const account_name)
 int
 accounts_get_max_sessions(const char* const account_name)
 {
-    if (!accounts_account_exists(account_name)) {
+    if (!_accounts_has_group(account_name)) {
         return 0;
     }
     return g_key_file_get_integer(accounts, account_name, "max.sessions", 0);
@@ -878,9 +843,9 @@ accounts_get_max_sessions(const char* const account_name)
 void
 accounts_set_login_presence(const char* const account_name, const char* const value)
 {
-    if (accounts_account_exists(account_name)) {
+    if (_accounts_has_group(account_name)) {
         g_key_file_set_string(accounts, account_name, "presence.login", value);
-        _save_accounts();
+        _accounts_save(account_name);
     }
 }
 
@@ -952,10 +917,4 @@ accounts_get_login_status(const char* const account_name)
     }
 
     return status;
-}
-
-static void
-_save_accounts(void)
-{
-    save_keyfile(&accounts_prof_keyfile);
 }

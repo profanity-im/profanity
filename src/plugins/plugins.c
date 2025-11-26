@@ -214,10 +214,8 @@ plugins_uninstall(const char* const plugin_name)
     g_string_append(target_path, "/");
     g_string_append(target_path, plugin_name);
     GFile* file = g_file_new_for_path(target_path->str);
-    GError* error = NULL;
-    gboolean result = g_file_delete(file, NULL, &error);
+    gboolean result = g_file_delete(file, NULL, NULL);
     g_object_unref(file);
-    g_error_free(error);
     g_string_free(target_path, TRUE);
     return result;
 }
