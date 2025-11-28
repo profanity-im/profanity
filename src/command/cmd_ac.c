@@ -509,6 +509,7 @@ cmd_ac_init(void)
     autocomplete_add(notify_ac, "mention");
     autocomplete_add(notify_ac, "trigger");
     autocomplete_add(notify_ac, "reset");
+    autocomplete_add(notify_ac, "idle");
 
     autocomplete_add(notify_chat_ac, "on");
     autocomplete_add(notify_chat_ac, "off");

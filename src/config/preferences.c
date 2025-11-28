@@ -1770,6 +1770,23 @@ prefs_free_aliases(GList* aliases)
     g_list_free_full(aliases, (GDestroyNotify)_free_alias);
 }
 
+void
+prefs_set_notify_idle(gint value)
+{
+     // The argument is supposed to be in seconds so its multiplied by 1000 to record it as microseconds.
+     g_key_file_set_integer(prefs, PREF_GROUP_NOTIFICATIONS, "idle", value * 1000);
+}
+
+gint
+prefs_get_notify_idle(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_NOTIFICATIONS, "idle", NULL)) {
+	 return 1000;
+    } else {
+	 return g_key_file_get_integer(prefs, PREF_GROUP_NOTIFICATIONS, "idle", NULL);
+    }
+}
+
 static void
 _save_prefs(void)
 {
@@ -1884,6 +1901,7 @@ _get_group(preference_t pref)
     case PREF_TRAY:
     case PREF_TRAY_READ:
     case PREF_ADV_NOTIFY_DISCO_OR_VERSION:
+    case PREF_NOTIFY_IDLE:
         return PREF_GROUP_NOTIFICATIONS;
     case PREF_DBLOG:
     case PREF_CHLOG:
@@ -2032,6 +2050,8 @@ _get_key(preference_t pref)
         return "room.mention.casesensitive";
     case PREF_NOTIFY_MENTION_WHOLE_WORD:
         return "room.mention.wholeword";
+    case PREF_NOTIFY_IDLE:
+	 return "idle";
     case PREF_CHLOG:
         return "chlog";
     case PREF_DBLOG:
