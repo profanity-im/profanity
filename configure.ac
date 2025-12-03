@@ -39,7 +39,11 @@ AC_DEFINE_UNQUOTED([PACKAGE_STATUS], ["$PACKAGE_STATUS"], [Status of this build]
 AS_IF([test "x$PLATFORM" = xcygwin],
     [AC_DEFINE([PLATFORM_CYGWIN], [1], [Cygwin])])
 AS_IF([test "x$PLATFORM" = xosx],
-    [AC_DEFINE([PLATFORM_OSX], [1], [OSx])])
+    [AC_DEFINE([PLATFORM_OSX], [1], [OSx])
+     # Apple silicon homebrew flags
+     AC_CHECK_FILE([/opt/homebrew/include],
+        [AM_CFLAGS="$AM_CFLAGS -I/opt/homebrew/include"
+         AM_LDFLAGS="$AM_LDFLAGS -L/opt/homebrew/lib"])])
 
 ## Environment variables
 AC_ARG_VAR([PYTHON_FRAMEWORK], [Set base directory for Python Framework])
@@ -345,9 +349,9 @@ AM_CONDITIONAL([BUILD_OMEMO], [false])
 if test "x$enable_omemo" != xno; then
     OMEMO_LIBS=""
     PKG_CHECK_MODULES([libsignal], [libsignal-protocol-c >= 2.3.2],
-        [OMEMO_LIBS="-lsignal-protocol-c"
-         AC_CHECK_LIB([gcrypt], [gcry_md_extract],
-             [OMEMO_LIBS="-lgcrypt $OMEMO_LIBS"
+        [OMEMO_LIBS="$libsignal_LIBS"
+         PKG_CHECK_MODULES([gcrypt], [libgcrypt >= 1.7.0],
+             [OMEMO_LIBS="$gcrypt_LIBS $OMEMO_LIBS"
               AM_CONDITIONAL([BUILD_OMEMO], [true])],
              [AC_MSG_NOTICE([gcrypt >= 1.7.0 not found, OMEMO support not enabled])])],
         [AC_MSG_NOTICE([libsignal-protocol-c >= 2.3.2 not found, OMEMO support not enabled])])
