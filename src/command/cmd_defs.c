@@ -105,6 +105,9 @@ static gboolean _cmd_has_tag(Command* pcmd, const char* const tag);
  * Command list
  */
 
+#define CMD_TLS_DIRECT "Use direct TLS for the connection. It means TLS handshake is started right after TCP connection is established."
+#define CMD_TLS_LEGACY "Alternative keyword for 'direct', which was created when one still thought that 'STARTTLS' is the future."
+
 // clang-format off
 static const struct cmd_t command_defs[] = {
     { CMD_PREAMBLE("/help",
@@ -146,7 +149,7 @@ static const struct cmd_t command_defs[] = {
               CMD_TAG_CONNECTION)
       CMD_SYN(
               "/connect [<account>]",
-              "/connect <account> [server <server>] [port <port>] [tls force|allow|trust|legacy|disable] [auth default|legacy]",
+              "/connect <account> [server <server>] [port <port>] [tls force|allow|trust|direct|disable|legacy] [auth default|legacy]",
               "/connect <server>")
       CMD_DESC(
               "Login to a chat service. "
@@ -161,8 +164,9 @@ static const struct cmd_t command_defs[] = {
               { "tls force", "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
               { "tls allow", "Use TLS for the connection if it is available." },
               { "tls trust", "Force TLS connection and trust server's certificate." },
-              { "tls legacy", "Use legacy TLS for the connection. It means server doesn't support STARTTLS and TLS is forced just after TCP connection is established." },
+              { "tls direct", CMD_TLS_DIRECT },
               { "tls disable", "Disable TLS for the connection." },
+              { "tls legacy", CMD_TLS_LEGACY },
               { "auth default", "Default authentication process." },
               { "auth legacy", "Allow legacy authentication." })
       CMD_EXAMPLES(
@@ -2072,7 +2076,7 @@ static const struct cmd_t command_defs[] = {
               "/account set <account> pgpkeyid <pgpkeyid>",
               "/account set <account> startscript <script>",
               "/account set <account> clientid \"<name> <version>\"",
-              "/account set <account> tls force|allow|trust|legacy|disable",
+              "/account set <account> tls force|allow|trust|direct|disable|legacy",
               "/account set <account> auth default|legacy",
               "/account set <account> theme <theme>",
               "/account set <account> session_alarm <max_sessions>",
@@ -2118,8 +2122,9 @@ static const struct cmd_t command_defs[] = {
               { "set <account> tls force", "Force TLS connection, and fail if one cannot be established, this is default behaviour." },
               { "set <account> tls allow", "Use TLS for the connection if it is available." },
               { "set <account> tls trust", "Force TLS connection and trust server's certificate." },
-              { "set <account> tls legacy", "Use legacy TLS for the connection. It means server doesn't support STARTTLS and TLS is forced just after TCP connection is established." },
+              { "set <account> tls direct", CMD_TLS_DIRECT },
               { "set <account> tls disable", "Disable TLS for the connection." },
+              { "set <account> tls legacy", CMD_TLS_LEGACY },
               { "set <account> auth default", "Use default authentication process." },
               { "set <account> auth legacy", "Allow legacy authentication." },
               { "set <account> theme <theme>", "Set the UI theme for the account." },
@@ -2352,6 +2357,15 @@ static const struct cmd_t command_defs[] = {
             "/omemo trust c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
             "/omemo untrust loki@valhalla.edda c4f9c875-144d7a3b-0c4a05b6-ca3be51a-a037f329-0bd3ae62-07f99719-55559d2a",
             "/omemo char *")
+    },
+
+    { CMD_PREAMBLE("/changes",
+                   parse_args, 0, 0, NULL)
+      CMD_MAINFUNC(cmd_changes)
+      CMD_SYN(
+              "/changes")
+      CMD_DESC(
+              "Show changes from saved configuration file.")
     },
 
     { CMD_PREAMBLE("/save",
@@ -2652,7 +2666,7 @@ static const struct cmd_t command_defs[] = {
       CMD_TAGS(
               CMD_TAG_CONNECTION)
       CMD_SYN(
-              "/register <username> <server> [port <port>] [tls force|allow|trust|legacy|disable]")
+              "/register <username> <server> [port <port>] [tls force|allow|trust|direct|disable|legacy]")
       CMD_DESC(
               "Register an account on a server.")
       CMD_ARGS(
@@ -2662,8 +2676,9 @@ static const struct cmd_t command_defs[] = {
               { "tls force", "Force TLS connection, and fail if one cannot be established. This is the default behavior." },
               { "tls allow", "Use TLS for the connection if it is available." },
               { "tls trust", "Force TLS connection and trust the server's certificate." },
-              { "tls legacy", "Use legacy TLS for the connection. This forces TLS just after the TCP connection is established. Use when a server doesn't support STARTTLS." },
-              { "tls disable", "Disable TLS for the connection." })
+              { "tls direct", CMD_TLS_DIRECT },
+              { "tls disable", "Disable TLS for the connection." },
+              { "tls legacy", CMD_TLS_LEGACY })
       CMD_EXAMPLES(
               "/register odin valhalla.edda ",
               "/register freyr vanaheimr.edda port 5678",

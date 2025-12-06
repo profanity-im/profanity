@@ -112,11 +112,21 @@ void auto_close_gfd(gint* fd);
 
 void auto_close_FILE(FILE** fd);
 
+void auto_free_gerror(GError** err);
+#define auto_gerror __attribute__((__cleanup__(auto_free_gerror)))
+
 #if defined(__OpenBSD__)
 #define STR_MAYBE_NULL(p) (p) ?: "(null)"
 #else
 #define STR_MAYBE_NULL(p) (p)
 #endif
+
+#define PROF_GERROR_MESSAGE(err) (err) ? (err)->message : "error message missing"
+#define PROF_GERROR_FREE(err)  \
+    do {                       \
+        if (err)               \
+            g_error_free(err); \
+    } while (0)
 
 typedef struct prof_keyfile_t
 {
@@ -178,6 +188,9 @@ gboolean copy_file(const char* const src, const char* const target, const gboole
 char* str_replace(const char* string, const char* substr, const char* replacement);
 gboolean strtoi_range(const char* str, int* saveptr, int min, int max, char** err_msg);
 int utf8_display_len(const char* const str);
+
+gboolean string_matches_one_of(const char* what, const char* is, gboolean is_can_be_null, const char* first, ...) __attribute__((sentinel));
+gboolean valid_tls_policy_option(const char* is);
 
 char* release_get_latest(void);
 gboolean release_is_new(char* found_version);

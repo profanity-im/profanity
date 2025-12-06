@@ -49,6 +49,7 @@
 #include "tools/autocomplete.h"
 #include "config/files.h"
 #include "config/conflists.h"
+#include "ui/ui.h"
 
 // preference groups refer to the sections in .profrc or theme files
 // for example [ui] but not [colours] which is handled in theme.c
@@ -89,7 +90,7 @@ _prefs_load(void)
     log_maxsize = g_key_file_get_integer(prefs, PREF_GROUP_LOGGING, "maxsize", &err);
     if (err) {
         log_maxsize = 0;
-        g_error_free(err);
+        PROF_GERROR_FREE(err);
     }
 
     // move pre 0.5.0 autoaway.time to autoaway.awaytime
@@ -284,6 +285,75 @@ prefs_load(const char* config_file)
     prefs = prefs_prof_keyfile.keyfile;
 
     _prefs_load();
+}
+
+void
+prefs_changes(void)
+{
+    const char* undef = "";
+    prof_keyfile_t saved;
+    if (!load_custom_keyfile(&saved, g_strdup(prefs_prof_keyfile.filename)))
+        return;
+    gsize ngroups, nsavedgroups, g;
+    auto_gcharv gchar** groups = g_key_file_get_groups(prefs_prof_keyfile.keyfile, &ngroups);
+    gboolean banner_shown = FALSE;
+    void prefs_changes_print(const char* key, const char* newval, const char* oldval)
+    {
+#define PREFS_CHANGES_FORMAT_STRING "%-32s | %-20s | %-20s"
+        if (!banner_shown) {
+            cons_show(PREFS_CHANGES_FORMAT_STRING, "Key", "New value", "Old value");
+            banner_shown = TRUE;
+        }
+        cons_show(PREFS_CHANGES_FORMAT_STRING, key, newval, oldval);
+#undef PREFS_CHANGES_FORMAT_STRING
+    }
+    for (g = 0; g < ngroups; ++g) {
+        gsize nkeys, k;
+        gboolean saved_has_group = g_key_file_has_group(saved.keyfile, groups[g]);
+        auto_gcharv gchar** keys = g_key_file_get_keys(prefs_prof_keyfile.keyfile, groups[g], &nkeys, NULL);
+        for (k = 0; k < nkeys; ++k) {
+            auto_gerror GError* err = NULL;
+            auto_gchar gchar* full_key = g_strdup_printf("%s.%s", groups[g], keys[k]);
+            auto_gchar gchar* new_value = g_key_file_get_value(prefs_prof_keyfile.keyfile, groups[g], keys[k], &err);
+            if (err || !new_value) {
+                cons_show_error("%s: New value (%s) error: %s", full_key, STR_MAYBE_NULL(new_value), PROF_GERROR_MESSAGE(err));
+                continue;
+            }
+            if (!saved_has_group
+                || !g_key_file_has_key(saved.keyfile, groups[g], keys[k], NULL)) {
+                prefs_changes_print(full_key, new_value, undef);
+                continue;
+            }
+            auto_gchar gchar* old_value = g_key_file_get_value(saved.keyfile, groups[g], keys[k], &err);
+            if (err || !old_value) {
+                cons_show_error("%s: Old value (%s) error: %s", full_key, STR_MAYBE_NULL(old_value), PROF_GERROR_MESSAGE(err));
+                continue;
+            }
+            if (!g_str_equal(old_value, new_value)) {
+                prefs_changes_print(full_key, new_value, old_value);
+            }
+        }
+    }
+    auto_gcharv gchar** savedgroups = g_key_file_get_groups(saved.keyfile, &nsavedgroups);
+    for (g = 0; g < nsavedgroups; ++g) {
+        gsize nkeys, k;
+        auto_gcharv gchar** keys = g_key_file_get_keys(saved.keyfile, savedgroups[g], &nkeys, NULL);
+        for (k = 0; k < nkeys; ++k) {
+            if (g_key_file_has_key(prefs_prof_keyfile.keyfile, savedgroups[g], keys[k], NULL))
+                continue;
+            auto_gerror GError* err = NULL;
+            auto_gchar gchar* full_key = g_strdup_printf("%s.%s", groups[g], keys[k]);
+            auto_gchar gchar* old_value = g_key_file_get_value(saved.keyfile, groups[g], keys[k], &err);
+            if (err || !old_value) {
+                cons_show_error("%s: Old value (%s) error: %s", full_key, STR_MAYBE_NULL(old_value), PROF_GERROR_MESSAGE(err));
+                continue;
+            }
+            prefs_changes_print(full_key, undef, old_value);
+        }
+    }
+    free_keyfile(&saved);
+    if (!banner_shown)
+        cons_show("No changes to saved preferences.");
 }
 
 void

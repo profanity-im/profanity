@@ -205,6 +205,7 @@ typedef struct prof_winplacement_t
 } ProfWinPlacement;
 
 void prefs_load(const char* config_file);
+void prefs_changes(void);
 void prefs_save(void);
 void prefs_close(void);
 void prefs_reload(void);

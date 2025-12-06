@@ -55,7 +55,7 @@ get_message_from_editor(gchar* message, gchar** returned_message)
     *returned_message = NULL;
 
     auto_gchar gchar* filename = NULL;
-    GError* glib_error = NULL;
+    auto_gerror GError* glib_error = NULL;
     const char* jid = connection_get_barejid();
     if (jid) {
         filename = files_file_in_account_data_path(DIR_EDITOR, jid, "compose.md");
@@ -78,10 +78,7 @@ get_message_from_editor(gchar* message, gchar** returned_message)
     }
 
     if (!g_file_set_contents(filename, message, messagelen, &glib_error)) {
-        log_error("[Editor] could not write to %s: %s", filename, glib_error ? glib_error->message : "No GLib error given");
-        if (glib_error) {
-            g_error_free(glib_error);
-        }
+        log_error("[Editor] could not write to %s: %s", filename, PROF_GERROR_MESSAGE(glib_error));
         return TRUE;
     }
 
@@ -106,10 +103,7 @@ get_message_from_editor(gchar* message, gchar** returned_message)
         gchar* contents;
         gsize length;
         if (!g_file_get_contents(filename, &contents, &length, &glib_error)) {
-            log_error("[Editor] could not read from %s: %s", filename, glib_error ? glib_error->message : "No GLib error given");
-            if (glib_error) {
-                g_error_free(glib_error);
-            }
+            log_error("[Editor] could not read from %s: %s", filename, PROF_GERROR_MESSAGE(glib_error));
             return TRUE;
         }
         /* Remove all trailing new-line characters */

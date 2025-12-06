@@ -854,8 +854,9 @@ cmd_ac_init(void)
     autocomplete_add(tls_property_ac, "force");
     autocomplete_add(tls_property_ac, "allow");
     autocomplete_add(tls_property_ac, "trust");
-    autocomplete_add(tls_property_ac, "legacy");
+    autocomplete_add(tls_property_ac, "direct");
     autocomplete_add(tls_property_ac, "disable");
+    autocomplete_add(tls_property_ac, "legacy");
 
     autocomplete_add(auth_property_ac, "default");
     autocomplete_add(auth_property_ac, "legacy");

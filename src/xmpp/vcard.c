@@ -1338,11 +1338,10 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
         g_string_append(filename, ".webp");
     }
 
-    GError* err = NULL;
+    auto_gerror GError* err = NULL;
 
     if (g_file_set_contents(filename->str, (gchar*)photo->data, photo->length, &err) == FALSE) {
-        cons_show_error("Unable to save photo: %s", err->message);
-        g_error_free(err);
+        cons_show_error("Unable to save photo: %s", PROF_GERROR_MESSAGE(err));
         g_string_free(filename, TRUE);
         return 1;
     } else {
@@ -1360,7 +1359,7 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
         g_string_append(filename, "\"");
         auto_char char* cmd = str_replace(cmdtemplate, "%p", filename->str);
 
-        if (g_shell_parse_argv(cmd, &argc, &argv, &err) == FALSE) {
+        if (g_shell_parse_argv(cmd, &argc, &argv, NULL) == FALSE) {
             cons_show_error("Failed to parse command template");
         } else {
             if (!call_external(argv)) {

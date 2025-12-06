@@ -361,7 +361,7 @@ void
 ui_handle_login_account_success(ProfAccount* account, gboolean secured)
 {
     if (account->theme) {
-        if (theme_load(account->theme, false)) {
+        if (theme_load(account->theme, FALSE)) {
             ui_load_colours();
             if (prefs_get_boolean(PREF_ROSTER)) {
                 ui_show_roster();

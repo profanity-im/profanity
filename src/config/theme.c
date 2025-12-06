@@ -532,7 +532,7 @@ _theme_find(const char* const theme_name)
         g_string_append(path, "/");
         g_string_append(path, theme_name);
         if (!g_file_test(path->str, G_FILE_TEST_EXISTS)) {
-            g_string_free(path, true);
+            g_string_free(path, TRUE);
             path = NULL;
         }
     }
@@ -666,22 +666,14 @@ _theme_prep_fgnd(char* setting, GString* lookup_str, gboolean* bold)
     }
 }
 
-char*
+gchar*
 theme_get_string(char* str)
 {
     gchar* res = g_key_file_get_string(theme, "colours", str, NULL);
     if (!res) {
-        return strdup(g_hash_table_lookup(defaults, str));
+        return g_strdup(g_hash_table_lookup(defaults, str));
     } else {
         return res;
-    }
-}
-
-void
-theme_free_string(char* str)
-{
-    if (str) {
-        g_free(str);
     }
 }
 

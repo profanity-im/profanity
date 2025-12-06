@@ -145,6 +145,32 @@ omemo_init(void)
     omemo_static_data.fingerprint_ac = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)autocomplete_free);
 }
 
+static gboolean
+_omemo_finalize_identity_load(ProfAccount* account)
+{
+    auto_gchar gchar* omemo_dir = files_file_in_account_data_path(DIR_OMEMO, account->jid, NULL);
+    if (!omemo_dir) {
+        log_error("[OMEMO] failed creating directory");
+        return FALSE;
+    }
+
+    if (load_custom_keyfile(&omemo_ctx.trust, g_strdup_printf("%s/%s", omemo_dir, "trust.txt"))) {
+        _load_trust();
+    }
+
+    if (load_custom_keyfile(&omemo_ctx.sessions, g_strdup_printf("%s/%s", omemo_dir, "sessions.txt"))) {
+        _load_sessions();
+    }
+
+    if (load_custom_keyfile(&omemo_ctx.knowndevices, g_strdup_printf("%s/%s", omemo_dir, "known_devices.txt"))) {
+        _load_known_devices();
+    }
+
+    omemo_devicelist_subscribe();
+
+    return TRUE;
+}
+
 void
 omemo_on_connect(ProfAccount* account)
 {
@@ -243,44 +269,29 @@ omemo_on_connect(ProfAccount* account)
             return;
     }
 
-    if (load_custom_keyfile(&omemo_ctx.trust, g_strdup_printf("%s/%s", omemo_dir, "trust.txt"))) {
-        _load_trust();
-    }
-
-    if (load_custom_keyfile(&omemo_ctx.sessions, g_strdup_printf("%s/%s", omemo_dir, "sessions.txt"))) {
-        _load_sessions();
-    }
-
-    if (load_custom_keyfile(&omemo_ctx.knowndevices, g_strdup_printf("%s/%s", omemo_dir, "known_devices.txt"))) {
-        _load_known_devices();
-    }
-
-    omemo_devicelist_subscribe();
+    _omemo_finalize_identity_load(account);
 }
 
 void
 omemo_on_disconnect(void)
 {
-    if (!omemo_ctx.loaded) {
-        return;
+    if (omemo_ctx.loaded) {
+        free_keyfile(&omemo_ctx.knowndevices);
+        free_keyfile(&omemo_ctx.sessions);
+        free_keyfile(&omemo_ctx.trust);
+
+        ec_public_key* pub = ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair);
+        ec_private_key* priv = ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair);
+        ratchet_identity_key_pair_destroy((signal_type_base*)omemo_ctx.identity_key_pair);
+        ec_private_key_destroy((signal_type_base*)priv);
+        ec_public_key_destroy((signal_type_base*)pub);
     }
 
+    free_keyfile(&omemo_ctx.identity);
     g_hash_table_destroy(omemo_ctx.known_devices);
     g_hash_table_destroy(omemo_ctx.device_list_handler);
     g_hash_table_destroy(omemo_ctx.device_list);
-
-    free_keyfile(&omemo_ctx.knowndevices);
-    free_keyfile(&omemo_ctx.sessions);
-    free_keyfile(&omemo_ctx.trust);
-    free_keyfile(&omemo_ctx.identity);
-
     signal_protocol_store_context_destroy(omemo_ctx.store);
-    ec_public_key* pub = ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair);
-    ec_private_key* priv = ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair);
-    ratchet_identity_key_pair_destroy((signal_type_base*)omemo_ctx.identity_key_pair);
-    ec_private_key_destroy((signal_type_base*)priv);
-    ec_public_key_destroy((signal_type_base*)pub);
-
     signal_context_destroy(omemo_ctx.signal);
     memset(&omemo_ctx, 0, sizeof(omemo_ctx));
 }
@@ -302,6 +313,8 @@ omemo_generate_crypto_materials(ProfAccount* account)
 
     /* Identity key */
     signal_protocol_key_helper_generate_identity_key_pair(&omemo_ctx.identity_key_pair, omemo_ctx.signal);
+    SIGNAL_REF(ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair));
+    SIGNAL_REF(ratchet_identity_key_pair_get_private(omemo_ctx.identity_key_pair));
 
     ec_public_key_serialize(&omemo_ctx.identity_key_store.public, ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair));
     auto_gchar gchar* identity_key_public = g_base64_encode(signal_buffer_data(omemo_ctx.identity_key_store.public), signal_buffer_len(omemo_ctx.identity_key_store.public));
@@ -323,7 +336,8 @@ omemo_generate_crypto_materials(ProfAccount* account)
 
     omemo_identity_keyfile_save();
 
-    omemo_ctx.loaded = TRUE;
+    if ((omemo_ctx.loaded = _omemo_finalize_identity_load(account)) == FALSE)
+        return;
 
     omemo_publish_crypto_materials();
     omemo_start_sessions();
@@ -332,15 +346,13 @@ omemo_generate_crypto_materials(ProfAccount* account)
 void
 omemo_publish_crypto_materials(void)
 {
-    log_debug("[OMEMO] publish crypto materials");
-
     if (omemo_ctx.loaded != TRUE) {
         cons_show("OMEMO: cannot publish crypto materials before they are generated");
         log_error("[OMEMO] cannot publish crypto materials before they are generated");
         return;
     }
 
-    omemo_bundle_publish(true);
+    omemo_bundle_publish(TRUE);
 }
 
 static void
@@ -734,7 +746,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
 
     GList* device_ids_iter;
 
-    omemo_ctx.identity_key_store.recv = false;
+    omemo_ctx.identity_key_store.recv = FALSE;
 
     // Encrypt keys for the recipients
     GList* recipients_iter;
@@ -937,14 +949,14 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         ec_public_key* their_identity_key;
         signal_buffer* identity_buffer = NULL;
 
-        omemo_ctx.identity_key_store.recv = true;
+        omemo_ctx.identity_key_store.recv = TRUE;
 
         pre_key_signal_message_deserialize(&message, key->data, key->length, omemo_ctx.signal);
         their_identity_key = pre_key_signal_message_get_identity_key(message);
 
         res = session_cipher_decrypt_pre_key_signal_message(cipher, message, NULL, &plaintext_key);
 
-        omemo_ctx.identity_key_store.recv = false;
+        omemo_ctx.identity_key_store.recv = FALSE;
 
         /* Perform a real check of the identity */
         ec_public_key_serialize(&identity_buffer, their_identity_key);
@@ -962,7 +974,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         SIGNAL_UNREF(new_pre_key);
         SIGNAL_UNREF(message);
         SIGNAL_UNREF(ec_pair);
-        omemo_bundle_publish(true);
+        omemo_bundle_publish(TRUE);
 
         if (res == 0) {
             /* Start a new session */
@@ -979,7 +991,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
             log_error("[OMEMO][RECV] cannot deserialize message");
         } else {
             res = session_cipher_decrypt_signal_message(cipher, message, NULL, &plaintext_key);
-            *trusted = true;
+            *trusted = TRUE;
             SIGNAL_UNREF(message);
         }
     }
@@ -1426,11 +1438,10 @@ omemo_automatic_start(const char* const recipient)
 static gboolean
 _load_identity(void)
 {
-    GError* error = NULL;
+    auto_gerror GError* error = NULL;
     log_info("[OMEMO] Loading OMEMO identity");
 
     /* Device ID */
-    error = NULL;
     omemo_ctx.device_id = g_key_file_get_uint64(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, &error);
     if (error != NULL) {
         log_error("[OMEMO] cannot load device id: %s", error->message);
@@ -1439,7 +1450,6 @@ _load_identity(void)
     log_debug("[OMEMO] device id: %d", omemo_ctx.device_id);
 
     /* Registration ID */
-    error = NULL;
     omemo_ctx.registration_id = g_key_file_get_uint64(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, &error);
     if (error != NULL) {
         log_error("[OMEMO] cannot load registration id: %s", error->message);
@@ -1447,10 +1457,9 @@ _load_identity(void)
     }
 
     /* Identity key */
-    error = NULL;
     auto_gchar gchar* identity_key_public_b64 = g_key_file_get_string(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PUBLIC, &error);
     if (!identity_key_public_b64) {
-        log_error("[OMEMO] cannot load identity public key: %s", error->message);
+        log_error("[OMEMO] cannot load identity public key: %s", PROF_GERROR_MESSAGE(error));
         return FALSE;
     }
 
@@ -1458,10 +1467,9 @@ _load_identity(void)
     auto_guchar guchar* identity_key_public = g_base64_decode(identity_key_public_b64, &identity_key_public_len);
     omemo_ctx.identity_key_store.public = signal_buffer_create(identity_key_public, identity_key_public_len);
 
-    error = NULL;
     auto_gchar gchar* identity_key_private_b64 = g_key_file_get_string(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_IDENTITY_KEY_PRIVATE, &error);
     if (!identity_key_private_b64) {
-        log_error("[OMEMO] cannot load identity private key: %s", error->message);
+        log_error("[OMEMO] cannot load identity private key: %s", PROF_GERROR_MESSAGE(error));
         return FALSE;
     }
 
@@ -1688,7 +1696,7 @@ omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res)
     gcry_create_nonce(nonce, OMEMO_AESGCM_NONCE_LENGTH);
 
     char* fragment = aes256gcm_create_secure_fragment(key, nonce);
-    *gcry_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, true);
+    *gcry_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, TRUE);
 
     if (*gcry_res != GPG_ERR_NO_ERROR) {
         gcry_free(fragment);
@@ -1747,7 +1755,7 @@ omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char* fragment)
                     key, OMEMO_AESGCM_KEY_LENGTH);
 
     gcry_error_t crypt_res;
-    crypt_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, false);
+    crypt_res = aes256gcm_crypt_file(in, out, file_size, key, nonce, FALSE);
 
     gcry_free(key);
 

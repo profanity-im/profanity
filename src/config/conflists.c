@@ -66,9 +66,7 @@ conf_string_list_add(GKeyFile* keyfile, const char* const group, const char* con
 
     // Add item to the existing list
     const gchar** new_list = g_new(const gchar*, length + 2);
-    for (gsize i = 0; i < length; ++i) {
-        new_list[i] = list[i];
-    }
+    memcpy(new_list, list, sizeof(list[0]) * length);
     new_list[length] = item;
     new_list[length + 1] = NULL;
 
@@ -89,33 +87,28 @@ conf_string_list_remove(GKeyFile* keyfile, const char* const group, const char* 
         return FALSE;
     }
 
-    GList* glist = NULL;
+    gsize new_length = 0;
+    const gchar** new_list = g_new(const gchar*, length + 1);
     gboolean deleted = FALSE;
 
-    for (int i = 0; i < length; i++) {
+    for (gsize i = 0; i < length; i++) {
         if (strcmp(list[i], item) == 0) {
             deleted = TRUE;
             continue;
         }
-        glist = g_list_append(glist, strdup(list[i]));
+        new_list[new_length++] = list[i];
     }
+    new_list[new_length] = NULL;
 
     if (deleted) {
-        if (g_list_length(glist) == 0) {
+        if (new_length == 0) {
             g_key_file_remove_key(keyfile, group, key, NULL);
         } else {
-            const gchar* new_list[g_list_length(glist) + 1];
-            int i = 0;
-
-            for (GList* curr = glist; curr; curr = g_list_next(curr)) {
-                new_list[i++] = curr->data;
-            }
-
-            new_list[i] = NULL;
-            g_key_file_set_string_list(keyfile, group, key, new_list, g_list_length(glist));
+            g_key_file_set_string_list(keyfile, group, key, new_list, new_length);
         }
     }
 
-    g_list_free_full(glist, g_free);
+    g_free(new_list);
+
     return deleted;
 }
