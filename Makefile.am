@@ -323,15 +323,16 @@ EXTRA_DIST += \
 	apidocs/python/src/prof.py
 
 if INCLUDE_GIT_VERSION
-EXTRA_DIST += .git/HEAD .git/index
+GIT_FILES = $(top_srcdir)/.git/HEAD $(top_srcdir)/.git/index
+EXTRA_DIST += $(GIT_FILES)
 
-$(git_include).in: .git/HEAD .git/index
+$(git_include).in: $(GIT_FILES)
 	rm -f $@
 	echo "#ifndef PROF_GIT_BRANCH" >> $@
-	echo "#define PROF_GIT_BRANCH \"$(shell git rev-parse --symbolic-full-name --abbrev-ref HEAD)\"" >> $@
+	echo "#define PROF_GIT_BRANCH \"$(shell git -C $(top_srcdir) rev-parse --symbolic-full-name --abbrev-ref HEAD)\"" >> $@
 	echo "#endif" >> $@
 	echo "#ifndef PROF_GIT_REVISION" >> $@
-	echo "#define PROF_GIT_REVISION \"$(shell git log --pretty=format:'%h' -n 1)\"" >> $@
+	echo "#define PROF_GIT_REVISION \"$(shell git -C $(top_srcdir) log --pretty=format:'%h' -n 1)\"" >> $@
 	echo "#endif" >> $@
 
 #
