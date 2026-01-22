@@ -196,6 +196,13 @@ _connect_default(const char* const account)
 }
 
 static void
+sigterm_handler(int sig)
+{
+    log_info("Received signal %d, exiting", sig);
+    force_quit = TRUE;
+}
+
+static void
 _init(char* log_level, char* config_file, char* log_file, char* theme_name)
 {
     setlocale(LC_ALL, "");
@@ -204,6 +211,8 @@ _init(char* log_level, char* config_file, char* log_file, char* theme_name)
     signal(SIGINT, SIG_IGN);
     signal(SIGTSTP, SIG_IGN);
     signal(SIGWINCH, ui_sigwinch_handler);
+    signal(SIGTERM, sigterm_handler);
+    signal(SIGHUP, sigterm_handler);
     if (pthread_mutex_init(&lock, NULL) != 0) {
         log_error("Mutex init failed");
         exit(1);
