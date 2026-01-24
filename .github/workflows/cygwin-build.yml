@@ -1,0 +1,91 @@
+name: Cygwin
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+
+jobs:
+  cygwin-build:
+    runs-on: windows-latest
+    env:
+      CYGWIN: winsymlinks:nativestrict
+
+    # Wrapper:
+    # - convert temp script + workspace to POSIX paths
+    # - strip CRLF
+    # - enable igncr and run under Cygwin bash
+    defaults:
+      run:
+        shell: >
+          C:\tools\cygwin\bin\bash.EXE --login -eo pipefail -c
+          "p=$(/usr/bin/cygpath -au '{0}');
+           w=$(/usr/bin/cygpath -au '${{ github.workspace }}');
+           /usr/bin/sed -i 's/\r$//' \"$p\" || true;
+           set -o igncr;
+           cd \"$w\" || (/usr/bin/pwd; /usr/bin/ls -la; exit 2);
+           /usr/bin/bash -leo pipefail \"$p\""
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Cygwin with build dependencies
+        uses: egor-tensin/setup-cygwin@v4
+        with:
+          packages: >-
+            autoconf
+            automake
+            libtool
+            make
+            pkg-config
+            autoconf-archive
+            gcc-core
+            gettext-devel
+            git
+            libncursesw-devel
+            libglib2.0-devel
+            libcurl-devel
+            libreadline-devel
+            libsqlite3-devel
+            libexpat-devel
+            libcmocka-devel
+
+      - name: Build and install libstrophe from source
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          mkdir -p deps && cd deps
+          git clone --depth 1 https://github.com/strophe/libstrophe.git
+          cd libstrophe
+          autoreconf -i
+          ./configure --prefix=$PWD/install
+          make -j2 install
+
+      - name: Autotools bootstrap
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          
+          # On Windows checkouts the executable bit may be lost and CRLF line endings
+          # can break shell scripts, so normalize bootstrap.sh if it exists.
+          if [ -f ./bootstrap.sh ]; then
+            sed -i 's/\r$//' ./bootstrap.sh
+            chmod +x ./bootstrap.sh
+            ./bootstrap.sh
+          else
+            autoreconf -fi
+          fi
+
+      - name: Configure
+        env:
+          PKG_CONFIG_PATH: ${{ github.workspace }}/deps/libstrophe/install/lib/pkgconfig:$PKG_CONFIG_PATH
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          ./configure
+
+      - name: Build
+        run: |
+          cd "$GITHUB_WORKSPACE"
+          make -j2
