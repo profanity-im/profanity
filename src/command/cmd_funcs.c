@@ -5741,6 +5741,18 @@ cmd_notify(ProfWin* window, const char* const command, gchar** args)
                 }
             }
         }
+    } else if (g_strcmp0(args[0], "idle") == 0) {
+        if (!args[1]) {
+	     cons_bad_cmd_usage(command);
+        } else {
+            gint idle = atoi(args[1]);
+            if (idle <= 0) {
+		 cons_show("Invalid idle value (%d)", idle);
+            } else {
+		 prefs_set_notify_idle(idle);
+		 win_println(window, THEME_DEFAULT, "!", "Message idle period set to %d seconds.", idle);
+            }
+        }
     } else {
         cons_bad_cmd_usage(command);
     }
