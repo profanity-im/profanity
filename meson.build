@@ -164,17 +164,11 @@ endif
 
 # GTK (for icons and clipboard)
 gtk_dep = dependency('', required: false)
-gtk_version = 'none'
 
 if get_option('icons-and-clipboard').enabled()
   gtk_dep = dependency('gtk+-3.0', version: '>= 3.24.0', required: false)
   if gtk_dep.found()
     conf_data.set('HAVE_GTK', 1)
-    gtk_version = gtk_dep.version()
-  else
-    gtk_dep = dependency('gtk+-2.0', version: '>= 2.24.10', required: true)
-    conf_data.set('HAVE_GTK', 1)
-    gtk_version = gtk_dep.version()
   endif
 endif
 
@@ -700,7 +694,6 @@ endif
 summary({
   'Platform': platform,
   'Package status': get_option('buildtype'),
-  'GTK version': gtk_version,
   'Install themes': get_option('install_themes'),
   'Themes path': themes_path,
   'Icons path': icons_path,
