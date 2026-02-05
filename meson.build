@@ -239,7 +239,9 @@ if get_option('icons-and-clipboard').enabled() or get_option('icons-and-clipboar
 endif
 
 # XScreenSaver
-xscrnsaver_dep = dependency('', required: false)
+# We use this variable because .found() will later not work on a list
+xscrnsaver_found = false
+xscrnsaver_dep = []
 
 if get_option('xscreensaver').enabled() or get_option('xscreensaver').auto()
   xss_dep = dependency('xscrnsaver', required: false)
@@ -247,6 +249,7 @@ if get_option('xscreensaver').enabled() or get_option('xscreensaver').auto()
   
   if xss_dep.found() and x11_dep.found()
     xscrnsaver_dep = [xss_dep, x11_dep]
+    xscrnsaver_found = true # Set our tracker to true
     conf_data.set('HAVE_LIBXSS', 1)
   elif get_option('xscreensaver').enabled()
     error('xscreensaver support requested but xscrnsaver or x11 not found')
@@ -431,7 +434,7 @@ if gtk_dep.found()
   profanity_deps += gtk_dep
 endif
 
-if xscrnsaver_dep.found()
+if xscrnsaver_found
   profanity_deps += xscrnsaver_dep
 endif
 
@@ -835,7 +838,7 @@ summary({
   'OTR': build_otr,
   'PGP': build_pgp,
   'OMEMO': build_omemo,
-  'XScreenSaver': xscrnsaver_dep.found(),
+  'XScreenSaver': xscrnsaver_found,
   'GTK': gtk_dep.found(),
   'GDK Pixbuf': gdk_pixbuf_dep.found(),
   'QR Code': qrencode_dep.found(),
