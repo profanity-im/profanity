@@ -214,10 +214,7 @@ endif
 
 # PGP support
 if get_option('pgp').enabled()
-  gpgme_dep = cc.find_library('gpgme', required: true)
-  gpgme_config = find_program('gpgme-config', required: true)
-  gpgme_cflags = run_command(gpgme_config, '--cflags', check: true).stdout().strip()
-  add_project_arguments(gpgme_cflags.split(), language: 'c')
+  gpgme_dep = dependency('gpgme', required: false)
   
   build_pgp = true
   conf_data.set('HAVE_LIBGPGME', 1)
