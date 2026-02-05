@@ -62,6 +62,7 @@ cc = meson.get_compiler('c')
 
 # Common compiler flags
 add_project_arguments('-Wno-deprecated-declarations', language: 'c')
+add_project_arguments('-Wno-unused-parameter', language: 'c')
 
 if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
   add_project_arguments('-ggdb3', language: 'c')
