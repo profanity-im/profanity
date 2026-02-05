@@ -18,17 +18,10 @@ Feel free to follow us on [twitter](https://twitter.com/profanityim), join our [
 Our [user guide](https://profanity-im.github.io/userguide.html) contains an [install](https://profanity-im.github.io/guide/latest/install.html) section and a section for [building](https://profanity-im.github.io/guide/latest/build.html) from source yourself.
 
 ## Donations
-We would highly appreciate it if you support us via [GitHub Sponsors](https://github.com/sponsors/jubalh/). Especially if you make feature requests or need help using Profanity.
+We would highly appreciate if you support us via [GitHub Sponsors](https://github.com/sponsors/jubalh/). Especially if you make feature requests or need help using Profanity.
 Sponsoring enables us to spend time on Profanity.
 
 An alternative way to support us would be to ask for our IBAN or use Bitcoin: `bc1qx265eat7hfasqkqmk9qf38delydnrnuvzhzy0x`.
-
-Issues backed by a sponsor will be tagged with the [sponsored](https://github.com/profanity-im/profanity/issues?q=label%3Asponsored+) label.
-Feature requests that we consider out of scope, either because of interest or because of time needed to implement them, will be marked with the [unfunded](https://github.com/profanity-im/profanity/issues?q=label%3Aunfunded) label.
-
-Another way to sponsor us or get an issue solved is to comment on an issue that you are willing to sponsor it. 
-
-Tasks from our [sponsors](SPONSORS.md) will be tackled first.
 
 Thank you! <3
 
