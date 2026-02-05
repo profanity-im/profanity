@@ -575,7 +575,7 @@ endif
 main_source = files('src/main.c')
 
 # Generate git version header if in development
-if get_option('buildtype') == 'release' or get_option('buildtype') == 'debugoptimized'
+if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
   git_branch = run_command('git', 'rev-parse', '--symbolic-full-name', '--abbrev-ref', 'HEAD', 
                            check: false).stdout().strip()
   git_revision = run_command('git', 'log', '--pretty=format:%h', '-n', '1',
