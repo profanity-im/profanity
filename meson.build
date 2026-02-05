@@ -122,40 +122,25 @@ endforeach
 # we need to declare the variable before
 # using it in the conditional branch.
 # Later the required is set correctly.
-readline_dep = dependency('', required: false)
+readline_dep = dependency('readline', required: false)
 
-if platform == 'osx'
-  brew = find_program('brew', required: false, dirs: ['/opt/homebrew/bin', '/usr/local/bin'])
-  
-  if brew.found()
-    readline_prefix_cmd = run_command(brew, '--prefix', 'readline', check: false)
-    if readline_prefix_cmd.returncode() == 0
-      readline_prefix = readline_prefix_cmd.stdout().strip()
-    else
-      readline_prefix = '/usr/local'
+if not readline_dep.found()
+  if platform == 'osx'
+    # brew prefix
+    brew = find_program('brew', required: false)
+    if brew.found()
+      prefix = run_command(brew, '--prefix', 'readline', check: false).stdout().strip()
+      readline_dep = cc.find_library('readline', dirs: [prefix / 'lib'], required: true)
+      add_project_arguments('-I' + prefix / 'include', language: 'c')
     endif
-  else
-    if run_command('test', '-f', '/opt/local/lib/libreadline.dylib', check: false).returncode() == 0
-      readline_prefix = '/opt/local'
-    else
-      readline_prefix = '/usr/local'
-    endif
+  elif platform == 'openbsd'
+    # ereadline alias
+    readline_dep = cc.find_library('ereadline', dirs: ['/usr/local/lib'], required: false)
   endif
-  
-  readline_dep = cc.find_library('readline', 
-    dirs: [readline_prefix / 'lib'],
-    required: true)
-  add_project_arguments('-I' + readline_prefix / 'include', language: 'c')
-elif platform == 'openbsd'
-  if run_command('test', '-d', '/usr/local/include/ereadline', check: false).returncode() == 0
-    readline_dep = cc.find_library('ereadline', 
-      dirs: ['/usr/local/lib'],
-      required: true)
-    add_project_arguments('-I/usr/local/include/ereadline', language: 'c')
-  else
-    readline_dep = cc.find_library('readline', required: true)
-  endif
-else
+endif
+
+# regular
+if not readline_dep.found()
   readline_dep = cc.find_library('readline', required: true)
 endif
 
