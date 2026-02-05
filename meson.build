@@ -8,9 +8,6 @@ project('profanity', 'c',
   ]
 )
 
-# 'development' or 'release'
-package_status = 'development'
-
 # Determine platform
 host_system = host_machine.system()
 platform = 'unknown'
@@ -35,7 +32,14 @@ conf_data.set_quoted('PACKAGE_NAME', meson.project_name())
 conf_data.set_quoted('PACKAGE_VERSION', meson.project_version())
 conf_data.set_quoted('PACKAGE_BUGREPORT', 'jubalh@iodoru.org')
 conf_data.set_quoted('PACKAGE_URL', 'https://profanity-im.github.io/')
-conf_data.set_quoted('PACKAGE_STATUS', package_status)
+
+# possible options from meson:
+# debug, debugoptimized, release, plain
+if get_option('buildtype') == 'release'
+  conf_data.set_quoted('PACKAGE_STATUS', 'release')
+else
+  conf_data.set_quoted('PACKAGE_STATUS', 'development')
+endif
 
 if platform == 'cygwin'
   conf_data.set('PLATFORM_CYGWIN', 1)
@@ -46,7 +50,7 @@ if platform == 'osx'
 endif
 
 # Get git version if in development
-if package_status == 'development'
+if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
   git = find_program('git', required: false)
   if git.found()
     conf_data.set('HAVE_GIT_VERSION', 1)
@@ -59,7 +63,7 @@ cc = meson.get_compiler('c')
 # Common compiler flags
 add_project_arguments('-Wno-deprecated-declarations', language: 'c')
 
-if get_option('buildtype') == 'debug' or package_status == 'development'
+if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
   add_project_arguments('-Wunused', language: 'c')
 endif
 
@@ -605,7 +609,7 @@ endif
 main_source = files('src/main.c')
 
 # Generate git version header if in development
-if package_status == 'development'
+if get_option('buildtype') == 'release' or get_option('buildtype') == 'debugoptimized'
   git_branch = run_command('git', 'rev-parse', '--symbolic-full-name', '--abbrev-ref', 'HEAD', 
                            check: false).stdout().strip()
   git_revision = run_command('git', 'log', '--pretty=format:%h', '-n', '1',
@@ -812,7 +816,7 @@ endif
 
 summary({
   'Platform': platform,
-  'Package status': package_status,
+  'Package status': get_option('buildtype'),
   'GTK version': gtk_version,
   'Install themes': get_option('install_themes'),
   'Themes path': themes_path,
