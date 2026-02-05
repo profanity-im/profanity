@@ -1,0 +1,85 @@
+# Features:
+option('notifications',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable desktop notifications'
+)
+
+option('python-plugins',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable Python plugins'
+)
+
+option('c-plugins',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable C plugins'
+)
+
+option('otr',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable OTR encryption'
+)
+
+option('pgp',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable PGP'
+)
+
+option('omemo',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable OMEMO encryption'
+)
+
+option('xscreensaver',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Use libXScrnSaver to determine idle time'
+)
+
+option('icons-and-clipboard',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable GTK tray icons and clipboard paste support'
+)
+
+option('gdk-pixbuf',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable GDK Pixbuf support to scale avatars before uploading'
+)
+
+option('omemo-qrcode',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable ability to display OMEMO QR code'
+)
+
+# Other:
+option('python_framework',
+  type: 'string',
+  value: '',
+  description: 'Set base directory for Python Framework (macOS only)'
+)
+
+option('tests',
+  type: 'boolean',
+  value: false,
+  description: 'Build tests'
+)
+
+option('install_themes',
+  type: 'boolean',
+  value: true,
+  description: 'Install themes'
+)
+
+option('themes_path',
+  type: 'string',
+  value: '',
+  description: 'Custom path for themes installation (empty for default)'
+)

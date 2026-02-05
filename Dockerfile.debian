@@ -5,6 +5,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   autoconf \
   autoconf-archive \
   automake \
+  cmake \
   expect \
   gcc \
   git \
@@ -13,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libgcrypt-dev \
   libglib2.0-dev \
   libgpgme11-dev \
-  libgtk2.0-dev \
+  libgtk-3-dev \
   libmicrohttpd-dev \
   libncursesw5-dev \
   libnotify-dev \
@@ -24,6 +25,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libtool \
   libxss-dev \
   make \
+  meson \
+  ninja-build \
   pkg-config \
   python3-dev \
   python-dev-is-python3 \
