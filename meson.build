@@ -330,47 +330,18 @@ profanity_deps = [
   libstrophe_dep,
   curses_dep,
   readline_dep,
+  libnotify_dep,
+  gtk_dep,
+  xscrnsaver_dep,
+  python_dep,
+  dl_dep,
+  gpgme_dep,
+  libotr_dep,
+  gdk_pixbuf_dep,
+  libsignal_dep,
+  gcrypt_dep,
+  qrencode_dep
 ]
-
-if libnotify_dep.found()
-  profanity_deps += libnotify_dep
-endif
-
-if gtk_dep.found()
-  profanity_deps += gtk_dep
-endif
-
-if xscrnsaver_found
-  profanity_deps += xscrnsaver_dep
-endif
-
-if python_dep.found()
-  profanity_deps += python_dep
-endif
-
-if dl_dep.found()
-  profanity_deps += dl_dep
-endif
-
-if gpgme_dep.found()
-  profanity_deps += gpgme_dep
-endif
-
-if libotr_dep.found()
-  profanity_deps += libotr_dep
-endif
-
-if gdk_pixbuf_dep.found()
-  profanity_deps += gdk_pixbuf_dep
-endif
-
-if libsignal_dep.found() and gcrypt_dep.found()
-  profanity_deps += [libsignal_dep, gcrypt_dep]
-endif
-
-if qrencode_dep.found()
-  profanity_deps += qrencode_dep
-endif
 
 # Include directories
 inc = include_directories('.', 'src')
