@@ -26,13 +26,13 @@ conf_data.set_quoted('PACKAGE_VERSION', meson.project_version())
 conf_data.set_quoted('PACKAGE_BUGREPORT', 'jubalh@iodoru.org')
 conf_data.set_quoted('PACKAGE_URL', 'https://profanity-im.github.io/')
 
-# possible options from meson:
+# Possible options from meson:
 # debug, debugoptimized, release, plain
-if get_option('buildtype') == 'release'
-  conf_data.set_quoted('PACKAGE_STATUS', 'release')
-else
-  conf_data.set_quoted('PACKAGE_STATUS', 'development')
-endif
+# Build type configuration
+is_release = get_option('buildtype') == 'release'
+is_debug = get_option('buildtype') in ['debug', 'debugoptimized']
+
+conf_data.set_quoted('PACKAGE_STATUS', is_release ? 'release' : 'development')
 
 if platform == 'cygwin'
   conf_data.set('PLATFORM_CYGWIN', 1)
@@ -43,7 +43,7 @@ if platform == 'osx'
 endif
 
 # Get git version if in development
-if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
+if is_debug
   git = find_program('git', required: false)
   if git.found()
     conf_data.set('HAVE_GIT_VERSION', 1)
@@ -54,14 +54,16 @@ endif
 cc = meson.get_compiler('c')
 
 # Common compiler flags
-add_project_arguments('-Wno-deprecated-declarations', language: 'c')
-add_project_arguments('-Wno-unused-parameter', language: 'c')
+add_project_arguments([
+  '-Wno-deprecated-declarations',
+  '-Wno-unused-parameter',
+], language: 'c')
 
-if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
-  add_project_arguments('-ggdb3', language: 'c')
-  add_project_arguments('-Wunused', language: 'c')
-  #Disabled for now due so we can build
-  #add_project_arguments('-Werror', language: 'c')
+if is_debug
+  add_project_arguments([
+    '-ggdb3',
+    '-Wunused',
+  ], language: 'c')
 endif
 
 if platform == 'osx'
@@ -80,7 +82,7 @@ gio_dep = dependency('gio-2.0')
 curl_dep = dependency('libcurl', version: '>= 7.62.0')
 sqlite_dep = dependency('sqlite3', version: '>= 3.22.0')
 thread_dep = dependency('threads')
-math_dep = cc.find_library('m', required: true)
+math_dep = cc.find_library('m')
 libstrophe_dep = dependency('libstrophe', version: '>= 0.12.3')
 
 # Check for XMPP_CERT_PUBKEY_FINGERPRINT_SHA256 support
@@ -95,66 +97,72 @@ if cc.links('''
 endif
 
 # ncurses
-curses_dep = disabler()
-foreach lib : ['ncursesw', 'ncurses']
-  d = dependency(lib, required: false)
-  if not d.found()
-    d = cc.find_library(lib, required: false)
-  endif
-  
-  if d.found()
-    curses_dep = d
-    break
-  endif
-endforeach
+curses_dep = dependency('ncursesw', required: false)
 if not curses_dep.found()
-  error('ncursesw/ncurses library not found')
+  curses_dep = dependency('ncurses', required: false)
+endif
+if not curses_dep.found()
+  curses_dep = cc.find_library('ncursesw', required: false)
+endif
+if not curses_dep.found()
+  curses_dep = cc.find_library('ncurses', required: true)
 endif
 
-# Check for ncursesw/ncurses.h, Arch linux uses ncurses.h for ncursesw
-foreach h : ['ncursesw/ncurses.h', 'ncurses.h']
-  if cc.has_header(h)
-    conf_data.set('HAVE_@0@'.format(h.underscorify().to_upper()), 1)
-  endif
-endforeach
+# Check for ncursesw/ncurses.h, Arch Linux uses ncurses.h for ncursesw
+if cc.has_header('ncursesw/ncurses.h')
+  conf_data.set('HAVE_NCURSESW_NCURSES_H', 1)
+elif cc.has_header('ncurses.h')
+  conf_data.set('HAVE_NCURSES_H', 1)
+endif
 
-# Readline:
-# we need to declare the variable before
-# using it in the conditional branch.
-# Later the required is set correctly.
+# Readline
 readline_dep = dependency('readline', required: false)
 
-if not readline_dep.found()
-  if platform == 'osx'
-    # brew prefix
-    brew = find_program('brew', required: false)
-    if brew.found()
-      prefix = run_command(brew, '--prefix', 'readline', check: false).stdout().strip()
-      readline_dep = cc.find_library('readline', dirs: [prefix / 'lib'], required: true)
-      add_project_arguments('-I' + prefix / 'include', language: 'c')
-    endif
-  elif platform == 'openbsd'
-    # ereadline alias
-    readline_dep = cc.find_library('ereadline', dirs: ['/usr/local/lib'], required: false)
+if not readline_dep.found() and platform == 'osx'
+  brew = find_program('brew', required: false)
+  if brew.found()
+    prefix = run_command(brew, '--prefix', 'readline', check: false).stdout().strip()
+    readline_dep = cc.find_library('readline', dirs: [prefix / 'lib'], required: true)
+    add_project_arguments('-I' + prefix / 'include', language: 'c')
   endif
 endif
 
-# regular
+if not readline_dep.found() and platform == 'openbsd'
+  readline_dep = cc.find_library('ereadline', dirs: ['/usr/local/lib'], required: false)
+endif
+
 if not readline_dep.found()
   readline_dep = cc.find_library('readline', required: true)
 endif
 
-# Optional dependencies:
-# Notifications
-libnotify_dep = dependency('', required: false)
+# Optional dependencies
 have_osxnotify = false
+libnotify_dep = disabler()
+gtk_dep = disabler()
+xscrnsaver_dep = []
+python_dep = disabler()
+dl_dep = disabler()
+gpgme_dep = disabler()
+libotr_dep = disabler()
+gdk_pixbuf_dep = disabler()
+libsignal_dep = disabler()
+gcrypt_dep = disabler()
+qrencode_dep = disabler()
 
+# Build flags
+build_python_api = false
+build_c_api = false
+build_pgp = false
+build_otr = false
+build_omemo = false
+
+# Notifications
 if get_option('notifications').enabled()
   if platform == 'osx'
     terminal_notifier = find_program('terminal-notifier', required: true)
     have_osxnotify = true
     conf_data.set('HAVE_OSXNOTIFY', 1)
-  elif platform == 'nix' or platform == 'freebsd'
+  elif platform in ['nix', 'freebsd']
     libnotify_dep = dependency('libnotify', required: true)
     conf_data.set('HAVE_LIBNOTIFY', 1)
   else
@@ -163,44 +171,26 @@ if get_option('notifications').enabled()
 endif
 
 # GTK (for icons and clipboard)
-gtk_dep = dependency('', required: false)
-
 if get_option('icons-and-clipboard').enabled()
-  gtk_dep = dependency('gtk+-3.0', version: '>= 3.24.0', required: false)
-  if gtk_dep.found()
-    conf_data.set('HAVE_GTK', 1)
-  endif
+  gtk_dep = dependency('gtk+-3.0', version: '>= 3.24.0', required: true)
+  conf_data.set('HAVE_GTK', 1)
 endif
 
 # XScreenSaver
-# We use this variable because .found() will later not work on a list
-xscrnsaver_found = false
-xscrnsaver_dep = []
-
 if get_option('xscreensaver').enabled()
-  xss_dep = dependency('xscrnsaver', required: true)
-  x11_dep = dependency('x11', required: true)
-  xscrnsaver_dep = [xss_dep, x11_dep]
-  xscrnsaver_found = true
+  xscrnsaver_dep = [
+    dependency('xscrnsaver', required: true),
+    dependency('x11', required: true)
+  ]
   conf_data.set('HAVE_LIBXSS', 1)
 endif
 
 # Python plugins
-python_dep = dependency('', required: false)
-build_python_api = false
-
 if get_option('python-plugins').enabled()
-  if platform == 'osx'
-    # Handle Python framework on macOS
-    python_framework = get_option('python_framework')
-    if python_framework == ''
-      python_framework = '/Library/Frameworks/Python.framework'
-    endif
-  endif
-  
-  python_dep = dependency('python-embed', required: false)
+  python_dep = dependency('python3-embed', required: false)
   if not python_dep.found()
-    python_dep = dependency('python3-embed', required: true)
+    python_dep = dependency('python-embed', required: true)
+  else
     conf_data.set('PY_IS_PYTHON3', 1)
   endif
   
@@ -209,34 +199,24 @@ if get_option('python-plugins').enabled()
 endif
 
 # C plugins
-dl_dep = dependency('', required: false)
-build_c_api = false
-
 if get_option('c-plugins').enabled()
   if platform == 'cygwin'
     error('C plugins are not supported on Cygwin')
   endif
   
-  if platform == 'openbsd' or platform == 'freebsd' or platform == 'netbsd'
-    build_c_api = true
-    conf_data.set('HAVE_C', 1)
-  else
+  if platform not in ['openbsd', 'freebsd', 'netbsd']
     dl_dep = cc.find_library('dl', required: true)
-    build_c_api = true
-    conf_data.set('HAVE_C', 1)
   endif
+  
+  build_c_api = true
+  conf_data.set('HAVE_C', 1)
 endif
 
 # PGP support
-gpgme_dep = dependency('', required: false)
-build_pgp = false
-
 if get_option('pgp').enabled()
   gpgme_dep = cc.find_library('gpgme', required: true)
-  
   gpgme_config = find_program('gpgme-config', required: true)
   gpgme_cflags = run_command(gpgme_config, '--cflags', check: true).stdout().strip()
-  gpgme_libs = run_command(gpgme_config, '--libs', check: true).stdout().strip()
   add_project_arguments(gpgme_cflags.split(), language: 'c')
   
   build_pgp = true
@@ -244,9 +224,6 @@ if get_option('pgp').enabled()
 endif
 
 # OTR support
-libotr_dep = dependency('', required: false)
-build_otr = false
-
 if get_option('otr').enabled()
   libotr_dep = dependency('libotr', version: '>= 4.0', required: true)
   build_otr = true
@@ -254,18 +231,12 @@ if get_option('otr').enabled()
 endif
 
 # GDK Pixbuf (for avatar scaling)
-gdk_pixbuf_dep = dependency('', required: false)
-
 if get_option('gdk-pixbuf').enabled()
   gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0', version: '>= 2.4', required: true)
   conf_data.set('HAVE_PIXBUF', 1)
 endif
 
 # OMEMO support
-libsignal_dep = dependency('', required: false)
-gcrypt_dep = dependency('', required: false)
-build_omemo = false
-
 if get_option('omemo').enabled()
   libsignal_dep = dependency('libsignal-protocol-c', version: '>= 2.3.2', required: true)
   gcrypt_dep = dependency('libgcrypt', version: '>= 1.7.0', required: true)
@@ -274,8 +245,6 @@ if get_option('omemo').enabled()
 endif
 
 # QR code support (for OMEMO)
-qrencode_dep = dependency('', required: false)
-
 if get_option('omemo-qrcode').enabled()
   qrencode_dep = dependency('libqrencode', required: true)
   conf_data.set('HAVE_QRENCODE', 1)
@@ -307,11 +276,7 @@ endforeach
 config_h = configure_file(
   output: 'config.h',
   configuration: conf_data,
-  install: false,
 )
-
-# Make config.h available by adding build directory to include path
-config_h_inc = include_directories('.')
 
 # Build dependencies list
 profanity_deps = [
@@ -324,18 +289,52 @@ profanity_deps = [
   libstrophe_dep,
   curses_dep,
   readline_dep,
-  libnotify_dep,
-  gtk_dep,
-  xscrnsaver_dep,
-  python_dep,
-  dl_dep,
-  gpgme_dep,
-  libotr_dep,
-  gdk_pixbuf_dep,
-  libsignal_dep,
-  gcrypt_dep,
-  qrencode_dep
 ]
+
+# Add optional dependencies only if found
+if libnotify_dep.found()
+  profanity_deps += libnotify_dep
+endif
+
+if gtk_dep.found()
+  profanity_deps += gtk_dep
+endif
+
+if xscrnsaver_dep.length() > 0
+  profanity_deps += xscrnsaver_dep
+endif
+
+if python_dep.found()
+  profanity_deps += python_dep
+endif
+
+if dl_dep.found()
+  profanity_deps += dl_dep
+endif
+
+if gpgme_dep.found()
+  profanity_deps += gpgme_dep
+endif
+
+if libotr_dep.found()
+  profanity_deps += libotr_dep
+endif
+
+if gdk_pixbuf_dep.found()
+  profanity_deps += gdk_pixbuf_dep
+endif
+
+if libsignal_dep.found()
+  profanity_deps += libsignal_dep
+endif
+
+if gcrypt_dep.found()
+  profanity_deps += gcrypt_dep
+endif
+
+if qrencode_dep.found()
+  profanity_deps += qrencode_dep
+endif
 
 # Include directories
 inc = include_directories('.', 'src')
@@ -420,73 +419,54 @@ core_sources = files(
   'src/plugins/disco.c',
 )
 
-# Python plugin sources
-python_sources = files(
-  'src/plugins/python_plugins.c',
-  'src/plugins/python_api.c',
-)
-
-# C plugin sources
-c_sources = files(
-  'src/plugins/c_plugins.c',
-  'src/plugins/c_api.c',
-)
-
-# PGP sources
-pgp_sources = files(
-  'src/pgp/gpg.c',
-  'src/pgp/ox.c',
-)
-
-# OTR sources
-otr_sources = files(
-  'src/otr/otrlibv4.c',
-  'src/otr/otr.c',
-)
-
-# OMEMO sources
-omemo_sources = files(
-  'src/omemo/omemo.c',
-  'src/omemo/crypto.c',
-  'src/omemo/store.c',
-  'src/xmpp/omemo.c',
-  'src/tools/aesgcm_download.c',
-)
-
 # Build the final source list
 profanity_sources = core_sources
 
-# Add tray support only when GTK is available
-# The calls to tray functions in profanity.c are already conditional on HAVE_GTK
+# Add conditional sources
 if gtk_dep.found()
   profanity_sources += files('src/ui/tray.c')
 endif
 
 if build_python_api
-  profanity_sources += python_sources
+  profanity_sources += files(
+    'src/plugins/python_plugins.c',
+    'src/plugins/python_api.c',
+  )
 endif
 
 if build_c_api
-  profanity_sources += c_sources
+  profanity_sources += files(
+    'src/plugins/c_plugins.c',
+    'src/plugins/c_api.c',
+  )
 endif
 
 if build_pgp
-  profanity_sources += pgp_sources
+  profanity_sources += files(
+    'src/pgp/gpg.c',
+    'src/pgp/ox.c',
+  )
 endif
 
 if build_otr
-  profanity_sources += otr_sources
+  profanity_sources += files(
+    'src/otr/otrlibv4.c',
+    'src/otr/otr.c',
+  )
 endif
 
 if build_omemo
-  profanity_sources += omemo_sources
+  profanity_sources += files(
+    'src/omemo/omemo.c',
+    'src/omemo/crypto.c',
+    'src/omemo/store.c',
+    'src/xmpp/omemo.c',
+    'src/tools/aesgcm_download.c',
+  )
 endif
 
-# Main source file
-main_source = files('src/main.c')
-
 # Generate git version header if in development
-if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
+if is_debug
   git_branch = run_command('git', 'rev-parse', '--symbolic-full-name', '--abbrev-ref', 'HEAD', 
                            check: false).stdout().strip()
   git_revision = run_command('git', 'log', '--pretty=format:%h', '-n', '1',
@@ -500,14 +480,15 @@ if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimi
     input: 'src/gitversion.h.in',
     output: 'gitversion.h',
     configuration: git_version_conf,
-    install: false,
   )
 endif
 
 # Build the executable
 profanity_exe = executable(
   'profanity',
-  profanity_sources + main_source + [config_h],
+  profanity_sources,
+  files('src/main.c'),
+  config_h,
   dependencies: profanity_deps,
   include_directories: inc,
   install: true,
@@ -525,7 +506,6 @@ if build_c_api
     version: '0.0.0',
   )
   
-  # Install profapi.h header
   install_headers('src/plugins/profapi.h')
 endif
 
@@ -544,19 +524,17 @@ install_subdir('icons',
 )
 
 # Install man pages
- man_pages = run_command('find', 'docs', '-name', 'profanity*.1', '-type', 'f',
+man_pages = run_command('find', 'docs', '-name', 'profanity*.1', '-type', 'f',
                         check: true).stdout().strip().split('\n')
 
 if man_pages.length() > 0 and man_pages[0] != ''
   install_man(man_pages)
 endif
 
-# Install example config
-install_data('profrc.example',
-  install_dir: get_option('datadir') / 'doc' / meson.project_name(),
-)
-
-install_data('theme_template',
+# Install example config and theme template
+install_data(
+  'profrc.example',
+  'theme_template',
   install_dir: get_option('datadir') / 'doc' / meson.project_name(),
 )
 
@@ -564,7 +542,6 @@ install_data('theme_template',
 if get_option('tests')
   cmocka_dep = dependency('cmocka', required: false)
   if cmocka_dep.found()
-    # Unit test sources
     unittest_sources = files(
       'src/xmpp/contact.c',
       'src/common.c',
@@ -650,11 +627,17 @@ if get_option('tests')
     )
     
     if build_python_api
-      unittest_sources += python_sources
+      unittest_sources += files(
+        'src/plugins/python_plugins.c',
+        'src/plugins/python_api.c',
+      )
     endif
     
     if build_c_api
-      unittest_sources += c_sources
+      unittest_sources += files(
+        'src/plugins/c_plugins.c',
+        'src/plugins/c_api.c',
+      )
     endif
     
     if build_pgp
@@ -665,18 +648,13 @@ if get_option('tests')
     endif
     
     if build_otr
-      unittest_sources += files(
-        'tests/unittests/otr/stub_otr.c',
-      )
+      unittest_sources += files('tests/unittests/otr/stub_otr.c')
     endif
     
     if build_omemo
-      unittest_sources += files(
-        'tests/unittests/omemo/stub_omemo.c',
-      )
+      unittest_sources += files('tests/unittests/omemo/stub_omemo.c')
     endif
     
-    # Build unit tests
     unittests = executable(
       'unittests',
       unittest_sources,
@@ -708,7 +686,7 @@ summary({
   'OTR': build_otr,
   'PGP': build_pgp,
   'OMEMO': build_omemo,
-  'XScreenSaver': xscrnsaver_found,
+  'XScreenSaver': xscrnsaver_dep.length() > 0,
   'GTK': gtk_dep.found(),
   'GDK Pixbuf': gdk_pixbuf_dep.found(),
   'QR Code': qrencode_dep.found(),
