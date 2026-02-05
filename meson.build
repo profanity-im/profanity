@@ -83,17 +83,6 @@ thread_dep = dependency('threads')
 math_dep = cc.find_library('m', required: true)
 libstrophe_dep = dependency('libstrophe', version: '>= 0.12.3')
 
-# Check if libstrophe works
-if not cc.links('''
-  #include <strophe.h>
-  int main() {
-    xmpp_initialize();
-    return 0;
-  }
-  ''', dependencies: libstrophe_dep)
-  error('libstrophe is broken')
-endif
-
 # Check for XMPP_CERT_PUBKEY_FINGERPRINT_SHA256 support
 if cc.links('''
   #include <strophe.h>
