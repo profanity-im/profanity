@@ -26,6 +26,21 @@ jobs:
           docker build -f Dockerfile.${{ matrix.flavor }} -t profanity .
           docker run profanity ./ci-build.sh
 
+  linux-meson:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        flavor: [debian]
+
+    name: Linux-meson
+    steps:
+      - uses: actions/checkout@v2
+      - name: Run tests
+        run: |
+          docker build -f Dockerfile.${{ matrix.flavor }} -t profanity .
+          docker run profanity ./ci-meson-build.sh
+
   code-style:
     runs-on: ubuntu-22.04
     name: Check coding style
