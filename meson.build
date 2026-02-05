@@ -64,7 +64,10 @@ cc = meson.get_compiler('c')
 add_project_arguments('-Wno-deprecated-declarations', language: 'c')
 
 if get_option('buildtype') == 'debug' or get_option('buildtype') == 'debugoptimized'
+  add_project_arguments('-ggdb3', language: 'c')
   add_project_arguments('-Wunused', language: 'c')
+  #Disabled for now due so we can build
+  #add_project_arguments('-Werror', language: 'c')
 endif
 
 if platform == 'osx'
