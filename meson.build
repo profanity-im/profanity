@@ -94,52 +94,29 @@ if cc.links('''
   conf_data.set('HAVE_XMPP_CERT_PUBKEY_FINGERPRINT_SHA256', 1)
 endif
 
-# Curses/ncurses library
-ncursesw_dep = dependency('ncursesw', required: false)
-ncurses_dep = dependency('ncurses', required: false)
-
-if ncursesw_dep.found()
-  curses_dep = ncursesw_dep
-  curses_name = 'ncursesw'
-elif ncurses_dep.found()
-  curses_dep = ncurses_dep
-  curses_name = 'ncurses'
-else
-  curses_dep = cc.find_library('ncursesw', required: false)
-  if curses_dep.found()
-    curses_name = 'ncursesw'
-  else
-    curses_dep = cc.find_library('ncurses', required: false)
-    if curses_dep.found()
-      curses_name = 'ncurses'
-    else
-      curses_dep = cc.find_library('curses', required: true)
-      curses_name = 'curses'
-    endif
+# ncurses
+curses_dep = disabler()
+foreach lib : ['ncursesw', 'ncurses']
+  d = dependency(lib, required: false)
+  if not d.found()
+    d = cc.find_library(lib, required: false)
   endif
+  
+  if d.found()
+    curses_dep = d
+    break
+  endif
+endforeach
+if not curses_dep.found()
+  error('ncursesw/ncurses library not found')
 endif
 
-# Check for wide character support
-if not cc.links('''
-  void wget_wch(void);
-  int main() {
-    wget_wch();
-    return 0;
-  }
-  ''', dependencies: curses_dep)
-  error('ncurses does not support wide characters')
-endif
-
-# Check for ncurses headers
-if cc.has_header('ncursesw/ncurses.h')
-  conf_data.set('HAVE_NCURSESW_NCURSES_H', 1)
-endif
-if cc.has_header('ncurses.h')
-  conf_data.set('HAVE_NCURSES_H', 1)
-endif
-if cc.has_header('curses.h')
-  conf_data.set('HAVE_CURSES_H', 1)
-endif
+# Check for ncursesw/ncurses.h, Arch linux uses ncurses.h for ncursesw
+foreach h : ['ncursesw/ncurses.h', 'ncurses.h']
+  if cc.has_header(h)
+    conf_data.set('HAVE_@0@'.format(h.underscorify().to_upper()), 1)
+  endif
+endforeach
 
 # Readline:
 # we need to declare the variable before
