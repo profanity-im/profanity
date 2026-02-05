@@ -149,18 +149,16 @@ endif
 libnotify_dep = dependency('', required: false)
 have_osxnotify = false
 
-if get_option('notifications').enabled() or get_option('notifications').auto()
+if get_option('notifications').enabled()
   if platform == 'osx'
-    terminal_notifier = find_program('terminal-notifier', required: get_option('notifications'))
-    if terminal_notifier.found()
-      have_osxnotify = true
-      conf_data.set('HAVE_OSXNOTIFY', 1)
-    endif
+    terminal_notifier = find_program('terminal-notifier', required: true)
+    have_osxnotify = true
+    conf_data.set('HAVE_OSXNOTIFY', 1)
   elif platform == 'nix' or platform == 'freebsd'
-    libnotify_dep = dependency('libnotify', required: get_option('notifications'))
-    if libnotify_dep.found()
-      conf_data.set('HAVE_LIBNOTIFY', 1)
-    endif
+    libnotify_dep = dependency('libnotify', required: true)
+    conf_data.set('HAVE_LIBNOTIFY', 1)
+  else
+    error('Notifications not supported on this platform')
   endif
 endif
 
@@ -168,18 +166,15 @@ endif
 gtk_dep = dependency('', required: false)
 gtk_version = 'none'
 
-if get_option('icons-and-clipboard').enabled() or get_option('icons-and-clipboard').auto()
+if get_option('icons-and-clipboard').enabled()
   gtk_dep = dependency('gtk+-3.0', version: '>= 3.24.0', required: false)
   if gtk_dep.found()
     conf_data.set('HAVE_GTK', 1)
     gtk_version = gtk_dep.version()
   else
-    gtk_dep = dependency('gtk+-2.0', version: '>= 2.24.10', 
-                        required: get_option('icons-and-clipboard'))
-    if gtk_dep.found()
-      conf_data.set('HAVE_GTK', 1)
-      gtk_version = gtk_dep.version()
-    endif
+    gtk_dep = dependency('gtk+-2.0', version: '>= 2.24.10', required: true)
+    conf_data.set('HAVE_GTK', 1)
+    gtk_version = gtk_dep.version()
   endif
 endif
 
@@ -188,24 +183,19 @@ endif
 xscrnsaver_found = false
 xscrnsaver_dep = []
 
-if get_option('xscreensaver').enabled() or get_option('xscreensaver').auto()
-  xss_dep = dependency('xscrnsaver', required: false)
-  x11_dep = dependency('x11', required: false)
-  
-  if xss_dep.found() and x11_dep.found()
-    xscrnsaver_dep = [xss_dep, x11_dep]
-    xscrnsaver_found = true # Set our tracker to true
-    conf_data.set('HAVE_LIBXSS', 1)
-  elif get_option('xscreensaver').enabled()
-    error('xscreensaver support requested but xscrnsaver or x11 not found')
-  endif
+if get_option('xscreensaver').enabled()
+  xss_dep = dependency('xscrnsaver', required: true)
+  x11_dep = dependency('x11', required: true)
+  xscrnsaver_dep = [xss_dep, x11_dep]
+  xscrnsaver_found = true
+  conf_data.set('HAVE_LIBXSS', 1)
 endif
 
 # Python plugins
 python_dep = dependency('', required: false)
 build_python_api = false
 
-if not get_option('plugins').disabled() and not get_option('python-plugins').disabled()
+if get_option('python-plugins').enabled()
   if platform == 'osx'
     # Handle Python framework on macOS
     python_framework = get_option('python_framework')
@@ -216,36 +206,30 @@ if not get_option('plugins').disabled() and not get_option('python-plugins').dis
   
   python_dep = dependency('python-embed', required: false)
   if not python_dep.found()
-    python_dep = dependency('python3-embed', required: false)
-    if python_dep.found()
-      conf_data.set('PY_IS_PYTHON3', 1)
-    endif
+    python_dep = dependency('python3-embed', required: true)
+    conf_data.set('PY_IS_PYTHON3', 1)
   endif
   
-  if python_dep.found()
-    build_python_api = true
-    conf_data.set('HAVE_PYTHON', 1)
-  elif get_option('python-plugins').enabled()
-    error('Python plugins enabled but Python not found')
-  endif
+  build_python_api = true
+  conf_data.set('HAVE_PYTHON', 1)
 endif
 
 # C plugins
 dl_dep = dependency('', required: false)
 build_c_api = false
 
-if platform != 'cygwin'
-  if not get_option('plugins').disabled() and not get_option('c-plugins').disabled()
-    if platform == 'openbsd' or platform == 'freebsd' or platform == 'netbsd'
-      build_c_api = true
-      conf_data.set('HAVE_C', 1)
-    else
-      dl_dep = cc.find_library('dl', required: get_option('c-plugins'))
-      if dl_dep.found()
-        build_c_api = true
-        conf_data.set('HAVE_C', 1)
-      endif
-    endif
+if get_option('c-plugins').enabled()
+  if platform == 'cygwin'
+    error('C plugins are not supported on Cygwin')
+  endif
+  
+  if platform == 'openbsd' or platform == 'freebsd' or platform == 'netbsd'
+    build_c_api = true
+    conf_data.set('HAVE_C', 1)
+  else
+    dl_dep = cc.find_library('dl', required: true)
+    build_c_api = true
+    conf_data.set('HAVE_C', 1)
   endif
 endif
 
@@ -253,45 +237,34 @@ endif
 gpgme_dep = dependency('', required: false)
 build_pgp = false
 
-if not get_option('pgp').disabled()
-  gpgme_dep = cc.find_library('gpgme', required: false)
+if get_option('pgp').enabled()
+  gpgme_dep = cc.find_library('gpgme', required: true)
   
-  if gpgme_dep.found()
-    gpgme_config = find_program('gpgme-config', required: false)
-    if gpgme_config.found()
-      gpgme_cflags = run_command(gpgme_config, '--cflags', check: true).stdout().strip()
-      gpgme_libs = run_command(gpgme_config, '--libs', check: true).stdout().strip()
-      add_project_arguments(gpgme_cflags.split(), language: 'c')
-    endif
-    
-    build_pgp = true
-    conf_data.set('HAVE_LIBGPGME', 1)
-  elif get_option('pgp').enabled()
-    error('PGP support enabled but libgpgme not found')
-  endif
+  gpgme_config = find_program('gpgme-config', required: true)
+  gpgme_cflags = run_command(gpgme_config, '--cflags', check: true).stdout().strip()
+  gpgme_libs = run_command(gpgme_config, '--libs', check: true).stdout().strip()
+  add_project_arguments(gpgme_cflags.split(), language: 'c')
+  
+  build_pgp = true
+  conf_data.set('HAVE_LIBGPGME', 1)
 endif
 
 # OTR support
 libotr_dep = dependency('', required: false)
 build_otr = false
 
-if not get_option('otr').disabled()
-  libotr_dep = dependency('libotr', version: '>= 4.0', required: get_option('otr'))
-  if libotr_dep.found()
-    build_otr = true
-    conf_data.set('HAVE_LIBOTR', 1)
-  endif
+if get_option('otr').enabled()
+  libotr_dep = dependency('libotr', version: '>= 4.0', required: true)
+  build_otr = true
+  conf_data.set('HAVE_LIBOTR', 1)
 endif
 
 # GDK Pixbuf (for avatar scaling)
 gdk_pixbuf_dep = dependency('', required: false)
 
-if not get_option('gdk-pixbuf').disabled()
-  gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0', version: '>= 2.4', 
-                              required: get_option('gdk-pixbuf'))
-  if gdk_pixbuf_dep.found()
-    conf_data.set('HAVE_PIXBUF', 1)
-  endif
+if get_option('gdk-pixbuf').enabled()
+  gdk_pixbuf_dep = dependency('gdk-pixbuf-2.0', version: '>= 2.4', required: true)
+  conf_data.set('HAVE_PIXBUF', 1)
 endif
 
 # OMEMO support
@@ -299,31 +272,19 @@ libsignal_dep = dependency('', required: false)
 gcrypt_dep = dependency('', required: false)
 build_omemo = false
 
-if not get_option('omemo').disabled()
-  libsignal_dep = dependency('libsignal-protocol-c', version: '>= 2.3.2', required: false)
-  
-  if libsignal_dep.found()
-    gcrypt_dep = dependency('libgcrypt', version: '>= 1.7.0', required: false)
-    
-    if gcrypt_dep.found()
-      build_omemo = true
-      conf_data.set('HAVE_OMEMO', 1)
-    elif get_option('omemo').enabled()
-      error('OMEMO support enabled but libgcrypt >= 1.7.0 not found')
-    endif
-  elif get_option('omemo').enabled()
-    error('OMEMO support enabled but libsignal-protocol-c >= 2.3.2 not found')
-  endif
+if get_option('omemo').enabled()
+  libsignal_dep = dependency('libsignal-protocol-c', version: '>= 2.3.2', required: true)
+  gcrypt_dep = dependency('libgcrypt', version: '>= 1.7.0', required: true)
+  build_omemo = true
+  conf_data.set('HAVE_OMEMO', 1)
 endif
 
 # QR code support (for OMEMO)
 qrencode_dep = dependency('', required: false)
 
-if not get_option('omemo-qrcode').disabled()
-  qrencode_dep = dependency('libqrencode', required: get_option('omemo-qrcode'))
-  if qrencode_dep.found()
-    conf_data.set('HAVE_QRENCODE', 1)
-  endif
+if get_option('omemo-qrcode').enabled()
+  qrencode_dep = dependency('libqrencode', required: true)
+  conf_data.set('HAVE_QRENCODE', 1)
 endif
 
 # Set installation paths
