@@ -10,21 +10,14 @@ project('profanity', 'c',
 
 # Determine platform
 host_system = host_machine.system()
-platform = 'unknown'
-
-if host_system == 'freebsd'
-  platform = 'freebsd'
-elif host_system == 'netbsd'
-  platform = 'netbsd'
-elif host_system == 'openbsd'
-  platform = 'openbsd'
-elif host_system == 'darwin'
-  platform = 'osx'
-elif host_system == 'cygwin'
-  platform = 'cygwin'
-else
-  platform = 'nix'
-endif
+platform_map = {
+  'freebsd': 'freebsd',
+  'netbsd':  'netbsd',
+  'openbsd': 'openbsd',
+  'darwin':  'osx',
+  'cygwin':  'cygwin',
+}
+platform = platform_map.get(host_system, 'nix')
 
 # Configuration data
 conf_data = configuration_data()
