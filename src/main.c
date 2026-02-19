@@ -78,7 +78,7 @@ main(int argc, char** argv)
 
     GOptionEntry entries[] = {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },
-        { "account", 'a', 0, G_OPTION_ARG_STRING, &account_name, "Auto connect to an account on startup" },
+        { "account", 'a', 0, G_OPTION_ARG_STRING, &account_name, "Auto connect to an account on startup", NULL },
         { "log", 'l', 0, G_OPTION_ARG_STRING, &log, "Set logging levels, DEBUG, INFO, WARN (default), ERROR", "LEVEL" },
         { "config", 'c', 0, G_OPTION_ARG_STRING, &config_file, "Use an alternative configuration file", NULL },
         { "logfile", 'f', 0, G_OPTION_ARG_STRING, &log_file, "Specify log file", NULL },
