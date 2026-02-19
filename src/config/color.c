@@ -344,7 +344,7 @@ color_distance(const struct color_def* a, const struct color_def* b)
 static int
 find_closest_col(int h, int s, int l)
 {
-    struct color_def a = { h, s, l };
+    struct color_def a = { h, s, l, NULL };
     int min = 0;
     int dmin = color_distance(&a, &color_names[0]);
 
