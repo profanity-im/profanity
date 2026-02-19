@@ -87,7 +87,7 @@ _p_gpg_free_pubkeyid(ProfPGPPubKeyId* pubkeyid)
     free(pubkeyid);
 }
 
-static gpgme_error_t*
+static gpgme_error_t
 _p_gpg_passphrase_cb(void* hook, const char* uid_hint, const char* passphrase_info, int prev_was_bad, int fd)
 {
     if (passphrase) {
@@ -109,7 +109,7 @@ _p_gpg_passphrase_cb(void* hook, const char* uid_hint, const char* passphrase_in
         gpgme_io_write(fd, passphrase_attempt, strlen(passphrase_attempt));
     }
 
-    return 0;
+    return GPG_ERR_NO_ERROR;
 }
 
 static void
