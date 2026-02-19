@@ -424,8 +424,8 @@ session_check_autoaway(void)
     gboolean check = prefs_get_boolean(PREF_AUTOAWAY_CHECK);
     gint away_time = prefs_get_autoaway_time();
     gint xa_time = prefs_get_autoxa_time();
-    int away_time_ms = away_time * 60000;
-    int xa_time_ms = xa_time * 60000;
+    unsigned long away_time_ms = away_time * 60000;
+    unsigned long xa_time_ms = xa_time * 60000;
 
     const char* account = session_get_account_name();
     resource_presence_t curr_presence = accounts_get_last_presence(account);

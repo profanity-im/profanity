@@ -308,7 +308,7 @@ _free_late_delivery_userdata(LateDeliveryUserdata* d)
 void
 iq_handlers_remove_win(ProfWin* window)
 {
-    log_debug("Remove window %p of type %d", window, window ? window->type : -1);
+    log_debug("Remove window %p of type %d", window, window ? window->type : (win_type_t)-1);
     if (!window)
         return;
     GSList *cur = late_delivery_windows, *next;
@@ -400,7 +400,7 @@ iq_autoping_check(void)
     }
 
     gdouble elapsed = g_timer_elapsed(autoping_time, NULL);
-    unsigned long seconds_elapsed = elapsed * 1.0;
+    gint seconds_elapsed = elapsed * 1.0;
     gint timeout = prefs_get_autoping_timeout();
     if (timeout > 0 && seconds_elapsed >= timeout) {
         cons_show("Autoping response timed out after %u seconds.", timeout);
