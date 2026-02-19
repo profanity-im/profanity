@@ -1583,7 +1583,11 @@ static struct PyModuleDef profModule = {
     "prof",
     "",
     -1,
-    apiMethods
+    apiMethods,
+    NULL, /* m_slots */
+    NULL, /* m_traverse */
+    NULL, /* m_clear */
+    NULL  /* m_free */
 };
 #endif
 
