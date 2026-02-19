@@ -180,7 +180,7 @@ p_gpg_on_connect(const char* const barejid)
         return;
     }
 
-    for (int i = 0; i < len; i++) {
+    for (gsize i = 0; i < len; i++) {
         GError* gerr = NULL;
         gchar* jid = jids[i];
         auto_gchar gchar* keyid = g_key_file_get_string(pubkeyfile, jid, "keyid", &gerr);

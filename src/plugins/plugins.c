@@ -126,7 +126,7 @@ plugins_init(void)
     if (!plugins_pref) {
         return;
     }
-    for (int i = 0; i < g_strv_length(plugins_pref); i++) {
+    for (guint i = 0; i < g_strv_length(plugins_pref); i++) {
         gboolean loaded = FALSE;
         gchar* filename = plugins_pref[i];
 #ifdef HAVE_PYTHON

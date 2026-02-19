@@ -328,7 +328,7 @@ GHashTable*
 parse_options(gchar** args, gchar** opt_keys, gboolean* res)
 {
     GList* keys = NULL;
-    for (int i = 0; i < g_strv_length(opt_keys); i++) {
+    for (guint i = 0; i < g_strv_length(opt_keys); i++) {
         keys = g_list_append(keys, opt_keys[i]);
     }
 
@@ -344,7 +344,7 @@ parse_options(gchar** args, gchar** opt_keys, gboolean* res)
 
     // validate options
     GList* found_keys = NULL;
-    for (int curr = 0; curr < g_strv_length(args); curr += 2) {
+    for (guint curr = 0; curr < g_strv_length(args); curr += 2) {
         // check if option valid
         if (g_list_find_custom(keys, args[curr], (GCompareFunc)g_strcmp0) == NULL) {
             *res = FALSE;
@@ -377,7 +377,7 @@ parse_options(gchar** args, gchar** opt_keys, gboolean* res)
     // create map
     options = g_hash_table_new(g_str_hash, g_str_equal);
     *res = TRUE;
-    for (int curr = 0; curr < g_strv_length(args); curr += 2) {
+    for (guint curr = 0; curr < g_strv_length(args); curr += 2) {
         g_hash_table_insert(options, args[curr], args[curr + 1]);
     }
 

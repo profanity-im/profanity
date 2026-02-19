@@ -1882,7 +1882,7 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
 
             int curx = getcurx(win);
             int cury;
-            int maxx = getmaxx(win);
+            size_t maxx = getmaxx(win);
 
             // wrap required
             if (curx + wordlen > maxx) {
