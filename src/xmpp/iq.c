@@ -248,6 +248,12 @@ _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const us
     return 1;
 }
 
+static void
+_xmpp_stanza_release_destroy_notify(gpointer data)
+{
+    xmpp_stanza_release((xmpp_stanza_t*)data);
+}
+
 void
 iq_handlers_init(void)
 {
@@ -264,7 +270,7 @@ iq_handlers_init(void)
     iq_handlers_clear();
 
     id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_iq_id_handler_free);
-    rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)xmpp_stanza_release);
+    rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, _xmpp_stanza_release_destroy_notify);
 }
 
 struct iq_win_finder
