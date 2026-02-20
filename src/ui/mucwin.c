@@ -497,7 +497,7 @@ _mucwin_print_triggers(ProfWin* window, const char* const message, GList* trigge
         }
         trigger_section[i] = '\0';
 
-        if (first_trigger_pos + first_trigger_len < strlen(message)) {
+        if (first_trigger_pos + first_trigger_len < (int)strlen(message)) {
             win_append_highlight(window, THEME_ROOMTRIGGER_TERM, "%s", trigger_section);
             _mucwin_print_triggers(window, &message[first_trigger_pos + first_trigger_len], triggers);
         } else {

@@ -369,7 +369,7 @@ find_col(const char* col_name, int n)
      * blue.
      */
 
-    if (n >= sizeof(name)) {
+    if (n >= (int)sizeof(name)) {
         /* truncate */
         log_error("Color: <%s,%d> bigger than %zu", col_name, n, sizeof(name));
         n = sizeof(name) - 1;
