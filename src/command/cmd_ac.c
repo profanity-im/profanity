@@ -1863,7 +1863,8 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
     }
     parsed[i] = '\0';
 
-    char* (*ac_func)(ProfWin*, const char* const, gboolean) = g_hash_table_lookup(ac_funcs, parsed);
+    char* (*ac_func)(ProfWin*, const char* const, gboolean) = (char* (*)(ProfWin*, const char* const, gboolean))g_hash_table_lookup(ac_funcs, parsed);
+
     if (ac_func) {
         result = ac_func(window, input, previous);
         if (result) {
