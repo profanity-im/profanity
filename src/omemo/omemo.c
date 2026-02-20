@@ -1030,7 +1030,7 @@ omemo_format_fingerprint(const char* const fingerprint)
 {
     char* output = malloc(strlen(fingerprint) + strlen(fingerprint) / 8);
 
-    int i, j;
+    size_t i, j;
     for (i = 0, j = 0; i < strlen(fingerprint); i++) {
         if (i > 0 && i % 8 == 0) {
             output[j++] = '-';
@@ -1117,7 +1117,7 @@ omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
 static char*
 _omemo_fingerprint(ec_public_key* identity, gboolean formatted)
 {
-    int i;
+    size_t i;
     signal_buffer* identity_public_key;
 
     ec_public_key_serialize(&identity_public_key, identity);
@@ -1161,8 +1161,8 @@ _omemo_fingerprint_decode(const char* const fingerprint, size_t* len)
 {
     unsigned char* output = malloc(strlen(fingerprint) / 2 + 1);
 
-    int i;
-    int j;
+    size_t i;
+    size_t j;
     for (i = 0, j = 0; i < strlen(fingerprint);) {
         if (!g_ascii_isxdigit(fingerprint[i])) {
             i++;
@@ -1724,7 +1724,7 @@ _bytes_from_hex(const char* hex, size_t hex_size,
 
     memset(bytes, 0, bytes_size);
 
-    for (int i = 0; (i < hex_size) && (i / 2 < bytes_size); i += 2) {
+    for (size_t i = 0; (i < hex_size) && (i / 2 < bytes_size); i += 2) {
         b0 = ((unsigned char)hex[i + 0] & 0x1f) ^ 0x10;
         b1 = ((unsigned char)hex[i + 1] & 0x1f) ^ 0x10;
 
