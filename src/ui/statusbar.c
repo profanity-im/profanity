@@ -71,7 +71,7 @@ typedef struct _status_bar_t
     char* prompt;
     char* fulljid;
     GHashTable* tabs;
-    int current_tab;
+    guint current_tab;
 } StatusBar;
 
 static GTimeZone* tz;
@@ -82,11 +82,11 @@ void _get_range_bounds(int* start, int* end, gboolean is_static);
 static int _status_bar_draw_time(int pos);
 static int _status_bar_draw_maintext(int pos);
 static int _status_bar_draw_bracket(gboolean current, int pos, const char* ch);
-static int _status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end, gboolean is_static);
-static int _status_bar_draw_tab(StatusBarTab* tab, int pos, int num, gboolean include_brackets);
+static int _status_bar_draw_extended_tabs(int pos, gboolean prefix, guint start, guint end, gboolean is_static);
+static int _status_bar_draw_tab(StatusBarTab* tab, guint pos, guint num, gboolean include_brackets);
 static int _status_bar_draw_tabs(int pos);
 static void _destroy_tab(StatusBarTab* tab);
-static int _tabs_width(int start, int end);
+static int _tabs_width(guint start, guint end);
 static unsigned int _count_digits(int number);
 static unsigned int _count_digits_in_range(int start, int end);
 static char* _display_name(StatusBarTab* tab);
@@ -161,7 +161,7 @@ status_bar_set_all_inactive(void)
 }
 
 void
-status_bar_current(int i)
+status_bar_current(guint i)
 {
     if (i == 0) {
         statusbar->current_tab = 10;
@@ -288,7 +288,7 @@ status_bar_draw(void)
     werase(statusbar_win);
     wbkgd(statusbar_win, theme_attrs(THEME_STATUS_TEXT));
 
-    gint max_tabs = prefs_get_statusbartabs();
+    guint max_tabs = prefs_get_statusbartabs();
     int pos = 1;
 
     pos = _status_bar_draw_time(pos);
@@ -365,9 +365,9 @@ _status_bar_draw_tabs(int pos)
 static gboolean
 _has_new_msgs_beyond_range_on_side(gboolean left_side, int display_tabs_start, int display_tabs_end)
 {
-    gint max_tabs = prefs_get_statusbartabs();
+    guint max_tabs = prefs_get_statusbartabs();
     int tabs_count = g_hash_table_size(statusbar->tabs);
-    if (tabs_count <= max_tabs) {
+    if ((guint)tabs_count <= max_tabs) {
         return FALSE;
     }
 
@@ -385,9 +385,9 @@ _has_new_msgs_beyond_range_on_side(gboolean left_side, int display_tabs_start, i
 }
 
 static int
-_status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end, gboolean is_static)
+_status_bar_draw_extended_tabs(int pos, gboolean prefix, guint start, guint end, gboolean is_static)
 {
-    gint max_tabs = prefs_get_statusbartabs();
+    guint max_tabs = prefs_get_statusbartabs();
     if (max_tabs == 0) {
         return pos;
     }
@@ -427,7 +427,7 @@ _status_bar_draw_extended_tabs(int pos, gboolean prefix, int start, int end, gbo
 }
 
 static int
-_status_bar_draw_tab(StatusBarTab* tab, int pos, int num, gboolean include_brackets)
+_status_bar_draw_tab(StatusBarTab* tab, guint pos, guint num, gboolean include_brackets)
 {
     gboolean is_current = num == statusbar->current_tab;
 
@@ -598,19 +598,19 @@ _destroy_tab(StatusBarTab* tab)
 }
 
 static int
-_tabs_width(int start, int end)
+_tabs_width(guint start, guint end)
 {
     gboolean show_number = prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER);
     gboolean show_name = prefs_get_boolean(PREF_STATUSBAR_SHOW_NAME);
     gboolean show_read = prefs_get_boolean(PREF_STATUSBAR_SHOW_READ);
-    gint max_tabs = prefs_get_statusbartabs();
+    guint max_tabs = prefs_get_statusbartabs();
     guint opened_tabs = g_hash_table_size(statusbar->tabs);
 
     int width = start < 2 ? 1 : 4;
     width += end > opened_tabs - 1 ? 0 : 3;
 
     if (show_name && show_number) {
-        for (int i = start; i <= end; i++) {
+        for (guint i = start; i <= end; i++) {
             StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
                 gboolean is_current = i == statusbar->current_tab;
@@ -627,7 +627,7 @@ _tabs_width(int start, int end)
     }
 
     if (show_name && !show_number) {
-        for (int i = start; i <= end; i++) {
+        for (guint i = start; i <= end; i++) {
             StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
                 gboolean is_current = i == statusbar->current_tab;
