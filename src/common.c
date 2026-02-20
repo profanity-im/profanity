@@ -456,7 +456,7 @@ release_get_latest(void)
 
     curl_easy_setopt(handle, CURLOPT_URL, url);
     curl_easy_setopt(handle, CURLOPT_WRITEFUNCTION, _data_callback);
-    curl_easy_setopt(handle, CURLOPT_TIMEOUT, 2);
+    curl_easy_setopt(handle, CURLOPT_TIMEOUT, (long)2);
     curl_easy_setopt(handle, CURLOPT_WRITEDATA, (void*)&output);
 
     curl_easy_perform(handle);
