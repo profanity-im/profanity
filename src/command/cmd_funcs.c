@@ -1084,7 +1084,7 @@ _writecsv(int fd, const char* const str)
 
     auto_char char* s = malloc(2 * len * sizeof(char));
     char* c = s;
-    for (int i = 0; i < strlen(str); i++) {
+    for (size_t i = 0; i < strlen(str); i++) {
         if (str[i] != '"')
             *c++ = str[i];
         else {
@@ -1387,7 +1387,7 @@ cmd_close(ProfWin* window, const char* const command, gchar** args)
     gboolean is_num = TRUE;
     int index = 0;
     if (args[0] != NULL) {
-        for (int i = 0; i < strlen(args[0]); i++) {
+        for (size_t i = 0; i < strlen(args[0]); i++) {
             if (!isdigit((int)args[0][i])) {
                 is_num = FALSE;
                 break;
@@ -1474,7 +1474,7 @@ gboolean
 cmd_win(ProfWin* window, const char* const command, gchar** args)
 {
     gboolean is_num = TRUE;
-    for (int i = 0; i < strlen(args[0]); i++) {
+    for (size_t i = 0; i < strlen(args[0]); i++) {
         if (!isdigit((int)args[0][i])) {
             is_num = FALSE;
             break;
@@ -9983,7 +9983,7 @@ cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
     }
 
     gboolean is_num = TRUE;
-    for (int i = 0; i < strlen(key); i++) {
+    for (size_t i = 0; i < strlen(key); i++) {
         if (!isdigit((int)key[i])) {
             is_num = FALSE;
             break;
