@@ -9,7 +9,7 @@ omemo_init(void)
 }
 
 char*
-omemo_fingerprint_autocomplete(const char* const search_str, gboolean previous)
+omemo_fingerprint_autocomplete(const char* const search_str, gboolean previous, void* context)
 {
     return NULL;
 }
@@ -64,7 +64,7 @@ omemo_on_disconnect(void)
 }
 
 char*
-omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_receipt, gboolean muc)
+omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_receipt, gboolean muc, const char* const replace_id)
 {
     return NULL;
 }
