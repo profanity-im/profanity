@@ -78,17 +78,17 @@ static GTimeZone* tz;
 static StatusBar* statusbar;
 static WINDOW* statusbar_win;
 
-void _get_range_bounds(int* start, int* end, gboolean is_static);
-static int _status_bar_draw_time(int pos);
-static int _status_bar_draw_maintext(int pos);
-static int _status_bar_draw_bracket(gboolean current, int pos, const char* ch);
-static int _status_bar_draw_extended_tabs(int pos, gboolean prefix, guint start, guint end, gboolean is_static);
-static int _status_bar_draw_tab(StatusBarTab* tab, guint pos, guint num, gboolean include_brackets);
-static int _status_bar_draw_tabs(int pos);
+void _get_range_bounds(guint* start, guint* end, gboolean is_static);
+static guint _status_bar_draw_time(guint pos);
+static guint _status_bar_draw_maintext(guint pos);
+static guint _status_bar_draw_bracket(gboolean current, guint pos, const char* ch);
+static guint _status_bar_draw_extended_tabs(guint pos, gboolean prefix, guint start, guint end, gboolean is_static);
+static guint _status_bar_draw_tab(StatusBarTab* tab, guint pos, guint num, gboolean include_brackets);
+static guint _status_bar_draw_tabs(guint pos);
 static void _destroy_tab(StatusBarTab* tab);
-static int _tabs_width(guint start, guint end);
-static unsigned int _count_digits(int number);
-static unsigned int _count_digits_in_range(int start, int end);
+static guint _tabs_width(guint start, guint end);
+static guint _count_digits(guint number);
+static guint _count_digits_in_range(guint start, guint end);
 static char* _display_name(StatusBarTab* tab);
 static gboolean _tabmode_is_actlist(void);
 
@@ -300,24 +300,22 @@ status_bar_draw(void)
     inp_put_back();
 }
 
-static int
-_status_bar_draw_tabs(int pos)
+static guint
+_status_bar_draw_tabs(guint pos)
 {
     auto_gchar gchar* tabmode = prefs_get_string(PREF_STATUSBAR_TABMODE);
 
     if (g_strcmp0(tabmode, "actlist") != 0) {
-        int start, end;
+        guint start, end;
         gboolean is_static = g_strcmp0(tabmode, "dynamic") != 0;
         _get_range_bounds(&start, &end, is_static);
 
-        pos = getmaxx(stdscr) - _tabs_width(start, end);
-        if (pos < 0) {
-            pos = 0;
-        }
+        // if the result of the calc is negative we take 0
+        pos = MAX(0, (getmaxx(stdscr) - (int)_tabs_width(start, end)));
 
         pos = _status_bar_draw_extended_tabs(pos, TRUE, start, end, is_static);
 
-        for (int i = start; i <= end; i++) {
+        for (guint i = start; i <= end; i++) {
             StatusBarTab* tab = g_hash_table_lookup(statusbar->tabs, GINT_TO_POINTER(i));
             if (tab) {
                 pos = _status_bar_draw_tab(tab, pos, i, TRUE);
@@ -384,8 +382,8 @@ _has_new_msgs_beyond_range_on_side(gboolean left_side, int display_tabs_start, i
     return FALSE;
 }
 
-static int
-_status_bar_draw_extended_tabs(int pos, gboolean prefix, guint start, guint end, gboolean is_static)
+static guint
+_status_bar_draw_extended_tabs(guint pos, gboolean prefix, guint start, guint end, gboolean is_static)
 {
     guint max_tabs = prefs_get_statusbartabs();
     if (max_tabs == 0) {
@@ -426,7 +424,7 @@ _status_bar_draw_extended_tabs(int pos, gboolean prefix, guint start, guint end,
     return pos;
 }
 
-static int
+static guint
 _status_bar_draw_tab(StatusBarTab* tab, guint pos, guint num, gboolean include_brackets)
 {
     gboolean is_current = num == statusbar->current_tab;
@@ -475,8 +473,8 @@ _status_bar_draw_tab(StatusBarTab* tab, guint pos, guint num, gboolean include_b
     return pos;
 }
 
-static int
-_status_bar_draw_bracket(gboolean current, int pos, const char* ch)
+static guint
+_status_bar_draw_bracket(gboolean current, guint pos, const char* ch)
 {
     int bracket_attrs = theme_attrs(THEME_STATUS_BRACKET);
     wattron(statusbar_win, bracket_attrs);
@@ -491,8 +489,8 @@ _status_bar_draw_bracket(gboolean current, int pos, const char* ch)
     return pos;
 }
 
-static int
-_status_bar_draw_time(int pos)
+static guint
+_status_bar_draw_time(guint pos)
 {
     auto_gchar gchar* time_pref = prefs_get_string(PREF_TIME_STATUSBAR);
     if (g_strcmp0(time_pref, "off") == 0) {
@@ -536,8 +534,8 @@ _tabmode_is_actlist(void)
     return g_strcmp0(tabmode, "actlist") == 0;
 }
 
-static int
-_status_bar_draw_maintext(int pos)
+static guint
+_status_bar_draw_maintext(guint pos)
 {
     const char* maintext = NULL;
     auto_jid Jid* jidp = NULL;
@@ -597,7 +595,7 @@ _destroy_tab(StatusBarTab* tab)
     }
 }
 
-static int
+static guint
 _tabs_width(guint start, guint end)
 {
     gboolean show_number = prefs_get_boolean(PREF_STATUSBAR_SHOW_NUMBER);
@@ -698,7 +696,7 @@ _display_name(StatusBarTab* tab)
 }
 
 void
-_get_range_bounds(int* start, int* end, gboolean is_static)
+_get_range_bounds(guint* start, guint* end, gboolean is_static)
 {
     int current_tab = statusbar->current_tab;
     gint display_range = prefs_get_statusbartabs();
@@ -721,12 +719,10 @@ _get_range_bounds(int* start, int* end, gboolean is_static)
 }
 
 // Counts amount of digits in a number
-static unsigned int
-_count_digits(int number)
+static guint
+_count_digits(guint number)
 {
-    unsigned int digits_count = 0;
-    if (number < 0)
-        number = -number;
+    guint digits_count = 0;
 
     do {
         number /= 10;
@@ -738,12 +734,11 @@ _count_digits(int number)
 
 // Counts the total number of digits in a range of numbers, inclusive.
 // Example: _count_digits_in_range(2, 3) returns 2, _count_digits_in_range(2, 922) returns 2657
-static unsigned int
-_count_digits_in_range(int start, int end)
+static guint
+_count_digits_in_range(guint start, guint end)
 {
-    int total_digits = 0;
-
-    for (int i = start; i <= end; i++) {
+    guint total_digits = 0;
+    for (guint i = start; i <= end; i++) {
         total_digits += _count_digits(i);
     }
 
