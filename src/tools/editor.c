@@ -2,7 +2,7 @@
  * editor.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2022 - 2025 Michael Vetter <jubalh@iodoru.org>
+ * Copyright (C) 2022 - 2026 Michael Vetter <jubalh@iodoru.org>
  * Copyright (C) 2022 MarcoPolo PasTonMolo <marcopolopastonmolo@protonmail.com>
  * Copyright (C) 2022 Steffen Jaeckel <jaeckel-floss@eyet-services.de>
  *

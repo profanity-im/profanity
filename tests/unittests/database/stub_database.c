@@ -1,7 +1,7 @@
 /*
  * stub_database.c
  *
- * Copyright (C) 2020 - 2025 Michael Vetter <jubalh@iodoru.org>
+ * Copyright (C) 2020 - 2026 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *

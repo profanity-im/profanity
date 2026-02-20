@@ -2,7 +2,7 @@
  * stanza.h
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
- * Copyright (C) 2019 - 2025 Michael Vetter <jubalh@iodoru.org>
+ * Copyright (C) 2019 - 2026 Michael Vetter <jubalh@iodoru.org>
  *
  * This file is part of Profanity.
  *
