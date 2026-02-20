@@ -773,7 +773,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
             // Yourself as recipients in case of MUC
             if (equals_our_barejid(recipients_iter->data)) {
-                if (GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
+                if ((uint32_t)GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
                     log_debug("[OMEMO][SEND] Skipping %d (my device) ", GPOINTER_TO_INT(device_ids_iter->data));
                     continue;
                 }
@@ -832,7 +832,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             log_debug("[OMEMO][SEND][Sender] Sending to device %d for %s ", address.device_id, address.name);
             // Don't encrypt for this device (according to
             // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
-            if (address.device_id == omemo_ctx.device_id) {
+            if ((uint32_t)address.device_id == omemo_ctx.device_id) {
                 continue;
             }
 
