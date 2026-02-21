@@ -515,6 +515,14 @@ roster_contact_autocomplete(const char* const search_str, gboolean previous, voi
 }
 
 char*
+roster_contact_autocomplete_substring(const char* const search_str, gboolean previous, void* context)
+{
+    assert(roster != NULL);
+
+    return autocomplete_complete_substring(roster->name_ac, search_str, TRUE, previous);
+}
+
+char*
 roster_fulljid_autocomplete(const char* const search_str, gboolean previous, void* context)
 {
     assert(roster != NULL);
