@@ -9,7 +9,10 @@ void
 clear_empty(void** state)
 {
     Autocomplete ac = autocomplete_new();
+    char* result = autocomplete_complete(ac, "test", TRUE, FALSE);
+    assert_null(result);
     autocomplete_free(ac);
+    free(result);
 }
 
 void
@@ -25,6 +28,7 @@ find_after_create(void** state)
 {
     Autocomplete ac = autocomplete_new();
     char* result = autocomplete_complete(ac, "hello", TRUE, FALSE);
+    assert_null(result);
     autocomplete_free(ac);
     free(result);
 }
