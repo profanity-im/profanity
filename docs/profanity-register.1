@@ -1,0 +1,73 @@
+.TH man 1 "2026-02-23" "0.16.0" "Profanity XMPP client"
+
+.SH NAME
+/register
+
+.SH DESCRIPTION
+Register an account on a server.
+
+.SH SYNOPSIS
+/register <username> <server> [port <port>] [tls force|allow|trust|direct|disable|legacy]
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fB<username>\fR
+.RS 4
+Username to register with.
+.RE
+.PP
+\fB<server>\fR
+.RS 4
+Server to register account on.
+.RE
+.PP
+\fBport <port>\fR
+.RS 4
+The port to use if different to the default (5222, or 5223 for SSL).
+.RE
+.PP
+\fBtls force\fR
+.RS 4
+Force TLS connection, and fail if one cannot be established. This is the default behavior.
+.RE
+.PP
+\fBtls allow\fR
+.RS 4
+Use TLS for the connection if it is available.
+.RE
+.PP
+\fBtls trust\fR
+.RS 4
+Force TLS connection and trust the server's certificate.
+.RE
+.PP
+\fBtls direct\fR
+.RS 4
+Use direct TLS for the connection. It means TLS handshake is started right after TCP connection is established.
+.RE
+.PP
+\fBtls disable\fR
+.RS 4
+Disable TLS for the connection.
+.RE
+.PP
+\fBtls legacy\fR
+.RS 4
+Alternative keyword for 'direct', which was created when one still thought that 'STARTTLS' is the future.
+.RE
+
+.SH EXAMPLES
+/register odin valhalla.edda 
+
+.LP
+/register freyr vanaheimr.edda port 5678
+
+.LP
+/register me 127.0.0.1 tls disable
+
+.LP
+/register someuser my.xmppserv.er port 5443 tls force
+
+.LP

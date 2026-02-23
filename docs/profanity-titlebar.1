@@ -1,0 +1,67 @@
+.TH man 1 "2026-02-23" "0.16.0" "Profanity XMPP client"
+
+.SH NAME
+/titlebar
+
+.SH DESCRIPTION
+Titlebar settings.
+
+.SH SYNOPSIS
+/titlebar up
+
+.LP
+/titlebar down
+
+.LP
+/titlebar show|hide encwarn|resource|tls
+
+.LP
+/titlebar room title bookmark|jid|localpart|name
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBup\fR
+.RS 4
+Move the title bar up the screen.
+.RE
+.PP
+\fBdown\fR
+.RS 4
+Move the title bar down the screen.
+.RE
+.PP
+\fBshow tls\fR
+.RS 4
+Show or hide TLS indicator in the titlebar.
+.RE
+.PP
+\fBshow encwarn\fR
+.RS 4
+Enable or disable the unencrypted warning message in the titlebar.
+.RE
+.PP
+\fBshow resource\fR
+.RS 4
+Show or hide the current resource in the titlebar.
+.RE
+.PP
+\fBroom title bookmark|jid|localpart|name\fR
+.RS 4
+Display the bookmark name, JID, JID localpart, or room name as the MUC window title.
+.RE
+
+.SH EXAMPLES
+/titlebar up
+
+.LP
+/titlebar show tls
+
+.LP
+/titlebar hide encwarn
+
+.LP
+/titlebar room title localpart
+
+.LP

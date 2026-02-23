@@ -1,3 +1,31 @@
+0.16.0 (2026-02-23)
+===================
+
+5 people contributed to this release: @balejk, @mcalierno, @ritesh006, @sjaeckel and @jubalh.
+
+Thanks a lot to our sponsors:  Matthew Fennell, Martin Dosch and one anonymous sponsor.
+If you want to support us too: https://profanity-im.github.io/donate.html
+
+This release depends on libstrophe >= 0.12.3.
+
+Changes:
+- Add new command /changes (#2080)
+  With that command one can see the modifications of the runtime
+  configuration vs. the saved configuration.
+- Explain the different kinds of messages in the manpage (#2063)
+- Fix OTR detection (#1957, #2072)
+- Fix OMEMO startup (79ff9ba)
+- Fix overwriting new accounts when running multiple instances (#2080)
+- Fix reconnect when no account has been set up yet (#2080)
+- Don't publish keys if the server doesn't support pubsub (#2078, #2080)
+- Fix compilation on Apple silicon macs (#2075)
+- Handle SIGTERM and SIGHUP (#2082)
+- Cleanup (#2067, #2080)
+- Add cygwin CI (#2066)
+- Replace ACX_PTHREAD with AX_PTHREAD (#2062)
+- Add meson build system (#2086)
+  Mainly for testing purposes. Details will be announced in a later release.
+
 0.15.1 (2025-08-22)
 ===================
 

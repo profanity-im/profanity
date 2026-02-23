@@ -1,5 +1,5 @@
 project('profanity', 'c',
-  version: '0.15.1',
+  version: '0.16.0',
   license: 'GPL-3.0-or-later',
   meson_version: '>= 0.56.0',
   default_options: [
