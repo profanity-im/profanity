@@ -287,6 +287,18 @@ prefs_load(const char* config_file)
     _prefs_load();
 }
 
+static void
+prefs_changes_print(const char* key, const char* newval, const char* oldval, gboolean* banner_shown)
+{
+#define PREFS_CHANGES_FORMAT_STRING "%-32s | %-20s | %-20s"
+    if (!*banner_shown) {
+        cons_show(PREFS_CHANGES_FORMAT_STRING, "Key", "New value", "Old value");
+        *banner_shown = TRUE;
+    }
+    cons_show(PREFS_CHANGES_FORMAT_STRING, key, newval, oldval);
+#undef PREFS_CHANGES_FORMAT_STRING
+}
+
 void
 prefs_changes(void)
 {
@@ -297,16 +309,6 @@ prefs_changes(void)
     gsize ngroups, nsavedgroups, g;
     auto_gcharv gchar** groups = g_key_file_get_groups(prefs_prof_keyfile.keyfile, &ngroups);
     gboolean banner_shown = FALSE;
-    void prefs_changes_print(const char* key, const char* newval, const char* oldval)
-    {
-#define PREFS_CHANGES_FORMAT_STRING "%-32s | %-20s | %-20s"
-        if (!banner_shown) {
-            cons_show(PREFS_CHANGES_FORMAT_STRING, "Key", "New value", "Old value");
-            banner_shown = TRUE;
-        }
-        cons_show(PREFS_CHANGES_FORMAT_STRING, key, newval, oldval);
-#undef PREFS_CHANGES_FORMAT_STRING
-    }
     for (g = 0; g < ngroups; ++g) {
         gsize nkeys, k;
         gboolean saved_has_group = g_key_file_has_group(saved.keyfile, groups[g]);
@@ -321,7 +323,7 @@ prefs_changes(void)
             }
             if (!saved_has_group
                 || !g_key_file_has_key(saved.keyfile, groups[g], keys[k], NULL)) {
-                prefs_changes_print(full_key, new_value, undef);
+                prefs_changes_print(full_key, new_value, undef, &banner_shown);
                 continue;
             }
             auto_gchar gchar* old_value = g_key_file_get_value(saved.keyfile, groups[g], keys[k], &err);
@@ -330,7 +332,7 @@ prefs_changes(void)
                 continue;
             }
             if (!g_str_equal(old_value, new_value)) {
-                prefs_changes_print(full_key, new_value, old_value);
+                prefs_changes_print(full_key, new_value, old_value, &banner_shown);
             }
         }
     }
@@ -348,7 +350,7 @@ prefs_changes(void)
                 cons_show_error("%s: Old value (%s) error: %s", full_key, STR_MAYBE_NULL(old_value), PROF_GERROR_MESSAGE(err));
                 continue;
             }
-            prefs_changes_print(full_key, undef, old_value);
+            prefs_changes_print(full_key, undef, old_value, &banner_shown);
         }
     }
     free_keyfile(&saved);
