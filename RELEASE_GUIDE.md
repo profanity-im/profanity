@@ -76,6 +76,7 @@ PACKAGE_STATUS="development"
   * Make changes to the git repo including uploading the new artefacts at:
         https://github.com/profanity-im/profanity-im.github.io
   * Add .xz and .zip tarballs to `tarballs` directory
+  * Copy generated main_fragment.html and toc_fragment.html to `guide/latest`
   * Copy `guide/latest` to `guide/newversion`
   * Update tarball location and name in index.html
   * Update checksums in index.html
