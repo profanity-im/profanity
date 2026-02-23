@@ -773,7 +773,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
             // Yourself as recipients in case of MUC
             if (equals_our_barejid(recipients_iter->data)) {
-                if (GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
+                if ((uint32_t)GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
                     log_debug("[OMEMO][SEND] Skipping %d (my device) ", GPOINTER_TO_INT(device_ids_iter->data));
                     continue;
                 }
@@ -832,7 +832,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             log_debug("[OMEMO][SEND][Sender] Sending to device %d for %s ", address.device_id, address.name);
             // Don't encrypt for this device (according to
             // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
-            if (address.device_id == omemo_ctx.device_id) {
+            if ((uint32_t)address.device_id == omemo_ctx.device_id) {
                 continue;
             }
 
@@ -1030,7 +1030,7 @@ omemo_format_fingerprint(const char* const fingerprint)
 {
     char* output = malloc(strlen(fingerprint) + strlen(fingerprint) / 8);
 
-    int i, j;
+    size_t i, j;
     for (i = 0, j = 0; i < strlen(fingerprint); i++) {
         if (i > 0 && i % 8 == 0) {
             output[j++] = '-';
@@ -1117,7 +1117,7 @@ omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
 static char*
 _omemo_fingerprint(ec_public_key* identity, gboolean formatted)
 {
-    int i;
+    size_t i;
     signal_buffer* identity_public_key;
 
     ec_public_key_serialize(&identity_public_key, identity);
@@ -1161,8 +1161,8 @@ _omemo_fingerprint_decode(const char* const fingerprint, size_t* len)
 {
     unsigned char* output = malloc(strlen(fingerprint) / 2 + 1);
 
-    int i;
-    int j;
+    size_t i;
+    size_t j;
     for (i = 0, j = 0; i < strlen(fingerprint);) {
         if (!g_ascii_isxdigit(fingerprint[i])) {
             i++;
@@ -1724,7 +1724,7 @@ _bytes_from_hex(const char* hex, size_t hex_size,
 
     memset(bytes, 0, bytes_size);
 
-    for (int i = 0; (i < hex_size) && (i / 2 < bytes_size); i += 2) {
+    for (size_t i = 0; (i < hex_size) && (i / 2 < bytes_size); i += 2) {
         b0 = ((unsigned char)hex[i + 0] & 0x1f) ^ 0x10;
         b1 = ((unsigned char)hex[i + 1] & 0x1f) ^ 0x10;
 

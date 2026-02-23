@@ -248,6 +248,12 @@ _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const us
     return 1;
 }
 
+static void
+_xmpp_stanza_release_destroy_notify(gpointer data)
+{
+    xmpp_stanza_release((xmpp_stanza_t*)data);
+}
+
 void
 iq_handlers_init(void)
 {
@@ -264,7 +270,7 @@ iq_handlers_init(void)
     iq_handlers_clear();
 
     id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_iq_id_handler_free);
-    rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)xmpp_stanza_release);
+    rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, _xmpp_stanza_release_destroy_notify);
 }
 
 struct iq_win_finder
@@ -302,7 +308,7 @@ _free_late_delivery_userdata(LateDeliveryUserdata* d)
 void
 iq_handlers_remove_win(ProfWin* window)
 {
-    log_debug("Remove window %p of type %d", window, window ? window->type : -1);
+    log_debug("Remove window %p of type %d", window, window ? window->type : (win_type_t)-1);
     if (!window)
         return;
     GSList *cur = late_delivery_windows, *next;
@@ -394,7 +400,7 @@ iq_autoping_check(void)
     }
 
     gdouble elapsed = g_timer_elapsed(autoping_time, NULL);
-    unsigned long seconds_elapsed = elapsed * 1.0;
+    gint seconds_elapsed = elapsed * 1.0;
     gint timeout = prefs_get_autoping_timeout();
     if (timeout > 0 && seconds_elapsed >= timeout) {
         cons_show("Autoping response timed out after %u seconds.", timeout);

@@ -366,7 +366,7 @@ _inp_write(char* line, int offset)
         if (line[i] == '\n') {
             c = retc;
             ch_len = wctomb(retc, L'\u23ce'); /* return symbol */
-            if (ch_len == -1) {               /* not representable */
+            if (ch_len == (size_t)-1) {       /* not representable */
                 retc[0] = '\\';
                 ch_len = 1;
             }

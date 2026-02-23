@@ -175,7 +175,7 @@ autocomplete_add(Autocomplete ac, const char* item)
 void
 autocomplete_add_all(Autocomplete ac, char** items)
 {
-    for (int i = 0; i < g_strv_length(items); i++) {
+    for (guint i = 0; i < g_strv_length(items); i++) {
         autocomplete_add(ac, items[i]);
     }
 }
@@ -205,7 +205,7 @@ autocomplete_remove(Autocomplete ac, const char* const item)
 void
 autocomplete_remove_all(Autocomplete ac, char** items)
 {
-    for (int i = 0; i < g_strv_length(items); i++) {
+    for (guint i = 0; i < g_strv_length(items); i++) {
         autocomplete_remove(ac, items[i]);
     }
 }

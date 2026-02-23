@@ -2796,7 +2796,7 @@ _cmd_index(const Command* cmd)
     g_string_free(index_source, TRUE);
 
     GString* index = g_string_new("");
-    for (int i = 0; i < g_strv_length(tokens); i++) {
+    for (guint i = 0; i < g_strv_length(tokens); i++) {
         index = g_string_append(index, tokens[i]);
         index = g_string_append(index, " ");
     }

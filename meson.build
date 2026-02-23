@@ -63,6 +63,8 @@ if is_debug
   add_project_arguments([
     '-ggdb3',
     '-Wunused',
+    '-Wall',
+    '-Wextra',
   ], language: 'c')
 endif
 

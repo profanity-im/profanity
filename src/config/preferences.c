@@ -253,7 +253,7 @@ _prefs_load(void)
     gsize len = 0;
     auto_gcharv gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
-    for (int i = 0; i < len; i++) {
+    for (gsize i = 0; i < len; i++) {
         autocomplete_add(room_trigger_ac, triggers[i]);
     }
 }
@@ -418,7 +418,7 @@ prefs_message_get_triggers(const char* const message)
     gsize len = 0;
     auto_gcharv gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
-    for (int i = 0; i < len; i++) {
+    for (gsize i = 0; i < len; i++) {
         auto_gchar gchar* trigger_lower = g_utf8_strdown(triggers[i], -1);
         if (g_strrstr(message_lower, trigger_lower)) {
             result = g_list_append(result, strdup(triggers[i]));
@@ -1392,7 +1392,7 @@ prefs_get_room_notify_triggers(void)
     gsize len = 0;
     auto_gcharv gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
-    for (int i = 0; i < len; i++) {
+    for (gsize i = 0; i < len; i++) {
         result = g_list_append(result, strdup(triggers[i]));
     }
 
@@ -1739,7 +1739,7 @@ prefs_get_aliases(void)
         gsize len;
         auto_gcharv gchar** keys = g_key_file_get_keys(prefs, PREF_GROUP_ALIAS, &len, NULL);
 
-        for (int i = 0; i < len; i++) {
+        for (gsize i = 0; i < len; i++) {
             char* name = keys[i];
             auto_gchar gchar* value = g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
 

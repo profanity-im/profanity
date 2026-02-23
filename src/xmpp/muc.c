@@ -427,7 +427,7 @@ muc_rooms(void)
  * Return current users nickname for the specified room
  * The nickname is owned by the chat room and should not be modified or freed
  */
-const char* const
+const char*
 muc_nick(const char* const room)
 {
     ChatRoom* chat_room = g_hash_table_lookup(rooms, room);

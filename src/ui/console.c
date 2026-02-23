@@ -117,7 +117,7 @@ cons_show_help(const char* const cmd, CommandHelp* help)
     cons_show("");
     win_println(console, THEME_HELP_HEADER, "-", "%s", &cmd[1]);
     win_print(console, THEME_HELP_HEADER, "-", "");
-    int i;
+    size_t i;
     for (i = 0; i < strlen(cmd) - 1; i++) {
         win_append(console, THEME_HELP_HEADER, "-");
     }
@@ -131,7 +131,7 @@ cons_show_help(const char* const cmd, CommandHelp* help)
     win_println(console, THEME_HELP_HEADER, "-", "Description");
     win_println(console, THEME_DEFAULT, "-", "%s", help->desc);
 
-    int maxlen = 0;
+    size_t maxlen = 0;
     for (i = 0; help->args[i][0] != NULL; i++) {
         if (strlen(help->args[i][0]) > maxlen)
             maxlen = strlen(help->args[i][0]);
@@ -448,7 +448,7 @@ cons_show_wins(gboolean unread)
 
     GSList* curr = window_strings;
     while (curr) {
-        if (g_strstr_len(curr->data, strlen(curr->data), " unread") > 0) {
+        if (g_strstr_len(curr->data, strlen(curr->data), " unread") != NULL) {
             win_println(console, THEME_CMD_WINS_UNREAD, "-", "%s", curr->data);
         } else {
             win_println(console, THEME_DEFAULT, "-", "%s", curr->data);
@@ -469,7 +469,7 @@ cons_show_wins_attention(void)
 
     GSList* curr = window_strings;
     while (curr) {
-        if (g_strstr_len(curr->data, strlen(curr->data), " unread") > 0) {
+        if (g_strstr_len(curr->data, strlen(curr->data), " unread") != NULL) {
             win_println(console, THEME_CMD_WINS_UNREAD, "-", "%s", curr->data);
         } else {
             win_println(console, THEME_DEFAULT, "-", "%s", curr->data);
@@ -823,7 +823,7 @@ cons_show_qrcode(const char* const text)
     static const size_t ZOOM_SIZE = 10;
     QRcode* qrcode = QRcode_encodeString(text, 0, QR_ECLEVEL_L, QR_MODE_8, 1);
 
-    int width = (qrcode->width * ZOOM_SIZE);
+    size_t width = (qrcode->width * ZOOM_SIZE);
     unsigned char* data = qrcode->data;
 
     ProfWin* console = wins_get_console();
@@ -835,7 +835,7 @@ cons_show_qrcode(const char* const text)
         return;
     }
 
-    for (int i = 0; i < width + 2 * ZOOM_SIZE; i += ZOOM_SIZE) {
+    for (size_t i = 0; i < width + 2 * ZOOM_SIZE; i += ZOOM_SIZE) {
         strcat(pad, "\u2588\u2588");
     }
 
@@ -2760,7 +2760,7 @@ cons_show_bookmarks_ignore(gchar** list, gsize len)
     cons_show("");
     cons_show("Ignored bookmarks:");
 
-    for (int i = 0; i < len; i++) {
+    for (gsize i = 0; i < len; i++) {
         win_print(console, THEME_DEFAULT, "-", "  %s", list[i]);
         win_newline(console);
     }

@@ -82,7 +82,7 @@ tlscerts_init(void)
     gsize len = 0;
     auto_gcharv gchar** groups = g_key_file_get_groups(tlscerts, &len);
 
-    for (int i = 0; i < g_strv_length(groups); i++) {
+    for (guint i = 0; i < g_strv_length(groups); i++) {
         autocomplete_add(certs_ac, groups[i]);
     }
 

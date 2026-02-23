@@ -376,7 +376,7 @@ _caps_by_ver(const char* const ver)
     auto_gcharv gchar** features_list = g_key_file_get_string_list(cache, ver, "features", &features_len, NULL);
     GSList* features = NULL;
     if (features_list && features_len > 0) {
-        for (int i = 0; i < features_len; i++) {
+        for (gsize i = 0; i < features_len; i++) {
             features = g_slist_append(features, features_list[i]);
         }
     }

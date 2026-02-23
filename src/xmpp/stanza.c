@@ -222,7 +222,7 @@ stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id,
 
     auto_char char* filename_cpy = strdup(upload->filename);
     // strip spaces from filename (servers don't spaces)
-    for (int i = 0; i < strlen(filename_cpy); i++) {
+    for (size_t i = 0; i < strlen(filename_cpy); i++) {
         if (filename_cpy[i] == ' ') {
             filename_cpy[i] = '_';
         }
@@ -1863,7 +1863,7 @@ stanza_get_error_message(xmpp_stanza_t* stanza)
             STANZA_NAME_UNEXPECTED_REQUEST
         };
 
-        for (int i = 0; i < ARRAY_SIZE(defined_conditions); i++) {
+        for (size_t i = 0; i < ARRAY_SIZE(defined_conditions); i++) {
             xmpp_stanza_t* cond_stanza = xmpp_stanza_get_child_by_name(error_stanza, defined_conditions[i]);
             if (cond_stanza) {
                 char* result = strdup(xmpp_stanza_get_name(cond_stanza));

@@ -1871,7 +1871,7 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
                     curr_ch++;
                     continue;
                 }
-                int offset = 0;
+                size_t offset = 0;
                 while (offset < ch_len) {
                     word[wordi++] = curr_ch[offset++];
                 }
@@ -1880,9 +1880,9 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
             word[wordi] = '\0';
             wordlen = utf8_display_len(word);
 
-            int curx = getcurx(win);
+            size_t curx = (size_t)getcurx(win);
             int cury;
-            int maxx = getmaxx(win);
+            size_t maxx = getmaxx(win);
 
             // wrap required
             if (curx + wordlen > maxx) {
@@ -1892,7 +1892,7 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
                 if (wordlen > linelen) {
                     gchar* word_ch = g_utf8_offset_to_pointer(word, 0);
                     while (*word_ch != '\0') {
-                        curx = getcurx(win);
+                        curx = (size_t)getcurx(win);
                         cury = getcury(win);
                         gboolean firstline = cury == starty;
 
@@ -1913,7 +1913,7 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
                     // newline and print word
                 } else {
                     waddch(win, '\n');
-                    curx = getcurx(win);
+                    curx = (size_t)getcurx(win);
                     cury = getcury(win);
                     gboolean firstline = cury == starty;
 
@@ -1928,7 +1928,7 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
 
                 // no wrap required
             } else {
-                curx = getcurx(win);
+                curx = (size_t)getcurx(win);
                 cury = getcury(win);
                 gboolean firstline = cury == starty;
 
