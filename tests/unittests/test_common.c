@@ -353,6 +353,68 @@ void test_get_expanded_path(void** state) {
     g_free(expanded_path);
 }
 
+void test_string_to_verbosity(void** state) {
+    int verbosity;
+    gchar* err_msg = NULL;
+    gboolean result;
+
+    // Valid input string (0)
+    result = string_to_verbosity("0", &verbosity, &err_msg);
+    assert_true(result);
+    assert_int_equal(0, verbosity);
+    assert_null(err_msg);
+    g_free(err_msg); err_msg = NULL; // Clear for next test
+
+    // Valid input string (1)
+    result = string_to_verbosity("1", &verbosity, &err_msg);
+    assert_true(result);
+    assert_int_equal(1, verbosity);
+    assert_null(err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // Valid input string (3)
+    result = string_to_verbosity("3", &verbosity, &err_msg);
+    assert_true(result);
+    assert_int_equal(3, verbosity);
+    assert_null(err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // Invalid input string (not a number)
+    result = string_to_verbosity("profanity", &verbosity, &err_msg);
+    assert_false(result);
+    assert_string_equal("Could not convert \"profanity\" to a number.", err_msg);
+    g_free(err_msg);
+	err_msg = NULL;
+
+    // Valid input string, out of range (too low)
+    result = string_to_verbosity("-1", &verbosity, &err_msg);
+    assert_false(result);
+    assert_string_equal("Value -1 out of range. Must be in 0..3.", err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // Valid input string, out of range (too high)
+    result = string_to_verbosity("4", &verbosity, &err_msg);
+    assert_false(result);
+    assert_string_equal("Value 4 out of range. Must be in 0..3.", err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // NULL input string
+    result = string_to_verbosity(NULL, &verbosity, &err_msg);
+    assert_false(result);
+    assert_string_equal("'str' input pointer can not be NULL", err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // Empty input string
+    result = string_to_verbosity("", &verbosity, &err_msg);
+    assert_false(result);
+    assert_string_equal("Could not convert \"\" to a number.", err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // err_msg is NULL
+    result = string_to_verbosity("abc", &verbosity, NULL);
+    assert_false(result);
+}
+
 typedef struct
 {
     char* template;
