@@ -327,6 +327,32 @@ strip_quotes_strips_both(void** state)
     free(result);
 }
 
+void test_get_expanded_path(void** state) {
+    gchar* expanded_path;
+
+    // `file://` prefix
+    expanded_path = get_expanded_path("file:///tmp/test.txt");
+    assert_string_equal("/tmp/test.txt", expanded_path);
+    g_free(expanded_path);
+
+    // `~/"` prefix
+    setenv("HOME", "/home/test", 1);
+    expanded_path = get_expanded_path("~/folder/file.txt");
+    assert_string_equal("/home/test/folder/file.txt", expanded_path);
+    g_free(expanded_path);
+    unsetenv("HOME");
+
+    // regular path
+    expanded_path = get_expanded_path("/home/test/file.pdf");
+    assert_string_equal("/home/test/file.pdf", expanded_path);
+    g_free(expanded_path);
+
+    // empty path
+    expanded_path = get_expanded_path("");
+    assert_string_equal("", expanded_path);
+    g_free(expanded_path);
+}
+
 typedef struct
 {
     char* template;

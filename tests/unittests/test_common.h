@@ -34,3 +34,4 @@ void prof_whole_occurrences_tests(void** state);
 void prof_occurrences_of_large_message_tests(void** state);
 void unique_filename_from_url_td(void** state);
 void format_call_external_argv_td(void** state);
+void test_get_expanded_path(void** state);

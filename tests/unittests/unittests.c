@@ -94,6 +94,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(strip_quotes_strips_both),
         cmocka_unit_test(format_call_external_argv_td),
         cmocka_unit_test(unique_filename_from_url_td),
+        cmocka_unit_test(test_get_expanded_path),
 
         cmocka_unit_test(clear_empty),
         cmocka_unit_test(reset_after_create),
