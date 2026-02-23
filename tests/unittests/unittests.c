@@ -96,6 +96,11 @@ main(int argc, char* argv[])
         cmocka_unit_test(unique_filename_from_url_td),
         cmocka_unit_test(test_string_to_verbosity),
         cmocka_unit_test(test_get_expanded_path),
+        cmocka_unit_test(test_strtoi_range_valid_input),
+        cmocka_unit_test(test_strtoi_range_out_of_range),
+        cmocka_unit_test(test_strtoi_range_invalid_input),
+        cmocka_unit_test(test_strtoi_range_null_empty_input),
+        cmocka_unit_test(test_strtoi_range_null_err_msg),
 
         cmocka_unit_test(clear_empty),
         cmocka_unit_test(reset_after_create),

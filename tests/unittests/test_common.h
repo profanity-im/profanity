@@ -36,3 +36,8 @@ void unique_filename_from_url_td(void** state);
 void format_call_external_argv_td(void** state);
 void test_get_expanded_path(void** state);
 void test_string_to_verbosity(void** state);
+void test_strtoi_range_valid_input(void** state);
+void test_strtoi_range_out_of_range(void** state);
+void test_strtoi_range_invalid_input(void** state);
+void test_strtoi_range_null_empty_input(void** state);
+void test_strtoi_range_null_err_msg(void** state);

@@ -353,6 +353,113 @@ void test_get_expanded_path(void** state) {
     g_free(expanded_path);
 }
 
+void test_strtoi_range_valid_input(void** state) {
+    int value;
+    gchar* err_msg = NULL;
+    gboolean result;
+
+    result = strtoi_range("10", &value, 0, 20, &err_msg);
+    assert_true(result);
+    assert_int_equal(10, value);
+    assert_null(err_msg);
+
+    result = strtoi_range("0", &value, 0, 20, &err_msg);
+    assert_true(result);
+    assert_int_equal(0, value);
+    assert_null(err_msg);
+
+    result = strtoi_range("20", &value, 0, 20, &err_msg);
+    assert_true(result);
+    assert_int_equal(20, value);
+    assert_null(err_msg);
+
+    result = strtoi_range("-5", &value, -10, 0, &err_msg);
+    assert_true(result);
+    assert_int_equal(-5, value);
+    assert_null(err_msg);
+}
+
+void test_strtoi_range_out_of_range(void** state) {
+    int value;
+    gchar* err_msg = NULL;
+    gboolean result;
+
+    // too low, negative
+    result = strtoi_range("-11", &value, -10, 0, &err_msg);
+    assert_false(result);
+    assert_string_equal("Value -11 out of range. Must be in -10..0.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+
+    // too low
+    result = strtoi_range("-1", &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("Value -1 out of range. Must be in 0..10.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+
+    // too high
+    result = strtoi_range("11", &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("Value 11 out of range. Must be in 0..10.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+}
+
+void test_strtoi_range_invalid_input(void** state) {
+    int value;
+    gchar* err_msg = NULL;
+    gboolean result;
+
+    // not a number
+    result = strtoi_range("profanity", &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("Could not convert \"profanity\" to a number.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+
+    // not a number, start with digits
+    result = strtoi_range("23kk", &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("Could not convert \"23kk\" to a number.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+}
+
+void test_strtoi_range_null_empty_input(void** state) {
+    int value;
+    gchar* err_msg = NULL;
+    gboolean result;
+
+    // NULL input string
+    result = strtoi_range(NULL, &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("'str' input pointer can not be NULL", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+
+    // Empty input string
+    result = strtoi_range("", &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("Could not convert \"\" to a number.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+}
+
+void test_strtoi_range_null_err_msg(void** state) {
+    int value;
+    gboolean result;
+
+    // valid conversion, err_msg is NULL
+    result = strtoi_range("5", &value, 0, 10, NULL);
+    assert_true(result);
+    assert_int_equal(5, value);
+
+    // invalid conversion, err_msg is NULL
+    result = strtoi_range("profanity", &value, 0, 10, NULL);
+    assert_false(result);
+}
+
 void test_string_to_verbosity(void** state) {
     int verbosity;
     gchar* err_msg = NULL;
