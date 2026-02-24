@@ -102,7 +102,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(test_strtoi_range_null_empty_input),
         cmocka_unit_test(test_strtoi_range_null_err_msg),
         cmocka_unit_test(test_string_matches_one_of_edge_cases),
-
+        cmocka_unit_test(test_valid_tls_policy_option),
         cmocka_unit_test(clear_empty),
         cmocka_unit_test(reset_after_create),
         cmocka_unit_test(find_after_create),

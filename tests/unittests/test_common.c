@@ -328,6 +328,30 @@ strip_quotes_strips_both(void** state)
     free(result);
 }
 
+void test_valid_tls_policy_option(void** state) {
+    // Valid inputs
+    assert_true(valid_tls_policy_option("force"));
+    assert_true(valid_tls_policy_option("allow"));
+    assert_true(valid_tls_policy_option("trust"));
+    assert_true(valid_tls_policy_option("disable"));
+    assert_true(valid_tls_policy_option("legacy"));
+    assert_true(valid_tls_policy_option("direct"));
+
+    // Invalid inputs
+    // Not an option
+    expect_any_cons_show(); // For "Invalid TLS policy: 'profanity'"
+    expect_any_cons_show(); // For "TLS policy must be one of: 'force', 'allow', 'trust', 'disable', 'legacy', or 'direct'."
+    assert_false(valid_tls_policy_option("profanity"));
+
+    // Empty
+    expect_any_cons_show(); // For "Invalid TLS policy: ''"
+    expect_any_cons_show(); // For "TLS policy must be one of: 'force', 'allow', 'trust', 'disable', 'legacy', or 'direct'."
+    assert_false(valid_tls_policy_option(""));
+
+	// NULL
+    assert_true(valid_tls_policy_option(NULL));
+}
+
 void test_get_expanded_path(void** state) {
     gchar* expanded_path;
 
