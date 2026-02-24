@@ -2,6 +2,7 @@
 #include "common.h"
 #include "prof_cmocka.h"
 #include <stdlib.h>
+#include "tests/unittests/ui/stub_ui.h" // Include for mocking cons_show
 
 void
 replace_one_substr(void** state)
@@ -1040,4 +1041,61 @@ prof_whole_occurrences_tests(void** state)
     actual = NULL;
     g_slist_free(expected);
     expected = NULL;
+}
+
+void test_string_matches_one_of_edge_cases(void** state) {
+    // is is NULL, is_can_be_null is TRUE -> should return TRUE
+    assert_true(string_matches_one_of(NULL, NULL, TRUE, "option1", "option2", NULL));
+
+    // is is NULL, is_can_be_null is FALSE -> should return FALSE
+    assert_false(string_matches_one_of(NULL, NULL, FALSE, "option1", "option2", NULL));
+
+    // is matches one of the options
+    assert_true(string_matches_one_of("Test", "option1", FALSE, "option1", "option2", NULL));
+    assert_true(string_matches_one_of("Test", "option2", FALSE, "option1", "option2", NULL));
+
+    // is does not match any of the options
+    expect_any_cons_show(); // For "Invalid Test: 'option3'"
+    expect_any_cons_show(); // For "Test must be one of: 'option1', or 'option2'."
+    assert_false(string_matches_one_of("Test", "option3", FALSE, "option1", "option2", NULL));
+
+    // what is NULL (no error message printed)
+    assert_false(string_matches_one_of(NULL, "option3", FALSE, "option1", "option2", NULL));
+
+    // Empty options list (first is NULL)
+    expect_any_cons_show(); // For "Invalid Test: 'option1'"
+    expect_any_cons_show(); // For "Test must be one of: ." (empty options list error message)
+    assert_false(string_matches_one_of("Test", "option1", FALSE, NULL, NULL));
+    assert_false(string_matches_one_of(NULL, NULL, FALSE, NULL, NULL));
+    assert_true(string_matches_one_of(NULL, NULL, TRUE, NULL, NULL));
+
+    // Single option, matches
+    assert_true(string_matches_one_of("Test", "single", FALSE, "single", NULL));
+
+    // Single option, no match
+    expect_any_cons_show(); // For "Invalid Test: 'nomatch'"
+    expect_any_cons_show(); // For "Test must be one of: 'single'."
+    assert_false(string_matches_one_of("Test", "nomatch", FALSE, "single", NULL));
+
+    // Multiple options, first matches
+    assert_true(string_matches_one_of("Test", "first", FALSE, "first", "second", "third", NULL));
+
+    // Multiple options, middle matches
+    assert_true(string_matches_one_of("Test", "second", FALSE, "first", "second", "third", NULL));
+
+    // Multiple options, last matches
+    assert_true(string_matches_one_of("Test", "third", FALSE, "first", "second", "third", NULL));
+
+    // Multiple options, no match
+    expect_any_cons_show(); // For "Invalid Test: 'none'"
+    expect_any_cons_show(); // For "Test must be one of: 'first', 'second', or 'third'."
+    assert_false(string_matches_one_of("Test", "none", FALSE, "first", "second", "third", NULL));
+
+    // is is an empty string, options are not
+    expect_any_cons_show(); // For "Invalid Test: ''"
+    expect_any_cons_show(); // For "Test must be one of: 'option1', or 'option2'."
+    assert_false(string_matches_one_of("Test", "", FALSE, "option1", "option2", NULL));
+
+    // is is an empty string, one of the options is an empty string
+    assert_true(string_matches_one_of("Test", "", FALSE, "option1", "", "option2", NULL));
 }

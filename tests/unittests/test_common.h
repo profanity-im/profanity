@@ -41,3 +41,4 @@ void test_strtoi_range_out_of_range(void** state);
 void test_strtoi_range_invalid_input(void** state);
 void test_strtoi_range_null_empty_input(void** state);
 void test_strtoi_range_null_err_msg(void** state);
+void test_string_matches_one_of_edge_cases(void** state);
