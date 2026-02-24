@@ -68,9 +68,11 @@ if is_debug
   ], language: 'c')
 endif
 
-if platform == 'osx'
+if cc.get_id() == 'clang'
   add_project_arguments('-Qunused-arguments', language: 'c')
-  
+endif
+
+if platform == 'osx'
   # Check for homebrew paths on Apple Silicon
   if run_command('test', '-d', '/opt/homebrew/include', check: false).returncode() == 0
     add_project_arguments('-I/opt/homebrew/include', language: 'c')
