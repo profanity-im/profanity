@@ -471,11 +471,15 @@ release_get_latest(void)
 }
 
 gboolean
-release_is_new(char* found_version)
+release_is_new(const char* const curr_version, const char* const found_version)
 {
+    if (!curr_version || !found_version) {
+        return FALSE;
+    }
+
     int curr_maj, curr_min, curr_patch, found_maj, found_min, found_patch;
 
-    int parse_curr = sscanf(PACKAGE_VERSION, "%d.%d.%d", &curr_maj, &curr_min,
+    int parse_curr = sscanf(curr_version, "%d.%d.%d", &curr_maj, &curr_min,
                             &curr_patch);
     int parse_found = sscanf(found_version, "%d.%d.%d", &found_maj, &found_min,
                              &found_patch);
@@ -578,36 +582,48 @@ is_notify_enabled(void)
 GSList*
 prof_occurrences(const char* const needle, const char* const haystack, int offset, gboolean whole_word, GSList** result)
 {
-    if (needle == NULL || haystack == NULL) {
+    if (needle == NULL || haystack == NULL || *needle == '\0') {
         return *result;
     }
 
-    do {
-        gchar* haystack_curr = g_utf8_offset_to_pointer(haystack, offset);
-        if (g_str_has_prefix(haystack_curr, needle)) {
+    size_t needle_len = strlen(needle);
+    gchar* p = g_utf8_offset_to_pointer(haystack, offset);
+    GSList* matches = NULL;
+
+    while (p) {
+        if (g_str_has_prefix(p, needle)) {
             if (whole_word) {
                 gunichar before = 0;
-                gchar* haystack_before_ch = g_utf8_find_prev_char(haystack, haystack_curr);
+                gchar* haystack_before_ch = g_utf8_find_prev_char(haystack, p);
                 if (haystack_before_ch) {
                     before = g_utf8_get_char(haystack_before_ch);
                 }
 
                 gunichar after = 0;
-                gchar* haystack_after_ch = haystack_curr + strlen(needle);
-                if (haystack_after_ch[0] != '\0') {
+                gchar* haystack_after_ch = p + needle_len;
+                if (*haystack_after_ch != '\0') {
                     after = g_utf8_get_char(haystack_after_ch);
                 }
 
                 if (!g_unichar_isalnum(before) && !g_unichar_isalnum(after)) {
-                    *result = g_slist_append(*result, GINT_TO_POINTER(offset));
+                    matches = g_slist_prepend(matches, GINT_TO_POINTER(offset));
                 }
             } else {
-                *result = g_slist_append(*result, GINT_TO_POINTER(offset));
+                matches = g_slist_prepend(matches, GINT_TO_POINTER(offset));
             }
         }
 
+        if (*p == '\0') {
+            break;
+        }
+
+        p = g_utf8_next_char(p);
         offset++;
-    } while (g_strcmp0(g_utf8_offset_to_pointer(haystack, offset), "\0") != 0);
+    }
+
+    if (matches) {
+        *result = g_slist_concat(*result, g_slist_reverse(matches));
+    }
 
     return *result;
 }

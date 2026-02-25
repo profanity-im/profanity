@@ -2,6 +2,7 @@
 #include "common.h"
 #include "prof_cmocka.h"
 #include <stdlib.h>
+#include "tests/unittests/ui/stub_ui.h" // Include for mocking cons_show
 
 void
 replace_one_substr(void** state)
@@ -327,6 +328,225 @@ strip_quotes_strips_both(void** state)
     free(result);
 }
 
+void test_valid_tls_policy_option(void** state) {
+    // Valid inputs
+    assert_true(valid_tls_policy_option("force"));
+    assert_true(valid_tls_policy_option("allow"));
+    assert_true(valid_tls_policy_option("trust"));
+    assert_true(valid_tls_policy_option("disable"));
+    assert_true(valid_tls_policy_option("legacy"));
+    assert_true(valid_tls_policy_option("direct"));
+
+    // Invalid inputs
+    // Not an option
+    expect_any_cons_show(); // For "Invalid TLS policy: 'profanity'"
+    expect_any_cons_show(); // For "TLS policy must be one of: 'force', 'allow', 'trust', 'disable', 'legacy', or 'direct'."
+    assert_false(valid_tls_policy_option("profanity"));
+
+    // Empty
+    expect_any_cons_show(); // For "Invalid TLS policy: ''"
+    expect_any_cons_show(); // For "TLS policy must be one of: 'force', 'allow', 'trust', 'disable', 'legacy', or 'direct'."
+    assert_false(valid_tls_policy_option(""));
+
+	// NULL
+    assert_true(valid_tls_policy_option(NULL));
+}
+
+void test_get_expanded_path(void** state) {
+    gchar* expanded_path;
+
+    // `file://` prefix
+    expanded_path = get_expanded_path("file:///tmp/test.txt");
+    assert_string_equal("/tmp/test.txt", expanded_path);
+    g_free(expanded_path);
+
+    // `~/"` prefix
+    setenv("HOME", "/home/test", 1);
+    expanded_path = get_expanded_path("~/folder/file.txt");
+    assert_string_equal("/home/test/folder/file.txt", expanded_path);
+    g_free(expanded_path);
+    unsetenv("HOME");
+
+    // regular path
+    expanded_path = get_expanded_path("/home/test/file.pdf");
+    assert_string_equal("/home/test/file.pdf", expanded_path);
+    g_free(expanded_path);
+
+    // empty path
+    expanded_path = get_expanded_path("");
+    assert_string_equal("", expanded_path);
+    g_free(expanded_path);
+}
+
+void test_strtoi_range_valid_input(void** state) {
+    int value;
+    gchar* err_msg = NULL;
+    gboolean result;
+
+    result = strtoi_range("10", &value, 0, 20, &err_msg);
+    assert_true(result);
+    assert_int_equal(10, value);
+    assert_null(err_msg);
+
+    result = strtoi_range("0", &value, 0, 20, &err_msg);
+    assert_true(result);
+    assert_int_equal(0, value);
+    assert_null(err_msg);
+
+    result = strtoi_range("20", &value, 0, 20, &err_msg);
+    assert_true(result);
+    assert_int_equal(20, value);
+    assert_null(err_msg);
+
+    result = strtoi_range("-5", &value, -10, 0, &err_msg);
+    assert_true(result);
+    assert_int_equal(-5, value);
+    assert_null(err_msg);
+}
+
+void test_strtoi_range_out_of_range(void** state) {
+    int value;
+    gchar* err_msg = NULL;
+    gboolean result;
+
+    // too low, negative
+    result = strtoi_range("-11", &value, -10, 0, &err_msg);
+    assert_false(result);
+    assert_string_equal("Value -11 out of range. Must be in -10..0.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+
+    // too low
+    result = strtoi_range("-1", &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("Value -1 out of range. Must be in 0..10.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+
+    // too high
+    result = strtoi_range("11", &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("Value 11 out of range. Must be in 0..10.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+}
+
+void test_strtoi_range_invalid_input(void** state) {
+    int value;
+    gchar* err_msg = NULL;
+    gboolean result;
+
+    // not a number
+    result = strtoi_range("profanity", &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("Could not convert \"profanity\" to a number.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+
+    // not a number, start with digits
+    result = strtoi_range("23kk", &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("Could not convert \"23kk\" to a number.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+}
+
+void test_strtoi_range_null_empty_input(void** state) {
+    int value;
+    gchar* err_msg = NULL;
+    gboolean result;
+
+    // NULL input string
+    result = strtoi_range(NULL, &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("'str' input pointer can not be NULL", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+
+    // Empty input string
+    result = strtoi_range("", &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("Could not convert \"\" to a number.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
+}
+
+void test_strtoi_range_null_err_msg(void** state) {
+    int value;
+    gboolean result;
+
+    // valid conversion, err_msg is NULL
+    result = strtoi_range("5", &value, 0, 10, NULL);
+    assert_true(result);
+    assert_int_equal(5, value);
+
+    // invalid conversion, err_msg is NULL
+    result = strtoi_range("profanity", &value, 0, 10, NULL);
+    assert_false(result);
+}
+
+void test_string_to_verbosity(void** state) {
+    int verbosity;
+    gchar* err_msg = NULL;
+    gboolean result;
+
+    // Valid input string (0)
+    result = string_to_verbosity("0", &verbosity, &err_msg);
+    assert_true(result);
+    assert_int_equal(0, verbosity);
+    assert_null(err_msg);
+    g_free(err_msg); err_msg = NULL; // Clear for next test
+
+    // Valid input string (1)
+    result = string_to_verbosity("1", &verbosity, &err_msg);
+    assert_true(result);
+    assert_int_equal(1, verbosity);
+    assert_null(err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // Valid input string (3)
+    result = string_to_verbosity("3", &verbosity, &err_msg);
+    assert_true(result);
+    assert_int_equal(3, verbosity);
+    assert_null(err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // Invalid input string (not a number)
+    result = string_to_verbosity("profanity", &verbosity, &err_msg);
+    assert_false(result);
+    assert_string_equal("Could not convert \"profanity\" to a number.", err_msg);
+    g_free(err_msg);
+	err_msg = NULL;
+
+    // Valid input string, out of range (too low)
+    result = string_to_verbosity("-1", &verbosity, &err_msg);
+    assert_false(result);
+    assert_string_equal("Value -1 out of range. Must be in 0..3.", err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // Valid input string, out of range (too high)
+    result = string_to_verbosity("4", &verbosity, &err_msg);
+    assert_false(result);
+    assert_string_equal("Value 4 out of range. Must be in 0..3.", err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // NULL input string
+    result = string_to_verbosity(NULL, &verbosity, &err_msg);
+    assert_false(result);
+    assert_string_equal("'str' input pointer can not be NULL", err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // Empty input string
+    result = string_to_verbosity("", &verbosity, &err_msg);
+    assert_false(result);
+    assert_string_equal("Could not convert \"\" to a number.", err_msg);
+    g_free(err_msg); err_msg = NULL;
+
+    // err_msg is NULL
+    result = string_to_verbosity("abc", &verbosity, NULL);
+    assert_false(result);
+}
+
 typedef struct
 {
     char* template;
@@ -645,6 +865,114 @@ prof_partial_occurrences_tests(void** state)
 }
 
 void
+get_mentions_tests(void** state)
+{
+    GSList* actual = NULL;
+    GSList* expected = NULL;
+
+    // Basic match, case sensitive
+    expected = g_slist_append(expected, GINT_TO_POINTER(6));
+    actual = get_mentions(FALSE, TRUE, "hello boothj5", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Case insensitive match
+    expected = g_slist_append(expected, GINT_TO_POINTER(6));
+    actual = get_mentions(FALSE, FALSE, "hello BOOTHJ5", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Whole word match
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    actual = get_mentions(TRUE, TRUE, "boothj5 hello", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Whole word no match (partial)
+    actual = get_mentions(TRUE, TRUE, "boothj5hello", "boothj5");
+    assert_true(_lists_equal(actual, expected)); // expected is NULL
+    g_slist_free(actual); actual = NULL;
+
+    // Multiple matches
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    expected = g_slist_append(expected, GINT_TO_POINTER(14));
+    actual = get_mentions(FALSE, TRUE, "boothj5 hello boothj5", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Nick with punctuation (whole word)
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    actual = get_mentions(TRUE, TRUE, "boothj5: hi", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Nick surrounded by punctuation
+    expected = g_slist_append(expected, GINT_TO_POINTER(1));
+    actual = get_mentions(TRUE, TRUE, "(boothj5)", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Empty message
+    actual = get_mentions(FALSE, TRUE, "", "boothj5");
+    assert_true(_lists_equal(actual, expected)); // expected is NULL
+    g_slist_free(actual); actual = NULL;
+
+    // Empty nick
+    actual = get_mentions(FALSE, TRUE, "hello", "");
+    assert_true(_lists_equal(actual, expected)); // expected is NULL
+    g_slist_free(actual); actual = NULL;
+
+    // UTF-8 characters
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    actual = get_mentions(TRUE, TRUE, "我能 hello", "我能");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+}
+
+void
+release_is_new_tests(void** state)
+{
+    // Higher major version
+    assert_true(release_is_new("0.16.0", "1.0.0"));
+    // Higher minor version
+    assert_true(release_is_new("0.16.0", "0.17.0"));
+    // Higher patch version
+    assert_true(release_is_new("0.16.0", "0.16.1"));
+
+    // Same version
+    assert_false(release_is_new("0.16.0", "0.16.0"));
+
+    // Lower major version
+    assert_false(release_is_new("0.16.0", "0.15.9"));
+    // Lower minor version
+    assert_false(release_is_new("0.16.0", "0.15.0"));
+    // Lower patch version
+    assert_false(release_is_new("0.16.1", "0.16.0"));
+
+    // Higher version but with different current versions
+    assert_true(release_is_new("1.2.3", "1.2.4"));
+    assert_true(release_is_new("1.2.3", "1.3.0"));
+    assert_true(release_is_new("1.2.3", "2.0.0"));
+
+    // Malformed version strings
+    assert_false(release_is_new("0.16.0", "0.16"));      // Missing patch in found
+    assert_false(release_is_new("0.16", "0.16.0"));      // Missing patch in curr
+    assert_false(release_is_new("0.16.0", "0.16.0.1"));  // Extra part
+
+    assert_false(release_is_new("0.16.0", "abc.def.ghi"));
+    assert_false(release_is_new("0.16.0", ""));
+    assert_false(release_is_new(NULL, "1.0.0"));
+    assert_false(release_is_new("1.0.0", NULL));
+}
+
+void
 prof_whole_occurrences_tests(void** state)
 {
     GSList* actual = NULL;
@@ -845,4 +1173,61 @@ prof_whole_occurrences_tests(void** state)
     actual = NULL;
     g_slist_free(expected);
     expected = NULL;
+}
+
+void test_string_matches_one_of_edge_cases(void** state) {
+    // is is NULL, is_can_be_null is TRUE -> should return TRUE
+    assert_true(string_matches_one_of(NULL, NULL, TRUE, "option1", "option2", NULL));
+
+    // is is NULL, is_can_be_null is FALSE -> should return FALSE
+    assert_false(string_matches_one_of(NULL, NULL, FALSE, "option1", "option2", NULL));
+
+    // is matches one of the options
+    assert_true(string_matches_one_of("Test", "option1", FALSE, "option1", "option2", NULL));
+    assert_true(string_matches_one_of("Test", "option2", FALSE, "option1", "option2", NULL));
+
+    // is does not match any of the options
+    expect_any_cons_show(); // For "Invalid Test: 'option3'"
+    expect_any_cons_show(); // For "Test must be one of: 'option1', or 'option2'."
+    assert_false(string_matches_one_of("Test", "option3", FALSE, "option1", "option2", NULL));
+
+    // what is NULL (no error message printed)
+    assert_false(string_matches_one_of(NULL, "option3", FALSE, "option1", "option2", NULL));
+
+    // Empty options list (first is NULL)
+    expect_any_cons_show(); // For "Invalid Test: 'option1'"
+    expect_any_cons_show(); // For "Test must be one of: ." (empty options list error message)
+    assert_false(string_matches_one_of("Test", "option1", FALSE, NULL, NULL));
+    assert_false(string_matches_one_of(NULL, NULL, FALSE, NULL, NULL));
+    assert_true(string_matches_one_of(NULL, NULL, TRUE, NULL, NULL));
+
+    // Single option, matches
+    assert_true(string_matches_one_of("Test", "single", FALSE, "single", NULL));
+
+    // Single option, no match
+    expect_any_cons_show(); // For "Invalid Test: 'nomatch'"
+    expect_any_cons_show(); // For "Test must be one of: 'single'."
+    assert_false(string_matches_one_of("Test", "nomatch", FALSE, "single", NULL));
+
+    // Multiple options, first matches
+    assert_true(string_matches_one_of("Test", "first", FALSE, "first", "second", "third", NULL));
+
+    // Multiple options, middle matches
+    assert_true(string_matches_one_of("Test", "second", FALSE, "first", "second", "third", NULL));
+
+    // Multiple options, last matches
+    assert_true(string_matches_one_of("Test", "third", FALSE, "first", "second", "third", NULL));
+
+    // Multiple options, no match
+    expect_any_cons_show(); // For "Invalid Test: 'none'"
+    expect_any_cons_show(); // For "Test must be one of: 'first', 'second', or 'third'."
+    assert_false(string_matches_one_of("Test", "none", FALSE, "first", "second", "third", NULL));
+
+    // is is an empty string, options are not
+    expect_any_cons_show(); // For "Invalid Test: ''"
+    expect_any_cons_show(); // For "Test must be one of: 'option1', or 'option2'."
+    assert_false(string_matches_one_of("Test", "", FALSE, "option1", "option2", NULL));
+
+    // is is an empty string, one of the options is an empty string
+    assert_true(string_matches_one_of("Test", "", FALSE, "option1", "", "option2", NULL));
 }
