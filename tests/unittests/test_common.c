@@ -865,6 +865,73 @@ prof_partial_occurrences_tests(void** state)
 }
 
 void
+get_mentions_tests(void** state)
+{
+    GSList* actual = NULL;
+    GSList* expected = NULL;
+
+    // Basic match, case sensitive
+    expected = g_slist_append(expected, GINT_TO_POINTER(6));
+    actual = get_mentions(FALSE, TRUE, "hello boothj5", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Case insensitive match
+    expected = g_slist_append(expected, GINT_TO_POINTER(6));
+    actual = get_mentions(FALSE, FALSE, "hello BOOTHJ5", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Whole word match
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    actual = get_mentions(TRUE, TRUE, "boothj5 hello", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Whole word no match (partial)
+    actual = get_mentions(TRUE, TRUE, "boothj5hello", "boothj5");
+    assert_true(_lists_equal(actual, expected)); // expected is NULL
+    g_slist_free(actual); actual = NULL;
+
+    // Multiple matches
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    expected = g_slist_append(expected, GINT_TO_POINTER(14));
+    actual = get_mentions(FALSE, TRUE, "boothj5 hello boothj5", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Nick with punctuation (whole word)
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    actual = get_mentions(TRUE, TRUE, "boothj5: hi", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Nick surrounded by punctuation
+    expected = g_slist_append(expected, GINT_TO_POINTER(1));
+    actual = get_mentions(TRUE, TRUE, "(boothj5)", "boothj5");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+
+    // Empty message
+    actual = get_mentions(FALSE, TRUE, "", "boothj5");
+    assert_true(_lists_equal(actual, expected)); // expected is NULL
+    g_slist_free(actual); actual = NULL;
+
+    // UTF-8 characters
+    expected = g_slist_append(expected, GINT_TO_POINTER(0));
+    actual = get_mentions(TRUE, TRUE, "我能 hello", "我能");
+    assert_true(_lists_equal(actual, expected));
+    g_slist_free(actual); actual = NULL;
+    g_slist_free(expected); expected = NULL;
+}
+
+void
 prof_whole_occurrences_tests(void** state)
 {
     GSList* actual = NULL;
