@@ -193,7 +193,7 @@ gboolean string_matches_one_of(const char* what, const char* is, gboolean is_can
 gboolean valid_tls_policy_option(const char* is);
 
 char* release_get_latest(void);
-gboolean release_is_new(char* found_version);
+gboolean release_is_new(const char* const curr_version, const char* const found_version);
 
 char* strip_arg_quotes(const char* const input);
 gboolean is_notify_enabled(void);

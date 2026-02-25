@@ -44,3 +44,4 @@ void test_strtoi_range_null_err_msg(void** state);
 void test_string_matches_one_of_edge_cases(void** state);
 void test_valid_tls_policy_option(void** state);
 void get_mentions_tests(void** state);
+void release_is_new_tests(void** state);

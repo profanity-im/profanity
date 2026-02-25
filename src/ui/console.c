@@ -395,7 +395,7 @@ cons_check_version(gboolean not_available_msg)
     gboolean relase_valid = g_regex_match_simple("^\\d+\\.\\d+\\.\\d+$", latest_release, 0, 0);
 
     if (relase_valid) {
-        if (release_is_new(latest_release)) {
+        if (release_is_new(PACKAGE_VERSION, latest_release)) {
             win_println(console, THEME_DEFAULT, "-", "A new version of Profanity is available: %s", latest_release);
             win_println(console, THEME_DEFAULT, "-", "Check <https://profanity-im.github.io> for details.");
             win_println(console, THEME_DEFAULT, "-", "");

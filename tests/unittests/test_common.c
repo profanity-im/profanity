@@ -937,6 +937,42 @@ get_mentions_tests(void** state)
 }
 
 void
+release_is_new_tests(void** state)
+{
+    // Higher major version
+    assert_true(release_is_new("0.16.0", "1.0.0"));
+    // Higher minor version
+    assert_true(release_is_new("0.16.0", "0.17.0"));
+    // Higher patch version
+    assert_true(release_is_new("0.16.0", "0.16.1"));
+
+    // Same version
+    assert_false(release_is_new("0.16.0", "0.16.0"));
+
+    // Lower major version
+    assert_false(release_is_new("0.16.0", "0.15.9"));
+    // Lower minor version
+    assert_false(release_is_new("0.16.0", "0.15.0"));
+    // Lower patch version
+    assert_false(release_is_new("0.16.1", "0.16.0"));
+
+    // Higher version but with different current versions
+    assert_true(release_is_new("1.2.3", "1.2.4"));
+    assert_true(release_is_new("1.2.3", "1.3.0"));
+    assert_true(release_is_new("1.2.3", "2.0.0"));
+
+    // Malformed version strings
+    assert_false(release_is_new("0.16.0", "0.16"));      // Missing patch in found
+    assert_false(release_is_new("0.16", "0.16.0"));      // Missing patch in curr
+    assert_false(release_is_new("0.16.0", "0.16.0.1"));  // Extra part
+
+    assert_false(release_is_new("0.16.0", "abc.def.ghi"));
+    assert_false(release_is_new("0.16.0", ""));
+    assert_false(release_is_new(NULL, "1.0.0"));
+    assert_false(release_is_new("1.0.0", NULL));
+}
+
+void
 prof_whole_occurrences_tests(void** state)
 {
     GSList* actual = NULL;

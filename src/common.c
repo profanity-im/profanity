@@ -471,11 +471,15 @@ release_get_latest(void)
 }
 
 gboolean
-release_is_new(char* found_version)
+release_is_new(const char* const curr_version, const char* const found_version)
 {
+    if (!curr_version || !found_version) {
+        return FALSE;
+    }
+
     int curr_maj, curr_min, curr_patch, found_maj, found_min, found_patch;
 
-    int parse_curr = sscanf(PACKAGE_VERSION, "%d.%d.%d", &curr_maj, &curr_min,
+    int parse_curr = sscanf(curr_version, "%d.%d.%d", &curr_maj, &curr_min,
                             &curr_patch);
     int parse_found = sscanf(found_version, "%d.%d.%d", &found_maj, &found_min,
                              &found_patch);

@@ -635,6 +635,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(prof_whole_occurrences_tests),
         cmocka_unit_test(prof_occurrences_of_large_message_tests),
         cmocka_unit_test(get_mentions_tests),
+        cmocka_unit_test(release_is_new_tests),
 
         cmocka_unit_test_setup_teardown(returns_no_commands,
                                         load_preferences,
