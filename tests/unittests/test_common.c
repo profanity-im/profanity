@@ -923,6 +923,11 @@ get_mentions_tests(void** state)
     assert_true(_lists_equal(actual, expected)); // expected is NULL
     g_slist_free(actual); actual = NULL;
 
+    // Empty nick
+    actual = get_mentions(FALSE, TRUE, "hello", "");
+    assert_true(_lists_equal(actual, expected)); // expected is NULL
+    g_slist_free(actual); actual = NULL;
+
     // UTF-8 characters
     expected = g_slist_append(expected, GINT_TO_POINTER(0));
     actual = get_mentions(TRUE, TRUE, "我能 hello", "我能");
