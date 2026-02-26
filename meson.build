@@ -69,6 +69,9 @@ if is_debug
     '-D_FORTIFY_SOURCE=2',
     '-Og'
   ], language: 'c')
+  if cc.get_id() == 'gcc'
+     add_project_arguments('-fanalyzer', language: 'c')
+  endif
 endif
 
 if cc.get_id() == 'clang'
