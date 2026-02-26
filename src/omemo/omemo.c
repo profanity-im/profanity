@@ -547,8 +547,12 @@ omemo_set_device_list(const char* const from, GList* device_list)
                         GList* fp = NULL;
                         for (fp = g_hash_table_get_keys(known_identities); fp != NULL; fp = fp->next) {
                             if (device_id->data == g_hash_table_lookup(known_identities, fp->data)) {
-                                cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, omemo_format_fingerprint(fp->data));
-                                omemo_trust(jid->barejid, omemo_format_fingerprint(fp->data));
+                                char* formatted = omemo_format_fingerprint(fp->data);
+                                if (formatted) {
+                                    cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, formatted);
+                                    omemo_trust(jid->barejid, formatted);
+                                    free(formatted);
+                                }
                             }
                         }
                     }
@@ -643,8 +647,15 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
         log_debug("[OMEMO] There is no Session for %s ( %d) ,? building session.", jid_address.name, jid_address.device_id);
         int res;
 
-        address = malloc(sizeof(signal_protocol_address));
+        address = calloc(1, sizeof(signal_protocol_address));
+        if (!address) {
+            goto out;
+        }
+
         address->name = strdup(jid);
+        if (!address->name) {
+            goto out;
+        }
         address->name_len = strlen(jid);
         address->device_id = device_id;
 
@@ -701,15 +712,18 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     const Jid* jid = connection_get_jid();
     GList* keys = NULL;
 
-    unsigned char* key;
-    unsigned char* iv;
-    unsigned char* ciphertext;
-    unsigned char* tag;
-    unsigned char* key_tag;
+    unsigned char* key = NULL;
+    unsigned char* iv = NULL;
+    unsigned char* ciphertext = NULL;
+    unsigned char* tag = NULL;
+    unsigned char* key_tag = NULL;
     size_t ciphertext_len, tag_len;
 
     ciphertext_len = strlen(message);
     ciphertext = malloc(ciphertext_len);
+    if (!ciphertext) {
+        goto out;
+    }
     tag_len = AES128_GCM_TAG_LENGTH;
     tag = gcry_malloc_secure(tag_len);
     key_tag = gcry_malloc_secure(AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH);
@@ -794,8 +808,17 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);
             omemo_key_t* key = malloc(sizeof(omemo_key_t));
+            if (!key) {
+                SIGNAL_UNREF(ciphertext);
+                continue;
+            }
             key->length = signal_buffer_len(buffer);
             key->data = malloc(key->length);
+            if (!key->data) {
+                free(key);
+                SIGNAL_UNREF(ciphertext);
+                continue;
+            }
             memcpy(key->data, signal_buffer_data(buffer), key->length);
             key->device_id = GPOINTER_TO_INT(device_ids_iter->data);
             key->prekey = ciphertext_message_get_type(ciphertext) == CIPHERTEXT_PREKEY_TYPE;
@@ -850,8 +873,17 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);
             omemo_key_t* key = malloc(sizeof(omemo_key_t));
+            if (!key) {
+                SIGNAL_UNREF(ciphertext);
+                continue;
+            }
             key->length = signal_buffer_len(buffer);
             key->data = malloc(key->length);
+            if (!key->data) {
+                free(key);
+                SIGNAL_UNREF(ciphertext);
+                continue;
+            }
             memcpy(key->data, signal_buffer_data(buffer), key->length);
             key->device_id = GPOINTER_TO_INT(device_ids_iter->data);
             key->prekey = ciphertext_message_get_type(ciphertext) == CIPHERTEXT_PREKEY_TYPE;
@@ -1028,7 +1060,9 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
 char*
 omemo_format_fingerprint(const char* const fingerprint)
 {
-    char* output = malloc(strlen(fingerprint) + strlen(fingerprint) / 8);
+    char* output = malloc(strlen(fingerprint) + strlen(fingerprint) / 8 + 1);
+    if (!output)
+        return NULL;
 
     size_t i, j;
     for (i = 0, j = 0; i < strlen(fingerprint); i++) {
@@ -1046,7 +1080,7 @@ omemo_format_fingerprint(const char* const fingerprint)
 static char*
 _omemo_unformat_fingerprint(const char* const fingerprint_formatted)
 {
-    char* fingerprint = malloc(strlen(fingerprint_formatted));
+    char* fingerprint = malloc(strlen(fingerprint_formatted) + 1);
     if (!fingerprint)
         return NULL;
 
@@ -1192,6 +1226,10 @@ _omemo_fingerprint_decode(const char* const fingerprint, size_t* len)
 void
 omemo_trust(const char* const jid, const char* const fingerprint_formatted)
 {
+    if (!jid || !fingerprint_formatted) {
+        return;
+    }
+
     size_t len;
 
     GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
@@ -1651,6 +1689,9 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
     }
 
     char* fingerprint = _omemo_fingerprint(identity, FALSE);
+    if (!fingerprint) {
+        return;
+    }
     log_debug("[OMEMO] cache identity for %s:%d: %s", jid, device_id, fingerprint);
     g_hash_table_insert(known_identities, strdup(fingerprint), GINT_TO_POINTER(device_id));
 
@@ -1664,9 +1705,15 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
         g_hash_table_insert(omemo_static_data.fingerprint_ac, strdup(jid), ac);
     }
 
+    if (!fingerprint) {
+        return;
+    }
+
     char* formatted_fingerprint = omemo_format_fingerprint(fingerprint);
-    autocomplete_add(ac, formatted_fingerprint);
-    free(formatted_fingerprint);
+    if (formatted_fingerprint) {
+        autocomplete_add(ac, formatted_fingerprint);
+        free(formatted_fingerprint);
+    }
     free(fingerprint);
 }
 
