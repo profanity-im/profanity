@@ -4869,6 +4869,11 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
     }
 
     FILE* fh = fdopen(fd, "rb");
+    if (!fh) {
+        cons_show_error("Unable to open file descriptor for '%s'.", filename);
+        close(fd);
+        goto out;
+    }
 
     if (omemo_enabled) {
 #ifdef HAVE_OMEMO
@@ -4878,18 +4883,40 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         if (err != NULL) {
             cons_show_error(err);
             win_println(window, THEME_ERROR, "-", err);
+            if (fh) {
+                fclose(fh);
+            }
             goto out;
         }
 #endif
     }
 
     HTTPUpload* upload = malloc(sizeof(HTTPUpload));
+    if (!upload) {
+        cons_show_error("Memory allocation failed.");
+        if (fh) {
+            fclose(fh);
+        }
+        goto out;
+    }
+
     upload->window = window;
 
     upload->filename = strdup(filename);
     upload->filehandle = fh;
     upload->filesize = file_size(fd);
     upload->mime_type = file_mime_type(filename);
+
+    if (!upload->filename || !upload->mime_type) {
+        cons_show_error("Memory allocation failed.");
+        if (fh) {
+            fclose(fh);
+        }
+        free(upload->filename);
+        free(upload->mime_type);
+        free(upload);
+        goto out;
+    }
 
     if (alt_scheme != NULL) {
         upload->alt_scheme = strdup(alt_scheme);
