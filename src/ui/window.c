@@ -1844,7 +1844,7 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
 {
     int starty = getcury(win);
     int wordi = 0;
-    auto_char char* word = malloc(strlen(message) + 1);
+    auto_gchar gchar* word = g_malloc(strlen(message) + 1);
 
     gchar* curr_ch = g_utf8_offset_to_pointer(message, 0);
 
