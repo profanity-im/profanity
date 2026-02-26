@@ -420,7 +420,7 @@ message_handlers_clear(void)
 void
 message_pubsub_event_handler_add(const char* const node, ProfMessageCallback func, ProfMessageFreeCallback free_func, void* userdata)
 {
-    ProfMessageHandler* handler = malloc(sizeof(ProfMessageHandler));
+    ProfMessageHandler* handler = g_new(ProfMessageHandler, 1);
     handler->func = func;
     handler->free_func = free_func;
     handler->userdata = userdata;
