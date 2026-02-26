@@ -1046,8 +1046,10 @@ omemo_format_fingerprint(const char* const fingerprint)
 static char*
 _omemo_unformat_fingerprint(const char* const fingerprint_formatted)
 {
-    /* Unformat fingerprint */
     char* fingerprint = malloc(strlen(fingerprint_formatted));
+    if (!fingerprint)
+        return NULL;
+
     int i;
     int j;
     for (i = 0, j = 0; fingerprint_formatted[i] != '\0'; i++) {
@@ -1129,6 +1131,10 @@ _omemo_fingerprint(ec_public_key* identity, gboolean formatted)
     identity_public_key_data = &identity_public_key_data[1];
 
     char* fingerprint = malloc(identity_public_key_len * 2 + 1);
+    if (!fingerprint) {
+        signal_buffer_free(identity_public_key);
+        return NULL;
+    }
 
     for (i = 0; i < identity_public_key_len; i++) {
         fingerprint[i * 2] = (identity_public_key_data[i] & 0xf0) >> 4;
@@ -1160,6 +1166,10 @@ static unsigned char*
 _omemo_fingerprint_decode(const char* const fingerprint, size_t* len)
 {
     unsigned char* output = malloc(strlen(fingerprint) / 2 + 1);
+    if (!output) {
+        *len = 0;
+        return NULL;
+    }
 
     size_t i;
     size_t j;
@@ -1192,6 +1202,11 @@ omemo_trust(const char* const jid, const char* const fingerprint_formatted)
     }
 
     char* fingerprint = _omemo_unformat_fingerprint(fingerprint_formatted);
+    if (!fingerprint) {
+        log_warning("[OMEMO] cannot unformat fingerprint");
+        cons_show("Cannot unformat fingerprint");
+        return;
+    }
 
     uint32_t device_id = GPOINTER_TO_INT(g_hash_table_lookup(known_identities, fingerprint));
     free(fingerprint);
@@ -1227,6 +1242,8 @@ omemo_untrust(const char* const jid, const char* const fingerprint_formatted)
 {
     size_t len;
     unsigned char* identity = _omemo_fingerprint_decode(fingerprint_formatted, &len);
+    if (!identity)
+        return;
 
     GHashTableIter iter;
     gpointer key, value;
@@ -1250,6 +1267,11 @@ omemo_untrust(const char* const jid, const char* const fingerprint_formatted)
     free(identity);
 
     auto_char char* fingerprint = _omemo_unformat_fingerprint(fingerprint_formatted);
+    if (!fingerprint) {
+        log_warning("[OMEMO] cannot unformat fingerprint");
+        cons_show("Cannot unformat fingerprint");
+        return;
+    }
 
     /* Remove existing session */
     GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
