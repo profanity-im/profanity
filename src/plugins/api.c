@@ -111,7 +111,7 @@ api_register_command(const char* const plugin_name, const char* command_name, in
                      char** synopsis, const char* description, char* arguments[][2], char** examples,
                      void* callback, void (*callback_exec)(PluginCommand* command, gchar** args), void (*callback_destroy)(void* callback))
 {
-    PluginCommand* command = calloc(1, sizeof(PluginCommand));
+    PluginCommand* command = g_new0(PluginCommand, 1);
     command->command_name = strdup(command_name);
     command->min_args = min_args;
     command->max_args = max_args;
@@ -119,7 +119,7 @@ api_register_command(const char* const plugin_name, const char* command_name, in
     command->callback_exec = callback_exec;
     command->callback_destroy = callback_destroy;
 
-    CommandHelp* help = calloc(1, sizeof(CommandHelp));
+    CommandHelp* help = g_new0(CommandHelp, 1);
 
     int i;
     for (i = 0; synopsis[i] != NULL; i++) {

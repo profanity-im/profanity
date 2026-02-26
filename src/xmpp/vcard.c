@@ -59,7 +59,7 @@ typedef struct
     // for photo
     int photo_index;
     gboolean open;
-    char* filename;
+    gchar* filename;
 } _userdata;
 
 static void
@@ -209,7 +209,7 @@ vcard_free_full(vCard* vcard)
 vCard*
 vcard_new(void)
 {
-    vCard* vcard = calloc(1, sizeof(vCard));
+    vCard* vcard = g_new0(vCard, 1);
 
     if (!vcard) {
         return NULL;
@@ -238,10 +238,10 @@ _free_userdata(_userdata* data)
     vcard_free(data->vcard);
 
     if (data->filename) {
-        free(data->filename);
+        g_free(data->filename);
     }
 
-    free(data);
+    g_free(data);
 }
 
 // Function must be called with <vCard> root element
@@ -287,7 +287,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
             vcard->name.suffix = child_pointer2 ? stanza_text_strdup(child_pointer2) : NULL;
             flags |= 2;
         } else if (!g_strcmp0(xmpp_stanza_get_name(child_pointer), "NICKNAME")) {
-            vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+            vcard_element_t* element = g_new0(vcard_element_t, 1);
             if (!element) {
                 // Allocation failed
                 continue;
@@ -304,7 +304,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             g_queue_push_tail(vcard->elements, element);
         } else if (!g_strcmp0(xmpp_stanza_get_name(child_pointer), "PHOTO")) {
-            vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+            vcard_element_t* element = g_new0(vcard_element_t, 1);
             if (!element) {
                 // Allocation failed
                 continue;
@@ -346,7 +346,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
             }
             g_queue_push_tail(vcard->elements, element);
         } else if (!g_strcmp0(xmpp_stanza_get_name(child_pointer), "BDAY")) {
-            vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+            vcard_element_t* element = g_new0(vcard_element_t, 1);
             if (!element) {
                 // Allocation failed
                 continue;
@@ -392,7 +392,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
             }
             g_queue_push_tail(vcard->elements, element);
         } else if (!g_strcmp0(xmpp_stanza_get_name(child_pointer), "ADR")) {
-            vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+            vcard_element_t* element = g_new0(vcard_element_t, 1);
             if (!element) {
                 // Allocation failed
                 continue;
@@ -438,7 +438,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
             element->address.country = child_pointer2 ? stanza_text_strdup(child_pointer2) : NULL;
             g_queue_push_tail(vcard->elements, element);
         } else if (!g_strcmp0(xmpp_stanza_get_name(child_pointer), "TEL")) {
-            vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+            vcard_element_t* element = g_new0(vcard_element_t, 1);
             if (!element) {
                 // Allocation failed
                 continue;
@@ -494,7 +494,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
             element->telephone.number = stanza_text_strdup(child_pointer2);
             g_queue_push_tail(vcard->elements, element);
         } else if (!g_strcmp0(xmpp_stanza_get_name(child_pointer), "EMAIL")) {
-            vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+            vcard_element_t* element = g_new0(vcard_element_t, 1);
             if (!element) {
                 // Allocation failed
                 continue;
@@ -526,7 +526,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
             element->email.userid = stanza_text_strdup(child_pointer2);
             g_queue_push_tail(vcard->elements, element);
         } else if (!g_strcmp0(xmpp_stanza_get_name(child_pointer), "JABBERID")) {
-            vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+            vcard_element_t* element = g_new0(vcard_element_t, 1);
             if (!element) {
                 // Allocation failed
                 continue;
@@ -543,7 +543,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             g_queue_push_tail(vcard->elements, element);
         } else if (!g_strcmp0(xmpp_stanza_get_name(child_pointer), "TITLE")) {
-            vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+            vcard_element_t* element = g_new0(vcard_element_t, 1);
             if (!element) {
                 // Allocation failed
                 continue;
@@ -560,7 +560,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             g_queue_push_tail(vcard->elements, element);
         } else if (!g_strcmp0(xmpp_stanza_get_name(child_pointer), "ROLE")) {
-            vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+            vcard_element_t* element = g_new0(vcard_element_t, 1);
             if (!element) {
                 // Allocation failed
                 continue;
@@ -577,7 +577,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             g_queue_push_tail(vcard->elements, element);
         } else if (!g_strcmp0(xmpp_stanza_get_name(child_pointer), "NOTE")) {
-            vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+            vcard_element_t* element = g_new0(vcard_element_t, 1);
             if (!element) {
                 // Allocation failed
                 continue;
@@ -594,7 +594,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             g_queue_push_tail(vcard->elements, element);
         } else if (!g_strcmp0(xmpp_stanza_get_name(child_pointer), "URL")) {
-            vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+            vcard_element_t* element = g_new0(vcard_element_t, 1);
             if (!element) {
                 // Allocation failed
                 continue;
@@ -1227,11 +1227,11 @@ vcard_print(xmpp_ctx_t* ctx, ProfWin* window, char* jid)
         return;
     }
 
-    _userdata* data = calloc(1, sizeof(_userdata));
+    _userdata* data = g_new0(_userdata, 1);
     data->vcard = vcard_new();
     if (!data || !data->vcard) {
         if (data) {
-            free(data);
+            g_free(data);
         }
 
         cons_show("vCard allocation failed");
@@ -1376,7 +1376,7 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
 void
 vcard_photo(xmpp_ctx_t* ctx, char* jid, char* filename, int index, gboolean open)
 {
-    _userdata* data = calloc(1, sizeof(_userdata));
+    _userdata* data = g_new0(_userdata, 1);
     data->vcard = vcard_new();
 
     if (!data || !data->vcard) {
@@ -1392,7 +1392,7 @@ vcard_photo(xmpp_ctx_t* ctx, char* jid, char* filename, int index, gboolean open
     data->open = open;
 
     if (filename) {
-        data->filename = strdup(filename);
+        data->filename = g_strdup(filename);
     }
 
     auto_char char* id = connection_create_stanza_id();

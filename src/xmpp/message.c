@@ -353,7 +353,7 @@ message_handlers_init(void)
 ProfMessage*
 message_init(void)
 {
-    ProfMessage* message = calloc(1, sizeof(ProfMessage));
+    ProfMessage* message = g_new0(ProfMessage, 1);
 
     message->enc = PROF_MSG_ENC_NONE;
     message->trusted = true;

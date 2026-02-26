@@ -19,15 +19,15 @@ void
 returns_commands(void** state)
 {
     plugins_init();
-    PluginCommand* command1 = calloc(1, sizeof(PluginCommand));
+    PluginCommand* command1 = g_new0(PluginCommand, 1);
     command1->command_name = strdup("command1");
     callbacks_add_command("plugin1", command1);
 
-    PluginCommand* command2 = calloc(1, sizeof(PluginCommand));
+    PluginCommand* command2 = g_new0(PluginCommand, 1);
     command2->command_name = strdup("command2");
     callbacks_add_command("plugin1", command2);
 
-    PluginCommand* command3 = calloc(1, sizeof(PluginCommand));
+    PluginCommand* command3 = g_new0(PluginCommand, 1);
     command3->command_name = strdup("command3");
     callbacks_add_command("plugin2", command3);
 

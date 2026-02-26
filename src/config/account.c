@@ -59,7 +59,7 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
             gchar* startscript, gchar* theme, gchar* tls_policy, gchar* auth_policy,
             gchar* client, int max_sessions)
 {
-    ProfAccount* new_account = calloc(1, sizeof(ProfAccount));
+    ProfAccount* new_account = g_new0(ProfAccount, 1);
 
     new_account->name = name;
 

@@ -9229,7 +9229,7 @@ _url_aesgcm_method(ProfWin* window, const char* cmd_template, gchar* url, gchar*
     auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return;
-    AESGCMDownload* download = calloc(1, sizeof(AESGCMDownload));
+    AESGCMDownload* download = g_new0(AESGCMDownload, 1);
     download->id = get_random_string(4);
     download->url = strdup(url);
     download->filename = strdup(filename);
@@ -9251,7 +9251,7 @@ _download_install_plugin(ProfWin* window, gchar* url, gchar* path)
     auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return FALSE;
-    HTTPDownload* download = calloc(1, sizeof(HTTPDownload));
+    HTTPDownload* download = g_new0(HTTPDownload, 1);
     download->id = get_random_string(4);
     download->url = strdup(url);
     download->filename = strdup(filename);
@@ -9270,7 +9270,7 @@ _url_http_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* p
     auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return;
-    HTTPDownload* download = calloc(1, sizeof(HTTPDownload));
+    HTTPDownload* download = g_new0(HTTPDownload, 1);
     download->id = get_random_string(4);
     download->url = strdup(url);
     download->filename = strdup(filename);
@@ -9678,7 +9678,7 @@ cmd_vcard_add(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+    vcard_element_t* element = g_new0(vcard_element_t, 1);
     if (!element) {
         cons_show_error("Memory allocation failed.");
         return TRUE;

@@ -87,7 +87,7 @@ handle_offline_removes_chat_session(void** state)
     Resource* resourcep = resource_new(resource, RESOURCE_ONLINE, NULL, 10);
     roster_update_presence(barejid, resourcep, NULL);
     chat_session_recipient_active(barejid, resource, FALSE);
-    ProfConsoleWin* console = calloc(1, sizeof(ProfConsoleWin));
+    ProfConsoleWin* console = g_new0(ProfConsoleWin, 1);
     will_return(win_create_console, &console->window);
     wins_init();
     sv_ev_contact_offline(barejid, resource, NULL);
