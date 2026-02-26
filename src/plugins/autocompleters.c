@@ -75,14 +75,14 @@ autocompleters_add(const char* const plugin_name, const char* key, char** items)
         } else {
             Autocomplete new_ac = autocomplete_new();
             autocomplete_add_all(new_ac, items);
-            g_hash_table_insert(key_to_ac, strdup(key), new_ac);
+            g_hash_table_insert(key_to_ac, g_strdup(key), new_ac);
         }
     } else {
         key_to_ac = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)autocomplete_free);
         Autocomplete new_ac = autocomplete_new();
         autocomplete_add_all(new_ac, items);
-        g_hash_table_insert(key_to_ac, strdup(key), new_ac);
-        g_hash_table_insert(plugin_to_acs, strdup(plugin_name), key_to_ac);
+        g_hash_table_insert(key_to_ac, g_strdup(key), new_ac);
+        g_hash_table_insert(plugin_to_acs, g_strdup(plugin_name), key_to_ac);
     }
 }
 
@@ -123,11 +123,11 @@ autocompleters_filepath_add(const char* const plugin_name, const char* prefix)
 {
     GHashTable* prefixes = g_hash_table_lookup(plugin_to_filepath_acs, plugin_name);
     if (prefixes) {
-        g_hash_table_add(prefixes, strdup(prefix));
+        g_hash_table_add(prefixes, g_strdup(prefix));
     } else {
         prefixes = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
-        g_hash_table_add(prefixes, strdup(prefix));
-        g_hash_table_insert(plugin_to_filepath_acs, strdup(plugin_name), prefixes);
+        g_hash_table_add(prefixes, g_strdup(prefix));
+        g_hash_table_insert(plugin_to_filepath_acs, g_strdup(plugin_name), prefixes);
     }
 }
 

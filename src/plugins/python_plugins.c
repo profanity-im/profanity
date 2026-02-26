@@ -130,8 +130,8 @@ python_plugin_create(const char* const filename)
 
     python_check_error();
     if (p_module) {
-        ProfPlugin* plugin = malloc(sizeof(ProfPlugin));
-        plugin->name = strdup(filename);
+        ProfPlugin* plugin = g_new0(ProfPlugin, 1);
+        plugin->name = g_strdup(filename);
         plugin->lang = LANG_PYTHON;
         plugin->module = p_module;
         plugin->init_func = python_init_hook;
