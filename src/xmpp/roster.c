@@ -122,7 +122,7 @@ roster_send_add_to_group(const char* const group, PContact contact)
     new_groups = g_slist_append(new_groups, strdup(group));
     // add an id handler to handle the response
     auto_char char* unique_id = connection_create_stanza_id();
-    GroupData* data = malloc(sizeof(GroupData));
+    GroupData* data = g_new0(GroupData, 1);
     data->group = strdup(group);
     if (p_contact_name(contact)) {
         data->name = strdup(p_contact_name(contact));
@@ -164,7 +164,7 @@ roster_send_remove_from_group(const char* const group, PContact contact)
 
     // add an id handler to handle the response
     auto_char char* unique_id = connection_create_stanza_id();
-    GroupData* data = malloc(sizeof(GroupData));
+    GroupData* data = g_new0(GroupData, 1);
     data->group = strdup(group);
     if (p_contact_name(contact)) {
         data->name = strdup(p_contact_name(contact));

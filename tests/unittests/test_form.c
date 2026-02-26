@@ -13,7 +13,7 @@ connection_get_ctx(void)
 static DataForm*
 _new_form(void)
 {
-    DataForm* form = malloc(sizeof(DataForm));
+    DataForm* form = g_new0(DataForm, 1);
     form->type = NULL;
     form->title = NULL;
     form->instructions = NULL;
@@ -28,7 +28,7 @@ _new_form(void)
 static FormField*
 _new_field(void)
 {
-    FormField* field = malloc(sizeof(FormField));
+    FormField* field = g_new0(FormField, 1);
     field->label = NULL;
     field->type = NULL;
     field->description = NULL;

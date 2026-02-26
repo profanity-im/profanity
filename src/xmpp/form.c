@@ -237,7 +237,7 @@ form_create(xmpp_stanza_t* const form_stanza)
 
                     // handle options
                 } else if (g_strcmp0(child_name, "option") == 0) {
-                    FormOption* option = malloc(sizeof(FormOption));
+                    FormOption* option = g_new0(FormOption, 1);
                     option->label = _get_attr(field_child, "label");
                     option->value = _get_property(field_child, "value");
 

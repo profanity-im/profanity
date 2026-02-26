@@ -50,7 +50,7 @@ cmd_account_list_shows_accounts(void** state)
 {
     gchar* args[] = { "list", NULL };
 
-    gchar** accounts = malloc(sizeof(gchar*) * 4);
+    gchar** accounts = g_new0(gchar, 4);
     accounts[0] = strdup("account1");
     accounts[1] = strdup("account2");
     accounts[2] = strdup("account3");

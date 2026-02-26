@@ -1404,7 +1404,7 @@ prefs_get_room_notify_triggers(void)
 ProfWinPlacement*
 prefs_create_profwin_placement(int titlebar, int mainwin, int statusbar, int inputwin)
 {
-    ProfWinPlacement* placement = malloc(sizeof(ProfWinPlacement));
+    ProfWinPlacement* placement = g_new0(ProfWinPlacement, 1);
     placement->titlebar_pos = titlebar;
     placement->mainwin_pos = mainwin;
     placement->statusbar_pos = statusbar;

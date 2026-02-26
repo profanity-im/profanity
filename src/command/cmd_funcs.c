@@ -4891,7 +4891,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 #endif
     }
 
-    HTTPUpload* upload = malloc(sizeof(HTTPUpload));
+    HTTPUpload* upload = g_new0(HTTPUpload, 1);
     if (!upload) {
         cons_show_error("Memory allocation failed.");
         if (fh) {

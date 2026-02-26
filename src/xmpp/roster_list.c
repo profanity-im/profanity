@@ -91,7 +91,7 @@ roster_create(void)
 {
     assert(roster == NULL);
 
-    roster = malloc(sizeof(ProfRoster));
+    roster = g_new0(ProfRoster, 1);
     roster->contacts = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free, (GDestroyNotify)p_contact_free);
     roster->name_ac = autocomplete_new();
     roster->barejid_ac = autocomplete_new();
@@ -145,7 +145,7 @@ roster_update_presence(const char* const barejid, Resource* resource, GDateTime*
     assert(resource != NULL);
 
     if (!roster_received) {
-        ProfPendingPresence* presence = malloc(sizeof(ProfPendingPresence));
+        ProfPendingPresence* presence = g_new0(ProfPendingPresence, 1);
         presence->barejid = strdup(barejid);
         presence->resource = resource;
         presence->last_activity = last_activity;

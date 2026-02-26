@@ -1690,7 +1690,7 @@ stanza_parse_caps(xmpp_stanza_t* const stanza)
     const char* node = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_NODE);
     const char* ver = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_VER);
 
-    XMPPCaps* caps = (XMPPCaps*)malloc(sizeof(XMPPCaps));
+    XMPPCaps* caps = g_new0(XMPPCaps, 1);
     caps->hash = hash ? strdup(hash) : NULL;
     caps->node = node ? strdup(node) : NULL;
     caps->ver = ver ? strdup(ver) : NULL;
@@ -2134,7 +2134,7 @@ stanza_parse_presence(xmpp_stanza_t* stanza, int* err)
         return NULL;
     }
 
-    XMPPPresence* result = (XMPPPresence*)malloc(sizeof(XMPPPresence));
+    XMPPPresence* result = g_new0(XMPPPresence, 1);
     result->jid = from_jid;
 
     result->show = stanza_get_show(stanza, "online");

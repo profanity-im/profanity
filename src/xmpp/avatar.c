@@ -232,7 +232,7 @@ _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
                 if (id && type) {
                     log_debug("Avatar ID for %s is: %s", from, id);
 
-                    avatar_metadata* data = malloc(sizeof(avatar_metadata));
+                    avatar_metadata* data = g_new0(avatar_metadata, 1);
                     if (data) {
                         data->type = strdup(type);
                         data->id = strdup(id);

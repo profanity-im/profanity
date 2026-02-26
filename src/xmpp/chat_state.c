@@ -55,7 +55,7 @@ static void _send_if_supported(const char* const barejid, void (*send_func)(cons
 ChatState*
 chat_state_new(void)
 {
-    ChatState* new_state = malloc(sizeof(struct prof_chat_state_t));
+    ChatState* new_state = g_new0(struct prof_chat_state_t, 1);
     new_state->type = CHAT_STATE_GONE;
     new_state->timer = g_timer_new();
 

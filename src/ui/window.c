@@ -96,7 +96,7 @@ _win_create_simple_layout(void)
 {
     int cols = getmaxx(stdscr);
 
-    ProfLayoutSimple* layout = malloc(sizeof(ProfLayoutSimple));
+    ProfLayoutSimple* layout = g_new0(ProfLayoutSimple, 1);
     layout->base.type = LAYOUT_SIMPLE;
     layout->base.win = newpad(PAD_SIZE, cols);
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
@@ -113,7 +113,7 @@ _win_create_split_layout(void)
 {
     int cols = getmaxx(stdscr);
 
-    ProfLayoutSplit* layout = malloc(sizeof(ProfLayoutSplit));
+    ProfLayoutSplit* layout = g_new0(ProfLayoutSplit, 1);
     layout->base.type = LAYOUT_SPLIT;
     layout->base.win = newpad(PAD_SIZE, cols);
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
@@ -131,7 +131,7 @@ _win_create_split_layout(void)
 ProfWin*
 win_create_console(void)
 {
-    ProfConsoleWin* new_win = malloc(sizeof(ProfConsoleWin));
+    ProfConsoleWin* new_win = g_new0(ProfConsoleWin, 1);
     new_win->window.type = WIN_CONSOLE;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_split_layout();
@@ -142,7 +142,7 @@ win_create_console(void)
 ProfWin*
 win_create_chat(const char* const barejid)
 {
-    ProfChatWin* new_win = malloc(sizeof(ProfChatWin));
+    ProfChatWin* new_win = g_new0(ProfChatWin, 1);
     new_win->window.type = WIN_CHAT;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
@@ -172,12 +172,12 @@ win_create_chat(const char* const barejid)
 ProfWin*
 win_create_muc(const char* const roomjid)
 {
-    ProfMucWin* new_win = malloc(sizeof(ProfMucWin));
+    ProfMucWin* new_win = g_new0(ProfMucWin, 1);
     int cols = getmaxx(stdscr);
 
     new_win->window.type = WIN_MUC;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
-    ProfLayoutSplit* layout = malloc(sizeof(ProfLayoutSplit));
+    ProfLayoutSplit* layout = g_new0(ProfLayoutSplit, 1);
     layout->base.type = LAYOUT_SPLIT;
 
     if (prefs_get_boolean(PREF_OCCUPANTS)) {
@@ -229,7 +229,7 @@ win_create_muc(const char* const roomjid)
 ProfWin*
 win_create_config(const char* const roomjid, DataForm* form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void* userdata)
 {
-    ProfConfWin* new_win = malloc(sizeof(ProfConfWin));
+    ProfConfWin* new_win = g_new0(ProfConfWin, 1);
     new_win->window.type = WIN_CONFIG;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
@@ -247,7 +247,7 @@ win_create_config(const char* const roomjid, DataForm* form, ProfConfWinCallback
 ProfWin*
 win_create_private(const char* const fulljid)
 {
-    ProfPrivateWin* new_win = malloc(sizeof(ProfPrivateWin));
+    ProfPrivateWin* new_win = g_new0(ProfPrivateWin, 1);
     new_win->window.type = WIN_PRIVATE;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
@@ -264,7 +264,7 @@ win_create_private(const char* const fulljid)
 ProfWin*
 win_create_xmlconsole(void)
 {
-    ProfXMLWin* new_win = malloc(sizeof(ProfXMLWin));
+    ProfXMLWin* new_win = g_new0(ProfXMLWin, 1);
     new_win->window.type = WIN_XML;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
@@ -277,7 +277,7 @@ win_create_xmlconsole(void)
 ProfWin*
 win_create_plugin(const char* const plugin_name, const char* const tag)
 {
-    ProfPluginWin* new_win = malloc(sizeof(ProfPluginWin));
+    ProfPluginWin* new_win = g_new0(ProfPluginWin, 1);
     new_win->window.type = WIN_PLUGIN;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
@@ -293,7 +293,7 @@ win_create_plugin(const char* const plugin_name, const char* const tag)
 ProfWin*
 win_create_vcard(vCard* vcard)
 {
-    ProfVcardWin* new_win = malloc(sizeof(ProfVcardWin));
+    ProfVcardWin* new_win = g_new0(ProfVcardWin, 1);
     new_win->window.type = WIN_VCARD;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
@@ -1622,7 +1622,7 @@ win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const ch
 {
     GDateTime* time = g_date_time_new_now_local();
 
-    DeliveryReceipt* receipt = malloc(sizeof(struct delivery_receipt_t));
+    DeliveryReceipt* receipt = g_new0(struct delivery_receipt_t, 1);
     receipt->received = FALSE;
 
     const char* myjid = connection_get_fulljid();
