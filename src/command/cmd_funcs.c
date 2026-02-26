@@ -1074,7 +1074,6 @@ cmd_script(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
-/* escape a string into csv and write it to the file descriptor */
 static void
 _append_csv_escaped(GString* buffer, const char* const str)
 {
