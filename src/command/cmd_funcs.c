@@ -8714,8 +8714,8 @@ cmd_omemo_trust(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    char* fingerprint;
-    char* barejid;
+    gchar* fingerprint;
+    gchar* barejid;
 
     /* Contact not provided */
     if (!args[2]) {
@@ -8731,7 +8731,7 @@ cmd_omemo_trust(ProfWin* window, const char* const command, gchar** args)
         barejid = chatwin->barejid;
     } else {
         fingerprint = args[2];
-        char* contact = args[1];
+        gchar* contact = args[1];
         barejid = roster_barejid_from_name(contact);
         if (barejid == NULL) {
             barejid = contact;
@@ -8740,7 +8740,7 @@ cmd_omemo_trust(ProfWin* window, const char* const command, gchar** args)
 
     omemo_trust(barejid, fingerprint);
 
-    auto_char char* unformatted_fingerprint = malloc(strlen(fingerprint));
+    auto_gchar gchar* unformatted_fingerprint = g_malloc(strlen(fingerprint) + 1);
     int i;
     int j;
     for (i = 0, j = 0; fingerprint[i] != '\0'; i++) {
@@ -8781,8 +8781,8 @@ cmd_omemo_untrust(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    char* fingerprint;
-    char* barejid;
+    gchar* fingerprint;
+    gchar* barejid;
 
     /* Contact not provided */
     if (!args[2]) {
@@ -8807,7 +8807,7 @@ cmd_omemo_untrust(ProfWin* window, const char* const command, gchar** args)
 
     omemo_untrust(barejid, fingerprint);
 
-    auto_char char* unformatted_fingerprint = malloc(strlen(fingerprint));
+    auto_gchar gchar* unformatted_fingerprint = g_malloc(strlen(fingerprint) + 1);
     int i, j;
     for (i = 0, j = 0; fingerprint[i] != '\0'; i++) {
         if (!g_ascii_isxdigit(fingerprint[i])) {
