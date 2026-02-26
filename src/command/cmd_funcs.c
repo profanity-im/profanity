@@ -1075,29 +1075,19 @@ cmd_script(ProfWin* window, const char* const command, gchar** args)
 }
 
 /* escape a string into csv and write it to the file descriptor */
-static int
-_writecsv(int fd, const char* const str)
+static void
+_append_csv_escaped(GString* buffer, const char* const str)
 {
-    if (!str)
-        return 0;
-    size_t len = strlen(str);
+    if (!str) {
+        return;
+    }
 
-    auto_char char* s = malloc(2 * len * sizeof(char));
-    char* c = s;
-    for (size_t i = 0; i < strlen(str); i++) {
-        if (str[i] != '"')
-            *c++ = str[i];
-        else {
-            *c++ = '"';
-            *c++ = '"';
-            len++;
+    for (const char* p = str; *p; p++) {
+        if (*p == '"') {
+            g_string_append_c(buffer, '"');
         }
+        g_string_append_c(buffer, *p);
     }
-    if (-1 == write(fd, s, len)) {
-        cons_show("error: failed to write '%s' to the requested file: %s", s, strerror(errno));
-        return -1;
-    }
-    return 0;
 }
 
 gboolean
@@ -1109,62 +1099,45 @@ cmd_export(ProfWin* window, const char* const command, gchar** args)
         cons_show("You are not currently connected.");
         cons_show("");
         return TRUE;
-    } else {
-        int fd;
-        GSList* list = NULL;
-        auto_char char* path = get_expanded_path(args[0]);
+    }
 
-        fd = open(path, O_WRONLY | O_CREAT, 00600);
-
-        if (-1 == fd) {
-            cons_show("error: cannot open %s: %s", args[0], strerror(errno));
-            cons_show("");
-            return TRUE;
-        }
-
-        if (-1 == write(fd, "jid,name\n", strlen("jid,name\n")))
-            goto write_error;
-
-        list = roster_get_contacts(ROSTER_ORD_NAME);
-        if (list) {
-            GSList* curr = list;
-            while (curr) {
-                PContact contact = curr->data;
-                const char* jid = p_contact_barejid(contact);
-                const char* name = p_contact_name(contact);
-
-                /* write the data to the file */
-                if (-1 == write(fd, "\"", 1))
-                    goto write_error;
-                if (-1 == _writecsv(fd, jid))
-                    goto write_error;
-                if (-1 == write(fd, "\",\"", 3))
-                    goto write_error;
-                if (-1 == _writecsv(fd, name))
-                    goto write_error;
-                if (-1 == write(fd, "\"\n", 2))
-                    goto write_error;
-
-                /* loop */
-                curr = g_slist_next(curr);
-            }
-            cons_show("Contacts exported successfully");
-            cons_show("");
-        } else {
-            cons_show("No contacts in roster.");
-            cons_show("");
-        }
-
-        g_slist_free(list);
-        close(fd);
-        return TRUE;
-write_error:
-        cons_show("error: write failed: %s", strerror(errno));
+    GSList* list = roster_get_contacts(ROSTER_ORD_NAME);
+    if (!list) {
+        cons_show("No contacts in roster.");
         cons_show("");
-        g_slist_free(list);
-        close(fd);
         return TRUE;
     }
+
+    auto_gchar gchar* path = get_expanded_path(args[0]);
+    GString* buffer = g_string_new("jid,name\n");
+
+    GSList* curr = list;
+    while (curr) {
+        PContact contact = curr->data;
+        const gchar* jid = p_contact_barejid(contact);
+        const gchar* name = p_contact_name(contact);
+
+        g_string_append_c(buffer, '"');
+        _append_csv_escaped(buffer, jid);
+        g_string_append(buffer, "\",\"");
+        _append_csv_escaped(buffer, name);
+        g_string_append(buffer, "\"\n");
+
+        curr = g_slist_next(curr);
+    }
+
+    auto_gerror GError* error = NULL;
+    if (!g_file_set_contents(path, buffer->str, buffer->len, &error)) {
+        cons_show_error("error: cannot save %s: %s", args[0], error->message);
+    } else {
+        g_chmod(path, S_IRUSR | S_IWUSR);
+        cons_show("Contacts exported successfully");
+    }
+
+    g_string_free(buffer, TRUE);
+    g_slist_free(list);
+
+    return TRUE;
 }
 
 gboolean
