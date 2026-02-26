@@ -679,12 +679,12 @@ get_file_paths_recursive(const char* path, GSList** contents)
     }
 }
 
-char*
+gchar*
 get_random_string(int length)
 {
     GRand* prng;
-    char* rand;
-    char alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    gchar* rand;
+    gchar alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     int endrange = sizeof(alphabet) - 1;
 
     rand = g_malloc0(length + 1);

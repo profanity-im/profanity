@@ -206,7 +206,7 @@ int is_regular_file(const char* path);
 int is_dir(const char* path);
 void get_file_paths_recursive(const char* directory, GSList** contents);
 
-char* get_random_string(int length);
+gchar* get_random_string(int length);
 
 gboolean call_external(gchar** argv);
 gchar** format_call_external_argv(const char* template, const char* url, const char* filename);

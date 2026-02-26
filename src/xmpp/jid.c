@@ -203,7 +203,7 @@ jid_fulljid_or_barejid(Jid* jid)
 gchar*
 jid_random_resource(void)
 {
-    auto_char char* rand = get_random_string(4);
+    auto_gchar gchar* rand = get_random_string(4);
 
     gchar* result = g_strdup_printf("profanity.%s", rand);
 

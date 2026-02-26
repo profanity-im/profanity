@@ -50,7 +50,7 @@
 
 typedef struct aesgcm_download_t
 {
-    char* id;
+    gchar* id;
     char* url;
     char* filename;
     char* cmd_template;

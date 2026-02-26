@@ -830,10 +830,10 @@ connection_free_uuid(char* uuid)
     }
 }
 
-char*
+gchar*
 connection_create_stanza_id(void)
 {
-    auto_char char* rndid = get_random_string(CON_RAND_ID_LEN);
+    auto_gchar gchar* rndid = get_random_string(CON_RAND_ID_LEN);
     assert(rndid != NULL);
 
     auto_gchar gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA1,
