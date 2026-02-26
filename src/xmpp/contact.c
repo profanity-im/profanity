@@ -66,7 +66,7 @@ p_contact_new(const char* const barejid, const char* const name,
               GSList* groups, const char* const subscription,
               const char* const offline_message, gboolean pending_out)
 {
-    PContact contact = malloc(sizeof(struct p_contact_t));
+    PContact contact = g_new0(struct p_contact_t, 1);
     contact->barejid = strdup(barejid);
     contact->barejid_collate_key = g_utf8_collate_key(contact->barejid, -1);
 
