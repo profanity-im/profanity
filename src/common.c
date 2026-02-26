@@ -687,7 +687,7 @@ get_random_string(int length)
     char alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     int endrange = sizeof(alphabet) - 1;
 
-    rand = calloc(length + 1, sizeof(char));
+    rand = g_malloc0(length + 1);
 
     prng = g_rand_new();
 
