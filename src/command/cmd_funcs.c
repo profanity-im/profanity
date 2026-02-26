@@ -206,7 +206,7 @@ cmd_tls_certpath(ProfWin* window, const char* const command, gchar** args)
         cons_show("Certificate path defaulted to finding system certpath.");
         return TRUE;
     } else if (args[1] == NULL) {
-        auto_char char* path = prefs_get_tls_certpath();
+        auto_gchar gchar* path = prefs_get_tls_certpath();
         if (path) {
             cons_show("Trusted certificate path: %s", path);
         } else {

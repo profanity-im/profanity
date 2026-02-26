@@ -244,7 +244,7 @@ _conn_apply_settings(const char* const jid, const char* const passwd, const char
         return FALSE;
     }
 
-    auto_char char* cert_path = prefs_get_tls_certpath();
+    auto_gchar gchar* cert_path = prefs_get_tls_certpath();
     if (cert_path) {
         xmpp_conn_set_capath(conn.xmpp_conn, cert_path);
     }

@@ -1319,7 +1319,7 @@ cons_occupants_setting(void)
     else
         cons_show("Occupants wrap (/occupants)         : OFF");
 
-    auto_char char* occupants_ch = prefs_get_occupants_char();
+    auto_gchar gchar* occupants_ch = prefs_get_occupants_char();
     if (occupants_ch) {
         cons_show("Occupants char (/occupants)         : %s", occupants_ch);
     } else {
@@ -1332,7 +1332,7 @@ cons_occupants_setting(void)
     int size = prefs_get_occupants_size();
     cons_show("Occupants size (/occupants)         : %d", size);
 
-    auto_char char* header_ch = prefs_get_occupants_header_char();
+    auto_gchar gchar* header_ch = prefs_get_occupants_header_char();
     if (header_ch) {
         cons_show("Occupants header char (/occupants)  : %s", header_ch);
     } else {
@@ -1449,42 +1449,42 @@ cons_roster_setting(void)
     else
         cons_show("Roster offline (/roster)            : hide");
 
-    auto_char char* header_ch = prefs_get_roster_header_char();
+    auto_gchar gchar* header_ch = prefs_get_roster_header_char();
     if (header_ch) {
         cons_show("Roster header char (/roster)        : %s", header_ch);
     } else {
         cons_show("Roster header char (/roster)        : none");
     }
 
-    auto_char char* contact_ch = prefs_get_roster_contact_char();
+    auto_gchar gchar* contact_ch = prefs_get_roster_contact_char();
     if (contact_ch) {
         cons_show("Roster contact char (/roster)       : %s", contact_ch);
     } else {
         cons_show("Roster contact char (/roster)       : none");
     }
 
-    auto_char char* resource_ch = prefs_get_roster_resource_char();
+    auto_gchar gchar* resource_ch = prefs_get_roster_resource_char();
     if (resource_ch) {
         cons_show("Roster resource char (/roster)      : %s", resource_ch);
     } else {
         cons_show("Roster resource char (/roster)      : none");
     }
 
-    auto_char char* room_ch = prefs_get_roster_room_char();
+    auto_gchar gchar* room_ch = prefs_get_roster_room_char();
     if (room_ch) {
         cons_show("Roster room char (/roster)          : %s", room_ch);
     } else {
         cons_show("Roster room char (/roster)          : none");
     }
 
-    auto_char char* room_priv_ch = prefs_get_roster_room_private_char();
+    auto_gchar gchar* room_priv_ch = prefs_get_roster_room_private_char();
     if (room_priv_ch) {
         cons_show("Roster room private char (/roster)  : %s", room_priv_ch);
     } else {
         cons_show("Roster room private char (/roster)  : none");
     }
 
-    auto_char char* private_ch = prefs_get_roster_private_char();
+    auto_gchar gchar* private_ch = prefs_get_roster_private_char();
     if (private_ch) {
         cons_show("Roster private char (/roster)       : %s", private_ch);
     } else {

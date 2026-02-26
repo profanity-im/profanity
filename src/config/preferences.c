@@ -78,10 +78,10 @@ static Autocomplete boolean_choice_ac;
 static Autocomplete room_trigger_ac;
 
 static void _save_prefs(void);
-static const char* _get_group(preference_t pref);
-static const char* _get_key(preference_t pref);
+static const gchar* _get_group(preference_t pref);
+static const gchar* _get_key(preference_t pref);
 static gboolean _get_default_boolean(preference_t pref);
-static char* _get_default_string(preference_t pref);
+static gchar* _get_default_string(preference_t pref);
 
 static void
 _prefs_load(void)
@@ -110,7 +110,7 @@ _prefs_load(void)
     // migrate pre 0.5.0 time settings
     if (g_key_file_has_key(prefs, PREF_GROUP_UI, "time", NULL)) {
         auto_gchar gchar* time = g_key_file_get_string(prefs, PREF_GROUP_UI, "time", NULL);
-        char* val = time ? time : "off";
+        gchar* val = time ? time : "off";
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.console", val);
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.chat", val);
         g_key_file_set_string(prefs, PREF_GROUP_UI, "time.muc", val);
@@ -179,7 +179,7 @@ _prefs_load(void)
         if (values && !g_key_file_has_key(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", NULL)) {
             // First value in array is `require_save` option -- we ignore that
             // one as there is no such option anymore.
-            char* executable = values[1];
+            gchar* executable = values[1];
 
             g_key_file_set_string(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", executable);
             g_key_file_set_comment(prefs, PREF_GROUP_EXECUTABLES, "url.open.cmd", " Migrated from url.open.cmd[DEF]. `require_save` option has been removed in v0.10 and was discarded.", NULL);
@@ -275,7 +275,7 @@ prefs_reload(void)
 }
 
 void
-prefs_load(const char* config_file)
+prefs_load(const gchar* config_file)
 {
     if (config_file == NULL) {
         load_config_keyfile(&prefs_prof_keyfile, FILE_PROFRC);
@@ -288,7 +288,7 @@ prefs_load(const char* config_file)
 }
 
 static void
-prefs_changes_print(const char* key, const char* newval, const char* oldval, gboolean* banner_shown)
+prefs_changes_print(const gchar* key, const gchar* newval, const gchar* oldval, gboolean* banner_shown)
 {
 #define PREFS_CHANGES_FORMAT_STRING "%-32s | %-20s | %-20s"
     if (!*banner_shown) {
@@ -302,7 +302,7 @@ prefs_changes_print(const char* key, const char* newval, const char* oldval, gbo
 void
 prefs_changes(void)
 {
-    const char* undef = "";
+    const gchar* undef = "";
     prof_keyfile_t saved;
     if (!load_custom_keyfile(&saved, g_strdup(prefs_prof_keyfile.filename)))
         return;
@@ -374,7 +374,7 @@ prefs_close(void)
 }
 
 gchar*
-prefs_autocomplete_boolean_choice(const char* const prefix, gboolean previous, void* context)
+prefs_autocomplete_boolean_choice(const gchar* const prefix, gboolean previous, void* context)
 {
     return autocomplete_complete(boolean_choice_ac, prefix, TRUE, previous);
 }
@@ -386,7 +386,7 @@ prefs_reset_boolean_choice(void)
 }
 
 gchar*
-prefs_autocomplete_room_trigger(const char* const prefix, gboolean previous, void* context)
+prefs_autocomplete_room_trigger(const gchar* const prefix, gboolean previous, void* context)
 {
     return autocomplete_complete(room_trigger_ac, prefix, TRUE, previous);
 }
@@ -412,7 +412,7 @@ prefs_do_chat_notify(gboolean current_win)
 }
 
 GList*
-prefs_message_get_triggers(const char* const message)
+prefs_message_get_triggers(const gchar* const message)
 {
     GList* result = NULL;
 
@@ -431,8 +431,8 @@ prefs_message_get_triggers(const char* const message)
 }
 
 gboolean
-prefs_do_room_notify(gboolean current_win, const char* const roomjid, const char* const mynick,
-                     const char* const theirnick, const char* const message, gboolean mention, gboolean trigger_found)
+prefs_do_room_notify(gboolean current_win, const gchar* const roomjid, const gchar* const mynick,
+                     const gchar* const theirnick, const gchar* const message, gboolean mention, gboolean trigger_found)
 {
     if (g_strcmp0(mynick, theirnick) == 0) {
         return FALSE;
@@ -481,7 +481,7 @@ prefs_do_room_notify(gboolean current_win, const char* const roomjid, const char
 }
 
 gboolean
-prefs_do_room_notify_mention(const char* const roomjid, int unread, gboolean mention, gboolean trigger)
+prefs_do_room_notify_mention(const gchar* const roomjid, int unread, gboolean mention, gboolean trigger)
 {
     gboolean notify_room = FALSE;
     if (g_key_file_has_key(prefs, roomjid, "notify", NULL)) {
@@ -517,61 +517,61 @@ prefs_do_room_notify_mention(const char* const roomjid, int unread, gboolean men
 }
 
 void
-prefs_set_room_notify(const char* const roomjid, gboolean value)
+prefs_set_room_notify(const gchar* const roomjid, gboolean value)
 {
     g_key_file_set_boolean(prefs, roomjid, "notify", value);
 }
 
 void
-prefs_set_room_notify_mention(const char* const roomjid, gboolean value)
+prefs_set_room_notify_mention(const gchar* const roomjid, gboolean value)
 {
     g_key_file_set_boolean(prefs, roomjid, "notify.mention", value);
 }
 
 void
-prefs_set_room_notify_trigger(const char* const roomjid, gboolean value)
+prefs_set_room_notify_trigger(const gchar* const roomjid, gboolean value)
 {
     g_key_file_set_boolean(prefs, roomjid, "notify.trigger", value);
 }
 
 gboolean
-prefs_has_room_notify(const char* const roomjid)
+prefs_has_room_notify(const gchar* const roomjid)
 {
     return g_key_file_has_key(prefs, roomjid, "notify", NULL);
 }
 
 gboolean
-prefs_has_room_notify_mention(const char* const roomjid)
+prefs_has_room_notify_mention(const gchar* const roomjid)
 {
     return g_key_file_has_key(prefs, roomjid, "notify.mention", NULL);
 }
 
 gboolean
-prefs_has_room_notify_trigger(const char* const roomjid)
+prefs_has_room_notify_trigger(const gchar* const roomjid)
 {
     return g_key_file_has_key(prefs, roomjid, "notify.trigger", NULL);
 }
 
 gboolean
-prefs_get_room_notify(const char* const roomjid)
+prefs_get_room_notify(const gchar* const roomjid)
 {
     return g_key_file_get_boolean(prefs, roomjid, "notify", NULL);
 }
 
 gboolean
-prefs_get_room_notify_mention(const char* const roomjid)
+prefs_get_room_notify_mention(const gchar* const roomjid)
 {
     return g_key_file_get_boolean(prefs, roomjid, "notify.mention", NULL);
 }
 
 gboolean
-prefs_get_room_notify_trigger(const char* const roomjid)
+prefs_get_room_notify_trigger(const gchar* const roomjid)
 {
     return g_key_file_get_boolean(prefs, roomjid, "notify.trigger", NULL);
 }
 
 gboolean
-prefs_reset_room_notify(const char* const roomjid)
+prefs_reset_room_notify(const gchar* const roomjid)
 {
     if (g_key_file_has_group(prefs, roomjid)) {
         g_key_file_remove_group(prefs, roomjid, NULL);
@@ -584,8 +584,8 @@ prefs_reset_room_notify(const char* const roomjid)
 gboolean
 prefs_get_boolean(preference_t pref)
 {
-    const char* group = _get_group(pref);
-    const char* key = _get_key(pref);
+    const gchar* group = _get_group(pref);
+    const gchar* key = _get_key(pref);
     gboolean def = _get_default_boolean(pref);
 
     if (!g_key_file_has_key(prefs, group, key, NULL)) {
@@ -598,8 +598,8 @@ prefs_get_boolean(preference_t pref)
 void
 prefs_set_boolean(preference_t pref, gboolean value)
 {
-    const char* group = _get_group(pref);
-    const char* key = _get_key(pref);
+    const gchar* group = _get_group(pref);
+    const gchar* key = _get_key(pref);
     g_key_file_set_boolean(prefs, group, key, value);
 }
 
@@ -614,9 +614,9 @@ prefs_set_boolean(preference_t pref, gboolean value)
 gchar*
 prefs_get_string(preference_t pref)
 {
-    const char* group = _get_group(pref);
-    const char* key = _get_key(pref);
-    char* def = _get_default_string(pref);
+    const gchar* group = _get_group(pref);
+    const gchar* key = _get_key(pref);
+    gchar* def = _get_default_string(pref);
 
     gchar* result = g_key_file_get_string(prefs, group, key, NULL);
 
@@ -643,9 +643,9 @@ prefs_get_string(preference_t pref)
 gchar*
 prefs_get_string_with_locale(preference_t pref, gchar* locale)
 {
-    const char* group = _get_group(pref);
-    const char* key = _get_key(pref);
-    char* def = _get_default_string(pref);
+    const gchar* group = _get_group(pref);
+    const gchar* key = _get_key(pref);
+    gchar* def = _get_default_string(pref);
 
     gchar* result = g_key_file_get_locale_string(prefs, group, key, locale, NULL);
 
@@ -674,8 +674,8 @@ prefs_get_string_with_locale(preference_t pref, gchar* locale)
 void
 prefs_set_string(preference_t pref, const gchar* new_value)
 {
-    const char* group = _get_group(pref);
-    const char* key = _get_key(pref);
+    const gchar* group = _get_group(pref);
+    const gchar* key = _get_key(pref);
     if (new_value == NULL) {
         g_key_file_remove_key(prefs, group, key, NULL);
     } else {
@@ -684,10 +684,10 @@ prefs_set_string(preference_t pref, const gchar* new_value)
 }
 
 void
-prefs_set_string_with_option(preference_t pref, char* option, char* value)
+prefs_set_string_with_option(preference_t pref, gchar* option, gchar* value)
 {
-    const char* group = _get_group(pref);
-    const char* key = _get_key(pref);
+    const gchar* group = _get_group(pref);
+    const gchar* key = _get_key(pref);
     if (value == NULL) {
         g_key_file_remove_key(prefs, group, key, NULL);
     } else {
@@ -696,10 +696,10 @@ prefs_set_string_with_option(preference_t pref, char* option, char* value)
 }
 
 void
-prefs_set_string_list_with_option(preference_t pref, char* option, const gchar* const* values)
+prefs_set_string_list_with_option(preference_t pref, gchar* option, const gchar* const* values)
 {
-    const char* group = _get_group(pref);
-    const char* key = _get_key(pref);
+    const gchar* group = _get_group(pref);
+    const gchar* key = _get_key(pref);
     if (values == NULL || *values == NULL) {
         if (g_strcmp0(option, "*") == 0) {
             g_key_file_set_string_list(prefs, group, key, NULL, 0);
@@ -719,11 +719,11 @@ prefs_set_string_list_with_option(preference_t pref, char* option, const gchar* 
     }
 }
 
-char*
+gchar*
 prefs_get_tls_certpath(void)
 {
-    const char* group = _get_group(PREF_TLS_CERTPATH);
-    const char* key = _get_key(PREF_TLS_CERTPATH);
+    const gchar* group = _get_group(PREF_TLS_CERTPATH);
+    const gchar* key = _get_key(PREF_TLS_CERTPATH);
 
     auto_gchar gchar* setting = g_key_file_get_string(prefs, group, key, NULL);
 
@@ -751,7 +751,7 @@ prefs_get_tls_certpath(void)
         return NULL;
     }
 
-    char* result = strdup(setting);
+    gchar* result = g_strdup(setting);
 
     return result;
 }
@@ -955,14 +955,14 @@ prefs_get_plugins(void)
 }
 
 void
-prefs_add_plugin(const char* const name)
+prefs_add_plugin(const gchar* const name)
 {
     conf_string_list_add(prefs, PREF_GROUP_PLUGINS, "load", name);
     _save_prefs();
 }
 
 void
-prefs_remove_plugin(const char* const name)
+prefs_remove_plugin(const gchar* const name)
 {
     conf_string_list_remove(prefs, PREF_GROUP_PLUGINS, "load", name);
     _save_prefs();
@@ -996,7 +996,7 @@ prefs_get_occupants_char(void)
 }
 
 void
-prefs_set_occupants_char(char* ch)
+prefs_set_occupants_char(gchar* ch)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, PREF_GROUP_UI, "occupants.char", ch);
@@ -1041,7 +1041,7 @@ prefs_get_occupants_header_char(void)
 }
 
 void
-prefs_set_occupants_header_char(char* ch)
+prefs_set_occupants_header_char(gchar* ch)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, PREF_GROUP_UI, "occupants.header.char", ch);
@@ -1075,7 +1075,7 @@ prefs_get_roster_size(void)
 }
 
 static gchar*
-_prefs_get_encryption_char(const char* const ch, const char* const pref_group, const char* const key)
+_prefs_get_encryption_char(const gchar* const ch, const gchar* const pref_group, const gchar* const key)
 {
     gchar* result = NULL;
 
@@ -1090,7 +1090,7 @@ _prefs_get_encryption_char(const char* const ch, const char* const pref_group, c
 }
 
 static gboolean
-_prefs_set_encryption_char(const char* const ch, const char* const pref_group, const char* const key)
+_prefs_set_encryption_char(const gchar* const ch, const gchar* const pref_group, const gchar* const key)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, pref_group, key, ch);
@@ -1108,7 +1108,7 @@ prefs_get_otr_char(void)
 }
 
 gboolean
-prefs_set_otr_char(char* ch)
+prefs_set_otr_char(gchar* ch)
 {
     return _prefs_set_encryption_char(ch, PREF_GROUP_OTR, "otr.char");
 }
@@ -1120,7 +1120,7 @@ prefs_get_pgp_char(void)
 }
 
 gboolean
-prefs_set_pgp_char(char* ch)
+prefs_set_pgp_char(gchar* ch)
 {
     return _prefs_set_encryption_char(ch, PREF_GROUP_PGP, "pgp.char");
 }
@@ -1132,7 +1132,7 @@ prefs_get_ox_char(void)
 }
 
 gboolean
-prefs_set_ox_char(char* ch)
+prefs_set_ox_char(gchar* ch)
 {
     return _prefs_set_encryption_char(ch, PREF_GROUP_OX, "ox.char");
 }
@@ -1144,7 +1144,7 @@ prefs_get_omemo_char(void)
 }
 
 gboolean
-prefs_set_omemo_char(char* ch)
+prefs_set_omemo_char(gchar* ch)
 {
     return _prefs_set_encryption_char(ch, PREF_GROUP_OMEMO, "omemo.char");
 }
@@ -1156,7 +1156,7 @@ prefs_get_roster_header_char(void)
 }
 
 void
-prefs_set_roster_header_char(char* ch)
+prefs_set_roster_header_char(gchar* ch)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.header.char", ch);
@@ -1178,7 +1178,7 @@ prefs_get_roster_contact_char(void)
 }
 
 void
-prefs_set_roster_contact_char(char* ch)
+prefs_set_roster_contact_char(gchar* ch)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.contact.char", ch);
@@ -1200,7 +1200,7 @@ prefs_get_roster_resource_char(void)
 }
 
 void
-prefs_set_roster_resource_char(char* ch)
+prefs_set_roster_resource_char(gchar* ch)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.resource.char", ch);
@@ -1222,7 +1222,7 @@ prefs_get_roster_private_char(void)
 }
 
 void
-prefs_set_roster_private_char(char* ch)
+prefs_set_roster_private_char(gchar* ch)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.private.char", ch);
@@ -1244,7 +1244,7 @@ prefs_get_roster_room_char(void)
 }
 
 void
-prefs_set_roster_room_char(char* ch)
+prefs_set_roster_room_char(gchar* ch)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.char", ch);
@@ -1266,7 +1266,7 @@ prefs_get_roster_room_private_char(void)
 }
 
 void
-prefs_set_roster_room_private_char(char* ch)
+prefs_set_roster_room_private_char(gchar* ch)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, PREF_GROUP_UI, "roster.rooms.private.char", ch);
@@ -1353,7 +1353,7 @@ prefs_get_correction_char(void)
 }
 
 void
-prefs_set_correction_char(char* ch)
+prefs_set_correction_char(gchar* ch)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, PREF_GROUP_UI, "correction.char", ch);
@@ -1363,7 +1363,7 @@ prefs_set_correction_char(char* ch)
 }
 
 gboolean
-prefs_add_room_notify_trigger(const char* const text)
+prefs_add_room_notify_trigger(const gchar* const text)
 {
     gboolean res = conf_string_list_add(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
 
@@ -1375,7 +1375,7 @@ prefs_add_room_notify_trigger(const char* const text)
 }
 
 gboolean
-prefs_remove_room_notify_trigger(const char* const text)
+prefs_remove_room_notify_trigger(const gchar* const text)
 {
     gboolean res = conf_string_list_remove(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", text);
     _save_prefs();
@@ -1695,7 +1695,7 @@ prefs_inputwin_pos_down(void)
 }
 
 gboolean
-prefs_add_alias(const char* const name, const char* const value)
+prefs_add_alias(const gchar* const name, const gchar* const value)
 {
     if (g_key_file_has_key(prefs, PREF_GROUP_ALIAS, name, NULL)) {
         return FALSE;
@@ -1706,13 +1706,13 @@ prefs_add_alias(const char* const name, const char* const value)
 }
 
 gchar*
-prefs_get_alias(const char* const name)
+prefs_get_alias(const gchar* const name)
 {
     return g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
 }
 
 gboolean
-prefs_remove_alias(const char* const name)
+prefs_remove_alias(const gchar* const name)
 {
     if (!g_key_file_has_key(prefs, PREF_GROUP_ALIAS, name, NULL)) {
         return FALSE;
@@ -1742,13 +1742,13 @@ prefs_get_aliases(void)
         auto_gcharv gchar** keys = g_key_file_get_keys(prefs, PREF_GROUP_ALIAS, &len, NULL);
 
         for (gsize i = 0; i < len; i++) {
-            char* name = keys[i];
+            gchar* name = keys[i];
             auto_gchar gchar* value = g_key_file_get_string(prefs, PREF_GROUP_ALIAS, name, NULL);
 
             if (value) {
-                ProfAlias* alias = malloc(sizeof(struct prof_alias_t));
-                alias->name = strdup(name);
-                alias->value = strdup(value);
+                ProfAlias* alias = g_new0(struct prof_alias_t, 1);
+                alias->name = g_strdup(name);
+                alias->value = g_strdup(value);
 
                 result = g_list_insert_sorted(result, alias, (GCompareFunc)_alias_cmp);
             }
@@ -1761,9 +1761,9 @@ prefs_get_aliases(void)
 void
 _free_alias(ProfAlias* alias)
 {
-    FREE_SET_NULL(alias->name);
-    FREE_SET_NULL(alias->value);
-    FREE_SET_NULL(alias);
+    GFREE_SET_NULL(alias->name);
+    GFREE_SET_NULL(alias->value);
+    GFREE_SET_NULL(alias);
 }
 
 void
@@ -1781,7 +1781,7 @@ _save_prefs(void)
 // get the preference group for a specific preference
 // for example the PREF_BEEP setting ("beep" in .profrc, see _get_key) belongs
 // to the [ui] section.
-static const char*
+static const gchar*
 _get_group(preference_t pref)
 {
     switch (pref) {
@@ -1942,7 +1942,7 @@ _get_group(preference_t pref)
 
 // get the key used in .profrc for the preference
 // for example the PREF_AUTOAWAY_MODE maps to "autoaway.mode" in .profrc
-static const char*
+static const gchar*
 _get_key(preference_t pref)
 {
     switch (pref) {
@@ -2283,7 +2283,7 @@ _get_default_boolean(preference_t pref)
 
 // the default setting for a string type preference
 // if it is not specified in .profrc
-static char*
+static gchar*
 _get_default_string(preference_t pref)
 {
     switch (pref) {
