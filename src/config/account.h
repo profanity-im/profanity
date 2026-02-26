@@ -84,7 +84,7 @@ ProfAccount* account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_p
                          GList* ox_enabled, GList* pgp_enabled, gchar* pgp_keyid,
                          gchar* startscript, gchar* theme, gchar* tls_policy, gchar* auth_policy,
                          gchar* client, int max_sessions);
-char* account_create_connect_jid(ProfAccount* account);
+gchar* account_create_connect_jid(ProfAccount* account);
 gboolean account_eval_password(ProfAccount* account);
 void account_free(ProfAccount* account);
 void account_set_server(ProfAccount* account, const char* server);

@@ -385,7 +385,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
         }
     }
 
-    auto_char char* jid = NULL;
+    auto_gchar gchar* jid = NULL;
     auto_char char* user = strdup(user_orig);
 
     // connect with account

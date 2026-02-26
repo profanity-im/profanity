@@ -216,7 +216,7 @@ returns_fulljid_when_exists(void** state)
 {
     Jid* jid = jid_create("localpart@domainpart/resourcepart");
 
-    const char* result = jid_fulljid_or_barejid(jid);
+    const gchar* result = jid_fulljid_or_barejid(jid);
 
     assert_string_equal("localpart@domainpart/resourcepart", result);
 
@@ -228,7 +228,7 @@ returns_barejid_when_fulljid_not_exists(void** state)
 {
     Jid* jid = jid_create("localpart@domainpart");
 
-    const char* result = jid_fulljid_or_barejid(jid);
+    const gchar* result = jid_fulljid_or_barejid(jid);
 
     assert_string_equal("localpart@domainpart", result);
 

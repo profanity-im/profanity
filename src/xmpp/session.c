@@ -565,11 +565,11 @@ session_reconnect_now(void)
             return;
         }
 
-        auto_char char* jid = NULL;
+        auto_gchar gchar* jid = NULL;
         if (account->resource) {
             jid = create_fulljid(account->jid, account->resource);
         } else {
-            jid = strdup(account->jid);
+            jid = g_strdup(account->jid);
         }
         const char* server;
         unsigned short port;

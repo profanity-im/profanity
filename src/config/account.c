@@ -144,13 +144,13 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
     return new_account;
 }
 
-char*
+gchar*
 account_create_connect_jid(ProfAccount* account)
 {
     if (account->resource) {
         return create_fulljid(account->jid, account->resource);
     } else {
-        return strdup(account->jid);
+        return g_strdup(account->jid);
     }
 }
 

@@ -41,18 +41,18 @@
 struct jid_t
 {
     unsigned int refcnt;
-    char* str;
-    char* localpart;
-    char* domainpart;
-    char* resourcepart;
-    char* barejid;
-    char* fulljid;
+    gchar* str;
+    gchar* localpart;
+    gchar* domainpart;
+    gchar* resourcepart;
+    gchar* barejid;
+    gchar* fulljid;
 };
 
 typedef struct jid_t Jid;
 
 Jid* jid_create(const gchar* const str);
-Jid* jid_create_from_bare_and_resource(const char* const barejid, const char* const resource);
+Jid* jid_create_from_bare_and_resource(const gchar* const barejid, const gchar* const resource);
 void jid_destroy(Jid* jid);
 void jid_ref(Jid* jid);
 
@@ -60,10 +60,10 @@ void jid_auto_destroy(Jid** str);
 #define auto_jid __attribute__((__cleanup__(jid_auto_destroy)))
 
 gboolean jid_is_valid_room_form(Jid* jid);
-char* create_fulljid(const char* const barejid, const char* const resource);
-char* get_nick_from_full_jid(const char* const full_room_jid);
+gchar* create_fulljid(const gchar* const barejid, const gchar* const resource);
+gchar* get_nick_from_full_jid(const gchar* const full_room_jid);
 
-const char* jid_fulljid_or_barejid(Jid* jid);
+const gchar* jid_fulljid_or_barejid(Jid* jid);
 gchar* jid_random_resource(void);
 
 #endif
