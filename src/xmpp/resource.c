@@ -39,18 +39,20 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <glib.h>
+
 #include "common.h"
 #include "xmpp/resource.h"
 
 Resource*
-resource_new(const char* const name, resource_presence_t presence, const char* const status, const int priority)
+resource_new(const gchar* const name, resource_presence_t presence, const gchar* const status, const int priority)
 {
     assert(name != NULL);
-    Resource* new_resource = malloc(sizeof(struct resource_t));
-    new_resource->name = strdup(name);
+    Resource* new_resource = g_new(Resource, 1);
+    new_resource->name = g_strdup(name);
     new_resource->presence = presence;
     if (status) {
-        new_resource->status = strdup(status);
+        new_resource->status = g_strdup(status);
     } else {
         new_resource->status = NULL;
     }
@@ -93,14 +95,14 @@ void
 resource_destroy(Resource* resource)
 {
     if (resource) {
-        free(resource->name);
-        free(resource->status);
-        free(resource);
+        g_free(resource->name);
+        g_free(resource->status);
+        g_free(resource);
     }
 }
 
 gboolean
-valid_resource_presence_string(const char* const str)
+valid_resource_presence_string(const gchar* const str)
 {
     assert(str != NULL);
     if ((strcmp(str, "online") == 0) || (strcmp(str, "chat") == 0) || (strcmp(str, "away") == 0) || (strcmp(str, "xa") == 0) || (strcmp(str, "dnd") == 0)) {
@@ -110,7 +112,7 @@ valid_resource_presence_string(const char* const str)
     }
 }
 
-const char*
+const gchar*
 string_from_resource_presence(resource_presence_t presence)
 {
     switch (presence) {
@@ -128,7 +130,7 @@ string_from_resource_presence(resource_presence_t presence)
 }
 
 resource_presence_t
-resource_presence_from_string(const char* const str)
+resource_presence_from_string(const gchar* const str)
 {
     if (str == NULL) {
         return RESOURCE_ONLINE;
