@@ -113,7 +113,7 @@ prof_run(gchar* log_level, gchar* account_name, gchar* config_file, gchar* log_f
     char* line = NULL;
     GTimer* waittimer = g_timer_new();
     g_timer_stop(waittimer);
-    int waittime;
+    int waittime = 0;
     while (cont && !force_quit) {
         log_stderr_handler();
         session_check_autoaway();
