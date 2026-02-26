@@ -476,7 +476,7 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
     ProfAccount* account = accounts_get_account(session_get_account_name());
     if (account->pgp_keyid) {
         auto_jid Jid* jidp = jid_create(jid);
-        auto_char char* encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
+        auto_gchar gchar* encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
         if (encrypted) {
             message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
             xmpp_message_set_body(message, "This message is encrypted (XEP-0027).");

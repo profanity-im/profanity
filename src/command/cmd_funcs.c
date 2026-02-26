@@ -7316,7 +7316,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
             account_free(account);
             return TRUE;
         }
-        auto_char char* pubkey = p_gpg_get_pubkey(account->pgp_keyid);
+        auto_gchar gchar* pubkey = p_gpg_get_pubkey(account->pgp_keyid);
         if (pubkey == NULL) {
             cons_show_error("Couldn't get your PGP public key. Please, check error logs.");
             account_free(account);

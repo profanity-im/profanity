@@ -38,9 +38,9 @@
 
 typedef struct pgp_key_t
 {
-    char* id;
-    char* name;
-    char* fp;
+    gchar* id;
+    gchar* name;
+    gchar* fp;
     gboolean encrypt;
     gboolean sign;
     gboolean certify;
@@ -50,31 +50,31 @@ typedef struct pgp_key_t
 
 typedef struct pgp_pubkeyid_t
 {
-    char* id;
+    gchar* id;
     gboolean received;
 } ProfPGPPubKeyId;
 
 void p_gpg_init(void);
-void p_gpg_on_connect(const char* const barejid);
+void p_gpg_on_connect(const gchar* const barejid);
 void p_gpg_on_disconnect(void);
 GHashTable* p_gpg_list_keys(void);
 void p_gpg_free_keys(GHashTable* keys);
-gboolean p_gpg_addkey(const char* const jid, const char* const keyid);
+gboolean p_gpg_addkey(const gchar* const jid, const gchar* const keyid);
 GHashTable* p_gpg_pubkeys(void);
-gboolean p_gpg_valid_key(const char* const keyid, char** err_str);
-gboolean p_gpg_available(const char* const barejid);
-const char* p_gpg_libver(void);
-char* p_gpg_sign(const char* const str, const char* const fp);
-void p_gpg_verify(const char* const barejid, const char* const sign);
-char* p_gpg_encrypt(const char* const barejid, const char* const message, const char* const fp);
-char* p_gpg_decrypt(const char* const cipher);
-void p_gpg_free_decrypted(char* decrypted);
-char* p_gpg_autocomplete_key(const char* const search_str, gboolean previous, void* context);
+gboolean p_gpg_valid_key(const gchar* const keyid, gchar** err_str);
+gboolean p_gpg_available(const gchar* const barejid);
+const gchar* p_gpg_libver(void);
+gchar* p_gpg_sign(const gchar* const str, const gchar* const fp);
+void p_gpg_verify(const gchar* const barejid, const gchar* const sign);
+gchar* p_gpg_encrypt(const gchar* const barejid, const gchar* const message, const gchar* const fp);
+gchar* p_gpg_decrypt(const gchar* const cipher);
+void p_gpg_free_decrypted(gchar* decrypted);
+gchar* p_gpg_autocomplete_key(const gchar* const search_str, gboolean previous, void* context);
 void p_gpg_autocomplete_key_reset(void);
-char* p_gpg_format_fp_str(char* fp);
-char* p_gpg_get_pubkey(const char* const keyid);
-gboolean p_gpg_is_public_key_format(const char* buffer);
-ProfPGPKey* p_gpg_import_pubkey(const char* buffer);
+gchar* p_gpg_format_fp_str(gchar* fp);
+gchar* p_gpg_get_pubkey(const gchar* const keyid);
+gboolean p_gpg_is_public_key_format(const gchar* buffer);
+ProfPGPKey* p_gpg_import_pubkey(const gchar* buffer);
 
 ProfPGPKey* p_gpg_key_new(void);
 void p_gpg_free_key(ProfPGPKey* key);

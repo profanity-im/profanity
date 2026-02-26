@@ -26,35 +26,35 @@ p_gpg_libver(void)
 }
 
 void
-p_gpg_verify(const char* const barejid, const char* const sign)
+p_gpg_verify(const gchar* const barejid, const gchar* const sign)
 {
 }
 
-char*
-p_gpg_sign(const char* const str, const char* const fp)
+gchar*
+p_gpg_sign(const gchar* const str, const gchar* const fp)
 {
     return NULL;
 }
 
 gboolean
-p_gpg_valid_key(const char* const keyid, char** err_str)
+p_gpg_valid_key(const gchar* const keyid, gchar** err_str)
 {
     return FALSE;
 }
 
 gboolean
-p_gpg_available(const char* const barejid)
+p_gpg_available(const gchar* const barejid)
 {
     return FALSE;
 }
-char*
-p_gpg_decrypt(const char* const cipher)
+gchar*
+p_gpg_decrypt(const gchar* const cipher)
 {
     return NULL;
 }
 
 void
-p_gpg_on_connect(const char* const barejid)
+p_gpg_on_connect(const gchar* const barejid)
 {
 }
 void
@@ -63,13 +63,13 @@ p_gpg_on_disconnect(void)
 }
 
 gboolean
-p_gpg_addkey(const char* const jid, const char* const keyid)
+p_gpg_addkey(const gchar* const jid, const gchar* const keyid)
 {
     return TRUE;
 }
 
 void
-p_gpg_free_decrypted(char* decrypted)
+p_gpg_free_decrypted(gchar* decrypted)
 {
 }
 
@@ -83,32 +83,32 @@ p_gpg_autocomplete_key_reset(void)
 {
 }
 
-char*
-p_gpg_autocomplete_key(const char* const search_str, gboolean previous, void* context)
+gchar*
+p_gpg_autocomplete_key(const gchar* const search_str, gboolean previous, void* context)
 {
     return NULL;
 }
 
-char*
-p_gpg_format_fp_str(char* fp)
+gchar*
+p_gpg_format_fp_str(gchar* fp)
 {
     return NULL;
 }
 
-char*
-p_gpg_get_pubkey(const char* const keyid)
+gchar*
+p_gpg_get_pubkey(const gchar* const keyid)
 {
     return NULL;
 }
 
 gboolean
-p_gpg_is_public_key_format(const char* buffer)
+p_gpg_is_public_key_format(const gchar* buffer)
 {
     return TRUE;
 }
 
 ProfPGPKey*
-p_gpg_import_pubkey(const char* buffer)
+p_gpg_import_pubkey(const gchar* buffer)
 {
     return NULL;
 }
