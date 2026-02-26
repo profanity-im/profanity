@@ -65,6 +65,7 @@ if is_debug
     '-Wunused',
     '-Wall',
     '-Wextra',
+    '-fstack-protector-strong'
   ], language: 'c')
 endif
 
