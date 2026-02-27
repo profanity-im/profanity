@@ -154,10 +154,8 @@ cmd_process_input(ProfWin* window, char* inp)
     if (inp[0] == '/') {
         auto_char char* inp_cpy = strdup(inp);
         char* command = strtok(inp_cpy, " ");
-        char* second_word = strtok(NULL, " ");
-        gboolean wants_help = second_word ? strcmp(second_word, "help") == 0 : FALSE;
         char* question_mark = strchr(command, '?');
-        if (wants_help || question_mark) {
+        if (question_mark) {
             *question_mark = '\0';
             auto_gchar gchar* fakeinp = g_strdup_printf("/help %s", command + 1);
             if (fakeinp) {
