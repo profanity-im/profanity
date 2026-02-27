@@ -1229,10 +1229,8 @@ vcard_print(xmpp_ctx_t* ctx, ProfWin* window, char* jid)
 
     _userdata* data = g_new0(_userdata, 1);
     data->vcard = vcard_new();
-    if (!data || !data->vcard) {
-        if (data) {
-            g_free(data);
-        }
+    if (!data->vcard) {
+        g_free(data);
 
         cons_show("vCard allocation failed");
         return;
@@ -1379,10 +1377,8 @@ vcard_photo(xmpp_ctx_t* ctx, char* jid, char* filename, int index, gboolean open
     _userdata* data = g_new0(_userdata, 1);
     data->vcard = vcard_new();
 
-    if (!data || !data->vcard) {
-        if (data) {
-            free(data);
-        }
+    if (!data->vcard) {
+        g_free(data);
 
         cons_show("vCard allocation failed");
         return;
