@@ -364,14 +364,19 @@ _iq_id_handler_free(ProfIqHandler* handler)
 void
 iq_id_handler_add(const char* const id, ProfIqCallback func, ProfIqFreeCallback free_func, void* userdata)
 {
-    ProfIqHandler* handler = g_new0(ProfIqHandler, 1);
-    if (handler) {
-        handler->func = func;
-        handler->free_func = free_func;
-        handler->userdata = userdata;
-
-        g_hash_table_insert(id_handlers, strdup(id), handler);
+    if (id == NULL) {
+        if (free_func) {
+            free_func(userdata);
+        }
+        return;
     }
+
+    ProfIqHandler* handler = g_new0(ProfIqHandler, 1);
+    handler->func = func;
+    handler->free_func = free_func;
+    handler->userdata = userdata;
+
+    g_hash_table_insert(id_handlers, strdup(id), handler);
 }
 
 void
