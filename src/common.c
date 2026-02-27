@@ -543,6 +543,9 @@ char*
 strip_arg_quotes(const char* const input)
 {
     char* unquoted = strdup(input);
+    if (unquoted == NULL) {
+        return NULL;
+    }
 
     // Remove starting quote if it exists
     if (strchr(unquoted, '"')) {
