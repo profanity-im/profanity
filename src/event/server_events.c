@@ -603,6 +603,9 @@ _sv_ev_incoming_plain(ProfChatWin* chatwin, gboolean new_win, ProfMessage* messa
     if (message->body) {
         message->enc = PROF_MSG_ENC_NONE;
         message->plain = strdup(message->body);
+        if (message->plain == NULL) {
+            return;
+        }
         _clean_incoming_message(message);
         chatwin_incoming_msg(chatwin, message, new_win);
         log_database_add_incoming(message);
@@ -1309,6 +1312,10 @@ sv_ev_bookmark_autojoin(Bookmark* bookmark)
 static void
 _cut(ProfMessage* message, const char* cut)
 {
+    if (message->plain == NULL) {
+        return;
+    }
+
     if (strstr(message->plain, cut)) {
         auto_gcharv gchar** split = g_strsplit(message->plain, cut, -1);
         free(message->plain);
