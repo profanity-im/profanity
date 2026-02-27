@@ -221,6 +221,12 @@ stanza_create_http_upload_request(xmpp_ctx_t* ctx, const char* const id,
     xmpp_stanza_set_ns(request, STANZA_NS_HTTP_UPLOAD);
 
     auto_char char* filename_cpy = strdup(upload->filename);
+    if (!filename_cpy) {
+        xmpp_stanza_release(iq);
+        xmpp_stanza_release(request);
+        return NULL;
+    }
+
     // strip spaces from filename (servers don't spaces)
     for (size_t i = 0; i < strlen(filename_cpy); i++) {
         if (filename_cpy[i] == ' ') {
