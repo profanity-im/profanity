@@ -73,7 +73,7 @@ cmd_alias_add_adds_alias(void** state)
     gchar* returned_val = prefs_get_alias("hc");
     assert_string_equal("/help commands", returned_val);
 
-    free(returned_val);
+    g_free(returned_val);
 }
 
 void
@@ -105,7 +105,7 @@ cmd_alias_remove_removes_alias(void** state)
     gchar* returned_val = prefs_get_alias("hn");
     assert_null(returned_val);
 
-    free(returned_val);
+    g_free(returned_val);
 }
 
 void

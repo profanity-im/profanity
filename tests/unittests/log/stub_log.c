@@ -60,10 +60,10 @@ log_msg(log_level_t level, const char* const area, const char* const msg)
 {
 }
 
-const char*
+const gchar*
 get_log_file_location(void)
 {
-    return mock_ptr_type(char*);
+    return mock_ptr_type(gchar*);
 }
 
 int

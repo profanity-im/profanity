@@ -50,10 +50,10 @@ cmd_account_list_shows_accounts(void** state)
 {
     gchar* args[] = { "list", NULL };
 
-    gchar** accounts = g_new0(gchar, 4);
-    accounts[0] = strdup("account1");
-    accounts[1] = strdup("account2");
-    accounts[2] = strdup("account3");
+    gchar** accounts = g_new0(gchar*, 4);
+    accounts[0] = g_strdup("account1");
+    accounts[1] = g_strdup("account2");
+    accounts[2] = g_strdup("account3");
     accounts[3] = NULL;
 
     will_return(accounts_get_list, accounts);

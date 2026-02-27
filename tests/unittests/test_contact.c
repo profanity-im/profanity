@@ -9,7 +9,7 @@ void
 contact_in_group(void** state)
 {
     GSList* groups = NULL;
-    groups = g_slist_append(groups, strdup("somegroup"));
+    groups = g_slist_append(groups, g_strdup("somegroup"));
     PContact contact = p_contact_new("bob@server.com", "bob", groups, "both",
                                      "is offline", FALSE);
 
@@ -25,7 +25,7 @@ void
 contact_not_in_group(void** state)
 {
     GSList* groups = NULL;
-    groups = g_slist_append(groups, strdup("somegroup"));
+    groups = g_slist_append(groups, g_strdup("somegroup"));
     PContact contact = p_contact_new("bob@server.com", "bob", groups, "both",
                                      "is offline", FALSE);
 
@@ -74,7 +74,7 @@ contact_string_when_name_exists(void** state)
     assert_string_equal("bob (laptop)", str);
 
     p_contact_free(contact);
-    free(str);
+    g_free(str);
 }
 
 void
@@ -88,7 +88,7 @@ contact_string_when_name_not_exists(void** state)
     assert_string_equal("bob@server.com (laptop)", str);
 
     p_contact_free(contact);
-    free(str);
+    g_free(str);
 }
 
 void
@@ -102,7 +102,7 @@ contact_string_when_default_resource(void** state)
     assert_string_equal("bob", str);
 
     p_contact_free(contact);
-    free(str);
+    g_free(str);
 }
 
 void

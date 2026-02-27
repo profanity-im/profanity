@@ -193,7 +193,7 @@ cmd_roster_nick_sends_name_change_request(void** state)
 
     roster_create();
     GSList* groups = NULL;
-    groups = g_slist_append(groups, strdup("group1"));
+    groups = g_slist_append(groups, g_strdup("group1"));
     roster_add(jid, "bob", groups, "both", FALSE);
 
     will_return(connection_get_status, JABBER_CONNECTED);
@@ -251,7 +251,7 @@ cmd_roster_clearnick_sends_name_change_request_with_empty_nick(void** state)
 
     roster_create();
     GSList* groups = NULL;
-    groups = g_slist_append(groups, strdup("group1"));
+    groups = g_slist_append(groups, g_strdup("group1"));
     roster_add(jid, "bob", groups, "both", FALSE);
 
     will_return(connection_get_status, JABBER_CONNECTED);

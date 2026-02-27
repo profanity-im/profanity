@@ -52,7 +52,7 @@ cmd_connect_when_no_account(void** state)
     expect_string(accounts_get_account, name, "user@server.org");
     will_return(accounts_get_account, NULL);
 
-    will_return(ui_ask_password, strdup("password"));
+    will_return(ui_ask_password, g_strdup("password"));
 
     expect_cons_show("Connecting as user@server.org");
 
@@ -76,7 +76,7 @@ cmd_connect_fail_message(void** state)
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, NULL);
 
-    will_return(ui_ask_password, strdup("password"));
+    will_return(ui_ask_password, g_strdup("password"));
 
     expect_cons_show("Connecting as user@server.org");
 
@@ -102,7 +102,7 @@ cmd_connect_lowercases_argument_with_no_account(void** state)
     expect_string(accounts_get_account, name, "USER@server.ORG");
     will_return(accounts_get_account, NULL);
 
-    will_return(ui_ask_password, strdup("password"));
+    will_return(ui_ask_password, g_strdup("password"));
 
     expect_cons_show("Connecting as user@server.org");
 
@@ -130,7 +130,7 @@ cmd_connect_lowercases_argument_with_account(void** state)
 
     expect_cons_show("Connecting with account Jabber_org as me@jabber.org");
 
-    expect_memory(session_connect_with_account, account, account, sizeof(account));
+    expect_memory(session_connect_with_account, account, account, sizeof(ProfAccount));
     will_return(session_connect_with_account, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
@@ -149,7 +149,7 @@ cmd_connect_asks_password_when_not_in_account(void** state)
     expect_any(accounts_get_account, name);
     will_return(accounts_get_account, account);
 
-    will_return(ui_ask_password, strdup("password"));
+    will_return(ui_ask_password, g_strdup("password"));
 
     expect_cons_show("Connecting with account jabber_org as me@jabber.org");
 
@@ -338,7 +338,7 @@ cmd_connect_with_server_when_provided(void** state)
     expect_string(accounts_get_account, name, "user@server.org");
     will_return(accounts_get_account, NULL);
 
-    will_return(ui_ask_password, strdup("password"));
+    will_return(ui_ask_password, g_strdup("password"));
 
     expect_cons_show("Connecting as user@server.org");
 
@@ -362,7 +362,7 @@ cmd_connect_with_port_when_provided(void** state)
     expect_string(accounts_get_account, name, "user@server.org");
     will_return(accounts_get_account, NULL);
 
-    will_return(ui_ask_password, strdup("password"));
+    will_return(ui_ask_password, g_strdup("password"));
 
     expect_cons_show("Connecting as user@server.org");
 
@@ -386,7 +386,7 @@ cmd_connect_with_server_and_port_when_provided(void** state)
     expect_string(accounts_get_account, name, "user@server.org");
     will_return(accounts_get_account, NULL);
 
-    will_return(ui_ask_password, strdup("password"));
+    will_return(ui_ask_password, g_strdup("password"));
 
     expect_cons_show("Connecting as user@server.org");
 
@@ -435,7 +435,7 @@ cmd_connect_connects_with_account(void** state)
 
     expect_cons_show("Connecting with account jabber_org as me@jabber.org");
 
-    expect_memory(session_connect_with_account, account, account, sizeof(account));
+    expect_memory(session_connect_with_account, account, account, sizeof(ProfAccount));
     will_return(session_connect_with_account, JABBER_CONNECTING);
 
     gboolean result = cmd_connect(NULL, CMD_CONNECT, args);
