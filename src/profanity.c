@@ -292,7 +292,7 @@ prof_add_shutdown_routine(void (*routine)(void))
     if (g_list_find_custom(shutdown_routines, &this, (GCompareFunc)_cmp_shutdown_routine)) {
         return;
     }
-    struct shutdown_routine* r = malloc(sizeof *r);
+    struct shutdown_routine* r = g_new(struct shutdown_routine, 1);
     r->routine = routine;
     shutdown_routines = g_list_prepend(shutdown_routines, r);
 }
