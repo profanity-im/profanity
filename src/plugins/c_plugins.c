@@ -78,8 +78,8 @@ c_plugin_create(const char* const filename)
         return NULL;
     }
 
-    plugin = malloc(sizeof(ProfPlugin));
-    plugin->name = strdup(filename);
+    plugin = g_new0(ProfPlugin, 1);
+    plugin->name = g_strdup(filename);
     plugin->lang = LANG_C;
     plugin->module = handle;
     plugin->init_func = c_init_hook;

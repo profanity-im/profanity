@@ -60,21 +60,21 @@ disco_add_feature(const char* plugin_name, char* feature)
     }
 
     if (!features) {
-        features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+        features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     }
     if (!plugin_to_features) {
-        plugin_to_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_features);
+        plugin_to_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_features);
     }
 
     GHashTable* plugin_features = g_hash_table_lookup(plugin_to_features, plugin_name);
     gboolean added = FALSE;
     if (plugin_features == NULL) {
-        plugin_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-        g_hash_table_add(plugin_features, strdup(feature));
-        g_hash_table_insert(plugin_to_features, strdup(plugin_name), plugin_features);
+        plugin_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+        g_hash_table_add(plugin_features, g_strdup(feature));
+        g_hash_table_insert(plugin_to_features, g_strdup(plugin_name), plugin_features);
         added = TRUE;
     } else if (!g_hash_table_contains(plugin_features, feature)) {
-        g_hash_table_add(plugin_features, strdup(feature));
+        g_hash_table_add(plugin_features, g_strdup(feature));
         added = TRUE;
     }
 
@@ -83,12 +83,12 @@ disco_add_feature(const char* plugin_name, char* feature)
     }
 
     if (!g_hash_table_contains(features, feature)) {
-        g_hash_table_insert(features, strdup(feature), GINT_TO_POINTER(1));
+        g_hash_table_insert(features, g_strdup(feature), GINT_TO_POINTER(1));
     } else {
         void* refcountp = g_hash_table_lookup(features, feature);
         int refcount = GPOINTER_TO_INT(refcountp);
         refcount++;
-        g_hash_table_replace(features, strdup(feature), GINT_TO_POINTER(refcount));
+        g_hash_table_replace(features, g_strdup(feature), GINT_TO_POINTER(refcount));
     }
 }
 
@@ -118,7 +118,7 @@ disco_remove_features(const char* plugin_name)
                 g_hash_table_remove(features, feature);
             } else {
                 refcount--;
-                g_hash_table_replace(features, strdup(feature), GINT_TO_POINTER(refcount));
+                g_hash_table_replace(features, g_strdup(feature), GINT_TO_POINTER(refcount));
             }
         }
 

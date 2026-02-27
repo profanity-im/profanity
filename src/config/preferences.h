@@ -203,16 +203,16 @@ typedef struct prof_winplacement_t
     int inputwin_pos;
 } ProfWinPlacement;
 
-void prefs_load(const char* config_file);
+void prefs_load(const gchar* config_file);
 void prefs_changes(void);
 void prefs_save(void);
 void prefs_close(void);
 void prefs_reload(void);
 
-gchar* prefs_autocomplete_boolean_choice(const char* const prefix, gboolean previous, void* context);
+gchar* prefs_autocomplete_boolean_choice(const gchar* const prefix, gboolean previous, void* context);
 void prefs_reset_boolean_choice(void);
 
-gchar* prefs_autocomplete_room_trigger(const char* const prefix, gboolean previous, void* context);
+gchar* prefs_autocomplete_room_trigger(const gchar* const prefix, gboolean previous, void* context);
 void prefs_reset_room_trigger_ac(void);
 
 gint prefs_get_gone(void);
@@ -249,42 +249,42 @@ gint prefs_get_autoxa_time(void);
 void prefs_set_autoxa_time(gint value);
 
 gchar** prefs_get_plugins(void);
-void prefs_add_plugin(const char* const name);
-void prefs_remove_plugin(const char* const name);
+void prefs_add_plugin(const gchar* const name);
+void prefs_remove_plugin(const gchar* const name);
 
 gchar* prefs_get_otr_char(void);
-gboolean prefs_set_otr_char(char* ch);
+gboolean prefs_set_otr_char(gchar* ch);
 gchar* prefs_get_pgp_char(void);
-gboolean prefs_set_pgp_char(char* ch);
+gboolean prefs_set_pgp_char(gchar* ch);
 gchar* prefs_get_omemo_char(void);
-gboolean prefs_set_omemo_char(char* ch);
+gboolean prefs_set_omemo_char(gchar* ch);
 // XEP-0373: OpenPGP for XMPP
 char* prefs_get_ox_char(void);
-gboolean prefs_set_ox_char(char* ch);
+gboolean prefs_set_ox_char(gchar* ch);
 
 gchar* prefs_get_roster_header_char(void);
-void prefs_set_roster_header_char(char* ch);
+void prefs_set_roster_header_char(gchar* ch);
 void prefs_clear_roster_header_char(void);
 gchar* prefs_get_roster_contact_char(void);
-void prefs_set_roster_contact_char(char* ch);
+void prefs_set_roster_contact_char(gchar* ch);
 void prefs_clear_roster_contact_char(void);
 gchar* prefs_get_roster_resource_char(void);
-void prefs_set_roster_resource_char(char* ch);
+void prefs_set_roster_resource_char(gchar* ch);
 void prefs_clear_roster_resource_char(void);
 gchar* prefs_get_roster_private_char(void);
-void prefs_set_roster_private_char(char* ch);
+void prefs_set_roster_private_char(gchar* ch);
 void prefs_clear_roster_private_char(void);
 gchar* prefs_get_roster_room_char(void);
-void prefs_set_roster_room_char(char* ch);
+void prefs_set_roster_room_char(gchar* ch);
 void prefs_clear_roster_room_char(void);
 gchar* prefs_get_roster_room_private_char(void);
-void prefs_set_roster_room_private_char(char* ch);
+void prefs_set_roster_room_private_char(gchar* ch);
 void prefs_clear_roster_room_private_char(void);
 gchar* prefs_get_occupants_char(void);
-void prefs_set_occupants_char(char* ch);
+void prefs_set_occupants_char(gchar* ch);
 void prefs_clear_occupants_char(void);
 gchar* prefs_get_occupants_header_char(void);
-void prefs_set_occupants_header_char(char* ch);
+void prefs_set_occupants_header_char(gchar* ch);
 void prefs_clear_occupants_header_char(void);
 
 gint prefs_get_roster_contact_indent(void);
@@ -297,21 +297,21 @@ gint prefs_get_occupants_indent(void);
 void prefs_set_occupants_indent(gint value);
 
 gchar* prefs_get_correction_char(void);
-void prefs_set_correction_char(char* ch);
+void prefs_set_correction_char(gchar* ch);
 
-void prefs_add_login(const char* jid);
+void prefs_add_login(const gchar* jid);
 
 void prefs_set_tray_timer(gint value);
 gint prefs_get_tray_timer(void);
 
-gboolean prefs_add_alias(const char* const name, const char* const value);
-gboolean prefs_remove_alias(const char* const name);
-gchar* prefs_get_alias(const char* const name);
+gboolean prefs_add_alias(const gchar* const name, const gchar* const value);
+gboolean prefs_remove_alias(const gchar* const name);
+gchar* prefs_get_alias(const gchar* const name);
 GList* prefs_get_aliases(void);
 void prefs_free_aliases(GList* aliases);
 
-gboolean prefs_add_room_notify_trigger(const char* const text);
-gboolean prefs_remove_room_notify_trigger(const char* const text);
+gboolean prefs_add_room_notify_trigger(const gchar* const text);
+gboolean prefs_remove_room_notify_trigger(const gchar* const text);
 GList* prefs_get_room_notify_triggers(void);
 
 ProfWinPlacement* prefs_get_win_placement(void);

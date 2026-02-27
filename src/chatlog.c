@@ -418,7 +418,7 @@ _create_chatlog(const char* const other, const char* const login)
     GDateTime* now = g_date_time_new_now_local();
     auto_char char* filename = _get_log_filename(other, login, now, FALSE);
 
-    struct dated_chat_log* new_log = malloc(sizeof(struct dated_chat_log));
+    struct dated_chat_log* new_log = g_new0(struct dated_chat_log, 1);
     new_log->filename = strdup(filename);
     new_log->date = now;
 
@@ -431,7 +431,7 @@ _create_groupchat_log(const char* const room, const char* const login)
     GDateTime* now = g_date_time_new_now_local();
     auto_char char* filename = _get_log_filename(room, login, now, TRUE);
 
-    struct dated_chat_log* new_log = malloc(sizeof(struct dated_chat_log));
+    struct dated_chat_log* new_log = g_new0(struct dated_chat_log, 1);
     new_log->filename = strdup(filename);
     new_log->date = now;
 

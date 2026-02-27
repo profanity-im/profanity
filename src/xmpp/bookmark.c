@@ -112,7 +112,7 @@ bookmark_add(const char* jid, const char* nick, const char* password, const char
         return FALSE;
     }
 
-    Bookmark* bookmark = malloc(sizeof(Bookmark));
+    Bookmark* bookmark = g_new0(Bookmark, 1);
     bookmark->barejid = strdup(jid);
     if (nick) {
         bookmark->nick = strdup(nick);
@@ -329,7 +329,7 @@ _bookmark_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         }
 
         autocomplete_add(bookmark_ac, barejid);
-        Bookmark* bookmark = malloc(sizeof(Bookmark));
+        Bookmark* bookmark = g_new0(Bookmark, 1);
         bookmark->barejid = strdup(barejid);
         bookmark->nick = nick;
         bookmark->password = password;

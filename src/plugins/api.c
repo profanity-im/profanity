@@ -111,29 +111,29 @@ api_register_command(const char* const plugin_name, const char* command_name, in
                      char** synopsis, const char* description, char* arguments[][2], char** examples,
                      void* callback, void (*callback_exec)(PluginCommand* command, gchar** args), void (*callback_destroy)(void* callback))
 {
-    PluginCommand* command = calloc(1, sizeof(PluginCommand));
-    command->command_name = strdup(command_name);
+    PluginCommand* command = g_new0(PluginCommand, 1);
+    command->command_name = g_strdup(command_name);
     command->min_args = min_args;
     command->max_args = max_args;
     command->callback = callback;
     command->callback_exec = callback_exec;
     command->callback_destroy = callback_destroy;
 
-    CommandHelp* help = calloc(1, sizeof(CommandHelp));
+    CommandHelp* help = g_new0(CommandHelp, 1);
 
     int i;
     for (i = 0; synopsis[i] != NULL; i++) {
-        help->synopsis[i] = strdup(synopsis[i]);
+        help->synopsis[i] = g_strdup(synopsis[i]);
     }
 
-    help->desc = strdup(description);
+    help->desc = g_strdup(description);
     for (i = 0; arguments[i][0] != NULL; i++) {
-        help->args[i][0] = strdup(arguments[i][0]);
-        help->args[i][1] = strdup(arguments[i][1]);
+        help->args[i][0] = g_strdup(arguments[i][0]);
+        help->args[i][1] = g_strdup(arguments[i][1]);
     }
 
     for (i = 0; examples[i] != NULL; i++) {
-        help->examples[i] = strdup(examples[i]);
+        help->examples[i] = g_strdup(examples[i]);
     }
 
     command->help = help;
@@ -145,7 +145,7 @@ void
 api_register_timed(const char* const plugin_name, void* callback, int interval_seconds,
                    void (*callback_exec)(PluginTimedFunction* timed_function), void (*callback_destroy)(void* callback))
 {
-    PluginTimedFunction* timed_function = malloc(sizeof(PluginTimedFunction));
+    PluginTimedFunction* timed_function = g_new0(PluginTimedFunction, 1);
     timed_function->callback = callback;
     timed_function->callback_exec = callback_exec;
     timed_function->callback_destroy = callback_destroy;
@@ -226,7 +226,7 @@ api_get_current_nick(void)
         ProfMucWin* mucwin = (ProfMucWin*)current;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         const char* const nick = muc_nick(mucwin->roomjid);
-        return nick ? strdup(nick) : NULL;
+        return nick ? g_strdup(nick) : NULL;
     } else {
         return NULL;
     }
@@ -235,7 +235,7 @@ api_get_current_nick(void)
 char*
 api_get_name_from_roster(const char* barejid)
 {
-    return strdup(roster_get_display_name(barejid));
+    return g_strdup(roster_get_display_name(barejid));
 }
 
 char*
@@ -253,14 +253,22 @@ api_get_current_occupants(void)
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         GList* occupants_list = muc_roster(mucwin->roomjid);
         char** result = malloc((g_list_length(occupants_list) + 1) * sizeof(char*));
+        if (result == NULL) {
+            g_list_free(occupants_list);
+            return NULL;
+        }
+
         GList* curr = occupants_list;
         int i = 0;
         while (curr) {
             Occupant* occupant = curr->data;
-            result[i++] = strdup(occupant->nick);
+            result[i++] = g_strdup(occupant->nick);
             curr = g_list_next(curr);
         }
         result[i] = NULL;
+
+        g_list_free(occupants_list);
+
         return result;
     } else {
         return NULL;
@@ -283,7 +291,7 @@ api_get_room_nick(const char* barejid)
 {
     const char* const nick = muc_nick(barejid);
 
-    return nick ? strdup(nick) : NULL;
+    return nick ? g_strdup(nick) : NULL;
 }
 
 void
@@ -331,7 +339,7 @@ api_win_create(
         return;
     }
 
-    PluginWindowCallback* window = malloc(sizeof(PluginWindowCallback));
+    PluginWindowCallback* window = g_new0(PluginWindowCallback, 1);
     window->callback = callback;
     window->callback_exec = callback_exec;
     window->callback_destroy = callback_destroy;
@@ -485,7 +493,7 @@ api_incoming_message(const char* const barejid, const char* const resource, cons
 {
     ProfMessage* message = message_init();
     message->from_jid = jid_create_from_bare_and_resource(barejid, resource);
-    message->plain = strdup(plain);
+    message->plain = g_strdup(plain);
 
     sv_ev_incoming_message(message);
 

@@ -97,12 +97,12 @@ status_bar_init(void)
 {
     tz = g_time_zone_new_local();
 
-    statusbar = malloc(sizeof(StatusBar));
+    statusbar = g_new0(StatusBar, 1);
     statusbar->time = NULL;
     statusbar->prompt = NULL;
     statusbar->fulljid = NULL;
     statusbar->tabs = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)_destroy_tab);
-    StatusBarTab* console = calloc(1, sizeof(StatusBarTab));
+    StatusBarTab* console = g_new0(StatusBarTab, 1);
     console->window_type = WIN_CONSOLE;
     console->identifier = strdup("console");
     console->display_name = NULL;
@@ -190,7 +190,7 @@ _create_tab(const int win, win_type_t wintype, char* identifier, gboolean highli
 {
     int true_win = win == 0 ? 10 : win;
 
-    StatusBarTab* tab = malloc(sizeof(StatusBarTab));
+    StatusBarTab* tab = g_new0(StatusBarTab, 1);
     tab->identifier = strdup(identifier);
     tab->highlight = highlight;
     tab->window_type = wintype;

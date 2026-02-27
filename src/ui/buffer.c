@@ -192,7 +192,7 @@ buffer_get_entry_by_id(ProfBuff buffer, const char* const id)
 static ProfBuffEntry*
 _create_entry(const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos)
 {
-    ProfBuffEntry* e = malloc(sizeof(struct prof_buff_entry_t));
+    ProfBuffEntry* e = g_new0(ProfBuffEntry, 1);
     e->show_char = STRDUP_OR_NULL(show_char);
     e->pad_indent = pad_indent;
     e->flags = flags;

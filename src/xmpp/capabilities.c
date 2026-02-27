@@ -189,10 +189,10 @@ caps_create(const char* const category, const char* const type, const char* cons
             const char* const os, const char* const os_version,
             GSList* features)
 {
-    EntityCapabilities* result = (EntityCapabilities*)malloc(sizeof(EntityCapabilities));
+    EntityCapabilities* result = g_new0(EntityCapabilities, 1);
 
     if (category || type || name) {
-        DiscoIdentity* identity = (DiscoIdentity*)malloc(sizeof(DiscoIdentity));
+        DiscoIdentity* identity = g_new0(DiscoIdentity, 1);
         identity->category = category ? strdup(category) : NULL;
         identity->type = type ? strdup(type) : NULL;
         identity->name = name ? strdup(name) : NULL;
@@ -202,7 +202,7 @@ caps_create(const char* const category, const char* const type, const char* cons
     }
 
     if (software || software_version || os || os_version) {
-        SoftwareVersion* software_versionp = (SoftwareVersion*)malloc(sizeof(SoftwareVersion));
+        SoftwareVersion* software_versionp = g_new0(SoftwareVersion, 1);
         software_versionp->software = software ? strdup(software) : NULL;
         software_versionp->software_version = software_version ? strdup(software_version) : NULL;
         software_versionp->os = os ? strdup(os) : NULL;

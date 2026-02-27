@@ -460,7 +460,7 @@ get_first_of_one(void** state)
     char* result = get_start(inp, 2);
 
     assert_string_equal("one", result);
-    free(result);
+    g_free(result);
 }
 
 void
@@ -470,7 +470,7 @@ get_first_of_two(void** state)
     char* result = get_start(inp, 2);
 
     assert_string_equal("one ", result);
-    free(result);
+    g_free(result);
 }
 
 void
@@ -480,7 +480,7 @@ get_first_two_of_three(void** state)
     char* result = get_start(inp, 3);
 
     assert_string_equal("one two ", result);
-    free(result);
+    g_free(result);
 }
 
 void
@@ -490,7 +490,7 @@ get_first_two_of_three_first_quoted(void** state)
     char* result = get_start(inp, 3);
 
     assert_string_equal("\"one\" two ", result);
-    free(result);
+    g_free(result);
 }
 
 void
@@ -500,7 +500,7 @@ get_first_two_of_three_second_quoted(void** state)
     char* result = get_start(inp, 3);
 
     assert_string_equal("one \"two\" ", result);
-    free(result);
+    g_free(result);
 }
 
 void
@@ -510,7 +510,7 @@ get_first_two_of_three_first_and_second_quoted(void** state)
     char* result = get_start(inp, 3);
 
     assert_string_equal("\"one\" \"two\" ", result);
-    free(result);
+    g_free(result);
 }
 
 void

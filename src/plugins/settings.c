@@ -88,7 +88,7 @@ plugin_settings_string_get(const char* const group, const char* const key, const
     if (group && key && g_key_file_has_key(settings, group, key, NULL)) {
         return g_key_file_get_string(settings, group, key, NULL);
     } else if (def) {
-        return strdup(def);
+        return g_strdup(def);
     } else {
         return NULL;
     }

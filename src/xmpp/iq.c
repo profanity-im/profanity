@@ -364,14 +364,19 @@ _iq_id_handler_free(ProfIqHandler* handler)
 void
 iq_id_handler_add(const char* const id, ProfIqCallback func, ProfIqFreeCallback free_func, void* userdata)
 {
-    ProfIqHandler* handler = malloc(sizeof(ProfIqHandler));
-    if (handler) {
-        handler->func = func;
-        handler->free_func = free_func;
-        handler->userdata = userdata;
-
-        g_hash_table_insert(id_handlers, strdup(id), handler);
+    if (id == NULL) {
+        if (free_func) {
+            free_func(userdata);
+        }
+        return;
     }
+
+    ProfIqHandler* handler = g_new0(ProfIqHandler, 1);
+    handler->func = func;
+    handler->free_func = free_func;
+    handler->userdata = userdata;
+
+    g_hash_table_insert(id_handlers, strdup(id), handler);
 }
 
 void
@@ -551,7 +556,7 @@ iq_room_info_request(const char* const room, gboolean display_result)
     auto_char char* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, id, room, NULL);
 
-    ProfRoomInfoData* cb_data = malloc(sizeof(ProfRoomInfoData));
+    ProfRoomInfoData* cb_data = g_new0(ProfRoomInfoData, 1);
     if (cb_data) {
         cb_data->room = strdup(room);
         cb_data->display = display_result;
@@ -735,7 +740,7 @@ iq_room_affiliation_list(const char* const room, char* affiliation, bool show_ui
 
     const char* id = xmpp_stanza_get_id(iq);
 
-    ProfAffiliationList* affiliation_list = malloc(sizeof(ProfAffiliationList));
+    ProfAffiliationList* affiliation_list = g_new0(ProfAffiliationList, 1);
     if (affiliation_list) {
         affiliation_list->affiliation = strdup(affiliation);
         affiliation_list->show_ui_message = show_ui_message;
@@ -769,7 +774,7 @@ iq_room_affiliation_set(const char* const room, const char* const jid, char* aff
 
     const char* id = xmpp_stanza_get_id(iq);
 
-    ProfPrivilegeSet* affiliation_set = malloc(sizeof(struct privilege_set_t));
+    ProfPrivilegeSet* affiliation_set = g_new0(struct privilege_set_t, 1);
     if (affiliation_set) {
         affiliation_set->item = strdup(jid);
         affiliation_set->privilege = strdup(affiliation);
@@ -790,7 +795,7 @@ iq_room_role_set(const char* const room, const char* const nick, char* role,
 
     const char* id = xmpp_stanza_get_id(iq);
 
-    struct privilege_set_t* role_set = malloc(sizeof(ProfPrivilegeSet));
+    struct privilege_set_t* role_set = g_new0(ProfPrivilegeSet, 1);
     if (role_set) {
         role_set->item = strdup(nick);
         role_set->privilege = strdup(role);
@@ -1333,7 +1338,7 @@ _command_exec_response_handler(xmpp_stanza_t* const stanza, void* const userdata
         const char* sessionid = xmpp_stanza_get_attribute(cmd, "sessionid");
 
         DataForm* form = form_create(x);
-        CommandConfigData* data = malloc(sizeof(CommandConfigData));
+        CommandConfigData* data = g_new0(CommandConfigData, 1);
         if (sessionid == NULL) {
             data->sessionid = NULL;
         } else {
@@ -2212,7 +2217,7 @@ _room_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata
                 const char* category = xmpp_stanza_get_attribute(child, STANZA_ATTR_CATEGORY);
 
                 if (name || category || type) {
-                    DiscoIdentity* identity = malloc(sizeof(struct disco_identity_t));
+                    DiscoIdentity* identity = g_new0(struct disco_identity_t, 1);
 
                     if (identity) {
                         if (name) {
@@ -2357,7 +2362,7 @@ _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdat
                 const char* category = xmpp_stanza_get_attribute(child, STANZA_ATTR_CATEGORY);
 
                 if (name || category || child_type) {
-                    DiscoIdentity* identity = malloc(sizeof(struct disco_identity_t));
+                    DiscoIdentity* identity = g_new0(struct disco_identity_t, 1);
 
                     if (identity) {
                         if (name) {
@@ -2541,7 +2546,7 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
         if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
             const char* item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
             if (item_jid) {
-                DiscoItem* item = malloc(sizeof(struct disco_item_t));
+                DiscoItem* item = g_new0(struct disco_item_t, 1);
                 if (item) {
                     item->jid = strdup(item_jid);
                     const char* item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
@@ -2718,7 +2723,7 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
 
     xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, startdate_str, enddate_str, firstid, NULL);
 
-    MamRsmUserdata* data = malloc(sizeof(MamRsmUserdata));
+    MamRsmUserdata* data = g_new0(MamRsmUserdata, 1);
     if (data) {
         data->start_datestr = startdate_str;
         data->end_datestr = enddate_str;
@@ -2744,7 +2749,7 @@ iq_mam_request(ProfChatWin* win, GDateTime* enddate)
 
     // Save request for later if disco items haven't been received yet
     if (!received_disco_items) {
-        LateDeliveryUserdata* cur_del_data = malloc(sizeof(LateDeliveryUserdata));
+        LateDeliveryUserdata* cur_del_data = g_new0(LateDeliveryUserdata, 1);
         cur_del_data->win = win;
         cur_del_data->enddate = enddate;
         cur_del_data->startdate = startdate;
@@ -2783,13 +2788,17 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             if (data->start_datestr) {
                 start_str = strdup(data->start_datestr);
                 // Convert to iso8601
-                start_str[strlen(start_str) - 3] = '\0';
+                if (start_str && strlen(start_str) >= 3) {
+                    start_str[strlen(start_str) - 3] = '\0';
+                }
             }
-            char* end_str = NULL;
+            auto_char char* end_str = NULL;
             if (data->end_datestr) {
                 end_str = strdup(data->end_datestr);
                 // Convert to iso8601
-                end_str[strlen(end_str) - 3] = '\0';
+                if (end_str && strlen(end_str) >= 3) {
+                    end_str[strlen(end_str) - 3] = '\0';
+                }
             }
 
             if (is_complete || !data->fetch_next) {
@@ -2817,7 +2826,7 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                     }
                     xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
 
-                    MamRsmUserdata* ndata = malloc(sizeof(*ndata));
+                    MamRsmUserdata* ndata = g_new0(MamRsmUserdata, 1);
                     *ndata = *data;
                     if (data->end_datestr)
                         ndata->end_datestr = strdup(data->end_datestr);

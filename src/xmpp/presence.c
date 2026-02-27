@@ -268,7 +268,7 @@ _send_room_presence(xmpp_stanza_t* presence)
         const char* const nick = muc_nick(room);
 
         if (nick) {
-            auto_char char* full_room_jid = create_fulljid(room, nick);
+            auto_gchar gchar* full_room_jid = create_fulljid(room, nick);
             xmpp_stanza_set_to(presence, full_room_jid);
             log_debug("Sending presence to room: %s", full_room_jid);
 
@@ -314,7 +314,7 @@ presence_change_room_nick(const char* const room, const char* const nick)
     const char* show = stanza_get_presence_string_from_type(presence_type);
     const char* status = connection_get_presence_msg();
     int pri = accounts_get_priority_for_presence_type(session_get_account_name(), presence_type);
-    auto_char char* full_room_jid = create_fulljid(room, nick);
+    auto_gchar gchar* full_room_jid = create_fulljid(room, nick);
 
     xmpp_ctx_t* ctx = connection_get_ctx();
     xmpp_stanza_t* presence = stanza_create_room_newnick_presence(ctx, full_room_jid);
@@ -621,7 +621,7 @@ _available_handler(xmpp_stanza_t* const stanza)
         }
         return;
     } else {
-        const char* jid = jid_fulljid_or_barejid(xmpp_presence->jid);
+        const gchar* jid = jid_fulljid_or_barejid(xmpp_presence->jid);
         log_debug("Presence available handler fired for: %s", jid);
     }
 
@@ -632,7 +632,7 @@ _available_handler(xmpp_stanza_t* const stanza)
     XMPPCaps* caps = stanza_parse_caps(stanza);
     if ((g_strcmp0(my_jid->fulljid, xmpp_presence->jid->fulljid) != 0) && caps) {
         log_debug("Presence contains capabilities.");
-        const char* jid = jid_fulljid_or_barejid(xmpp_presence->jid);
+        const gchar* jid = jid_fulljid_or_barejid(xmpp_presence->jid);
         _handle_caps(jid, caps);
     }
     stanza_free_caps(caps);

@@ -132,7 +132,7 @@ _tlscerts_new(gchar* fingerprint_sha1, int version, gchar* serialnumber, gchar* 
               gchar* key_alg, gchar* signature_alg, gchar* pem,
               gchar* fingerprint_sha256, gchar* pubkey_fingerprint)
 {
-    TLSCertificate* cert = calloc(1, sizeof(TLSCertificate));
+    TLSCertificate* cert = g_new0(TLSCertificate, 1);
 
     if (fingerprint_sha256 && fingerprint_sha1) {
         cert->fingerprint_sha256 = fingerprint_sha256;

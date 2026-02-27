@@ -62,7 +62,7 @@ static gchar* _search(Autocomplete ac, GList* curr, gboolean quote, search_direc
 Autocomplete
 autocomplete_new(void)
 {
-    return calloc(1, sizeof(struct autocomplete_t));
+    return g_new0(struct autocomplete_t, 1);
 }
 
 void

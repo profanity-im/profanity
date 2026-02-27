@@ -214,7 +214,7 @@ muc_confserver_clear(void)
 void
 muc_join(const char* const room, const char* const nick, const char* const password, gboolean autojoin)
 {
-    ChatRoom* new_room = malloc(sizeof(ChatRoom));
+    ChatRoom* new_room = g_new0(ChatRoom, 1);
     new_room->room = strdup(room);
     new_room->nick = strdup(nick);
     new_room->role = MUC_ROLE_NONE;
@@ -1046,7 +1046,7 @@ static Occupant*
 _muc_occupant_new(const char* const nick, const char* const jid, muc_role_t role, muc_affiliation_t affiliation,
                   resource_presence_t presence, const char* const status)
 {
-    Occupant* occupant = malloc(sizeof(Occupant));
+    Occupant* occupant = g_new0(Occupant, 1);
 
     if (nick) {
         occupant->nick = strdup(nick);

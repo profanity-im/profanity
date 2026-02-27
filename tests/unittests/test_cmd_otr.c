@@ -247,7 +247,7 @@ cmd_otr_myfp_shows_my_fingerprint(void** state)
 
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(otr_key_loaded, TRUE);
-    will_return(otr_get_my_fingerprint, strdup(fingerprint));
+    will_return(otr_get_my_fingerprint, g_strdup(fingerprint));
 
     expect_win_println(message->str);
 
@@ -344,7 +344,7 @@ cmd_otr_theirfp_shows_fingerprint(void** state)
     will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(otr_get_their_fingerprint, recipient, recipient);
-    will_return(otr_get_their_fingerprint, strdup(fingerprint));
+    will_return(otr_get_their_fingerprint, g_strdup(fingerprint));
 
     expect_win_println(message->str);
 

@@ -353,7 +353,7 @@ message_handlers_init(void)
 ProfMessage*
 message_init(void)
 {
-    ProfMessage* message = calloc(1, sizeof(ProfMessage));
+    ProfMessage* message = g_new0(ProfMessage, 1);
 
     message->enc = PROF_MSG_ENC_NONE;
     message->trusted = true;
@@ -420,7 +420,7 @@ message_handlers_clear(void)
 void
 message_pubsub_event_handler_add(const char* const node, ProfMessageCallback func, ProfMessageFreeCallback free_func, void* userdata)
 {
-    ProfMessageHandler* handler = malloc(sizeof(ProfMessageHandler));
+    ProfMessageHandler* handler = g_new(ProfMessageHandler, 1);
     handler->func = func;
     handler->free_func = free_func;
     handler->userdata = userdata;
@@ -476,7 +476,7 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
     ProfAccount* account = accounts_get_account(session_get_account_name());
     if (account->pgp_keyid) {
         auto_jid Jid* jidp = jid_create(jid);
-        auto_char char* encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
+        auto_gchar gchar* encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
         if (encrypted) {
             message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
             xmpp_message_set_body(message, "This message is encrypted (XEP-0027).");

@@ -720,8 +720,8 @@ unique_filename_from_url_td(void** state)
 
         assert_string_equal(got_filename, exp_filename);
 
-        free(got_filename);
-        free(exp_filename);
+        g_free(got_filename);
+        g_free(exp_filename);
     }
 }
 
@@ -735,7 +735,7 @@ _lists_equal(GSList* a, GSList* b)
     GSList* curra = a;
     GSList* currb = b;
 
-    while (curra) {
+    while (curra && currb) {
         int aval = GPOINTER_TO_INT(curra->data);
         int bval = GPOINTER_TO_INT(currb->data);
 

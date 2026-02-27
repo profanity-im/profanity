@@ -76,6 +76,8 @@ enum {
 static void
 _rotate_log_file(void)
 {
+    if (!mainlogfile)
+        return;
     auto_gchar gchar* log_file = g_strdup(mainlogfile);
     size_t len = strlen(log_file);
     auto_gchar gchar* log_file_new = malloc(len + 5);
@@ -362,11 +364,6 @@ log_stderr_init(log_level_t level)
     if (rc != 0)
         goto err;
 
-    close(STDERR_FILENO);
-    rc = dup2(stderr_pipe[1], STDERR_FILENO);
-    if (rc < 0)
-        goto err_close;
-
     rc = log_stderr_nonblock_set(stderr_pipe[0])
              ?: log_stderr_nonblock_set(stderr_pipe[1]);
     if (rc != 0)
@@ -374,15 +371,21 @@ log_stderr_init(log_level_t level)
 
     stderr_buf = malloc(STDERR_BUFSIZE);
     stderr_msg = g_string_sized_new(STDERR_BUFSIZE);
-    stderr_level = level;
-    stderr_inited = 1;
-
-    prof_add_shutdown_routine(_log_stderr_close);
 
     if (stderr_buf == NULL || stderr_msg == NULL) {
         errno = ENOMEM;
         goto err_free;
     }
+
+    int dup_fd = dup2(stderr_pipe[1], STDERR_FILENO);
+    if (dup_fd < 0)
+        goto err_free;
+    close(dup_fd);
+
+    stderr_level = level;
+    stderr_inited = 1;
+
+    prof_add_shutdown_routine(_log_stderr_close);
     return;
 
 err_free:

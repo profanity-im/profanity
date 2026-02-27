@@ -2976,8 +2976,14 @@ command_docgen(void)
         cmds = g_list_insert_sorted(cmds, (gpointer)pcmd, (GCompareFunc)_cmp_command);
     }
 
-    FILE* toc_fragment = fopen("toc_fragment.html", "w");
-    FILE* main_fragment = fopen("main_fragment.html", "w");
+    auto_FILE FILE* toc_fragment = fopen("toc_fragment.html", "w");
+    auto_FILE FILE* main_fragment = fopen("main_fragment.html", "w");
+
+    if (!toc_fragment || !main_fragment) {
+        printf("\nError opening html files: %s.\n", strerror(errno));
+        g_list_free(cmds);
+        return;
+    }
 
     fputs("<ul><li><ul><li>\n", toc_fragment);
     fputs("<hr>\n", main_fragment);
@@ -3045,8 +3051,6 @@ command_docgen(void)
 
     fputs("</ul></ul>\n", toc_fragment);
 
-    fclose(toc_fragment);
-    fclose(main_fragment);
     printf("\nProcessed %d commands.\n\n", g_list_length(cmds));
     g_list_free(cmds);
 }

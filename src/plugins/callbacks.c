@@ -139,9 +139,9 @@ _free_timed_function_list(GList* timed_functions)
 void
 callbacks_init(void)
 {
-    p_commands = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_command_hash);
-    p_timed_functions = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_timed_function_list);
-    p_window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_window_callbacks);
+    p_commands = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_command_hash);
+    p_timed_functions = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_timed_function_list);
+    p_window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_window_callbacks);
 }
 
 void
@@ -193,11 +193,11 @@ callbacks_add_command(const char* const plugin_name, PluginCommand* command)
 {
     GHashTable* command_hash = g_hash_table_lookup(p_commands, plugin_name);
     if (command_hash) {
-        g_hash_table_insert(command_hash, strdup(command->command_name), command);
+        g_hash_table_insert(command_hash, g_strdup(command->command_name), command);
     } else {
-        command_hash = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_command);
-        g_hash_table_insert(command_hash, strdup(command->command_name), command);
-        g_hash_table_insert(p_commands, strdup(plugin_name), command_hash);
+        command_hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_command);
+        g_hash_table_insert(command_hash, g_strdup(command->command_name), command);
+        g_hash_table_insert(p_commands, g_strdup(plugin_name), command_hash);
     }
     cmd_ac_add(command->command_name);
     cmd_ac_add_help(&command->command_name[1]);
@@ -212,7 +212,7 @@ callbacks_add_timed(const char* const plugin_name, PluginTimedFunction* timed_fu
         timed_function_list = g_list_append(timed_function_list, timed_function);
     } else {
         timed_function_list = g_list_append(timed_function_list, timed_function);
-        g_hash_table_insert(p_timed_functions, strdup(plugin_name), timed_function_list);
+        g_hash_table_insert(p_timed_functions, g_strdup(plugin_name), timed_function_list);
     }
 }
 
@@ -244,11 +244,11 @@ callbacks_add_window_handler(const char* const plugin_name, const char* tag, Plu
 {
     GHashTable* window_callbacks = g_hash_table_lookup(p_window_callbacks, plugin_name);
     if (window_callbacks) {
-        g_hash_table_insert(window_callbacks, strdup(tag), window_callback);
+        g_hash_table_insert(window_callbacks, g_strdup(tag), window_callback);
     } else {
-        window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_free_window_callback);
-        g_hash_table_insert(window_callbacks, strdup(tag), window_callback);
-        g_hash_table_insert(p_window_callbacks, strdup(plugin_name), window_callbacks);
+        window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_window_callback);
+        g_hash_table_insert(window_callbacks, g_strdup(tag), window_callback);
+        g_hash_table_insert(p_window_callbacks, g_strdup(plugin_name), window_callbacks);
     }
 }
 

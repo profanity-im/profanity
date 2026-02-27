@@ -543,6 +543,9 @@ char*
 strip_arg_quotes(const char* const input)
 {
     char* unquoted = strdup(input);
+    if (unquoted == NULL) {
+        return NULL;
+    }
 
     // Remove starting quote if it exists
     if (strchr(unquoted, '"')) {
@@ -679,15 +682,15 @@ get_file_paths_recursive(const char* path, GSList** contents)
     }
 }
 
-char*
+gchar*
 get_random_string(int length)
 {
     GRand* prng;
-    char* rand;
-    char alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    gchar* rand;
+    gchar alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     int endrange = sizeof(alphabet) - 1;
 
-    rand = calloc(length + 1, sizeof(char));
+    rand = g_malloc0(length + 1);
 
     prng = g_rand_new();
 

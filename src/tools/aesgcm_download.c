@@ -101,7 +101,7 @@ aesgcm_file_get(void* userdata)
 
     // We wrap the HTTPDownload tool and use it for retrieving the ciphertext
     // and storing it in the temporary file previously opened.
-    HTTPDownload* http_dl = calloc(1, sizeof(HTTPDownload));
+    HTTPDownload* http_dl = g_new0(HTTPDownload, 1);
     http_dl->window = aesgcm_dl->window;
     http_dl->worker = aesgcm_dl->worker;
     http_dl->id = strdup(aesgcm_dl->id);

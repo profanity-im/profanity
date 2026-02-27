@@ -244,7 +244,7 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
             continue;
         }
 
-        omemo_key_t* key = malloc(sizeof(omemo_key_t));
+        omemo_key_t* key = g_new0(omemo_key_t, 1);
         key->data = NULL;
 
         const char* prekey_id_text = xmpp_stanza_get_attribute(prekey, "preKeyId");
@@ -410,7 +410,7 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted)
             continue;
         }
 
-        omemo_key_t* key = malloc(sizeof(omemo_key_t));
+        omemo_key_t* key = g_new0(omemo_key_t, 1);
         char* key_text = xmpp_stanza_get_text(key_stanza);
         if (!key_text) {
             free(key);

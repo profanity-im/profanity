@@ -74,7 +74,7 @@ _is_valid_form_element(xmpp_stanza_t* stanza)
 static DataForm*
 _form_new(void)
 {
-    DataForm* form = calloc(1, sizeof(DataForm));
+    DataForm* form = g_new0(DataForm, 1);
 
     return form;
 }
@@ -82,7 +82,7 @@ _form_new(void)
 static FormField*
 _field_new(void)
 {
-    FormField* field = calloc(1, sizeof(FormField));
+    FormField* field = g_new0(FormField, 1);
 
     return field;
 }
@@ -237,7 +237,7 @@ form_create(xmpp_stanza_t* const form_stanza)
 
                     // handle options
                 } else if (g_strcmp0(child_name, "option") == 0) {
-                    FormOption* option = malloc(sizeof(FormOption));
+                    FormOption* option = g_new0(FormOption, 1);
                     option->label = _get_attr(field_child, "label");
                     option->value = _get_property(field_child, "value");
 

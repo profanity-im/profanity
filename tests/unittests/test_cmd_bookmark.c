@@ -97,23 +97,23 @@ cmd_bookmark_list_shows_bookmarks(void** state)
     ProfWin window;
     window.type = WIN_CONSOLE;
 
-    Bookmark* bm1 = malloc(sizeof(Bookmark));
+    Bookmark* bm1 = g_new0(Bookmark, 1);
     bm1->barejid = strdup("room1@conf.org");
     bm1->nick = strdup("bob");
     bm1->autojoin = FALSE;
-    Bookmark* bm2 = malloc(sizeof(Bookmark));
+    Bookmark* bm2 = g_new0(Bookmark, 1);
     bm2->barejid = strdup("room2@conf.org");
     bm2->nick = strdup("steve");
     bm2->autojoin = TRUE;
-    Bookmark* bm3 = malloc(sizeof(Bookmark));
+    Bookmark* bm3 = g_new0(Bookmark, 1);
     bm3->barejid = strdup("room3@conf.org");
     bm3->nick = strdup("dave");
     bm3->autojoin = TRUE;
-    Bookmark* bm4 = malloc(sizeof(Bookmark));
+    Bookmark* bm4 = g_new0(Bookmark, 1);
     bm4->barejid = strdup("room4@conf.org");
     bm4->nick = strdup("james");
     bm4->autojoin = FALSE;
-    Bookmark* bm5 = malloc(sizeof(Bookmark));
+    Bookmark* bm5 = g_new0(Bookmark, 1);
     bm5->barejid = strdup("room5@conf.org");
     bm5->nick = strdup("mike");
     bm5->autojoin = FALSE;

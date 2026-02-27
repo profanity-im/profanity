@@ -244,7 +244,7 @@ _conn_apply_settings(const char* const jid, const char* const passwd, const char
         return FALSE;
     }
 
-    auto_char char* cert_path = prefs_get_tls_certpath();
+    auto_gchar gchar* cert_path = prefs_get_tls_certpath();
     if (cert_path) {
         xmpp_conn_set_capath(conn.xmpp_conn, cert_path);
     }
@@ -830,10 +830,10 @@ connection_free_uuid(char* uuid)
     }
 }
 
-char*
+gchar*
 connection_create_stanza_id(void)
 {
-    auto_char char* rndid = get_random_string(CON_RAND_ID_LEN);
+    auto_gchar gchar* rndid = get_random_string(CON_RAND_ID_LEN);
     assert(rndid != NULL);
 
     auto_gchar gchar* hmac = g_compute_hmac_for_string(G_CHECKSUM_SHA1,
@@ -1027,8 +1027,12 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
                 conn.sm_state = xmpp_conn_get_sm_state(conn.xmpp_conn);
                 if (send_queue_len > 0 && prefs_get_boolean(PREF_STROPHE_SM_RESEND)) {
                     conn.queued_messages = calloc(send_queue_len + 1, sizeof(*conn.queued_messages));
-                    for (int n = 0; n < send_queue_len && conn.queued_messages[n]; ++n) {
-                        conn.queued_messages[n] = xmpp_conn_send_queue_drop_element(conn.xmpp_conn, XMPP_QUEUE_OLDEST);
+                    if (conn.queued_messages == NULL) {
+                        log_error("Failed to allocate memory for queued messages during disconnection.");
+                    } else {
+                        for (int n = 0; n < send_queue_len; ++n) {
+                            conn.queued_messages[n] = xmpp_conn_send_queue_drop_element(conn.xmpp_conn, XMPP_QUEUE_OLDEST);
+                        }
                     }
                 } else if (send_queue_len > 0) {
                     log_debug("Connection handler: dropping those messages since SM RESEND is disabled");

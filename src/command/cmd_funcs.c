@@ -154,10 +154,11 @@ cmd_process_input(ProfWin* window, char* inp)
     if (inp[0] == '/') {
         auto_char char* inp_cpy = strdup(inp);
         char* command = strtok(inp_cpy, " ");
-        char* second_word = strtok(NULL, " ");
-        gboolean wants_help = second_word ? strcmp(second_word, "help") == 0 : FALSE;
+        if (!command) {
+            return TRUE;
+        }
         char* question_mark = strchr(command, '?');
-        if (wants_help || question_mark) {
+        if (question_mark) {
             *question_mark = '\0';
             auto_gchar gchar* fakeinp = g_strdup_printf("/help %s", command + 1);
             if (fakeinp) {
@@ -206,7 +207,7 @@ cmd_tls_certpath(ProfWin* window, const char* const command, gchar** args)
         cons_show("Certificate path defaulted to finding system certpath.");
         return TRUE;
     } else if (args[1] == NULL) {
-        auto_char char* path = prefs_get_tls_certpath();
+        auto_gchar gchar* path = prefs_get_tls_certpath();
         if (path) {
             cons_show("Trusted certificate path: %s", path);
         } else {
@@ -385,7 +386,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
         }
     }
 
-    auto_char char* jid = NULL;
+    auto_gchar gchar* jid = NULL;
     auto_char char* user = strdup(user_orig);
 
     // connect with account
@@ -1074,30 +1075,19 @@ cmd_script(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
-/* escape a string into csv and write it to the file descriptor */
-static int
-_writecsv(int fd, const char* const str)
+static void
+_append_csv_escaped(GString* buffer, const char* const str)
 {
-    if (!str)
-        return 0;
-    size_t len = strlen(str);
+    if (!str) {
+        return;
+    }
 
-    auto_char char* s = malloc(2 * len * sizeof(char));
-    char* c = s;
-    for (size_t i = 0; i < strlen(str); i++) {
-        if (str[i] != '"')
-            *c++ = str[i];
-        else {
-            *c++ = '"';
-            *c++ = '"';
-            len++;
+    for (const char* p = str; *p; p++) {
+        if (*p == '"') {
+            g_string_append_c(buffer, '"');
         }
+        g_string_append_c(buffer, *p);
     }
-    if (-1 == write(fd, s, len)) {
-        cons_show("error: failed to write '%s' to the requested file: %s", s, strerror(errno));
-        return -1;
-    }
-    return 0;
 }
 
 gboolean
@@ -1109,62 +1099,45 @@ cmd_export(ProfWin* window, const char* const command, gchar** args)
         cons_show("You are not currently connected.");
         cons_show("");
         return TRUE;
-    } else {
-        int fd;
-        GSList* list = NULL;
-        auto_char char* path = get_expanded_path(args[0]);
+    }
 
-        fd = open(path, O_WRONLY | O_CREAT, 00600);
-
-        if (-1 == fd) {
-            cons_show("error: cannot open %s: %s", args[0], strerror(errno));
-            cons_show("");
-            return TRUE;
-        }
-
-        if (-1 == write(fd, "jid,name\n", strlen("jid,name\n")))
-            goto write_error;
-
-        list = roster_get_contacts(ROSTER_ORD_NAME);
-        if (list) {
-            GSList* curr = list;
-            while (curr) {
-                PContact contact = curr->data;
-                const char* jid = p_contact_barejid(contact);
-                const char* name = p_contact_name(contact);
-
-                /* write the data to the file */
-                if (-1 == write(fd, "\"", 1))
-                    goto write_error;
-                if (-1 == _writecsv(fd, jid))
-                    goto write_error;
-                if (-1 == write(fd, "\",\"", 3))
-                    goto write_error;
-                if (-1 == _writecsv(fd, name))
-                    goto write_error;
-                if (-1 == write(fd, "\"\n", 2))
-                    goto write_error;
-
-                /* loop */
-                curr = g_slist_next(curr);
-            }
-            cons_show("Contacts exported successfully");
-            cons_show("");
-        } else {
-            cons_show("No contacts in roster.");
-            cons_show("");
-        }
-
-        g_slist_free(list);
-        close(fd);
-        return TRUE;
-write_error:
-        cons_show("error: write failed: %s", strerror(errno));
+    GSList* list = roster_get_contacts(ROSTER_ORD_NAME);
+    if (!list) {
+        cons_show("No contacts in roster.");
         cons_show("");
-        g_slist_free(list);
-        close(fd);
         return TRUE;
     }
+
+    auto_gchar gchar* path = get_expanded_path(args[0]);
+    GString* buffer = g_string_new("jid,name\n");
+
+    GSList* curr = list;
+    while (curr) {
+        PContact contact = curr->data;
+        const gchar* jid = p_contact_barejid(contact);
+        const gchar* name = p_contact_name(contact);
+
+        g_string_append_c(buffer, '"');
+        _append_csv_escaped(buffer, jid);
+        g_string_append(buffer, "\",\"");
+        _append_csv_escaped(buffer, name);
+        g_string_append(buffer, "\"\n");
+
+        curr = g_slist_next(curr);
+    }
+
+    auto_gerror GError* error = NULL;
+    if (!g_file_set_contents(path, buffer->str, buffer->len, &error)) {
+        cons_show_error("error: cannot save %s: %s", args[0], error->message);
+    } else {
+        g_chmod(path, S_IRUSR | S_IWUSR);
+        cons_show("Contacts exported successfully");
+    }
+
+    g_string_free(buffer, TRUE);
+    g_slist_free(list);
+
+    return TRUE;
 }
 
 gboolean
@@ -4897,6 +4870,11 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
     }
 
     FILE* fh = fdopen(fd, "rb");
+    if (!fh) {
+        cons_show_error("Unable to open file descriptor for '%s'.", filename);
+        close(fd);
+        goto out;
+    }
 
     if (omemo_enabled) {
 #ifdef HAVE_OMEMO
@@ -4906,18 +4884,40 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         if (err != NULL) {
             cons_show_error(err);
             win_println(window, THEME_ERROR, "-", err);
+            if (fh) {
+                fclose(fh);
+            }
             goto out;
         }
 #endif
     }
 
-    HTTPUpload* upload = malloc(sizeof(HTTPUpload));
+    HTTPUpload* upload = g_new0(HTTPUpload, 1);
+    if (!upload) {
+        cons_show_error("Memory allocation failed.");
+        if (fh) {
+            fclose(fh);
+        }
+        goto out;
+    }
+
     upload->window = window;
 
     upload->filename = strdup(filename);
     upload->filehandle = fh;
     upload->filesize = file_size(fd);
     upload->mime_type = file_mime_type(filename);
+
+    if (!upload->filename || !upload->mime_type) {
+        cons_show_error("Memory allocation failed.");
+        if (fh) {
+            fclose(fh);
+        }
+        free(upload->filename);
+        free(upload->mime_type);
+        free(upload);
+        goto out;
+    }
 
     if (alt_scheme != NULL) {
         upload->alt_scheme = strdup(alt_scheme);
@@ -7317,7 +7317,7 @@ cmd_pgp(ProfWin* window, const char* const command, gchar** args)
             account_free(account);
             return TRUE;
         }
-        auto_char char* pubkey = p_gpg_get_pubkey(account->pgp_keyid);
+        auto_gchar gchar* pubkey = p_gpg_get_pubkey(account->pgp_keyid);
         if (pubkey == NULL) {
             cons_show_error("Couldn't get your PGP public key. Please, check error logs.");
             account_free(account);
@@ -8714,8 +8714,8 @@ cmd_omemo_trust(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    char* fingerprint;
-    char* barejid;
+    gchar* fingerprint;
+    gchar* barejid;
 
     /* Contact not provided */
     if (!args[2]) {
@@ -8731,7 +8731,7 @@ cmd_omemo_trust(ProfWin* window, const char* const command, gchar** args)
         barejid = chatwin->barejid;
     } else {
         fingerprint = args[2];
-        char* contact = args[1];
+        gchar* contact = args[1];
         barejid = roster_barejid_from_name(contact);
         if (barejid == NULL) {
             barejid = contact;
@@ -8740,7 +8740,7 @@ cmd_omemo_trust(ProfWin* window, const char* const command, gchar** args)
 
     omemo_trust(barejid, fingerprint);
 
-    auto_char char* unformatted_fingerprint = malloc(strlen(fingerprint));
+    auto_gchar gchar* unformatted_fingerprint = g_malloc(strlen(fingerprint) + 1);
     int i;
     int j;
     for (i = 0, j = 0; fingerprint[i] != '\0'; i++) {
@@ -8781,8 +8781,8 @@ cmd_omemo_untrust(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    char* fingerprint;
-    char* barejid;
+    gchar* fingerprint;
+    gchar* barejid;
 
     /* Contact not provided */
     if (!args[2]) {
@@ -8807,7 +8807,7 @@ cmd_omemo_untrust(ProfWin* window, const char* const command, gchar** args)
 
     omemo_untrust(barejid, fingerprint);
 
-    auto_char char* unformatted_fingerprint = malloc(strlen(fingerprint));
+    auto_gchar gchar* unformatted_fingerprint = g_malloc(strlen(fingerprint) + 1);
     int i, j;
     for (i = 0, j = 0; fingerprint[i] != '\0'; i++) {
         if (!g_ascii_isxdigit(fingerprint[i])) {
@@ -9229,7 +9229,7 @@ _url_aesgcm_method(ProfWin* window, const char* cmd_template, gchar* url, gchar*
     auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return;
-    AESGCMDownload* download = calloc(1, sizeof(AESGCMDownload));
+    AESGCMDownload* download = g_new0(AESGCMDownload, 1);
     download->id = get_random_string(4);
     download->url = strdup(url);
     download->filename = strdup(filename);
@@ -9251,7 +9251,7 @@ _download_install_plugin(ProfWin* window, gchar* url, gchar* path)
     auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return FALSE;
-    HTTPDownload* download = calloc(1, sizeof(HTTPDownload));
+    HTTPDownload* download = g_new0(HTTPDownload, 1);
     download->id = get_random_string(4);
     download->url = strdup(url);
     download->filename = strdup(filename);
@@ -9270,7 +9270,7 @@ _url_http_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* p
     auto_gchar gchar* filename = _prepare_filename(window, url, path);
     if (!filename)
         return;
-    HTTPDownload* download = calloc(1, sizeof(HTTPDownload));
+    HTTPDownload* download = g_new0(HTTPDownload, 1);
     download->id = get_random_string(4);
     download->url = strdup(url);
     download->filename = strdup(filename);
@@ -9678,7 +9678,7 @@ cmd_vcard_add(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    vcard_element_t* element = calloc(1, sizeof(vcard_element_t));
+    vcard_element_t* element = g_new0(vcard_element_t, 1);
     if (!element) {
         cons_show_error("Memory allocation failed.");
         return TRUE;

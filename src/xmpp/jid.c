@@ -69,13 +69,7 @@ jid_create(const gchar* const str)
         return NULL;
     }
 
-    result = malloc(sizeof(struct jid_t));
-    result->str = NULL;
-    result->localpart = NULL;
-    result->domainpart = NULL;
-    result->resourcepart = NULL;
-    result->barejid = NULL;
-    result->fulljid = NULL;
+    result = g_new0(Jid, 1);
     result->refcnt = 1;
 
     gchar* atp = g_utf8_strchr(trimmed, -1, '@');
@@ -109,9 +103,9 @@ jid_create(const gchar* const str)
 }
 
 Jid*
-jid_create_from_bare_and_resource(const char* const barejid, const char* const resource)
+jid_create_from_bare_and_resource(const gchar* const barejid, const gchar* const resource)
 {
-    auto_char char* jid = create_fulljid(barejid, resource);
+    auto_gchar gchar* jid = create_fulljid(barejid, resource);
     return jid_create(jid);
 }
 
@@ -160,8 +154,8 @@ jid_is_valid_room_form(Jid* jid)
  * barejid/resourcepart
  * Will return a newly created string that must be freed by the caller
  */
-char*
-create_fulljid(const char* const barejid, const char* const resource)
+gchar*
+create_fulljid(const gchar* const barejid, const gchar* const resource)
 {
     auto_gchar gchar* barejidlower = g_utf8_strdown(barejid, -1);
     return g_strdup_printf("%s/%s", barejidlower, resource);
@@ -172,11 +166,11 @@ create_fulljid(const char* const barejid, const char* const resource)
  * Full JID = "test@conference.server/person"
  * returns "person"
  */
-char*
-get_nick_from_full_jid(const char* const full_room_jid)
+gchar*
+get_nick_from_full_jid(const gchar* const full_room_jid)
 {
     auto_gcharv gchar** tokens = g_strsplit(full_room_jid, "/", 0);
-    char* nick_part = NULL;
+    gchar* nick_part = NULL;
 
     if (tokens) {
         if (tokens[0] && tokens[1]) {
@@ -190,7 +184,7 @@ get_nick_from_full_jid(const char* const full_room_jid)
 /*
  * get the fulljid, fall back to the barejid
  */
-const char*
+const gchar*
 jid_fulljid_or_barejid(Jid* jid)
 {
     if (jid->fulljid) {
@@ -203,7 +197,7 @@ jid_fulljid_or_barejid(Jid* jid)
 gchar*
 jid_random_resource(void)
 {
-    auto_char char* rand = get_random_string(4);
+    auto_gchar gchar* rand = get_random_string(4);
 
     gchar* result = g_strdup_printf("profanity.%s", rand);
 

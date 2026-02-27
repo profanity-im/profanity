@@ -39,6 +39,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <sys/wait.h>
 
 #include <glib.h>
 
@@ -59,7 +60,7 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
             gchar* startscript, gchar* theme, gchar* tls_policy, gchar* auth_policy,
             gchar* client, int max_sessions)
 {
-    ProfAccount* new_account = calloc(1, sizeof(ProfAccount));
+    ProfAccount* new_account = g_new0(ProfAccount, 1);
 
     new_account->name = name;
 
@@ -144,13 +145,13 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
     return new_account;
 }
 
-char*
+gchar*
 account_create_connect_jid(ProfAccount* account)
 {
     if (account->resource) {
         return create_fulljid(account->jid, account->resource);
     } else {
-        return strdup(account->jid);
+        return g_strdup(account->jid);
     }
 }
 
@@ -160,53 +161,31 @@ account_eval_password(ProfAccount* account)
     assert(account != NULL);
     assert(account->eval_password != NULL);
 
-    errno = 0;
+    gchar* stdout_buf = NULL;
+    GError* error = NULL;
+    gint exit_status = 0;
 
-    FILE* stream = popen(account->eval_password, "r");
-    if (stream == NULL) {
-        const char* errmsg = strerror(errno);
-        if (errmsg) {
-            log_error("Could not execute `eval_password` command (%s).",
-                      errmsg);
-        } else {
-            log_error("Failed to allocate memory for `eval_password` command.");
+    if (!g_spawn_command_line_sync(account->eval_password, &stdout_buf, NULL, &exit_status, &error)) {
+        log_error("Failed to execute `eval_password` command: %s", error->message);
+        g_error_free(error);
+        return FALSE;
+    }
+
+    if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == 0) {
+        account->password = stdout_buf;
+        g_strstrip(account->password);
+        if (account->password[0] == '\0') {
+            log_error("Empty password returned by `eval_password` command.");
+            g_free(account->password);
+            account->password = NULL;
+            return FALSE;
         }
+        return TRUE;
+    } else {
+        log_error("`eval_password` command failed with status %d", exit_status);
+        g_free(stdout_buf);
         return FALSE;
     }
-
-    account->password = g_malloc(READ_BUF_SIZE);
-    if (!account->password) {
-        log_error("Failed to allocate enough memory to read `eval_password` "
-                  "output.");
-        return FALSE;
-    }
-
-    account->password = fgets(account->password, READ_BUF_SIZE, stream);
-    if (!account->password) {
-        log_error("Failed to read password from stream.");
-        return FALSE;
-    }
-
-    int exit_status = pclose(stream);
-    if (exit_status > 0) {
-        log_error("Command for `eval_password` returned error status (%s).",
-                  exit_status);
-        return FALSE;
-    } else if (exit_status < 0) {
-        log_error("Failed to close stream for `eval_password` command output "
-                  "(%s).",
-                  strerror(errno));
-        return FALSE;
-    };
-
-    // Remove leading and trailing whitespace from output.
-    g_strstrip(account->password);
-    if (!account->password) {
-        log_error("Empty password returned by `eval_password` command.");
-        return FALSE;
-    }
-
-    return TRUE;
 }
 
 void

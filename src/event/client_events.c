@@ -116,7 +116,7 @@ cl_ev_reconnect(void)
 void
 cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs)
 {
-    auto_char char* signed_status = NULL;
+    auto_gchar gchar* signed_status = NULL;
 
 #ifdef HAVE_LIBGPGME
     ProfAccount* account = accounts_get_account(session_get_account_name());

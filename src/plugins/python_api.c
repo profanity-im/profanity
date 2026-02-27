@@ -451,10 +451,10 @@ python_api_get_name_from_roster(PyObject* self, PyObject* args)
         Py_RETURN_NONE;
     }
 
-    char* barejid_str = python_str_or_unicode_to_string(barejid);
+    gchar* barejid_str = python_str_or_unicode_to_string(barejid);
 
     allow_python_threads();
-    char* name = strdup(roster_get_display_name(barejid_str));
+    gchar* name = g_strdup(roster_get_display_name(barejid_str));
     free(barejid_str);
     disable_python_threads();
     if (name) {
@@ -1630,16 +1630,16 @@ _python_plugin_name(void)
 #if PY_VERSION_HEX >= 0x030B0000
     PyFrameObject* frame = PyThreadState_GetFrame(ts);
     PyCodeObject* code = PyFrame_GetCode(frame);
-    char* filename = python_str_or_unicode_to_string(code->co_filename);
+    gchar* filename = python_str_or_unicode_to_string(code->co_filename);
     Py_DECREF(code);
     Py_DECREF(frame);
 #else
     PyFrameObject* frame = ts->frame;
-    char* filename = python_str_or_unicode_to_string(frame->f_code->co_filename);
+    gchar* filename = python_str_or_unicode_to_string(frame->f_code->co_filename);
 #endif
     gchar** split = g_strsplit(filename, "/", 0);
     free(filename);
-    char* plugin_name = strdup(split[g_strv_length(split) - 1]);
+    gchar* plugin_name = g_strdup(split[g_strv_length(split) - 1]);
     g_strfreev(split);
 
     return plugin_name;
@@ -1659,20 +1659,20 @@ python_str_or_unicode_to_string(void* obj)
 #ifdef PY_IS_PYTHON3
     if (PyUnicode_Check(pyobj)) {
         PyObject* utf8_str = PyUnicode_AsUTF8String(pyobj);
-        char* result = strdup(PyBytes_AS_STRING(utf8_str));
+        gchar* result = g_strdup(PyBytes_AS_STRING(utf8_str));
         Py_XDECREF(utf8_str);
         return result;
     } else {
-        return strdup(PyBytes_AS_STRING(pyobj));
+        return g_strdup(PyBytes_AS_STRING(pyobj));
     }
 #else
     if (PyUnicode_Check(pyobj)) {
         PyObject* utf8_str = PyUnicode_AsUTF8String(pyobj);
-        char* result = strdup(PyString_AsString(utf8_str));
+        gchar* result = g_strdup(PyString_AsString(utf8_str));
         Py_XDECREF(utf8_str);
         return result;
     } else {
-        return strdup(PyString_AsString(pyobj));
+        return g_strdup(PyString_AsString(pyobj));
     }
 #endif
 }

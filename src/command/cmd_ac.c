@@ -1653,60 +1653,52 @@ cmd_ac_uninit(void)
 }
 
 static void
-_filepath_item_free(char** ptr)
+_filepath_item_free(gchar** ptr)
 {
-    char* item = *ptr;
-    free(item);
+    gchar* item = *ptr;
+    g_free(item);
 }
 
 char*
 cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean previous)
 {
-    unsigned int output_off = 0;
-    char* tmp = NULL;
-
     // strip command
-    char* inpcp = (char*)input + strlen(startstr);
-    while (*inpcp == ' ') {
-        inpcp++;
+    char* inpcp_ptr = (char*)input + strlen(startstr);
+    while (*inpcp_ptr == ' ') {
+        inpcp_ptr++;
     }
 
-    inpcp = strdup(inpcp);
-
-    // strip quotes
-    if (*inpcp == '"') {
-        tmp = strrchr(inpcp + 1, '"');
-        if (tmp) {
-            *tmp = '\0';
-        }
-        tmp = strdup(inpcp + 1);
-        free(inpcp);
-        inpcp = tmp;
-        tmp = NULL;
-    }
-
-    // expand ~ to $HOME
-    if (inpcp[0] == '~' && inpcp[1] == '/') {
-        char* home = getenv("HOME");
-        if (!home) {
-            free(inpcp);
-            return NULL;
-        }
-        tmp = g_strdup_printf("%s/%sfoo", home, inpcp + 2);
-        output_off = strlen(home) + 1;
-    } else {
-        tmp = g_strdup_printf("%sfoo", inpcp);
-    }
-    free(inpcp);
-    if (!tmp) {
+    auto_gchar gchar* inpcp = g_strdup(inpcp_ptr);
+    if (!inpcp) {
         return NULL;
     }
 
-    char* foofile = strdup(basename(tmp));
-    char* directory = strdup(dirname(tmp));
-    g_free(tmp);
+    // strip quotes
+    if (inpcp[0] == '"') {
+        char* last_quote = strrchr(inpcp + 1, '"');
+        if (last_quote) {
+            *last_quote = '\0';
+        }
+        gchar* unquoted = g_strdup(inpcp + 1);
+        inpcp = unquoted;
+    }
 
-    GArray* files = g_array_new(TRUE, FALSE, sizeof(char*));
+    auto_gchar gchar* expanded = get_expanded_path(inpcp);
+    if (!expanded) {
+        return NULL;
+    }
+
+    auto_gchar gchar* foofile = g_path_get_basename(expanded);
+    auto_gchar gchar* directory = g_path_get_dirname(expanded);
+
+    // If the input ends with a slash, the basename will be "." or "/"
+    // In that case, we are looking for all files in that directory
+    gboolean find_all = FALSE;
+    if (inpcp[strlen(inpcp) - 1] == '/') {
+        find_all = TRUE;
+    }
+
+    GArray* files = g_array_new(TRUE, FALSE, sizeof(gchar*));
     g_array_set_clear_func(files, (GDestroyNotify)_filepath_item_free);
 
     DIR* d = opendir(directory);
@@ -1714,40 +1706,33 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
         struct dirent* dir;
 
         while ((dir = readdir(d)) != NULL) {
-            if (strcmp(dir->d_name, ".") == 0) {
-                continue;
-            } else if (strcmp(dir->d_name, "..") == 0) {
-                continue;
-            } else if (*(dir->d_name) == '.' && *foofile != '.') {
-                // only show hidden files on explicit request
+            if (strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0) {
                 continue;
             }
 
-            char* acstring = NULL;
-            if (output_off) {
-                tmp = g_strdup_printf("%s/%s", directory, dir->d_name);
-                if (tmp) {
-                    acstring = g_strdup_printf("~/%s", tmp + output_off);
-                    g_free(tmp);
-                }
-            } else if (strcmp(directory, "/") == 0) {
+            // check if it matches prefix
+            if (!find_all && !g_str_has_prefix(dir->d_name, foofile)) {
+                continue;
+            }
+
+            // only show hidden files on explicit request
+            if (dir->d_name[0] == '.' && (find_all || foofile[0] != '.')) {
+                continue;
+            }
+
+            auto_gchar gchar* acstring = NULL;
+            if (strcmp(directory, "/") == 0) {
                 acstring = g_strdup_printf("/%s", dir->d_name);
             } else {
                 acstring = g_strdup_printf("%s/%s", directory, dir->d_name);
             }
-            if (!acstring) {
-                g_array_free(files, TRUE);
-                free(foofile);
-                free(directory);
-                return NULL;
-            }
 
-            g_array_append_val(files, acstring);
+            if (acstring) {
+                g_array_append_val(files, acstring);
+            }
         }
         closedir(d);
     }
-    free(directory);
-    free(foofile);
 
     autocomplete_update(filepath_ac, (char**)files->data);
     g_array_free(files, TRUE);

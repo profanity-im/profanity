@@ -56,7 +56,7 @@ _chat_session_new(const char* const barejid, const char* const resource, gboolea
     assert(barejid != NULL);
     assert(resource != NULL);
 
-    ChatSession* new_session = calloc(1, sizeof(*new_session));
+    ChatSession* new_session = g_new0(ChatSession, 1);
     new_session->barejid = strdup(barejid);
     new_session->resource = strdup(resource);
     new_session->resource_override = resource_override;

@@ -94,7 +94,7 @@ c_api_register_command(const char* filename, const char* command_name, int min_a
     auto_char char* plugin_name = _c_plugin_name(filename);
     log_debug("Register command %s for %s", command_name, plugin_name);
 
-    CommandWrapper* wrapper = malloc(sizeof(CommandWrapper));
+    CommandWrapper* wrapper = g_new0(CommandWrapper, 1);
     wrapper->func = callback;
     api_register_command(plugin_name, command_name, min_args, max_args, synopsis,
                          description, arguments, examples, wrapper, c_command_callback, free);
@@ -106,7 +106,7 @@ c_api_register_timed(const char* filename, void (*callback)(void), int interval_
     auto_char char* plugin_name = _c_plugin_name(filename);
     log_debug("Register timed for %s", plugin_name);
 
-    TimedWrapper* wrapper = malloc(sizeof(TimedWrapper));
+    TimedWrapper* wrapper = g_new0(TimedWrapper, 1);
     wrapper->func = callback;
     api_register_timed(plugin_name, wrapper, interval_seconds, c_timed_callback, free);
 }
@@ -242,7 +242,7 @@ c_api_win_create(const char* filename, char* tag, void (*callback)(char* tag, ch
 {
     auto_char char* plugin_name = _c_plugin_name(filename);
 
-    WindowWrapper* wrapper = malloc(sizeof(WindowWrapper));
+    WindowWrapper* wrapper = g_new0(WindowWrapper, 1);
     wrapper->func = callback;
     api_win_create(plugin_name, tag, wrapper, c_window_callback, free);
 }

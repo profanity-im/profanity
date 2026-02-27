@@ -578,7 +578,7 @@ _rosterwin_resources(ProfLayoutSplit* layout, PContact contact, int current_inde
                     g_string_append(msg, " ");
                     this_indent--;
                 }
-                auto_char char* ch = prefs_get_roster_resource_char();
+                auto_gchar gchar* ch = prefs_get_roster_resource_char();
                 if (ch) {
                     g_string_append_printf(msg, "%s", ch);
                 }
