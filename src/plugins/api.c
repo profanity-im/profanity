@@ -253,6 +253,11 @@ api_get_current_occupants(void)
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         GList* occupants_list = muc_roster(mucwin->roomjid);
         char** result = malloc((g_list_length(occupants_list) + 1) * sizeof(char*));
+        if (result == NULL) {
+            g_list_free(occupants_list);
+            return NULL;
+        }
+
         GList* curr = occupants_list;
         int i = 0;
         while (curr) {
@@ -261,6 +266,9 @@ api_get_current_occupants(void)
             curr = g_list_next(curr);
         }
         result[i] = NULL;
+
+        g_list_free(occupants_list);
+
         return result;
     } else {
         return NULL;
