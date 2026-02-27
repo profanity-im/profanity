@@ -1669,6 +1669,9 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
     }
 
     auto_gchar gchar* inpcp = g_strdup(inpcp_ptr);
+    if (!inpcp) {
+        return NULL;
+    }
 
     // strip quotes
     if (inpcp[0] == '"') {
