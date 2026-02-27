@@ -177,7 +177,7 @@ http_file_get(void* userdata)
         err = strdup(curl_easy_strerror(res));
     }
 
-    if (ftell(outfh) == 0) {
+    if (!err && ftell(outfh) == 0) {
         err = strdup("Output file is empty.");
     }
 
@@ -185,7 +185,9 @@ http_file_get(void* userdata)
     curl_global_cleanup();
 
     if (fclose(outfh) == EOF) {
-        err = strdup(g_strerror(errno));
+        if (!err) {
+            err = strdup(g_strerror(errno));
+        }
     }
 
     pthread_mutex_lock(&lock);
@@ -211,7 +213,9 @@ http_file_get(void* userdata)
             win_mark_received(download->window, download->id);
             if (download->return_bytes_received) {
                 ret = malloc(sizeof(*ret));
-                *ret = download->bytes_received;
+                if (ret) {
+                    *ret = download->bytes_received;
+                }
             }
         }
     }
