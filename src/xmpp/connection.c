@@ -1027,8 +1027,12 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
                 conn.sm_state = xmpp_conn_get_sm_state(conn.xmpp_conn);
                 if (send_queue_len > 0 && prefs_get_boolean(PREF_STROPHE_SM_RESEND)) {
                     conn.queued_messages = calloc(send_queue_len + 1, sizeof(*conn.queued_messages));
-                    for (int n = 0; n < send_queue_len && conn.queued_messages[n]; ++n) {
-                        conn.queued_messages[n] = xmpp_conn_send_queue_drop_element(conn.xmpp_conn, XMPP_QUEUE_OLDEST);
+                    if (conn.queued_messages == NULL) {
+                        log_error("Failed to allocate memory for queued messages during disconnection.");
+                    } else {
+                        for (int n = 0; n < send_queue_len; ++n) {
+                            conn.queued_messages[n] = xmpp_conn_send_queue_drop_element(conn.xmpp_conn, XMPP_QUEUE_OLDEST);
+                        }
                     }
                 } else if (send_queue_len > 0) {
                     log_debug("Connection handler: dropping those messages since SM RESEND is disabled");
