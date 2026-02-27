@@ -154,6 +154,9 @@ cmd_process_input(ProfWin* window, char* inp)
     if (inp[0] == '/') {
         auto_char char* inp_cpy = strdup(inp);
         char* command = strtok(inp_cpy, " ");
+        if (!command) {
+            return TRUE;
+        }
         char* question_mark = strchr(command, '?');
         if (question_mark) {
             *question_mark = '\0';
