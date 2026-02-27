@@ -2783,13 +2783,17 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             if (data->start_datestr) {
                 start_str = strdup(data->start_datestr);
                 // Convert to iso8601
-                start_str[strlen(start_str) - 3] = '\0';
+                if (start_str && strlen(start_str) >= 3) {
+                    start_str[strlen(start_str) - 3] = '\0';
+                }
             }
-            char* end_str = NULL;
+            auto_char char* end_str = NULL;
             if (data->end_datestr) {
                 end_str = strdup(data->end_datestr);
                 // Convert to iso8601
-                end_str[strlen(end_str) - 3] = '\0';
+                if (end_str && strlen(end_str) >= 3) {
+                    end_str[strlen(end_str) - 3] = '\0';
+                }
             }
 
             if (is_complete || !data->fetch_next) {
