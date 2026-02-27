@@ -85,6 +85,7 @@ ox_gpg_public_keys(void)
         if (error != GPG_ERR_EOF && error != GPG_ERR_NO_ERROR) {
             log_error("OX: gpgme_op_keylist_next %s %s", gpgme_strsource(error), gpgme_strerror(error));
             g_hash_table_destroy(result);
+            gpgme_release(ctx);
             return NULL;
         }
         while (!error) {
@@ -145,10 +146,16 @@ ox_gpg_public_keys(void)
 char*
 p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient_barejid, const char* const message)
 {
+    char* result = NULL;
+    gpgme_ctx_t ctx = NULL;
+    gpgme_key_t recp[3] = { NULL, NULL, NULL };
+    gpgme_data_t plain = NULL;
+    gpgme_data_t cipher = NULL;
+    char* cipher_str = NULL;
+
     setlocale(LC_ALL, "");
     gpgme_check_version(NULL);
     gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
-    gpgme_ctx_t ctx;
 
     gpgme_error_t error = gpgme_new(&ctx);
     if (GPG_ERR_NO_ERROR != error) {
@@ -165,13 +172,6 @@ p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient
     gpgme_set_textmode(ctx, 0);
     gpgme_set_offline(ctx, 1);
     gpgme_set_keylist_mode(ctx, GPGME_KEYLIST_MODE_LOCAL);
-    if (error != 0) {
-        log_error("OX: Signcrypt error: %s", gpgme_strerror(error));
-    }
-
-    gpgme_key_t recp[3];
-    recp[0] = NULL,
-    recp[1] = NULL;
 
     char* xmpp_jid_me = alloca((strlen(sender_barejid) + 6) * sizeof(char));
     char* xmpp_jid_recipient = alloca((strlen(recipient_barejid) + 6) * sizeof(char));
@@ -185,64 +185,73 @@ p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient
 
     // lookup own key
     recp[0] = _ox_key_lookup(sender_barejid, TRUE);
-    if (error != 0) {
+    if (recp[0] == NULL) {
         cons_show_error("Can't find OX key for %s", xmpp_jid_me);
-        log_error("OX: Key not found for %s. Error: %s", xmpp_jid_me, gpgme_strerror(error));
-        return NULL;
+        log_error("OX: Key not found for %s.", xmpp_jid_me);
+        goto cleanup;
     }
 
     error = gpgme_signers_add(ctx, recp[0]);
     if (error != 0) {
         log_error("OX: gpgme_signers_add %s. Error: %s", xmpp_jid_me, gpgme_strerror(error));
-        return NULL;
+        goto cleanup;
     }
 
     // lookup key of recipient
     recp[1] = _ox_key_lookup(recipient_barejid, FALSE);
-    if (error != 0) {
+    if (recp[1] == NULL) {
         cons_show_error("Can't find OX key for %s", xmpp_jid_recipient);
-        log_error("OX: Key not found for %s. Error: %s", xmpp_jid_recipient, gpgme_strerror(error));
-        return NULL;
+        log_error("OX: Key not found for %s.", xmpp_jid_recipient);
+        goto cleanup;
     }
 
     recp[2] = NULL;
-    log_debug("OX: %s <%s>", recp[0]->uids->name, recp[0]->uids->email);
-    log_debug("OX: %s <%s>", recp[1]->uids->name, recp[1]->uids->email);
+    if (recp[0]->uids) {
+        log_debug("OX: %s <%s>", recp[0]->uids->name, recp[0]->uids->email);
+    }
+    if (recp[1]->uids) {
+        log_debug("OX: %s <%s>", recp[1]->uids->name, recp[1]->uids->email);
+    }
 
     gpgme_encrypt_flags_t flags = 0;
-
-    gpgme_data_t plain;
-    gpgme_data_t cipher;
-
-    error = gpgme_data_new(&plain);
-    if (error != 0) {
-        log_error("OX: %s", gpgme_strerror(error));
-        return NULL;
-    }
 
     error = gpgme_data_new_from_mem(&plain, message, strlen(message), 0);
     if (error != 0) {
         log_error("OX: %s", gpgme_strerror(error));
-        return NULL;
+        goto cleanup;
     }
+
     error = gpgme_data_new(&cipher);
     if (error != 0) {
         log_error("OX: %s", gpgme_strerror(error));
-        return NULL;
+        goto cleanup;
     }
 
     error = gpgme_op_encrypt_sign(ctx, recp, flags, plain, cipher);
     if (error != 0) {
         log_error("OX: %s", gpgme_strerror(error));
-        return NULL;
+        goto cleanup;
     }
 
     size_t len;
-    char* cipher_str = gpgme_data_release_and_get_mem(cipher, &len);
-    char* result = g_base64_encode((unsigned char*)cipher_str, len);
-    gpgme_key_release(recp[0]);
-    gpgme_key_release(recp[1]);
-    gpgme_release(ctx);
+    cipher_str = gpgme_data_release_and_get_mem(cipher, &len);
+    cipher = NULL; // Already released by gpgme_data_release_and_get_mem
+    result = g_base64_encode((unsigned char*)cipher_str, len);
+
+cleanup:
+    if (cipher_str)
+        gpgme_free(cipher_str);
+    if (plain)
+        gpgme_data_release(plain);
+    if (cipher)
+        gpgme_data_release(cipher);
+    if (recp[0])
+        gpgme_key_release(recp[0]);
+    if (recp[1])
+        gpgme_key_release(recp[1]);
+    if (ctx)
+        gpgme_release(ctx);
+
     return result;
 }
 
@@ -313,6 +322,7 @@ _ox_key_lookup(const char* const barejid, gboolean secret_only)
                 if (uid->name && strlen(uid->name) >= 10) {
                     if (g_strcmp0(uid->name, xmppuri->str) == 0) {
                         gpgme_release(ctx);
+                        g_string_free(xmppuri, TRUE);
                         return key;
                     }
                 }
@@ -321,6 +331,7 @@ _ox_key_lookup(const char* const barejid, gboolean secret_only)
             gpgme_key_unref(key);
             error = gpgme_op_keylist_next(ctx, &key);
         }
+        g_string_free(xmppuri, TRUE);
     }
     gpgme_release(ctx);
 
@@ -362,6 +373,13 @@ _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret)
 char*
 p_ox_gpg_decrypt(char* base64)
 {
+    char* result = NULL;
+    gpgme_ctx_t ctx = NULL;
+    gpgme_data_t plain = NULL;
+    gpgme_data_t cipher = NULL;
+    guchar* encrypted = NULL;
+    char* plain_str = NULL;
+
     // if there is no private key avaibale,
     // we don't try do decrypt
     if (!ox_is_private_key_available(connection_get_barejid())) {
@@ -370,7 +388,6 @@ p_ox_gpg_decrypt(char* base64)
     setlocale(LC_ALL, "");
     gpgme_check_version(NULL);
     gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
-    gpgme_ctx_t ctx;
     gpgme_error_t error = gpgme_new(&ctx);
 
     if (GPG_ERR_NO_ERROR != error) {
@@ -387,25 +404,19 @@ p_ox_gpg_decrypt(char* base64)
     gpgme_set_textmode(ctx, 0);
     gpgme_set_offline(ctx, 1);
     gpgme_set_keylist_mode(ctx, GPGME_KEYLIST_MODE_LOCAL);
-    if (error != 0) {
-        log_error("OX: %s", gpgme_strerror(error));
-    }
-
-    gpgme_data_t plain = NULL;
-    gpgme_data_t cipher = NULL;
 
     gsize s;
-    guchar* encrypted = g_base64_decode(base64, &s);
+    encrypted = g_base64_decode(base64, &s);
     error = gpgme_data_new_from_mem(&cipher, (char*)encrypted, s, 0);
     if (error != 0) {
         log_error("OX: gpgme_data_new_from_mem: %s", gpgme_strerror(error));
-        return NULL;
+        goto cleanup;
     }
 
     error = gpgme_data_new(&plain);
     if (error != 0) {
         log_error("OX: %s", gpgme_strerror(error));
-        return NULL;
+        goto cleanup;
     }
 
     error = gpgme_op_decrypt_verify(ctx, cipher, plain);
@@ -413,17 +424,28 @@ p_ox_gpg_decrypt(char* base64)
         log_error("OX: gpgme_op_decrypt: %s", gpgme_strerror(error));
         error = gpgme_op_decrypt(ctx, cipher, plain);
         if (error != 0) {
-            return NULL;
+            goto cleanup;
         }
     }
 
     size_t len;
-    char* plain_str = gpgme_data_release_and_get_mem(plain, &len);
-    char* result = NULL;
+    plain_str = gpgme_data_release_and_get_mem(plain, &len);
+    plain = NULL; // Already released by gpgme_data_release_and_get_mem
     if (plain_str) {
         result = strndup(plain_str, len);
-        gpgme_free(plain_str);
     }
+
+cleanup:
+    if (encrypted)
+        g_free(encrypted);
+    if (plain_str)
+        gpgme_free(plain_str);
+    if (plain)
+        gpgme_data_release(plain);
+    if (cipher)
+        gpgme_data_release(cipher);
+    if (ctx)
+        gpgme_release(ctx);
 
     return result;
 }
@@ -455,30 +477,33 @@ p_ox_gpg_readkey(const char* const filename, char** key, char** fp)
 {
     log_info("PX: Read OpenPGP Key from file %s", filename);
 
-    GError* error = NULL;
+    GError* gerr = NULL;
     gchar* data = NULL;
     gsize size = -1;
+    gpgme_ctx_t ctx = NULL;
+    gpgme_data_t gpgme_data = NULL;
+    gpgme_key_t gkey = NULL;
+    gpgme_key_t end = NULL;
 
     gboolean success = g_file_get_contents(filename,
                                            &data,
                                            &size,
-                                           &error);
+                                           &gerr);
     if (success) {
         setlocale(LC_ALL, "");
         gpgme_check_version(NULL);
         gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
-        gpgme_ctx_t ctx;
         gpgme_error_t error = gpgme_new(&ctx);
 
         if (GPG_ERR_NO_ERROR != error) {
             log_error("OX: Read OpenPGP key from file: gpgme_new failed: %s", gpgme_strerror(error));
-            return;
+            goto cleanup;
         }
 
         error = gpgme_set_protocol(ctx, GPGME_PROTOCOL_OPENPGP);
         if (error != GPG_ERR_NO_ERROR) {
             log_error("OX: Read OpenPGP key from file: set GPGME_PROTOCOL_OPENPGP:  %s", gpgme_strerror(error));
-            return;
+            goto cleanup;
         }
 
         gpgme_set_armor(ctx, 0);
@@ -486,49 +511,54 @@ p_ox_gpg_readkey(const char* const filename, char** key, char** fp)
         gpgme_set_offline(ctx, 1);
         gpgme_set_keylist_mode(ctx, GPGME_KEYLIST_MODE_LOCAL);
 
-        gpgme_data_t gpgme_data = NULL;
-        error = gpgme_data_new(&gpgme_data);
-        if (error != GPG_ERR_NO_ERROR) {
-            log_error("OX: Read OpenPGP key from file: gpgme_data_new %s", gpgme_strerror(error));
-            return;
-        }
-
         error = gpgme_data_new_from_mem(&gpgme_data, (char*)data, size, 0);
         if (error != GPG_ERR_NO_ERROR) {
             log_error("OX: Read OpenPGP key from file: gpgme_data_new_from_mem %s", gpgme_strerror(error));
-            return;
+            goto cleanup;
         }
         error = gpgme_op_keylist_from_data_start(ctx, gpgme_data, 0);
         if (error != GPG_ERR_NO_ERROR) {
             log_error("OX: Read OpenPGP key from file: gpgme_op_keylist_from_data_start %s", gpgme_strerror(error));
-            return;
+            goto cleanup;
         }
-        gpgme_key_t gkey;
         error = gpgme_op_keylist_next(ctx, &gkey);
         if (error != GPG_ERR_NO_ERROR) {
             log_error("OX: Read OpenPGP key from file: gpgme_op_keylist_next %s", gpgme_strerror(error));
-            return;
+            goto cleanup;
         }
 
-        gpgme_key_t end;
         error = gpgme_op_keylist_next(ctx, &end);
         if (error == GPG_ERR_NO_ERROR) {
             log_error("OX: Read OpenPGP key from file: ambiguous key");
-            return;
+            goto cleanup;
         }
 
         if (gkey->revoked || gkey->expired || gkey->disabled || gkey->invalid || gkey->secret) {
             log_error("OX: Read OpenPGP key from file: Key is not valid");
-            return;
+            goto cleanup;
         }
 
         gchar* keybase64 = g_base64_encode((const guchar*)data, size);
 
         *key = strdup(keybase64);
         *fp = strdup(gkey->fpr);
+        g_free(keybase64);
     } else {
-        log_error("OX: Read OpenPGP key from file: Unable to read file: %s", error->message);
+        log_error("OX: Read OpenPGP key from file: Unable to read file: %s", gerr->message);
+        g_error_free(gerr);
     }
+
+cleanup:
+    if (data)
+        g_free(data);
+    if (gpgme_data)
+        gpgme_data_release(gpgme_data);
+    if (gkey)
+        gpgme_key_unref(gkey);
+    if (end)
+        gpgme_key_unref(end);
+    if (ctx)
+        gpgme_release(ctx);
 }
 
 gboolean
@@ -536,22 +566,26 @@ p_ox_gpg_import(char* base64_public_key)
 {
     gsize size = -1;
     guchar* key = g_base64_decode(base64_public_key, &size);
+    gboolean result = TRUE;
 
     setlocale(LC_ALL, "");
     gpgme_check_version(NULL);
     gpgme_set_locale(NULL, LC_CTYPE, setlocale(LC_CTYPE, NULL));
-    gpgme_ctx_t ctx;
+    gpgme_ctx_t ctx = NULL;
+    gpgme_data_t gpgme_data = NULL;
     gpgme_error_t error = gpgme_new(&ctx);
 
     if (GPG_ERR_NO_ERROR != error) {
         log_error("OX: Read OpenPGP key from file: gpgme_new failed: %s", gpgme_strerror(error));
-        return FALSE;
+        result = FALSE;
+        goto cleanup;
     }
 
     error = gpgme_set_protocol(ctx, GPGME_PROTOCOL_OPENPGP);
     if (error != GPG_ERR_NO_ERROR) {
         log_error("OX: Read OpenPGP key from file: set GPGME_PROTOCOL_OPENPGP:  %s", gpgme_strerror(error));
-        return FALSE;
+        result = FALSE;
+        goto cleanup;
     }
 
     gpgme_set_armor(ctx, 0);
@@ -559,18 +593,26 @@ p_ox_gpg_import(char* base64_public_key)
     gpgme_set_offline(ctx, 1);
     gpgme_set_keylist_mode(ctx, GPGME_KEYLIST_MODE_LOCAL);
 
-    gpgme_data_t gpgme_data = NULL;
-    error = gpgme_data_new(&gpgme_data);
+    error = gpgme_data_new_from_mem(&gpgme_data, (gchar*)key, size, 0);
     if (error != GPG_ERR_NO_ERROR) {
-        log_error("OX: Read OpenPGP key from file: gpgme_data_new %s", gpgme_strerror(error));
-        return FALSE;
+        log_error("OX: Read OpenPGP key from file: gpgme_data_new_from_mem %s", gpgme_strerror(error));
+        result = FALSE;
+        goto cleanup;
     }
 
-    gpgme_data_new_from_mem(&gpgme_data, (gchar*)key, size, 0);
     error = gpgme_op_import(ctx, gpgme_data);
     if (error != GPG_ERR_NO_ERROR) {
         log_error("OX: Failed to import key");
+        result = FALSE;
     }
 
-    return TRUE;
+cleanup:
+    if (key)
+        g_free(key);
+    if (gpgme_data)
+        gpgme_data_release(gpgme_data);
+    if (ctx)
+        gpgme_release(ctx);
+
+    return result;
 }
