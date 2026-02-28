@@ -63,7 +63,7 @@ We will then pull from your repository and merge manually.
 Follow the style already present ;-)
 
 To make this easier for you we created a `.clang-format` file.
-You'll need to have `clang-format` installed.
+You'll need to have `clang-format` installed. We currently use **version 21**, which is also the version enforced by our CI in `.github/workflows/main.yml`.
 
 Then just run `make format` before you do any commit.
 
