@@ -30,6 +30,7 @@
 #include "command/test_cmd_bookmark.h"
 #include "command/test_cmd_join.h"
 #include "xmpp/test_muc.h"
+#include "command/test_cmd_ac.h"
 #include "command/test_cmd_roster.h"
 #include "command/test_cmd_disconnect.h"
 #include "xmpp/test_form.h"
@@ -96,6 +97,10 @@ main(int argc, char* argv[])
         cmocka_unit_test(unique_filename_from_url__tests__table_driven),
         cmocka_unit_test(string_to_verbosity__returns__correct_values),
         cmocka_unit_test(get_expanded_path__returns__expanded),
+        cmocka_unit_test_setup_teardown(cmd_ac_complete_filepath__segfaults_when_empty, load_preferences, close_preferences),
+        cmocka_unit_test_setup_teardown(cmd_ac_complete_filepath__finds_files_in_current_dir, load_preferences, close_preferences),
+        cmocka_unit_test_setup_teardown(cmd_ac_complete_filepath__finds_files_with_dot_slash, load_preferences, close_preferences),
+        cmocka_unit_test_setup_teardown(cmd_ac_complete_filepath__cycles_through_files, load_preferences, close_preferences),
         cmocka_unit_test(strtoi_range__returns__true_for_valid_input),
         cmocka_unit_test(strtoi_range__returns__false_for_out_of_range),
         cmocka_unit_test(strtoi_range__returns__false_for_invalid_input),
