@@ -39,7 +39,7 @@ tests=(
 if [[ "$(uname | tr '[:upper:]' '[:lower:]')" == linux* ]]; then
     echo "--> Running Valgrind check with full features"
 
-    meson setup build_valgrind ${tests[0]} -Dtests=true
+    meson setup build_valgrind ${tests[0]} -Dtests=true -Db_sanitize=address,undefined
     meson compile -C build_valgrind
     
     meson test -C build_valgrind --print-errorlogs --wrap=valgrind || echo "Valgrind issues detected"
