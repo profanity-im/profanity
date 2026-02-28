@@ -328,7 +328,9 @@ strip_arg_quotes__returns__stripped_both(void** state)
     free(result);
 }
 
-void valid_tls_policy_option__is__correct_for_various_inputs(void** state) {
+void
+valid_tls_policy_option__is__correct_for_various_inputs(void** state)
+{
     // Valid inputs
     assert_true(valid_tls_policy_option("force"));
     assert_true(valid_tls_policy_option("allow"));
@@ -348,11 +350,13 @@ void valid_tls_policy_option__is__correct_for_various_inputs(void** state) {
     expect_any_cons_show(); // For "TLS policy must be one of: 'force', 'allow', 'trust', 'disable', 'legacy', or 'direct'."
     assert_false(valid_tls_policy_option(""));
 
-	// NULL
+    // NULL
     assert_true(valid_tls_policy_option(NULL));
 }
 
-void get_expanded_path__returns__expanded(void** state) {
+void
+get_expanded_path__returns__expanded(void** state)
+{
     gchar* expanded_path;
 
     // `file://` prefix
@@ -378,7 +382,9 @@ void get_expanded_path__returns__expanded(void** state) {
     g_free(expanded_path);
 }
 
-void strtoi_range__returns__true_for_valid_input(void** state) {
+void
+strtoi_range__returns__true_for_valid_input(void** state)
+{
     int value;
     gchar* err_msg = NULL;
     gboolean result;
@@ -404,7 +410,9 @@ void strtoi_range__returns__true_for_valid_input(void** state) {
     assert_null(err_msg);
 }
 
-void strtoi_range__returns__false_for_out_of_range(void** state) {
+void
+strtoi_range__returns__false_for_out_of_range(void** state)
+{
     int value;
     gchar* err_msg = NULL;
     gboolean result;
@@ -431,7 +439,9 @@ void strtoi_range__returns__false_for_out_of_range(void** state) {
     err_msg = NULL;
 }
 
-void strtoi_range__returns__false_for_invalid_input(void** state) {
+void
+strtoi_range__returns__false_for_invalid_input(void** state)
+{
     int value;
     gchar* err_msg = NULL;
     gboolean result;
@@ -451,7 +461,9 @@ void strtoi_range__returns__false_for_invalid_input(void** state) {
     err_msg = NULL;
 }
 
-void strtoi_range__returns__false_for_null_empty_input(void** state) {
+void
+strtoi_range__returns__false_for_null_empty_input(void** state)
+{
     int value;
     gchar* err_msg = NULL;
     gboolean result;
@@ -471,7 +483,9 @@ void strtoi_range__returns__false_for_null_empty_input(void** state) {
     err_msg = NULL;
 }
 
-void strtoi_range__returns__correct_values_when_err_msg_null(void** state) {
+void
+strtoi_range__returns__correct_values_when_err_msg_null(void** state)
+{
     int value;
     gboolean result;
 
@@ -485,7 +499,9 @@ void strtoi_range__returns__correct_values_when_err_msg_null(void** state) {
     assert_false(result);
 }
 
-void string_to_verbosity__returns__correct_values(void** state) {
+void
+string_to_verbosity__returns__correct_values(void** state)
+{
     int verbosity;
     gchar* err_msg = NULL;
     gboolean result;
@@ -495,52 +511,59 @@ void string_to_verbosity__returns__correct_values(void** state) {
     assert_true(result);
     assert_int_equal(0, verbosity);
     assert_null(err_msg);
-    g_free(err_msg); err_msg = NULL; // Clear for next test
+    g_free(err_msg);
+    err_msg = NULL; // Clear for next test
 
     // Valid input string (1)
     result = string_to_verbosity("1", &verbosity, &err_msg);
     assert_true(result);
     assert_int_equal(1, verbosity);
     assert_null(err_msg);
-    g_free(err_msg); err_msg = NULL;
+    g_free(err_msg);
+    err_msg = NULL;
 
     // Valid input string (3)
     result = string_to_verbosity("3", &verbosity, &err_msg);
     assert_true(result);
     assert_int_equal(3, verbosity);
     assert_null(err_msg);
-    g_free(err_msg); err_msg = NULL;
+    g_free(err_msg);
+    err_msg = NULL;
 
     // Invalid input string (not a number)
     result = string_to_verbosity("profanity", &verbosity, &err_msg);
     assert_false(result);
     assert_string_equal("Could not convert \"profanity\" to a number.", err_msg);
     g_free(err_msg);
-	err_msg = NULL;
+    err_msg = NULL;
 
     // Valid input string, out of range (too low)
     result = string_to_verbosity("-1", &verbosity, &err_msg);
     assert_false(result);
     assert_string_equal("Value -1 out of range. Must be in 0..3.", err_msg);
-    g_free(err_msg); err_msg = NULL;
+    g_free(err_msg);
+    err_msg = NULL;
 
     // Valid input string, out of range (too high)
     result = string_to_verbosity("4", &verbosity, &err_msg);
     assert_false(result);
     assert_string_equal("Value 4 out of range. Must be in 0..3.", err_msg);
-    g_free(err_msg); err_msg = NULL;
+    g_free(err_msg);
+    err_msg = NULL;
 
     // NULL input string
     result = string_to_verbosity(NULL, &verbosity, &err_msg);
     assert_false(result);
     assert_string_equal("'str' input pointer can not be NULL", err_msg);
-    g_free(err_msg); err_msg = NULL;
+    g_free(err_msg);
+    err_msg = NULL;
 
     // Empty input string
     result = string_to_verbosity("", &verbosity, &err_msg);
     assert_false(result);
     assert_string_equal("Could not convert \"\" to a number.", err_msg);
-    g_free(err_msg); err_msg = NULL;
+    g_free(err_msg);
+    err_msg = NULL;
 
     // err_msg is NULL
     result = string_to_verbosity("abc", &verbosity, NULL);
@@ -874,66 +897,83 @@ get_mentions__tests__various(void** state)
     expected = g_slist_append(expected, GINT_TO_POINTER(6));
     actual = get_mentions(FALSE, TRUE, "hello boothj5", "boothj5");
     assert_true(_lists_equal(actual, expected));
-    g_slist_free(actual); actual = NULL;
-    g_slist_free(expected); expected = NULL;
+    g_slist_free(actual);
+    actual = NULL;
+    g_slist_free(expected);
+    expected = NULL;
 
     // Case insensitive match
     expected = g_slist_append(expected, GINT_TO_POINTER(6));
     actual = get_mentions(FALSE, FALSE, "hello BOOTHJ5", "boothj5");
     assert_true(_lists_equal(actual, expected));
-    g_slist_free(actual); actual = NULL;
-    g_slist_free(expected); expected = NULL;
+    g_slist_free(actual);
+    actual = NULL;
+    g_slist_free(expected);
+    expected = NULL;
 
     // Whole word match
     expected = g_slist_append(expected, GINT_TO_POINTER(0));
     actual = get_mentions(TRUE, TRUE, "boothj5 hello", "boothj5");
     assert_true(_lists_equal(actual, expected));
-    g_slist_free(actual); actual = NULL;
-    g_slist_free(expected); expected = NULL;
+    g_slist_free(actual);
+    actual = NULL;
+    g_slist_free(expected);
+    expected = NULL;
 
     // Whole word no match (partial)
     actual = get_mentions(TRUE, TRUE, "boothj5hello", "boothj5");
     assert_true(_lists_equal(actual, expected)); // expected is NULL
-    g_slist_free(actual); actual = NULL;
+    g_slist_free(actual);
+    actual = NULL;
 
     // Multiple matches
     expected = g_slist_append(expected, GINT_TO_POINTER(0));
     expected = g_slist_append(expected, GINT_TO_POINTER(14));
     actual = get_mentions(FALSE, TRUE, "boothj5 hello boothj5", "boothj5");
     assert_true(_lists_equal(actual, expected));
-    g_slist_free(actual); actual = NULL;
-    g_slist_free(expected); expected = NULL;
+    g_slist_free(actual);
+    actual = NULL;
+    g_slist_free(expected);
+    expected = NULL;
 
     // Nick with punctuation (whole word)
     expected = g_slist_append(expected, GINT_TO_POINTER(0));
     actual = get_mentions(TRUE, TRUE, "boothj5: hi", "boothj5");
     assert_true(_lists_equal(actual, expected));
-    g_slist_free(actual); actual = NULL;
-    g_slist_free(expected); expected = NULL;
+    g_slist_free(actual);
+    actual = NULL;
+    g_slist_free(expected);
+    expected = NULL;
 
     // Nick surrounded by punctuation
     expected = g_slist_append(expected, GINT_TO_POINTER(1));
     actual = get_mentions(TRUE, TRUE, "(boothj5)", "boothj5");
     assert_true(_lists_equal(actual, expected));
-    g_slist_free(actual); actual = NULL;
-    g_slist_free(expected); expected = NULL;
+    g_slist_free(actual);
+    actual = NULL;
+    g_slist_free(expected);
+    expected = NULL;
 
     // Empty message
     actual = get_mentions(FALSE, TRUE, "", "boothj5");
     assert_true(_lists_equal(actual, expected)); // expected is NULL
-    g_slist_free(actual); actual = NULL;
+    g_slist_free(actual);
+    actual = NULL;
 
     // Empty nick
     actual = get_mentions(FALSE, TRUE, "hello", "");
     assert_true(_lists_equal(actual, expected)); // expected is NULL
-    g_slist_free(actual); actual = NULL;
+    g_slist_free(actual);
+    actual = NULL;
 
     // UTF-8 characters
     expected = g_slist_append(expected, GINT_TO_POINTER(0));
     actual = get_mentions(TRUE, TRUE, "我能 hello", "我能");
     assert_true(_lists_equal(actual, expected));
-    g_slist_free(actual); actual = NULL;
-    g_slist_free(expected); expected = NULL;
+    g_slist_free(actual);
+    actual = NULL;
+    g_slist_free(expected);
+    expected = NULL;
 }
 
 void
@@ -962,9 +1002,9 @@ release_is_new__tests__various(void** state)
     assert_true(release_is_new("1.2.3", "2.0.0"));
 
     // Malformed version strings
-    assert_false(release_is_new("0.16.0", "0.16"));      // Missing patch in found
-    assert_false(release_is_new("0.16", "0.16.0"));      // Missing patch in curr
-    assert_false(release_is_new("0.16.0", "0.16.0.1"));  // Extra part
+    assert_false(release_is_new("0.16.0", "0.16"));     // Missing patch in found
+    assert_false(release_is_new("0.16", "0.16.0"));     // Missing patch in curr
+    assert_false(release_is_new("0.16.0", "0.16.0.1")); // Extra part
 
     assert_false(release_is_new("0.16.0", "abc.def.ghi"));
     assert_false(release_is_new("0.16.0", ""));
@@ -1175,7 +1215,9 @@ prof_occurrences__tests__whole(void** state)
     expected = NULL;
 }
 
-void string_matches_one_of__tests__edge_cases(void** state) {
+void
+string_matches_one_of__tests__edge_cases(void** state)
+{
     // is is NULL, is_can_be_null is TRUE -> should return TRUE
     assert_true(string_matches_one_of(NULL, NULL, TRUE, "option1", "option2", NULL));
 

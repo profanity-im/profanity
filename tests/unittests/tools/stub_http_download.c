@@ -27,7 +27,7 @@ http_file_get(void* userdata)
     return NULL;
 }
 
-void http_download_cancel_processes(){};
-void http_download_add_download(){};
+void http_download_cancel_processes() {};
+void http_download_add_download() {};
 
 #endif

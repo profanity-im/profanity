@@ -1,1 +1,1 @@
-void rooms_query(void **state);
+void rooms_query(void** state);
