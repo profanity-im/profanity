@@ -374,4 +374,5 @@ format-sources: $(core_sources) $(main_source)
 spell:
 	codespell
 
-doublecheck: format check spell
+doublecheck:
+	@./scripts/quality-check.sh --fix-formatting --autotools

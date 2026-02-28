@@ -676,6 +676,10 @@ if get_option('tests')
   endif
 endif
 
+run_target('doublecheck',
+  command: ['scripts/quality-check.sh', '--fix-formatting', '--meson']
+)
+
 summary({
   'Platform': platform,
   'Package status': get_option('buildtype'),

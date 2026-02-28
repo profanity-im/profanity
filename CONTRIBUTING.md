@@ -160,7 +160,34 @@ Before committing it might make sense to run `codespell` to see if you made any 
 
 You can run the `make spell` command for this.
 
-### Check everything
+### Full check
+Run the central quality check script before submitting a patch. This runs the spell checker, code formatter, and unit tests.
 
-`make doublecheck` will run the code formatter, spell checker and unit tests.
+If using Autotools:
+```
+make doublecheck
+```
+
+If using Meson:
+```
+meson compile doublecheck
+```
+
+Alternatively, you can run the script directly:
+```
+./scripts/quality-check.sh --fix-formatting --meson  # or --autotools
+```
+
+### Pre-commit hook
+It is highly recommended to install the quality check script as a git pre-commit hook. This will automatically check your staged changes for spelling and formatting issues every time you commit.
+
+To install the hook:
+```
+./scripts/quality-check.sh --install
+```
+
+If you need to bypass the formatting check (e.g. due to a `clang-format` version mismatch), you can set the `SKIP_FORMAT` environment variable:
+```
+SKIP_FORMAT=1 git commit
+```
 
