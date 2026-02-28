@@ -86,12 +86,18 @@ get_message_from_editor(gchar* message, gchar** returned_message)
     auto_gchar gchar* editor_with_filename = g_strdup_printf("%s %s", editor, filename);
     auto_gcharv gchar** editor_argv = g_strsplit(editor_with_filename, " ", 0);
 
+    if (!editor_argv || !editor_argv[0]) {
+        log_error("[Editor] Failed to parse editor command: %s", editor);
+        return TRUE;
+    }
+
     // Fork / exec
     pid_t pid = fork();
     if (pid == 0) {
-        int x = execvp(editor_argv[0], editor_argv);
-        if (x == -1) {
-            log_error("[Editor] Failed to exec %s", editor);
+        if (editor_argv && editor_argv[0]) {
+            int x = execvp(editor_argv[0], editor_argv);
+            if (x == -1)
+                log_error("[Editor] Failed to exec %s", editor);
         }
         _exit(EXIT_FAILURE);
     } else {
