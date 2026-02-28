@@ -666,8 +666,13 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
         }
 
         int prekey_index;
+        size_t prekeys_len = g_list_length(prekeys);
+        if (prekeys_len == 0) {
+            log_error("[OMEMO] No prekeys found for %s device %d", jid, device_id);
+            goto out;
+        }
         gcry_randomize(&prekey_index, sizeof(int), GCRY_STRONG_RANDOM);
-        prekey_index %= g_list_length(prekeys);
+        prekey_index %= prekeys_len;
         omemo_key_t* prekey = g_list_nth_data(prekeys, prekey_index);
 
         curve_decode_point(&prekey_public, prekey->data, prekey->length, omemo_ctx.signal);
