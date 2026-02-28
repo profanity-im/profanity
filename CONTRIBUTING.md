@@ -101,9 +101,36 @@ and the `pre-push` hook will be skipped.
 ## Finding mistakes
 Test your changes with the following tools to find mistakes.
 
-### unit tests
+### Unit tests
 
 Run `make check` to run the unit tests with your current configuration or `./ci-build.sh` to check with different switches passed to configure.
+
+### Writing unit tests
+
+We use the [cmocka](https://cmocka.org/) testing framework for unit tests.
+
+Test files are located in `tests/unittests` and should mirror the directory structure of the `src/` directory. For example, if you are testing `src/xmpp/jid.c`, the corresponding test file should be `tests/unittests/xmpp/test_jid.c`.
+
+#### Naming Convention
+Test functions must follow a behavior-driven naming convention using double underscores (`__`) as semantic separators:
+
+`[unit]__[verb]__[scenario]`
+
+- **unit**: The name of the function or module being tested.
+- **verb**: A descriptive verb of the outcome (`returns`, `is`, `updates`, `shows`, `triggers`, `fails`).
+- **scenario**: The specific condition or input being tested.
+
+Examples:
+- `jid_create__returns__null_from_null`
+- `p_contact_is_available__is__false_when_offline`
+- `cmd_connect__shows__usage_when_no_server_value`
+- `str_replace__returns__one_substr`
+
+#### Adding a new test
+When adding a new test file:
+1. Create the `.c` and `.h` files in the appropriate subdirectory of `tests/unittests`.
+2. Register the test functions in `tests/unittests/unittests.c` within the `all_tests` array.
+3. Add the new source file to `unittest_sources` in both `meson.build` and `Makefile.am`.
 
 ### valgrind
 We provide a suppressions file `prof.supp`. It is a combination of the suppressions for shipped with glib2, python and custom rules.
