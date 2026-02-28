@@ -5,14 +5,14 @@
 #include "xmpp/chat_session.h"
 
 void
-returns_false_when_chat_session_does_not_exist(void** state)
+chat_session_get__returns__null_when_no_session(void** state)
 {
     ChatSession* session = chat_session_get("somejid@server.org");
     assert_null(session);
 }
 
 void
-creates_chat_session_on_recipient_activity(void** state)
+chat_session_recipient_active__updates__new_session(void** state)
 {
     char* barejid = "myjid@server.org";
     char* resource = "tablet";
@@ -25,7 +25,7 @@ creates_chat_session_on_recipient_activity(void** state)
 }
 
 void
-replaces_chat_session_on_recipient_activity_with_different_resource(void** state)
+chat_session_recipient_active__updates__replace_resource(void** state)
 {
     char* barejid = "myjid@server.org";
     char* resource1 = "tablet";
@@ -39,7 +39,7 @@ replaces_chat_session_on_recipient_activity_with_different_resource(void** state
 }
 
 void
-removes_chat_session(void** state)
+chat_session_remove__updates__session_removed(void** state)
 {
     char* barejid = "myjid@server.org";
     char* resource1 = "laptop";

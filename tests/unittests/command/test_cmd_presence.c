@@ -13,7 +13,7 @@
 #define CMD_PRESENCE "/presence"
 
 void
-cmd_presence_shows_usage_when_bad_subcmd(void** state)
+cmd_presence__shows__usage_when_bad_subcmd(void** state)
 {
     gchar* args[] = { "badcmd", NULL };
 
@@ -24,7 +24,7 @@ cmd_presence_shows_usage_when_bad_subcmd(void** state)
 }
 
 void
-cmd_presence_shows_usage_when_bad_console_setting(void** state)
+cmd_presence__shows__usage_when_bad_console_setting(void** state)
 {
     gchar* args[] = { "console", "badsetting", NULL };
 
@@ -35,7 +35,7 @@ cmd_presence_shows_usage_when_bad_console_setting(void** state)
 }
 
 void
-cmd_presence_shows_usage_when_bad_chat_setting(void** state)
+cmd_presence__shows__usage_when_bad_chat_setting(void** state)
 {
     gchar* args[] = { "chat", "badsetting", NULL };
 
@@ -46,7 +46,7 @@ cmd_presence_shows_usage_when_bad_chat_setting(void** state)
 }
 
 void
-cmd_presence_shows_usage_when_bad_muc_setting(void** state)
+cmd_presence__shows__usage_when_bad_muc_setting(void** state)
 {
     gchar* args[] = { "muc", "badsetting", NULL };
 
@@ -57,7 +57,7 @@ cmd_presence_shows_usage_when_bad_muc_setting(void** state)
 }
 
 void
-cmd_presence_console_sets_all(void** state)
+cmd_presence__updates__console_all(void** state)
 {
     gchar* args[] = { "console", "all", NULL };
 
@@ -72,7 +72,7 @@ cmd_presence_console_sets_all(void** state)
 }
 
 void
-cmd_presence_console_sets_online(void** state)
+cmd_presence__updates__console_online(void** state)
 {
     gchar* args[] = { "console", "online", NULL };
 
@@ -87,7 +87,7 @@ cmd_presence_console_sets_online(void** state)
 }
 
 void
-cmd_presence_console_sets_none(void** state)
+cmd_presence__updates__console_none(void** state)
 {
     gchar* args[] = { "console", "none", NULL };
 
@@ -102,7 +102,7 @@ cmd_presence_console_sets_none(void** state)
 }
 
 void
-cmd_presence_chat_sets_all(void** state)
+cmd_presence__updates__chat_all(void** state)
 {
     gchar* args[] = { "chat", "all", NULL };
 
@@ -117,7 +117,7 @@ cmd_presence_chat_sets_all(void** state)
 }
 
 void
-cmd_presence_chat_sets_online(void** state)
+cmd_presence__updates__chat_online(void** state)
 {
     gchar* args[] = { "chat", "online", NULL };
 
@@ -132,7 +132,7 @@ cmd_presence_chat_sets_online(void** state)
 }
 
 void
-cmd_presence_chat_sets_none(void** state)
+cmd_presence__updates__chat_none(void** state)
 {
     gchar* args[] = { "chat", "none", NULL };
 
@@ -147,7 +147,7 @@ cmd_presence_chat_sets_none(void** state)
 }
 
 void
-cmd_presence_room_sets_all(void** state)
+cmd_presence__updates__room_all(void** state)
 {
     gchar* args[] = { "room", "all", NULL };
 
@@ -162,7 +162,7 @@ cmd_presence_room_sets_all(void** state)
 }
 
 void
-cmd_presence_room_sets_online(void** state)
+cmd_presence__updates__room_online(void** state)
 {
     gchar* args[] = { "room", "online", NULL };
 
@@ -177,7 +177,7 @@ cmd_presence_room_sets_online(void** state)
 }
 
 void
-cmd_presence_room_sets_none(void** state)
+cmd_presence__updates__room_none(void** state)
 {
     gchar* args[] = { "room", "none", NULL };
 

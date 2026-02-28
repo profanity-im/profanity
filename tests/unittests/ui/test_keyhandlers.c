@@ -12,7 +12,8 @@ static char line[INP_WIN_MAX];
 
 // append
 
-void append_to_empty(void **state)
+void
+key_printable__updates__append_to_empty(void** state)
 {
     setlocale(LC_ALL, "");
     line[0] = '\0';
@@ -28,7 +29,8 @@ void append_to_empty(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void append_wide_to_empty(void **state)
+void
+key_printable__updates__append_wide_to_empty(void** state)
 {
     setlocale(LC_ALL, "");
     line[0] = '\0';
@@ -44,7 +46,8 @@ void append_wide_to_empty(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void append_to_single(void **state)
+void
+key_printable__updates__append_to_single(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "a", 1);
@@ -61,8 +64,8 @@ void append_to_single(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-
-void append_wide_to_single_non_wide(void **state)
+void
+key_printable__updates__append_wide_to_single_non_wide(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "a", 1);
@@ -79,7 +82,8 @@ void append_wide_to_single_non_wide(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void append_non_wide_to_single_wide(void **state)
+void
+key_printable__updates__append_non_wide_to_single_wide(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "四", 1);
@@ -96,7 +100,8 @@ void append_non_wide_to_single_wide(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void append_wide_to_single_wide(void **state)
+void
+key_printable__updates__append_wide_to_single_wide(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "四", 1);
@@ -113,7 +118,8 @@ void append_wide_to_single_wide(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void append_non_wide_when_overrun(void **state)
+void
+key_printable__updates__append_non_wide_when_overrun(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "0123456789四1234567", 18);
@@ -132,7 +138,8 @@ void append_non_wide_when_overrun(void **state)
     assert_int_equal(pad_start, 3);
 }
 
-void insert_non_wide_to_non_wide(void **state)
+void
+key_printable__updates__insert_non_wide_to_non_wide(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd", 4);
@@ -149,7 +156,8 @@ void insert_non_wide_to_non_wide(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void insert_single_non_wide_when_pad_scrolled(void **state)
+void
+key_printable__updates__insert_single_non_wide_when_pad_scrolled(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "AAAAAAAAAAAAAAA", 15);
@@ -166,7 +174,8 @@ void insert_single_non_wide_when_pad_scrolled(void **state)
     assert_int_equal(pad_start, 2);
 }
 
-void insert_many_non_wide_when_pad_scrolled(void **state)
+void
+key_printable__updates__insert_many_non_wide_when_pad_scrolled(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "AAAAAAAAAAAAAAA", 15);
@@ -185,7 +194,8 @@ void insert_many_non_wide_when_pad_scrolled(void **state)
     assert_int_equal(pad_start, 2);
 }
 
-void insert_single_non_wide_last_column(void **state)
+void
+key_printable__updates__insert_single_non_wide_last_column(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcdefghijklmno", 15);
@@ -202,7 +212,8 @@ void insert_single_non_wide_last_column(void **state)
     assert_int_equal(pad_start, 3);
 }
 
-void insert_many_non_wide_last_column(void **state)
+void
+key_printable__updates__insert_many_non_wide_last_column(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcdefghijklmno", 15);
@@ -220,7 +231,8 @@ void insert_many_non_wide_last_column(void **state)
     assert_int_equal(pad_start, 4);
 }
 
-void ctrl_left_when_no_input(void **state)
+void
+key_ctrl_left__updates__when_no_input(void** state)
 {
     setlocale(LC_ALL, "");
     line[0] = '\0';
@@ -235,7 +247,8 @@ void ctrl_left_when_no_input(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_at_start(void **state)
+void
+key_ctrl_left__updates__when_at_start(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -251,7 +264,8 @@ void ctrl_left_when_at_start(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_in_first_word(void **state)
+void
+key_ctrl_left__updates__when_in_first_word(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -267,7 +281,8 @@ void ctrl_left_when_in_first_word(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_in_first_space(void **state)
+void
+key_ctrl_left__updates__when_in_first_space(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -283,7 +298,8 @@ void ctrl_left_when_in_first_space(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_at_start_of_second_word(void **state)
+void
+key_ctrl_left__updates__at_start_of_second_word(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -299,7 +315,8 @@ void ctrl_left_when_at_start_of_second_word(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_in_second_word(void **state)
+void
+key_ctrl_left__updates__when_in_second_word(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -315,7 +332,8 @@ void ctrl_left_when_in_second_word(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_at_end_of_second_word(void **state)
+void
+key_ctrl_left__updates__at_end_of_second_word(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -331,7 +349,8 @@ void ctrl_left_when_at_end_of_second_word(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_in_second_space(void **state)
+void
+key_ctrl_left__updates__when_in_second_space(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -347,7 +366,8 @@ void ctrl_left_when_in_second_space(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_at_start_of_third_word(void **state)
+void
+key_ctrl_left__updates__at_start_of_third_word(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -363,7 +383,8 @@ void ctrl_left_when_at_start_of_third_word(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_in_third_word(void **state)
+void
+key_ctrl_left__updates__when_in_third_word(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -379,7 +400,8 @@ void ctrl_left_when_in_third_word(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_at_end_of_third_word(void **state)
+void
+key_ctrl_left__updates__at_end_of_third_word(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -395,7 +417,8 @@ void ctrl_left_when_at_end_of_third_word(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_in_third_space(void **state)
+void
+key_ctrl_left__updates__when_in_third_space(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -411,7 +434,8 @@ void ctrl_left_when_in_third_space(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_at_end(void **state)
+void
+key_ctrl_left__updates__when_at_end(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "abcd efghij klmn opqr", 21);
@@ -427,7 +451,8 @@ void ctrl_left_when_at_end(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_in_only_whitespace(void **state)
+void
+key_ctrl_left__updates__when_in_only_whitespace(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "       ", 7);
@@ -443,7 +468,8 @@ void ctrl_left_when_in_only_whitespace(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_start_whitespace_start_of_word(void **state)
+void
+key_ctrl_left__updates__when_start_whitespace_start_of_word(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "    hello", 9);
@@ -459,7 +485,8 @@ void ctrl_left_when_start_whitespace_start_of_word(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_start_whitespace_middle_of_word(void **state)
+void
+key_ctrl_left__updates__when_start_whitespace_middle_of_word(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "    hello", 9);
@@ -475,7 +502,8 @@ void ctrl_left_when_start_whitespace_middle_of_word(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_in_whitespace_between_words(void **state)
+void
+key_ctrl_left__updates__in_whitespace_between_words(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "hey    hello", 12);
@@ -491,7 +519,8 @@ void ctrl_left_in_whitespace_between_words(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_in_whitespace_between_words_start_of_word(void **state)
+void
+key_ctrl_left__updates__in_whitespace_between_words_start_of_word(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "hey    hello", 12);
@@ -507,7 +536,8 @@ void ctrl_left_in_whitespace_between_words_start_of_word(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_in_whitespace_between_words_middle_of_word(void **state)
+void
+key_ctrl_left__updates__in_whitespace_between_words_middle_of_word(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "hey    hello", 12);
@@ -523,7 +553,8 @@ void ctrl_left_in_whitespace_between_words_middle_of_word(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_left_when_word_overrun_to_left(void **state)
+void
+key_ctrl_left__updates__when_word_overrun_to_left(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "someword anotherword", 20);
@@ -539,7 +570,8 @@ void ctrl_left_when_word_overrun_to_left(void **state)
     assert_int_equal(pad_start, 9);
 }
 
-void ctrl_right_when_no_input(void **state)
+void
+key_ctrl_right__updates__when_no_input(void** state)
 {
     setlocale(LC_ALL, "");
     line[0] = '\0';
@@ -554,7 +586,8 @@ void ctrl_right_when_no_input(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_right_when_at_end(void **state)
+void
+key_ctrl_right__updates__when_at_end(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "someword anotherword", 20);
@@ -570,7 +603,8 @@ void ctrl_right_when_at_end(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_right_one_word_at_start(void **state)
+void
+key_ctrl_right__updates__one_word_at_start(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "someword", 8);
@@ -586,7 +620,8 @@ void ctrl_right_one_word_at_start(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_right_one_word_in_middle(void **state)
+void
+key_ctrl_right__updates__one_word_in_middle(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "someword", 8);
@@ -602,7 +637,8 @@ void ctrl_right_one_word_in_middle(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_right_one_word_at_end(void **state)
+void
+key_ctrl_right__updates__one_word_at_end(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "someword", 8);
@@ -618,7 +654,8 @@ void ctrl_right_one_word_at_end(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_right_two_words_from_middle_first(void **state)
+void
+key_ctrl_right__updates__two_words_from_middle_first(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "someword anotherword", 20);
@@ -634,7 +671,8 @@ void ctrl_right_two_words_from_middle_first(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_right_two_words_from_end_first(void **state)
+void
+key_ctrl_right__updates__two_words_from_end_first(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "someword anotherword", 20);
@@ -650,7 +688,8 @@ void ctrl_right_two_words_from_end_first(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_right_two_words_from_space(void **state)
+void
+key_ctrl_right__updates__two_words_from_space(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "someword anotherword", 20);
@@ -666,7 +705,8 @@ void ctrl_right_two_words_from_space(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_right_two_words_from_start_second(void **state)
+void
+key_ctrl_right__updates__two_words_from_start_second(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "someword anotherword", 20);
@@ -682,7 +722,8 @@ void ctrl_right_two_words_from_start_second(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_right_one_word_leading_whitespace(void **state)
+void
+key_ctrl_right__updates__one_word_leading_whitespace(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "       someword", 15);
@@ -698,7 +739,8 @@ void ctrl_right_one_word_leading_whitespace(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_right_two_words_in_whitespace(void **state)
+void
+key_ctrl_right__updates__two_words_in_whitespace(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "       someword        adfasdf", 30);
@@ -714,7 +756,8 @@ void ctrl_right_two_words_in_whitespace(void **state)
     assert_int_equal(pad_start, 0);
 }
 
-void ctrl_right_trailing_whitespace_from_middle(void **state)
+void
+key_ctrl_right__updates__trailing_whitespace_from_middle(void** state)
 {
     setlocale(LC_ALL, "");
     g_utf8_strncpy(line, "someword        ", 16);

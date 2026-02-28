@@ -15,7 +15,7 @@
 #define CMD_ACCOUNT "/account"
 
 void
-cmd_account_shows_usage_when_not_connected_and_no_args(void** state)
+cmd_account__shows__usage_when_not_connected_and_no_args(void** state)
 {
     gchar* args[] = { NULL };
 
@@ -28,7 +28,7 @@ cmd_account_shows_usage_when_not_connected_and_no_args(void** state)
 }
 
 void
-cmd_account_shows_account_when_connected_and_no_args(void** state)
+cmd_account__shows__account_when_connected_and_no_args(void** state)
 {
     ProfAccount* account = account_new(g_strdup("jabber_org"), g_strdup("me@jabber.org"), NULL, NULL,
                                        TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
@@ -46,7 +46,7 @@ cmd_account_shows_account_when_connected_and_no_args(void** state)
 }
 
 void
-cmd_account_list_shows_accounts(void** state)
+cmd_account_list__shows__accounts(void** state)
 {
     gchar* args[] = { "list", NULL };
 
@@ -65,7 +65,7 @@ cmd_account_list_shows_accounts(void** state)
 }
 
 void
-cmd_account_show_shows_usage_when_no_arg(void** state)
+cmd_account_show__shows__usage_when_no_arg(void** state)
 {
     gchar* args[] = { "show", NULL };
 
@@ -76,7 +76,7 @@ cmd_account_show_shows_usage_when_no_arg(void** state)
 }
 
 void
-cmd_account_show_shows_message_when_account_does_not_exist(void** state)
+cmd_account_show__shows__message_when_account_does_not_exist(void** state)
 {
     gchar* args[] = { "show", "account_name", NULL };
 
@@ -91,7 +91,7 @@ cmd_account_show_shows_message_when_account_does_not_exist(void** state)
 }
 
 void
-cmd_account_show_shows_account_when_exists(void** state)
+cmd_account_show__shows__account_when_exists(void** state)
 {
     gchar* args[] = { "show", "account_name", NULL };
     ProfAccount* account = account_new(g_strdup("jabber_org"), g_strdup("me@jabber.org"), NULL, NULL,
@@ -107,7 +107,7 @@ cmd_account_show_shows_account_when_exists(void** state)
 }
 
 void
-cmd_account_add_shows_usage_when_no_arg(void** state)
+cmd_account_add__shows__usage_when_no_arg(void** state)
 {
     gchar* args[] = { "add", NULL };
 
@@ -118,7 +118,7 @@ cmd_account_add_shows_usage_when_no_arg(void** state)
 }
 
 void
-cmd_account_add_adds_account(void** state)
+cmd_account_add__updates__adds_account(void** state)
 {
     gchar* args[] = { "add", "new_account", NULL };
 
@@ -133,7 +133,7 @@ cmd_account_add_adds_account(void** state)
 }
 
 void
-cmd_account_enable_shows_usage_when_no_arg(void** state)
+cmd_account_enable__shows__usage_when_no_arg(void** state)
 {
     gchar* args[] = { "enable", NULL };
 
@@ -144,7 +144,7 @@ cmd_account_enable_shows_usage_when_no_arg(void** state)
 }
 
 void
-cmd_account_enable_enables_account(void** state)
+cmd_account_enable__updates__enables_account(void** state)
 {
     gchar* args[] = { "enable", "account_name", NULL };
 
@@ -159,7 +159,7 @@ cmd_account_enable_enables_account(void** state)
 }
 
 void
-cmd_account_enable_shows_message_when_account_doesnt_exist(void** state)
+cmd_account_enable__shows__message_when_account_doesnt_exist(void** state)
 {
     gchar* args[] = { "enable", "account_name", NULL };
 
@@ -174,7 +174,7 @@ cmd_account_enable_shows_message_when_account_doesnt_exist(void** state)
 }
 
 void
-cmd_account_disable_shows_usage_when_no_arg(void** state)
+cmd_account_disable__shows__usage_when_no_arg(void** state)
 {
     gchar* args[] = { "disable", NULL };
 
@@ -185,7 +185,7 @@ cmd_account_disable_shows_usage_when_no_arg(void** state)
 }
 
 void
-cmd_account_disable_disables_account(void** state)
+cmd_account_disable__updates__disables_account(void** state)
 {
     gchar* args[] = { "disable", "account_name", NULL };
 
@@ -200,7 +200,7 @@ cmd_account_disable_disables_account(void** state)
 }
 
 void
-cmd_account_disable_shows_message_when_account_doesnt_exist(void** state)
+cmd_account_disable__shows__message_when_account_doesnt_exist(void** state)
 {
     gchar* args[] = { "disable", "account_name", NULL };
 
@@ -215,7 +215,7 @@ cmd_account_disable_shows_message_when_account_doesnt_exist(void** state)
 }
 
 void
-cmd_account_rename_shows_usage_when_no_args(void** state)
+cmd_account_rename__shows__usage_when_no_args(void** state)
 {
     gchar* args[] = { "rename", NULL };
 
@@ -226,7 +226,7 @@ cmd_account_rename_shows_usage_when_no_args(void** state)
 }
 
 void
-cmd_account_rename_shows_usage_when_one_arg(void** state)
+cmd_account_rename__shows__usage_when_one_arg(void** state)
 {
     gchar* args[] = { "rename", "original_name", NULL };
 
@@ -237,7 +237,7 @@ cmd_account_rename_shows_usage_when_one_arg(void** state)
 }
 
 void
-cmd_account_rename_renames_account(void** state)
+cmd_account_rename__updates__renames_account(void** state)
 {
     gchar* args[] = { "rename", "original_name", "new_name", NULL };
 
@@ -253,7 +253,7 @@ cmd_account_rename_renames_account(void** state)
 }
 
 void
-cmd_account_rename_shows_message_when_not_renamed(void** state)
+cmd_account_rename__shows__message_when_not_renamed(void** state)
 {
     gchar* args[] = { "rename", "original_name", "new_name", NULL };
 
@@ -269,7 +269,7 @@ cmd_account_rename_shows_message_when_not_renamed(void** state)
 }
 
 void
-cmd_account_set_shows_usage_when_no_args(void** state)
+cmd_account_set__shows__usage_when_no_args(void** state)
 {
     gchar* args[] = { "set", NULL };
 
@@ -280,7 +280,7 @@ cmd_account_set_shows_usage_when_no_args(void** state)
 }
 
 void
-cmd_account_set_shows_usage_when_one_arg(void** state)
+cmd_account_set__shows__usage_when_one_arg(void** state)
 {
     gchar* args[] = { "set", "a_account", NULL };
 
@@ -291,7 +291,7 @@ cmd_account_set_shows_usage_when_one_arg(void** state)
 }
 
 void
-cmd_account_set_shows_usage_when_two_args(void** state)
+cmd_account_set__shows__usage_when_two_args(void** state)
 {
     gchar* args[] = { "set", "a_account", "a_property", NULL };
 
@@ -302,7 +302,7 @@ cmd_account_set_shows_usage_when_two_args(void** state)
 }
 
 void
-cmd_account_set_shows_message_when_account_doesnt_exist(void** state)
+cmd_account_set__shows__message_when_account_doesnt_exist(void** state)
 {
     gchar* args[] = { "set", "a_account", "a_property", "a_value", NULL };
 
@@ -317,7 +317,7 @@ cmd_account_set_shows_message_when_account_doesnt_exist(void** state)
 }
 
 void
-cmd_account_set_jid_shows_message_for_malformed_jid(void** state)
+cmd_account_set__shows__message_for_malformed_jid(void** state)
 {
     gchar* args[] = { "set", "a_account", "jid", "@malformed", NULL };
 
@@ -331,7 +331,7 @@ cmd_account_set_jid_shows_message_for_malformed_jid(void** state)
 }
 
 void
-cmd_account_set_jid_sets_barejid(void** state)
+cmd_account_set__updates__jid_sets_barejid(void** state)
 {
     gchar* args[] = { "set", "a_account", "jid", "a_local@a_domain", NULL };
 
@@ -349,7 +349,7 @@ cmd_account_set_jid_sets_barejid(void** state)
 }
 
 void
-cmd_account_set_jid_sets_resource(void** state)
+cmd_account_set__updates__jid_sets_resource(void** state)
 {
     gchar* args[] = { "set", "a_account", "jid", "a_local@a_domain/a_resource", NULL };
 
@@ -372,7 +372,7 @@ cmd_account_set_jid_sets_resource(void** state)
 }
 
 void
-cmd_account_set_server_sets_server(void** state)
+cmd_account_set__updates__server_sets_server(void** state)
 {
     gchar* args[] = { "set", "a_account", "server", "a_server", NULL };
 
@@ -390,7 +390,7 @@ cmd_account_set_server_sets_server(void** state)
 }
 
 void
-cmd_account_set_resource_sets_resource(void** state)
+cmd_account_set__updates__resource_sets_resource(void** state)
 {
     gchar* args[] = { "set", "a_account", "resource", "a_resource", NULL };
 
@@ -410,7 +410,7 @@ cmd_account_set_resource_sets_resource(void** state)
 }
 
 void
-cmd_account_set_resource_sets_resource_with_online_message(void** state)
+cmd_account_set__shows__resource_sets_resource_with_online_message(void** state)
 {
     gchar* args[] = { "set", "a_account", "resource", "a_resource", NULL };
 
@@ -430,7 +430,7 @@ cmd_account_set_resource_sets_resource_with_online_message(void** state)
 }
 
 void
-cmd_account_set_password_sets_password(void** state)
+cmd_account_set__updates__password_sets_password(void** state)
 {
     gchar* args[] = { "set", "a_account", "password", "a_password", NULL };
     ProfAccount* account = account_new(g_strdup("a_account"), NULL, NULL, NULL,
@@ -453,7 +453,7 @@ cmd_account_set_password_sets_password(void** state)
 }
 
 void
-cmd_account_set_eval_password_sets_eval_password(void** state)
+cmd_account_set__updates__eval_password_sets_eval_password(void** state)
 {
     gchar* args[] = { "set", "a_account", "eval_password", "a_password", NULL };
     ProfAccount* account = account_new(g_strdup("a_account"), NULL, NULL, NULL,
@@ -476,7 +476,7 @@ cmd_account_set_eval_password_sets_eval_password(void** state)
 }
 
 void
-cmd_account_set_password_when_eval_password_set(void** state)
+cmd_account_set__shows__password_when_eval_password_set(void** state)
 {
     gchar* args[] = { "set", "a_account", "password", "a_password", NULL };
     ProfAccount* account = account_new(g_strdup("a_account"), NULL, NULL, g_strdup("a_password"),
@@ -495,7 +495,7 @@ cmd_account_set_password_when_eval_password_set(void** state)
 }
 
 void
-cmd_account_set_eval_password_when_password_set(void** state)
+cmd_account_set__shows__eval_password_when_password_set(void** state)
 {
     gchar* args[] = { "set", "a_account", "eval_password", "a_password", NULL };
     ProfAccount* account = account_new(g_strdup("a_account"), NULL, g_strdup("a_password"), NULL,
@@ -514,7 +514,7 @@ cmd_account_set_eval_password_when_password_set(void** state)
 }
 
 void
-cmd_account_set_muc_sets_muc(void** state)
+cmd_account_set__updates__muc_sets_muc(void** state)
 {
     gchar* args[] = { "set", "a_account", "muc", "a_muc", NULL };
 
@@ -532,7 +532,7 @@ cmd_account_set_muc_sets_muc(void** state)
 }
 
 void
-cmd_account_set_nick_sets_nick(void** state)
+cmd_account_set__updates__nick_sets_nick(void** state)
 {
     gchar* args[] = { "set", "a_account", "nick", "a_nick", NULL };
 
@@ -550,7 +550,7 @@ cmd_account_set_nick_sets_nick(void** state)
 }
 
 void
-cmd_account_show_message_for_missing_otr_policy(void** state)
+cmd_account_set__shows__message_for_missing_otr_policy(void** state)
 {
     gchar* args[] = { "set", "a_account", "otr", NULL };
 
@@ -561,7 +561,7 @@ cmd_account_show_message_for_missing_otr_policy(void** state)
 }
 
 void
-cmd_account_show_message_for_invalid_otr_policy(void** state)
+cmd_account_set__shows__message_for_invalid_otr_policy(void** state)
 {
     gchar* args[] = { "set", "a_account", "otr", "bad_otr_policy", NULL };
 
@@ -576,7 +576,7 @@ cmd_account_show_message_for_invalid_otr_policy(void** state)
 }
 
 void
-cmd_account_set_otr_sets_otr(void** state)
+cmd_account_set__updates__otr_sets_otr(void** state)
 {
     gchar* args[] = { "set", "a_account", "otr", "opportunistic", NULL };
 
@@ -594,7 +594,7 @@ cmd_account_set_otr_sets_otr(void** state)
 }
 
 void
-cmd_account_set_status_shows_message_when_invalid_status(void** state)
+cmd_account_set__shows__message_when_invalid_status(void** state)
 {
     gchar* args[] = { "set", "a_account", "status", "bad_status", NULL };
 
@@ -609,7 +609,7 @@ cmd_account_set_status_shows_message_when_invalid_status(void** state)
 }
 
 void
-cmd_account_set_status_sets_status_when_valid(void** state)
+cmd_account_set__updates__status_sets_status_when_valid(void** state)
 {
     gchar* args[] = { "set", "a_account", "status", "away", NULL };
 
@@ -627,7 +627,7 @@ cmd_account_set_status_sets_status_when_valid(void** state)
 }
 
 void
-cmd_account_set_status_sets_status_when_last(void** state)
+cmd_account_set__updates__status_sets_status_when_last(void** state)
 {
     gchar* args[] = { "set", "a_account", "status", "last", NULL };
 
@@ -645,7 +645,7 @@ cmd_account_set_status_sets_status_when_last(void** state)
 }
 
 void
-cmd_account_set_invalid_presence_string_priority_shows_message(void** state)
+cmd_account_set__shows__invalid_presence_string_priority_message(void** state)
 {
     gchar* args[] = { "set", "a_account", "blah", "10", NULL };
 
@@ -660,7 +660,7 @@ cmd_account_set_invalid_presence_string_priority_shows_message(void** state)
 }
 
 void
-cmd_account_set_last_priority_shows_message(void** state)
+cmd_account_set__shows__last_priority_message(void** state)
 {
     gchar* args[] = { "set", "a_account", "last", "10", NULL };
 
@@ -675,7 +675,7 @@ cmd_account_set_last_priority_shows_message(void** state)
 }
 
 void
-cmd_account_set_online_priority_sets_preference(void** state)
+cmd_account_set__updates__online_priority_sets_preference(void** state)
 {
     gchar* args[] = { "set", "a_account", "online", "10", NULL };
 
@@ -695,7 +695,7 @@ cmd_account_set_online_priority_sets_preference(void** state)
 }
 
 void
-cmd_account_set_chat_priority_sets_preference(void** state)
+cmd_account_set__updates__chat_priority_sets_preference(void** state)
 {
     gchar* args[] = { "set", "a_account", "chat", "10", NULL };
 
@@ -715,7 +715,7 @@ cmd_account_set_chat_priority_sets_preference(void** state)
 }
 
 void
-cmd_account_set_away_priority_sets_preference(void** state)
+cmd_account_set__updates__away_priority_sets_preference(void** state)
 {
     gchar* args[] = { "set", "a_account", "away", "10", NULL };
 
@@ -735,7 +735,7 @@ cmd_account_set_away_priority_sets_preference(void** state)
 }
 
 void
-cmd_account_set_xa_priority_sets_preference(void** state)
+cmd_account_set__updates__xa_priority_sets_preference(void** state)
 {
     gchar* args[] = { "set", "a_account", "xa", "10", NULL };
 
@@ -755,7 +755,7 @@ cmd_account_set_xa_priority_sets_preference(void** state)
 }
 
 void
-cmd_account_set_dnd_priority_sets_preference(void** state)
+cmd_account_set__updates__dnd_priority_sets_preference(void** state)
 {
     gchar* args[] = { "set", "a_account", "dnd", "10", NULL };
 
@@ -775,7 +775,7 @@ cmd_account_set_dnd_priority_sets_preference(void** state)
 }
 
 void
-cmd_account_set_priority_too_low_shows_message(void** state)
+cmd_account_set__shows__priority_too_low_message(void** state)
 {
     gchar* args[] = { "set", "a_account", "online", "-150", NULL };
 
@@ -789,7 +789,7 @@ cmd_account_set_priority_too_low_shows_message(void** state)
 }
 
 void
-cmd_account_set_priority_too_high_shows_message(void** state)
+cmd_account_set__shows__priority_too_high_message(void** state)
 {
     gchar* args[] = { "set", "a_account", "online", "150", NULL };
 
@@ -803,7 +803,7 @@ cmd_account_set_priority_too_high_shows_message(void** state)
 }
 
 void
-cmd_account_set_priority_when_not_number_shows_message(void** state)
+cmd_account_set__shows__priority_when_not_number_message(void** state)
 {
     gchar* args[] = { "set", "a_account", "online", "abc", NULL };
 
@@ -817,7 +817,7 @@ cmd_account_set_priority_when_not_number_shows_message(void** state)
 }
 
 void
-cmd_account_set_priority_when_empty_shows_message(void** state)
+cmd_account_set__shows__priority_when_empty_message(void** state)
 {
     gchar* args[] = { "set", "a_account", "online", "", NULL };
 
@@ -831,7 +831,7 @@ cmd_account_set_priority_when_empty_shows_message(void** state)
 }
 
 void
-cmd_account_set_priority_updates_presence_when_account_connected_with_presence(void** state)
+cmd_account_set__updates__priority_updates_presence_when_connected(void** state)
 {
     gchar* args[] = { "set", "a_account", "online", "10", NULL };
 
@@ -868,7 +868,7 @@ cmd_account_set_priority_updates_presence_when_account_connected_with_presence(v
 }
 
 void
-cmd_account_clear_shows_usage_when_no_args(void** state)
+cmd_account_clear__shows__usage_when_no_args(void** state)
 {
     gchar* args[] = { "clear", NULL };
 
@@ -879,7 +879,7 @@ cmd_account_clear_shows_usage_when_no_args(void** state)
 }
 
 void
-cmd_account_clear_shows_usage_when_one_arg(void** state)
+cmd_account_clear__shows__usage_when_one_arg(void** state)
 {
     gchar* args[] = { "clear", "a_account", NULL };
 
@@ -890,7 +890,7 @@ cmd_account_clear_shows_usage_when_one_arg(void** state)
 }
 
 void
-cmd_account_clear_shows_message_when_account_doesnt_exist(void** state)
+cmd_account_clear__shows__message_when_account_doesnt_exist(void** state)
 {
     gchar* args[] = { "clear", "a_account", "a_property", NULL };
 
@@ -905,7 +905,7 @@ cmd_account_clear_shows_message_when_account_doesnt_exist(void** state)
 }
 
 void
-cmd_account_clear_shows_message_when_invalid_property(void** state)
+cmd_account_clear__shows__message_when_invalid_property(void** state)
 {
     gchar* args[] = { "clear", "a_account", "badproperty", NULL };
 

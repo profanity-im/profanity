@@ -15,7 +15,7 @@
 #include "ui/window_list.h"
 
 void
-console_shows_online_presence_when_set_online(void** state)
+sv_ev_contact_online__shows__presence_in_console_when_set_online(void** state)
 {
     prefs_set_string(PREF_STATUSES_CONSOLE, "online");
     plugins_init();
@@ -35,7 +35,7 @@ console_shows_online_presence_when_set_online(void** state)
 }
 
 void
-console_shows_online_presence_when_set_all(void** state)
+sv_ev_contact_online__shows__presence_in_console_when_set_all(void** state)
 {
     prefs_set_string(PREF_STATUSES_CONSOLE, "all");
     plugins_init();
@@ -55,7 +55,7 @@ console_shows_online_presence_when_set_all(void** state)
 }
 
 void
-console_shows_dnd_presence_when_set_all(void** state)
+sv_ev_contact_online__shows__dnd_presence_in_console_when_set_all(void** state)
 {
     prefs_set_string(PREF_STATUSES_CONSOLE, "all");
     plugins_init();
@@ -75,7 +75,7 @@ console_shows_dnd_presence_when_set_all(void** state)
 }
 
 void
-handle_offline_removes_chat_session(void** state)
+sv_ev_contact_offline__updates__removes_chat_session(void** state)
 {
     plugins_init();
     roster_create();
@@ -100,7 +100,7 @@ handle_offline_removes_chat_session(void** state)
 }
 
 void
-lost_connection_clears_chat_sessions(void** state)
+sv_ev_lost_connection__updates__clears_chat_sessions(void** state)
 {
     roster_create();
     roster_process_pending_presence();

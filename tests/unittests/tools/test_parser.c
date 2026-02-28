@@ -4,7 +4,7 @@
 #include "tools/parser.h"
 
 void
-parse_null_returns_null(void** state)
+parse_args__returns__null_from_null(void** state)
 {
     char* inp = NULL;
     gboolean result = TRUE;
@@ -16,7 +16,7 @@ parse_null_returns_null(void** state)
 }
 
 void
-parse_empty_returns_null(void** state)
+parse_args__returns__null_from_empty(void** state)
 {
     char* inp = "";
     gboolean result = TRUE;
@@ -28,7 +28,7 @@ parse_empty_returns_null(void** state)
 }
 
 void
-parse_space_returns_null(void** state)
+parse_args__returns__null_from_space(void** state)
 {
     char* inp = "   ";
     gboolean result = TRUE;
@@ -40,7 +40,7 @@ parse_space_returns_null(void** state)
 }
 
 void
-parse_cmd_no_args_returns_null(void** state)
+parse_args__returns__null_when_no_args(void** state)
 {
     char* inp = "/cmd";
     gboolean result = TRUE;
@@ -52,7 +52,7 @@ parse_cmd_no_args_returns_null(void** state)
 }
 
 void
-parse_cmd_with_space_returns_null(void** state)
+parse_args__returns__null_from_cmd_with_space(void** state)
 {
     char* inp = "/cmd   ";
     gboolean result = TRUE;
@@ -64,7 +64,7 @@ parse_cmd_with_space_returns_null(void** state)
 }
 
 void
-parse_cmd_with_too_few_returns_null(void** state)
+parse_args__returns__null_when_too_few(void** state)
 {
     char* inp = "/cmd arg1";
     gboolean result = TRUE;
@@ -76,7 +76,7 @@ parse_cmd_with_too_few_returns_null(void** state)
 }
 
 void
-parse_cmd_with_too_many_returns_null(void** state)
+parse_args__returns__null_when_too_many(void** state)
 {
     char* inp = "/cmd arg1 arg2 arg3 arg4";
     gboolean result = TRUE;
@@ -88,7 +88,7 @@ parse_cmd_with_too_many_returns_null(void** state)
 }
 
 void
-parse_cmd_one_arg(void** state)
+parse_args__returns__one_arg(void** state)
 {
     char* inp = "/cmd arg1";
     gboolean result = FALSE;
@@ -101,7 +101,7 @@ parse_cmd_one_arg(void** state)
 }
 
 void
-parse_cmd_two_args(void** state)
+parse_args__returns__two_args(void** state)
 {
     char* inp = "/cmd arg1 arg2";
     gboolean result = FALSE;
@@ -115,7 +115,7 @@ parse_cmd_two_args(void** state)
 }
 
 void
-parse_cmd_three_args(void** state)
+parse_args__returns__three_args(void** state)
 {
     char* inp = "/cmd arg1 arg2 arg3";
     gboolean result = FALSE;
@@ -130,7 +130,7 @@ parse_cmd_three_args(void** state)
 }
 
 void
-parse_cmd_three_args_with_spaces(void** state)
+parse_args__returns__three_args_with_spaces(void** state)
 {
     char* inp = "  /cmd    arg1  arg2     arg3 ";
     gboolean result = FALSE;
@@ -145,7 +145,7 @@ parse_cmd_three_args_with_spaces(void** state)
 }
 
 void
-parse_cmd_with_freetext(void** state)
+parse_args_with_freetext__returns__freetext(void** state)
 {
     char* inp = "/cmd this is some free text";
     gboolean result = FALSE;
@@ -158,7 +158,7 @@ parse_cmd_with_freetext(void** state)
 }
 
 void
-parse_cmd_one_arg_with_freetext(void** state)
+parse_args_with_freetext__returns__one_arg_with_freetext(void** state)
 {
     char* inp = "/cmd arg1 this is some free text";
     gboolean result = FALSE;
@@ -172,7 +172,7 @@ parse_cmd_one_arg_with_freetext(void** state)
 }
 
 void
-parse_cmd_two_args_with_freetext(void** state)
+parse_args_with_freetext__returns__two_args_with_freetext(void** state)
 {
     char* inp = "/cmd arg1 arg2 this is some free text";
     gboolean result = FALSE;
@@ -187,7 +187,7 @@ parse_cmd_two_args_with_freetext(void** state)
 }
 
 void
-parse_cmd_min_zero(void** state)
+parse_args__returns__zero_args_when_min_zero(void** state)
 {
     char* inp = "/cmd";
     gboolean result = FALSE;
@@ -200,7 +200,7 @@ parse_cmd_min_zero(void** state)
 }
 
 void
-parse_cmd_min_zero_with_freetext(void** state)
+parse_args_with_freetext__returns__zero_args_when_min_zero(void** state)
 {
     char* inp = "/cmd";
     gboolean result = FALSE;
@@ -213,7 +213,7 @@ parse_cmd_min_zero_with_freetext(void** state)
 }
 
 void
-parse_cmd_with_quoted(void** state)
+parse_args__returns__quoted_args(void** state)
 {
     char* inp = "/cmd \"arg1\" arg2";
     gboolean result = FALSE;
@@ -227,7 +227,7 @@ parse_cmd_with_quoted(void** state)
 }
 
 void
-parse_cmd_with_quoted_and_space(void** state)
+parse_args__returns__quoted_args_with_space(void** state)
 {
     char* inp = "/cmd \"the arg1\" arg2";
     gboolean result = FALSE;
@@ -241,7 +241,7 @@ parse_cmd_with_quoted_and_space(void** state)
 }
 
 void
-parse_cmd_with_quoted_and_many_spaces(void** state)
+parse_args__returns__quoted_args_with_many_spaces(void** state)
 {
     char* inp = "/cmd \"the arg1 is here\" arg2";
     gboolean result = FALSE;
@@ -255,7 +255,7 @@ parse_cmd_with_quoted_and_many_spaces(void** state)
 }
 
 void
-parse_cmd_with_many_quoted_and_many_spaces(void** state)
+parse_args__returns__many_quoted_args_with_many_spaces(void** state)
 {
     char* inp = "/cmd \"the arg1 is here\" \"and arg2 is right here\"";
     gboolean result = FALSE;
@@ -269,7 +269,7 @@ parse_cmd_with_many_quoted_and_many_spaces(void** state)
 }
 
 void
-parse_cmd_freetext_with_quoted(void** state)
+parse_args_with_freetext__returns__quoted_args(void** state)
 {
     char* inp = "/cmd \"arg1\" arg2 hello there what's up";
     gboolean result = FALSE;
@@ -284,7 +284,7 @@ parse_cmd_freetext_with_quoted(void** state)
 }
 
 void
-parse_cmd_freetext_with_quoted_and_space(void** state)
+parse_args_with_freetext__returns__quoted_args_with_space(void** state)
 {
     char* inp = "/cmd \"the arg1\" arg2 another bit of freetext";
     gboolean result = FALSE;
@@ -299,7 +299,7 @@ parse_cmd_freetext_with_quoted_and_space(void** state)
 }
 
 void
-parse_cmd_freetext_with_quoted_and_many_spaces(void** state)
+parse_args_with_freetext__returns__quoted_args_with_many_spaces(void** state)
 {
     char* inp = "/cmd \"the arg1 is here\" arg2 some more freetext";
     gboolean result = FALSE;
@@ -314,7 +314,7 @@ parse_cmd_freetext_with_quoted_and_many_spaces(void** state)
 }
 
 void
-parse_cmd_freetext_with_many_quoted_and_many_spaces(void** state)
+parse_args_with_freetext__returns__many_quoted_args_with_many_spaces(void** state)
 {
     char* inp = "/cmd \"the arg1 is here\" \"and arg2 is right here\" and heres the free text";
     gboolean result = FALSE;
@@ -329,7 +329,7 @@ parse_cmd_freetext_with_many_quoted_and_many_spaces(void** state)
 }
 
 void
-parse_cmd_with_quoted_freetext(void** state)
+parse_args_with_freetext__returns__quoted_freetext(void** state)
 {
     char* inp = "/cmd arg1 here is \"some\" quoted freetext";
     gboolean result = FALSE;
@@ -343,7 +343,7 @@ parse_cmd_with_quoted_freetext(void** state)
 }
 
 void
-parse_cmd_with_third_arg_quoted_0_min_3_max(void** state)
+parse_args_with_freetext__returns__third_arg_quoted(void** state)
 {
     char* inp = "/group add friends \"The User\"";
     gboolean result = FALSE;
@@ -359,7 +359,7 @@ parse_cmd_with_third_arg_quoted_0_min_3_max(void** state)
 }
 
 void
-parse_cmd_with_second_arg_quoted_0_min_3_max(void** state)
+parse_args_with_freetext__returns__second_arg_quoted(void** state)
 {
     char* inp = "/group add \"The Group\" friend";
     gboolean result = FALSE;
@@ -375,7 +375,7 @@ parse_cmd_with_second_arg_quoted_0_min_3_max(void** state)
 }
 
 void
-parse_cmd_with_second_and_third_arg_quoted_0_min_3_max(void** state)
+parse_args_with_freetext__returns__second_and_third_arg_quoted(void** state)
 {
     char* inp = "/group add \"The Group\" \"The User\"";
     gboolean result = FALSE;
@@ -391,7 +391,7 @@ parse_cmd_with_second_and_third_arg_quoted_0_min_3_max(void** state)
 }
 
 void
-count_one_token(void** state)
+count_tokens__returns__one_token(void** state)
 {
     char* inp = "one";
     int result = count_tokens(inp);
@@ -400,7 +400,7 @@ count_one_token(void** state)
 }
 
 void
-count_one_token_quoted_no_whitespace(void** state)
+count_tokens__returns__one_token_quoted_no_whitespace(void** state)
 {
     char* inp = "\"one\"";
     int result = count_tokens(inp);
@@ -409,7 +409,7 @@ count_one_token_quoted_no_whitespace(void** state)
 }
 
 void
-count_one_token_quoted_with_whitespace(void** state)
+count_tokens__returns__one_token_quoted_with_whitespace(void** state)
 {
     char* inp = "\"one two\"";
     int result = count_tokens(inp);
@@ -418,7 +418,7 @@ count_one_token_quoted_with_whitespace(void** state)
 }
 
 void
-count_two_tokens(void** state)
+count_tokens__returns__two_tokens(void** state)
 {
     char* inp = "one two";
     int result = count_tokens(inp);
@@ -427,7 +427,7 @@ count_two_tokens(void** state)
 }
 
 void
-count_two_tokens_first_quoted(void** state)
+count_tokens__returns__two_tokens_first_quoted(void** state)
 {
     char* inp = "\"one and\" two";
     int result = count_tokens(inp);
@@ -436,7 +436,7 @@ count_two_tokens_first_quoted(void** state)
 }
 
 void
-count_two_tokens_second_quoted(void** state)
+count_tokens__returns__two_tokens_second_quoted(void** state)
 {
     char* inp = "one \"two and\"";
     int result = count_tokens(inp);
@@ -445,7 +445,7 @@ count_two_tokens_second_quoted(void** state)
 }
 
 void
-count_two_tokens_both_quoted(void** state)
+count_tokens__returns__two_tokens_both_quoted(void** state)
 {
     char* inp = "\"one and then\" \"two and\"";
     int result = count_tokens(inp);
@@ -454,7 +454,7 @@ count_two_tokens_both_quoted(void** state)
 }
 
 void
-get_first_of_one(void** state)
+get_start__returns__first_of_one(void** state)
 {
     char* inp = "one";
     char* result = get_start(inp, 2);
@@ -464,7 +464,7 @@ get_first_of_one(void** state)
 }
 
 void
-get_first_of_two(void** state)
+get_start__returns__first_of_two(void** state)
 {
     char* inp = "one two";
     char* result = get_start(inp, 2);
@@ -474,7 +474,7 @@ get_first_of_two(void** state)
 }
 
 void
-get_first_two_of_three(void** state)
+get_start__returns__first_two_of_three(void** state)
 {
     char* inp = "one two three";
     char* result = get_start(inp, 3);
@@ -484,7 +484,7 @@ get_first_two_of_three(void** state)
 }
 
 void
-get_first_two_of_three_first_quoted(void** state)
+get_start__returns__first_two_of_three_first_quoted(void** state)
 {
     char* inp = "\"one\" two three";
     char* result = get_start(inp, 3);
@@ -494,7 +494,7 @@ get_first_two_of_three_first_quoted(void** state)
 }
 
 void
-get_first_two_of_three_second_quoted(void** state)
+get_start__returns__first_two_of_three_second_quoted(void** state)
 {
     char* inp = "one \"two\" three";
     char* result = get_start(inp, 3);
@@ -504,7 +504,7 @@ get_first_two_of_three_second_quoted(void** state)
 }
 
 void
-get_first_two_of_three_first_and_second_quoted(void** state)
+get_start__returns__first_two_of_three_first_and_second_quoted(void** state)
 {
     char* inp = "\"one\" \"two\" three";
     char* result = get_start(inp, 3);
@@ -514,7 +514,7 @@ get_first_two_of_three_first_and_second_quoted(void** state)
 }
 
 void
-parse_options_when_none_returns_empty_hasmap(void** state)
+parse_options__returns__empty_hashmap_when_none(void** state)
 {
     gchar* args[] = { "cmd1", "cmd2", NULL };
     gchar* keys[] = { "opt1", NULL };
@@ -531,7 +531,7 @@ parse_options_when_none_returns_empty_hasmap(void** state)
 }
 
 void
-parse_options_when_opt1_no_val_sets_error(void** state)
+parse_options__returns__error_when_opt1_no_val(void** state)
 {
     gchar* args[] = { "cmd1", "cmd2", "opt1", NULL };
     gchar* keys[] = { "opt1", NULL };
@@ -547,7 +547,7 @@ parse_options_when_opt1_no_val_sets_error(void** state)
 }
 
 void
-parse_options_when_one_returns_map(void** state)
+parse_options__returns__map_when_one(void** state)
 {
     gchar* args[] = { "cmd1", "cmd2", "opt1", "val1", NULL };
     gchar* keys[] = { "opt1", NULL };
@@ -565,7 +565,7 @@ parse_options_when_one_returns_map(void** state)
 }
 
 void
-parse_options_when_opt2_no_val_sets_error(void** state)
+parse_options__returns__error_when_opt2_no_val(void** state)
 {
     gchar* args[] = { "cmd1", "cmd2", "opt1", "val1", "opt2", NULL };
     gchar* keys[] = { "opt1", "opt2", NULL };
@@ -581,7 +581,7 @@ parse_options_when_opt2_no_val_sets_error(void** state)
 }
 
 void
-parse_options_when_two_returns_map(void** state)
+parse_options__returns__map_when_two(void** state)
 {
     gchar* args[] = { "cmd1", "cmd2", "opt1", "val1", "opt2", "val2", NULL };
     gchar* keys[] = { "opt1", "opt2", NULL };
@@ -601,7 +601,7 @@ parse_options_when_two_returns_map(void** state)
 }
 
 void
-parse_options_when_opt3_no_val_sets_error(void** state)
+parse_options__returns__error_when_opt3_no_val(void** state)
 {
     gchar* args[] = { "cmd1", "cmd2", "opt1", "val1", "opt2", "val2", "opt3", NULL };
     gchar* keys[] = { "opt1", "opt2", "opt3", NULL };
@@ -617,7 +617,7 @@ parse_options_when_opt3_no_val_sets_error(void** state)
 }
 
 void
-parse_options_when_three_returns_map(void** state)
+parse_options__returns__map_when_three(void** state)
 {
     gchar* args[] = { "cmd1", "cmd2", "opt1", "val1", "opt2", "val2", "opt3", "val3", NULL };
     gchar* keys[] = { "opt1", "opt2", "opt3", NULL };
@@ -639,7 +639,7 @@ parse_options_when_three_returns_map(void** state)
 }
 
 void
-parse_options_when_unknown_opt_sets_error(void** state)
+parse_options__returns__error_when_unknown_opt(void** state)
 {
     gchar* args[] = { "cmd1", "cmd2", "opt1", "val1", "oops", "val2", "opt3", "val3", NULL };
     gchar* keys[] = { "opt1", "opt2", "opt3", NULL };
@@ -655,7 +655,7 @@ parse_options_when_unknown_opt_sets_error(void** state)
 }
 
 void
-parse_options_with_duplicated_option_sets_error(void** state)
+parse_options__returns__error_when_duplicated_option(void** state)
 {
     gchar* args[] = { "cmd1", "cmd2", "opt1", "val1", "opt2", "val2", "opt1", "val3", NULL };
     gchar* keys[] = { "opt1", "opt2", "opt3", NULL };

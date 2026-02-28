@@ -7,7 +7,7 @@
 #include "plugins/plugins.h"
 
 void
-returns_no_commands(void** state)
+plugins_get_command_names__returns__no_commands(void** state)
 {
     plugins_init();
     GList* commands = plugins_get_command_names();
@@ -16,7 +16,7 @@ returns_no_commands(void** state)
 }
 
 void
-returns_commands(void** state)
+plugins_get_command_names__returns__commands_when_added(void** state)
 {
     plugins_init();
     PluginCommand* command1 = g_new0(PluginCommand, 1);

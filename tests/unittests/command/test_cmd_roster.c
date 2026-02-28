@@ -26,25 +26,25 @@ test_with_connection_status(jabber_conn_status_t status)
 }
 
 void
-cmd_roster_shows_message_when_disconnecting(void** state)
+cmd_roster__shows__message_when_disconnecting(void** state)
 {
     test_with_connection_status(JABBER_DISCONNECTING);
 }
 
 void
-cmd_roster_shows_message_when_connecting(void** state)
+cmd_roster__shows__message_when_connecting(void** state)
 {
     test_with_connection_status(JABBER_CONNECTING);
 }
 
 void
-cmd_roster_shows_message_when_disconnected(void** state)
+cmd_roster__shows__message_when_disconnected(void** state)
 {
     test_with_connection_status(JABBER_DISCONNECTED);
 }
 
 void
-cmd_roster_shows_roster_when_no_args(void** state)
+cmd_roster__shows__roster_when_no_args(void** state)
 {
     gchar* args[] = { NULL };
 
@@ -64,7 +64,7 @@ cmd_roster_shows_roster_when_no_args(void** state)
 }
 
 void
-cmd_roster_add_shows_message_when_no_jid(void** state)
+cmd_roster__shows__message_when_add_no_jid(void** state)
 {
     gchar* args[] = { "add", NULL };
 
@@ -77,7 +77,7 @@ cmd_roster_add_shows_message_when_no_jid(void** state)
 }
 
 void
-cmd_roster_add_sends_roster_add_request(void** state)
+cmd_roster__tests__add_sends_roster_add_request(void** state)
 {
     char* jid = "bob@server.org";
     char* nick = "bob";
@@ -93,7 +93,7 @@ cmd_roster_add_sends_roster_add_request(void** state)
 }
 
 void
-cmd_roster_remove_shows_message_when_no_jid(void** state)
+cmd_roster__shows__message_when_remove_no_jid(void** state)
 {
     gchar* args[] = { "remove", NULL };
 
@@ -106,7 +106,7 @@ cmd_roster_remove_shows_message_when_no_jid(void** state)
 }
 
 void
-cmd_roster_remove_sends_roster_remove_request(void** state)
+cmd_roster__tests__remove_sends_roster_remove_request(void** state)
 {
     char* jid = "bob@server.org";
     gchar* args[] = { "remove", jid, NULL };
@@ -124,13 +124,14 @@ cmd_roster_remove_sends_roster_remove_request(void** state)
 }
 
 void
-cmd_roster_remove_nickname_sends_roster_remove_request(void** state)
+cmd_roster__tests__remove_nickname_sends_roster_remove_request(void** state)
 {
     char* jid = "bob@server.org";
-    gchar* args[] = { "remove", "bob", NULL };
+    char* nick = "bob";
+    gchar* args[] = { "remove", nick, NULL };
 
     roster_create();
-    roster_add("bob@server.org", "bob", NULL, "both", FALSE);
+    roster_add(jid, nick, NULL, "both", FALSE);
 
     will_return(connection_get_status, JABBER_CONNECTED);
 
@@ -142,7 +143,7 @@ cmd_roster_remove_nickname_sends_roster_remove_request(void** state)
 }
 
 void
-cmd_roster_nick_shows_message_when_no_jid(void** state)
+cmd_roster__shows__message_when_nick_no_jid(void** state)
 {
     gchar* args[] = { "nick", NULL };
 
@@ -155,7 +156,7 @@ cmd_roster_nick_shows_message_when_no_jid(void** state)
 }
 
 void
-cmd_roster_nick_shows_message_when_no_nick(void** state)
+cmd_roster__shows__message_when_nick_no_nick(void** state)
 {
     gchar* args[] = { "nick", "bob@server.org", NULL };
 
@@ -168,7 +169,7 @@ cmd_roster_nick_shows_message_when_no_nick(void** state)
 }
 
 void
-cmd_roster_nick_shows_message_when_no_contact_exists(void** state)
+cmd_roster__shows__message_when_nick_no_contact_exists(void** state)
 {
     gchar* args[] = { "nick", "bob@server.org", "bobster", NULL };
 
@@ -185,7 +186,7 @@ cmd_roster_nick_shows_message_when_no_contact_exists(void** state)
 }
 
 void
-cmd_roster_nick_sends_name_change_request(void** state)
+cmd_roster__tests__nick_sends_name_change_request(void** state)
 {
     char* jid = "bob@server.org";
     char* nick = "bobster";
@@ -214,7 +215,7 @@ cmd_roster_nick_sends_name_change_request(void** state)
 }
 
 void
-cmd_roster_clearnick_shows_message_when_no_jid(void** state)
+cmd_roster__shows__message_when_clearnick_no_jid(void** state)
 {
     gchar* args[] = { "clearnick", NULL };
 
@@ -227,7 +228,7 @@ cmd_roster_clearnick_shows_message_when_no_jid(void** state)
 }
 
 void
-cmd_roster_clearnick_shows_message_when_no_contact_exists(void** state)
+cmd_roster__shows__message_when_clearnick_no_contact_exists(void** state)
 {
     gchar* args[] = { "clearnick", "bob@server.org", NULL };
 
@@ -244,7 +245,7 @@ cmd_roster_clearnick_shows_message_when_no_contact_exists(void** state)
 }
 
 void
-cmd_roster_clearnick_sends_name_change_request_with_empty_nick(void** state)
+cmd_roster__tests__clearnick_sends_name_change_request_with_empty_nick(void** state)
 {
     char* jid = "bob@server.org";
     gchar* args[] = { "clearnick", jid, NULL };

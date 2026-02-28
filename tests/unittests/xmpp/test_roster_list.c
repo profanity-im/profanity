@@ -7,7 +7,7 @@
 #include "xmpp/roster_list.h"
 
 void
-empty_list_when_none_added(void** state)
+roster_get_contacts__returns__empty_list_when_none_added(void** state)
 {
     roster_create();
     GSList* list = roster_get_contacts(ROSTER_ORD_NAME);
@@ -18,7 +18,7 @@ empty_list_when_none_added(void** state)
 }
 
 void
-contains_one_element(void** state)
+roster_get_contacts__returns__one_element(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -30,7 +30,7 @@ contains_one_element(void** state)
 }
 
 void
-first_element_correct(void** state)
+roster_get_contacts__returns__correct_first_element(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -44,7 +44,7 @@ first_element_correct(void** state)
 }
 
 void
-contains_two_elements(void** state)
+roster_get_contacts__returns__two_elements(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -58,7 +58,7 @@ contains_two_elements(void** state)
 }
 
 void
-first_and_second_elements_correct(void** state)
+roster_get_contacts__returns__correct_first_and_second_elements(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -76,7 +76,7 @@ first_and_second_elements_correct(void** state)
 }
 
 void
-contains_three_elements(void** state)
+roster_get_contacts__returns__three_elements(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -91,7 +91,7 @@ contains_three_elements(void** state)
 }
 
 void
-first_three_elements_correct(void** state)
+roster_get_contacts__returns__correct_first_three_elements(void** state)
 {
     roster_create();
     roster_add("Bob", NULL, NULL, NULL, FALSE);
@@ -111,7 +111,7 @@ first_three_elements_correct(void** state)
 }
 
 void
-add_twice_at_beginning_adds_once(void** state)
+roster_add__updates__adds_once_when_called_twice_at_beginning(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -133,7 +133,7 @@ add_twice_at_beginning_adds_once(void** state)
 }
 
 void
-add_twice_in_middle_adds_once(void** state)
+roster_add__updates__adds_once_when_called_twice_in_middle(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -155,7 +155,7 @@ add_twice_in_middle_adds_once(void** state)
 }
 
 void
-add_twice_at_end_adds_once(void** state)
+roster_add__updates__adds_once_when_called_twice_at_end(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -177,7 +177,7 @@ add_twice_at_end_adds_once(void** state)
 }
 
 void
-find_first_exists(void** state)
+roster_contact_autocomplete__returns__first_exists(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -194,7 +194,7 @@ find_first_exists(void** state)
 }
 
 void
-find_second_exists(void** state)
+roster_contact_autocomplete__returns__second_exists(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -208,7 +208,7 @@ find_second_exists(void** state)
 }
 
 void
-find_third_exists(void** state)
+roster_contact_autocomplete__returns__third_exists(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -222,7 +222,7 @@ find_third_exists(void** state)
 }
 
 void
-find_returns_null(void** state)
+roster_contact_autocomplete__returns__null_when_no_match(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -235,7 +235,7 @@ find_returns_null(void** state)
 }
 
 void
-find_on_empty_returns_null(void** state)
+roster_contact_autocomplete__returns__null_on_empty_roster(void** state)
 {
     roster_create();
     char* result = roster_contact_autocomplete("James", FALSE, NULL);
@@ -244,7 +244,7 @@ find_on_empty_returns_null(void** state)
 }
 
 void
-find_twice_returns_second_when_two_match(void** state)
+roster_contact_autocomplete__returns__second_when_two_match(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -260,7 +260,7 @@ find_twice_returns_second_when_two_match(void** state)
 }
 
 void
-find_five_times_finds_fifth(void** state)
+roster_contact_autocomplete__returns__fifth_when_multiple_match(void** state)
 {
     roster_create();
     roster_add("Jama", NULL, NULL, NULL, FALSE);
@@ -289,7 +289,7 @@ find_five_times_finds_fifth(void** state)
 }
 
 void
-find_twice_returns_first_when_two_match_and_reset(void** state)
+roster_contact_autocomplete__returns__first_when_two_match_and_reset(void** state)
 {
     roster_create();
     roster_add("James", NULL, NULL, NULL, FALSE);
@@ -306,7 +306,7 @@ find_twice_returns_first_when_two_match_and_reset(void** state)
 }
 
 void
-add_contact_with_no_group(void** state)
+roster_get_groups__returns__empty_for_no_group(void** state)
 {
     roster_create();
     roster_add("person@server.org", NULL, NULL, NULL, FALSE);
@@ -319,7 +319,7 @@ add_contact_with_no_group(void** state)
 }
 
 void
-add_contact_with_group(void** state)
+roster_get_groups__returns__one_group(void** state)
 {
     roster_create();
 
@@ -339,7 +339,7 @@ add_contact_with_group(void** state)
 }
 
 void
-add_contact_with_two_groups(void** state)
+roster_get_groups__returns__two_groups(void** state)
 {
     roster_create();
 
@@ -363,7 +363,7 @@ add_contact_with_two_groups(void** state)
 }
 
 void
-add_contact_with_three_groups(void** state)
+roster_get_groups__returns__three_groups(void** state)
 {
     roster_create();
 
@@ -391,7 +391,7 @@ add_contact_with_three_groups(void** state)
 }
 
 void
-add_contact_with_three_groups_update_adding_two(void** state)
+roster_update__updates__adding_two_groups(void** state)
 {
     roster_create();
 
@@ -433,7 +433,7 @@ add_contact_with_three_groups_update_adding_two(void** state)
 }
 
 void
-add_contact_with_three_groups_update_removing_one(void** state)
+roster_update__updates__removing_one_group(void** state)
 {
     roster_create();
 
@@ -463,7 +463,7 @@ add_contact_with_three_groups_update_removing_one(void** state)
 }
 
 void
-add_contact_with_three_groups_update_removing_two(void** state)
+roster_update__updates__removing_two_groups(void** state)
 {
     roster_create();
 
@@ -489,7 +489,7 @@ add_contact_with_three_groups_update_removing_two(void** state)
 }
 
 void
-add_contact_with_three_groups_update_removing_three(void** state)
+roster_update__updates__removing_three_groups(void** state)
 {
     roster_create();
 
@@ -509,7 +509,7 @@ add_contact_with_three_groups_update_removing_three(void** state)
 }
 
 void
-add_contact_with_three_groups_update_two_new(void** state)
+roster_update__updates__two_new_groups(void** state)
 {
     roster_create();
 
@@ -537,7 +537,7 @@ add_contact_with_three_groups_update_two_new(void** state)
 }
 
 void
-add_remove_contact_groups(void** state)
+roster_remove__updates__contact_groups(void** state)
 {
     roster_create();
 
@@ -557,7 +557,7 @@ add_remove_contact_groups(void** state)
 }
 
 void
-add_contacts_with_different_groups(void** state)
+roster_add__updates__different_groups(void** state)
 {
     roster_create();
 
@@ -591,7 +591,7 @@ add_contacts_with_different_groups(void** state)
 }
 
 void
-add_contacts_with_same_groups(void** state)
+roster_add__updates__same_groups(void** state)
 {
     roster_create();
 
@@ -622,7 +622,7 @@ add_contacts_with_same_groups(void** state)
 }
 
 void
-add_contacts_with_overlapping_groups(void** state)
+roster_add__updates__overlapping_groups(void** state)
 {
     roster_create();
 
@@ -655,7 +655,7 @@ add_contacts_with_overlapping_groups(void** state)
 }
 
 void
-remove_contact_with_remaining_in_group(void** state)
+roster_remove__updates__remaining_in_group(void** state)
 {
     roster_create();
 
@@ -688,7 +688,7 @@ remove_contact_with_remaining_in_group(void** state)
 }
 
 void
-get_contact_display_name(void** state)
+roster_get_display_name__returns__nickname_when_exists(void** state)
 {
     roster_create();
     roster_add("person@server.org", "nickname", NULL, NULL, FALSE);
@@ -699,7 +699,7 @@ get_contact_display_name(void** state)
 }
 
 void
-get_contact_display_name_is_barejid_if_name_is_empty(void** state)
+roster_get_display_name__returns__barejid_when_nickname_empty(void** state)
 {
     roster_create();
     roster_add("person@server.org", NULL, NULL, NULL, FALSE);
@@ -710,7 +710,7 @@ get_contact_display_name_is_barejid_if_name_is_empty(void** state)
 }
 
 void
-get_contact_display_name_is_passed_barejid_if_contact_does_not_exist(void** state)
+roster_get_display_name__returns__barejid_when_not_exists(void** state)
 {
     roster_create();
 

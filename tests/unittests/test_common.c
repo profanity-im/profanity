@@ -5,7 +5,7 @@
 #include "tests/unittests/ui/stub_ui.h" // Include for mocking cons_show
 
 void
-replace_one_substr(void** state)
+str_replace__returns__one_substr(void** state)
 {
     char* string = "it is a string";
     char* sub = "is";
@@ -19,7 +19,7 @@ replace_one_substr(void** state)
 }
 
 void
-replace_one_substr_beginning(void** state)
+str_replace__returns__one_substr_beginning(void** state)
 {
     char* string = "it is a string";
     char* sub = "it";
@@ -33,7 +33,7 @@ replace_one_substr_beginning(void** state)
 }
 
 void
-replace_one_substr_end(void** state)
+str_replace__returns__one_substr_end(void** state)
 {
     char* string = "it is a string";
     char* sub = "string";
@@ -47,7 +47,7 @@ replace_one_substr_end(void** state)
 }
 
 void
-replace_two_substr(void** state)
+str_replace__returns__two_substr(void** state)
 {
     char* string = "it is a is string";
     char* sub = "is";
@@ -61,7 +61,7 @@ replace_two_substr(void** state)
 }
 
 void
-replace_char(void** state)
+str_replace__returns__char(void** state)
 {
     char* string = "some & a thing & something else";
     char* sub = "&";
@@ -75,7 +75,7 @@ replace_char(void** state)
 }
 
 void
-replace_when_none(void** state)
+str_replace__returns__original_when_none(void** state)
 {
     char* string = "its another string";
     char* sub = "haha";
@@ -89,7 +89,7 @@ replace_when_none(void** state)
 }
 
 void
-replace_when_match(void** state)
+str_replace__returns__replaced_when_match(void** state)
 {
     char* string = "hello";
     char* sub = "hello";
@@ -103,7 +103,7 @@ replace_when_match(void** state)
 }
 
 void
-replace_when_string_empty(void** state)
+str_replace__returns__empty_when_string_empty(void** state)
 {
     char* string = "";
     char* sub = "hello";
@@ -117,7 +117,7 @@ replace_when_string_empty(void** state)
 }
 
 void
-replace_when_string_null(void** state)
+str_replace__returns__null_when_string_null(void** state)
 {
     char* string = NULL;
     char* sub = "hello";
@@ -129,7 +129,7 @@ replace_when_string_null(void** state)
 }
 
 void
-replace_when_sub_empty(void** state)
+str_replace__returns__original_when_sub_empty(void** state)
 {
     char* string = "hello";
     char* sub = "";
@@ -143,7 +143,7 @@ replace_when_sub_empty(void** state)
 }
 
 void
-replace_when_sub_null(void** state)
+str_replace__returns__original_when_sub_null(void** state)
 {
     char* string = "hello";
     char* sub = NULL;
@@ -157,7 +157,7 @@ replace_when_sub_null(void** state)
 }
 
 void
-replace_when_new_empty(void** state)
+str_replace__returns__empty_when_new_empty(void** state)
 {
     char* string = "hello";
     char* sub = "hello";
@@ -171,7 +171,7 @@ replace_when_new_empty(void** state)
 }
 
 void
-replace_when_new_null(void** state)
+str_replace__returns__original_when_new_null(void** state)
 {
     char* string = "hello";
     char* sub = "hello";
@@ -185,55 +185,55 @@ replace_when_new_null(void** state)
 }
 
 void
-test_online_is_valid_resource_presence_string(void** state)
+valid_resource_presence_string__is__true_for_online(void** state)
 {
     assert_true(valid_resource_presence_string("online"));
 }
 
 void
-test_chat_is_valid_resource_presence_string(void** state)
+valid_resource_presence_string__is__true_for_chat(void** state)
 {
     assert_true(valid_resource_presence_string("chat"));
 }
 
 void
-test_away_is_valid_resource_presence_string(void** state)
+valid_resource_presence_string__is__true_for_away(void** state)
 {
     assert_true(valid_resource_presence_string("away"));
 }
 
 void
-test_xa_is_valid_resource_presence_string(void** state)
+valid_resource_presence_string__is__true_for_xa(void** state)
 {
     assert_true(valid_resource_presence_string("xa"));
 }
 
 void
-test_dnd_is_valid_resource_presence_string(void** state)
+valid_resource_presence_string__is__true_for_dnd(void** state)
 {
     assert_true(valid_resource_presence_string("dnd"));
 }
 
 void
-test_available_is_not_valid_resource_presence_string(void** state)
+valid_resource_presence_string__is__false_for_available(void** state)
 {
     assert_false(valid_resource_presence_string("available"));
 }
 
 void
-test_unavailable_is_not_valid_resource_presence_string(void** state)
+valid_resource_presence_string__is__false_for_unavailable(void** state)
 {
     assert_false(valid_resource_presence_string("unavailable"));
 }
 
 void
-test_blah_is_not_valid_resource_presence_string(void** state)
+valid_resource_presence_string__is__false_for_blah(void** state)
 {
     assert_false(valid_resource_presence_string("blah"));
 }
 
 void
-utf8_display_len_null_str(void** state)
+utf8_display_len__returns__0_for_null(void** state)
 {
     int result = utf8_display_len(NULL);
 
@@ -241,7 +241,7 @@ utf8_display_len_null_str(void** state)
 }
 
 void
-utf8_display_len_1_non_wide(void** state)
+utf8_display_len__returns__1_for_non_wide(void** state)
 {
     int result = utf8_display_len("1");
 
@@ -249,7 +249,7 @@ utf8_display_len_1_non_wide(void** state)
 }
 
 void
-utf8_display_len_1_wide(void** state)
+utf8_display_len__returns__2_for_wide(void** state)
 {
     int result = utf8_display_len("四");
 
@@ -257,7 +257,7 @@ utf8_display_len_1_wide(void** state)
 }
 
 void
-utf8_display_len_non_wide(void** state)
+utf8_display_len__returns__correct_for_non_wide(void** state)
 {
     int result = utf8_display_len("123456789abcdef");
 
@@ -265,7 +265,7 @@ utf8_display_len_non_wide(void** state)
 }
 
 void
-utf8_display_len_wide(void** state)
+utf8_display_len__returns__correct_for_wide(void** state)
 {
     int result = utf8_display_len("12三四56");
 
@@ -273,7 +273,7 @@ utf8_display_len_wide(void** state)
 }
 
 void
-utf8_display_len_all_wide(void** state)
+utf8_display_len__returns__correct_for_all_wide(void** state)
 {
     int result = utf8_display_len("ひらがな");
 
@@ -281,7 +281,7 @@ utf8_display_len_all_wide(void** state)
 }
 
 void
-strip_quotes_does_nothing_when_no_quoted(void** state)
+strip_arg_quotes__returns__original_when_no_quotes(void** state)
 {
     char* input = "/cmd test string";
 
@@ -293,7 +293,7 @@ strip_quotes_does_nothing_when_no_quoted(void** state)
 }
 
 void
-strip_quotes_strips_first(void** state)
+strip_arg_quotes__returns__stripped_first(void** state)
 {
     char* input = "/cmd \"test string";
 
@@ -305,7 +305,7 @@ strip_quotes_strips_first(void** state)
 }
 
 void
-strip_quotes_strips_last(void** state)
+strip_arg_quotes__returns__stripped_last(void** state)
 {
     char* input = "/cmd test string\"";
 
@@ -317,7 +317,7 @@ strip_quotes_strips_last(void** state)
 }
 
 void
-strip_quotes_strips_both(void** state)
+strip_arg_quotes__returns__stripped_both(void** state)
 {
     char* input = "/cmd \"test string\"";
 
@@ -328,7 +328,7 @@ strip_quotes_strips_both(void** state)
     free(result);
 }
 
-void test_valid_tls_policy_option(void** state) {
+void valid_tls_policy_option__is__correct_for_various_inputs(void** state) {
     // Valid inputs
     assert_true(valid_tls_policy_option("force"));
     assert_true(valid_tls_policy_option("allow"));
@@ -352,7 +352,7 @@ void test_valid_tls_policy_option(void** state) {
     assert_true(valid_tls_policy_option(NULL));
 }
 
-void test_get_expanded_path(void** state) {
+void get_expanded_path__returns__expanded(void** state) {
     gchar* expanded_path;
 
     // `file://` prefix
@@ -378,7 +378,7 @@ void test_get_expanded_path(void** state) {
     g_free(expanded_path);
 }
 
-void test_strtoi_range_valid_input(void** state) {
+void strtoi_range__returns__true_for_valid_input(void** state) {
     int value;
     gchar* err_msg = NULL;
     gboolean result;
@@ -404,7 +404,7 @@ void test_strtoi_range_valid_input(void** state) {
     assert_null(err_msg);
 }
 
-void test_strtoi_range_out_of_range(void** state) {
+void strtoi_range__returns__false_for_out_of_range(void** state) {
     int value;
     gchar* err_msg = NULL;
     gboolean result;
@@ -431,7 +431,7 @@ void test_strtoi_range_out_of_range(void** state) {
     err_msg = NULL;
 }
 
-void test_strtoi_range_invalid_input(void** state) {
+void strtoi_range__returns__false_for_invalid_input(void** state) {
     int value;
     gchar* err_msg = NULL;
     gboolean result;
@@ -451,7 +451,7 @@ void test_strtoi_range_invalid_input(void** state) {
     err_msg = NULL;
 }
 
-void test_strtoi_range_null_empty_input(void** state) {
+void strtoi_range__returns__false_for_null_empty_input(void** state) {
     int value;
     gchar* err_msg = NULL;
     gboolean result;
@@ -471,7 +471,7 @@ void test_strtoi_range_null_empty_input(void** state) {
     err_msg = NULL;
 }
 
-void test_strtoi_range_null_err_msg(void** state) {
+void strtoi_range__returns__correct_values_when_err_msg_null(void** state) {
     int value;
     gboolean result;
 
@@ -485,7 +485,7 @@ void test_strtoi_range_null_err_msg(void** state) {
     assert_false(result);
 }
 
-void test_string_to_verbosity(void** state) {
+void string_to_verbosity__returns__correct_values(void** state) {
     int verbosity;
     gchar* err_msg = NULL;
     gboolean result;
@@ -556,7 +556,7 @@ typedef struct
 } format_call_external_argv_t;
 
 void
-format_call_external_argv_td(void** state)
+format_call_external_argv__tests__table_driven(void** state)
 {
 
     enum table { num_tests = 4 };
@@ -613,7 +613,7 @@ typedef struct
 } unique_filename_from_url_t;
 
 void
-unique_filename_from_url_td(void** state)
+unique_filename_from_url__tests__table_driven(void** state)
 {
 
     enum table { num_tests = 15 };
@@ -751,7 +751,7 @@ _lists_equal(GSList* a, GSList* b)
 }
 
 void
-prof_occurrences_of_large_message_tests(void** state)
+prof_occurrences__tests__large_message(void** state)
 {
     GSList* actual = NULL;
     GSList* expected = NULL;
@@ -773,7 +773,7 @@ prof_occurrences_of_large_message_tests(void** state)
 }
 
 void
-prof_partial_occurrences_tests(void** state)
+prof_occurrences__tests__partial(void** state)
 {
     GSList* actual = NULL;
     GSList* expected = NULL;
@@ -865,7 +865,7 @@ prof_partial_occurrences_tests(void** state)
 }
 
 void
-get_mentions_tests(void** state)
+get_mentions__tests__various(void** state)
 {
     GSList* actual = NULL;
     GSList* expected = NULL;
@@ -937,7 +937,7 @@ get_mentions_tests(void** state)
 }
 
 void
-release_is_new_tests(void** state)
+release_is_new__tests__various(void** state)
 {
     // Higher major version
     assert_true(release_is_new("0.16.0", "1.0.0"));
@@ -973,7 +973,7 @@ release_is_new_tests(void** state)
 }
 
 void
-prof_whole_occurrences_tests(void** state)
+prof_occurrences__tests__whole(void** state)
 {
     GSList* actual = NULL;
     GSList* expected = NULL;
@@ -1175,7 +1175,7 @@ prof_whole_occurrences_tests(void** state)
     expected = NULL;
 }
 
-void test_string_matches_one_of_edge_cases(void** state) {
+void string_matches_one_of__tests__edge_cases(void** state) {
     // is is NULL, is_can_be_null is TRUE -> should return TRUE
     assert_true(string_matches_one_of(NULL, NULL, TRUE, "option1", "option2", NULL));
 

@@ -25,25 +25,25 @@ test_with_connection_status(jabber_conn_status_t status)
 }
 
 void
-cmd_connect_shows_message_when_disconnecting(void** state)
+cmd_connect__shows__message_when_disconnecting(void** state)
 {
     test_with_connection_status(JABBER_DISCONNECTING);
 }
 
 void
-cmd_connect_shows_message_when_connecting(void** state)
+cmd_connect__shows__message_when_connecting(void** state)
 {
     test_with_connection_status(JABBER_CONNECTING);
 }
 
 void
-cmd_connect_shows_message_when_connected(void** state)
+cmd_connect__shows__message_when_connected(void** state)
 {
     test_with_connection_status(JABBER_CONNECTED);
 }
 
 void
-cmd_connect_when_no_account(void** state)
+cmd_connect__tests__no_account(void** state)
 {
     gchar* args[] = { "user@server.org", NULL };
 
@@ -67,7 +67,7 @@ cmd_connect_when_no_account(void** state)
 }
 
 void
-cmd_connect_fail_message(void** state)
+cmd_connect__shows__fail_message(void** state)
 {
     gchar* args[] = { "user@server.org", NULL };
 
@@ -93,7 +93,7 @@ cmd_connect_fail_message(void** state)
 }
 
 void
-cmd_connect_lowercases_argument_with_no_account(void** state)
+cmd_connect__tests__lowercases_argument_with_no_account(void** state)
 {
     gchar* args[] = { "USER@server.ORG", NULL };
 
@@ -117,7 +117,7 @@ cmd_connect_lowercases_argument_with_no_account(void** state)
 }
 
 void
-cmd_connect_lowercases_argument_with_account(void** state)
+cmd_connect__tests__lowercases_argument_with_account(void** state)
 {
     gchar* args[] = { "Jabber_org", NULL };
     ProfAccount* account = account_new(g_strdup("Jabber_org"), g_strdup("me@jabber.org"), g_strdup("password"), NULL,
@@ -138,7 +138,7 @@ cmd_connect_lowercases_argument_with_account(void** state)
 }
 
 void
-cmd_connect_asks_password_when_not_in_account(void** state)
+cmd_connect__tests__asks_password_when_not_in_account(void** state)
 {
     gchar* args[] = { "jabber_org", NULL };
     ProfAccount* account = account_new(g_strdup("jabber_org"), g_strdup("me@jabber.org"), NULL, NULL,
@@ -161,7 +161,7 @@ cmd_connect_asks_password_when_not_in_account(void** state)
 }
 
 void
-cmd_connect_shows_usage_when_no_server_value(void** state)
+cmd_connect__shows__usage_when_no_server_value(void** state)
 {
     gchar* args[] = { "user@server.org", "server", NULL };
 
@@ -175,7 +175,7 @@ cmd_connect_shows_usage_when_no_server_value(void** state)
 }
 
 void
-cmd_connect_shows_usage_when_server_no_port_value(void** state)
+cmd_connect__shows__usage_when_server_no_port_value(void** state)
 {
     gchar* args[] = { "user@server.org", "server", "aserver", "port", NULL };
 
@@ -189,7 +189,7 @@ cmd_connect_shows_usage_when_server_no_port_value(void** state)
 }
 
 void
-cmd_connect_shows_usage_when_no_port_value(void** state)
+cmd_connect__shows__usage_when_no_port_value(void** state)
 {
     gchar* args[] = { "user@server.org", "port", NULL };
 
@@ -203,7 +203,7 @@ cmd_connect_shows_usage_when_no_port_value(void** state)
 }
 
 void
-cmd_connect_shows_usage_when_port_no_server_value(void** state)
+cmd_connect__shows__usage_when_port_no_server_value(void** state)
 {
     gchar* args[] = { "user@server.org", "port", "5678", "server", NULL };
 
@@ -217,7 +217,7 @@ cmd_connect_shows_usage_when_port_no_server_value(void** state)
 }
 
 void
-cmd_connect_shows_message_when_port_0(void** state)
+cmd_connect__shows__message_when_port_0(void** state)
 {
     gchar* args[] = { "user@server.org", "port", "0", NULL };
 
@@ -231,7 +231,7 @@ cmd_connect_shows_message_when_port_0(void** state)
 }
 
 void
-cmd_connect_shows_message_when_port_minus1(void** state)
+cmd_connect__shows__message_when_port_minus1(void** state)
 {
     gchar* args[] = { "user@server.org", "port", "-1", NULL };
 
@@ -245,7 +245,7 @@ cmd_connect_shows_message_when_port_minus1(void** state)
 }
 
 void
-cmd_connect_shows_message_when_port_65536(void** state)
+cmd_connect__shows__message_when_port_65536(void** state)
 {
     gchar* args[] = { "user@server.org", "port", "65536", NULL };
 
@@ -259,7 +259,7 @@ cmd_connect_shows_message_when_port_65536(void** state)
 }
 
 void
-cmd_connect_shows_message_when_port_contains_chars(void** state)
+cmd_connect__shows__message_when_port_contains_chars(void** state)
 {
     gchar* args[] = { "user@server.org", "port", "52f66", NULL };
 
@@ -273,7 +273,7 @@ cmd_connect_shows_message_when_port_contains_chars(void** state)
 }
 
 void
-cmd_connect_shows_usage_when_server_provided_twice(void** state)
+cmd_connect__shows__usage_when_server_provided_twice(void** state)
 {
     gchar* args[] = { "user@server.org", "server", "server1", "server", "server2", NULL };
 
@@ -287,7 +287,7 @@ cmd_connect_shows_usage_when_server_provided_twice(void** state)
 }
 
 void
-cmd_connect_shows_usage_when_port_provided_twice(void** state)
+cmd_connect__shows__usage_when_port_provided_twice(void** state)
 {
     gchar* args[] = { "user@server.org", "port", "1111", "port", "1111", NULL };
 
@@ -301,7 +301,7 @@ cmd_connect_shows_usage_when_port_provided_twice(void** state)
 }
 
 void
-cmd_connect_shows_usage_when_invalid_first_property(void** state)
+cmd_connect__shows__usage_when_invalid_first_property(void** state)
 {
     gchar* args[] = { "user@server.org", "wrong", "server", NULL };
 
@@ -315,7 +315,7 @@ cmd_connect_shows_usage_when_invalid_first_property(void** state)
 }
 
 void
-cmd_connect_shows_usage_when_invalid_second_property(void** state)
+cmd_connect__shows__usage_when_invalid_second_property(void** state)
 {
     gchar* args[] = { "user@server.org", "server", "aserver", "wrong", "1234", NULL };
 
@@ -329,7 +329,7 @@ cmd_connect_shows_usage_when_invalid_second_property(void** state)
 }
 
 void
-cmd_connect_with_server_when_provided(void** state)
+cmd_connect__tests__with_server_when_provided(void** state)
 {
     gchar* args[] = { "user@server.org", "server", "aserver", NULL };
 
@@ -353,7 +353,7 @@ cmd_connect_with_server_when_provided(void** state)
 }
 
 void
-cmd_connect_with_port_when_provided(void** state)
+cmd_connect__tests__with_port_when_provided(void** state)
 {
     gchar* args[] = { "user@server.org", "port", "5432", NULL };
 
@@ -377,7 +377,7 @@ cmd_connect_with_port_when_provided(void** state)
 }
 
 void
-cmd_connect_with_server_and_port_when_provided(void** state)
+cmd_connect__tests__with_server_and_port_when_provided(void** state)
 {
     gchar* args[] = { "user@server.org", "port", "5432", "server", "aserver", NULL };
 
@@ -401,7 +401,7 @@ cmd_connect_with_server_and_port_when_provided(void** state)
 }
 
 void
-cmd_connect_shows_message_when_connecting_with_account(void** state)
+cmd_connect__shows__message_when_connecting_with_account(void** state)
 {
     gchar* args[] = { "jabber_org", NULL };
     ProfAccount* account = account_new(g_strdup("jabber_org"), g_strdup("user@jabber.org"), g_strdup("password"), NULL,
@@ -422,7 +422,7 @@ cmd_connect_shows_message_when_connecting_with_account(void** state)
 }
 
 void
-cmd_connect_connects_with_account(void** state)
+cmd_connect__tests__connects_with_account(void** state)
 {
     gchar* args[] = { "jabber_org", NULL };
     ProfAccount* account = account_new(g_strdup("jabber_org"), g_strdup("me@jabber.org"), g_strdup("password"), NULL,

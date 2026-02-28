@@ -17,7 +17,7 @@
 #define CMD_ALIAS "/alias"
 
 void
-cmd_alias_add_shows_usage_when_no_args(void** state)
+cmd_alias__shows__usage_when_add_no_args(void** state)
 {
     gchar* args[] = { "add", NULL };
 
@@ -28,7 +28,7 @@ cmd_alias_add_shows_usage_when_no_args(void** state)
 }
 
 void
-cmd_alias_add_shows_usage_when_no_value(void** state)
+cmd_alias__shows__usage_when_add_no_value(void** state)
 {
     gchar* args[] = { "add", "alias", NULL };
 
@@ -39,7 +39,7 @@ cmd_alias_add_shows_usage_when_no_value(void** state)
 }
 
 void
-cmd_alias_remove_shows_usage_when_no_args(void** state)
+cmd_alias__shows__usage_when_remove_no_args(void** state)
 {
     gchar* args[] = { "remove", NULL };
 
@@ -50,7 +50,7 @@ cmd_alias_remove_shows_usage_when_no_args(void** state)
 }
 
 void
-cmd_alias_show_usage_when_invalid_subcmd(void** state)
+cmd_alias__shows__usage_when_invalid_subcmd(void** state)
 {
     gchar* args[] = { "blah", NULL };
 
@@ -61,7 +61,7 @@ cmd_alias_show_usage_when_invalid_subcmd(void** state)
 }
 
 void
-cmd_alias_add_adds_alias(void** state)
+cmd_alias__updates__adds_alias(void** state)
 {
     gchar* args[] = { "add", "hc", "/help commands", NULL };
 
@@ -77,7 +77,7 @@ cmd_alias_add_adds_alias(void** state)
 }
 
 void
-cmd_alias_add_shows_message_when_exists(void** state)
+cmd_alias__shows__message_when_add_exists(void** state)
 {
     gchar* args[] = { "add", "hc", "/help commands", NULL };
 
@@ -91,7 +91,7 @@ cmd_alias_add_shows_message_when_exists(void** state)
 }
 
 void
-cmd_alias_remove_removes_alias(void** state)
+cmd_alias__updates__removes_alias(void** state)
 {
     gchar* args[] = { "remove", "hn", NULL };
 
@@ -109,7 +109,7 @@ cmd_alias_remove_removes_alias(void** state)
 }
 
 void
-cmd_alias_remove_shows_message_when_no_alias(void** state)
+cmd_alias__shows__message_when_remove_no_alias(void** state)
 {
     gchar* args[] = { "remove", "hn", NULL };
 
@@ -120,7 +120,7 @@ cmd_alias_remove_shows_message_when_no_alias(void** state)
 }
 
 void
-cmd_alias_list_shows_all_aliases(void** state)
+cmd_alias__shows__all_aliases(void** state)
 {
     gchar* args[] = { "list", NULL };
 

@@ -6,7 +6,7 @@
 #include "config/preferences.h"
 
 void
-statuses_console_defaults_to_all(void** state)
+prefs_get_string__returns__all_for_console_default(void** state)
 {
     gchar* setting = prefs_get_string(PREF_STATUSES_CONSOLE);
 
@@ -16,7 +16,7 @@ statuses_console_defaults_to_all(void** state)
 }
 
 void
-statuses_chat_defaults_to_all(void** state)
+prefs_get_string__returns__none_for_chat_default(void** state)
 {
     gchar* setting = prefs_get_string(PREF_STATUSES_CHAT);
 
@@ -26,7 +26,7 @@ statuses_chat_defaults_to_all(void** state)
 }
 
 void
-statuses_muc_defaults_to_all(void** state)
+prefs_get_string__returns__none_for_muc_default(void** state)
 {
     gchar* setting = prefs_get_string(PREF_STATUSES_MUC);
 

@@ -24,7 +24,7 @@
 
 #ifdef HAVE_LIBOTR
 void
-cmd_otr_log_shows_usage_when_no_args(void** state)
+cmd_otr_log__shows__usage_when_no_args(void** state)
 {
     gchar* args[] = { "log", NULL };
 
@@ -35,7 +35,7 @@ cmd_otr_log_shows_usage_when_no_args(void** state)
 }
 
 void
-cmd_otr_log_shows_usage_when_invalid_subcommand(void** state)
+cmd_otr_log__shows__usage_when_invalid_subcommand(void** state)
 {
     gchar* args[] = { "log", "wrong", NULL };
 
@@ -46,7 +46,7 @@ cmd_otr_log_shows_usage_when_invalid_subcommand(void** state)
 }
 
 void
-cmd_otr_log_on_enables_logging(void** state)
+cmd_otr_log__updates__enables_logging(void** state)
 {
     gchar* args[] = { "log", "on", NULL };
     prefs_set_string(PREF_OTR_LOG, "off");
@@ -62,7 +62,7 @@ cmd_otr_log_on_enables_logging(void** state)
 }
 
 void
-cmd_otr_log_on_shows_warning_when_chlog_disabled(void** state)
+cmd_otr_log__shows__warning_when_chlog_disabled(void** state)
 {
     gchar* args[] = { "log", "on", NULL };
     prefs_set_string(PREF_OTR_LOG, "off");
@@ -76,7 +76,7 @@ cmd_otr_log_on_shows_warning_when_chlog_disabled(void** state)
 }
 
 void
-cmd_otr_log_off_disables_logging(void** state)
+cmd_otr_log__updates__disables_logging(void** state)
 {
     gchar* args[] = { "log", "off", NULL };
     prefs_set_string(PREF_OTR_LOG, "on");
@@ -92,7 +92,7 @@ cmd_otr_log_off_disables_logging(void** state)
 }
 
 void
-cmd_otr_redact_redacts_logging(void** state)
+cmd_otr_log__updates__redacts_logging(void** state)
 {
     gchar* args[] = { "log", "redact", NULL };
     prefs_set_string(PREF_OTR_LOG, "on");
@@ -108,7 +108,7 @@ cmd_otr_redact_redacts_logging(void** state)
 }
 
 void
-cmd_otr_log_redact_shows_warning_when_chlog_disabled(void** state)
+cmd_otr_log__shows__redact_warning_when_chlog_disabled(void** state)
 {
     gchar* args[] = { "log", "redact", NULL };
     prefs_set_string(PREF_OTR_LOG, "off");
@@ -122,7 +122,7 @@ cmd_otr_log_redact_shows_warning_when_chlog_disabled(void** state)
 }
 
 void
-cmd_otr_libver_shows_libotr_version(void** state)
+cmd_otr_libver__shows__libotr_version(void** state)
 {
     gchar* args[] = { "libver", NULL };
     char* version = "9.9.9";
@@ -140,7 +140,7 @@ cmd_otr_libver_shows_libotr_version(void** state)
 }
 
 void
-cmd_otr_gen_shows_message_when_not_connected(void** state)
+cmd_otr_gen__shows__message_when_not_connected(void** state)
 {
     gchar* args[] = { "gen", NULL };
 
@@ -167,25 +167,25 @@ test_with_command_and_connection_status(char* command, void* cmd_func, jabber_co
 }
 
 void
-cmd_otr_gen_shows_message_when_disconnected(void** state)
+cmd_otr_gen__shows__message_when_disconnected(void** state)
 {
     test_with_command_and_connection_status("gen", cmd_otr_gen, JABBER_DISCONNECTED);
 }
 
 void
-cmd_otr_gen_shows_message_when_connecting(void** state)
+cmd_otr_gen__shows__message_when_connecting(void** state)
 {
     test_with_command_and_connection_status("gen", cmd_otr_gen, JABBER_CONNECTING);
 }
 
 void
-cmd_otr_gen_shows_message_when_disconnecting(void** state)
+cmd_otr_gen__shows__message_when_disconnecting(void** state)
 {
     test_with_command_and_connection_status("gen", cmd_otr_gen, JABBER_DISCONNECTING);
 }
 
 void
-cmd_otr_gen_generates_key_for_connected_account(void** state)
+cmd_otr_gen__tests__generates_key_for_connected_account(void** state)
 {
     gchar* args[] = { "gen", NULL };
     gchar* account_name = g_strdup("myaccount");
@@ -206,25 +206,25 @@ cmd_otr_gen_generates_key_for_connected_account(void** state)
 }
 
 void
-cmd_otr_myfp_shows_message_when_disconnected(void** state)
+cmd_otr_myfp__shows__message_when_disconnected(void** state)
 {
     test_with_command_and_connection_status("myfp", cmd_otr_myfp, JABBER_DISCONNECTED);
 }
 
 void
-cmd_otr_myfp_shows_message_when_connecting(void** state)
+cmd_otr_myfp__shows__message_when_connecting(void** state)
 {
     test_with_command_and_connection_status("myfp", cmd_otr_myfp, JABBER_CONNECTING);
 }
 
 void
-cmd_otr_myfp_shows_message_when_disconnecting(void** state)
+cmd_otr_myfp__shows__message_when_disconnecting(void** state)
 {
     test_with_command_and_connection_status("myfp", cmd_otr_myfp, JABBER_DISCONNECTING);
 }
 
 void
-cmd_otr_myfp_shows_message_when_no_key(void** state)
+cmd_otr_myfp__shows__message_when_no_key(void** state)
 {
     gchar* args[] = { "myfp", NULL };
 
@@ -238,7 +238,7 @@ cmd_otr_myfp_shows_message_when_no_key(void** state)
 }
 
 void
-cmd_otr_myfp_shows_my_fingerprint(void** state)
+cmd_otr_myfp__shows__my_fingerprint(void** state)
 {
     char* fingerprint = "AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD EEEEEEEE";
     gchar* args[] = { "myfp", NULL };
@@ -277,25 +277,25 @@ test_cmd_otr_theirfp_from_wintype(win_type_t wintype)
 }
 
 void
-cmd_otr_theirfp_shows_message_when_in_console(void** state)
+cmd_otr_theirfp__shows__message_when_in_console(void** state)
 {
     test_cmd_otr_theirfp_from_wintype(WIN_CONSOLE);
 }
 
 void
-cmd_otr_theirfp_shows_message_when_in_muc(void** state)
+cmd_otr_theirfp__shows__message_when_in_muc(void** state)
 {
     test_cmd_otr_theirfp_from_wintype(WIN_MUC);
 }
 
 void
-cmd_otr_theirfp_shows_message_when_in_private(void** state)
+cmd_otr_theirfp__shows__message_when_in_private(void** state)
 {
     test_cmd_otr_theirfp_from_wintype(WIN_PRIVATE);
 }
 
 void
-cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void** state)
+cmd_otr_theirfp__shows__message_when_non_otr_chat_window(void** state)
 {
     gchar* args[] = { "theirfp", NULL };
 
@@ -320,7 +320,7 @@ cmd_otr_theirfp_shows_message_when_non_otr_chat_window(void** state)
 }
 
 void
-cmd_otr_theirfp_shows_fingerprint(void** state)
+cmd_otr_theirfp__shows__fingerprint(void** state)
 {
     char* recipient = "someone@chat.com";
     char* fingerprint = "AAAAAAAA BBBBBBBB CCCCCCCC DDDDDDDD EEEEEEEE";
@@ -373,25 +373,25 @@ test_cmd_otr_start_from_wintype(win_type_t wintype)
 }
 
 void
-cmd_otr_start_shows_message_when_in_console(void** state)
+cmd_otr_start__shows__message_when_in_console(void** state)
 {
     test_cmd_otr_start_from_wintype(WIN_CONSOLE);
 }
 
 void
-cmd_otr_start_shows_message_when_in_muc(void** state)
+cmd_otr_start__shows__message_when_in_muc(void** state)
 {
     test_cmd_otr_start_from_wintype(WIN_MUC);
 }
 
 void
-cmd_otr_start_shows_message_when_in_private(void** state)
+cmd_otr_start__shows__message_when_in_private(void** state)
 {
     test_cmd_otr_start_from_wintype(WIN_PRIVATE);
 }
 
 void
-cmd_otr_start_shows_message_when_already_started(void** state)
+cmd_otr_start__shows__message_when_already_started(void** state)
 {
     char* recipient = "someone@server.org";
     gchar* args[] = { "start", NULL };
@@ -417,7 +417,7 @@ cmd_otr_start_shows_message_when_already_started(void** state)
 }
 
 void
-cmd_otr_start_shows_message_when_no_key(void** state)
+cmd_otr_start__shows__message_when_no_key(void** state)
 {
     char* recipient = "someone@server.org";
     gchar* args[] = { "start", NULL };
@@ -444,7 +444,7 @@ cmd_otr_start_shows_message_when_no_key(void** state)
 }
 
 void
-cmd_otr_start_sends_otr_query_message_to_current_recipeint(void** state)
+cmd_otr_start__tests__sends_otr_query_message_to_current_recipeint(void** state)
 {
     char* recipient = "buddy@chat.com";
     char* query_message = "?OTR?";
@@ -475,7 +475,7 @@ cmd_otr_start_sends_otr_query_message_to_current_recipeint(void** state)
 
 #else
 void
-cmd_otr_shows_message_when_otr_unsupported(void** state)
+cmd_otr__shows__message_when_otr_unsupported(void** state)
 {
     gchar* args[] = { "gen", NULL };
 

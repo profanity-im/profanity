@@ -12,7 +12,7 @@
 #define CMD_DISCONNECT "/disconnect"
 
 void
-clears_chat_sessions(void** state)
+cmd_disconnect__updates__clears_chat_sessions(void** state)
 {
     chat_sessions_init();
     roster_create();

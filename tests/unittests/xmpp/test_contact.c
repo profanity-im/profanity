@@ -6,7 +6,7 @@
 #include "xmpp/contact.h"
 
 void
-contact_in_group(void** state)
+p_contact_in_group__is__true_when_in_group(void** state)
 {
     GSList* groups = NULL;
     groups = g_slist_append(groups, g_strdup("somegroup"));
@@ -22,7 +22,7 @@ contact_in_group(void** state)
 }
 
 void
-contact_not_in_group(void** state)
+p_contact_in_group__is__false_when_not_in_group(void** state)
 {
     GSList* groups = NULL;
     groups = g_slist_append(groups, g_strdup("somegroup"));
@@ -38,7 +38,7 @@ contact_not_in_group(void** state)
 }
 
 void
-contact_name_when_name_exists(void** state)
+p_contact_name_or_jid__returns__name_when_exists(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
@@ -51,7 +51,7 @@ contact_name_when_name_exists(void** state)
 }
 
 void
-contact_jid_when_name_not_exists(void** state)
+p_contact_name_or_jid__returns__jid_when_name_not_exists(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", NULL, NULL, "both",
                                      "is offline", FALSE);
@@ -64,7 +64,7 @@ contact_jid_when_name_not_exists(void** state)
 }
 
 void
-contact_string_when_name_exists(void** state)
+p_contact_create_display_string__returns__name_and_resource_when_name_exists(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
@@ -78,7 +78,7 @@ contact_string_when_name_exists(void** state)
 }
 
 void
-contact_string_when_name_not_exists(void** state)
+p_contact_create_display_string__returns__jid_and_resource_when_name_not_exists(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", NULL, NULL, "both",
                                      "is offline", FALSE);
@@ -92,7 +92,7 @@ contact_string_when_name_not_exists(void** state)
 }
 
 void
-contact_string_when_default_resource(void** state)
+p_contact_create_display_string__returns__name_when_default_resource(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
@@ -106,7 +106,7 @@ contact_string_when_default_resource(void** state)
 }
 
 void
-contact_presence_offline(void** state)
+p_contact_presence__returns__offline_when_no_resources(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
@@ -119,7 +119,7 @@ contact_presence_offline(void** state)
 }
 
 void
-contact_presence_uses_highest_priority(void** state)
+p_contact_presence__returns__highest_priority_presence(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
@@ -143,7 +143,7 @@ contact_presence_uses_highest_priority(void** state)
 }
 
 void
-contact_presence_chat_when_same_prioroty(void** state)
+p_contact_presence__returns__chat_when_same_priority(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
@@ -167,7 +167,7 @@ contact_presence_chat_when_same_prioroty(void** state)
 }
 
 void
-contact_presence_online_when_same_prioroty(void** state)
+p_contact_presence__returns__online_when_same_priority(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
@@ -189,7 +189,7 @@ contact_presence_online_when_same_prioroty(void** state)
 }
 
 void
-contact_presence_away_when_same_prioroty(void** state)
+p_contact_presence__returns__away_when_same_priority(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
@@ -209,7 +209,7 @@ contact_presence_away_when_same_prioroty(void** state)
 }
 
 void
-contact_presence_xa_when_same_prioroty(void** state)
+p_contact_presence__returns__xa_when_same_priority(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
@@ -227,7 +227,7 @@ contact_presence_xa_when_same_prioroty(void** state)
 }
 
 void
-contact_presence_dnd(void** state)
+p_contact_presence__returns__dnd(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
@@ -243,7 +243,7 @@ contact_presence_dnd(void** state)
 }
 
 void
-contact_subscribed_when_to(void** state)
+p_contact_subscribed__is__true_when_to(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "to",
                                      "is offline", FALSE);
@@ -256,7 +256,7 @@ contact_subscribed_when_to(void** state)
 }
 
 void
-contact_subscribed_when_both(void** state)
+p_contact_subscribed__is__true_when_both(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
@@ -269,7 +269,7 @@ contact_subscribed_when_both(void** state)
 }
 
 void
-contact_not_subscribed_when_from(void** state)
+p_contact_subscribed__is__false_when_from(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "from",
                                      "is offline", FALSE);
@@ -282,7 +282,7 @@ contact_not_subscribed_when_from(void** state)
 }
 
 void
-contact_not_subscribed_when_no_subscription_value(void** state)
+p_contact_subscribed__is__false_when_no_subscription_value(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
                                      "is offline", FALSE);
@@ -295,7 +295,7 @@ contact_not_subscribed_when_no_subscription_value(void** state)
 }
 
 void
-contact_not_available(void** state)
+p_contact_is_available__is__false_when_offline(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
                                      "is offline", FALSE);
@@ -308,7 +308,7 @@ contact_not_available(void** state)
 }
 
 void
-contact_not_available_when_highest_priority_away(void** state)
+p_contact_is_available__is__false_when_highest_priority_away(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
                                      "is offline", FALSE);
@@ -332,7 +332,7 @@ contact_not_available_when_highest_priority_away(void** state)
 }
 
 void
-contact_not_available_when_highest_priority_xa(void** state)
+p_contact_is_available__is__false_when_highest_priority_xa(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
                                      "is offline", FALSE);
@@ -356,7 +356,7 @@ contact_not_available_when_highest_priority_xa(void** state)
 }
 
 void
-contact_not_available_when_highest_priority_dnd(void** state)
+p_contact_is_available__is__false_when_highest_priority_dnd(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
                                      "is offline", FALSE);
@@ -380,7 +380,7 @@ contact_not_available_when_highest_priority_dnd(void** state)
 }
 
 void
-contact_available_when_highest_priority_online(void** state)
+p_contact_is_available__is__true_when_highest_priority_online(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
                                      "is offline", FALSE);
@@ -404,7 +404,7 @@ contact_available_when_highest_priority_online(void** state)
 }
 
 void
-contact_available_when_highest_priority_chat(void** state)
+p_contact_is_available__is__true_when_highest_priority_chat(void** state)
 {
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, NULL,
                                      "is offline", FALSE);

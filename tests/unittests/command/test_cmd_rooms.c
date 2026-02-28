@@ -25,25 +25,25 @@ test_with_connection_status(jabber_conn_status_t status)
 }
 
 void
-cmd_rooms_shows_message_when_disconnected(void** state)
+cmd_rooms__shows__message_when_disconnected(void** state)
 {
     test_with_connection_status(JABBER_DISCONNECTED);
 }
 
 void
-cmd_rooms_shows_message_when_disconnecting(void** state)
+cmd_rooms__shows__message_when_disconnecting(void** state)
 {
     test_with_connection_status(JABBER_DISCONNECTING);
 }
 
 void
-cmd_rooms_shows_message_when_connecting(void** state)
+cmd_rooms__shows__message_when_connecting(void** state)
 {
     test_with_connection_status(JABBER_CONNECTING);
 }
 
 void
-cmd_rooms_uses_account_default_when_no_arg(void** state)
+cmd_rooms__tests__account_default_when_no_arg(void** state)
 {
     gchar* args[] = { NULL };
 
@@ -66,7 +66,7 @@ cmd_rooms_uses_account_default_when_no_arg(void** state)
 }
 
 void
-cmd_rooms_service_arg_used_when_passed(void** state)
+cmd_rooms__tests__service_arg_used_when_passed(void** state)
 {
     gchar* args[] = { "service", "conf_server_arg", NULL };
 
@@ -83,7 +83,7 @@ cmd_rooms_service_arg_used_when_passed(void** state)
 }
 
 void
-cmd_rooms_filter_arg_used_when_passed(void** state)
+cmd_rooms__tests__filter_arg_used_when_passed(void** state)
 {
     gchar* args[] = { "filter", "text", NULL };
 

@@ -20,7 +20,7 @@ muc_after_test(void** state)
 }
 
 void
-test_muc_invites_add(void** state)
+muc_invites_add__updates__invites_list(void** state)
 {
     char* room = "room@conf.server";
     muc_invites_add(room, NULL);
@@ -31,7 +31,7 @@ test_muc_invites_add(void** state)
 }
 
 void
-test_muc_remove_invite(void** state)
+muc_invites_remove__updates__invites_list(void** state)
 {
     char* room = "room@conf.server";
     muc_invites_add(room, NULL);
@@ -43,7 +43,7 @@ test_muc_remove_invite(void** state)
 }
 
 void
-test_muc_invites_count_0(void** state)
+muc_invites_count__returns__0_when_no_invites(void** state)
 {
     int invite_count = muc_invites_count();
 
@@ -51,7 +51,7 @@ test_muc_invites_count_0(void** state)
 }
 
 void
-test_muc_invites_count_5(void** state)
+muc_invites_count__returns__5_when_five_invites_added(void** state)
 {
     muc_invites_add("room1@conf.server", NULL);
     muc_invites_add("room2@conf.server", NULL);
@@ -65,7 +65,7 @@ test_muc_invites_count_5(void** state)
 }
 
 void
-test_muc_room_is_not_active(void** state)
+muc_active__is__false_when_not_joined(void** state)
 {
     char* room = "room@server.org";
 
@@ -75,7 +75,7 @@ test_muc_room_is_not_active(void** state)
 }
 
 void
-test_muc_active(void** state)
+muc_active__is__true_when_joined(void** state)
 {
     char* room = "room@server.org";
     char* nick = "bob";

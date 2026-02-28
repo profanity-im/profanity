@@ -27,25 +27,25 @@ test_with_connection_status(jabber_conn_status_t status)
 }
 
 void
-cmd_join_shows_message_when_disconnecting(void** state)
+cmd_join__shows__message_when_disconnecting(void** state)
 {
     test_with_connection_status(JABBER_DISCONNECTING);
 }
 
 void
-cmd_join_shows_message_when_connecting(void** state)
+cmd_join__shows__message_when_connecting(void** state)
 {
     test_with_connection_status(JABBER_CONNECTING);
 }
 
 void
-cmd_join_shows_message_when_disconnected(void** state)
+cmd_join__shows__message_when_disconnected(void** state)
 {
     test_with_connection_status(JABBER_DISCONNECTED);
 }
 
 void
-cmd_join_shows_error_message_when_invalid_room_jid(void** state)
+cmd_join__shows__error_message_when_invalid_room_jid(void** state)
 {
     gchar* args[] = { "//@@/", NULL };
 
@@ -59,7 +59,7 @@ cmd_join_shows_error_message_when_invalid_room_jid(void** state)
 }
 
 void
-cmd_join_uses_account_mucservice_when_no_service_specified(void** state)
+cmd_join__tests__uses_account_mucservice_when_no_service_specified(void** state)
 {
     gchar* account_name = g_strdup("an_account");
     char* room = "room";
@@ -85,7 +85,7 @@ cmd_join_uses_account_mucservice_when_no_service_specified(void** state)
 }
 
 void
-cmd_join_uses_supplied_nick(void** state)
+cmd_join__tests__uses_supplied_nick(void** state)
 {
     gchar* account_name = g_strdup("an_account");
     char* room = "room@conf.server.org";
@@ -109,7 +109,7 @@ cmd_join_uses_supplied_nick(void** state)
 }
 
 void
-cmd_join_uses_account_nick_when_not_supplied(void** state)
+cmd_join__tests__uses_account_nick_when_not_supplied(void** state)
 {
     gchar* account_name = g_strdup("an_account");
     char* room = "room2@conf.server.org";
@@ -133,7 +133,7 @@ cmd_join_uses_account_nick_when_not_supplied(void** state)
 }
 
 void
-cmd_join_uses_password_when_supplied(void** state)
+cmd_join__tests__uses_password_when_supplied(void** state)
 {
     gchar* account_name = g_strdup("an_account");
     char* room = "room";

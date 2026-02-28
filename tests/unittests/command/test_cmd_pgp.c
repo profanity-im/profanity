@@ -14,7 +14,7 @@
 
 #ifdef HAVE_LIBGPGME
 void
-cmd_pgp_shows_usage_when_no_args(void** state)
+cmd_pgp__shows__usage_when_no_args(void** state)
 {
     gchar* args[] = { NULL };
 
@@ -25,7 +25,7 @@ cmd_pgp_shows_usage_when_no_args(void** state)
 }
 
 void
-cmd_pgp_start_shows_message_when_connection(jabber_conn_status_t conn_status)
+cmd_pgp_start__shows__message_when_connection(jabber_conn_status_t conn_status)
 {
     gchar* args[] = { "start", NULL };
     ProfWin window;
@@ -40,25 +40,25 @@ cmd_pgp_start_shows_message_when_connection(jabber_conn_status_t conn_status)
 }
 
 void
-cmd_pgp_start_shows_message_when_disconnected(void** state)
+cmd_pgp_start__shows__message_when_disconnected(void** state)
 {
-    cmd_pgp_start_shows_message_when_connection(JABBER_DISCONNECTED);
+    cmd_pgp_start__shows__message_when_connection(JABBER_DISCONNECTED);
 }
 
 void
-cmd_pgp_start_shows_message_when_disconnecting(void** state)
+cmd_pgp_start__shows__message_when_disconnecting(void** state)
 {
-    cmd_pgp_start_shows_message_when_connection(JABBER_DISCONNECTING);
+    cmd_pgp_start__shows__message_when_connection(JABBER_DISCONNECTING);
 }
 
 void
-cmd_pgp_start_shows_message_when_connecting(void** state)
+cmd_pgp_start__shows__message_when_connecting(void** state)
 {
-    cmd_pgp_start_shows_message_when_connection(JABBER_CONNECTING);
+    cmd_pgp_start__shows__message_when_connection(JABBER_CONNECTING);
 }
 
 void
-cmd_pgp_start_shows_message_when_no_arg_in_wintype(win_type_t wintype)
+cmd_pgp_start__shows__message_when_no_arg_in_wintype(win_type_t wintype)
 {
     gchar* args[] = { "start", NULL };
     ProfWin window;
@@ -73,38 +73,38 @@ cmd_pgp_start_shows_message_when_no_arg_in_wintype(win_type_t wintype)
 }
 
 void
-cmd_pgp_start_shows_message_when_no_arg_in_console(void** state)
+cmd_pgp_start__shows__message_when_no_arg_in_console(void** state)
 {
-    cmd_pgp_start_shows_message_when_no_arg_in_wintype(WIN_CONSOLE);
+    cmd_pgp_start__shows__message_when_no_arg_in_wintype(WIN_CONSOLE);
 }
 
 void
-cmd_pgp_start_shows_message_when_no_arg_in_muc(void** state)
+cmd_pgp_start__shows__message_when_no_arg_in_muc(void** state)
 {
-    cmd_pgp_start_shows_message_when_no_arg_in_wintype(WIN_MUC);
+    cmd_pgp_start__shows__message_when_no_arg_in_wintype(WIN_MUC);
 }
 
 void
-cmd_pgp_start_shows_message_when_no_arg_in_conf(void** state)
+cmd_pgp_start__shows__message_when_no_arg_in_conf(void** state)
 {
-    cmd_pgp_start_shows_message_when_no_arg_in_wintype(WIN_CONFIG);
+    cmd_pgp_start__shows__message_when_no_arg_in_wintype(WIN_CONFIG);
 }
 
 void
-cmd_pgp_start_shows_message_when_no_arg_in_private(void** state)
+cmd_pgp_start__shows__message_when_no_arg_in_private(void** state)
 {
-    cmd_pgp_start_shows_message_when_no_arg_in_wintype(WIN_PRIVATE);
+    cmd_pgp_start__shows__message_when_no_arg_in_wintype(WIN_PRIVATE);
 }
 
 void
-cmd_pgp_start_shows_message_when_no_arg_in_xmlconsole(void** state)
+cmd_pgp_start__shows__message_when_no_arg_in_xmlconsole(void** state)
 {
-    cmd_pgp_start_shows_message_when_no_arg_in_wintype(WIN_XML);
+    cmd_pgp_start__shows__message_when_no_arg_in_wintype(WIN_XML);
 }
 
 #else
 void
-cmd_pgp_shows_message_when_pgp_unsupported(void** state)
+cmd_pgp__shows__message_when_pgp_unsupported(void** state)
 {
     gchar* args[] = { "gen", NULL };
 

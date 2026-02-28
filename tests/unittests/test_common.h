@@ -1,47 +1,56 @@
-void replace_one_substr(void** state);
-void replace_one_substr_beginning(void** state);
-void replace_one_substr_end(void** state);
-void replace_two_substr(void** state);
-void replace_char(void** state);
-void replace_when_none(void** state);
-void replace_when_match(void** state);
-void replace_when_string_empty(void** state);
-void replace_when_string_null(void** state);
-void replace_when_sub_empty(void** state);
-void replace_when_sub_null(void** state);
-void replace_when_new_empty(void** state);
-void replace_when_new_null(void** state);
-void test_online_is_valid_resource_presence_string(void** state);
-void test_chat_is_valid_resource_presence_string(void** state);
-void test_away_is_valid_resource_presence_string(void** state);
-void test_xa_is_valid_resource_presence_string(void** state);
-void test_dnd_is_valid_resource_presence_string(void** state);
-void test_available_is_not_valid_resource_presence_string(void** state);
-void test_unavailable_is_not_valid_resource_presence_string(void** state);
-void test_blah_is_not_valid_resource_presence_string(void** state);
-void utf8_display_len_null_str(void** state);
-void utf8_display_len_1_non_wide(void** state);
-void utf8_display_len_1_wide(void** state);
-void utf8_display_len_non_wide(void** state);
-void utf8_display_len_wide(void** state);
-void utf8_display_len_all_wide(void** state);
-void strip_quotes_does_nothing_when_no_quoted(void** state);
-void strip_quotes_strips_first(void** state);
-void strip_quotes_strips_last(void** state);
-void strip_quotes_strips_both(void** state);
-void prof_partial_occurrences_tests(void** state);
-void prof_whole_occurrences_tests(void** state);
-void prof_occurrences_of_large_message_tests(void** state);
-void unique_filename_from_url_td(void** state);
-void format_call_external_argv_td(void** state);
-void test_get_expanded_path(void** state);
-void test_string_to_verbosity(void** state);
-void test_strtoi_range_valid_input(void** state);
-void test_strtoi_range_out_of_range(void** state);
-void test_strtoi_range_invalid_input(void** state);
-void test_strtoi_range_null_empty_input(void** state);
-void test_strtoi_range_null_err_msg(void** state);
-void test_string_matches_one_of_edge_cases(void** state);
-void test_valid_tls_policy_option(void** state);
-void get_mentions_tests(void** state);
-void release_is_new_tests(void** state);
+#ifndef TESTS_TEST_COMMON_H
+#define TESTS_TEST_COMMON_H
+
+void str_replace__returns__one_substr(void** state);
+void str_replace__returns__one_substr_beginning(void** state);
+void str_replace__returns__one_substr_end(void** state);
+void str_replace__returns__two_substr(void** state);
+void str_replace__returns__char(void** state);
+void str_replace__returns__original_when_none(void** state);
+void str_replace__returns__replaced_when_match(void** state);
+void str_replace__returns__empty_when_string_empty(void** state);
+void str_replace__returns__null_when_string_null(void** state);
+void str_replace__returns__original_when_sub_empty(void** state);
+void str_replace__returns__original_when_sub_null(void** state);
+void str_replace__returns__empty_when_new_empty(void** state);
+void str_replace__returns__original_when_new_null(void** state);
+
+void valid_resource_presence_string__is__true_for_online(void** state);
+void valid_resource_presence_string__is__true_for_chat(void** state);
+void valid_resource_presence_string__is__true_for_away(void** state);
+void valid_resource_presence_string__is__true_for_xa(void** state);
+void valid_resource_presence_string__is__true_for_dnd(void** state);
+void valid_resource_presence_string__is__false_for_available(void** state);
+void valid_resource_presence_string__is__false_for_unavailable(void** state);
+void valid_resource_presence_string__is__false_for_blah(void** state);
+
+void utf8_display_len__returns__0_for_null(void** state);
+void utf8_display_len__returns__1_for_non_wide(void** state);
+void utf8_display_len__returns__2_for_wide(void** state);
+void utf8_display_len__returns__correct_for_non_wide(void** state);
+void utf8_display_len__returns__correct_for_wide(void** state);
+void utf8_display_len__returns__correct_for_all_wide(void** state);
+
+void strip_arg_quotes__returns__original_when_no_quotes(void** state);
+void strip_arg_quotes__returns__stripped_first(void** state);
+void strip_arg_quotes__returns__stripped_last(void** state);
+void strip_arg_quotes__returns__stripped_both(void** state);
+
+void prof_occurrences__tests__partial(void** state);
+void prof_occurrences__tests__whole(void** state);
+void prof_occurrences__tests__large_message(void** state);
+void unique_filename_from_url__tests__table_driven(void** state);
+void format_call_external_argv__tests__table_driven(void** state);
+void get_expanded_path__returns__expanded(void** state);
+void string_to_verbosity__returns__correct_values(void** state);
+void strtoi_range__returns__true_for_valid_input(void** state);
+void strtoi_range__returns__false_for_out_of_range(void** state);
+void strtoi_range__returns__false_for_invalid_input(void** state);
+void strtoi_range__returns__false_for_null_empty_input(void** state);
+void strtoi_range__returns__correct_values_when_err_msg_null(void** state);
+void string_matches_one_of__tests__edge_cases(void** state);
+void valid_tls_policy_option__is__correct_for_various_inputs(void** state);
+void get_mentions__tests__various(void** state);
+void release_is_new__tests__various(void** state);
+
+#endif

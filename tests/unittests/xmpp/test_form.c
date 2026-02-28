@@ -42,7 +42,7 @@ _new_field(void)
 }
 
 void
-get_form_type_field_returns_null_no_fields(void** state)
+form_get_form_type_field__returns__null_no_fields(void** state)
 {
     DataForm* form = _new_form();
 
@@ -54,7 +54,7 @@ get_form_type_field_returns_null_no_fields(void** state)
 }
 
 void
-get_form_type_field_returns_null_when_not_present(void** state)
+form_get_form_type_field__returns__null_when_not_present(void** state)
 {
     DataForm* form = _new_form();
     FormField* field = _new_field();
@@ -70,7 +70,7 @@ get_form_type_field_returns_null_when_not_present(void** state)
 }
 
 void
-get_form_type_field_returns_value_when_present(void** state)
+form_get_form_type_field__returns__value_when_present(void** state)
 {
     DataForm* form = _new_form();
 
@@ -97,7 +97,7 @@ get_form_type_field_returns_value_when_present(void** state)
 }
 
 void
-get_field_type_returns_unknown_when_no_fields(void** state)
+form_get_field_type__returns__unknown_when_no_fields(void** state)
 {
     DataForm* form = _new_form();
 
@@ -109,7 +109,7 @@ get_field_type_returns_unknown_when_no_fields(void** state)
 }
 
 void
-get_field_type_returns_correct_type(void** state)
+form_get_field_type__returns__correct_type(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -135,7 +135,7 @@ get_field_type_returns_correct_type(void** state)
 }
 
 void
-set_value_adds_when_none(void** state)
+form_set_value__updates__adds_when_none(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -174,7 +174,7 @@ set_value_adds_when_none(void** state)
 }
 
 void
-set_value_updates_when_one(void** state)
+form_set_value__updates__updates_when_one(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -213,7 +213,7 @@ set_value_updates_when_one(void** state)
 }
 
 void
-add_unique_value_adds_when_none(void** state)
+form_add_unique_value__updates__adds_when_none(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -253,7 +253,7 @@ add_unique_value_adds_when_none(void** state)
 }
 
 void
-add_unique_value_does_nothing_when_exists(void** state)
+form_add_unique_value__updates__does_nothing_when_exists(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -294,7 +294,7 @@ add_unique_value_does_nothing_when_exists(void** state)
 }
 
 void
-add_unique_value_adds_when_doesnt_exist(void** state)
+form_add_unique_value__updates__adds_when_doesnt_exist(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -343,7 +343,7 @@ add_unique_value_adds_when_doesnt_exist(void** state)
 }
 
 void
-add_value_adds_when_none(void** state)
+form_add_value__updates__adds_when_none(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -375,7 +375,7 @@ add_value_adds_when_none(void** state)
 }
 
 void
-add_value_adds_when_some(void** state)
+form_add_value__updates__adds_when_some(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -416,7 +416,7 @@ add_value_adds_when_some(void** state)
 }
 
 void
-add_value_adds_when_exists(void** state)
+form_add_value__updates__adds_when_exists(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -458,7 +458,7 @@ add_value_adds_when_exists(void** state)
 }
 
 void
-remove_value_does_nothing_when_none(void** state)
+form_remove_value__updates__does_nothing_when_none(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -487,7 +487,7 @@ remove_value_does_nothing_when_none(void** state)
 }
 
 void
-remove_value_does_nothing_when_doesnt_exist(void** state)
+form_remove_value__updates__does_nothing_when_doesnt_exist(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -529,7 +529,7 @@ remove_value_does_nothing_when_doesnt_exist(void** state)
 }
 
 void
-remove_value_removes_when_one(void** state)
+form_remove_value__updates__removes_when_one(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -559,7 +559,7 @@ remove_value_removes_when_one(void** state)
 }
 
 void
-remove_value_removes_when_many(void** state)
+form_remove_value__updates__removes_when_many(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -601,7 +601,7 @@ remove_value_removes_when_many(void** state)
 }
 
 void
-remove_text_multi_value_does_nothing_when_none(void** state)
+form_remove_text_multi_value__updates__does_nothing_when_none(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -630,7 +630,7 @@ remove_text_multi_value_does_nothing_when_none(void** state)
 }
 
 void
-remove_text_multi_value_does_nothing_when_doesnt_exist(void** state)
+form_remove_text_multi_value__updates__does_nothing_when_doesnt_exist(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -672,7 +672,7 @@ remove_text_multi_value_does_nothing_when_doesnt_exist(void** state)
 }
 
 void
-remove_text_multi_value_removes_when_one(void** state)
+form_remove_text_multi_value__updates__removes_when_one(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
@@ -702,7 +702,7 @@ remove_text_multi_value_removes_when_one(void** state)
 }
 
 void
-remove_text_multi_value_removes_when_many(void** state)
+form_remove_text_multi_value__updates__removes_when_many(void** state)
 {
     DataForm* form = _new_form();
     g_hash_table_insert(form->tag_to_var, g_strdup("tag1"), g_strdup("var1"));
