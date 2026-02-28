@@ -38,7 +38,7 @@ file_size(int filedes)
     return 0;
 }
 
-void http_upload_cancel_processes(){};
-void http_upload_add_upload(){};
+void http_upload_cancel_processes() {};
+void http_upload_add_upload() {};
 
 #endif

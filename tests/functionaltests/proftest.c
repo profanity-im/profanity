@@ -14,13 +14,13 @@
 
 #include "proftest.h"
 
-char *config_orig;
-char *data_orig;
+char* config_orig;
+char* data_orig;
 
 int fd = 0;
 
 gboolean
-_create_dir(const char *name)
+_create_dir(const char* name)
 {
     struct stat sb;
 
@@ -38,14 +38,14 @@ _create_dir(const char *name)
 }
 
 gboolean
-_mkdir_recursive(const char *dir)
+_mkdir_recursive(const char* dir)
 {
     int i;
     gboolean result = TRUE;
 
     for (i = 1; i <= strlen(dir); i++) {
         if (dir[i] == '/' || dir[i] == '\0') {
-            gchar *next_dir = g_strndup(dir, i);
+            gchar* next_dir = g_strndup(dir, i);
             result = _create_dir(next_dir);
             g_free(next_dir);
             if (!result) {
@@ -60,7 +60,7 @@ _mkdir_recursive(const char *dir)
 void
 _create_config_dir(void)
 {
-    GString *profanity_dir = g_string_new(XDG_CONFIG_HOME);
+    GString* profanity_dir = g_string_new(XDG_CONFIG_HOME);
     g_string_append(profanity_dir, "/profanity");
 
     if (!_mkdir_recursive(profanity_dir->str)) {
@@ -73,7 +73,7 @@ _create_config_dir(void)
 void
 _create_data_dir(void)
 {
-    GString *profanity_dir = g_string_new(XDG_DATA_HOME);
+    GString* profanity_dir = g_string_new(XDG_DATA_HOME);
     g_string_append(profanity_dir, "/profanity");
 
     if (!_mkdir_recursive(profanity_dir->str)) {
@@ -86,7 +86,7 @@ _create_data_dir(void)
 void
 _create_chatlogs_dir(void)
 {
-    GString *chatlogs_dir = g_string_new(XDG_DATA_HOME);
+    GString* chatlogs_dir = g_string_new(XDG_DATA_HOME);
     g_string_append(chatlogs_dir, "/profanity/chatlogs");
 
     if (!_mkdir_recursive(chatlogs_dir->str)) {
@@ -99,7 +99,7 @@ _create_chatlogs_dir(void)
 void
 _create_logs_dir(void)
 {
-    GString *logs_dir = g_string_new(XDG_DATA_HOME);
+    GString* logs_dir = g_string_new(XDG_DATA_HOME);
     g_string_append(logs_dir, "/profanity/logs");
 
     if (!_mkdir_recursive(logs_dir->str)) {
@@ -124,21 +124,21 @@ prof_start(void)
     // helper script sets terminal columns, avoids assertions failing
     // based on the test runner terminal size
     fd = exp_spawnl("sh",
-        "sh",
-        "-c",
-        "./tests/functionaltests/start_profanity.sh",
-        NULL);
-    FILE *fp = fdopen(fd, "r+");
+                    "sh",
+                    "-c",
+                    "./tests/functionaltests/start_profanity.sh",
+                    NULL);
+    FILE* fp = fdopen(fd, "r+");
 
     assert_true(fp != NULL);
 
-    setbuf(fp, (char *)0);
+    setbuf(fp, (char*)0);
 }
 
 int
-init_prof_test(void **state)
+init_prof_test(void** state)
 {
-    if (stbbr_start(STBBR_LOGDEBUG ,5230, 0) != 0) {
+    if (stbbr_start(STBBR_LOGDEBUG, 5230, 0) != 0) {
         assert_true(FALSE);
         return -1;
     }
@@ -191,7 +191,7 @@ init_prof_test(void **state)
 }
 
 int
-close_prof_test(void **state)
+close_prof_test(void** state)
 {
     prof_input("/quit");
     waitpid(exp_pid, NULL, 0);
@@ -205,48 +205,45 @@ close_prof_test(void **state)
 }
 
 void
-prof_input(const char *input)
+prof_input(const char* input)
 {
-    GString *inp_str = g_string_new(input);
+    GString* inp_str = g_string_new(input);
     g_string_append(inp_str, "\r");
     write(fd, inp_str->str, inp_str->len);
     g_string_free(inp_str, TRUE);
 }
 
 int
-prof_output_exact(const char *text)
+prof_output_exact(const char* text)
 {
     return (1 == exp_expectl(fd, exp_exact, text, 1, exp_end));
 }
 
 int
-prof_output_regex(const char *text)
+prof_output_regex(const char* text)
 {
     return (1 == exp_expectl(fd, exp_regexp, text, 1, exp_end));
 }
 
 void
-prof_connect_with_roster(const char *roster)
+prof_connect_with_roster(const char* roster)
 {
-    GString *roster_str = g_string_new(
+    GString* roster_str = g_string_new(
         "<iq type='result' to='stabber@localhost/profanity'>"
-            "<query xmlns='jabber:iq:roster' ver='362'>"
-    );
+        "<query xmlns='jabber:iq:roster' ver='362'>");
     g_string_append(roster_str, roster);
     g_string_append(roster_str,
-            "</query>"
-        "</iq>"
-    );
+                    "</query>"
+                    "</iq>");
 
     stbbr_for_query("jabber:iq:roster", roster_str->str);
     g_string_free(roster_str, TRUE);
 
     stbbr_for_id("prof_presence_1",
-        "<presence id='prof_presence_1' lang='en' to='stabber@localhost/profanity' from='stabber@localhost/profanity'>"
-            "<priority>0</priority>"
-            "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io/' ver='f8mrtdyAmhnj8Ca+630bThSL718='/>"
-        "</presence>"
-    );
+                 "<presence id='prof_presence_1' lang='en' to='stabber@localhost/profanity' from='stabber@localhost/profanity'>"
+                 "<priority>0</priority>"
+                 "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io/' ver='f8mrtdyAmhnj8Ca+630bThSL718='/>"
+                 "</presence>");
 
     prof_input("/connect stabber@localhost server 127.0.0.1 port 5230 tls allow");
     prof_input("password");
@@ -275,6 +272,5 @@ prof_connect(void)
 {
     prof_connect_with_roster(
         "<item jid='buddy1@localhost' subscription='both' name='Buddy1'/>"
-        "<item jid='buddy2@localhost' subscription='both' name='Buddy2'/>"
-    );
+        "<item jid='buddy2@localhost' subscription='both' name='Buddy2'/>");
 }

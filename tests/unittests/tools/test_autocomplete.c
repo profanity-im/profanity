@@ -1,0 +1,235 @@
+#include <glib.h>
+#include "prof_cmocka.h"
+#include <stdlib.h>
+
+#include "xmpp/contact.h"
+#include "tools/autocomplete.h"
+
+void
+autocomplete_complete__returns__null_when_empty(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    char* result = autocomplete_complete(ac, "test", TRUE, FALSE);
+    assert_null(result);
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_reset__updates__after_create(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_reset(ac);
+    autocomplete_free(ac);
+}
+
+void
+autocomplete_complete__returns__null_after_create(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    char* result = autocomplete_complete(ac, "hello", TRUE, FALSE);
+    assert_null(result);
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_create_list__returns__null_after_create(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    GList* result = autocomplete_create_list(ac);
+
+    assert_null(result);
+
+    autocomplete_free(ac);
+    g_list_free_full(result, free);
+}
+
+void
+autocomplete_add__updates__one_and_complete(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "Hello");
+    char* result = autocomplete_complete(ac, "Hel", TRUE, FALSE);
+
+    assert_string_equal("Hello", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__returns__first_of_two(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "Hello");
+    autocomplete_add(ac, "Help");
+    char* result = autocomplete_complete(ac, "Hel", TRUE, FALSE);
+
+    assert_string_equal("Hello", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__returns__second_of_two(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "Hello");
+    autocomplete_add(ac, "Help");
+    char* result1 = autocomplete_complete(ac, "Hel", TRUE, FALSE);
+    char* result2 = autocomplete_complete(ac, result1, TRUE, FALSE);
+
+    assert_string_equal("Help", result2);
+
+    autocomplete_free(ac);
+    free(result1);
+    free(result2);
+}
+
+void
+autocomplete_add__updates__two_elements(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "Hello");
+    autocomplete_add(ac, "Help");
+    GList* result = autocomplete_create_list(ac);
+
+    assert_int_equal(2, g_list_length(result));
+
+    autocomplete_free(ac);
+    g_list_free_full(result, free);
+}
+
+void
+autocomplete_add__updates__only_once_for_same_value(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "Hello");
+    autocomplete_add(ac, "Hello");
+    GList* result = autocomplete_create_list(ac);
+
+    assert_int_equal(1, g_list_length(result));
+
+    autocomplete_free(ac);
+    g_list_free_full(result, free);
+}
+
+void
+autocomplete_add__updates__existing_value(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "Hello");
+    autocomplete_add(ac, "Hello");
+    GList* result = autocomplete_create_list(ac);
+
+    GList* first = g_list_nth(result, 0);
+
+    char* str = first->data;
+
+    assert_string_equal("Hello", str);
+
+    autocomplete_free(ac);
+    g_list_free_full(result, free);
+}
+
+void
+autocomplete_complete__returns__accented_with_accented(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "èâîô");
+
+    char* result = autocomplete_complete(ac, "èâ", TRUE, FALSE);
+
+    assert_string_equal("èâîô", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__returns__accented_with_base(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "èâîô");
+
+    char* result = autocomplete_complete(ac, "ea", TRUE, FALSE);
+
+    assert_string_equal("èâîô", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__returns__both_with_accented(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "eaooooo");
+    autocomplete_add(ac, "èâîô");
+
+    char* result1 = autocomplete_complete(ac, "èâ", TRUE, FALSE);
+    char* result2 = autocomplete_complete(ac, result1, TRUE, FALSE);
+
+    assert_string_equal("èâîô", result2);
+
+    autocomplete_free(ac);
+    free(result1);
+    free(result2);
+}
+
+void
+autocomplete_complete__returns__both_with_base(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "eaooooo");
+    autocomplete_add(ac, "èâîô");
+
+    char* result1 = autocomplete_complete(ac, "ea", TRUE, FALSE);
+    char* result2 = autocomplete_complete(ac, result1, TRUE, FALSE);
+
+    assert_string_equal("èâîô", result2);
+
+    autocomplete_free(ac);
+
+    free(result1);
+    free(result2);
+}
+
+void
+autocomplete_complete__is__case_insensitive(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "MyBuddy");
+
+    char* result = autocomplete_complete(ac, "myb", TRUE, FALSE);
+
+    assert_string_equal("MyBuddy", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__returns__previous(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "MyBuddy1");
+    autocomplete_add(ac, "MyBuddy2");
+    autocomplete_add(ac, "MyBuddy3");
+
+    char* result1 = autocomplete_complete(ac, "myb", TRUE, FALSE);
+    char* result2 = autocomplete_complete(ac, result1, TRUE, FALSE);
+    char* result3 = autocomplete_complete(ac, result2, TRUE, FALSE);
+    char* result4 = autocomplete_complete(ac, result3, TRUE, TRUE);
+
+    assert_string_equal("MyBuddy2", result4);
+
+    autocomplete_free(ac);
+
+    free(result1);
+    free(result2);
+    free(result3);
+    free(result4);
+}

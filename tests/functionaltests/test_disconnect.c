@@ -9,7 +9,7 @@
 #include "proftest.h"
 
 void
-disconnect_ends_session(void **state)
+disconnect_ends_session(void** state)
 {
     prof_connect();
 

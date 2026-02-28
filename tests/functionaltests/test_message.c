@@ -9,7 +9,7 @@
 #include "proftest.h"
 
 void
-message_send(void **state)
+message_send(void** state)
 {
     prof_connect();
 
@@ -17,29 +17,27 @@ message_send(void **state)
 
     assert_true(stbbr_received(
         "<message id='*' to='somejid@someserver.com' type='chat'>"
-            "<body>Hi there</body>"
-        "</message>"
-    ));
+        "<body>Hi there</body>"
+        "</message>"));
 
     assert_true(prof_output_regex("me: .+Hi there"));
 }
 
 void
-message_receive_console(void **state)
+message_receive_console(void** state)
 {
     prof_connect();
 
     stbbr_send(
         "<message id='message1' to='stabber@localhost' from='someuser@chatserv.org/laptop' type='chat'>"
-            "<body>How are you?</body>"
-        "</message>"
-    );
+        "<body>How are you?</body>"
+        "</message>");
 
     assert_true(prof_output_exact("<< chat message: someuser@chatserv.org/laptop (win 2)"));
 }
 
 void
-message_receive_chatwin(void **state)
+message_receive_chatwin(void** state)
 {
     prof_connect();
 
@@ -48,9 +46,8 @@ message_receive_chatwin(void **state)
 
     stbbr_send(
         "<message id='message1' to='stabber@localhost' from='someuser@chatserv.org/laptop' type='chat'>"
-            "<body>How are you?</body>"
-        "</message>"
-    );
+        "<body>How are you?</body>"
+        "</message>");
 
     assert_true(prof_output_regex("someuser@chatserv.org/laptop: .+How are you?"));
 }

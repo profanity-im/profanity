@@ -22,7 +22,9 @@
 
 #define PROF_FUNC_TEST(test) cmocka_unit_test_setup_teardown(test, init_prof_test, close_prof_test)
 
-int main(int argc, char* argv[]) {
+int
+main(int argc, char* argv[])
+{
 
     const struct CMUnitTest all_tests[] = {
 

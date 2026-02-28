@@ -142,31 +142,31 @@ unittest_sources = \
 	tests/unittests/tools/stub_aesgcm_download.c \
 	tests/unittests/tools/stub_plugin_download.c \
 	tests/unittests/helpers.c tests/unittests/helpers.h \
-	tests/unittests/test_form.c tests/unittests/test_form.h \
+	tests/unittests/xmpp/test_form.c tests/unittests/xmpp/test_form.h \
 	tests/unittests/test_common.c tests/unittests/test_common.h \
-	tests/unittests/test_autocomplete.c tests/unittests/test_autocomplete.h \
-	tests/unittests/test_jid.c tests/unittests/test_jid.h \
-	tests/unittests/test_parser.c tests/unittests/test_parser.h \
-	tests/unittests/test_roster_list.c tests/unittests/test_roster_list.h \
-	tests/unittests/test_chat_session.c tests/unittests/test_chat_session.h \
-	tests/unittests/test_contact.c tests/unittests/test_contact.h \
-	tests/unittests/test_preferences.c tests/unittests/test_preferences.h \
-	tests/unittests/test_server_events.c tests/unittests/test_server_events.h \
-	tests/unittests/test_muc.c tests/unittests/test_muc.h \
-	tests/unittests/test_cmd_presence.c tests/unittests/test_cmd_presence.h \
-	tests/unittests/test_cmd_alias.c tests/unittests/test_cmd_alias.h \
-	tests/unittests/test_cmd_connect.c tests/unittests/test_cmd_connect.h \
-	tests/unittests/test_cmd_rooms.c tests/unittests/test_cmd_rooms.h \
-	tests/unittests/test_cmd_account.c tests/unittests/test_cmd_account.h \
-	tests/unittests/test_cmd_sub.c tests/unittests/test_cmd_sub.h \
-	tests/unittests/test_cmd_bookmark.c tests/unittests/test_cmd_bookmark.h \
-	tests/unittests/test_cmd_otr.c tests/unittests/test_cmd_otr.h \
-	tests/unittests/test_cmd_pgp.c tests/unittests/test_cmd_pgp.h \
-	tests/unittests/test_cmd_join.c tests/unittests/test_cmd_join.h \
-	tests/unittests/test_cmd_roster.c tests/unittests/test_cmd_roster.h \
-	tests/unittests/test_cmd_disconnect.c tests/unittests/test_cmd_disconnect.h \
-	tests/unittests/test_callbacks.c tests/unittests/test_callbacks.h \
-	tests/unittests/test_plugins_disco.c tests/unittests/test_plugins_disco.h \
+	tests/unittests/tools/test_autocomplete.c tests/unittests/tools/test_autocomplete.h \
+	tests/unittests/xmpp/test_jid.c tests/unittests/xmpp/test_jid.h \
+	tests/unittests/tools/test_parser.c tests/unittests/tools/test_parser.h \
+	tests/unittests/xmpp/test_roster_list.c tests/unittests/xmpp/test_roster_list.h \
+	tests/unittests/xmpp/test_chat_session.c tests/unittests/xmpp/test_chat_session.h \
+	tests/unittests/xmpp/test_contact.c tests/unittests/xmpp/test_contact.h \
+	tests/unittests/config/test_preferences.c tests/unittests/config/test_preferences.h \
+	tests/unittests/event/test_server_events.c tests/unittests/event/test_server_events.h \
+	tests/unittests/xmpp/test_muc.c tests/unittests/xmpp/test_muc.h \
+	tests/unittests/command/test_cmd_presence.c tests/unittests/command/test_cmd_presence.h \
+	tests/unittests/command/test_cmd_alias.c tests/unittests/command/test_cmd_alias.h \
+	tests/unittests/command/test_cmd_connect.c tests/unittests/command/test_cmd_connect.h \
+	tests/unittests/command/test_cmd_rooms.c tests/unittests/command/test_cmd_rooms.h \
+	tests/unittests/command/test_cmd_account.c tests/unittests/command/test_cmd_account.h \
+	tests/unittests/command/test_cmd_sub.c tests/unittests/command/test_cmd_sub.h \
+	tests/unittests/command/test_cmd_bookmark.c tests/unittests/command/test_cmd_bookmark.h \
+	tests/unittests/command/test_cmd_otr.c tests/unittests/command/test_cmd_otr.h \
+	tests/unittests/command/test_cmd_pgp.c tests/unittests/command/test_cmd_pgp.h \
+	tests/unittests/command/test_cmd_join.c tests/unittests/command/test_cmd_join.h \
+	tests/unittests/command/test_cmd_roster.c tests/unittests/command/test_cmd_roster.h \
+	tests/unittests/command/test_cmd_disconnect.c tests/unittests/command/test_cmd_disconnect.h \
+	tests/unittests/plugins/test_callbacks.c tests/unittests/plugins/test_callbacks.h \
+	tests/unittests/plugins/test_plugins_disco.c tests/unittests/plugins/test_plugins_disco.h \
 	tests/unittests/unittests.c
 
 functionaltest_sources = \
@@ -285,7 +285,7 @@ endif
 
 TESTS = tests/unittests/unittests
 check_PROGRAMS = tests/unittests/unittests
-tests_unittests_unittests_CPPFLAGS = -I$(srcdir)/tests/
+tests_unittests_unittests_CPPFLAGS = -I$(srcdir)/tests/ -I$(srcdir)/tests/unittests
 tests_unittests_unittests_SOURCES = $(unittest_sources)
 tests_unittests_unittests_LDADD = -lcmocka
 
@@ -374,4 +374,5 @@ format-sources: $(core_sources) $(main_source)
 spell:
 	codespell
 
-doublecheck: format check spell
+doublecheck:
+	@./scripts/quality-check.sh --fix-formatting --autotools

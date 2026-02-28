@@ -1,0 +1,61 @@
+#ifndef TESTS_TEST_CMD_ACCOUNT_H
+#define TESTS_TEST_CMD_ACCOUNT_H
+
+void cmd_account__shows__usage_when_not_connected_and_no_args(void** state);
+void cmd_account__shows__account_when_connected_and_no_args(void** state);
+void cmd_account_list__shows__accounts(void** state);
+void cmd_account_show__shows__usage_when_no_arg(void** state);
+void cmd_account_show__shows__message_when_account_does_not_exist(void** state);
+void cmd_account_show__shows__account_when_exists(void** state);
+void cmd_account_add__shows__usage_when_no_arg(void** state);
+void cmd_account_add__updates__adds_account(void** state);
+void cmd_account_enable__shows__usage_when_no_arg(void** state);
+void cmd_account_enable__updates__enables_account(void** state);
+void cmd_account_enable__shows__message_when_account_doesnt_exist(void** state);
+void cmd_account_disable__shows__usage_when_no_arg(void** state);
+void cmd_account_disable__updates__disables_account(void** state);
+void cmd_account_disable__shows__message_when_account_doesnt_exist(void** state);
+void cmd_account_rename__shows__usage_when_no_args(void** state);
+void cmd_account_rename__shows__usage_when_one_arg(void** state);
+void cmd_account_rename__updates__renames_account(void** state);
+void cmd_account_rename__shows__message_when_not_renamed(void** state);
+void cmd_account_set__shows__usage_when_no_args(void** state);
+void cmd_account_set__shows__usage_when_one_arg(void** state);
+void cmd_account_set__shows__usage_when_two_args(void** state);
+void cmd_account_set__shows__message_when_account_doesnt_exist(void** state);
+void cmd_account_set__shows__message_for_malformed_jid(void** state);
+void cmd_account_set__updates__jid_sets_barejid(void** state);
+void cmd_account_set__updates__jid_sets_resource(void** state);
+void cmd_account_set__updates__server_sets_server(void** state);
+void cmd_account_set__updates__resource_sets_resource(void** state);
+void cmd_account_set__shows__resource_sets_resource_with_online_message(void** state);
+void cmd_account_set__updates__password_sets_password(void** state);
+void cmd_account_set__updates__eval_password_sets_eval_password(void** state);
+void cmd_account_set__shows__password_when_eval_password_set(void** state);
+void cmd_account_set__shows__eval_password_when_password_set(void** state);
+void cmd_account_set__updates__muc_sets_muc(void** state);
+void cmd_account_set__updates__nick_sets_nick(void** state);
+void cmd_account_set__shows__message_for_missing_otr_policy(void** state);
+void cmd_account_set__shows__message_for_invalid_otr_policy(void** state);
+void cmd_account_set__updates__otr_sets_otr(void** state);
+void cmd_account_set__shows__message_when_invalid_status(void** state);
+void cmd_account_set__updates__status_sets_status_when_valid(void** state);
+void cmd_account_set__updates__status_sets_status_when_last(void** state);
+void cmd_account_set__shows__invalid_presence_string_priority_message(void** state);
+void cmd_account_set__shows__last_priority_message(void** state);
+void cmd_account_set__updates__online_priority_sets_preference(void** state);
+void cmd_account_set__updates__chat_priority_sets_preference(void** state);
+void cmd_account_set__updates__away_priority_sets_preference(void** state);
+void cmd_account_set__updates__xa_priority_sets_preference(void** state);
+void cmd_account_set__updates__dnd_priority_sets_preference(void** state);
+void cmd_account_set__shows__priority_too_low_message(void** state);
+void cmd_account_set__shows__priority_too_high_message(void** state);
+void cmd_account_set__shows__priority_when_not_number_message(void** state);
+void cmd_account_set__shows__priority_when_empty_message(void** state);
+void cmd_account_set__updates__priority_updates_presence_when_connected(void** state);
+void cmd_account_clear__shows__usage_when_no_args(void** state);
+void cmd_account_clear__shows__usage_when_one_arg(void** state);
+void cmd_account_clear__shows__message_when_account_doesnt_exist(void** state);
+void cmd_account_clear__shows__message_when_invalid_property(void** state);
+
+#endif
