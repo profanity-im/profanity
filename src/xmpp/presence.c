@@ -813,7 +813,12 @@ _muc_user_self_handler(xmpp_stanza_t* stanza)
                 affiliation = xmpp_stanza_get_attribute(item, "affiliation");
             }
         }
-        sv_ev_muc_self_online(room, nick, config_required, role, affiliation, actor, reason, jid, show_str, status_str);
+
+        if (muc_active(room)) {
+            sv_ev_muc_self_online(room, nick, config_required, role, affiliation, actor, reason, jid, show_str, status_str);
+        } else {
+            log_debug("presence: self-presence received for untracked room: %s", room);
+        }
     }
 }
 
