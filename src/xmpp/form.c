@@ -477,16 +477,13 @@ form_set_value(DataForm* form, const char* const tag, char* value)
         while (curr) {
             FormField* field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
-                if (g_slist_length(field->values) == 0) {
-                    field->values = g_slist_append(field->values, strdup(value));
-                    form->modified = TRUE;
-                    return;
-                } else if (g_slist_length(field->values) == 1) {
-                    free(field->values->data);
-                    field->values->data = strdup(value);
-                    form->modified = TRUE;
-                    return;
+                if (field->values) {
+                    g_slist_free_full(field->values, free);
+                    field->values = NULL;
                 }
+                field->values = g_slist_append(NULL, strdup(value));
+                form->modified = TRUE;
+                return;
             }
             curr = g_slist_next(curr);
         }
