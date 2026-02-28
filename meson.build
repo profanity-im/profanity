@@ -67,7 +67,8 @@ if is_debug
     '-Wextra',
     '-fstack-protector-strong',
     '-D_FORTIFY_SOURCE=2',
-    '-Og'
+    '-Og',
+    '-Wpointer-arith'
   ], language: 'c')
   if cc.get_id() == 'gcc'
      add_project_arguments('-fanalyzer', language: 'c')
