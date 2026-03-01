@@ -1129,16 +1129,20 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
         // checking the domainpart is a workaround for some prosody versions (gh#1190)
         message->timestamp = stanza_get_delay_from(stanza, from_jid->domainpart);
     }
-
-    bool is_muc_history = FALSE;
-    if (message->timestamp != NULL) {
-        is_muc_history = TRUE;
-        g_date_time_unref(message->timestamp);
-        message->timestamp = NULL;
+    //bug fix for issue #1938
+    bool is_muc_history = (message->timestamp != NULL);
+    GDateTime* oldest_delay = stanza_get_oldest_delay(stanza);
+    if (oldest_delay) {
+        if(message->timestamp){
+        g_date_time_unref(message->timestamp); //free inital timestamp only if replacement
+        }
+        message->timestamp = oldest_delay;
     }
 
-    // we want to display the oldest delay
-    message->timestamp = stanza_get_oldest_delay(stanza);
+    //1938 Bug fix explained
+    //Instead of discarding the timestamp associated with the message without checking it
+    //First we check if we have an older delay, at which point we replace the time stamp with that.
+
 
     // now this has nothing to do with MUC history
     // it's just setting the time to the received time so upon displaying we can use this time
