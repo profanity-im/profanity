@@ -164,6 +164,7 @@ unittest_sources = \
 	tests/unittests/command/test_cmd_pgp.c tests/unittests/command/test_cmd_pgp.h \
 	tests/unittests/command/test_cmd_join.c tests/unittests/command/test_cmd_join.h \
 	tests/unittests/command/test_cmd_roster.c tests/unittests/command/test_cmd_roster.h \
+	tests/unittests/command/test_cmd_ac.c tests/unittests/command/test_cmd_ac.h \
 	tests/unittests/command/test_cmd_disconnect.c tests/unittests/command/test_cmd_disconnect.h \
 	tests/unittests/plugins/test_callbacks.c tests/unittests/plugins/test_callbacks.h \
 	tests/unittests/plugins/test_plugins_disco.c tests/unittests/plugins/test_plugins_disco.h \

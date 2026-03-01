@@ -297,6 +297,8 @@ static Autocomplete vcard_set_param_ac;
 static Autocomplete vcard_togglable_param_ac;
 static Autocomplete vcard_address_type_ac;
 
+static char* last_filepath_input = NULL;
+
 static Autocomplete* all_acs[] = {
     &commands_ac,
     &who_room_ac,
@@ -1652,6 +1654,8 @@ cmd_ac_uninit(void)
     autocomplete_free(plugins_unload_ac);
     autocomplete_free(plugins_reload_ac);
     autocomplete_free(script_show_ac);
+    g_free(last_filepath_input);
+    last_filepath_input = NULL;
     g_hash_table_destroy(ac_funcs);
     ac_funcs = NULL;
 }
@@ -1684,6 +1688,7 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
             *last_quote = '\0';
         }
         gchar* unquoted = g_strdup(inpcp + 1);
+        g_free(inpcp);
         inpcp = unquoted;
     }
 
@@ -1695,11 +1700,25 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
     auto_gchar gchar* foofile = g_path_get_basename(expanded);
     auto_gchar gchar* directory = g_path_get_dirname(expanded);
 
+    // If the input is already a known completion, don't update to allow cycling
+    if (last_filepath_input && (g_strcmp0(inpcp, last_filepath_input) == 0 || autocomplete_contains(filepath_ac, inpcp))) {
+        return autocomplete_param_with_ac(input, startstr, filepath_ac, TRUE, previous);
+    }
+
     // If the input ends with a slash, the basename will be "." or "/"
     // In that case, we are looking for all files in that directory
     gboolean find_all = FALSE;
-    if (inpcp[strlen(inpcp) - 1] == '/') {
+    size_t inpcp_len = strlen(inpcp);
+    if (inpcp_len == 0 || inpcp[inpcp_len - 1] == '/') {
         find_all = TRUE;
+    }
+
+    char* last_slash = strrchr(inpcp, '/');
+    auto_gchar gchar* user_dir_part = NULL;
+    if (last_slash) {
+        user_dir_part = g_strndup(inpcp, last_slash - inpcp + 1);
+    } else {
+        user_dir_part = g_strdup("");
     }
 
     GArray* files = g_array_new(TRUE, FALSE, sizeof(gchar*));
@@ -1724,12 +1743,7 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
                 continue;
             }
 
-            auto_gchar gchar* acstring = NULL;
-            if (strcmp(directory, "/") == 0) {
-                acstring = g_strdup_printf("/%s", dir->d_name);
-            } else {
-                acstring = g_strdup_printf("%s/%s", directory, dir->d_name);
-            }
+            gchar* acstring = g_strdup_printf("%s%s", user_dir_part, dir->d_name);
 
             if (acstring) {
                 g_array_append_val(files, acstring);
@@ -1740,6 +1754,9 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
 
     autocomplete_update(filepath_ac, (char**)files->data);
     g_array_free(files, TRUE);
+
+    g_free(last_filepath_input);
+    last_filepath_input = g_strdup(inpcp);
 
     return autocomplete_param_with_ac(input, startstr, filepath_ac, TRUE, previous);
 }
