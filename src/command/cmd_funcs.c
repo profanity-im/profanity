@@ -5290,6 +5290,9 @@ cmd_time(ProfWin* window, const char* const command, gchar** args)
             cons_bad_cmd_usage(command);
             return TRUE;
         }
+        if (!set_all) {
+            break;
+        }
     }
     if (!set_all && n == ARRAY_SIZE(time_prefs)) {
         cons_bad_cmd_usage(command);
