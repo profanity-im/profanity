@@ -143,7 +143,7 @@ static const struct cmd_t command_defs[] = {
     },
 
     { CMD_PREAMBLE("/connect",
-                   parse_args, 0, 7, NULL)
+                   parse_args, 0, 9, NULL)
       CMD_MAINFUNC(cmd_connect)
       CMD_TAGS(
               CMD_TAG_CONNECTION)
