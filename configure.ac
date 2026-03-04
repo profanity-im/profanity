@@ -391,9 +391,9 @@ PKG_CHECK_MODULES([cmocka], [cmocka], [],
 AM_CONDITIONAL([HAVE_STABBER], [false])
 AC_CHECK_LIB([stabber], [stbbr_start], [AM_CONDITIONAL([HAVE_STABBER], [true])],
     [AC_MSG_NOTICE([libstabber not found, will not be able to run functional tests])])
-AM_CONDITIONAL([HAVE_EXPECT], [false])
-AC_CHECK_LIB([expect], [exp_expectl], [AM_CONDITIONAL([HAVE_EXPECT], [true])],
-    [AC_MSG_NOTICE([libexpect not found, will not be able to run functional tests])])
+AM_CONDITIONAL([HAVE_UTIL], [false])
+AC_CHECK_LIB([util], [forkpty], [AM_CONDITIONAL([HAVE_UTIL], [true])],
+    [AC_MSG_NOTICE([libutil not found, will not be able to run functional tests])])
 
 ## Default parameters
 AM_CFLAGS="$AM_CFLAGS -Wall -Wno-deprecated-declarations -std=gnu99 -ggdb3"

@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include <stabber.h>
-#include <expect.h>
 
 #include "proftest.h"
 
@@ -30,8 +29,8 @@ send_receipt_request(void** state)
 
     prof_connect();
 
-    stbbr_for_id("prof_caps_4",
-                 "<iq from='buddy1@localhost/laptop' to='stabber@localhost' id='prof_caps_4' type='result'>"
+    stbbr_for_id("prof_caps_*",
+                 "<iq from='buddy1@localhost/laptop' to='stabber@localhost' id='prof_caps_*' type='result'>"
                  "<query xmlns='http://jabber.org/protocol/disco#info' node='http://profanity-im.github.io#hAkb1xZdJV9BQpgGNw8zG5Xsals='>"
                  "<identity category='client' name='Profanity 0.5.0' type='console'/>"
                  "<feature var='urn:xmpp:receipts'/>"

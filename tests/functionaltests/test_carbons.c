@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include <stabber.h>
-#include <expect.h>
 
 #include "proftest.h"
 

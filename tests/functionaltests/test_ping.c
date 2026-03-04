@@ -4,38 +4,37 @@
 #include <string.h>
 
 #include <stabber.h>
-#include <expect.h>
 
 #include "proftest.h"
 
 void
 ping_server(void** state)
 {
-    stbbr_for_id("prof_disco_info_onconnect_2",
-                 "<iq id='prof_disco_info_onconnect_2' to='stabber@localhost/profanity' type='result' from='localhost'>"
+    stbbr_for_id("prof_disco_info_onconnect_*",
+                 "<iq id='prof_disco_info_onconnect_*' to='stabber@localhost/profanity' type='result' from='localhost'>"
                  "<query xmlns='http://jabber.org/protocol/disco#info'>"
                  "<identity category='server' type='im' name='Prosody'/>"
                  "<feature var='urn:xmpp:ping'/>"
                  "</query>"
                  "</iq>");
 
-    stbbr_for_id("prof_ping_4",
-                 "<iq id='prof_ping_4' type='result' to='stabber@localhost/profanity'/>");
-    stbbr_for_id("prof_ping_5",
-                 "<iq id='prof_ping_5' type='result' to='stabber@localhost/profanity'/>");
+    stbbr_for_id("prof_ping_*",
+                 "<iq id='prof_ping_*' type='result' to='stabber@localhost/profanity'/>");
+    stbbr_for_id("prof_ping_*",
+                 "<iq id='prof_ping_*' type='result' to='stabber@localhost/profanity'/>");
 
     prof_connect();
 
     prof_input("/ping");
     assert_true(stbbr_received(
-        "<iq id='prof_ping_4' type='get'>"
+        "<iq id='prof_ping_*' type='get'>"
         "<ping xmlns='urn:xmpp:ping'/>"
         "</iq>"));
     assert_true(prof_output_exact("Ping response from server"));
 
     prof_input("/ping");
     assert_true(stbbr_received(
-        "<iq id='prof_ping_5' type='get'>"
+        "<iq id='prof_ping_*' type='get'>"
         "<ping xmlns='urn:xmpp:ping'/>"
         "</iq>"));
     assert_true(prof_output_exact("Ping response from server"));
@@ -44,8 +43,8 @@ ping_server(void** state)
 void
 ping_server_not_supported(void** state)
 {
-    stbbr_for_id("prof_disco_info_onconnect_2",
-                 "<iq id='prof_disco_info_onconnect_2' to='stabber@localhost/profanity' type='result' from='localhost'>"
+    stbbr_for_id("prof_disco_info_onconnect_*",
+                 "<iq id='prof_disco_info_onconnect_*' to='stabber@localhost/profanity' type='result' from='localhost'>"
                  "<query xmlns='http://jabber.org/protocol/disco#info'>"
                  "<identity category='server' type='im' name='Stabber'/>"
                  "</query>"
@@ -74,8 +73,8 @@ ping_responds_to_server_request(void** state)
 void
 ping_jid(void** state)
 {
-    stbbr_for_id("prof_caps_4",
-                 "<iq id='prof_caps_4' to='stabber@localhost/profanity' type='result' from='buddy1@localhost/mobile'>"
+    stbbr_for_id("prof_caps_*",
+                 "<iq id='prof_caps_*' to='stabber@localhost/profanity' type='result' from='buddy1@localhost/mobile'>"
                  "<query xmlns='http://jabber.org/protocol/disco#info' node='http://profanity-im.github.io#LpT2xs3nun7jC2sq4gg3WRDQFZ4='>"
                  "<identity category='client' type='console' name='Profanity0.6.0'/>"
                  "<feature var='urn:xmpp:ping'/>"
@@ -100,17 +99,17 @@ ping_jid(void** state)
     assert_true(prof_output_exact("Buddy1 (mobile) is online, \"I'm here\""));
 
     assert_true(stbbr_received(
-        "<iq id='prof_caps_4' to='buddy1@localhost/mobile' type='get'>"
+        "<iq id='prof_caps_*' to='buddy1@localhost/mobile' type='get'>"
         "<query xmlns='http://jabber.org/protocol/disco#info' node='http://profanity-im.github.io#LpT2xs3nun7jC2sq4gg3WRDQFZ4='/>"
         "</iq>"));
 
-    stbbr_for_id("prof_ping_5",
-                 "<iq from='buddy1@localhost/mobile' to='stabber@localhost' id='prof_ping_5' type='result'/>");
+    stbbr_for_id("prof_ping_*",
+                 "<iq from='buddy1@localhost/mobile' to='stabber@localhost' id='prof_ping_*' type='result'/>");
 
     prof_input("/ping buddy1@localhost/mobile");
 
     assert_true(stbbr_received(
-        "<iq id='prof_ping_5' type='get' to='buddy1@localhost/mobile'>"
+        "<iq id='prof_ping_*' type='get' to='buddy1@localhost/mobile'>"
         "<ping xmlns='urn:xmpp:ping'/>"
         "</iq>"));
     assert_true(prof_output_exact("Ping response from buddy1@localhost/mobile"));
@@ -119,8 +118,8 @@ ping_jid(void** state)
 void
 ping_jid_not_supported(void** state)
 {
-    stbbr_for_id("prof_caps_4",
-                 "<iq id='prof_caps_4' to='stabber@localhost/profanity' type='result' from='buddy1@localhost/mobile'>"
+    stbbr_for_id("prof_caps_*",
+                 "<iq id='prof_caps_*' to='stabber@localhost/profanity' type='result' from='buddy1@localhost/mobile'>"
                  "<query xmlns='http://jabber.org/protocol/disco#info' node='http://profanity-im.github.io#LpT2xs3nun7jC2sq4gg3WRDQFZ4='>"
                  "<identity category='client' type='console' name='Profanity0.6.0'/>"
                  "<feature var='http://jabber.org/protocol/disco#info'/>"
@@ -144,7 +143,7 @@ ping_jid_not_supported(void** state)
     assert_true(prof_output_exact("Buddy1 (mobile) is online, \"I'm here\""));
 
     assert_true(stbbr_received(
-        "<iq id='prof_caps_4' to='buddy1@localhost/mobile' type='get'>"
+        "<iq id='prof_caps_*' to='buddy1@localhost/mobile' type='get'>"
         "<query xmlns='http://jabber.org/protocol/disco#info' node='http://profanity-im.github.io#LpT2xs3nun7jC2sq4gg3WRDQFZ4='/>"
         "</iq>"));
 
