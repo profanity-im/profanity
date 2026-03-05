@@ -105,7 +105,11 @@ prof_expect(int fd, ...)
                 return 0;
             }
             if (g_regex_match(regex, clean_output, 0, &match_info)) {
+                gint start_pos, end_pos;
+                g_match_info_fetch_pos(match_info, 0, &start_pos, &end_pos);
+                
                 g_string_truncate(accumulated_output, 0);
+                
                 g_match_info_free(match_info);
                 g_regex_unref(regex);
                 g_free(clean_output);
@@ -406,11 +410,9 @@ prof_output_exact(const char* text)
 int
 prof_output_regex(const char* text)
 {
-    gchar* escaped = g_regex_escape_string(text, -1);
-    gchar* pattern = g_strdup_printf(".*%s", escaped);
+    gchar* pattern = g_strdup_printf(".*%s", text);
     int res = prof_expect(fd, prof_expect_regexp, pattern, 1, prof_expect_end);
     g_free(pattern);
-    g_free(escaped);
     return res;
 }
 
