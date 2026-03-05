@@ -51,7 +51,7 @@ ping_server_not_supported(void** state)
     prof_connect();
 
     prof_input("/ping");
-    assert_true(prof_output_exact("Server does not support ping requests."));
+    assert_true(prof_output_exact("Server does not support ping requests (urn:xmpp:ping)."));
 }
 
 void
@@ -65,7 +65,7 @@ ping_responds_to_server_request(void** state)
         "</iq>");
 
     assert_true(stbbr_received(
-        "<iq id='pingtest1' to='localhost' type='result'/>"));
+        "<iq id='pingtest1' to='localhost' from='stabber@localhost/profanity' type='result'/>"));
 }
 
 void
