@@ -29,7 +29,7 @@ sends_message_to_barejid_when_contact_online(void** state)
         "<presence to='stabber@localhost/profanity' from='buddy1@localhost/mobile'>"
         "<priority>10</priority>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (mobile) is online"));
+    assert_true(prof_output_regex("Buddy1 \\(mobile\\) is online"));
 
     prof_input("/msg buddy1@localhost Hi there");
 
@@ -48,13 +48,13 @@ sends_message_to_fulljid_when_received_from_fulljid(void** state)
         "<presence to='stabber@localhost' from='buddy1@localhost/mobile'>"
         "<priority>10</priority>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (mobile) is online"));
+    assert_true(prof_output_regex("Buddy1 \\(mobile\\) is online"));
 
     stbbr_send(
         "<message id='message1' to='stabber@localhost' from='buddy1@localhost/mobile' type='chat'>"
         "<body>First message</body>"
         "</message>");
-    assert_true(prof_output_exact("<< chat message: Buddy1/mobile (win 2)"));
+    assert_true(prof_output_regex("chat message: Buddy1/mobile \\(win 2\\)"));
 
     prof_input("/msg buddy1@localhost Hi there");
 
@@ -73,13 +73,13 @@ sends_subsequent_messages_to_fulljid(void** state)
         "<presence to='stabber@localhost' from='buddy1@localhost/mobile'>"
         "<priority>10</priority>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (mobile) is online"));
+    assert_true(prof_output_regex("Buddy1 \\(mobile\\) is online"));
 
     stbbr_send(
         "<message id='message1' to='stabber@localhost' from='buddy1@localhost/mobile' type='chat'>"
         "<body>First message</body>"
         "</message>");
-    assert_true(prof_output_exact("<< chat message: Buddy1/mobile (win 2)"));
+    assert_true(prof_output_regex("chat message: Buddy1/mobile \\(win 2\\)"));
 
     prof_input("/msg buddy1@localhost Outgoing 1");
     assert_true(stbbr_received(
@@ -109,13 +109,13 @@ resets_to_barejid_after_presence_received(void** state)
         "<presence to='stabber@localhost' from='buddy1@localhost/mobile'>"
         "<priority>10</priority>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (mobile) is online"));
+    assert_true(prof_output_regex("Buddy1 \\(mobile\\) is online"));
 
     stbbr_send(
         "<message id='message1' to='stabber@localhost' from='buddy1@localhost/mobile' type='chat'>"
         "<body>First message</body>"
         "</message>");
-    assert_true(prof_output_exact("<< chat message: Buddy1/mobile (win 2)"));
+    assert_true(prof_output_regex("chat message: Buddy1/mobile \\(win 2\\)"));
 
     prof_input("/msg buddy1@localhost Outgoing 1");
     assert_true(stbbr_received(
@@ -123,12 +123,14 @@ resets_to_barejid_after_presence_received(void** state)
         "<body>Outgoing 1</body>"
         "</message>"));
 
+    prof_input("/presence chat all");
+
     stbbr_send(
         "<presence to='stabber@localhost' from='buddy1@localhost/laptop'>"
         "<priority>5</priority>"
         "<show>dnd</show>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (laptop) is dnd"));
+    assert_true(prof_output_regex("Buddy1 \\(laptop\\) is dnd"));
 
     prof_input("/msg buddy1@localhost Outgoing 2");
     assert_true(stbbr_received(
@@ -146,20 +148,20 @@ new_session_when_message_received_from_different_fulljid(void** state)
         "<presence to='stabber@localhost' from='buddy1@localhost/mobile'>"
         "<priority>10</priority>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (mobile) is online"));
+    assert_true(prof_output_regex("Buddy1 \\(mobile\\) is online"));
 
     stbbr_send(
         "<presence to='stabber@localhost' from='buddy1@localhost/laptop'>"
         "<priority>8</priority>"
         "<show>away</show>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (laptop) is away"));
+    assert_true(prof_output_regex("Buddy1 \\(laptop\\) is away"));
 
     stbbr_send(
         "<message id='message1' to='stabber@localhost' from='buddy1@localhost/mobile' type='chat'>"
         "<body>From first resource</body>"
         "</message>");
-    assert_true(prof_output_exact("<< chat message: Buddy1/mobile (win 2)"));
+    assert_true(prof_output_regex("chat message: Buddy1/mobile \\(win 2\\)"));
 
     prof_input("/msg buddy1@localhost Outgoing 1");
     assert_true(stbbr_received(
