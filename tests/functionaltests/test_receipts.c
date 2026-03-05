@@ -29,8 +29,8 @@ send_receipt_request(void** state)
 
     prof_connect();
 
-    stbbr_for_id("prof_caps_*",
-                 "<iq from='buddy1@localhost/laptop' to='stabber@localhost' id='prof_caps_*' type='result'>"
+    stbbr_for_id("iq:*",
+                 "<iq from='buddy1@localhost/laptop' to='stabber@localhost' id='*' type='result'>"
                  "<query xmlns='http://jabber.org/protocol/disco#info' node='http://profanity-im.github.io#hAkb1xZdJV9BQpgGNw8zG5Xsals='>"
                  "<identity category='client' name='Profanity 0.5.0' type='console'/>"
                  "<feature var='urn:xmpp:receipts'/>"
@@ -44,7 +44,7 @@ send_receipt_request(void** state)
         "<c hash='sha-256' xmlns='http://jabber.org/protocol/caps' node='http://profanity-im.github.io' ver='hAkb1xZdJV9BQpgGNw8zG5Xsals='/>"
         "</presence>");
 
-    prof_output_exact("Buddy1 is online, \"My status\"");
+    assert_true(prof_output_regex("Buddy1 \\(laptop\\) is online, \"My status\""));
 
     prof_input("/msg Buddy1");
     prof_input("/resource set laptop");
