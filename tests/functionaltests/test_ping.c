@@ -97,7 +97,7 @@ ping_jid(void** state)
         "ver='LpT2xs3nun7jC2sq4gg3WRDQFZ4='"
         "/>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (mobile) is online, \"I'm here\""));
+    assert_true(prof_output_exact("++ Buddy1 (mobile) is online, \"I'm here\""));
 
     assert_true(stbbr_received(
         "<iq id='*' to='buddy1@localhost/mobile' type='get'>"
@@ -138,7 +138,7 @@ ping_jid_not_supported(void** state)
         "ver='LpT2xs3nun7jC2sq4gg3WRDQFZ4='"
         "/>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (mobile) is online, \"I'm here\""));
+    assert_true(prof_output_exact("++ Buddy1 (mobile) is online, \"I'm here\""));
 
     assert_true(stbbr_received(
         "<iq id='*' to='buddy1@localhost/mobile' type='get'>"
