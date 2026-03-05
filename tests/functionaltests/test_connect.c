@@ -59,26 +59,26 @@ connect_shows_presence_updates(void** state)
         "<show>dnd</show>"
         "<status>busy!</status>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (mobile) is dnd, \"busy!\""));
+    assert_true(prof_output_exact("++ Buddy1 (mobile) is dnd, \"busy!\""));
 
     stbbr_send(
         "<presence to='stabber@localhost' from='buddy1@localhost/laptop'>"
         "<show>chat</show>"
         "<status>Talk to me!</status>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (laptop) is chat, \"Talk to me!\""));
+    assert_true(prof_output_exact("++ Buddy1 (laptop) is chat, \"Talk to me!\""));
 
     stbbr_send(
         "<presence to='stabber@localhost' from='buddy2@localhost/work'>"
         "<show>away</show>"
         "<status>Out of office</status>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy2 (work) is away, \"Out of office\""));
+    assert_true(prof_output_exact("++ Buddy2 (work) is away, \"Out of office\""));
 
     stbbr_send(
         "<presence to='stabber@localhost' from='buddy1@localhost/mobile'>"
         "<show>xa</show>"
         "<status>Gone :(</status>"
         "</presence>");
-    assert_true(prof_output_exact("Buddy1 (mobile) is xa, \"Gone :(\""));
+    assert_true(prof_output_exact("++ Buddy1 (mobile) is xa, \"Gone :(\""));
 }
