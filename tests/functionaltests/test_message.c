@@ -19,7 +19,7 @@ message_send(void** state)
         "<body>Hi there</body>"
         "</message>"));
 
-    assert_true(prof_output_regex("me: .+Hi there"));
+    assert_true(prof_output_exact("me: Hi there"));
 }
 
 void
@@ -48,5 +48,5 @@ message_receive_chatwin(void** state)
         "<body>How are you?</body>"
         "</message>");
 
-    assert_true(prof_output_regex("someuser@chatserv.org/laptop: .+How are you?"));
+    assert_true(prof_output_exact("someuser@chatserv.org/laptop: How are you?"));
 }
