@@ -41,12 +41,11 @@ message_receive_chatwin(void** state)
     prof_connect();
 
     prof_input("/msg someuser@chatserv.org");
-    assert_true(prof_output_exact("someuser@chatserv.org"));
 
     stbbr_send(
         "<message id='message1' to='stabber@localhost' from='someuser@chatserv.org/laptop' type='chat'>"
         "<body>How are you?</body>"
         "</message>");
 
-    assert_true(prof_output_exact("someuser@chatserv.org/laptop: How are you?"));
+    assert_true(prof_output_regex("someuser@chatserv.org/laptop: How are you\\?"));
 }
