@@ -56,7 +56,12 @@ prof_expect(int fd, ...)
     pfd.fd = fd;
     pfd.events = POLLIN;
 
-    GRegex *ansi = g_regex_new("\\x1b\\[[0-9;]*[a-zA-Z]|\\x1b\\([a-zA-Z]", 0, 0, NULL);
+    GError *error = NULL;
+    GRegex *ansi = g_regex_new("\\x1b\\[[0-9;]*[a-zA-Z]|\\x1b\\([a-zA-Z]", 0, 0, &error);
+    if (error) {
+        g_error_free(error);
+        return 0;
+    }
     GTimer* timer = g_timer_new();
     while (g_timer_elapsed(timer, NULL) < prof_expect_timeout) {
         // Check if pattern is already in accumulated output
@@ -64,7 +69,16 @@ prof_expect(int fd, ...)
 
         if (type == prof_expect_exact) {
             gchar* escaped = g_regex_escape_string(pattern, -1);
-            GRegex *regex = g_regex_new(escaped, G_REGEX_DOTALL | G_REGEX_OPTIMIZE, 0, NULL);
+            error = NULL;
+            GRegex *regex = g_regex_new(escaped, G_REGEX_DOTALL | G_REGEX_OPTIMIZE, 0, &error);
+            if (error) {
+                g_error_free(error);
+                g_free(escaped);
+                g_free(clean_output);
+                g_timer_destroy(timer);
+                g_regex_unref(ansi);
+                return 0;
+            }
             g_free(escaped);
             GMatchInfo *match_info;
             if (g_regex_match(regex, clean_output, 0, &match_info)) {
@@ -81,7 +95,15 @@ prof_expect(int fd, ...)
             g_regex_unref(regex);
         } else if (type == prof_expect_regexp) {
             GMatchInfo *match_info;
-            GRegex *regex = g_regex_new(pattern, G_REGEX_DOTALL | G_REGEX_OPTIMIZE, 0, NULL);
+            error = NULL;
+            GRegex *regex = g_regex_new(pattern, G_REGEX_DOTALL | G_REGEX_OPTIMIZE, 0, &error);
+            if (error) {
+                g_error_free(error);
+                g_free(clean_output);
+                g_timer_destroy(timer);
+                g_regex_unref(ansi);
+                return 0;
+            }
             if (g_regex_match(regex, clean_output, 0, &match_info)) {
                 g_string_truncate(accumulated_output, 0);
                 g_match_info_free(match_info);
@@ -373,9 +395,11 @@ int
 prof_output_exact(const char* text)
 {
     // Use regex to skip potential timestamps [HH:MM:SS] or character noise
-    gchar* pattern = g_strdup_printf(".*%s", text);
+    gchar* escaped = g_regex_escape_string(text, -1);
+    gchar* pattern = g_strdup_printf(".*%s", escaped);
     int res = prof_expect(fd, prof_expect_regexp, pattern, 1, prof_expect_end);
     g_free(pattern);
+    g_free(escaped);
     return res;
 }
 
