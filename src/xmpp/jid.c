@@ -152,6 +152,13 @@ jid_is_valid(const gchar* const str)
     return (jid != NULL);
 }
 
+gboolean
+jid_is_valid_user_jid(const gchar* const str)
+{
+    auto_jid Jid* jid = jid_create(str);
+    return (jid != NULL && jid->localpart != NULL);
+}
+
 Jid*
 jid_create_from_bare_and_resource(const gchar* const barejid, const gchar* const resource)
 {

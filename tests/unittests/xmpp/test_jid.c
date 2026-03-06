@@ -307,6 +307,29 @@ jid_create__returns__correct_parts_with_at_in_resource_only(void** state)
 }
 
 void
+jid_is_valid_user_jid__is__true_for_valid_user_jid(void** state)
+{
+    assert_true(jid_is_valid_user_jid("myuser@mydomain/laptop"));
+    assert_true(jid_is_valid_user_jid("myuser@mydomain"));
+}
+
+void
+jid_is_valid_user_jid__is__false_for_domain_jid(void** state)
+{
+    assert_false(jid_is_valid_user_jid("mydomain/laptop"));
+    assert_false(jid_is_valid_user_jid("mydomain"));
+}
+
+void
+jid_is_valid_user_jid__is__false_for_invalid_jid(void** state)
+{
+    assert_false(jid_is_valid_user_jid("@mydomain"));
+    assert_false(jid_is_valid_user_jid("/laptop"));
+    assert_false(jid_is_valid_user_jid(NULL));
+    assert_false(jid_is_valid_user_jid(""));
+}
+
+void
 jid_is_valid__is__true_for_valid_jid(void** state)
 {
     assert_true(jid_is_valid("myuser@mydomain/laptop"));
