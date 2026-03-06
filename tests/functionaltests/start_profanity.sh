@@ -1,2 +1,7 @@
 export COLUMNS=300
-./profanity -l DEBUG
+if [ -f "./build_run/profanity" ]; then
+    ./build_run/profanity -l DEBUG
+else
+    # Fallback for autotools
+    ./profanity -l DEBUG
+fi

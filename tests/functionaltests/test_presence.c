@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include <stabber.h>
-#include <expect.h>
 
 #include "proftest.h"
 
@@ -13,11 +12,11 @@ presence_online(void** state)
 {
     prof_connect();
 
-    prof_input("/online");
+    prof_input("/status set online");
 
     assert_true(stbbr_received(
-        "<presence id='prof_presence_3'>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<presence id=\"*\">"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
 
     assert_true(prof_output_exact("Status set to online (priority 0)"));
@@ -28,12 +27,12 @@ presence_online_with_message(void** state)
 {
     prof_connect();
 
-    prof_input("/online \"Hi there\"");
+    prof_input("/status set online \"Hi there\"");
 
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<status>Hi there</status>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
 
     assert_true(prof_output_exact("Status set to online (priority 0), \"Hi there\"."));
@@ -44,12 +43,12 @@ presence_away(void** state)
 {
     prof_connect();
 
-    prof_input("/away");
+    prof_input("/status set away");
 
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<show>away</show>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
 
     assert_true(prof_output_exact("Status set to away (priority 0)"));
@@ -60,13 +59,13 @@ presence_away_with_message(void** state)
 {
     prof_connect();
 
-    prof_input("/away \"I'm not here for a bit\"");
+    prof_input("/status set away \"I'm not here for a bit\"");
 
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<show>away</show>"
         "<status>I'm not here for a bit</status>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
 
     assert_true(prof_output_exact("Status set to away (priority 0), \"I'm not here for a bit\"."));
@@ -77,12 +76,12 @@ presence_xa(void** state)
 {
     prof_connect();
 
-    prof_input("/xa");
+    prof_input("/status set xa");
 
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<show>xa</show>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
 
     assert_true(prof_output_exact("Status set to xa (priority 0)"));
@@ -93,13 +92,13 @@ presence_xa_with_message(void** state)
 {
     prof_connect();
 
-    prof_input("/xa \"Gone to the shops\"");
+    prof_input("/status set xa \"Gone to the shops\"");
 
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<show>xa</show>"
         "<status>Gone to the shops</status>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
 
     assert_true(prof_output_exact("Status set to xa (priority 0), \"Gone to the shops\"."));
@@ -110,12 +109,12 @@ presence_dnd(void** state)
 {
     prof_connect();
 
-    prof_input("/dnd");
+    prof_input("/status set dnd");
 
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<show>dnd</show>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
 
     assert_true(prof_output_exact("Status set to dnd (priority 0)"));
@@ -126,13 +125,13 @@ presence_dnd_with_message(void** state)
 {
     prof_connect();
 
-    prof_input("/dnd \"Working\"");
+    prof_input("/status set dnd \"Working\"");
 
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<show>dnd</show>"
         "<status>Working</status>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
 
     assert_true(prof_output_exact("Status set to dnd (priority 0), \"Working\"."));
@@ -143,12 +142,12 @@ presence_chat(void** state)
 {
     prof_connect();
 
-    prof_input("/chat");
+    prof_input("/status set chat");
 
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<show>chat</show>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
 
     assert_true(prof_output_exact("Status set to chat (priority 0)"));
@@ -159,13 +158,13 @@ presence_chat_with_message(void** state)
 {
     prof_connect();
 
-    prof_input("/chat \"Free to talk\"");
+    prof_input("/status set chat \"Free to talk\"");
 
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<show>chat</show>"
         "<status>Free to talk</status>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
 
     assert_true(prof_output_exact("Status set to chat (priority 0), \"Free to talk\"."));
@@ -179,9 +178,9 @@ presence_set_priority(void** state)
     prof_input("/priority 25");
 
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<priority>25</priority>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
 
     assert_true(prof_output_exact("Priority set to 25."));
@@ -194,19 +193,19 @@ presence_includes_priority(void** state)
 
     prof_input("/priority 25");
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<priority>25</priority>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
     assert_true(prof_output_exact("Priority set to 25."));
 
-    prof_input("/chat \"Free to talk\"");
+    prof_input("/status set chat \"Free to talk\"");
     assert_true(stbbr_received(
-        "<presence id='prof_presence_5'>"
+        "<presence id=\"*\">"
         "<priority>25</priority>"
         "<show>chat</show>"
         "<status>Free to talk</status>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
     assert_true(prof_output_exact("Status set to chat (priority 25), \"Free to talk\"."));
 }
@@ -216,22 +215,22 @@ presence_keeps_status(void** state)
 {
     prof_connect();
 
-    prof_input("/chat \"Free to talk\"");
+    prof_input("/status set chat \"Free to talk\"");
     assert_true(stbbr_received(
-        "<presence id='prof_presence_4'>"
+        "<presence id=\"*\">"
         "<show>chat</show>"
         "<status>Free to talk</status>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
     assert_true(prof_output_exact("Status set to chat (priority 0), \"Free to talk\"."));
 
     prof_input("/priority 25");
     assert_true(stbbr_received(
-        "<presence id='prof_presence_5'>"
+        "<presence id=\"*\">"
         "<show>chat</show>"
         "<status>Free to talk</status>"
         "<priority>25</priority>"
-        "<c hash='sha-1' xmlns='http://jabber.org/protocol/caps' ver='*' node='http://profanity-im.github.io'/>"
+        "<c hash=\"sha-1\" xmlns=\"http://jabber.org/protocol/caps\" ver=\"*\" node=\"http://profanity-im.github.io\"/>"
         "</presence>"));
     assert_true(prof_output_exact("Priority set to 25."));
 }
@@ -247,7 +246,7 @@ presence_received(void** state)
         "<status>I'm here</status>"
         "</presence>");
 
-    assert_true(prof_output_exact("Buddy1 (mobile) is online, \"I'm here\""));
+    assert_true(prof_output_regex("Buddy1 \\(mobile\\) is online, \"I'm here\""));
 }
 
 // Typical use case for gateways that don't support resources

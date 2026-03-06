@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include <stabber.h>
-#include <expect.h>
 
 #include "proftest.h"
 
@@ -25,7 +24,6 @@ connect_with_carbons_enabled(void** state)
     prof_input("/carbons on");
 
     prof_connect();
-
     assert_true(stbbr_received(
         "<iq id='*' type='set'><enable xmlns='urn:xmpp:carbons:2'/></iq>"));
 }
@@ -36,9 +34,10 @@ send_disable_carbons(void** state)
     prof_input("/carbons on");
 
     prof_connect();
+    assert_true(stbbr_received(
+        "<iq id='*' type='set'><enable xmlns='urn:xmpp:carbons:2'/></iq>"));
 
     prof_input("/carbons off");
-
     assert_true(stbbr_received(
         "<iq id='*' type='set'><disable xmlns='urn:xmpp:carbons:2'/></iq>"));
 }
@@ -47,6 +46,7 @@ void
 receive_carbon(void** state)
 {
     prof_input("/carbons on");
+    stbbr_for_xmlns("urn:xmpp:carbons:2", "<iq type='result'/>");
 
     prof_connect();
     assert_true(stbbr_received(
@@ -65,20 +65,21 @@ receive_carbon(void** state)
         "<message type='chat' to='stabber@localhost/profanity' from='stabber@localhost'>"
         "<received xmlns='urn:xmpp:carbons:2'>"
         "<forwarded xmlns='urn:xmpp:forward:0'>"
-        "<message id='prof_msg_7' xmlns='jabber:client' type='chat' lang='en' to='stabber@localhost/profanity' from='buddy1@localhost/mobile'>"
+        "<message id='*' xmlns='jabber:client' type='chat' lang='en' to='stabber@localhost/profanity' from='buddy1@localhost/mobile'>"
         "<body>test carbon from recipient</body>"
         "</message>"
         "</forwarded>"
         "</received>"
         "</message>");
 
-    assert_true(prof_output_regex("Buddy1/mobile: .+test carbon from recipient"));
+    assert_true(prof_output_regex("Buddy1/mobile: test carbon from recipient"));
 }
 
 void
 receive_self_carbon(void** state)
 {
     prof_input("/carbons on");
+    stbbr_for_xmlns("urn:xmpp:carbons:2", "<iq type='result'/>");
 
     prof_connect();
     assert_true(stbbr_received(
@@ -97,20 +98,21 @@ receive_self_carbon(void** state)
         "<message type='chat' to='stabber@localhost/profanity' from='stabber@localhost'>"
         "<sent xmlns='urn:xmpp:carbons:2'>"
         "<forwarded xmlns='urn:xmpp:forward:0'>"
-        "<message id='59' xmlns='jabber:client' type='chat' to='buddy1@localhost/mobile' lang='en' from='stabber@localhost/profanity'>"
-        "<body>self sent carbon</body>"
+        "<message id='*' xmlns='jabber:client' type='chat' lang='en' to='buddy1@localhost/mobile' from='stabber@localhost/mobile'>"
+        "<body>test carbon from sender</body>"
         "</message>"
         "</forwarded>"
         "</sent>"
         "</message>");
 
-    assert_true(prof_output_regex("me: .+self sent carbon"));
+    assert_true(prof_output_regex("me: test carbon from sender"));
 }
 
 void
 receive_private_carbon(void** state)
 {
     prof_input("/carbons on");
+    stbbr_for_xmlns("urn:xmpp:carbons:2", "<iq type='result'/>");
 
     prof_connect();
     assert_true(stbbr_received(
@@ -126,10 +128,16 @@ receive_private_carbon(void** state)
     assert_true(prof_output_exact("unencrypted"));
 
     stbbr_send(
-        "<message type='chat' to='stabber@localhost/profanity' from='buddy1@localhost/mobile'>"
+        "<message type='chat' to='stabber@localhost/profanity' from='stabber@localhost'>"
+        "<received xmlns='urn:xmpp:carbons:2'>"
+        "<forwarded xmlns='urn:xmpp:forward:0'>"
+        "<message id='*' xmlns='jabber:client' type='chat' lang='en' to='stabber@localhost/profanity' from='buddy1@localhost/mobile'>"
         "<body>Private carbon</body>"
         "<private xmlns='urn:xmpp:carbons:2'/>"
+        "</message>"
+        "</forwarded>"
+        "</received>"
         "</message>");
 
-    assert_true(prof_output_regex("Buddy1/mobile: .+Private carbon"));
+    assert_true(prof_output_regex("Buddy1/mobile: Private carbon"));
 }

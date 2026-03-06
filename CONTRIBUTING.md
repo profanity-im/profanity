@@ -171,6 +171,53 @@ When adding a new test file:
 2. Register the test functions in `tests/unittests/unittests.c` within the `all_tests` array.
 3. Add the new source file to `unittest_sources` in both `meson.build` and `Makefile.am`.
 
+### Running functional tests
+Functional tests use [stabber](https://github.com/profanity-im/stabber) to simulate an XMPP server.
+
+**Performance Note:** It is highly recommended to run functional tests **without** sanitizers (**ASan** and **UBSan**). These sanitizers add significant overhead that can cause functional tests to time out or take an excessively long time to complete.
+
+*   **Meson:** Ensure `-Db_sanitize=none` is set in your build configuration. You can check your current configuration with `meson configure build_run | grep b_sanitize`.
+*   **Autotools:** Ensure your `CFLAGS` does not contain `-fsanitize=address` or `-fsanitize=undefined`.
+
+To run functional tests, you need the same dependencies as unit tests (`cmocka`) plus `stabber` and `libutil`.
+
+Functional tests will be automatically enabled if these dependencies are detected during configuration.
+
+Using Meson:
+1. Setup build directory: `meson setup build_run -Dtests=true` (check the summary to ensure "Functional tests" is `true`)
+2. Compile and run all tests (unit and functional): `meson test -C build_run`
+3. To run only functional tests: `meson test -C build_run "functional tests"`
+4. To run manually: `./build_run/functionaltests`
+5. To run a specific test manually: `CMOCKA_TEST_FILTER=test_name ./build_run/functionaltests` (use `./build_run/functionaltests --list` to see all available tests)
+
+Using Autotools:
+1. Configure: `./configure` (check the summary to ensure `cmocka`, `stabber` and `libutil` were found)
+2. Build and run all tests: `make check`
+3. To run manually: `./tests/functionaltests/functionaltests`
+4. To run a specific test manually: `CMOCKA_TEST_FILTER=test_name ./tests/functionaltests/functionaltests`
+
+### Writing functional tests
+Functional tests simulate real world usage by running Profanity and interacting with it. They verify Profanitys responses to an XMPP server.
+
+They are located in `tests/functionaltests/`.
+
+#### Helper Functions
+We provide a set of helper functions:
+- `prof_input(const char* input)`: Sends a command or message to Profanity.
+- `prof_output_regex(const char* regex)`: Verifies that Profanity's output matches the given regular expression.
+- `prof_output_exact(const char* text)`: Verifies that Profanity's output exactly matches the given text.
+- `prof_connect()`: Connects Profanity to the simulated stabber server.
+- `stbbr_for_id(const char* id, const char* xml)`: Tells stabber to respond with `xml` when it receives a stanza with the given `id`.
+- `stbbr_for_query(const char* xmlns, const char* xml): Tells the server to respond with xml whenever a query for a specific namespace is received.
+
+To see the complete list check `proftest.h`.
+
+#### Adding a new test
+1. Create a new test file (`test_new_feature.c` and `test_new_feature.h`) in `tests/functionaltests/`.
+2. Define your test functions using the `void test_name(void** state)` signature.
+3. Use the `PROF_FUNC_TEST(test_name)` macro to register your test in `tests/functionaltests/functionaltests.c`. This macro automatically handles the setup (`init_prof_test`) and teardown (`close_prof_test`) for each test.
+4. Add the new source file to `functionaltest_sources` in both `meson.build` and `Makefile.am`.
+
 ### Valgrind
 We provide a suppressions file `prof.supp`. It is a combination of the suppressions for shipped with glib2, python and custom rules.
 

@@ -59,6 +59,7 @@ add_project_arguments([
   '-Wno-unused-parameter',
 ], language: 'c')
 
+analyzer_args = []
 if is_debug
   add_project_arguments([
     '-ggdb3',
@@ -71,7 +72,7 @@ if is_debug
     '-Wpointer-arith'
   ], language: 'c')
   if cc.get_id() == 'gcc'
-     add_project_arguments('-fanalyzer', language: 'c')
+     analyzer_args += '-fanalyzer'
   endif
 endif
 
@@ -159,6 +160,10 @@ gdk_pixbuf_dep = disabler()
 libsignal_dep = disabler()
 gcrypt_dep = disabler()
 qrencode_dep = disabler()
+
+# Dependencies for functional tests
+stabber_dep = cc.find_library('stabber', required: false)
+util_dep = cc.find_library('util', required: false)
 
 # Build flags
 build_python_api = false
@@ -497,6 +502,7 @@ profanity_exe = executable(
   profanity_sources,
   files('src/main.c'),
   config_h,
+  c_args: analyzer_args,
   dependencies: profanity_deps,
   include_directories: inc,
   install: true,
@@ -547,9 +553,13 @@ install_data(
 )
 
 # Tests
+build_unittests = false
+build_functionaltests = false
+
 if get_option('tests')
   cmocka_dep = dependency('cmocka', required: false)
   if cmocka_dep.found()
+    build_unittests = true
     unittest_sources = files(
       'src/xmpp/contact.c',
       'src/common.c',
@@ -673,6 +683,37 @@ if get_option('tests')
     )
     
     test('unit tests', unittests)
+
+    # Functional tests
+    if stabber_dep.found() and util_dep.found()
+      build_functionaltests = true
+      functionaltest_sources = files(
+        'tests/functionaltests/proftest.c',
+        'tests/functionaltests/test_connect.c',
+        'tests/functionaltests/test_ping.c',
+        'tests/functionaltests/test_rooms.c',
+        'tests/functionaltests/test_presence.c',
+        'tests/functionaltests/test_message.c',
+        'tests/functionaltests/test_chat_session.c',
+        'tests/functionaltests/test_carbons.c',
+        'tests/functionaltests/test_receipts.c',
+        'tests/functionaltests/test_roster.c',
+        'tests/functionaltests/test_software.c',
+        'tests/functionaltests/test_muc.c',
+        'tests/functionaltests/test_disconnect.c',
+        'tests/functionaltests/functionaltests.c',
+      )
+
+      functionaltests = executable(
+        'functionaltests',
+        functionaltest_sources,
+        dependencies: [cmocka_dep, stabber_dep, util_dep] + profanity_deps,
+        include_directories: [inc, include_directories('tests')],
+        build_by_default: false,
+      )
+
+      test('functional tests', functionaltests, timeout: 1800)
+    endif
   else
     warning('cmocka not found, tests will not be built')
   endif
@@ -704,3 +745,8 @@ summary({
   'GDK Pixbuf': gdk_pixbuf_dep.found(),
   'QR Code': qrencode_dep.found(),
 }, section: 'Features')
+
+summary({
+  'Unit tests': build_unittests,
+  'Functional tests': build_functionaltests,
+}, section: 'Testing')

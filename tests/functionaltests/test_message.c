@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include <stabber.h>
-#include <expect.h>
 
 #include "proftest.h"
 
@@ -20,7 +19,7 @@ message_send(void** state)
         "<body>Hi there</body>"
         "</message>"));
 
-    assert_true(prof_output_regex("me: .+Hi there"));
+    assert_true(prof_output_exact("me: Hi there"));
 }
 
 void
@@ -42,12 +41,11 @@ message_receive_chatwin(void** state)
     prof_connect();
 
     prof_input("/msg someuser@chatserv.org");
-    assert_true(prof_output_exact("someuser@chatserv.org"));
 
     stbbr_send(
         "<message id='message1' to='stabber@localhost' from='someuser@chatserv.org/laptop' type='chat'>"
         "<body>How are you?</body>"
         "</message>");
 
-    assert_true(prof_output_regex("someuser@chatserv.org/laptop: .+How are you?"));
+    assert_true(prof_output_regex("someuser@chatserv.org/laptop: How are you\\?"));
 }

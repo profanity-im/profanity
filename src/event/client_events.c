@@ -135,6 +135,10 @@ cl_ev_send_msg_correct(ProfChatWin* chatwin, const char* const msg, const char* 
     chat_state_active(chatwin->state);
 
     gboolean request_receipt = prefs_get_boolean(PREF_RECEIPTS_REQUEST);
+    if (request_receipt) {
+        auto_char char* jid = chat_session_get_jid(chatwin->barejid);
+        request_receipt = caps_jid_has_feature(jid, XMPP_FEATURE_RECEIPTS);
+    }
 
     auto_char char* plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
     const char* const message = plugin_msg ?: msg;
