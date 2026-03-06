@@ -2155,7 +2155,11 @@ cmd_msg(ProfWin* window, const char* const command, gchar** args)
             barejid = usr;
         }
 
-        _cmd_msg_chatwin(barejid, msg);
+        if (jid_is_valid_user_jid(barejid)) {
+            _cmd_msg_chatwin(barejid, msg);
+        } else {
+            cons_show_error("Not a contact or valid JID: %s", barejid);
+        }
 
         return TRUE;
     }
