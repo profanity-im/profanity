@@ -105,6 +105,7 @@ typedef struct omemo_context
     prof_keyfile_t knowndevices;
     GHashTable* known_devices;
     gboolean loaded;
+    gboolean notifying;
 } omemo_context;
 
 static omemo_context omemo_ctx;
@@ -167,6 +168,8 @@ _omemo_finalize_identity_load(ProfAccount* account)
     }
 
     omemo_devicelist_subscribe();
+
+    omemo_ctx.notifying = TRUE;
 
     return TRUE;
 }
@@ -254,6 +257,7 @@ omemo_on_connect(ProfAccount* account)
     signal_protocol_store_context_set_identity_key_store(omemo_ctx.store, &identity_key_store);
 
     omemo_ctx.loaded = FALSE;
+    omemo_ctx.notifying = FALSE;
     omemo_ctx.device_list = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_list_free);
     omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
     omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
@@ -514,6 +518,40 @@ omemo_set_device_list(const char* const from, GList* device_list)
 {
     log_debug("[OMEMO] Setting device list for %s", STR_MAYBE_NULL(from));
     auto_jid Jid* jid = jid_create(from ?: connection_get_fulljid());
+
+    if (omemo_ctx.notifying) {
+        GList* old_list = g_hash_table_lookup(omemo_ctx.device_list, jid->barejid);
+        GList* new_iter;
+        for (new_iter = device_list; new_iter != NULL; new_iter = new_iter->next) {
+            uint32_t dev_id = GPOINTER_TO_INT(new_iter->data);
+            gboolean found = FALSE;
+            GList* old_iter;
+            for (old_iter = old_list; old_iter != NULL; old_iter = old_iter->next) {
+                if (GPOINTER_TO_INT(old_iter->data) == dev_id) {
+                    found = TRUE;
+                    break;
+                }
+            }
+
+            if (!found) {
+                if (equals_our_barejid(jid->barejid)) {
+                    if (dev_id != omemo_ctx.device_id) {
+                        cons_show("New OMEMO device (ID: %u) added to your account.", dev_id);
+                    }
+                } else {
+                    ProfChatWin* chatwin = wins_get_chat(jid->barejid);
+                    if (chatwin) {
+                        win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "New OMEMO device (ID: %u) found for %s.", dev_id, jid->barejid);
+                    } else {
+                        ProfMucWin* mucwin = wins_get_muc(jid->barejid);
+                        if (mucwin) {
+                            win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "New OMEMO device (ID: %u) found for %s.", dev_id, jid->barejid);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     g_hash_table_insert(omemo_ctx.device_list, strdup(jid->barejid), device_list);
 
@@ -1744,6 +1782,27 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
     if (!fingerprint) {
         return;
     }
+
+    if (omemo_ctx.notifying) {
+        if (!g_hash_table_contains(known_identities, fingerprint)) {
+            char* formatted = omemo_format_fingerprint(fingerprint);
+            if (equals_our_barejid(jid)) {
+                cons_show("New OMEMO fingerprint for your account: %s (ID: %u).", formatted, device_id);
+            } else {
+                ProfChatWin* chatwin = wins_get_chat(jid);
+                if (chatwin) {
+                    win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "New OMEMO fingerprint for %s: %s (ID: %u).", jid, formatted, device_id);
+                } else {
+                    ProfMucWin* mucwin = wins_get_muc(jid);
+                    if (mucwin) {
+                        win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "New OMEMO fingerprint for %s: %s (ID: %u).", jid, formatted, device_id);
+                    }
+                }
+            }
+            free(formatted);
+        }
+    }
+
     log_debug("[OMEMO] cache identity for %s:%d: %s", jid, device_id, fingerprint);
     g_hash_table_insert(known_identities, strdup(fingerprint), GINT_TO_POINTER(device_id));
 
