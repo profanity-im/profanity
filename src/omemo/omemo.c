@@ -1014,13 +1014,21 @@ out:
 char*
 omemo_on_message_recv(const char* const from_jid, uint32_t sid,
                       const unsigned char* const iv, size_t iv_len, GList* keys,
-                      const unsigned char* const payload, size_t payload_len, gboolean muc, gboolean* trusted)
+                      const unsigned char* const payload, size_t payload_len, gboolean muc, gboolean* trusted, omemo_error_t* error)
 {
     unsigned char* plaintext = NULL;
     auto_jid Jid* sender = NULL;
     auto_jid Jid* from = jid_create(from_jid);
+
+    if (error) {
+        *error = OMEMO_ERR_NONE;
+    }
+
     if (!from) {
         log_error("[OMEMO][RECV] Invalid jid %s", from_jid);
+        if (error) {
+            *error = OMEMO_ERR_INVALID_JID;
+        }
         return NULL;
     }
 
@@ -1036,6 +1044,9 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
 
     if (!key) {
         log_warning("[OMEMO][RECV] received a message with no corresponding key");
+        if (error) {
+            *error = OMEMO_ERR_NO_KEY;
+        }
         return NULL;
     }
 
@@ -1052,6 +1063,9 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         g_list_free(roster);
         if (!sender) {
             log_warning("[OMEMO][RECV] cannot find MUC message sender fulljid");
+            if (error) {
+                *error = OMEMO_ERR_MUC_SENDER_NOT_FOUND;
+            }
             return NULL;
         }
     } else {
@@ -1069,6 +1083,9 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
     res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
     if (res != 0) {
         log_error("[OMEMO][RECV] cannot create session cipher");
+        if (error) {
+            *error = OMEMO_ERR_NO_SESSION;
+        }
         return NULL;
     }
 
@@ -1127,13 +1144,23 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
 
     session_cipher_free(cipher);
     if (res != 0) {
-        log_error("[OMEMO][RECV] cannot decrypt message key");
+        log_error("[OMEMO][RECV] cannot decrypt message key: %d", res);
+        if (error) {
+            if (!*trusted) {
+                *error = OMEMO_ERR_NOT_TRUSTED;
+            } else {
+                *error = OMEMO_ERR_DECRYPT_FAILED;
+            }
+        }
         return NULL;
     }
 
     if (signal_buffer_len(plaintext_key) != AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH) {
         log_error("[OMEMO][RECV] invalid key length");
         signal_buffer_free(plaintext_key);
+        if (error) {
+            *error = OMEMO_ERR_DECRYPT_FAILED;
+        }
         return NULL;
     }
 
@@ -1146,6 +1173,9 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
     if (res != 0) {
         log_error("[OMEMO][RECV] cannot decrypt message: %s", gcry_strerror(res));
         free(plaintext);
+        if (error) {
+            *error = OMEMO_ERR_DECRYPT_FAILED;
+        }
         return NULL;
     }
 

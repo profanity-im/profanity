@@ -356,6 +356,7 @@ message_init(void)
     ProfMessage* message = g_new0(ProfMessage, 1);
 
     message->enc = PROF_MSG_ENC_NONE;
+    message->omemo_err = OMEMO_ERR_NONE;
     message->trusted = true;
     message->type = PROF_MSG_TYPE_UNINITIALIZED;
 
@@ -1110,8 +1111,29 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
 
     // check omemo encryption
 #ifdef HAVE_OMEMO
-    message->plain = omemo_receive_message(stanza, &message->trusted);
-    if (message->plain != NULL) {
+    message->plain = omemo_receive_message(stanza, &message->trusted, &message->omemo_err);
+    if (message->omemo_err != OMEMO_ERR_NONE) {
+        message->enc = PROF_MSG_ENC_OMEMO;
+        if (message->plain == NULL) {
+            switch (message->omemo_err) {
+            case OMEMO_ERR_NO_KEY:
+                message->plain = g_strdup("OMEMO message received but no key for this device found.");
+                break;
+            case OMEMO_ERR_NOT_TRUSTED:
+                message->plain = g_strdup("OMEMO message received but sender identity is untrusted.");
+                break;
+            case OMEMO_ERR_NO_SESSION:
+                message->plain = g_strdup("OMEMO message received but no session found. Try '/omemo start'.");
+                break;
+            case OMEMO_ERR_DECRYPT_FAILED:
+                message->plain = g_strdup("OMEMO message received but decryption failed.");
+                break;
+            default:
+                message->plain = g_strdup("OMEMO message received but could not be decrypted.");
+                break;
+            }
+        }
+    } else if (message->plain != NULL) {
         message->enc = PROF_MSG_ENC_OMEMO;
     }
 #endif
@@ -1270,8 +1292,29 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
 
     // check omemo encryption
 #ifdef HAVE_OMEMO
-    message->plain = omemo_receive_message(stanza, &message->trusted);
-    if (message->plain != NULL) {
+    message->plain = omemo_receive_message(stanza, &message->trusted, &message->omemo_err);
+    if (message->omemo_err != OMEMO_ERR_NONE) {
+        message->enc = PROF_MSG_ENC_OMEMO;
+        if (message->plain == NULL) {
+            switch (message->omemo_err) {
+            case OMEMO_ERR_NO_KEY:
+                message->plain = g_strdup("OMEMO message received but no key for this device found.");
+                break;
+            case OMEMO_ERR_NOT_TRUSTED:
+                message->plain = g_strdup("OMEMO message received but sender identity is untrusted.");
+                break;
+            case OMEMO_ERR_NO_SESSION:
+                message->plain = g_strdup("OMEMO message received but no session found. Try '/omemo start'.");
+                break;
+            case OMEMO_ERR_DECRYPT_FAILED:
+                message->plain = g_strdup("OMEMO message received but decryption failed.");
+                break;
+            default:
+                message->plain = g_strdup("OMEMO message received but could not be decrypted.");
+                break;
+            }
+        }
+    } else if (message->plain != NULL) {
         message->enc = PROF_MSG_ENC_OMEMO;
     }
 #endif
@@ -1437,8 +1480,29 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
 
 #ifdef HAVE_OMEMO
     // check omemo encryption
-    message->plain = omemo_receive_message(stanza, &message->trusted);
-    if (message->plain != NULL) {
+    message->plain = omemo_receive_message(stanza, &message->trusted, &message->omemo_err);
+    if (message->omemo_err != OMEMO_ERR_NONE) {
+        message->enc = PROF_MSG_ENC_OMEMO;
+        if (message->plain == NULL) {
+            switch (message->omemo_err) {
+            case OMEMO_ERR_NO_KEY:
+                message->plain = g_strdup("OMEMO message received but no key for this device found.");
+                break;
+            case OMEMO_ERR_NOT_TRUSTED:
+                message->plain = g_strdup("OMEMO message received but sender identity is untrusted.");
+                break;
+            case OMEMO_ERR_NO_SESSION:
+                message->plain = g_strdup("OMEMO message received but no session found. Try '/omemo start'.");
+                break;
+            case OMEMO_ERR_DECRYPT_FAILED:
+                message->plain = g_strdup("OMEMO message received but decryption failed.");
+                break;
+            default:
+                message->plain = g_strdup("OMEMO message received but could not be decrypted.");
+                break;
+            }
+        }
+    } else if (message->plain != NULL) {
         message->enc = PROF_MSG_ENC_OMEMO;
     }
 #endif

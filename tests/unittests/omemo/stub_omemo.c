@@ -129,6 +129,27 @@ omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res)
 };
 void omemo_free(void* a) {};
 
+char*
+omemo_on_message_recv(const char* const from, uint32_t sid,
+                      const unsigned char* const iv, size_t iv_len,
+                      GList* keys, const unsigned char* const payload,
+                      size_t payload_len, gboolean muc, gboolean* trusted, omemo_error_t* error)
+{
+    if (error) {
+        *error = OMEMO_ERR_NONE;
+    }
+    return NULL;
+}
+
+char*
+omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_error_t* error)
+{
+    if (error) {
+        *error = OMEMO_ERR_NONE;
+    }
+    return NULL;
+}
+
 uint32_t
 omemo_device_id()
 {
