@@ -729,8 +729,30 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
         }
 
         log_debug("[OMEMO] create session with %s device %d", jid, device_id);
+        if (omemo_ctx.notifying) {
+            ProfChatWin* chatwin = wins_get_chat(jid);
+            if (chatwin) {
+                win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "OMEMO session with %s (device %u) ready.", jid, device_id);
+            } else {
+                ProfMucWin* mucwin = wins_get_muc(jid);
+                if (mucwin) {
+                    win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "OMEMO session with %s (device %u) ready.", jid, device_id);
+                }
+            }
+        }
     } else {
         log_debug("[OMEMO] session with %s device %d exists", jid, device_id);
+        if (omemo_ctx.notifying) {
+            ProfChatWin* chatwin = wins_get_chat(jid);
+            if (chatwin) {
+                win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "OMEMO session with %s (device %u) already exists.", jid, device_id);
+            } else {
+                ProfMucWin* mucwin = wins_get_muc(jid);
+                if (mucwin) {
+                    win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "OMEMO session with %s (device %u) already exists.", jid, device_id);
+                }
+            }
+        }
     }
 
 out:

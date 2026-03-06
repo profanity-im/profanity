@@ -8479,6 +8479,7 @@ cmd_omemo_start(ProfWin* window, const char* const command, gchar** args)
         }
 
         accounts_add_omemo_state(session_get_account_name(), chatwin->barejid, TRUE);
+        win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "Initiating OMEMO session with %s...", chatwin->barejid);
         omemo_start_session(chatwin->barejid);
         chatwin->is_omemo = TRUE;
     } else if (window->type == WIN_MUC) {
@@ -8493,6 +8494,7 @@ cmd_omemo_start(ProfWin* window, const char* const command, gchar** args)
         if (muc_anonymity_type(mucwin->roomjid) == MUC_ANONYMITY_TYPE_NONANONYMOUS
             && muc_member_type(mucwin->roomjid) == MUC_MEMBER_TYPE_MEMBERS_ONLY) {
             accounts_add_omemo_state(session_get_account_name(), mucwin->roomjid, TRUE);
+            win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "Initiating OMEMO session in %s...", mucwin->roomjid);
             omemo_start_muc_sessions(mucwin->roomjid);
             mucwin->is_omemo = TRUE;
         } else {
