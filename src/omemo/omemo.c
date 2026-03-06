@@ -523,11 +523,11 @@ omemo_set_device_list(const char* const from, GList* device_list)
         GList* old_list = g_hash_table_lookup(omemo_ctx.device_list, jid->barejid);
         GList* new_iter;
         for (new_iter = device_list; new_iter != NULL; new_iter = new_iter->next) {
-            uint32_t dev_id = GPOINTER_TO_INT(new_iter->data);
+            uint32_t dev_id = GPOINTER_TO_UINT(new_iter->data);
             gboolean found = FALSE;
             GList* old_iter;
             for (old_iter = old_list; old_iter != NULL; old_iter = old_iter->next) {
-                if (GPOINTER_TO_INT(old_iter->data) == dev_id) {
+                if (GPOINTER_TO_UINT(old_iter->data) == dev_id) {
                     found = TRUE;
                     break;
                 }
@@ -1259,7 +1259,7 @@ omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
     signal_protocol_address address = {
         .name = jid,
         .name_len = strlen(jid),
-        .device_id = GPOINTER_TO_INT(device_id),
+        .device_id = GPOINTER_TO_UINT(device_id),
     };
 
     size_t fingerprint_len;
@@ -1269,7 +1269,7 @@ omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
     buffer = signal_buffer_append(buffer, fingerprint_raw, fingerprint_len);
 
     gboolean trusted = is_trusted_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
-    log_debug("[OMEMO] Device trusted %s (%d): %d", jid, GPOINTER_TO_INT(device_id), trusted);
+    log_debug("[OMEMO] Device trusted %s (%u): %d", jid, GPOINTER_TO_UINT(device_id), trusted);
 
     free(fingerprint_raw);
     signal_buffer_free(buffer);
@@ -1291,7 +1291,7 @@ omemo_is_jid_trusted(const char* const jid)
 
     GList* device_id_iter;
     for (device_id_iter = device_list; device_id_iter != NULL; device_id_iter = device_id_iter->next) {
-        uint32_t device_id = GPOINTER_TO_INT(device_id_iter->data);
+        uint32_t device_id = GPOINTER_TO_UINT(device_id_iter->data);
         if (device_id == omemo_ctx.device_id && equals_our_barejid(jid)) {
             continue;
         }
@@ -1305,7 +1305,7 @@ omemo_is_jid_trusted(const char* const jid)
         GList* fp_list = g_hash_table_get_keys(known_identities);
         GList* fp_iter;
         for (fp_iter = fp_list; fp_iter != NULL; fp_iter = fp_iter->next) {
-            if (device_id == GPOINTER_TO_INT(g_hash_table_lookup(known_identities, fp_iter->data))) {
+            if (device_id == GPOINTER_TO_UINT(g_hash_table_lookup(known_identities, fp_iter->data))) {
                 if (!omemo_is_trusted_identity(jid, fp_iter->data)) {
                     g_list_free(fp_list);
                     return FALSE;
@@ -1339,7 +1339,7 @@ omemo_get_jid_untrusted_fingerprints(const char* const jid)
     GList* untrusted_fps = NULL;
     GList* device_id_iter;
     for (device_id_iter = device_list; device_id_iter != NULL; device_id_iter = device_id_iter->next) {
-        uint32_t device_id = GPOINTER_TO_INT(device_id_iter->data);
+        uint32_t device_id = GPOINTER_TO_UINT(device_id_iter->data);
         if (device_id == omemo_ctx.device_id && equals_our_barejid(jid)) {
             continue;
         }
@@ -1352,7 +1352,7 @@ omemo_get_jid_untrusted_fingerprints(const char* const jid)
         GList* fp_list = g_hash_table_get_keys(known_identities);
         GList* fp_iter;
         for (fp_iter = fp_list; fp_iter != NULL; fp_iter = fp_iter->next) {
-            if (device_id == GPOINTER_TO_INT(g_hash_table_lookup(known_identities, fp_iter->data))) {
+            if (device_id == GPOINTER_TO_UINT(g_hash_table_lookup(known_identities, fp_iter->data))) {
                 if (!omemo_is_trusted_identity(jid, fp_iter->data)) {
                     untrusted_fps = g_list_append(untrusted_fps, g_strdup(fp_iter->data));
                 }
@@ -1387,10 +1387,10 @@ omemo_is_device_active(const char* const jid, const char* const fingerprint)
         return FALSE;
     }
 
-    uint32_t dev_id = GPOINTER_TO_INT(device_id);
+    uint32_t dev_id = GPOINTER_TO_UINT(device_id);
     GList* iter;
     for (iter = device_list; iter != NULL; iter = iter->next) {
-        if (GPOINTER_TO_INT(iter->data) == dev_id) {
+        if (GPOINTER_TO_UINT(iter->data) == dev_id) {
             return TRUE;
         }
     }
