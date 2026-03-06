@@ -258,12 +258,6 @@ prof_start(void)
     }
     prof_pid = pid;
     fd = master;
-
-    FILE* fp = fdopen(fd, "r+");
-
-    assert_true(fp != NULL);
-
-    setbuf(fp, (char*)0);
 }
 
 int
@@ -451,6 +445,7 @@ prof_connect_with_roster(const char* roster)
     assert_true(prof_output_regex("successfully"));
     prof_expect_timeout = 10;
     stbbr_wait_for("presence:*");
+    //usleep(1000 * 2000); // 2s delay
 }
 
 void
