@@ -150,6 +150,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(jid_create__returns__correct_parts_with_trailing_slash),
         cmocka_unit_test(jid_fulljid_or_barejid__returns__fulljid_when_exists),
         cmocka_unit_test(jid_fulljid_or_barejid__returns__barejid_when_fulljid_not_exists),
+        cmocka_unit_test(jid_create__returns__bare_from_trailing_slash),
         cmocka_unit_test(jid_create__returns__null_from_invalid_localpart_chars),
         cmocka_unit_test(jid_create__returns__null_from_empty_parts),
         cmocka_unit_test(jid_create__returns__null_from_multiple_at_in_bare),

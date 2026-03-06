@@ -157,11 +157,11 @@ jid_is_valid(const gchar* const str)
         domain_start = at + 1;
     }
 
-    // Resourcepart validation
+    // Resourcepart validation if present
     if (slash) {
         domain_len = slash - domain_start;
         size_t resource_len = strlen(slash + 1);
-        if (resource_len == 0 || resource_len > JID_MAX_PART_LEN) {
+        if (resource_len > JID_MAX_PART_LEN) {
             return FALSE;
         }
     } else {

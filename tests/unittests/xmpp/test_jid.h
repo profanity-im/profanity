@@ -26,6 +26,7 @@ void jid_create__returns__correct_parts_with_at_and_slash_in_resource(void** sta
 void jid_create__returns__correct_parts_with_trailing_slash(void** state);
 void jid_fulljid_or_barejid__returns__fulljid_when_exists(void** state);
 void jid_fulljid_or_barejid__returns__barejid_when_fulljid_not_exists(void** state);
+void jid_create__returns__bare_from_trailing_slash(void** state);
 void jid_create__returns__null_from_invalid_localpart_chars(void** state);
 void jid_create__returns__null_from_empty_parts(void** state);
 void jid_create__returns__null_from_multiple_at_in_bare(void** state);

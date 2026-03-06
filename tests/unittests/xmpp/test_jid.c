@@ -236,6 +236,16 @@ jid_fulljid_or_barejid__returns__barejid_when_fulljid_not_exists(void** state)
 }
 
 void
+jid_create__returns__bare_from_trailing_slash(void** state)
+{
+    Jid* result = jid_create("myuser@mydomain/");
+    assert_non_null(result);
+    assert_string_equal("myuser@mydomain", result->barejid);
+    assert_null(result->resourcepart);
+    jid_destroy(result);
+}
+
+void
 jid_create__returns__null_from_invalid_localpart_chars(void** state)
 {
     // Space
@@ -276,10 +286,6 @@ jid_create__returns__null_from_empty_parts(void** state)
 
     // Empty domain (trailing @)
     result = jid_create("user@");
-    assert_null(result);
-
-    // Empty resource (trailing /)
-    result = jid_create("user@domain.com/");
     assert_null(result);
 
     // Empty domain in full jid
