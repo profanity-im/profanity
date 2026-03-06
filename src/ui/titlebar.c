@@ -49,6 +49,9 @@
 #include "ui/window_list.h"
 #include "ui/window.h"
 #include "ui/screen.h"
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
 #include "xmpp/roster_list.h"
 #include "xmpp/chat_session.h"
 
@@ -412,6 +415,8 @@ _show_muc_privacy(ProfMucWin* mucwin)
     int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
 
     if (mucwin->is_omemo) {
+        int untrusted_attrs = theme_attrs(THEME_TITLE_UNTRUSTED);
+        int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
         wprintw(win, " ");
         wattron(win, bracket_attrs);
         wprintw(win, "[");
@@ -422,6 +427,32 @@ _show_muc_privacy(ProfMucWin* mucwin)
         wattron(win, bracket_attrs);
         wprintw(win, "]");
         wattroff(win, bracket_attrs);
+
+#ifdef HAVE_OMEMO
+        if (omemo_is_jid_trusted(mucwin->roomjid)) {
+            wprintw(win, " ");
+            wattron(win, bracket_attrs);
+            wprintw(win, "[");
+            wattroff(win, bracket_attrs);
+            wattron(win, trusted_attrs);
+            wprintw(win, "trusted");
+            wattroff(win, trusted_attrs);
+            wattron(win, bracket_attrs);
+            wprintw(win, "]");
+            wattroff(win, bracket_attrs);
+        } else {
+            wprintw(win, " ");
+            wattron(win, bracket_attrs);
+            wprintw(win, "[");
+            wattroff(win, bracket_attrs);
+            wattron(win, untrusted_attrs);
+            wprintw(win, "untrusted");
+            wattroff(win, untrusted_attrs);
+            wattron(win, bracket_attrs);
+            wprintw(win, "]");
+            wattroff(win, bracket_attrs);
+        }
+#endif
 
         return;
     }
@@ -551,6 +582,32 @@ _show_privacy(ProfChatWin* chatwin)
         wattron(win, bracket_attrs);
         wprintw(win, "]");
         wattroff(win, bracket_attrs);
+
+#ifdef HAVE_OMEMO
+        if (omemo_is_jid_trusted(chatwin->barejid)) {
+            wprintw(win, " ");
+            wattron(win, bracket_attrs);
+            wprintw(win, "[");
+            wattroff(win, bracket_attrs);
+            wattron(win, trusted_attrs);
+            wprintw(win, "trusted");
+            wattroff(win, trusted_attrs);
+            wattron(win, bracket_attrs);
+            wprintw(win, "]");
+            wattroff(win, bracket_attrs);
+        } else {
+            wprintw(win, " ");
+            wattron(win, bracket_attrs);
+            wprintw(win, "[");
+            wattroff(win, bracket_attrs);
+            wattron(win, untrusted_attrs);
+            wprintw(win, "untrusted");
+            wattroff(win, untrusted_attrs);
+            wattron(win, bracket_attrs);
+            wprintw(win, "]");
+            wattroff(win, bracket_attrs);
+        }
+#endif
 
         return;
     }

@@ -1155,6 +1155,53 @@ omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
     return trusted;
 }
 
+gboolean
+omemo_is_jid_trusted(const char* const jid)
+{
+    if (!omemo_loaded()) {
+        return FALSE;
+    }
+
+    GList* device_list = g_hash_table_lookup(omemo_ctx.device_list, jid);
+    if (!device_list) {
+        return FALSE;
+    }
+
+    GList* device_id_iter;
+    for (device_id_iter = device_list; device_id_iter != NULL; device_id_iter = device_id_iter->next) {
+        uint32_t device_id = GPOINTER_TO_INT(device_id_iter->data);
+        if (device_id == omemo_ctx.device_id && equals_our_barejid(jid)) {
+            continue;
+        }
+
+        GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
+        if (!known_identities) {
+            return FALSE;
+        }
+
+        gboolean found = FALSE;
+        GList* fp_list = g_hash_table_get_keys(known_identities);
+        GList* fp_iter;
+        for (fp_iter = fp_list; fp_iter != NULL; fp_iter = fp_iter->next) {
+            if (device_id == GPOINTER_TO_INT(g_hash_table_lookup(known_identities, fp_iter->data))) {
+                if (!omemo_is_trusted_identity(jid, fp_iter->data)) {
+                    g_list_free(fp_list);
+                    return FALSE;
+                }
+                found = TRUE;
+                break;
+            }
+        }
+        g_list_free(fp_list);
+
+        if (!found) {
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
 static char*
 _omemo_fingerprint(ec_public_key* identity, gboolean formatted)
 {
