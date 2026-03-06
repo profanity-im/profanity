@@ -171,6 +171,26 @@ When adding a new test file:
 2. Register the test functions in `tests/unittests/unittests.c` within the `all_tests` array.
 3. Add the new source file to `unittest_sources` in both `meson.build` and `Makefile.am`.
 
+### Running functional tests
+Functional tests use [stabber](https://github.com/profanity-im/stabber) to simulate an XMPP server.
+
+To run functional tests, you need the same dependencies as unit tests (`cmocka`) plus `stabber` and `libutil`.
+
+Functional tests will be automatically enabled if these dependencies are detected during configuration.
+
+Using Meson:
+1. Setup build directory: `meson setup build_run -Dtests=true` (check the summary to ensure "Functional tests" is `true`)
+2. Compile and run all tests (unit and functional): `meson test -C build_run`
+3. To run only functional tests: `meson test -C build_run "functional tests"`
+4. To run manually: `./build_run/functionaltests`
+5. To run a specific test manually: `CMOCKA_TEST_FILTER=test_name ./build_run/functionaltests` (use `./build_run/functionaltests --list` to see all available tests)
+
+Using Autotools:
+1. Configure: `./configure` (check the summary to ensure `cmocka`, `stabber` and `libutil` were found)
+2. Build and run all tests: `make check`
+3. To run manually: `./tests/functionaltests/functionaltests`
+4. To run a specific test manually: `CMOCKA_TEST_FILTER=test_name ./tests/functionaltests/functionaltests`
+
 ### Valgrind
 We provide a suppressions file `prof.supp`. It is a combination of the suppressions for shipped with glib2, python and custom rules.
 
