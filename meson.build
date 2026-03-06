@@ -59,6 +59,7 @@ add_project_arguments([
   '-Wno-unused-parameter',
 ], language: 'c')
 
+analyzer_args = []
 if is_debug
   add_project_arguments([
     '-ggdb3',
@@ -71,7 +72,7 @@ if is_debug
     '-Wpointer-arith'
   ], language: 'c')
   if cc.get_id() == 'gcc'
-     add_project_arguments('-fanalyzer', language: 'c')
+     analyzer_args += '-fanalyzer'
   endif
 endif
 
@@ -501,6 +502,7 @@ profanity_exe = executable(
   profanity_sources,
   files('src/main.c'),
   config_h,
+  c_args: analyzer_args,
   dependencies: profanity_deps,
   include_directories: inc,
   install: true,
@@ -710,7 +712,7 @@ if get_option('tests')
         build_by_default: false,
       )
 
-      test('functional tests', functionaltests)
+      test('functional tests', functionaltests, timeout: 1800)
     endif
   else
     warning('cmocka not found, tests will not be built')

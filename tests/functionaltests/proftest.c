@@ -298,9 +298,9 @@ init_prof_test(void** state)
 
     prof_start();
     usleep(1000 * 500); // Wait for profanity to start
+    prof_expect_timeout = 30;
     assert_true(prof_output_regex("Profanity"));
 
-    prof_expect_timeout = 30;
     // set UI options to make expect assertions faster and more reliable
     prof_input("/inpblock timeout 5");
     prof_output_regex("Input blocking set to 5 milliseconds");
