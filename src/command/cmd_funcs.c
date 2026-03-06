@@ -8686,8 +8686,9 @@ cmd_omemo_fingerprint(ProfWin* window, const char* const command, gchar** args)
     for (GList* fingerprint = fingerprints; fingerprint != NULL; fingerprint = fingerprint->next) {
         auto_char char* formatted_fingerprint = omemo_format_fingerprint(fingerprint->data);
         gboolean trusted = omemo_is_trusted_identity(jid->barejid, fingerprint->data);
+        gboolean active = omemo_is_device_active(jid->barejid, fingerprint->data);
 
-        win_println(window, THEME_DEFAULT, "-", "%s's OMEMO fingerprint: %s%s", jid->barejid, formatted_fingerprint, trusted ? " (trusted)" : "");
+        win_println(window, THEME_DEFAULT, "-", "%s's OMEMO fingerprint: %s%s%s", jid->barejid, formatted_fingerprint, trusted ? " (trusted)" : " (untrusted)", active ? " (active)" : " (inactive)");
     }
 
     g_list_free(fingerprints);

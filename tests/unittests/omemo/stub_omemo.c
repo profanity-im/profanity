@@ -42,10 +42,28 @@ omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
     return TRUE;
 }
 
+gboolean
+omemo_is_jid_trusted(const char* const jid)
+{
+    return TRUE;
+}
+
+GList*
+omemo_get_jid_untrusted_fingerprints(const char* const jid)
+{
+    return NULL;
+}
+
 GList*
 omemo_known_device_identities(const char* const jid)
 {
     return NULL;
+}
+
+gboolean
+omemo_is_device_active(const char* const jid, const char* const fingerprint)
+{
+    return TRUE;
 }
 
 gboolean

@@ -1313,6 +1313,39 @@ omemo_get_jid_untrusted_fingerprints(const char* const jid)
     return untrusted_fps;
 }
 
+gboolean
+omemo_is_device_active(const char* const jid, const char* const fingerprint)
+{
+    if (!omemo_loaded()) {
+        return FALSE;
+    }
+
+    GList* device_list = g_hash_table_lookup(omemo_ctx.device_list, jid);
+    if (!device_list) {
+        return FALSE;
+    }
+
+    GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
+    if (!known_identities) {
+        return FALSE;
+    }
+
+    void* device_id = g_hash_table_lookup(known_identities, fingerprint);
+    if (!device_id) {
+        return FALSE;
+    }
+
+    uint32_t dev_id = GPOINTER_TO_INT(device_id);
+    GList* iter;
+    for (iter = device_list; iter != NULL; iter = iter->next) {
+        if (GPOINTER_TO_INT(iter->data) == dev_id) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 static char*
 _omemo_fingerprint(ec_public_key* identity, gboolean formatted)
 {
