@@ -174,6 +174,11 @@ When adding a new test file:
 ### Running functional tests
 Functional tests use [stabber](https://github.com/profanity-im/stabber) to simulate an XMPP server.
 
+**Performance Note:** It is highly recommended to run functional tests **without** sanitizers (**ASan** and **UBSan**). These sanitizers add significant overhead that can cause functional tests to time out or take an excessively long time to complete.
+
+*   **Meson:** Ensure `-Db_sanitize=none` is set in your build configuration. You can check your current configuration with `meson configure build_run | grep b_sanitize`.
+*   **Autotools:** Ensure your `CFLAGS` does not contain `-fsanitize=address` or `-fsanitize=undefined`.
+
 To run functional tests, you need the same dependencies as unit tests (`cmocka`) plus `stabber` and `libutil`.
 
 Functional tests will be automatically enabled if these dependencies are detected during configuration.
