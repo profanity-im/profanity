@@ -309,6 +309,9 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
 
         msg->stanzaid = _db_strdup(archive_id);
         msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
+    } else {
+        message_free(msg);
+        msg = NULL;
     }
     sqlite3_finalize(stmt);
 
