@@ -250,7 +250,11 @@ gchar*
 create_fulljid(const gchar* const barejid, const gchar* const resource)
 {
     auto_gchar gchar* barejidlower = g_utf8_strdown(barejid, -1);
-    return g_strdup_printf("%s/%s", barejidlower, resource);
+    if (resource && strlen(resource) > 0) {
+        return g_strdup_printf("%s/%s", barejidlower, resource);
+    } else {
+        return g_strdup(barejidlower);
+    }
 }
 
 /*
