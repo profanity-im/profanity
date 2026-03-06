@@ -875,10 +875,42 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     // Don't send the message if no key could be encrypted.
     // (Since none of the recipients would be able to read the message.)
     if (keys == NULL) {
-        win_println(win, THEME_ERROR, "!", "This message cannot be decrypted for any recipient.\n"
-                                           "You should trust your recipients' device fingerprint(s) using \"/omemo trust FINGERPRINT\".\n"
-                                           "It could also be that the key bundle of the recipient(s) have not been received. "
-                                           "In this case, you could try \"omemo end\", \"omemo start\", and send the message again.");
+        win_println(win, THEME_ERROR, "!", "This message cannot be encrypted for any recipient.");
+
+        // Check for untrusted fingerprints for each recipient
+        GList* recipients = NULL;
+        if (muc) {
+            ProfMucWin* mucwin = (ProfMucWin*)win;
+            GList* members = muc_members(mucwin->roomjid);
+            GList* iter;
+            for (iter = members; iter != NULL; iter = iter->next) {
+                auto_jid Jid* jidp = jid_create(iter->data);
+                recipients = g_list_append(recipients, strdup(jidp->barejid));
+            }
+            g_list_free(members);
+        } else {
+            ProfChatWin* chatwin = (ProfChatWin*)win;
+            recipients = g_list_append(recipients, strdup(chatwin->barejid));
+        }
+
+        GList* rec_iter;
+        for (rec_iter = recipients; rec_iter != NULL; rec_iter = rec_iter->next) {
+            GList* untrusted = omemo_get_jid_untrusted_fingerprints(rec_iter->data);
+            if (untrusted) {
+                win_println(win, THEME_ERROR, "!", "Untrusted OMEMO fingerprints for %s:", (char*)rec_iter->data);
+                GList* fp_iter;
+                for (fp_iter = untrusted; fp_iter != NULL; fp_iter = fp_iter->next) {
+                    char* formatted = omemo_format_fingerprint(fp_iter->data);
+                    win_println(win, THEME_ERROR, "!", "  - %s", formatted);
+                    free(formatted);
+                }
+                win_println(win, THEME_ERROR, "!", "Use \"/omemo trust %s <fingerprint>\" to trust them.", (char*)rec_iter->data);
+                g_list_free_full(untrusted, free);
+            }
+        }
+        g_list_free_full(recipients, free);
+
+        win_println(win, THEME_ERROR, "!", "It could also be that key bundles have not been received. Try \"/omemo end\", then \"/omemo start\".");
         goto out;
     }
 
@@ -1238,6 +1270,47 @@ omemo_is_jid_trusted(const char* const jid)
     }
 
     return TRUE;
+}
+
+GList*
+omemo_get_jid_untrusted_fingerprints(const char* const jid)
+{
+    if (!omemo_loaded()) {
+        return NULL;
+    }
+
+    GList* device_list = g_hash_table_lookup(omemo_ctx.device_list, jid);
+    if (!device_list) {
+        return NULL;
+    }
+
+    GList* untrusted_fps = NULL;
+    GList* device_id_iter;
+    for (device_id_iter = device_list; device_id_iter != NULL; device_id_iter = device_id_iter->next) {
+        uint32_t device_id = GPOINTER_TO_INT(device_id_iter->data);
+        if (device_id == omemo_ctx.device_id && equals_our_barejid(jid)) {
+            continue;
+        }
+
+        GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
+        if (!known_identities) {
+            continue;
+        }
+
+        GList* fp_list = g_hash_table_get_keys(known_identities);
+        GList* fp_iter;
+        for (fp_iter = fp_list; fp_iter != NULL; fp_iter = fp_iter->next) {
+            if (device_id == GPOINTER_TO_INT(g_hash_table_lookup(known_identities, fp_iter->data))) {
+                if (!omemo_is_trusted_identity(jid, fp_iter->data)) {
+                    untrusted_fps = g_list_append(untrusted_fps, g_strdup(fp_iter->data));
+                }
+                break;
+            }
+        }
+        g_list_free(fp_list);
+    }
+
+    return untrusted_fps;
 }
 
 static char*
