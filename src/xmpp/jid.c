@@ -57,23 +57,12 @@ _is_invalid_local_char(gunichar c)
 Jid*
 jid_create(const gchar* const str)
 {
-    if (str == NULL) {
+    if (!jid_is_valid(str)) {
         return NULL;
     }
 
     gchar* trimmed = g_strdup(str);
     if (trimmed == NULL) {
-        return NULL;
-    }
-
-    size_t len = strlen(trimmed);
-    if (len == 0 || len > JID_MAX_TOTAL_LEN) {
-        g_free(trimmed);
-        return NULL;
-    }
-
-    if (!g_utf8_validate(trimmed, -1, NULL)) {
-        g_free(trimmed);
         return NULL;
     }
 
@@ -85,62 +74,30 @@ jid_create(const gchar* const str)
     auto_gchar gchar* bare = NULL;
 
     if (slashp) {
-        result->resourcepart = g_strdup(slashp + 1);
+        if (strlen(slashp + 1) > 0) {
+            result->resourcepart = g_strdup(slashp + 1);
+            result->fulljid = g_strdup(trimmed);
+        }
         bare = g_utf8_substring(trimmed, 0, g_utf8_pointer_to_offset(trimmed, slashp));
-        result->fulljid = g_strdup(trimmed);
     } else {
         bare = g_strdup(trimmed);
-    }
-
-    // Validate resourcepart
-    if (result->resourcepart) {
-        size_t rlen = strlen(result->resourcepart);
-        if (rlen == 0 || rlen > JID_MAX_PART_LEN) {
-            jid_destroy(result);
-            return NULL;
-        }
     }
 
     gchar* atp = g_utf8_strchr(bare, -1, '@');
     gchar* domain_start = bare;
 
     if (atp) {
-        result->localpart = g_utf8_substring(bare, 0, g_utf8_pointer_to_offset(bare, atp));
+        if (g_utf8_pointer_to_offset(bare, atp) > 0) {
+            result->localpart = g_utf8_substring(bare, 0, g_utf8_pointer_to_offset(bare, atp));
+        }
         domain_start = atp + 1;
-
-        // Validate localpart
-        size_t llen = strlen(result->localpart);
-        if (llen == 0 || llen > JID_MAX_PART_LEN) {
-            jid_destroy(result);
-            return NULL;
-        }
-
-        const gchar* p = result->localpart;
-        while (*p) {
-            gunichar c = g_utf8_get_char(p);
-            if (_is_invalid_local_char(c)) {
-                jid_destroy(result);
-                return NULL;
-            }
-            p = g_utf8_next_char(p);
-        }
     }
 
-    result->domainpart = g_strdup(domain_start);
+    if (strlen(domain_start) > 0) {
+        result->domainpart = g_strdup(domain_start);
+    }
+
     result->barejid = g_utf8_strdown(bare, -1);
-
-    // Validate domainpart
-    size_t dlen = result->domainpart ? strlen(result->domainpart) : 0;
-    if (dlen == 0 || dlen > JID_MAX_PART_LEN) {
-        jid_destroy(result);
-        return NULL;
-    }
-
-    // Domainpart cannot contain @
-    if (g_utf8_strchr(result->domainpart, -1, '@')) {
-        jid_destroy(result);
-        return NULL;
-    }
 
     return result;
 }
@@ -148,15 +105,93 @@ jid_create(const gchar* const str)
 gboolean
 jid_is_valid(const gchar* const str)
 {
-    auto_jid Jid* jid = jid_create(str);
-    return (jid != NULL);
+    if (str == NULL) {
+        return FALSE;
+    }
+
+    size_t total_len = strlen(str);
+    if (total_len == 0 || total_len > JID_MAX_TOTAL_LEN) {
+        return FALSE;
+    }
+
+    if (!g_utf8_validate(str, -1, NULL)) {
+        return FALSE;
+    }
+
+    const gchar* slash = g_utf8_strchr(str, -1, '/');
+    const gchar* at = NULL;
+
+    // Find the first '@' that is NOT in the resourcepart
+    // and ensure there is at most one '@' in the bare JID
+    const gchar* p = str;
+    while (*p && (!slash || p < slash)) {
+        if (g_utf8_get_char(p) == '@') {
+            if (at == NULL) {
+                at = p;
+            } else {
+                // More than one '@' in bare JID
+                return FALSE;
+            }
+        }
+        p = g_utf8_next_char(p);
+    }
+
+    const gchar* domain_start = str;
+    size_t domain_len = 0;
+
+    // Localpart validation
+    if (at) {
+        size_t local_len = at - str;
+        if (local_len == 0 || local_len > JID_MAX_PART_LEN) {
+            return FALSE;
+        }
+
+        const gchar* lp = str;
+        while (lp < at) {
+            gunichar c = g_utf8_get_char(lp);
+            if (_is_invalid_local_char(c)) {
+                return FALSE;
+            }
+            lp = g_utf8_next_char(lp);
+        }
+        domain_start = at + 1;
+    }
+
+    // Resourcepart validation
+    if (slash) {
+        domain_len = slash - domain_start;
+        size_t resource_len = strlen(slash + 1);
+        if (resource_len == 0 || resource_len > JID_MAX_PART_LEN) {
+            return FALSE;
+        }
+    } else {
+        domain_len = strlen(domain_start);
+    }
+
+    // Domainpart validation
+    if (domain_len == 0 || domain_len > JID_MAX_PART_LEN) {
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 gboolean
 jid_is_valid_user_jid(const gchar* const str)
 {
-    auto_jid Jid* jid = jid_create(str);
-    return (jid != NULL && jid->localpart != NULL);
+    if (!jid_is_valid(str)) {
+        return FALSE;
+    }
+
+    const gchar* slash = g_utf8_strchr(str, -1, '/');
+    const gchar* at = g_utf8_strchr(str, -1, '@');
+
+    // A user JID must have an '@' before any '/'
+    if (at && (!slash || at < slash)) {
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
 Jid*
