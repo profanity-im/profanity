@@ -86,6 +86,10 @@ void
 sv_ev_login_account_success(char* account_name, gboolean secured)
 {
     ProfAccount* account = accounts_get_account(account_name);
+    if (!account) {
+        log_error("Could not find account: %s", account_name);
+        return;
+    }
 
     bookmark_ignore_on_connect(account->jid);
 
