@@ -85,6 +85,9 @@ void omemo_trust(const char* const jid, const char* const fingerprint);
 void omemo_untrust(const char* const jid, const char* const fingerprint);
 GList* omemo_known_device_identities(const char* const jid);
 gboolean omemo_is_trusted_identity(const char* const jid, const char* const fingerprint);
+gboolean omemo_is_jid_trusted(const char* const jid);
+GList* omemo_get_jid_untrusted_fingerprints(const char* const jid);
+gboolean omemo_is_device_active(const char* const jid, const char* const fingerprint);
 char* omemo_fingerprint_autocomplete(const char* const search_str, gboolean previous, void* context);
 void omemo_fingerprint_autocomplete_reset(void);
 gboolean omemo_automatic_start(const char* const recipient);
@@ -95,8 +98,9 @@ void omemo_start_muc_sessions(const char* const roomjid);
 void omemo_start_device_session(const char* const jid, uint32_t device_id, GList* prekeys, uint32_t signed_prekey_id, const unsigned char* const signed_prekey, size_t signed_prekey_len, const unsigned char* const signature, size_t signature_len, const unsigned char* const identity_key, size_t identity_key_len);
 
 gboolean omemo_loaded(void);
+
 char* omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_receipt, gboolean muc, const char* const replace_id);
-char* omemo_on_message_recv(const char* const from, uint32_t sid, const unsigned char* const iv, size_t iv_len, GList* keys, const unsigned char* const payload, size_t payload_len, gboolean muc, gboolean* trusted);
+char* omemo_on_message_recv(const char* const from, uint32_t sid, const unsigned char* const iv, size_t iv_len, GList* keys, const unsigned char* const payload, size_t payload_len, gboolean muc, gboolean* trusted, omemo_error_t* error) __attribute__((nonnull(9, 10)));
 
 char* omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res);
 gcry_error_t omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char* fragment);

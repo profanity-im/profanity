@@ -2332,13 +2332,18 @@ static const struct cmd_t command_defs[] = {
             "/omemo clear_device_list",
             "/omemo qrcode")
         CMD_DESC(
-            "OMEMO commands to manage keys, and perform encryption during chat sessions.")
+            "OMEMO commands to manage keys, and perform encryption during chat sessions.\n"
+            "The title bar will show the OMEMO session status:\n"
+            "[OMEMO][trusted]   - All active devices for the contact are trusted.\n"
+            "[OMEMO][untrusted] - One or more active devices for the contact are untrusted.\n")
         CMD_ARGS(
             { "gen",                     "Generate OMEMO cryptographic materials for current account." },
             { "start [<contact>]",       "Start an OMEMO session with contact, or current recipient if omitted." },
             { "end",                     "End the current OMEMO session." },
             { "log on|off",              "Enable or disable plaintext logging of OMEMO encrypted messages." },
             { "log redact",              "Log OMEMO encrypted messages, but replace the contents with [redacted]." },
+            { "trust [<contact>] <fp>",  "Trust a fingerprint for a contact, or current recipient if omitted. If all active devices are trusted, the title bar will show [trusted]. Otherwise, it will show [untrusted]." },
+            { "untrust [<contact>] <fp>","Untrust a fingerprint for a contact, or current recipient if omitted." },
             { "fingerprint [<contact>]", "Show contact's fingerprints, or current recipient's if omitted." },
             { "char <char>",             "Set the character to be displayed next to OMEMO encrypted messages." },
             { "trustmode manual",        "Set the global OMEMO trust mode to manual, OMEMO keys has to be trusted manually." },

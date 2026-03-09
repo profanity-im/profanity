@@ -150,6 +150,17 @@ typedef enum {
     PROF_MSG_TYPE_MUCPM
 } prof_msg_type_t;
 
+typedef enum {
+    OMEMO_ERR_NONE = 0,
+    OMEMO_ERR_NO_KEY,
+    OMEMO_ERR_NOT_TRUSTED,
+    OMEMO_ERR_NO_SESSION,
+    OMEMO_ERR_DECRYPT_FAILED,
+    OMEMO_ERR_INVALID_JID,
+    OMEMO_ERR_MUC_SENDER_NOT_FOUND,
+    OMEMO_ERR_OTHER
+} omemo_error_t;
+
 typedef struct prof_message_t
 {
     Jid* from_jid;
@@ -172,6 +183,7 @@ typedef struct prof_message_t
     char* plain;
     GDateTime* timestamp;
     prof_enc_t enc;
+    omemo_error_t omemo_err;
     gboolean trusted;
     gboolean is_mam;
     prof_msg_type_t type;
