@@ -39,7 +39,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
 
-static const int PAD_SIZE = 100;
+static const int PAD_SIZE = 1000;
 static const char* LOADING_MESSAGE = "Loading older messages…";
 static const char* CONS_WIN_TITLE = "Profanity. Type /help for help information.";
 static const char* XML_WIN_TITLE = "XML Console";
