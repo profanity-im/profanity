@@ -360,9 +360,7 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_erro
     char* iv_text = NULL;
     char* payload_text = NULL;
 
-    if (error) {
-        *error = OMEMO_ERR_NONE;
-    }
+    *error = OMEMO_ERR_NONE;
 
     xmpp_stanza_t* encrypted = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_OMEMO);
     if (!encrypted) {
@@ -371,64 +369,48 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_erro
 
     xmpp_stanza_t* header = xmpp_stanza_get_child_by_name(encrypted, "header");
     if (!header) {
-        if (error) {
-            *error = OMEMO_ERR_OTHER;
-        }
+        *error = OMEMO_ERR_OTHER;
         return NULL;
     }
 
     const char* sid_text = xmpp_stanza_get_attribute(header, "sid");
     if (!sid_text) {
-        if (error) {
-            *error = OMEMO_ERR_OTHER;
-        }
+        *error = OMEMO_ERR_OTHER;
         return NULL;
     }
     uint32_t sid = strtoul(sid_text, NULL, 10);
 
     xmpp_stanza_t* iv = xmpp_stanza_get_child_by_name(header, "iv");
     if (!iv) {
-        if (error) {
-            *error = OMEMO_ERR_OTHER;
-        }
+        *error = OMEMO_ERR_OTHER;
         return NULL;
     }
     iv_text = xmpp_stanza_get_text(iv);
     if (!iv_text) {
-        if (error) {
-            *error = OMEMO_ERR_OTHER;
-        }
+        *error = OMEMO_ERR_OTHER;
         return NULL;
     }
     size_t iv_len;
     iv_raw = g_base64_decode(iv_text, &iv_len);
     if (!iv_raw) {
-        if (error) {
-            *error = OMEMO_ERR_OTHER;
-        }
+        *error = OMEMO_ERR_OTHER;
         return NULL;
     }
 
     xmpp_stanza_t* payload = xmpp_stanza_get_child_by_name(encrypted, "payload");
     if (!payload) {
-        if (error) {
-            *error = OMEMO_ERR_OTHER;
-        }
+        *error = OMEMO_ERR_OTHER;
         goto quit;
     }
     payload_text = xmpp_stanza_get_text(payload);
     if (!payload_text) {
-        if (error) {
-            *error = OMEMO_ERR_OTHER;
-        }
+        *error = OMEMO_ERR_OTHER;
         goto quit;
     }
     size_t payload_len;
     payload_raw = g_base64_decode(payload_text, &payload_len);
     if (!payload_raw) {
-        if (error) {
-            *error = OMEMO_ERR_OTHER;
-        }
+        *error = OMEMO_ERR_OTHER;
         goto quit;
     }
 

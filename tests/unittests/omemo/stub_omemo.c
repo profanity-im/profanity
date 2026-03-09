@@ -135,18 +135,14 @@ omemo_on_message_recv(const char* const from, uint32_t sid,
                       GList* keys, const unsigned char* const payload,
                       size_t payload_len, gboolean muc, gboolean* trusted, omemo_error_t* error)
 {
-    if (error) {
-        *error = OMEMO_ERR_NONE;
-    }
+    *error = OMEMO_ERR_NONE;
     return NULL;
 }
 
 char*
 omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_error_t* error)
 {
-    if (error) {
-        *error = OMEMO_ERR_NONE;
-    }
+    *error = OMEMO_ERR_NONE;
     return NULL;
 }
 
