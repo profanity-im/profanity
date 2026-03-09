@@ -100,23 +100,14 @@ _accounts_save(const char* account_name)
 
     auto_gchar gchar* sanitized = _sanitize_account_name(account_name);
 
-    gsize written = 0;
     if (_accounts_has_group(sanitized)) {
-        gsize naccounts;
-        auto_gcharv gchar** account_names = g_key_file_get_groups(current.keyfile, &naccounts);
-        for (gsize i = 0; i < naccounts; i++) {
-            /* EITHER current already contains the account, OR we're at the end of
-             * the list of accounts and we should add this new one.
-             */
-            if (g_strcmp0(sanitized, account_names[i]) && (i != naccounts - 1))
-                continue;
-            gsize nkeys;
-            auto_gcharv gchar** keys = g_key_file_get_keys(accounts_prof_keyfile.keyfile, sanitized, &nkeys, NULL);
+        gsize nkeys;
+        auto_gcharv gchar** keys = g_key_file_get_keys(accounts_prof_keyfile.keyfile, sanitized, &nkeys, NULL);
+        if (keys) {
             for (gsize j = 0; j < nkeys; ++j) {
                 auto_gchar gchar* new_value = g_key_file_get_value(accounts_prof_keyfile.keyfile, sanitized, keys[j], NULL);
                 g_key_file_set_value(current.keyfile, sanitized, keys[j], new_value);
             }
-            written++;
         }
     } else {
         g_key_file_remove_group(current.keyfile, sanitized, NULL);
