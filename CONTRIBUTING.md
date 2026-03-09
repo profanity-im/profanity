@@ -81,6 +81,28 @@ Common types are:
 Example:
 `fix(omemo): resolve trust check issues`
 
+The **footer** is used for metadata and automation:
+- `Fixes: #123`: Links to an issue and automatically closes it when merged.
+- `Ref: <hash>`: References a related commit.
+- `See-also: <url>`: Links to external documentation or discussion.
+- `Co-authored-by: Name <email>`: Credits multiple authors.
+- `BREAKING CHANGE:`: Starts with this phrase to signal a major change that breaks backward compatibility.
+
+Full Example:
+```text
+feat(omemo): add support for QR code trust verification
+
+This adds a new command `/omemo qrcode` that displays a QR code
+of the current identity key for easier out-of-band verification.
+
+BREAKING CHANGE: The 'libqrencode' library is now a required dependency.
+
+Fixes: #2105
+Ref: a26cdf386bfec381563294342f2152a5c0eb677e
+See-also: https://xmpp.org/extensions/xep-0384.html
+Co-authored-by: Another Dev <dev@example.com>
+```
+
 ### GitHub
 We would like to encourage people to use GitHub to create pull requests.
 It makes it easy for us to review the patches, track WIP branches, organize branches with labels and milestones,
