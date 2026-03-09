@@ -55,6 +55,32 @@ Write commit messages that make sense. Explain what and *why* you change.
 Write in present tense.
 Please give [this guideline](https://gist.github.com/robertpainsi/b632364184e70900af4ab688decf6f53) a read.
 
+We are experimenting with using [Conventional Commit Structure](https://www.conventionalcommits.org/en/v1.0.0/) so that we can later generate automated changelogs.
+
+The structure should look like this:
+```text
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+Common types are:
+- `feat`: A new feature
+- `fix`: A bug fix
+- `docs`: Documentation only changes
+- `style`: Changes that do not affect the meaning of the code (formatting)
+- `refactor`: A code change that neither fixes a bug nor adds a feature
+- `perf`: A code change that improves performance
+- `tests`: Adding missing tests or correcting existing tests
+- `build`: Changes that affect the build system or external dependencies (example scopes: make, meson)
+- `ci`: Changes to our CI configuration files and scripts
+- `chore`: Other changes that don't modify src or test files
+
+Example:
+`fix(omemo): resolve trust check issues`
+
 ### GitHub
 We would like to encourage people to use GitHub to create pull requests.
 It makes it easy for us to review the patches, track WIP branches, organize branches with labels and milestones,
