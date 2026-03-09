@@ -968,6 +968,31 @@ _wins_get_next_available_num(GList* used)
     }
 }
 
+void
+wins_omemo_trust_changed(const char* const jid)
+{
+    GList* curr = values;
+    while (curr) {
+        ProfWin* window = curr->data;
+        if (window->type == WIN_CHAT) {
+            ProfChatWin* chatwin = (ProfChatWin*)window;
+            if (jid == NULL || strcmp(chatwin->barejid, jid) == 0) {
+#ifdef HAVE_OMEMO
+                chatwin->omemo_trusted = omemo_is_jid_trusted(chatwin->barejid);
+#endif
+            }
+        } else if (window->type == WIN_MUC) {
+            ProfMucWin* mucwin = (ProfMucWin*)window;
+            if (jid == NULL || strcmp(mucwin->roomjid, jid) == 0) {
+#ifdef HAVE_OMEMO
+                mucwin->omemo_trusted = omemo_is_jid_trusted(mucwin->roomjid);
+#endif
+            }
+        }
+        curr = g_list_next(curr);
+    }
+}
+
 gboolean
 wins_tidy(void)
 {

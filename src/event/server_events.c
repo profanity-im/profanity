@@ -572,6 +572,8 @@ _sv_ev_incoming_omemo(ProfChatWin* chatwin, gboolean new_win, ProfMessage* messa
         chat_log_omemo_msg_in(message);
     }
     chatwin->pgp_recv = FALSE;
+
+    wins_omemo_trust_changed(chatwin->barejid);
 #endif
 }
 

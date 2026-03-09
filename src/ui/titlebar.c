@@ -405,7 +405,7 @@ _show_muc_privacy(ProfMucWin* mucwin)
         wattroff(win, bracket_attrs);
 
 #ifdef HAVE_OMEMO
-        if (omemo_is_jid_trusted(mucwin->roomjid)) {
+        if (mucwin->omemo_trusted) {
             wprintw(win, " ");
             wattron(win, bracket_attrs);
             wprintw(win, "[");
@@ -560,7 +560,7 @@ _show_privacy(ProfChatWin* chatwin)
         wattroff(win, bracket_attrs);
 
 #ifdef HAVE_OMEMO
-        if (omemo_is_jid_trusted(chatwin->barejid)) {
+        if (chatwin->omemo_trusted) {
             wprintw(win, " ");
             wattron(win, bracket_attrs);
             wprintw(win, "[");
