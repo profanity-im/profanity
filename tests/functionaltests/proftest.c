@@ -1,3 +1,11 @@
+/*
+ * proftest.c
+ *
+ * Copyright (C) 2015 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <glib.h>
@@ -56,8 +64,8 @@ prof_expect(int fd, ...)
     pfd.fd = fd;
     pfd.events = POLLIN;
 
-    GError *error = NULL;
-    GRegex *ansi = g_regex_new("\\x1b\\[[0-9;]*[a-zA-Z]|\\x1b\\([a-zA-Z]", 0, 0, &error);
+    GError* error = NULL;
+    GRegex* ansi = g_regex_new("\\x1b\\[[0-9;]*[a-zA-Z]|\\x1b\\([a-zA-Z]", 0, 0, &error);
     if (error) {
         g_error_free(error);
         return 0;
@@ -70,7 +78,7 @@ prof_expect(int fd, ...)
         if (type == prof_expect_exact) {
             gchar* escaped = g_regex_escape_string(pattern, -1);
             error = NULL;
-            GRegex *regex = g_regex_new(escaped, G_REGEX_DOTALL | G_REGEX_OPTIMIZE, 0, &error);
+            GRegex* regex = g_regex_new(escaped, G_REGEX_DOTALL | G_REGEX_OPTIMIZE, 0, &error);
             if (error) {
                 g_error_free(error);
                 g_free(escaped);
@@ -80,10 +88,10 @@ prof_expect(int fd, ...)
                 return 0;
             }
             g_free(escaped);
-            GMatchInfo *match_info;
+            GMatchInfo* match_info;
             if (g_regex_match(regex, clean_output, 0, &match_info)) {
-                g_string_truncate(accumulated_output, 0); 
-                
+                g_string_truncate(accumulated_output, 0);
+
                 g_match_info_free(match_info);
                 g_regex_unref(regex);
                 g_free(clean_output);
@@ -94,9 +102,9 @@ prof_expect(int fd, ...)
             g_match_info_free(match_info);
             g_regex_unref(regex);
         } else if (type == prof_expect_regexp) {
-            GMatchInfo *match_info;
+            GMatchInfo* match_info;
             error = NULL;
-            GRegex *regex = g_regex_new(pattern, G_REGEX_DOTALL | G_REGEX_OPTIMIZE, 0, &error);
+            GRegex* regex = g_regex_new(pattern, G_REGEX_DOTALL | G_REGEX_OPTIMIZE, 0, &error);
             if (error) {
                 g_error_free(error);
                 g_free(clean_output);
@@ -107,9 +115,9 @@ prof_expect(int fd, ...)
             if (g_regex_match(regex, clean_output, 0, &match_info)) {
                 gint start_pos, end_pos;
                 g_match_info_fetch_pos(match_info, 0, &start_pos, &end_pos);
-                
+
                 g_string_truncate(accumulated_output, 0);
-                
+
                 g_match_info_free(match_info);
                 g_regex_unref(regex);
                 g_free(clean_output);
@@ -120,7 +128,7 @@ prof_expect(int fd, ...)
             g_match_info_free(match_info);
             g_regex_unref(regex);
         }
-        
+
         g_free(clean_output);
 
         int ret = poll(&pfd, 1, 10); // 10ms timeout for poll
@@ -253,7 +261,7 @@ prof_start(void)
     pid_t pid = forkpty(&master, NULL, NULL, NULL);
     if (pid == 0) {
         system("stty sane -echo");
-        execlp("sh", "sh", "-c", "./tests/functionaltests/start_profanity.sh", (char *)0);
+        execlp("sh", "sh", "-c", "./tests/functionaltests/start_profanity.sh", (char*)0);
         _exit(1);
     }
     prof_pid = pid;
@@ -263,8 +271,8 @@ prof_start(void)
 int
 init_prof_test(void** state)
 {
-    const char *cfg = getenv("XDG_CONFIG_HOME");
-    const char *dat = getenv("XDG_DATA_HOME");
+    const char* cfg = getenv("XDG_CONFIG_HOME");
+    const char* dat = getenv("XDG_DATA_HOME");
     config_orig = cfg ? g_strdup(cfg) : NULL;
     data_orig = dat ? g_strdup(dat) : NULL;
 
@@ -272,7 +280,7 @@ init_prof_test(void** state)
     setenv("XDG_DATA_HOME", XDG_DATA_HOME, 1);
 
     usleep(1000 * 2000); // 2s delay between tests to let OS recover
-    
+
     int res = -1;
     int port = 0;
     for (int i = 0; i < 5; i++) {
@@ -337,7 +345,7 @@ int
 close_prof_test(void** state)
 {
     prof_input("/quit");
-    
+
     // Give it some time to quit gracefully
     int retries = 0;
     int status;
@@ -445,7 +453,7 @@ prof_connect_with_roster(const char* roster)
     assert_true(prof_output_regex("successfully"));
     prof_expect_timeout = 10;
     stbbr_wait_for("presence:*");
-    //usleep(1000 * 2000); // 2s delay
+    // usleep(1000 * 2000); // 2s delay
 }
 
 void

@@ -1,3 +1,11 @@
+/*
+ * stub_gpg.c
+ *
+ * Copyright (C) 2015 - 2017 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2020 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #include <glib.h>
 
 #include "pgp/gpg.h"

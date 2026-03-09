@@ -1,3 +1,11 @@
+/*
+ * test_common.c
+ *
+ * Copyright (C) 2015 - 2017 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2015 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #include "xmpp/resource.h"
 #include "common.h"
 #include "prof_cmocka.h"

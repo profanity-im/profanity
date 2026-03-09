@@ -1,3 +1,11 @@
+/*
+ * test_software.h
+ *
+ * Copyright (C) 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2026 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 void send_software_version_request(void** state);
 void display_software_version_result(void** state);
 void shows_message_when_software_version_error(void** state);

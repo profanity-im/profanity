@@ -1,3 +1,11 @@
+/*
+ * stub_otr.c
+ *
+ * Copyright (C) 2015 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2020 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #include <libotr/proto.h>
 #include <libotr/message.h>
 #include <glib.h>

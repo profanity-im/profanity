@@ -1,3 +1,11 @@
+/*
+ * test_chat_session.h
+ *
+ * Copyright (C) 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2026 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 void sends_message_to_barejid_when_contact_offline(void** state);
 void sends_message_to_barejid_when_contact_online(void** state);
 void sends_message_to_fulljid_when_received_from_fulljid(void** state);

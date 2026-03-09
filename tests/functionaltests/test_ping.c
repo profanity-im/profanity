@@ -1,3 +1,11 @@
+/*
+ * test_ping.c
+ *
+ * Copyright (C) 2015 - 2017 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #include <glib.h>
 #include "prof_cmocka.h"
 #include <stdlib.h>
@@ -11,15 +19,15 @@ void
 ping_server(void** state)
 {
     stbbr_for_query("http://jabber.org/protocol/disco#info",
-                 "<iq id='*' to='stabber@localhost/profanity' type='result' from='localhost'>"
-                 "<query xmlns='http://jabber.org/protocol/disco#info'>"
-                 "<identity category='server' type='im' name='Prosody'/>"
-                 "<feature var='urn:xmpp:ping'/>"
-                 "</query>"
-                 "</iq>");
+                    "<iq id='*' to='stabber@localhost/profanity' type='result' from='localhost'>"
+                    "<query xmlns='http://jabber.org/protocol/disco#info'>"
+                    "<identity category='server' type='im' name='Prosody'/>"
+                    "<feature var='urn:xmpp:ping'/>"
+                    "</query>"
+                    "</iq>");
 
     stbbr_for_xmlns("urn:xmpp:ping",
-                 "<iq id='*' type='result' to='stabber@localhost/profanity'/>");
+                    "<iq id='*' type='result' to='stabber@localhost/profanity'/>");
 
     prof_connect();
 
@@ -42,11 +50,11 @@ void
 ping_server_not_supported(void** state)
 {
     stbbr_for_query("http://jabber.org/protocol/disco#info",
-                 "<iq id='*' to='stabber@localhost/profanity' type='result' from='localhost'>"
-                 "<query xmlns='http://jabber.org/protocol/disco#info'>"
-                 "<identity category='server' type='im' name='Stabber'/>"
-                 "</query>"
-                 "</iq>");
+                    "<iq id='*' to='stabber@localhost/profanity' type='result' from='localhost'>"
+                    "<query xmlns='http://jabber.org/protocol/disco#info'>"
+                    "<identity category='server' type='im' name='Stabber'/>"
+                    "</query>"
+                    "</iq>");
 
     prof_connect();
 
@@ -82,7 +90,7 @@ ping_jid(void** state)
                  "</iq>");
 
     stbbr_for_xmlns("urn:xmpp:ping",
-                 "<iq id='*' type='result' from='buddy1@localhost/mobile' to='stabber@localhost/profanity'/>");
+                    "<iq id='*' type='result' from='buddy1@localhost/mobile' to='stabber@localhost/profanity'/>");
 
     prof_connect();
 

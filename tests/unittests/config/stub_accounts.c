@@ -1,3 +1,11 @@
+/*
+ * stub_accounts.c
+ *
+ * Copyright (C) 2015 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2020 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later WITH OpenSSL-exception
+ */
 #include "prof_cmocka.h"
 
 #include "common.h"

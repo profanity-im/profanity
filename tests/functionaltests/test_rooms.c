@@ -1,3 +1,11 @@
+/*
+ * test_rooms.c
+ *
+ * Copyright (C) 2015 - 2018 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2026 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #include <glib.h>
 #include "prof_cmocka.h"
 #include <stdlib.h>
@@ -11,12 +19,12 @@ void
 rooms_query(void** state)
 {
     stbbr_for_query("http://jabber.org/protocol/disco#items",
-                 "<iq id='*' type='result' to='stabber@localhost/profanity' from='conference.localhost'>"
-                 "<query xmlns='http://jabber.org/protocol/disco#items'>"
-                 "<item jid='chatroom@conference.localhost' name='A chat room'/>"
-                 "<item jid='hangout@conference.localhost' name='Another chat room'/>"
-                 "</query>"
-                 "</iq>");
+                    "<iq id='*' type='result' to='stabber@localhost/profanity' from='conference.localhost'>"
+                    "<query xmlns='http://jabber.org/protocol/disco#items'>"
+                    "<item jid='chatroom@conference.localhost' name='A chat room'/>"
+                    "<item jid='hangout@conference.localhost' name='Another chat room'/>"
+                    "</query>"
+                    "</iq>");
 
     prof_connect();
 

@@ -1,3 +1,11 @@
+/*
+ * stub_ui.c
+ *
+ * Copyright (C) 2015 - 2018 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #include "config.h"
 
 #include <glib.h>

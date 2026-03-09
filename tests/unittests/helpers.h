@@ -1,3 +1,11 @@
+/*
+ * helpers.h
+ *
+ * Copyright (C) 2015 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2020 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #include "glib.h"
 
 int load_preferences(void** state);

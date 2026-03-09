@@ -1,3 +1,11 @@
+/*
+ * test_presence.h
+ *
+ * Copyright (C) 2015 - 2017 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2026 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 void presence_away(void** state);
 void presence_away_with_message(void** state);
 void presence_online(void** state);

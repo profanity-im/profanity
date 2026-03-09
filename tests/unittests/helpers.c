@@ -1,3 +1,11 @@
+/*
+ * helpers.c
+ *
+ * Copyright (C) 2015 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2015 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #include <stdlib.h>
 #include "prof_cmocka.h"
 #include <glib.h>

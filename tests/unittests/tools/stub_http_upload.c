@@ -1,3 +1,11 @@
+/*
+ * stub_http_upload.c
+ *
+ * Copyright (C) 2017 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2020 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #ifndef TOOLS_HTTP_UPLOAD_H
 #define TOOLS_HTTP_UPLOAD_H
 

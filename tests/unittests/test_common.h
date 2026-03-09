@@ -1,3 +1,11 @@
+/*
+ * test_common.h
+ *
+ * Copyright (C) 2015 - 2016 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2018 - 2026 Michael Vetter <jubalh@iodoru.org>
+ *
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 #ifndef TESTS_TEST_COMMON_H
 #define TESTS_TEST_COMMON_H
 
