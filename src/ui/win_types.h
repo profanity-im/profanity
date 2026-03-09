@@ -177,6 +177,7 @@ typedef struct prof_chat_win_t
     gboolean pgp_send;
     gboolean pgp_recv;
     gboolean is_omemo;
+    gboolean omemo_trusted;
     gboolean is_ox; // XEP-0373: OpenPGP for XMPP
     char* resource_override;
     gboolean history_shown;
@@ -201,6 +202,7 @@ typedef struct prof_muc_win_t
     gboolean showjid;
     gboolean showoffline;
     gboolean is_omemo;
+    gboolean omemo_trusted;
     unsigned long memcheck;
     char* enctext;
     char* message_char;

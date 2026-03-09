@@ -144,6 +144,8 @@ omemo_init(void)
     pthread_mutex_init(&omemo_static_data.lock, &omemo_static_data.attr);
 
     omemo_static_data.fingerprint_ac = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)autocomplete_free);
+
+    wins_omemo_trust_changed(NULL);
 }
 
 static gboolean
@@ -274,6 +276,8 @@ omemo_on_connect(ProfAccount* account)
     }
 
     _omemo_finalize_identity_load(account);
+
+    wins_omemo_trust_changed(NULL);
 }
 
 void
@@ -298,6 +302,8 @@ omemo_on_disconnect(void)
     signal_protocol_store_context_destroy(omemo_ctx.store);
     signal_context_destroy(omemo_ctx.signal);
     memset(&omemo_ctx, 0, sizeof(omemo_ctx));
+
+    wins_omemo_trust_changed(NULL);
 }
 
 void
@@ -598,6 +604,8 @@ omemo_set_device_list(const char* const from, GList* device_list)
             }
         }
     }
+
+    wins_omemo_trust_changed(jid->barejid);
 }
 
 GKeyFile*
@@ -1505,6 +1513,8 @@ omemo_trust(const char* const jid, const char* const fingerprint_formatted)
     signal_buffer_free(buffer);
 
     omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, free, strdup(jid));
+
+    wins_omemo_trust_changed(jid);
 }
 
 void
@@ -1567,6 +1577,8 @@ omemo_untrust(const char* const jid, const char* const fingerprint_formatted)
     auto_gchar gchar* device_id_str = g_strdup_printf("%d", device_id);
     g_key_file_remove_key(omemo_ctx.trust.keyfile, jid, device_id_str, NULL);
     omemo_trust_keyfile_save();
+
+    wins_omemo_trust_changed(jid);
 }
 
 static void
@@ -1968,6 +1980,8 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
         free(formatted_fingerprint);
     }
     free(fingerprint);
+
+    wins_omemo_trust_changed(jid);
 }
 
 static void

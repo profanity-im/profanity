@@ -36,6 +36,9 @@
 
 #include "config.h"
 #include "ui/window_list.h"
+#ifdef HAVE_OMEMO
+#include "omemo/omemo.h"
+#endif
 
 #include <stdlib.h>
 #include <string.h>
@@ -154,6 +157,9 @@ win_create_chat(const char* const barejid)
     new_win->pgp_recv = FALSE;
     new_win->pgp_send = FALSE;
     new_win->is_omemo = FALSE;
+#ifdef HAVE_OMEMO
+    new_win->omemo_trusted = omemo_is_jid_trusted(barejid);
+#endif
     new_win->is_ox = FALSE;
     new_win->history_shown = FALSE;
     new_win->unread = 0;
@@ -217,6 +223,9 @@ win_create_muc(const char* const roomjid)
     new_win->enctext = NULL;
     new_win->message_char = NULL;
     new_win->is_omemo = FALSE;
+#ifdef HAVE_OMEMO
+    new_win->omemo_trusted = omemo_is_jid_trusted(roomjid);
+#endif
     new_win->last_message = NULL;
     new_win->last_msg_id = NULL;
     new_win->has_attention = FALSE;
