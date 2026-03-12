@@ -612,9 +612,13 @@ omemo_sessions_keyfile(void)
     return omemo_ctx.sessions.keyfile;
 }
 
+static gboolean omemo_sessions_keyfile_save_disable = FALSE;
+
 void
 omemo_sessions_keyfile_save(void)
 {
+    if (omemo_sessions_keyfile_save_disable)
+        return;
     save_keyfile(&omemo_ctx.sessions);
 }
 
@@ -765,6 +769,8 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     unsigned char* tag = NULL;
     unsigned char* key_tag = NULL;
     size_t ciphertext_len, tag_len;
+
+    omemo_sessions_keyfile_save_disable = TRUE;
 
     ciphertext_len = strlen(message);
     ciphertext = malloc(ciphertext_len);
@@ -983,6 +989,8 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     }
 
 out:
+    omemo_sessions_keyfile_save_disable = FALSE;
+    omemo_sessions_keyfile_save();
     g_list_free_full(keys, (GDestroyNotify)omemo_key_free);
     free(ciphertext);
     gcry_free(key);
