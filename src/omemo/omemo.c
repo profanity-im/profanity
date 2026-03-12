@@ -781,8 +781,8 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
     tag = gcry_malloc_secure(tag_len);
     key_tag = gcry_malloc_secure(AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH);
 
-    key = gcry_random_bytes_secure(AES128_GCM_KEY_LENGTH, GCRY_VERY_STRONG_RANDOM);
-    iv = gcry_random_bytes_secure(AES128_GCM_IV_LENGTH, GCRY_VERY_STRONG_RANDOM);
+    key = gcry_random_bytes_secure(AES128_GCM_KEY_LENGTH + AES128_GCM_IV_LENGTH, GCRY_VERY_STRONG_RANDOM);
+    iv = key + AES128_GCM_KEY_LENGTH;
 
     res = aes128gcm_encrypt(ciphertext, &ciphertext_len, tag, &tag_len, (const unsigned char* const)message, strlen(message), iv, key);
     if (res != 0) {
@@ -994,7 +994,6 @@ out:
     g_list_free_full(keys, (GDestroyNotify)omemo_key_free);
     free(ciphertext);
     gcry_free(key);
-    gcry_free(iv);
     gcry_free(tag);
     gcry_free(key_tag);
 
