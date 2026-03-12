@@ -2668,8 +2668,10 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
         cons_show_error("Server doesn't support MAM (%s).", XMPP_FEATURE_MAM2);
-        g_date_time_unref(startdate);
-        g_date_time_unref(enddate);
+        if (startdate)
+            g_date_time_unref(startdate);
+        if (enddate)
+            g_date_time_unref(enddate);
         return;
     }
 
