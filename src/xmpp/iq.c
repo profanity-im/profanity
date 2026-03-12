@@ -2668,8 +2668,10 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
         cons_show_error("Server doesn't support MAM (%s).", XMPP_FEATURE_MAM2);
-        g_date_time_unref(startdate);
-        g_date_time_unref(enddate);
+        if (startdate)
+            g_date_time_unref(startdate);
+        if (enddate)
+            g_date_time_unref(enddate);
         return;
     }
 
@@ -2718,8 +2720,12 @@ void
 iq_mam_request(ProfChatWin* win, GDateTime* enddate)
 {
     ProfMessage* last_msg = log_database_get_limits_info(win->barejid, TRUE);
-    GDateTime* startdate = g_date_time_ref(last_msg->timestamp);
-    message_free(last_msg);
+    GDateTime* startdate = NULL;
+    if (last_msg) {
+        if (last_msg->timestamp)
+            startdate = g_date_time_ref(last_msg->timestamp);
+        message_free(last_msg);
+    }
 
     // Save request for later if disco items haven't been received yet
     if (!received_disco_items) {
