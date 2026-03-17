@@ -50,7 +50,7 @@ buffer_create(void)
     return new_buff;
 }
 
-int
+unsigned int
 buffer_size(ProfBuff buffer)
 {
     return g_slist_length(buffer->entries);
@@ -114,7 +114,7 @@ buffer_remove_entry_by_id(ProfBuff buffer, const char* const id)
 }
 
 void
-buffer_remove_entry(ProfBuff buffer, int entry)
+buffer_remove_entry(ProfBuff buffer, unsigned int entry)
 {
     GSList* node = g_slist_nth(buffer->entries, entry);
     ProfBuffEntry* e = node->data;
@@ -142,7 +142,7 @@ buffer_mark_received(ProfBuff buffer, const char* const id)
 }
 
 ProfBuffEntry*
-buffer_get_entry(ProfBuff buffer, int entry)
+buffer_get_entry(ProfBuff buffer, unsigned int entry)
 {
     GSList* node = g_slist_nth(buffer->entries, entry);
     return node->data;
