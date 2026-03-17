@@ -864,6 +864,20 @@ unique_filename_from_url(const char* url, const char* path)
     return unique_filename;
 }
 
+/* This returns a timestamp formatted in ISO8601 format.
+ * Either it returns the current time if `dt` is NULL, or
+ * it returns the formatted time value passed in `dt`.
+ */
+gchar*
+prof_date_time_format_iso8601(GDateTime* dt)
+{
+    GDateTime* dt_ = (dt == NULL) ? g_date_time_new_now_local() : dt;
+    gchar* ret = g_date_time_format_iso8601(dt_);
+    if (dt == NULL)
+        g_date_time_unref(dt_);
+    return ret;
+}
+
 /* build profanity version string.
  * example: 0.13.1dev.master.69d8c1f9
  */
