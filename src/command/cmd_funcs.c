@@ -57,6 +57,7 @@
 #include "plugins/plugins.h"
 #include "ui/inputwin.h"
 #include "ui/ui.h"
+#include "ui/window.h"
 #include "ui/window_list.h"
 #include "xmpp/avatar.h"
 #include "xmpp/chat_session.h"
@@ -8456,6 +8457,7 @@ cmd_omemo_start(ProfWin* window, const char* const command, gchar** args)
         win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "Initiating OMEMO session with %s...", chatwin->barejid);
         omemo_start_session(chatwin->barejid);
         chatwin->is_omemo = TRUE;
+        win_clear_warned_jids((ProfWin*)chatwin);
     } else if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
@@ -8471,6 +8473,7 @@ cmd_omemo_start(ProfWin* window, const char* const command, gchar** args)
             win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "Initiating OMEMO session in %s...", mucwin->roomjid);
             omemo_start_muc_sessions(mucwin->roomjid);
             mucwin->is_omemo = TRUE;
+            win_clear_warned_jids((ProfWin*)mucwin);
         } else {
             win_println(window, THEME_DEFAULT, "!", "MUC must be non-anonymous (i.e. be configured to present real jid to anyone) and members-only in order to support OMEMO.");
         }
@@ -8589,6 +8592,7 @@ cmd_omemo_end(ProfWin* window, const char* const command, gchar** args)
 
         chatwin->is_omemo = FALSE;
         accounts_add_omemo_state(session_get_account_name(), chatwin->barejid, FALSE);
+        win_clear_warned_jids((ProfWin*)chatwin);
     } else if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
@@ -8600,6 +8604,7 @@ cmd_omemo_end(ProfWin* window, const char* const command, gchar** args)
 
         mucwin->is_omemo = FALSE;
         accounts_add_omemo_state(session_get_account_name(), mucwin->roomjid, FALSE);
+        win_clear_warned_jids((ProfWin*)mucwin);
     } else {
         win_println(window, THEME_DEFAULT, "-", "You must be in a regular chat window to start an OMEMO session.");
         return TRUE;

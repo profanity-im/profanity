@@ -30,6 +30,7 @@
 #include "omemo/omemo.h"
 #include "omemo/store.h"
 #include "ui/ui.h"
+#include "ui/window.h"
 #include "ui/window_list.h"
 #include "xmpp/connection.h"
 #include "xmpp/muc.h"
@@ -822,7 +823,11 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
         recipient_device_id = g_hash_table_lookup(omemo_ctx.device_list, recipients_iter->data);
         if (!recipient_device_id) {
             log_warning("[OMEMO][SEND] cannot find device ids for %s", recipients_iter->data);
-            win_println(win, THEME_ERROR, "!", "Can't find a OMEMO device id for %s.\n", recipients_iter->data);
+
+            if (win_warn_needed(win, "omemo_no_device", recipients_iter->data)) {
+                win_println(win, THEME_ERROR, "!", "Can't find a OMEMO device id for %s.", recipients_iter->data);
+                win_warn_sent(win, "omemo_no_device", recipients_iter->data);
+            }
             continue;
         }
 

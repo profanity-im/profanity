@@ -133,6 +133,7 @@ typedef struct prof_win_t
     ProfLayout* layout;
     Autocomplete urls_ac;
     Autocomplete quotes_ac;
+    GHashTable* warned_jids;
 } ProfWin;
 
 typedef struct prof_console_win_t
