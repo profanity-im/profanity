@@ -515,18 +515,21 @@ omemo_set_device_list(const char* const from, GList* device_list)
             }
 
             if (!found) {
-                if (equals_our_barejid(jid->barejid)) {
-                    if (dev_id != omemo_ctx.device_id) {
-                        cons_show("New OMEMO device (ID: %u) added to your account.", dev_id);
-                    }
-                } else {
-                    ProfChatWin* chatwin = wins_get_chat(jid->barejid);
-                    if (chatwin) {
-                        win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "New OMEMO device (ID: %u) found for %s.", dev_id, jid->barejid);
+                auto_gchar gchar* dev_id_str = g_strdup_printf("%u", dev_id);
+                if (!g_key_file_has_key(omemo_ctx.knowndevices.keyfile, jid->barejid, dev_id_str, NULL)) {
+                    if (equals_our_barejid(jid->barejid)) {
+                        if (dev_id != omemo_ctx.device_id) {
+                            cons_show("New OMEMO device (ID: %u) added to your account.", dev_id);
+                        }
                     } else {
-                        ProfMucWin* mucwin = wins_get_muc(jid->barejid);
-                        if (mucwin) {
-                            win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "New OMEMO device (ID: %u) found for %s.", dev_id, jid->barejid);
+                        ProfChatWin* chatwin = wins_get_chat(jid->barejid);
+                        if (chatwin) {
+                            win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "New OMEMO device (ID: %u) found for %s.", dev_id, jid->barejid);
+                        } else {
+                            ProfMucWin* mucwin = wins_get_muc(jid->barejid);
+                            if (mucwin) {
+                                win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "New OMEMO device (ID: %u) found for %s.", dev_id, jid->barejid);
+                            }
                         }
                     }
                 }
