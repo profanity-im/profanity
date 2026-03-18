@@ -204,14 +204,11 @@ log_close(void)
 static void
 _log_msg(log_level_t level, const char* const area, const char* const msg)
 {
-    GDateTime* dt = g_date_time_new_now_local();
-
     char* level_str = _log_abbreviation_string_from_level(level);
 
-    auto_gchar gchar* date_fmt = g_date_time_format_iso8601(dt);
+    auto_gchar gchar* date_fmt = prof_date_time_format_iso8601(NULL);
 
     fprintf(logp, "%s: %08d: %s: %s: %s\n", date_fmt, prof_pid, area, level_str, msg);
-    g_date_time_unref(dt);
 
     fflush(logp);
 

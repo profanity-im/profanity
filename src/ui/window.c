@@ -637,7 +637,7 @@ win_page_up(ProfWin* window, int scroll_size)
                 iq_mam_request_older(chatwin);
             }
 
-            int buff_size = buffer_size(window->layout->buffer);
+            unsigned int buff_size = buffer_size(window->layout->buffer);
             int offset_entry_id = buff_size > 10 ? 10 : buff_size - 1;
             int offset = buffer_get_entry(window->layout->buffer, offset_entry_id)->y_end_pos;
             *page_start = offset - page_space;
@@ -678,17 +678,13 @@ win_page_down(ProfWin* window, int scroll_size)
 
     // Scrolled down after reaching the bottom of the page
     if ((*page_start > total_rows - page_space || (*page_start == page_space && *page_start >= total_rows)) && window->type == WIN_CHAT) {
-        int bf_size = buffer_size(window->layout->buffer);
-        if (bf_size > 0) {
+        unsigned int bf_size = buffer_size(window->layout->buffer);
+        if (bf_size != 0) {
             ProfBuffEntry* last_entry = buffer_get_entry(window->layout->buffer, bf_size - 1);
             auto_gchar gchar* start = g_date_time_format_iso8601(last_entry->time);
-            GDateTime* now = g_date_time_new_now_local();
-            gchar* end_date = g_date_time_format_iso8601(now);
-            g_date_time_unref(now);
+            auto_gchar gchar* end_date = prof_date_time_format_iso8601(NULL);
             if (*scroll_state != WIN_SCROLL_REACHED_BOTTOM && !chatwin_db_history((ProfChatWin*)window, start, end_date, FALSE)) {
                 *scroll_state = WIN_SCROLL_REACHED_BOTTOM;
-            } else if (*scroll_state == WIN_SCROLL_REACHED_BOTTOM) {
-                g_free(end_date);
             }
 
             int offset = last_entry->y_end_pos - 1;
@@ -1954,10 +1950,10 @@ win_print_trackbar(ProfWin* window)
 void
 win_redraw(ProfWin* window)
 {
-    int size = buffer_size(window->layout->buffer);
+    unsigned int size = buffer_size(window->layout->buffer);
     werase(window->layout->win);
 
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         ProfBuffEntry* e = buffer_get_entry(window->layout->buffer, i);
 
         e->y_start_pos = getcury(window->layout->win);
@@ -2185,11 +2181,11 @@ win_handle_command_exec_result_note(ProfWin* window, const char* const type, con
 void
 win_insert_last_read_position_marker(ProfWin* window, char* id)
 {
-    int size = buffer_size(window->layout->buffer);
+    unsigned int size = buffer_size(window->layout->buffer);
 
     // TODO: this is somewhat costly. We should improve this later.
     // check if we already have a separator present
-    for (int i = 0; i < size; i++) {
+    for (unsigned int i = 0; i < size; i++) {
         ProfBuffEntry* e = buffer_get_entry(window->layout->buffer, i);
 
         // if yes, don't print a new one

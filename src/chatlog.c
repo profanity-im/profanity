@@ -241,13 +241,7 @@ _chat_log_chat(const char* const login, const char* const other, const char* msg
         g_string_free(other_str, TRUE);
     }
 
-    if (timestamp == NULL) {
-        timestamp = g_date_time_new_now_local();
-    } else {
-        g_date_time_ref(timestamp);
-    }
-
-    auto_gchar gchar* date_fmt = g_date_time_format_iso8601(timestamp);
+    auto_gchar gchar* date_fmt = prof_date_time_format_iso8601(timestamp);
     FILE* chatlogp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
     if (chatlogp) {
@@ -278,8 +272,6 @@ _chat_log_chat(const char* const login, const char* const other, const char* msg
             log_error("Error closing file %s, errno = %d", dated_log->filename, errno);
         }
     }
-
-    g_date_time_unref(timestamp);
 }
 
 void
@@ -347,9 +339,7 @@ _groupchat_log_chat(const gchar* const login, const gchar* const room, const gch
         g_hash_table_replace(logs, strdup(room), dated_log);
     }
 
-    GDateTime* dt_tmp = g_date_time_new_now_local();
-
-    auto_gchar gchar* date_fmt = g_date_time_format_iso8601(dt_tmp);
+    auto_gchar gchar* date_fmt = prof_date_time_format_iso8601(NULL);
 
     FILE* grpchatlogp = fopen(dated_log->filename, "a");
     g_chmod(dated_log->filename, S_IRUSR | S_IWUSR);
@@ -366,8 +356,6 @@ _groupchat_log_chat(const gchar* const login, const gchar* const room, const gch
             log_error("Error closing file %s, errno = %d", dated_log->filename, errno);
         }
     }
-
-    g_date_time_unref(dt_tmp);
 }
 
 static char*

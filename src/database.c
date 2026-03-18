@@ -296,7 +296,7 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
 // null the current time is used. from_start gets first few messages if true
 // otherwise the last ones. Flip flips the order of the results
 GSList*
-log_database_get_previous_chat(const gchar* const contact_barejid, const char* start_time, char* end_time, gboolean from_start, gboolean flip)
+log_database_get_previous_chat(const gchar* const contact_barejid, const char* start_time, const char* end_time, gboolean from_start, gboolean flip)
 {
     sqlite3_stmt* stmt = NULL;
     const Jid* myjid = connection_get_jid();
@@ -306,8 +306,7 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
     // Flip order when querying older pages
     gchar* sort1 = from_start ? "ASC" : "DESC";
     gchar* sort2 = !flip ? "ASC" : "DESC";
-    GDateTime* now = g_date_time_new_now_local();
-    auto_gchar gchar* end_date_fmt = end_time ? end_time : g_date_time_format_iso8601(now);
+    auto_gchar gchar* end_date_fmt = end_time ? g_strdup(end_time) : prof_date_time_format_iso8601(NULL);
     auto_sqlite gchar* query = sqlite3_mprintf("SELECT * FROM ("
                                                "SELECT COALESCE(B.`message`, A.`message`) AS message, "
                                                "A.`timestamp`, A.`from_jid`, A.`from_resource`, A.`to_jid`, A.`to_resource`, A.`type`, A.`encryption`, A.`stanza_id` FROM `ChatLogs` AS A "
@@ -319,8 +318,6 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
                                                "ORDER BY A.`timestamp` %s LIMIT %d) "
                                                "ORDER BY `timestamp` %s;",
                                                contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, end_date_fmt, start_time, start_time, sort1, MESSAGES_TO_RETRIEVE, sort2);
-
-    g_date_time_unref(now);
 
     if (!query) {
         log_error("Could not allocate memory");
@@ -448,16 +445,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     }
 
     char* err_msg;
-    auto_gchar gchar* date_fmt = NULL;
-
-    if (message->timestamp) {
-        date_fmt = g_date_time_format_iso8601(message->timestamp);
-    } else {
-        GDateTime* dt = g_date_time_new_now_local();
-        date_fmt = g_date_time_format_iso8601(dt);
-        g_date_time_unref(dt);
-    }
-
+    auto_gchar gchar* date_fmt = prof_date_time_format_iso8601(message->timestamp);
     const char* enc = _get_message_enc_str(message->enc);
 
     if (!type) {
