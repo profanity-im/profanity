@@ -208,6 +208,11 @@ _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const us
         blocked_set_handler(stanza);
     }
 
+    xmpp_stanza_t* reporting = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_REPORTING);
+    if (reporting && (g_strcmp0(type, STANZA_TYPE_SET) == 0)) {
+        reporting_set_handler(stanza);
+    }
+
     const char* id = xmpp_stanza_get_id(stanza);
     if (id) {
         ProfIqHandler* handler = g_hash_table_lookup(id_handlers, id);

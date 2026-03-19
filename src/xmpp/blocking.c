@@ -116,9 +116,26 @@ blocked_add(char* jid, blocked_report reportkind, const char* const message)
             xmpp_stanza_set_attribute(report, STANZA_ATTR_REASON, STANZA_REPORTING_SPAM);
         }
 
+        xmpp_stanza_t* origin = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(origin, STANZA_NAME_REPORT_ORIGIN);
+        xmpp_stanza_set_attribute(origin, STANZA_ATTR_JID, connection_get_fulljid());
+        xmpp_stanza_add_child(report, origin);
+        xmpp_stanza_release(origin);
+
+        xmpp_stanza_t* third_party = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(third_party, STANZA_NAME_THIRD_PARTY);
+        xmpp_stanza_set_attribute(third_party, STANZA_ATTR_JID, jid);
+        xmpp_stanza_add_child(report, third_party);
+        xmpp_stanza_release(third_party);
+
         if (message) {
             xmpp_stanza_t* text = xmpp_stanza_new(ctx);
-            xmpp_stanza_set_name(text, STANZA_NAME_TEXT);
+            if (reportkind == BLOCKED_REPORT_SPAM) {
+                xmpp_stanza_set_name(text, STANZA_NAME_BODY);
+                xmpp_stanza_set_ns(text, "jabber:client");
+            } else {
+                xmpp_stanza_set_name(text, STANZA_NAME_TEXT);
+            }
 
             xmpp_stanza_t* txt = xmpp_stanza_new(ctx);
             xmpp_stanza_set_text(txt, message);
@@ -313,4 +330,84 @@ _blocklist_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
     }
 
     return 0;
+}
+
+int
+reporting_set_handler(xmpp_stanza_t* stanza)
+{
+    const char* from = xmpp_stanza_get_from(stanza);
+    xmpp_stanza_t* report = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_REPORTING);
+    if (!report) {
+        return 1;
+    }
+
+    const char* reason = xmpp_stanza_get_attribute(report, STANZA_ATTR_REASON);
+    const char* display_reason = "unknown";
+    if (g_strcmp0(reason, STANZA_REPORTING_SPAM) == 0) {
+        display_reason = "spam";
+    } else if (g_strcmp0(reason, STANZA_REPORTING_ABUSE) == 0) {
+        display_reason = "abuse";
+    }
+
+    char* message = NULL;
+    xmpp_stanza_t* body = xmpp_stanza_get_child_by_name(report, STANZA_NAME_BODY);
+    if (body) {
+        message = xmpp_stanza_get_text(body);
+    } else {
+        xmpp_stanza_t* text = xmpp_stanza_get_child_by_name(report, STANZA_NAME_TEXT);
+        if (text) {
+            message = xmpp_stanza_get_text(text);
+        }
+    }
+
+    // Attempt to find the reported JID if it's wrapped in an item (sync push style)
+    const char* reported_jid = NULL;
+    xmpp_stanza_t* block = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_BLOCKING);
+    if (block) {
+        xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(block, STANZA_NAME_ITEM);
+        if (item) {
+            reported_jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+        }
+    }
+
+    xmpp_stanza_t* third_party = xmpp_stanza_get_child_by_name(report, STANZA_NAME_THIRD_PARTY);
+    if (third_party) {
+        reported_jid = xmpp_stanza_get_attribute(third_party, STANZA_ATTR_JID);
+    }
+
+    const char* reported_by = NULL;
+    xmpp_stanza_t* origin = xmpp_stanza_get_child_by_name(report, STANZA_NAME_REPORT_ORIGIN);
+    if (origin) {
+        reported_by = xmpp_stanza_get_attribute(origin, STANZA_ATTR_JID);
+    }
+
+    auto_gchar gchar* report_origin_str = NULL;
+    if (reported_by) {
+        report_origin_str = g_strdup_printf(" (origin: %s)", reported_by);
+    } else {
+        report_origin_str = g_strdup("");
+    }
+
+    if (reported_jid) {
+        if (message) {
+            cons_show("Incoming %s report%s from %s: User %s reported for %s. Content: \"%s\"",
+                      display_reason, report_origin_str, from, reported_jid, display_reason, message);
+        } else {
+            cons_show("Incoming %s report%s from %s: User %s reported for %s.",
+                      display_reason, report_origin_str, from, reported_jid, display_reason);
+        }
+    } else {
+        if (message) {
+            cons_show("Incoming %s report%s from %s. Content: \"%s\"",
+                      display_reason, report_origin_str, from, message);
+        } else {
+            cons_show("Incoming %s report%s from %s.", display_reason, report_origin_str, from);
+        }
+    }
+
+    if (message) {
+        xmpp_free(xmpp_stanza_get_context(stanza), message);
+    }
+
+    return 1;
 }

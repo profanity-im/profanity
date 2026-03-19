@@ -381,15 +381,17 @@ static const struct cmd_t command_defs[] = {
       CMD_DESC(
               "Manage blocked users (XEP-0191), calling with no arguments shows the current list of blocked users. "
               "To blog a certain user in a MUC use the following as jid: room@conference.example.org/spammy-user"
-              "It is also possible to block and report (XEP-0377) a user with the report-abuse and report-spam commands.")
+              "It is also possible to block and report (XEP-0377) a user with the report-abuse and report-spam commands. "
+              "For spam reporting, please include the content of the spam message as evidence for the service operator.")
       CMD_ARGS(
               { "add [<jid>]", "Block the specified Jabber ID. If in a chat window and no jid is specified, the current recipient will be blocked." },
               { "remove <jid>", "Remove the specified Jabber ID from the blocked list." },
-              { "report-abuse <jid> [<message>]", "Report the jid as abuse with an optional message to the service operator." },
-              { "report-spam <jid> [<message>]", "Report the jid as spam with an optional message to the service operator." })
+              { "report-abuse <jid> [<message>]", "Report a user for abuse with an optional description of the behavior." },
+              { "report-spam <jid> [<message>]", "Report a user for spam, including the actual spam message as evidence." })
       CMD_EXAMPLES(
               "/blocked add hel@helheim.edda",
-              "/blocked report-spam hel@helheim.edda Very annoying guy",
+              "/blocked report-abuse hel@helheim.edda Harassing me in MUC",
+              "/blocked report-spam spambot@example.com \"You won a free prize!\"",
               "/blocked add profanity@rooms.dismail.de/spammy-user")
     },
 
