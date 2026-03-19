@@ -397,6 +397,14 @@ prof_input(const char* input)
     usleep(1000 * 100); // 100ms delay
 }
 
+void
+prof_send_raw(const char* bytes)
+{
+    write(fd, bytes, strlen(bytes));
+    tcdrain(fd);
+    usleep(1000 * 100);
+}
+
 int
 prof_output_exact(const char* text)
 {

@@ -698,6 +698,7 @@ if get_option('tests')
         'tests/functionaltests/test_carbons.c',
         'tests/functionaltests/test_receipts.c',
         'tests/functionaltests/test_roster.c',
+        'tests/functionaltests/test_i18n.c',
         'tests/functionaltests/test_software.c',
         'tests/functionaltests/test_muc.c',
         'tests/functionaltests/test_disconnect.c',

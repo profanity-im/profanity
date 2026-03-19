@@ -233,3 +233,115 @@ autocomplete_complete__returns__previous(void** state)
     free(result3);
     free(result4);
 }
+
+void
+autocomplete_complete__returns__greek_false_match(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    // Σωκράτης (Socrates) and Πλάτων (Plato)
+    autocomplete_add(ac, "Σωκράτης");
+    autocomplete_add(ac, "Πλάτων");
+
+    char* result = autocomplete_complete(ac, "Π", TRUE, FALSE);
+
+    assert_string_equal("Πλάτων", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__returns__greek(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "Αριστοτέλης");
+
+    char* result = autocomplete_complete(ac, "Αριστ", TRUE, FALSE);
+
+    assert_non_null(result);
+    assert_string_equal("Αριστοτέλης", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__returns__greek_case_insensitive(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "Σωκράτης");
+
+    // Case insensitive search for Socrates
+    // σω is the lowercase of Σω
+    char* result = autocomplete_complete(ac, "σω", TRUE, FALSE);
+
+    assert_non_null(result);
+    assert_string_equal("Σωκράτης", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__returns__russian(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "Достоевский");
+    autocomplete_add(ac, "Толстой");
+    autocomplete_add(ac, "Пушкин");
+
+    char* result = autocomplete_complete(ac, "дост", TRUE, FALSE);
+
+    assert_non_null(result);
+    assert_string_equal("Достоевский", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__returns__chinese(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "孙子");
+    autocomplete_add(ac, "诸葛亮");
+
+    char* result = autocomplete_complete(ac, "孙", TRUE, FALSE);
+
+    assert_non_null(result);
+    assert_string_equal("孙子", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__returns__transliterated(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "München");
+
+    // Match 'ü' with 'u'
+    char* result = autocomplete_complete(ac, "mun", TRUE, FALSE);
+
+    assert_non_null(result);
+    assert_string_equal("München", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__returns__regular_ascii(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "London");
+
+    char* result = autocomplete_complete(ac, "lon", TRUE, FALSE);
+
+    assert_non_null(result);
+    assert_string_equal("London", result);
+
+    autocomplete_free(ac);
+    free(result);
+}

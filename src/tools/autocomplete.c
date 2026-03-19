@@ -370,16 +370,34 @@ autocomplete_remove_older_than_max_reverse(Autocomplete ac, int maxsize)
 static gchar*
 _search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction)
 {
+    auto_gchar gchar* search_str_fold = g_utf8_casefold(ac->search_str, -1);
     auto_gchar gchar* search_str_ascii = g_str_to_ascii(ac->search_str, NULL);
-    auto_gchar gchar* search_str_lower = g_ascii_strdown(search_str_ascii, -1);
+    auto_gchar gchar* search_str_ascii_lower = g_ascii_strdown(search_str_ascii, -1);
 
     while (curr) {
-        auto_gchar gchar* curr_ascii = g_str_to_ascii(curr->data, NULL);
-        auto_gchar gchar* curr_lower = g_ascii_strdown(curr_ascii, -1);
+        gboolean match = FALSE;
 
-        // match found
-        if (strncmp(curr_lower, search_str_lower, strlen(search_str_lower)) == 0) {
+        // Try exact UTF-8 case insensitive match
+        auto_gchar gchar* curr_fold = g_utf8_casefold(curr->data, -1);
+        if (g_str_has_prefix(curr_fold, search_str_fold)) {
+            match = TRUE;
+        }
 
+        // Try transliterated match (allow typing 'e' for 'è')
+        if (!match) {
+            auto_gchar gchar* curr_ascii = g_str_to_ascii(curr->data, NULL);
+            auto_gchar gchar* curr_ascii_lower = g_ascii_strdown(curr_ascii, -1);
+
+            // We only use transliterated match if the search string conversion didn't result
+            // in unknown characters ('?'), to avoid false matches between different scripts.
+            if (strchr(search_str_ascii_lower, '?') == NULL) {
+                if (g_str_has_prefix(curr_ascii_lower, search_str_ascii_lower)) {
+                    match = TRUE;
+                }
+            }
+        }
+
+        if (match) {
             // set pointer to last found
             ac->last_found = curr;
 

@@ -27,6 +27,7 @@
 #include "test_software.h"
 #include "test_muc.h"
 #include "test_disconnect.h"
+#include "test_i18n.h"
 
 #define PROF_FUNC_TEST(test) cmocka_unit_test_setup_teardown(test, init_prof_test, close_prof_test)
 
@@ -116,6 +117,11 @@ main(int argc, char* argv[])
         PROF_FUNC_TEST(shows_no_message_in_console_when_window_not_focussed),
 
         PROF_FUNC_TEST(disconnect_ends_session),
+
+        PROF_FUNC_TEST(i18n_msg_nickname),
+        PROF_FUNC_TEST(i18n_win_nickname),
+        PROF_FUNC_TEST(i18n_autocomplete_tab_utf8),
+        PROF_FUNC_TEST(i18n_autocomplete_tab_latin),
     };
 
     return cmocka_run_group_tests(all_tests, NULL, NULL);
