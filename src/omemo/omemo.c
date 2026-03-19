@@ -16,11 +16,20 @@
 #include <errno.h>
 #include <glib.h>
 #include <pthread.h>
+
+#ifdef HAVE_LIBOMEMO_C
+#include <omemo/key_helper.h>
+#include <omemo/protocol.h>
+#include <omemo/signal_protocol.h>
+#include <omemo/session_builder.h>
+#include <omemo/session_cipher.h>
+#else
 #include <signal/key_helper.h>
 #include <signal/protocol.h>
 #include <signal/signal_protocol.h>
 #include <signal/session_builder.h>
 #include <signal/session_cipher.h>
+#endif
 
 #include "config/account.h"
 #include "config/files.h"

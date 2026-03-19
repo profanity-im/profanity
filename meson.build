@@ -157,7 +157,7 @@ dl_dep = disabler()
 gpgme_dep = disabler()
 libotr_dep = disabler()
 gdk_pixbuf_dep = disabler()
-libsignal_dep = disabler()
+omemo_dep = disabler()
 gcrypt_dep = disabler()
 qrencode_dep = disabler()
 
@@ -251,7 +251,13 @@ endif
 
 # OMEMO support
 if get_option('omemo').enabled()
-  libsignal_dep = dependency('libsignal-protocol-c', version: '>= 2.3.2', required: true)
+  omemo_backend = get_option('omemo-backend')
+  if omemo_backend == 'libsignal'
+    omemo_dep = dependency('libsignal-protocol-c', version: '>= 2.3.2', required: true)
+  elif omemo_backend == 'libomemo-c'
+    omemo_dep = dependency('libomemo-c', version: '>= 0.5.1', required: true)
+    conf_data.set('HAVE_LIBOMEMO_C', 1)
+  endif
   gcrypt_dep = dependency('libgcrypt', version: '>= 1.7.0', required: true)
   build_omemo = true
   conf_data.set('HAVE_OMEMO', 1)
@@ -337,8 +343,8 @@ if gdk_pixbuf_dep.found()
   profanity_deps += gdk_pixbuf_dep
 endif
 
-if libsignal_dep.found()
-  profanity_deps += libsignal_dep
+if omemo_dep.found()
+  profanity_deps += omemo_dep
 endif
 
 if gcrypt_dep.found()

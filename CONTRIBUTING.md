@@ -18,12 +18,23 @@ Both build systems support several features that can be enabled or disabled.
 | **OTR** | Off-the-Record encryption | `--enable-otr` | `-Dotr=enabled` |
 | **PGP** | PGP encryption support | `--enable-pgp` | `-Dpgp=enabled` |
 | **OMEMO** | OMEMO encryption support | `--enable-omemo` | `-Domemo=enabled` |
+| **OMEMO Backend** | Select OMEMO backend library | *N/A* | `-Domemo-backend=libsignal\|libomemo-c` |
 | **QR Code** | OMEMO QR code display | `--enable-omemo-qrcode` | `-Domemo-qrcode=enabled` |
 | **Icons/Clipboard** | GTK tray icons & clipboard | `--enable-icons-and-clipboard` | `-Dicons-and-clipboard=enabled` |
 | **GDK Pixbuf** | Avatar scaling support | `--enable-gdk-pixbuf` | `-Dgdk-pixbuf=enabled` |
 | **XScreenSaver** | Idle time detection | `--with-xscreensaver` | `-Dxscreensaver=enabled` |
 | **Tests** | Build unit tests | *Built by default* | `-Dtests=true` |
 | **Sanitizers** | Run-time error detection | *Via CFLAGS* | `-Db_sanitize=address,undefined` |
+
+### Selecting OMEMO Backend
+When building with OMEMO support enabled in Meson, you can choose between two backend libraries:
+- `libsignal`: The default backend using `libsignal-protocol-c`.
+- `libomemo-c`: An alternative backend using `libomemo-c`.
+
+Example of choosing the `libomemo-c` backend:
+```bash
+meson setup build_run -Domemo=enabled -Domemo-backend=libomemo-c
+```
 
 ### Using Autotools
 1. Generate configuration files: `./bootstrap.sh`

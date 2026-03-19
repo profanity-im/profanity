@@ -9,8 +9,13 @@
 #include "config.h"
 
 #include <assert.h>
+#ifdef HAVE_LIBOMEMO_C
+#include <omemo/signal_protocol.h>
+#include <omemo/signal_protocol_types.h>
+#else
 #include <signal/signal_protocol.h>
 #include <signal/signal_protocol_types.h>
+#endif
 
 #include "log.h"
 #include "omemo/omemo.h"

@@ -35,6 +35,13 @@ option('omemo',
   description: 'Enable OMEMO encryption'
 )
 
+option('omemo-backend',
+  type: 'combo',
+  choices: ['libsignal', 'libomemo-c'],
+  value: 'libsignal',
+  description: 'Select OMEMO backend library'
+)
+
 option('xscreensaver',
   type: 'feature',
   value: 'disabled',
