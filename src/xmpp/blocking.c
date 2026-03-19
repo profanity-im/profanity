@@ -118,7 +118,12 @@ blocked_add(char* jid, blocked_report reportkind, const char* const message)
 
         if (message) {
             xmpp_stanza_t* text = xmpp_stanza_new(ctx);
-            xmpp_stanza_set_name(text, STANZA_NAME_TEXT);
+            if (reportkind == BLOCKED_REPORT_SPAM) {
+                xmpp_stanza_set_name(text, STANZA_NAME_BODY);
+                xmpp_stanza_set_ns(text, "jabber:client");
+            } else {
+                xmpp_stanza_set_name(text, STANZA_NAME_TEXT);
+            }
 
             xmpp_stanza_t* txt = xmpp_stanza_new(ctx);
             xmpp_stanza_set_text(txt, message);
