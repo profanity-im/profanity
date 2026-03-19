@@ -1139,6 +1139,14 @@ sv_ev_muc_occupant_online(const char* const room, const char* const nick, const 
 int
 sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert)
 {
+    if (cert == NULL) {
+        cons_show("");
+        cons_show_error("TLS certificate verification failed: %s", (errormsg != NULL) ? errormsg : "Unknown error");
+        cons_show_error("No certificate information was provided by the server.");
+        cons_show("");
+        return 0;
+    }
+
     // check profanity trusted certs
     if (tlscerts_exists(cert)) {
         cafile_add(cert);
