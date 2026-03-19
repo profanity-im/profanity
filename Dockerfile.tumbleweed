@@ -25,6 +25,7 @@ RUN zypper --non-interactive in --no-recommends \
   libnotify-devel \
   libotr-devel \
   libsignal-protocol-c-devel \
+  libomemo-c-devel \
   libtool \
   libuuid-devel \
   make \

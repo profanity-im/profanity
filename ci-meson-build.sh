@@ -35,15 +35,20 @@ tests=(
     "-Dgdk-pixbuf=disabled"
 )
 
+BACKEND_OPT=""
+if [ -n "${OMEMO_BACKEND}" ]; then
+    BACKEND_OPT="-Domemo-backend=${OMEMO_BACKEND}"
+fi
+
 # Run Valgrind check (Only on Linux, on first/full feature set)
 if [[ "$(uname | tr '[:upper:]' '[:lower:]')" == linux* ]]; then
-    echo "--> Running Valgrind check with full features"
+    echo "--> Running Valgrind check with full features ${BACKEND_OPT}"
 
-    meson setup build_valgrind ${tests[0]} -Dtests=true -Db_sanitize=address,undefined
+    meson setup build_valgrind ${tests[0]} ${BACKEND_OPT} -Dtests=true -Db_sanitize=address,undefined
     meson compile -C build_valgrind
-    
+
     meson test -C build_valgrind --print-errorlogs --wrap=valgrind || echo "Valgrind issues detected"
-    
+
     rm -rf build_valgrind
 fi
 
@@ -51,12 +56,12 @@ fi
 for features in "${tests[@]}"
 do
     echo "----------------------------------------------------"
-    echo "--> Building with: ${features}"
+    echo "--> Building with: ${features} ${BACKEND_OPT}"
     echo "----------------------------------------------------"
     
     rm -rf build_run
     
-    meson setup build_run ${features} -Dtests=true
+    meson setup build_run ${features} ${BACKEND_OPT} -Dtests=true
     meson compile -C build_run
     
     meson test -C build_run --print-errorlogs
