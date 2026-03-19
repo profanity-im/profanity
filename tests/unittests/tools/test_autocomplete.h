@@ -17,5 +17,12 @@ void autocomplete_complete__returns__both_with_accented(void** state);
 void autocomplete_complete__returns__both_with_base(void** state);
 void autocomplete_complete__is__case_insensitive(void** state);
 void autocomplete_complete__returns__previous(void** state);
+void autocomplete_complete__returns__greek(void** state);
+void autocomplete_complete__returns__greek_false_match(void** state);
+void autocomplete_complete__returns__greek_case_insensitive(void** state);
+void autocomplete_complete__returns__russian(void** state);
+void autocomplete_complete__returns__chinese(void** state);
+void autocomplete_complete__returns__transliterated(void** state);
+void autocomplete_complete__returns__regular_ascii(void** state);
 
 #endif

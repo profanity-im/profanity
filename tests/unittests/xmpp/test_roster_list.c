@@ -306,7 +306,29 @@ roster_contact_autocomplete__returns__first_when_two_match_and_reset(void** stat
 }
 
 void
+roster_contact_autocomplete__returns__utf8(void** state)
+{
+    roster_create();
+    roster_add("Σωκράτης", NULL, NULL, NULL, FALSE);
+    roster_add("Πλάτων", NULL, NULL, NULL, FALSE);
+
+    // Byte-wise (strcmp): Πλάτων (CE A0...) < Σωκράτης (CE A3...)
+    char* result = roster_contact_autocomplete("Π", FALSE, NULL);
+    assert_string_equal("Πλάτων", result);
+    g_free(result);
+
+    roster_reset_search_attempts();
+
+    result = roster_contact_autocomplete("σω", FALSE, NULL);
+    assert_string_equal("Σωκράτης", result);
+    g_free(result);
+
+    roster_destroy();
+}
+
+void
 roster_get_groups__returns__empty_for_no_group(void** state)
+
 {
     roster_create();
     roster_add("person@server.org", NULL, NULL, NULL, FALSE);

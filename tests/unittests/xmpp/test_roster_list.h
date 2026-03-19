@@ -19,6 +19,7 @@ void roster_contact_autocomplete__returns__null_on_empty_roster(void** state);
 void roster_contact_autocomplete__returns__second_when_two_match(void** state);
 void roster_contact_autocomplete__returns__fifth_when_multiple_match(void** state);
 void roster_contact_autocomplete__returns__first_when_two_match_and_reset(void** state);
+void roster_contact_autocomplete__returns__utf8(void** state);
 void roster_get_groups__returns__empty_for_no_group(void** state);
 void roster_get_groups__returns__one_group(void** state);
 void roster_get_groups__returns__two_groups(void** state);
