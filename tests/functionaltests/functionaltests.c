@@ -120,6 +120,8 @@ main(int argc, char* argv[])
 
         PROF_FUNC_TEST(i18n_msg_nickname),
         PROF_FUNC_TEST(i18n_win_nickname),
+        PROF_FUNC_TEST(i18n_autocomplete_tab_utf8),
+        PROF_FUNC_TEST(i18n_autocomplete_tab_latin),
     };
 
     return cmocka_run_group_tests(all_tests, NULL, NULL);

@@ -49,3 +49,42 @@ i18n_win_nickname(void** state)
     prof_input("/win Σωκράτης");
     assert_true(prof_output_regex("socrates@localhost"));
 }
+
+void
+i18n_autocomplete_tab_utf8(void** state)
+{
+    prof_connect_with_roster(
+        "<item jid='socrates@localhost' subscription='both' name='Σωκράτης'/>");
+
+    prof_send_raw("/msg Σω");
+    // TAB for completion
+    prof_send_raw("\t");
+    prof_input(" Hello");
+
+    // If autocompletion worked, we should be in the Socrates window
+    assert_true(prof_output_regex("socrates@localhost"));
+
+    // And stabber should have received the message
+    assert_true(stbbr_received(
+        "<message to='socrates@localhost' id='*' type='chat'>"
+        "<body>Hello</body>"
+        "</message>"));
+}
+
+void
+i18n_autocomplete_tab_latin(void** state)
+{
+    prof_connect_with_roster(
+        "<item jid='plato@localhost' subscription='both' name='Plato'/>");
+
+    prof_send_raw("/msg Pl");
+    prof_send_raw("\t");
+    prof_input(" Hello");
+
+    assert_true(prof_output_regex("plato@localhost"));
+
+    assert_true(stbbr_received(
+        "<message to='plato@localhost' id='*' type='chat'>"
+        "<body>Hello</body>"
+        "</message>"));
+}

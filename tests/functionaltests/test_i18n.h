@@ -7,3 +7,5 @@
  */
 void i18n_msg_nickname(void** state);
 void i18n_win_nickname(void** state);
+void i18n_autocomplete_tab_utf8(void** state);
+void i18n_autocomplete_tab_latin(void** state);
