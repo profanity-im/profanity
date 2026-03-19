@@ -7,7 +7,12 @@
  * SPDX-License-Identifier: GPL-3.0-or-later WITH OpenSSL-exception
  */
 #include <glib.h>
+
+#ifdef HAVE_LIBOMEMO_C
+#include <omemo/signal_protocol.h>
+#else
 #include <signal/signal_protocol.h>
+#endif
 
 #include "config.h"
 #include "log.h"
