@@ -39,7 +39,31 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
 
-static const int PAD_SIZE = 100;
+static const int PAD_MIN_HEIGHT = 100;
+static const int PAD_THRESHOLD = 3000;
+static gboolean _in_redraw = FALSE;
+
+static void
+_win_ensure_pad_capacity(ProfWin* window, WINDOW* win, int lines_needed)
+{
+    if (!win) {
+        return;
+    }
+
+    int cur_height = getmaxy(win);
+    int cur_width = getmaxx(win);
+    if (lines_needed >= cur_height - 1) {
+        // If we are getting too large, trigger a redraw to clean up old lines
+        // but only if we are not already in a redraw process.
+        if (window && cur_height >= PAD_THRESHOLD && !_in_redraw) {
+            win_redraw(window);
+        } else {
+            // resize to required lines + some buffer for next messages
+            int new_height = lines_needed + 100;
+            wresize(win, new_height, cur_width);
+        }
+    }
+}
 static const char* LOADING_MESSAGE = "Loading older messages…";
 static const char* CONS_WIN_TITLE = "Profanity. Type /help for help information.";
 static const char* XML_WIN_TITLE = "XML Console";
@@ -75,7 +99,7 @@ _win_create_simple_layout(void)
 
     ProfLayoutSimple* layout = g_new0(ProfLayoutSimple, 1);
     layout->base.type = LAYOUT_SIMPLE;
-    layout->base.win = newpad(PAD_SIZE, cols);
+    layout->base.win = newpad(PAD_MIN_HEIGHT, cols);
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
     layout->base.buffer = buffer_create();
     layout->base.y_pos = 0;
@@ -92,7 +116,7 @@ _win_create_split_layout(void)
 
     ProfLayoutSplit* layout = g_new0(ProfLayoutSplit, 1);
     layout->base.type = LAYOUT_SPLIT;
-    layout->base.win = newpad(PAD_SIZE, cols);
+    layout->base.win = newpad(PAD_MIN_HEIGHT, cols);
     wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
     layout->base.buffer = buffer_create();
     layout->base.y_pos = 0;
@@ -162,12 +186,12 @@ win_create_muc(const char* const roomjid)
 
     if (prefs_get_boolean(PREF_OCCUPANTS)) {
         int subwin_cols = win_occpuants_cols();
-        layout->base.win = newpad(PAD_SIZE, cols - subwin_cols);
+        layout->base.win = newpad(PAD_MIN_HEIGHT, cols - subwin_cols);
         wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
-        layout->subwin = newpad(PAD_SIZE, subwin_cols);
+        layout->subwin = newpad(PAD_MIN_HEIGHT, subwin_cols);
         wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
     } else {
-        layout->base.win = newpad(PAD_SIZE, (cols));
+        layout->base.win = newpad(PAD_MIN_HEIGHT, (cols));
         wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
         layout->subwin = NULL;
     }
@@ -509,11 +533,11 @@ win_hide_subwin(ProfWin* window)
         layout->subwin = NULL;
         layout->sub_y_pos = 0;
         int cols = getmaxx(stdscr);
-        wresize(layout->base.win, PAD_SIZE, cols);
+        wresize(layout->base.win, PAD_MIN_HEIGHT, cols);
         win_redraw(window);
     } else {
         int cols = getmaxx(stdscr);
-        wresize(window->layout->win, PAD_SIZE, cols);
+        wresize(window->layout->win, PAD_MIN_HEIGHT, cols);
         win_redraw(window);
     }
 }
@@ -535,9 +559,9 @@ win_show_subwin(ProfWin* window)
     }
 
     ProfLayoutSplit* layout = (ProfLayoutSplit*)window->layout;
-    layout->subwin = newpad(PAD_SIZE, subwin_cols);
+    layout->subwin = newpad(PAD_MIN_HEIGHT, subwin_cols);
     wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
-    wresize(layout->base.win, PAD_SIZE, cols - subwin_cols);
+    wresize(layout->base.win, PAD_MIN_HEIGHT, cols - subwin_cols);
     win_redraw(window);
 }
 
@@ -832,9 +856,9 @@ win_resize(ProfWin* window)
                 subwin_cols = win_occpuants_cols();
             }
             wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
-            wresize(layout->base.win, PAD_SIZE, cols - subwin_cols);
+            wresize(layout->base.win, PAD_MIN_HEIGHT, cols - subwin_cols);
             wbkgd(layout->subwin, theme_attrs(THEME_TEXT));
-            wresize(layout->subwin, PAD_SIZE, subwin_cols);
+            wresize(layout->subwin, PAD_MIN_HEIGHT, subwin_cols);
             if (window->type == WIN_CONSOLE) {
                 rosterwin_roster();
             } else if (window->type == WIN_MUC) {
@@ -844,11 +868,11 @@ win_resize(ProfWin* window)
             }
         } else {
             wbkgd(layout->base.win, theme_attrs(THEME_TEXT));
-            wresize(layout->base.win, PAD_SIZE, cols);
+            wresize(layout->base.win, PAD_MIN_HEIGHT, cols);
         }
     } else {
         wbkgd(window->layout->win, theme_attrs(THEME_TEXT));
-        wresize(window->layout->win, PAD_SIZE, cols);
+        wresize(window->layout->win, PAD_MIN_HEIGHT, cols);
     }
 
     win_redraw(window);
@@ -1828,6 +1852,8 @@ _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDat
         }
     }
 
+    _win_ensure_pad_capacity(window, window->layout->win, getcury(window->layout->win));
+
     if (prefs_get_boolean(PREF_WRAP)) {
         _win_print_wrapped(window->layout->win, message + offset, indent, pad_indent);
     } else {
@@ -1977,6 +2003,7 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
 void
 win_print_trackbar(ProfWin* window)
 {
+    _win_ensure_pad_capacity(window, window->layout->win, getcury(window->layout->win));
     int cols = getmaxx(window->layout->win);
 
     wbkgdset(window->layout->win, theme_attrs(THEME_TRACKBAR));
@@ -1993,10 +2020,18 @@ void
 win_redraw(ProfWin* window)
 {
     unsigned int size = buffer_size(window->layout->buffer);
+    _in_redraw = TRUE;
+
+    // shrink pad back to minimum size and erase it
+    int cols = getmaxx(window->layout->win);
+    wresize(window->layout->win, PAD_MIN_HEIGHT, cols);
     werase(window->layout->win);
 
     for (unsigned int i = 0; i < size; i++) {
         ProfBuffEntry* e = buffer_get_entry(window->layout->buffer, i);
+
+        // check if we need more space before printing
+        _win_ensure_pad_capacity(window, window->layout->win, getcury(window->layout->win));
 
         e->y_start_pos = getcury(window->layout->win);
         if (e->display_from == NULL && e->message && e->message[0] == '-') {
@@ -2008,6 +2043,8 @@ win_redraw(ProfWin* window)
         }
         e->y_end_pos = getcury(window->layout->win);
     }
+
+    _in_redraw = FALSE;
 }
 
 void
@@ -2135,6 +2172,7 @@ win_toggle_attention(ProfWin* window)
 void
 win_sub_print(WINDOW* win, char* msg, gboolean newline, gboolean wrap, int indent)
 {
+    _win_ensure_pad_capacity(NULL, win, getcury(win));
     int maxx = getmaxx(win);
     int curx = getcurx(win);
     int cury = getcury(win);
