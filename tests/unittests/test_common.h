@@ -60,5 +60,6 @@ void string_matches_one_of__tests__edge_cases(void** state);
 void valid_tls_policy_option__is__correct_for_various_inputs(void** state);
 void get_mentions__tests__various(void** state);
 void release_is_new__tests__various(void** state);
+void str_xml_sanitize__strips_illegal_characters(void** state);
 
 #endif

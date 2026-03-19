@@ -661,6 +661,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(prof_occurrences__tests__large_message),
         cmocka_unit_test(get_mentions__tests__various),
         cmocka_unit_test(release_is_new__tests__various),
+        cmocka_unit_test(str_xml_sanitize__strips_illegal_characters),
 
         cmocka_unit_test_setup_teardown(plugins_get_command_names__returns__no_commands,
                                         load_preferences,

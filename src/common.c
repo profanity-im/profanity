@@ -418,6 +418,33 @@ utf8_display_len(const char* const str)
     return len;
 }
 
+/**
+ * Removes illegal XML 1.0 characters from a string.
+ *
+ * This function creates a new string that excludes characters in the range
+ * U+0000 to U+001F, except for U+0009 (TAB), U+000A (LF), and U+000D (CR).
+ */
+gchar*
+str_xml_sanitize(const char* const str)
+{
+    if (str == NULL) {
+        return NULL;
+    }
+
+    GString* sanitized = g_string_new_len(NULL, strlen(str));
+    const char* curr = str;
+
+    while (*curr != '\0') {
+        gunichar c = g_utf8_get_char(curr);
+        if ((c >= 0x20) || (c == 0x09) || (c == 0x0A) || (c == 0x0D)) {
+            g_string_append_unichar(sanitized, c);
+        }
+        curr = g_utf8_next_char(curr);
+    }
+
+    return g_string_free(sanitized, FALSE);
+}
+
 char*
 release_get_latest(void)
 {

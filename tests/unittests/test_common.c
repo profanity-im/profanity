@@ -1281,3 +1281,35 @@ string_matches_one_of__tests__edge_cases(void** state)
     // is is an empty string, one of the options is an empty string
     assert_true(string_matches_one_of("Test", "", FALSE, "option1", "", "option2", NULL));
 }
+
+void
+str_xml_sanitize__strips_illegal_characters(void** state)
+{
+    // Test NULL input
+    assert_null(str_xml_sanitize(NULL));
+
+    // Test empty string
+    gchar* res1 = str_xml_sanitize("");
+    assert_string_equal("", res1);
+    g_free(res1);
+
+    // Test string with no illegal characters
+    gchar* res2 = str_xml_sanitize("Hello World! \t\n\r");
+    assert_string_equal("Hello World! \t\n\r", res2);
+    g_free(res2);
+
+    // Test string with illegal characters (0x16 is ^V, 0x01 is ^A)
+    gchar* res3 = str_xml_sanitize("Hello\x16World\x01!");
+    assert_string_equal("HelloWorld!", res3);
+    g_free(res3);
+
+    // Test string with mixed legal and illegal control characters
+    gchar* res4 = str_xml_sanitize("\x09Legal\x0BIllegal\x0ALegal\x1FIllegal\x0DLegal");
+    assert_string_equal("\tLegalIllegal\nLegalIllegal\rLegal", res4);
+    g_free(res4);
+
+    // Test UTF-8 characters
+    gchar* res5 = str_xml_sanitize("UTF-8: üñîçøðé \x16 and more");
+    assert_string_equal("UTF-8: üñîçøðé  and more", res5);
+    g_free(res5);
+}
