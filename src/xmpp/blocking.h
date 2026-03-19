@@ -12,5 +12,6 @@
 
 void blocking_request(void);
 int blocked_set_handler(xmpp_stanza_t* stanza);
+int reporting_set_handler(xmpp_stanza_t* stanza);
 
 #endif

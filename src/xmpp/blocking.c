@@ -319,3 +319,65 @@ _blocklist_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
     return 0;
 }
+
+int
+reporting_set_handler(xmpp_stanza_t* stanza)
+{
+    const char* from = xmpp_stanza_get_from(stanza);
+    xmpp_stanza_t* report = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_REPORTING);
+    if (!report) {
+        return 1;
+    }
+
+    const char* reason = xmpp_stanza_get_attribute(report, STANZA_ATTR_REASON);
+    const char* display_reason = "unknown";
+    if (g_strcmp0(reason, STANZA_REPORTING_SPAM) == 0) {
+        display_reason = "spam";
+    } else if (g_strcmp0(reason, STANZA_REPORTING_ABUSE) == 0) {
+        display_reason = "abuse";
+    }
+
+    char* message = NULL;
+    xmpp_stanza_t* body = xmpp_stanza_get_child_by_name(report, STANZA_NAME_BODY);
+    if (body) {
+        message = xmpp_stanza_get_text(body);
+    } else {
+        xmpp_stanza_t* text = xmpp_stanza_get_child_by_name(report, STANZA_NAME_TEXT);
+        if (text) {
+            message = xmpp_stanza_get_text(text);
+        }
+    }
+
+    // Attempt to find the reported JID if it's wrapped in an item (sync push style)
+    const char* reported_jid = NULL;
+    xmpp_stanza_t* block = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_BLOCKING);
+    if (block) {
+        xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(block, STANZA_NAME_ITEM);
+        if (item) {
+            reported_jid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+        }
+    }
+
+    if (reported_jid) {
+        if (message) {
+            cons_show("Incoming %s report from %s: User %s reported for %s. Content: \"%s\"",
+                      display_reason, from, reported_jid, display_reason, message);
+        } else {
+            cons_show("Incoming %s report from %s: User %s reported for %s.",
+                      display_reason, from, reported_jid, display_reason);
+        }
+    } else {
+        if (message) {
+            cons_show("Incoming %s report from %s. Content: \"%s\"",
+                      display_reason, from, message);
+        } else {
+            cons_show("Incoming %s report from %s.", display_reason, from);
+        }
+    }
+
+    if (message) {
+        xmpp_free(xmpp_stanza_get_context(stanza), message);
+    }
+
+    return 1;
+}
