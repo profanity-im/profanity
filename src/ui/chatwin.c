@@ -397,6 +397,8 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, const char
         win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, display_message);
     }
 
+    plugins_post_chat_message_display(myjid->barejid, myjid->resourcepart, display_message);
+
     // save last id and message for LMC in case if it's not LMC message
     if (id && !replace_id) {
         _chatwin_set_last_message(chatwin, id, display_message);
@@ -421,7 +423,16 @@ chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message)
 
     ProfWin* window = (ProfWin*)chatwin;
 
+    char* old_plain = message->plain;
+    auto_char char* plugin_msg = plugins_pre_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
+    if (plugin_msg)
+        message->plain = plugin_msg;
+
     win_print_outgoing(window, enc_char, message->id, message->replace_id, message->plain);
+
+    plugins_post_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
+    message->plain = old_plain;
+
     int num = wins_get_num(window);
     status_bar_active(num, WIN_CHAT, chatwin->barejid);
 }
@@ -545,6 +556,7 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
             if (plugin_msg)
                 msg->plain = plugin_msg;
             win_print_history((ProfWin*)chatwin, msg);
+            plugins_post_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
             msg->plain = old_plain;
             curr = g_slist_next(curr);
         }
@@ -580,6 +592,7 @@ chatwin_db_history(ProfChatWin* chatwin, const char* start_time, const char* end
         } else {
             win_print_history((ProfWin*)chatwin, msg);
         }
+        plugins_post_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
         msg->plain = old_plain;
         curr = g_slist_next(curr);
     }
