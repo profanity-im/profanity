@@ -1318,6 +1318,22 @@ win_refresh_with_subwin(ProfWin* window)
 {
 }
 
+gboolean
+win_warn_needed(ProfWin* window, const char* const type, const char* const jid)
+{
+    return TRUE;
+}
+
+void
+win_warn_sent(ProfWin* window, const char* const type, const char* const jid)
+{
+}
+
+void
+win_clear_warned_jids(ProfWin* window)
+{
+}
+
 void
 win_println(ProfWin* window, theme_item_t theme, const char* ch, const char* const message, ...)
 {

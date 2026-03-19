@@ -30,6 +30,7 @@
 #include "omemo/omemo.h"
 #include "omemo/store.h"
 #include "ui/ui.h"
+#include "ui/window.h"
 #include "ui/window_list.h"
 #include "xmpp/connection.h"
 #include "xmpp/muc.h"
@@ -514,18 +515,21 @@ omemo_set_device_list(const char* const from, GList* device_list)
             }
 
             if (!found) {
-                if (equals_our_barejid(jid->barejid)) {
-                    if (dev_id != omemo_ctx.device_id) {
-                        cons_show("New OMEMO device (ID: %u) added to your account.", dev_id);
-                    }
-                } else {
-                    ProfChatWin* chatwin = wins_get_chat(jid->barejid);
-                    if (chatwin) {
-                        win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "New OMEMO device (ID: %u) found for %s.", dev_id, jid->barejid);
+                auto_gchar gchar* dev_id_str = g_strdup_printf("%u", dev_id);
+                if (!g_key_file_has_key(omemo_ctx.knowndevices.keyfile, jid->barejid, dev_id_str, NULL)) {
+                    if (equals_our_barejid(jid->barejid)) {
+                        if (dev_id != omemo_ctx.device_id) {
+                            cons_show("New OMEMO device (ID: %u) added to your account.", dev_id);
+                        }
                     } else {
-                        ProfMucWin* mucwin = wins_get_muc(jid->barejid);
-                        if (mucwin) {
-                            win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "New OMEMO device (ID: %u) found for %s.", dev_id, jid->barejid);
+                        ProfChatWin* chatwin = wins_get_chat(jid->barejid);
+                        if (chatwin) {
+                            win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "New OMEMO device (ID: %u) found for %s.", dev_id, jid->barejid);
+                        } else {
+                            ProfMucWin* mucwin = wins_get_muc(jid->barejid);
+                            if (mucwin) {
+                                win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "New OMEMO device (ID: %u) found for %s.", dev_id, jid->barejid);
+                            }
                         }
                     }
                 }
@@ -728,17 +732,6 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
         }
     } else {
         log_debug("[OMEMO] session with %s device %d exists", jid, device_id);
-        if (omemo_ctx.notifying) {
-            ProfChatWin* chatwin = wins_get_chat(jid);
-            if (chatwin) {
-                win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "OMEMO session with %s (device %u) already exists.", jid, device_id);
-            } else {
-                ProfMucWin* mucwin = wins_get_muc(jid);
-                if (mucwin) {
-                    win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "OMEMO session with %s (device %u) already exists.", jid, device_id);
-                }
-            }
-        }
     }
 
 out:
@@ -822,7 +815,11 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
         recipient_device_id = g_hash_table_lookup(omemo_ctx.device_list, recipients_iter->data);
         if (!recipient_device_id) {
             log_warning("[OMEMO][SEND] cannot find device ids for %s", recipients_iter->data);
-            win_println(win, THEME_ERROR, "!", "Can't find a OMEMO device id for %s.\n", recipients_iter->data);
+
+            if (win_warn_needed(win, "omemo_no_device", recipients_iter->data)) {
+                win_println(win, THEME_ERROR, "!", "Can't find a OMEMO device id for %s.", recipients_iter->data);
+                win_warn_sent(win, "omemo_no_device", recipients_iter->data);
+            }
             continue;
         }
 

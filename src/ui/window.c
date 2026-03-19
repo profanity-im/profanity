@@ -557,6 +557,10 @@ win_free(ProfWin* window)
     }
     free(window->layout);
 
+    if (window->warned_jids) {
+        g_hash_table_destroy(window->warned_jids);
+    }
+
     switch (window->type) {
     case WIN_CHAT:
     {
@@ -607,6 +611,44 @@ win_free(ProfWin* window)
     }
 
     free(window);
+}
+
+gboolean
+win_warn_needed(ProfWin* window, const char* const type, const char* const jid)
+{
+    if (!window || !type || !jid) {
+        return TRUE;
+    }
+
+    if (!window->warned_jids) {
+        return TRUE;
+    }
+
+    auto_gchar gchar* key = g_strdup_printf("%s:%s", type, jid);
+    return !g_hash_table_contains(window->warned_jids, key);
+}
+
+void
+win_warn_sent(ProfWin* window, const char* const type, const char* const jid)
+{
+    if (!window || !type || !jid) {
+        return;
+    }
+
+    if (!window->warned_jids) {
+        window->warned_jids = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    }
+
+    gchar* key = g_strdup_printf("%s:%s", type, jid);
+    g_hash_table_insert(window->warned_jids, key, GINT_TO_POINTER(1));
+}
+
+void
+win_clear_warned_jids(ProfWin* window)
+{
+    if (window && window->warned_jids) {
+        g_hash_table_remove_all(window->warned_jids);
+    }
 }
 
 void
