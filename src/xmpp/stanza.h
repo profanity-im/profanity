@@ -96,6 +96,8 @@
 #define STANZA_NAME_USERNAME         "username"
 #define STANZA_NAME_PROPOSE          "propose"
 #define STANZA_NAME_REPORT           "report"
+#define STANZA_NAME_REPORT_ORIGIN    "report-origin"
+#define STANZA_NAME_THIRD_PARTY      "third-party"
 #define STANZA_NAME_EVENT            "event"
 #define STANZA_NAME_MOOD             "mood"
 #define STANZA_NAME_RECEIVED         "received"

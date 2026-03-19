@@ -116,6 +116,18 @@ blocked_add(char* jid, blocked_report reportkind, const char* const message)
             xmpp_stanza_set_attribute(report, STANZA_ATTR_REASON, STANZA_REPORTING_SPAM);
         }
 
+        xmpp_stanza_t* origin = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(origin, STANZA_NAME_REPORT_ORIGIN);
+        xmpp_stanza_set_attribute(origin, STANZA_ATTR_JID, connection_get_fulljid());
+        xmpp_stanza_add_child(report, origin);
+        xmpp_stanza_release(origin);
+
+        xmpp_stanza_t* third_party = xmpp_stanza_new(ctx);
+        xmpp_stanza_set_name(third_party, STANZA_NAME_THIRD_PARTY);
+        xmpp_stanza_set_attribute(third_party, STANZA_ATTR_JID, jid);
+        xmpp_stanza_add_child(report, third_party);
+        xmpp_stanza_release(third_party);
+
         if (message) {
             xmpp_stanza_t* text = xmpp_stanza_new(ctx);
             if (reportkind == BLOCKED_REPORT_SPAM) {
@@ -358,20 +370,38 @@ reporting_set_handler(xmpp_stanza_t* stanza)
         }
     }
 
+    xmpp_stanza_t* third_party = xmpp_stanza_get_child_by_name(report, STANZA_NAME_THIRD_PARTY);
+    if (third_party) {
+        reported_jid = xmpp_stanza_get_attribute(third_party, STANZA_ATTR_JID);
+    }
+
+    const char* reported_by = NULL;
+    xmpp_stanza_t* origin = xmpp_stanza_get_child_by_name(report, STANZA_NAME_REPORT_ORIGIN);
+    if (origin) {
+        reported_by = xmpp_stanza_get_attribute(origin, STANZA_ATTR_JID);
+    }
+
+    auto_gchar gchar* report_origin_str = NULL;
+    if (reported_by) {
+        report_origin_str = g_strdup_printf(" (origin: %s)", reported_by);
+    } else {
+        report_origin_str = g_strdup("");
+    }
+
     if (reported_jid) {
         if (message) {
-            cons_show("Incoming %s report from %s: User %s reported for %s. Content: \"%s\"",
-                      display_reason, from, reported_jid, display_reason, message);
+            cons_show("Incoming %s report%s from %s: User %s reported for %s. Content: \"%s\"",
+                      display_reason, report_origin_str, from, reported_jid, display_reason, message);
         } else {
-            cons_show("Incoming %s report from %s: User %s reported for %s.",
-                      display_reason, from, reported_jid, display_reason);
+            cons_show("Incoming %s report%s from %s: User %s reported for %s.",
+                      display_reason, report_origin_str, from, reported_jid, display_reason);
         }
     } else {
         if (message) {
-            cons_show("Incoming %s report from %s. Content: \"%s\"",
-                      display_reason, from, message);
+            cons_show("Incoming %s report%s from %s. Content: \"%s\"",
+                      display_reason, report_origin_str, from, message);
         } else {
-            cons_show("Incoming %s report from %s.", display_reason, from);
+            cons_show("Incoming %s report%s from %s.", display_reason, report_origin_str, from);
         }
     }
 
