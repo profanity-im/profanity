@@ -37,9 +37,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
+        env:
+          OMEMO_BACKEND: libomemo-c
         run: |
           docker build -f Dockerfile.${{ matrix.flavor }} -t profanity .
-          docker run profanity ./ci-meson-build.sh
+          docker run -e OMEMO_BACKEND profanity ./ci-meson-build.sh
 
   code-style:
     runs-on: ubuntu-22.04
