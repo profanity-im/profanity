@@ -392,7 +392,8 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, const char
     const char* display_message = plugin_message ?: message;
 
     if (request_receipt && id) {
-        win_print_outgoing_with_receipt((ProfWin*)chatwin, enc_char, "me", display_message, id, replace_id);
+        auto_gchar gchar* outgoing_str = prefs_get_string(PREF_OUTGOING_STAMP);
+        win_print_outgoing_with_receipt((ProfWin*)chatwin, enc_char, outgoing_str, display_message, id, replace_id);
     } else {
         win_print_outgoing((ProfWin*)chatwin, enc_char, id, replace_id, display_message);
     }

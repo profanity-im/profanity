@@ -2405,7 +2405,7 @@ static const struct cmd_t command_defs[] = {
               "/stamp unset outgoing|incoming")
       CMD_DESC("Set chat window stamp. "
                "The format of line in the chat window is: \"<timestamp> <encryption sign> <stamp> <message>\" "
-               "where <stamp> is \"me:\" for incoming messages or \"username@server/resource\" for outgoing messages. "
+               "where <stamp> is \"me:\" for outgoing messages or \"username@server/resource\" for incoming messages. "
                "This command allows to change <stamp> value.")
       CMD_ARGS({ "outgoing", "Set outgoing stamp" },
                { "incoming", "Set incoming stamp"},

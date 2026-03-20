@@ -8960,15 +8960,15 @@ gboolean
 cmd_stamp(ProfWin* window, const char* const command, gchar** args)
 {
     if (g_strv_length(args) == 0) {
-        auto_gchar gchar* def_incoming = prefs_get_string(PREF_OUTGOING_STAMP);
-        if (def_incoming) {
-            cons_show("The outgoing stamp is: %s", def_incoming);
+        auto_gchar gchar* def_outgoing = prefs_get_string(PREF_OUTGOING_STAMP);
+        if (def_outgoing) {
+            cons_show("The outgoing stamp is: %s", def_outgoing);
         } else {
             cons_show("The default outgoing stamp is used.");
         }
-        auto_gchar gchar* def_outgoing = prefs_get_string(PREF_INCOMING_STAMP);
-        if (def_outgoing) {
-            cons_show("The incoming stamp is: %s", def_outgoing);
+        auto_gchar gchar* def_incoming = prefs_get_string(PREF_INCOMING_STAMP);
+        if (def_incoming) {
+            cons_show("The incoming stamp is: %s", def_incoming);
         } else {
             cons_show("The default incoming stamp is used.");
         }

@@ -76,7 +76,7 @@ gchar*
 get_display_name(const ProfMessage* const message, int* flags)
 {
     if (equals_our_barejid(message->from_jid->barejid)) {
-        return g_strdup("me");
+        return prefs_get_string(PREF_OUTGOING_STAMP);
     } else {
         if (flags)
             *flags = NO_ME;
