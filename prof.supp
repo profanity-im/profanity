@@ -2652,3 +2652,12 @@
    fun:calloc
    fun:_dl_allocate_tls
 }
+
+# glibc/avx2 false positives
+{
+   g_utf8_collate_key_invalid_read_avx2
+   Memcheck:Addr32
+   fun:__wcpncpy_avx2
+   fun:wcsxfrm_l
+   fun:g_utf8_collate_key
+}
