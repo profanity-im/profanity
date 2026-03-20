@@ -1,0 +1,17 @@
+name: "Commits"
+
+on:
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Applies to all commits
+          fetch-depth: 0
+
+      - name: "Conventional Commits"
+        uses: wagoid/commitlint-github-action@v6
