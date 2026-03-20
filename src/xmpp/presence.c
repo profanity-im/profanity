@@ -507,8 +507,8 @@ _unavailable_handler(xmpp_stanza_t* const stanza)
         return;
     }
 
+    auto_char char* status_str = stanza_get_status(stanza, NULL);
     if (strcmp(my_jid->barejid, from_jid->barejid) != 0) {
-        auto_char char* status_str = stanza_get_status(stanza, NULL);
         if (from_jid->resourcepart) {
             sv_ev_contact_offline(from_jid->barejid, from_jid->resourcepart, status_str);
 
@@ -518,6 +518,7 @@ _unavailable_handler(xmpp_stanza_t* const stanza)
         }
     } else {
         if (from_jid->resourcepart) {
+            sv_ev_contact_offline(from_jid->barejid, from_jid->resourcepart, status_str);
             connection_remove_available_resource(from_jid->resourcepart);
         }
     }
@@ -613,8 +614,16 @@ _available_handler(xmpp_stanza_t* const stanza)
 
     Resource* resource = stanza_resource_from_presence(xmpp_presence);
 
+    char* pgpsig = NULL;
+    xmpp_stanza_t* x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_SIGNED);
+    if (x) {
+        pgpsig = xmpp_stanza_get_text(x);
+    }
+
     if (g_strcmp0(xmpp_presence->jid->barejid, my_jid->barejid) == 0) {
         connection_add_available_resource(resource);
+        Resource* resource_for_roster = resource_copy(resource);
+        sv_ev_contact_online(xmpp_presence->jid->barejid, resource_for_roster, xmpp_presence->last_activity, pgpsig);
         const char* account_name = session_get_account_name();
         int max_sessions = accounts_get_max_sessions(account_name);
         if (max_sessions > 0) {
@@ -678,16 +687,11 @@ _available_handler(xmpp_stanza_t* const stanza)
             }
         }
     } else {
-        char* pgpsig = NULL;
-        xmpp_stanza_t* x = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_SIGNED);
-        if (x) {
-            pgpsig = xmpp_stanza_get_text(x);
-        }
         sv_ev_contact_online(xmpp_presence->jid->barejid, resource, xmpp_presence->last_activity, pgpsig);
-        xmpp_ctx_t* ctx = connection_get_ctx();
-        xmpp_free(ctx, pgpsig);
     }
 
+    xmpp_ctx_t* ctx = connection_get_ctx();
+    xmpp_free(ctx, pgpsig);
     stanza_free_presence(xmpp_presence);
 }
 

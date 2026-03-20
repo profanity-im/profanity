@@ -1156,6 +1156,10 @@ cmd_sub(ProfWin* window, const char* const command, gchar** args)
     }
 
     auto_jid Jid* jidp = jid_create(jid);
+    if (!jidp) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
 
     if (strcmp(subcmd, "allow") == 0) {
         presence_subscription(jidp->barejid, PRESENCE_SUBSCRIBED);
@@ -1166,9 +1170,13 @@ cmd_sub(ProfWin* window, const char* const command, gchar** args)
         cons_show("Deleted/denied subscription for %s", jidp->barejid);
         log_info("Deleted/denied subscription for %s", jidp->barejid);
     } else if (strcmp(subcmd, "request") == 0) {
-        presence_subscription(jidp->barejid, PRESENCE_SUBSCRIBE);
-        cons_show("Sent subscription request to %s.", jidp->barejid);
-        log_info("Sent subscription request to %s.", jidp->barejid);
+        if (equals_our_barejid(jidp->barejid)) {
+            cons_show("Subscription to yourself is implicit.");
+        } else {
+            presence_subscription(jidp->barejid, PRESENCE_SUBSCRIBE);
+            cons_show("Sent subscription request to %s.", jidp->barejid);
+            log_info("Sent subscription request to %s.", jidp->barejid);
+        }
     } else if (strcmp(subcmd, "show") == 0) {
         PContact contact = roster_get_contact(jidp->barejid);
         if ((contact == NULL) || (p_contact_subscription(contact) == NULL)) {

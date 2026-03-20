@@ -22,6 +22,7 @@ typedef struct resource_t
 
 Resource* resource_new(const gchar* const name, resource_presence_t presence, const gchar* const status,
                        const int priority);
+Resource* resource_copy(Resource* resource);
 void resource_destroy(Resource* resource);
 int resource_compare_availability(Resource* first, Resource* second);
 

@@ -21,6 +21,7 @@
 #include "xmpp/resource.h"
 #include "xmpp/contact.h"
 #include "xmpp/jid.h"
+#include "xmpp/xmpp.h"
 
 typedef struct prof_roster_t
 {
@@ -366,6 +367,19 @@ roster_add(const char* const barejid, const char* const name, GSList* groups, co
     }
 
     g_hash_table_insert(roster->contacts, strdup(barejid), contact);
+
+    if (equals_our_barejid(barejid)) {
+        GList* resources = connection_get_available_resources();
+        GList* curr = resources;
+        while (curr) {
+            Resource* res = curr->data;
+            Resource* res_copy = resource_copy(res);
+            p_contact_set_presence(contact, res_copy);
+            curr = g_list_next(curr);
+        }
+        g_list_free(resources);
+    }
+
     autocomplete_add(roster->barejid_ac, barejid);
     _add_name_and_barejid(name, barejid);
 
