@@ -36,13 +36,13 @@ jobs:
             buildsystem: meson
             tests: unit
             omemo: signal
-            script: ./ci/ci-meson-build.sh
+            script: ./scripts/build-configuration-matrix.sh meson
             omemo_env: libsignal
           - flavor: debian
             buildsystem: meson
             tests: unit
             omemo: libomemo
-            script: ./ci/ci-meson-build.sh
+            script: ./scripts/build-configuration-matrix.sh meson
             omemo_env: libomemo-c
 
     name: ${{ matrix.flavor }} | ${{ matrix.buildsystem }} | ${{ matrix.tests }} | ${{ matrix.omemo }}

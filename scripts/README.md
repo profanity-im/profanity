@@ -14,10 +14,11 @@ Central validation script mainly for local development.
   - `--install`: Install the script as a git `pre-commit` hook.
 
 ## `build-configuration-matrix.sh`
-Exhaustive build configuration matrix testing. It ensures that Profanity compiles and passes unit tests across a variety of feature configurations.
+Exhaustive build configuration matrix testing. It ensures that Profanity compiles and passes unit tests across a variety of feature configurations for both Autotools and Meson.
 
 - **Purpose:** Verifies architectural compatibility by testing many combinations of build flags.
-- **Usage:** `./scripts/build-configuration-matrix.sh`
+- **Usage:** `./scripts/build-configuration-matrix.sh [autotools|meson] [extra-args]`
+- **Extra Arguments:** Any arguments passed after the build system are forwarded directly to the configuration command (`./configure` or `meson setup`).
 - **Environment:** Primarily used in CI (GitHub Actions), but can be run locally to verify all configurations.
 
 ## `changelog-helper.py`

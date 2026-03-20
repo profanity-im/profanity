@@ -214,7 +214,7 @@ In cases where you want to disable automatic formatting for a specific block of 
 ## Verification & Testing
 
 ### Running unit tests
-Run `make check` to run the unit tests with your current configuration or `./scripts/build-configuration-matrix.sh` to check with different switches passed to configure.
+Run `make check` to run the unit tests with your current configuration or `./scripts/build-configuration-matrix.sh [autotools|meson]` to check with different switches passed to configure.
 
 ### Writing unit tests
 We use the [cmocka](https://cmocka.org/) testing framework for unit tests.
