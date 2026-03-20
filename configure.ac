@@ -73,6 +73,8 @@ AC_ARG_ENABLE([gdk-pixbuf],
     [AS_HELP_STRING([--enable-gdk-pixbuf], [enable GDK Pixbuf support to scale avatars before uploading])])
 AC_ARG_ENABLE([omemo-qrcode],
     [AS_HELP_STRING([--enable-omemo-qrcode], [enable ability to display omemo qr code])])
+AC_ARG_ENABLE([functional-tests],
+    [AS_HELP_STRING([--enable-functional-tests], [enable functional tests (default auto)])])
 
 m4_include([m4/ax_valgrind_check.m4])
 AX_VALGRIND_DFLT([drd], [off])
@@ -389,11 +391,18 @@ PKG_CHECK_MODULES([cmocka], [cmocka], [],
     [AC_MSG_NOTICE([cmocka is not found, will not be able to run tests])])
 
 AM_CONDITIONAL([HAVE_STABBER], [false])
-AC_CHECK_LIB([stabber], [stbbr_start], [AM_CONDITIONAL([HAVE_STABBER], [true])],
-    [AC_MSG_NOTICE([libstabber not found, will not be able to run functional tests])])
 AM_CONDITIONAL([HAVE_UTIL], [false])
-AC_CHECK_LIB([util], [forkpty], [AM_CONDITIONAL([HAVE_UTIL], [true])],
-    [AC_MSG_NOTICE([libutil not found, will not be able to run functional tests])])
+
+if test "x$enable_functional_tests" != xno; then
+    AC_CHECK_LIB([stabber], [stbbr_start], [AM_CONDITIONAL([HAVE_STABBER], [true])],
+        [AS_IF([test "x$enable_functional_tests" = xyes],
+               [AC_MSG_ERROR([libstabber not found, but functional tests were explicitly enabled])],
+               [AC_MSG_NOTICE([libstabber not found, will not be able to run functional tests])])])
+    AC_CHECK_LIB([util], [forkpty], [AM_CONDITIONAL([HAVE_UTIL], [true])],
+        [AS_IF([test "x$enable_functional_tests" = xyes],
+               [AC_MSG_ERROR([libutil not found, but functional tests were explicitly enabled])],
+               [AC_MSG_NOTICE([libutil not found, will not be able to run functional tests])])])
+fi
 
 ## Default parameters
 AM_CFLAGS="$AM_CFLAGS -Wall -Wno-deprecated-declarations -std=gnu99 -ggdb3"
