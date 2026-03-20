@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Exhaustive build configuration matrix testing for Profanity
+
 log_content()
 {
     echo

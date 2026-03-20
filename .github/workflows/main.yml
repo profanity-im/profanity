@@ -21,17 +21,17 @@ jobs:
             buildsystem: autotools
             tests: unit
             omemo: signal
-            script: ./ci/ci-build.sh
+            script: ./scripts/build-configuration-matrix.sh
           - flavor: fedora
             buildsystem: autotools
             tests: unit
             omemo: signal
-            script: ./ci/ci-build.sh
+            script: ./scripts/build-configuration-matrix.sh
           - flavor: ubuntu
             buildsystem: autotools
             tests: unit
             omemo: signal
-            script: ./ci/ci-build.sh
+            script: ./scripts/build-configuration-matrix.sh
           - flavor: debian
             buildsystem: meson
             tests: unit

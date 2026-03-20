@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Central quality check script for Profanity
+# Central linting and testing script for Profanity
 
 set -e
 
@@ -118,7 +118,7 @@ while [[ "$#" -gt 0 ]]; do
             echo "Installing pre-commit hook..."
             mkdir -p .git/hooks
             echo "#!/usr/bin/env bash" > .git/hooks/pre-commit
-            echo "./scripts/quality-check.sh --hook" >> .git/hooks/pre-commit
+            echo "./scripts/lint-and-test.sh --hook" >> .git/hooks/pre-commit
             chmod +x .git/hooks/pre-commit
             echo "Hook installed."
             exit 0
@@ -140,4 +140,4 @@ if [ "$BUILD_SYSTEM" != "none" ]; then
     run_tests "$BUILD_SYSTEM"
 fi
 
-echo -e "${GREEN}Quality check successful!${NC}"
+echo -e "${GREEN}Validation successful!${NC}"

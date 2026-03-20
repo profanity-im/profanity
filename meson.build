@@ -727,7 +727,7 @@ if get_option('tests')
 endif
 
 run_target('doublecheck',
-  command: ['scripts/quality-check.sh', '--fix-formatting', '--meson']
+  command: ['scripts/lint-and-test.sh', '--fix-formatting', '--meson']
 )
 
 summary({

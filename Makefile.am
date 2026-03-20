@@ -376,4 +376,4 @@ spell:
 	codespell
 
 doublecheck:
-	@./scripts/quality-check.sh --fix-formatting --autotools
+	@./scripts/lint-and-test.sh --fix-formatting --autotools
