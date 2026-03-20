@@ -108,6 +108,7 @@ static char* _lastactivity_autocomplete(ProfWin* window, const char* const input
 static char* _intype_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _mood_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _strophe_autocomplete(ProfWin* window, const char* const input, gboolean previous);
+static char* _stamp_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _adhoc_cmd_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _vcard_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 
@@ -260,6 +261,8 @@ static Autocomplete mood_type_ac;
 static Autocomplete strophe_ac;
 static Autocomplete strophe_sm_ac;
 static Autocomplete strophe_verbosity_ac;
+static Autocomplete stamp_ac;
+static Autocomplete stamp_unset_ac;
 static Autocomplete adhoc_cmd_ac;
 static Autocomplete lastactivity_ac;
 static Autocomplete vcard_ac;
@@ -414,6 +417,8 @@ static Autocomplete* all_acs[] = {
     &strophe_ac,
     &strophe_sm_ac,
     &strophe_verbosity_ac,
+    &stamp_ac,
+    &stamp_unset_ac,
     &adhoc_cmd_ac,
     &lastactivity_ac,
     &vcard_ac,
@@ -1157,6 +1162,13 @@ cmd_ac_init(void)
     autocomplete_add(strophe_verbosity_ac, "2");
     autocomplete_add(strophe_verbosity_ac, "3");
 
+    autocomplete_add(stamp_ac, "outgoing");
+    autocomplete_add(stamp_ac, "incoming");
+    autocomplete_add(stamp_ac, "unset");
+
+    autocomplete_add(stamp_unset_ac, "outgoing");
+    autocomplete_add(stamp_unset_ac, "incoming");
+
     autocomplete_add(mood_ac, "set");
     autocomplete_add(mood_ac, "clear");
     autocomplete_add(mood_ac, "on");
@@ -1379,6 +1391,7 @@ cmd_ac_init(void)
     g_hash_table_insert(ac_funcs, "/status", _status_autocomplete);
     g_hash_table_insert(ac_funcs, "/statusbar", _statusbar_autocomplete);
     g_hash_table_insert(ac_funcs, "/strophe", _strophe_autocomplete);
+    g_hash_table_insert(ac_funcs, "/stamp", _stamp_autocomplete);
     g_hash_table_insert(ac_funcs, "/sub", _sub_autocomplete);
     g_hash_table_insert(ac_funcs, "/subject", _subject_autocomplete);
     g_hash_table_insert(ac_funcs, "/theme", _theme_autocomplete);
@@ -4229,6 +4242,20 @@ _strophe_autocomplete(ProfWin* window, const char* const input, gboolean previou
     }
 
     return autocomplete_param_with_ac(input, "/strophe", strophe_ac, FALSE, previous);
+}
+
+static char*
+_stamp_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+{
+    char* result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/stamp unset", stamp_unset_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/stamp", stamp_ac, TRUE, previous);
+    return result;
 }
 
 static char*
