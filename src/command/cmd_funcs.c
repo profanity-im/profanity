@@ -6208,6 +6208,10 @@ cmd_reconnect(ProfWin* window, const char* const command, gchar** args)
     int intval = 0;
     auto_char char* err_msg = NULL;
     if (g_strcmp0(value, "now") == 0) {
+        if (connection_get_status() != JABBER_CONNECTED) {
+            cons_show("You can't reconnect now, a connection has not been established yet.");
+            return TRUE;
+        }
         cl_ev_reconnect();
     } else if (strtoi_range(value, &intval, 0, INT_MAX, &err_msg)) {
         prefs_set_reconnect(intval);
@@ -9522,6 +9526,12 @@ cmd_register(ProfWin* window, const char* const command, gchar** args)
 {
     gchar* opt_keys[] = { "port", "tls", "auth", NULL };
     gboolean parsed;
+
+    if (connection_get_status() != JABBER_DISCONNECTED) {
+        cons_show_error("Can't register unless disconnected, please wait.");
+        log_info("Can't register unless disconnected, please wait.");
+        return TRUE;
+    }
 
     GHashTable* options = parse_options(&args[2], opt_keys, &parsed);
     if (!parsed) {
