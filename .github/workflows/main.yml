@@ -11,37 +11,49 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux:
+  tests:
     runs-on: ubuntu-latest
-
     strategy:
+      fail-fast: false
       matrix:
-        flavor: [debian, fedora, ubuntu]
+        include:
+          - flavor: debian
+            buildsystem: Autotools
+            tests: unit+func
+            omemo: signal
+            script: ./ci/ci-build.sh
+          - flavor: fedora
+            buildsystem: Autotools
+            tests: unit+func
+            omemo: signal
+            script: ./ci/ci-build.sh
+          - flavor: ubuntu
+            buildsystem: Autotools
+            tests: unit+func
+            omemo: signal
+            script: ./ci/ci-build.sh
+          - flavor: debian
+            buildsystem: Meson
+            tests: unit+func
+            omemo: signal
+            script: ./ci/ci-meson-build.sh
+            omemo_env: libsignal
+          - flavor: debian
+            buildsystem: Meson
+            tests: unit+func
+            omemo: libomemo
+            script: ./ci/ci-meson-build.sh
+            omemo_env: libomemo-c
 
-    name: Linux
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run tests
-        run: |
-          docker build -f ci/Dockerfile.${{ matrix.flavor }} -t profanity .
-          docker run profanity ./ci/ci-build.sh
-
-  linux-meson:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        flavor: [debian]
-
-    name: Linux-meson
+    name: ${{ matrix.flavor }} | ${{ matrix.buildsystem }} | ${{ matrix.tests }} | ${{ matrix.omemo }}
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
         env:
-          OMEMO_BACKEND: libomemo-c
+          OMEMO_BACKEND: ${{ matrix.omemo_env }}
         run: |
           docker build -f ci/Dockerfile.${{ matrix.flavor }} -t profanity .
-          docker run -e OMEMO_BACKEND profanity ./ci/ci-meson-build.sh
+          docker run ${OMEMO_BACKEND:+ -e OMEMO_BACKEND} profanity ${{ matrix.script }}
 
   code-style:
     runs-on: ubuntu-22.04
