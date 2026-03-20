@@ -19,17 +19,17 @@ jobs:
         include:
           - flavor: debian
             buildsystem: Autotools
-            tests: unit+func
+            tests: unit
             omemo: signal
             script: ./ci/ci-build.sh
           - flavor: fedora
             buildsystem: Autotools
-            tests: unit+func
+            tests: unit
             omemo: signal
             script: ./ci/ci-build.sh
           - flavor: ubuntu
             buildsystem: Autotools
-            tests: unit+func
+            tests: unit
             omemo: signal
             script: ./ci/ci-build.sh
           - flavor: debian

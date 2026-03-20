@@ -17,7 +17,6 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   gpgme \
   gtk2 \
   libgcrypt \
-  libmicrohttpd \
   libnotify \
   libsignal-protocol-c \
   libomemo-c \
@@ -34,7 +33,7 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   gdk-pixbuf2 \
   qrencode
 
-RUN mkdir -p /usr/src/{stabber,profanity}
+RUN mkdir -p /usr/src/profanity
 
 RUN useradd -mb /usr/src --shell=/bin/false aur && usermod -L aur
 USER aur
@@ -53,15 +52,6 @@ RUN pushd libstrophe-git && makepkg && popd
 USER root
 
 RUN pacman -U --noconfirm libstrophe-git/libstrophe-git-*.pkg.tar.zst
-
-WORKDIR /usr/src
-#RUN git clone https://github.com/boothj5/stabber
-
-#WORKDIR /usr/src/stabber
-#RUN ./bootstrap.sh
-#RUN ./configure --prefix=/usr --disable-dependency-tracking
-#RUN make
-#RUN make install
 
 WORKDIR /usr/src/profanity
 COPY . /usr/src/profanity

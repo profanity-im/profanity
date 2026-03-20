@@ -1,15 +1,12 @@
 # Build the latest Fedora image
 FROM fedora:latest
 
-# expect - for functional tests
-# libmicrohttpd - for stabber
 # glibc-locale - to have en_US locale
 RUN dnf install -y \
   autoconf \
   autoconf-archive \
   automake \
   awk \
-  expect-devel \
   gcc \
   git \
   glib2-devel \
@@ -21,7 +18,6 @@ RUN dnf install -y \
   expat-devel \
   libgcrypt-devel \
   gpgme-devel \
-  libmicrohttpd-devel \
   libnotify-devel \
   libotr-devel \
   libsignal-protocol-c-devel \
@@ -47,15 +43,6 @@ ENV LC_ALL en_US.UTF-8
 RUN mkdir -p /usr/src
 WORKDIR /usr/src
 
-#RUN mkdir -p /usr/src/stabber
-#RUN git clone https://github.com/boothj5/stabber
-#WORKDIR /usr/src/stabber
-#RUN ./bootstrap.sh
-#RUN ./configure --prefix=/usr --disable-dependency-tracking
-#RUN make
-#RUN make install
-
-WORKDIR /usr/src
 RUN mkdir -p /usr/src/libstrophe
 RUN git clone -c http.sslverify=false https://github.com/strophe/libstrophe
 WORKDIR /usr/src/libstrophe

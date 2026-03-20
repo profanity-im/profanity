@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   autoconf \
   autoconf-archive \
   automake \
-  expect \
   gcc \
   git \
   libcmocka-dev \
@@ -15,7 +14,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libglib2.0-dev \
   libgpgme11-dev \
   libgtk2.0-dev \
-  libmicrohttpd-dev \
   libncursesw5-dev \
   libnotify-dev \
   libotr5-dev \
@@ -34,18 +32,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libgdk-pixbuf-2.0-dev \
   libqrencode-dev
 
-RUN mkdir -p /usr/src/{stabber,libstrophe,profanity}
+RUN mkdir -p /usr/src/{libstrophe,profanity}
 WORKDIR /usr/src
 
-#RUN git clone https://github.com/boothj5/stabber
 RUN git clone -c http.sslverify=false https://github.com/strophe/libstrophe
-
-# TODO: Re-enable once libmicrohttpd-dev has been updated.
-#WORKDIR /usr/src/stabber
-#RUN ./bootstrap.sh
-#RUN ./configure --prefix=/usr --disable-dependency-tracking
-#RUN make
-#RUN make install
 
 WORKDIR /usr/src/libstrophe
 RUN ./bootstrap.sh

@@ -1,14 +1,11 @@
 # Build the latest openSUSE Tumbleweed image
 FROM opensuse/tumbleweed
 
-# expect - for functional tests
-# libmicrohttpd - for stabber
 # glibc-locale - to have en_US locale
 RUN zypper --non-interactive in --no-recommends \
   autoconf \
   autoconf-archive \
   automake \
-  expect-devel \
   gcc \
   git \
   glib2-devel \
@@ -21,7 +18,6 @@ RUN zypper --non-interactive in --no-recommends \
   libgcrypt-devel \
   libgpgme-devel \
   libstrophe-devel \
-  libmicrohttpd-devel \
   libnotify-devel \
   libotr-devel \
   libsignal-protocol-c-devel \
@@ -45,14 +41,6 @@ ENV LC_ALL en_US.UTF-8
 
 RUN mkdir -p /usr/src
 WORKDIR /usr/src
-
-#RUN mkdir -p /usr/src/stabber
-#RUN git clone git://github.com/boothj5/stabber.git
-#WORKDIR /usr/src/stabber
-#RUN ./bootstrap.sh
-#RUN ./configure --prefix=/usr --disable-dependency-tracking
-#RUN make
-#RUN make install
 
 RUN mkdir -p /usr/src/profanity
 WORKDIR /usr/src/profanity

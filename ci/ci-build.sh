@@ -121,18 +121,14 @@ esac
 case "$ARCH" in
     linux*)
          echo
-         echo "--> Building with ./configure ${tests[0]} --enable-valgrind $*"
+         echo "--> Building with ./configure ${tests[0]} --enable-valgrind --disable-functional-tests $*"
          echo
 
          # shellcheck disable=SC2086
-        ./configure ${tests[0]} --enable-valgrind $*
+        ./configure ${tests[0]} --enable-valgrind --disable-functional-tests $*
 
         $MAKE CC="${CC}"
-        if grep '^ID=' /etc/os-release | grep -q -e debian; then
-            $MAKE check-valgrind
-        else
-            $MAKE check-valgrind || log_content ./test-suite-memcheck.log
-        fi
+        $MAKE check-valgrind
         $MAKE distclean
         ;;
 esac
@@ -140,14 +136,14 @@ esac
 for features in "${tests[@]}"
 do
     echo
-    echo "--> Building with ./configure ${features} $*"
+    echo "--> Building with ./configure ${features} --disable-functional-tests $*"
     echo
 
     # shellcheck disable=SC2086
-    ./configure $features $*
+    ./configure $features --disable-functional-tests $*
 
     $MAKE CC="${CC}"
-    $MAKE check
+    $MAKE check-unit
 
     ./profanity -v
     $MAKE clean
