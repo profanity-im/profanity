@@ -114,6 +114,18 @@ See-also: https://xmpp.org/extensions/xep-0384.html
 Co-authored-by: Another Dev <dev@example.com>
 ```
 
+### Developer Certificate of Origin (DCO)
+To ensure that all contributions are legally cleared for inclusion in the project, **all commits must be signed-off**.
+
+By signing off your commits, you certify that you have the right to submit the code under the project's license (GPL-3.0-or-later). This is a standard industry practice to protect both the project and its contributors.
+
+#### How to Sign-Off Your Commits
+Simply add the `-s` flag when committing:
+```bash
+git commit -s -m "Message"
+```
+This will append a `Signed-off-by: Your Name <your.email@example.com>` line to the end of your commit message.
+
 ### GitHub
 We would like to encourage people to use GitHub to create pull requests.
 It makes it easy for us to review the patches, track WIP branches, organize branches with labels and milestones,
