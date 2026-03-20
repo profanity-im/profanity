@@ -75,6 +75,16 @@ resource_destroy(Resource* resource)
     }
 }
 
+Resource*
+resource_copy(Resource* resource)
+{
+    if (resource == NULL) {
+        return NULL;
+    }
+
+    return resource_new(resource->name, resource->presence, resource->status, resource->priority);
+}
+
 gboolean
 valid_resource_presence_string(const gchar* const str)
 {

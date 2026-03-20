@@ -610,3 +610,9 @@ void
 blocked_ac_reset(void)
 {
 }
+
+GList*
+connection_get_available_resources(void)
+{
+    return NULL;
+}
