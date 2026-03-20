@@ -1,0 +1,47 @@
+# Build the latest openSUSE Tumbleweed image
+FROM opensuse/tumbleweed
+
+# glibc-locale - to have en_US locale
+RUN zypper --non-interactive in --no-recommends \
+  autoconf \
+  autoconf-archive \
+  automake \
+  gcc \
+  git \
+  glib2-devel \
+  glibc-locale \
+  gtk2-devel \
+  libXss-devel \
+  libcmocka-devel \
+  libcurl-devel \
+  libexpat-devel \
+  libgcrypt-devel \
+  libgpgme-devel \
+  libstrophe-devel \
+  libnotify-devel \
+  libotr-devel \
+  libsignal-protocol-c-devel \
+  libomemo-c-devel \
+  libtool \
+  libuuid-devel \
+  make \
+  ncurses-devel \
+  python310 \
+  python310-devel \
+  readline-devel \
+  sqlite3-devel \
+  valgrind \
+  gdk-pixbuf-devel \
+  qrencode-devel
+
+# https://github.com/openSUSE/docker-containers-build/issues/26
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
+RUN mkdir -p /usr/src
+WORKDIR /usr/src
+
+RUN mkdir -p /usr/src/profanity
+WORKDIR /usr/src/profanity
+COPY . /usr/src/profanity

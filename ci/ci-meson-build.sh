@@ -9,10 +9,12 @@ error_handler()
     echo
     echo "Error ${ERR_CODE} with command '${BASH_COMMAND}' on line ${BASH_LINENO[0]}. Exiting."
     # Meson logs are stored in the build directory
-    if [ -f "build/meson-logs/testlog.txt" ]; then
-        echo "--- Meson Test Log ---"
-        cat build/meson-logs/testlog.txt
-    fi
+    for log in build_run/meson-logs/testlog.txt build_valgrind/meson-logs/testlog.txt; do
+        if [ -f "$log" ]; then
+            echo "--- Meson Test Log ($log) ---"
+            cat "$log"
+        fi
+    done
     exit ${ERR_CODE}
 }
 
@@ -47,7 +49,7 @@ if [[ "$(uname | tr '[:upper:]' '[:lower:]')" == linux* ]]; then
     meson setup build_valgrind ${tests[0]} ${BACKEND_OPT} -Dtests=true -Db_sanitize=address,undefined
     meson compile -C build_valgrind
 
-    meson test -C build_valgrind --print-errorlogs --wrap=valgrind || echo "Valgrind issues detected"
+    meson test -C build_valgrind "unit tests" --print-errorlogs --wrap=valgrind || echo "Valgrind issues detected"
 
     rm -rf build_valgrind
 fi
@@ -64,7 +66,7 @@ do
     meson setup build_run ${features} ${BACKEND_OPT} -Dtests=true
     meson compile -C build_run
     
-    meson test -C build_run --print-errorlogs
+    meson test -C build_run "unit tests" --print-errorlogs
     
     ./build_run/profanity -v
 done

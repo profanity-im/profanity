@@ -1,4 +1,4 @@
-name: CI
+name: Linux
 
 on:
   push:
@@ -11,67 +11,46 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  linux:
+  tests:
     runs-on: ubuntu-latest
-
     strategy:
+      fail-fast: false
       matrix:
-        flavor: [debian, fedora, ubuntu]
+        include:
+          - flavor: debian
+            buildsystem: autotools
+            tests: unit
+            omemo: signal
+            script: ./ci/ci-build.sh
+          - flavor: fedora
+            buildsystem: autotools
+            tests: unit
+            omemo: signal
+            script: ./ci/ci-build.sh
+          - flavor: ubuntu
+            buildsystem: autotools
+            tests: unit
+            omemo: signal
+            script: ./ci/ci-build.sh
+          - flavor: debian
+            buildsystem: meson
+            tests: unit
+            omemo: signal
+            script: ./ci/ci-meson-build.sh
+            omemo_env: libsignal
+          - flavor: debian
+            buildsystem: meson
+            tests: unit
+            omemo: libomemo
+            script: ./ci/ci-meson-build.sh
+            omemo_env: libomemo-c
 
-    name: Linux
-    steps:
-      - uses: actions/checkout@v2
-      - name: Run tests
-        run: |
-          docker build -f Dockerfile.${{ matrix.flavor }} -t profanity .
-          docker run profanity ./ci-build.sh
-
-  linux-meson:
-    runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        flavor: [debian]
-
-    name: Linux-meson
+    name: ${{ matrix.flavor }} | ${{ matrix.buildsystem }} | ${{ matrix.tests }} | ${{ matrix.omemo }}
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
         env:
-          OMEMO_BACKEND: libomemo-c
+          OMEMO_BACKEND: ${{ matrix.omemo_env }}
         run: |
-          docker build -f Dockerfile.${{ matrix.flavor }} -t profanity .
-          docker run -e OMEMO_BACKEND profanity ./ci-meson-build.sh
-
-  code-style:
-    runs-on: ubuntu-22.04
-    name: Check coding style
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v2
-      # if this check fails, you have to update the number of auto types known and the list of auto types in the check below
-      - name: Check auto types are up-to-date
-        run: |
-          [[ "$(find src -type f -name '*.[ch]' -exec awk '/^#define auto_[\W]*/ {print $2}' '{}' \; | sort -u | wc -l)" == "9" ]] || exit -1
-      - name: Check auto types are initialized
-        run: |
-          grep -P 'auto_(char|gchar|gcharv|gerror|guchar|jid|sqlite|gfd|FILE)[\w *]*;$' -r src && exit -1 || true
-      - name: Run clang-format
-        uses: jidicula/clang-format-action@v4.16.0
-        with:
-          clang-format-version: '21'
-          check-path: 'src'
-
-  spell-check:
-    runs-on: ubuntu-22.04
-    name: Check spelling
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v2
-      - name: install dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y --no-install-recommends codespell
-      - name: Check spelling
-        run: |
-          codespell
+          docker build -f ci/Dockerfile.${{ matrix.flavor }} -t profanity .
+          docker run ${OMEMO_BACKEND:+ -e OMEMO_BACKEND} profanity ${{ matrix.script }}

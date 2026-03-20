@@ -86,6 +86,7 @@ _pendingPresence_free(ProfPendingPresence* presence)
     if (presence->last_activity)
         g_date_time_unref(presence->last_activity);
     free(presence->barejid);
+    resource_destroy(presence->resource);
     free(presence);
 }
 
@@ -685,6 +686,7 @@ roster_process_pending_presence(void)
     for (iter = roster_pending_presence; iter != NULL; iter = iter->next) {
         ProfPendingPresence* presence = iter->data;
         roster_update_presence(presence->barejid, presence->resource, presence->last_activity);
+        presence->resource = NULL;
     }
 
     g_slist_free_full(roster_pending_presence, (GDestroyNotify)_pendingPresence_free);

@@ -1,0 +1,45 @@
+name: Style
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  code-style:
+    runs-on: ubuntu-22.04
+    name: coding style
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      # if this check fails, you have to update the number of auto types known and the list of auto types in the check below
+      - name: Check auto types are up-to-date
+        run: |
+          [[ "$(find src -type f -name '*.[ch]' -exec awk '/^#define auto_[\W]*/ {print $2}' '{}' \; | sort -u | wc -l)" == "9" ]] || exit -1
+      - name: Check auto types are initialized
+        run: |
+          grep -P 'auto_(char|gchar|gcharv|gerror|guchar|jid|sqlite|gfd|FILE)[\w *]*;$' -r src && exit -1 || true
+      - name: Run clang-format
+        uses: jidicula/clang-format-action@v4.16.0
+        with:
+          clang-format-version: '21'
+          check-path: 'src'
+
+  spell-check:
+    runs-on: ubuntu-22.04
+    name: spellcheck
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      - name: install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y --no-install-recommends codespell
+      - name: Check spelling
+        run: |
+          codespell

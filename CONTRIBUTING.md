@@ -48,7 +48,7 @@ meson setup build_run -Domemo=enabled -Domemo-backend=libomemo-c
 3. Run: `./build_run/profanity`
 
 We also have a [build section](https://profanity-im.github.io/guide/latest/build.html) in our user guide.
-You might also take a look at the `Dockerfile.*` in the root directory.
+You might also take a look at the `Dockerfile.*` in the `ci` directory.
 
 ## Submitting patches
 We recommend for people to always work on a dedicated git branch for each fix or feature.
@@ -113,6 +113,18 @@ Ref: a26cdf386bfec381563294342f2152a5c0eb677e
 See-also: https://xmpp.org/extensions/xep-0384.html
 Co-authored-by: Another Dev <dev@example.com>
 ```
+
+### Developer Certificate of Origin (DCO)
+To ensure that all contributions are legally cleared for inclusion in the project, **all commits must be signed-off**.
+
+By signing off your commits, you certify that you have the right to submit the code under the project's license (GPL-3.0-or-later). This is a standard industry practice to protect both the project and its contributors.
+
+#### How to Sign-Off Your Commits
+Simply add the `-s` flag when committing:
+```bash
+git commit -s -m "Message"
+```
+This will append a `Signed-off-by: Your Name <your.email@example.com>` line to the end of your commit message.
 
 ### GitHub
 We would like to encourage people to use GitHub to create pull requests.
@@ -180,7 +192,7 @@ snippet to `.git/hooks/pre-push`:
 ```shell
 #!/bin/sh
 set -e
-./ci-build.sh
+./ci/ci-build.sh
 ```
 
 This will run the same tests that the CI runs and refuse the push if it fails.
@@ -202,7 +214,7 @@ In cases where you want to disable automatic formatting for a specific block of 
 ## Verification & Testing
 
 ### Running unit tests
-Run `make check` to run the unit tests with your current configuration or `./ci-build.sh` to check with different switches passed to configure.
+Run `make check` to run the unit tests with your current configuration or `./ci/ci-build.sh` to check with different switches passed to configure.
 
 ### Writing unit tests
 We use the [cmocka](https://cmocka.org/) testing framework for unit tests.
