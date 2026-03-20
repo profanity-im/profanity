@@ -1,0 +1,10 @@
+# Pattern              Attribute
+.clang-format          export-ignore
+.codespellrc           export-ignore
+.git-blame-ignore-revs export-ignore
+.github/*              export-ignore
+CONTRIBUTING.md        export-ignore
+RELEASE_GUIDE.md       export-ignore
+ci/*                   export-ignore
+prof.supp              export-ignore
+scripts/*              export-ignore
