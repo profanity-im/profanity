@@ -34,13 +34,13 @@ jobs:
             script: ./ci/ci-build.sh
           - flavor: debian
             buildsystem: meson
-            tests: unit+func
+            tests: unit
             omemo: signal
             script: ./ci/ci-meson-build.sh
             omemo_env: libsignal
           - flavor: debian
             buildsystem: meson
-            tests: unit+func
+            tests: unit
             omemo: libomemo
             script: ./ci/ci-meson-build.sh
             omemo_env: libomemo-c

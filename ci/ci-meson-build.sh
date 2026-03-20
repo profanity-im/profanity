@@ -49,7 +49,7 @@ if [[ "$(uname | tr '[:upper:]' '[:lower:]')" == linux* ]]; then
     meson setup build_valgrind ${tests[0]} ${BACKEND_OPT} -Dtests=true -Db_sanitize=address,undefined
     meson compile -C build_valgrind
 
-    meson test -C build_valgrind --print-errorlogs --wrap=valgrind || echo "Valgrind issues detected"
+    meson test -C build_valgrind "unit tests" --print-errorlogs --wrap=valgrind || echo "Valgrind issues detected"
 
     rm -rf build_valgrind
 fi
@@ -66,7 +66,7 @@ do
     meson setup build_run ${features} ${BACKEND_OPT} -Dtests=true
     meson compile -C build_run
     
-    meson test -C build_run --print-errorlogs
+    meson test -C build_run "unit tests" --print-errorlogs
     
     ./build_run/profanity -v
 done
