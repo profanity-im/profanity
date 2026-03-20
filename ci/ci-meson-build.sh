@@ -9,10 +9,12 @@ error_handler()
     echo
     echo "Error ${ERR_CODE} with command '${BASH_COMMAND}' on line ${BASH_LINENO[0]}. Exiting."
     # Meson logs are stored in the build directory
-    if [ -f "build/meson-logs/testlog.txt" ]; then
-        echo "--- Meson Test Log ---"
-        cat build/meson-logs/testlog.txt
-    fi
+    for log in build_run/meson-logs/testlog.txt build_valgrind/meson-logs/testlog.txt; do
+        if [ -f "$log" ]; then
+            echo "--- Meson Test Log ($log) ---"
+            cat "$log"
+        fi
+    done
     exit ${ERR_CODE}
 }
 

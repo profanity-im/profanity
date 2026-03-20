@@ -3,8 +3,12 @@
 log_content()
 {
     echo
-    echo "Content of $1:"
-    cat "$1"
+    if [ -f "$1" ]; then
+        echo "Content of $1:"
+        cat "$1"
+    else
+        echo "Log file $1 not found."
+    fi
 }
 
 error_handler()
