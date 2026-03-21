@@ -1,6 +1,7 @@
 # Pattern              Attribute
 .clang-format          export-ignore
 .codespellrc           export-ignore
+.commitlintrc.json     export-ignore
 .git-blame-ignore-revs export-ignore
 .github/*              export-ignore
 CONTRIBUTING.md        export-ignore
