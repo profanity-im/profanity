@@ -1,0 +1,34 @@
+name: "Lint"
+
+on:
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened]
+
+jobs:
+  commitlint:
+    name: "Conventional Commits"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Fetch all history so commitlint can see the commits in the PR
+          fetch-depth: 0
+
+      - name: "Conventional Commits"
+        uses: wagoid/commitlint-github-action@v6
+
+  dco:
+    name: "DCO"
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Get PR Commits"
+        id: "get-pr-commits"
+        uses: tim-actions/get-pr-commits@v1.3.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Check DCO"
+        uses: tim-actions/dco@v1.1.0
+        with:
+          commits: ${{ steps.get-pr-commits.outputs.commits }}

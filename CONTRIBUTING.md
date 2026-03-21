@@ -192,7 +192,7 @@ snippet to `.git/hooks/pre-push`:
 ```shell
 #!/bin/sh
 set -e
-./ci/ci-build.sh
+./scripts/build-configuration-matrix.sh
 ```
 
 This will run the same tests that the CI runs and refuse the push if it fails.
@@ -214,7 +214,7 @@ In cases where you want to disable automatic formatting for a specific block of 
 ## Verification & Testing
 
 ### Running unit tests
-Run `make check` to run the unit tests with your current configuration or `./ci/ci-build.sh` to check with different switches passed to configure.
+Run `make check` to run the unit tests with your current configuration or `./scripts/build-configuration-matrix.sh [autotools|meson]` to check with different switches passed to configure.
 
 ### Writing unit tests
 We use the [cmocka](https://cmocka.org/) testing framework for unit tests.
@@ -331,7 +331,7 @@ meson compile doublecheck
 
 Alternatively, you can run the script directly:
 ```
-./scripts/quality-check.sh --fix-formatting --meson  # or --autotools
+./scripts/lint-and-test.sh --fix-formatting --meson  # or --autotools
 ```
 
 ### Pre-commit hook
@@ -339,7 +339,7 @@ It is highly recommended to install the quality check script as a git pre-commit
 
 To install the hook:
 ```
-./scripts/quality-check.sh --install
+./scripts/lint-and-test.sh --install
 ```
 
 If you need to bypass the formatting check (e.g. due to a `clang-format` version mismatch), you can set the `SKIP_FORMAT` environment variable:
