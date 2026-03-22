@@ -20,3 +20,4 @@ void omemo_bundle_request(const char* const jid, uint32_t device_id, ProfIqCallb
 int omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* const userdata);
 
 char* omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_error_t* error) __attribute__((nonnull(2, 3)));
+char* omemo_error_to_string(omemo_error_t error);

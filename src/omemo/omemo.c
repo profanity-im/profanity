@@ -1145,6 +1145,12 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         return NULL;
     }
 
+    if (payload == NULL) {
+        signal_buffer_free(plaintext_key);
+        *error = OMEMO_ERR_KEY_TRANSPORT;
+        return NULL;
+    }
+
     size_t plaintext_len = payload_len;
     plaintext = malloc(plaintext_len + 1);
     res = aes128gcm_decrypt(plaintext, &plaintext_len, payload, payload_len, iv,

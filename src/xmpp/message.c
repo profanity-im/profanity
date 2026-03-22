@@ -1089,23 +1089,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
     if (message->omemo_err != OMEMO_ERR_NONE) {
         message->enc = PROF_MSG_ENC_OMEMO;
         if (message->plain == NULL) {
-            switch (message->omemo_err) {
-            case OMEMO_ERR_NO_KEY:
-                message->plain = g_strdup("OMEMO message received but no key for this device found.");
-                break;
-            case OMEMO_ERR_NOT_TRUSTED:
-                message->plain = g_strdup("OMEMO message received but sender identity is untrusted.");
-                break;
-            case OMEMO_ERR_NO_SESSION:
-                message->plain = g_strdup("OMEMO message received but no session found. Try '/omemo start'.");
-                break;
-            case OMEMO_ERR_DECRYPT_FAILED:
-                message->plain = g_strdup("OMEMO message received but decryption failed.");
-                break;
-            default:
-                message->plain = g_strdup("OMEMO message received but could not be decrypted.");
-                break;
-            }
+            message->plain = omemo_error_to_string(message->omemo_err);
         }
     } else if (message->plain != NULL) {
         message->enc = PROF_MSG_ENC_OMEMO;
@@ -1270,23 +1254,7 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
     if (message->omemo_err != OMEMO_ERR_NONE) {
         message->enc = PROF_MSG_ENC_OMEMO;
         if (message->plain == NULL) {
-            switch (message->omemo_err) {
-            case OMEMO_ERR_NO_KEY:
-                message->plain = g_strdup("OMEMO message received but no key for this device found.");
-                break;
-            case OMEMO_ERR_NOT_TRUSTED:
-                message->plain = g_strdup("OMEMO message received but sender identity is untrusted.");
-                break;
-            case OMEMO_ERR_NO_SESSION:
-                message->plain = g_strdup("OMEMO message received but no session found. Try '/omemo start'.");
-                break;
-            case OMEMO_ERR_DECRYPT_FAILED:
-                message->plain = g_strdup("OMEMO message received but decryption failed.");
-                break;
-            default:
-                message->plain = g_strdup("OMEMO message received but could not be decrypted.");
-                break;
-            }
+            message->plain = omemo_error_to_string(message->omemo_err);
         }
     } else if (message->plain != NULL) {
         message->enc = PROF_MSG_ENC_OMEMO;
@@ -1458,23 +1426,7 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
     if (message->omemo_err != OMEMO_ERR_NONE) {
         message->enc = PROF_MSG_ENC_OMEMO;
         if (message->plain == NULL) {
-            switch (message->omemo_err) {
-            case OMEMO_ERR_NO_KEY:
-                message->plain = g_strdup("OMEMO message received but no key for this device found.");
-                break;
-            case OMEMO_ERR_NOT_TRUSTED:
-                message->plain = g_strdup("OMEMO message received but sender identity is untrusted.");
-                break;
-            case OMEMO_ERR_NO_SESSION:
-                message->plain = g_strdup("OMEMO message received but no session found. Try '/omemo start'.");
-                break;
-            case OMEMO_ERR_DECRYPT_FAILED:
-                message->plain = g_strdup("OMEMO message received but decryption failed.");
-                break;
-            default:
-                message->plain = g_strdup("OMEMO message received but could not be decrypted.");
-                break;
-            }
+            message->plain = omemo_error_to_string(message->omemo_err);
         }
     } else if (message->plain != NULL) {
         message->enc = PROF_MSG_ENC_OMEMO;

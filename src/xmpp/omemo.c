@@ -333,6 +333,7 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_erro
     unsigned char* payload_raw = NULL;
     char* iv_text = NULL;
     char* payload_text = NULL;
+    size_t payload_len = 0;
 
     *error = OMEMO_ERR_NONE;
 
@@ -372,20 +373,15 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_erro
     }
 
     xmpp_stanza_t* payload = xmpp_stanza_get_child_by_name(encrypted, "payload");
-    if (!payload) {
-        *error = OMEMO_ERR_OTHER;
-        goto quit;
-    }
-    payload_text = xmpp_stanza_get_text(payload);
-    if (!payload_text) {
-        *error = OMEMO_ERR_OTHER;
-        goto quit;
-    }
-    size_t payload_len;
-    payload_raw = g_base64_decode(payload_text, &payload_len);
-    if (!payload_raw) {
-        *error = OMEMO_ERR_OTHER;
-        goto quit;
+    if (payload) {
+        payload_text = xmpp_stanza_get_text(payload);
+        if (payload_text) {
+            payload_raw = g_base64_decode(payload_text, &payload_len);
+            if (!payload_raw) {
+                *error = OMEMO_ERR_OTHER;
+                goto quit;
+            }
+        }
     }
 
     xmpp_stanza_t* key_stanza;
@@ -706,4 +702,25 @@ _omemo_bundle_publish_configure_result(xmpp_stanza_t* const stanza, void* const 
     omemo_bundle_publish(TRUE);
 
     return 0;
+}
+
+char*
+omemo_error_to_string(omemo_error_t error)
+{
+    switch (error) {
+    case OMEMO_ERR_NO_KEY:
+        return g_strdup("OMEMO message received but no key for this device found.");
+    case OMEMO_ERR_NOT_TRUSTED:
+        return g_strdup("OMEMO message received but sender identity is untrusted.");
+    case OMEMO_ERR_NO_SESSION:
+        return g_strdup("OMEMO message received but no session found. Try '/omemo start'.");
+    case OMEMO_ERR_DECRYPT_FAILED:
+        return g_strdup("OMEMO message received but decryption failed.");
+    case OMEMO_ERR_KEY_TRANSPORT:
+        return NULL;
+    case OMEMO_ERR_NONE:
+        return NULL;
+    default:
+        return g_strdup("OMEMO message received but could not be decrypted.");
+    }
 }
