@@ -421,10 +421,6 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_erro
                                       keys, payload_raw, payload_len,
                                       g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0, trusted, error);
 
-    if (plaintext == NULL && *error == OMEMO_ERR_NONE && payload == NULL) {
-        *error = OMEMO_ERR_KEY_TRANSPORT;
-    }
-
     if (keys) {
         g_list_free_full(keys, (GDestroyNotify)omemo_key_free);
     }
@@ -706,4 +702,25 @@ _omemo_bundle_publish_configure_result(xmpp_stanza_t* const stanza, void* const 
     omemo_bundle_publish(TRUE);
 
     return 0;
+}
+
+char*
+omemo_error_to_string(omemo_error_t error)
+{
+    switch (error) {
+    case OMEMO_ERR_NO_KEY:
+        return g_strdup("OMEMO message received but no key for this device found.");
+    case OMEMO_ERR_NOT_TRUSTED:
+        return g_strdup("OMEMO message received but sender identity is untrusted.");
+    case OMEMO_ERR_NO_SESSION:
+        return g_strdup("OMEMO message received but no session found. Try '/omemo start'.");
+    case OMEMO_ERR_DECRYPT_FAILED:
+        return g_strdup("OMEMO message received but decryption failed.");
+    case OMEMO_ERR_KEY_TRANSPORT:
+        return NULL;
+    case OMEMO_ERR_NONE:
+        return NULL;
+    default:
+        return g_strdup("OMEMO message received but could not be decrypted.");
+    }
 }

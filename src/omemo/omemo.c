@@ -1147,6 +1147,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
 
     if (payload == NULL) {
         signal_buffer_free(plaintext_key);
+        *error = OMEMO_ERR_KEY_TRANSPORT;
         return NULL;
     }
 
