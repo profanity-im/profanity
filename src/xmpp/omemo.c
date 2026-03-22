@@ -333,6 +333,7 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_erro
     unsigned char* payload_raw = NULL;
     char* iv_text = NULL;
     char* payload_text = NULL;
+    size_t payload_len = 0;
 
     *error = OMEMO_ERR_NONE;
 
@@ -372,20 +373,15 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_erro
     }
 
     xmpp_stanza_t* payload = xmpp_stanza_get_child_by_name(encrypted, "payload");
-    if (!payload) {
-        *error = OMEMO_ERR_OTHER;
-        goto quit;
-    }
-    payload_text = xmpp_stanza_get_text(payload);
-    if (!payload_text) {
-        *error = OMEMO_ERR_OTHER;
-        goto quit;
-    }
-    size_t payload_len;
-    payload_raw = g_base64_decode(payload_text, &payload_len);
-    if (!payload_raw) {
-        *error = OMEMO_ERR_OTHER;
-        goto quit;
+    if (payload) {
+        payload_text = xmpp_stanza_get_text(payload);
+        if (payload_text) {
+            payload_raw = g_base64_decode(payload_text, &payload_len);
+            if (!payload_raw) {
+                *error = OMEMO_ERR_OTHER;
+                goto quit;
+            }
+        }
     }
 
     xmpp_stanza_t* key_stanza;
@@ -424,6 +420,10 @@ omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_erro
     plaintext = omemo_on_message_recv(from, sid, iv_raw, iv_len,
                                       keys, payload_raw, payload_len,
                                       g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0, trusted, error);
+
+    if (plaintext == NULL && *error == OMEMO_ERR_NONE && payload == NULL) {
+        *error = OMEMO_ERR_KEY_TRANSPORT;
+    }
 
     if (keys) {
         g_list_free_full(keys, (GDestroyNotify)omemo_key_free);

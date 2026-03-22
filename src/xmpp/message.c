@@ -1102,6 +1102,8 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
             case OMEMO_ERR_DECRYPT_FAILED:
                 message->plain = g_strdup("OMEMO message received but decryption failed.");
                 break;
+            case OMEMO_ERR_KEY_TRANSPORT:
+                break;
             default:
                 message->plain = g_strdup("OMEMO message received but could not be decrypted.");
                 break;
@@ -1282,6 +1284,8 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
                 break;
             case OMEMO_ERR_DECRYPT_FAILED:
                 message->plain = g_strdup("OMEMO message received but decryption failed.");
+                break;
+            case OMEMO_ERR_KEY_TRANSPORT:
                 break;
             default:
                 message->plain = g_strdup("OMEMO message received but could not be decrypted.");
@@ -1470,6 +1474,8 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
                 break;
             case OMEMO_ERR_DECRYPT_FAILED:
                 message->plain = g_strdup("OMEMO message received but decryption failed.");
+                break;
+            case OMEMO_ERR_KEY_TRANSPORT:
                 break;
             default:
                 message->plain = g_strdup("OMEMO message received but could not be decrypted.");
