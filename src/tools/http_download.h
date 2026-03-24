@@ -25,6 +25,7 @@ typedef struct http_download_t
 {
     char* id;
     char* url;
+    char* display_url;
     char* filename;
     char* cmd_template;
     curl_off_t bytes_received;
@@ -32,6 +33,7 @@ typedef struct http_download_t
     pthread_t worker;
     int cancel;
     gboolean silent;
+    gboolean silent_done;
     gboolean return_bytes_received;
 } HTTPDownload;
 

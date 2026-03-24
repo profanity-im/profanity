@@ -32,7 +32,6 @@
 #include "common.h"
 
 GSList* download_processes = NULL;
-gboolean silent = FALSE;
 
 static int
 _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
@@ -58,9 +57,16 @@ _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
         dlperc = (100 * dlnow) / dltotal;
     }
 
-    if (!silent)
-        http_print_transfer_update(download->window, download->url,
-                                   "Downloading '%s': %d%%", download->url, dlperc);
+    if (!download->silent) {
+        const char* url = download->display_url ? download->display_url : download->url;
+        if (dlnow == dltotal && dltotal > 0) {
+            http_print_transfer_update(download->window, download->id,
+                                       "Downloading '%s': done", url);
+        } else {
+            http_print_transfer_update(download->window, download->id,
+                                       "Downloading '%s': %d%%", url, dlperc);
+        }
+    }
 
     pthread_mutex_unlock(&lock);
 
@@ -85,15 +91,15 @@ http_file_get(void* userdata)
 
     CURL* curl;
     CURLcode res;
-    silent = download->silent;
 
     download->cancel = 0;
     download->bytes_received = 0;
 
     pthread_mutex_lock(&lock);
-    if (!silent) {
+    const char* display_url = download->display_url ? download->display_url : download->url;
+    if (!download->silent) {
         http_print_transfer(download->window, download->id,
-                            "Downloading '%s': 0%%", download->url);
+                            "Downloading '%s': 0%%", display_url);
     }
 
     FILE* outfh = fopen(download->filename, "wb");
@@ -172,18 +178,18 @@ http_file_get(void* userdata)
             http_print_transfer_update(download->window, download->id,
                                        "Downloading '%s' failed: "
                                        "Download was canceled",
-                                       download->url);
+                                       display_url);
         } else {
             http_print_transfer_update(download->window, download->id,
                                        "Downloading '%s' failed: %s",
-                                       download->url, err);
+                                       display_url, err);
         }
         free(err);
     } else {
-        if (!download->cancel && !silent) {
+        if (!download->cancel && !download->silent && !download->silent_done) {
             http_print_transfer_update(download->window, download->id,
                                        "Downloading '%s': done\nSaved to '%s'",
-                                       download->url, download->filename);
+                                       display_url, download->filename);
             win_mark_received(download->window, download->id);
             if (download->return_bytes_received) {
                 ret = malloc(sizeof(*ret));
@@ -204,7 +210,7 @@ http_file_get(void* userdata)
             http_print_transfer_update(download->window, download->id,
                                        "Downloading '%s' failed: Unable to call "
                                        "command '%s' with file at '%s' (%s).",
-                                       download->url,
+                                       display_url,
                                        download->cmd_template,
                                        download->filename,
                                        "TODO: Log the error");
@@ -221,6 +227,7 @@ out:
 
     free(download->filename);
     free(download->url);
+    free(download->display_url);
     free(download->id);
     free(download);
 

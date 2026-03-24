@@ -65,7 +65,13 @@ _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
         ulperc = (100 * ulnow) / ultotal;
     }
 
-    gchar* msg = g_strdup_printf("Uploading '%s': %d%%", upload->filename, ulperc);
+    gchar* msg = NULL;
+    if (ulnow == ultotal && ultotal > 0) {
+        msg = g_strdup_printf("Uploading '%s': done", upload->filename);
+    } else {
+        msg = g_strdup_printf("Uploading '%s': %d%%", upload->filename, ulperc);
+    }
+
     if (!msg) {
         msg = g_strdup(FALLBACK_MSG);
     }
@@ -288,7 +294,7 @@ http_file_put(void* userdata)
         cons_show_error(err_msg);
     } else {
         if (!upload->cancel) {
-            auto_gchar gchar* status_msg = g_strdup_printf("Uploading '%s': 100%%", upload->filename);
+            auto_gchar gchar* status_msg = g_strdup_printf("Uploading '%s': done", upload->filename);
             if (!status_msg) {
                 status_msg = g_strdup(FALLBACK_MSG);
             }

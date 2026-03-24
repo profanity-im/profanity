@@ -9209,18 +9209,30 @@ _prepare_filename(ProfWin* window, gchar* url, gchar* path)
         break;
     }
 
-    // Ensure that the downloads directory exists for saving cleartexts.
-    auto_gchar gchar* downloads_dir = path ? get_expanded_path(path) : files_get_download_path(jid);
-    if (g_mkdir_with_parents(downloads_dir, S_IRWXU) != 0) {
-        cons_show_error("Failed to create download directory "
-                        "at '%s' with error '%s'",
-                        downloads_dir, strerror(errno));
-        return NULL;
+    auto_gchar gchar* expanded_path = path ? get_expanded_path(path) : files_get_download_path(jid);
+
+    // If path is provided and doesn't look like a directory, create its parent.
+    // Otherwise, create the directory itself.
+    if (path && !g_str_has_suffix(expanded_path, G_DIR_SEPARATOR_S) && !g_file_test(expanded_path, G_FILE_TEST_IS_DIR)) {
+        auto_gchar gchar* dirname = g_path_get_dirname(expanded_path);
+        if (g_mkdir_with_parents(dirname, S_IRWXU) != 0) {
+            cons_show_error("Failed to create download directory "
+                            "at '%s' with error '%s'",
+                            dirname, strerror(errno));
+            return NULL;
+        }
+    } else {
+        if (g_mkdir_with_parents(expanded_path, S_IRWXU) != 0) {
+            cons_show_error("Failed to create download directory "
+                            "at '%s' with error '%s'",
+                            expanded_path, strerror(errno));
+            return NULL;
+        }
     }
 
     // Generate an unique filename from the URL that should be stored in the
     // downloads directory.
-    return unique_filename_from_url(url, downloads_dir);
+    return unique_filename_from_url(url, expanded_path);
 }
 
 #ifdef HAVE_OMEMO

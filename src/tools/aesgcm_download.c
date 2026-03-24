@@ -80,9 +80,11 @@ aesgcm_file_get(void* userdata)
     http_dl->worker = aesgcm_dl->worker;
     http_dl->id = strdup(aesgcm_dl->id);
     http_dl->url = strdup(https_url);
+    http_dl->display_url = strdup(aesgcm_dl->url);
     http_dl->filename = strdup(tmpname);
     http_dl->cmd_template = NULL;
     http_dl->silent = FALSE;
+    http_dl->silent_done = TRUE;
     http_dl->return_bytes_received = TRUE;
     aesgcm_dl->http_dl = http_dl;
 
@@ -113,10 +115,12 @@ aesgcm_file_get(void* userdata)
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
                                    "Downloading '%s' failed: Failed to decrypt "
                                    "file (%s).",
-                                   https_url, gcry_strerror(crypt_res));
+                                   aesgcm_dl->url, gcry_strerror(crypt_res));
     } else {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
-                                   "Decrypted file saved to '%s'", aesgcm_dl->filename);
+                                   "Downloading '%s': done\nSaved to '%s'",
+                                   aesgcm_dl->url, aesgcm_dl->filename);
+        win_mark_received(aesgcm_dl->window, aesgcm_dl->id);
     }
 
     if (aesgcm_dl->cmd_template != NULL) {
