@@ -43,7 +43,7 @@ aesgcm_file_get(void* userdata)
     // and tag stored in the URL fragment.
     if (omemo_parse_aesgcm_url(aesgcm_dl->url, &https_url, &fragment) != 0) {
         cons_show_error("Download failed: Cannot parse URL '%s'.", aesgcm_dl->url);
-        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
+        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id, THEME_ERROR, ENTRY_ERROR,
                                    "Download failed: Cannot parse URL '%s'.",
                                    aesgcm_dl->url);
         return NULL;
@@ -54,7 +54,7 @@ aesgcm_file_get(void* userdata)
     auto_gchar gchar* tmpname = NULL;
     auto_gfd gint tmpfd = 0;
     if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
-        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
+        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id, THEME_ERROR, ENTRY_ERROR,
                                    "Downloading '%s' failed: Unable to create "
                                    "temporary ciphertext file for writing "
                                    "(%s).",
@@ -65,7 +65,7 @@ aesgcm_file_get(void* userdata)
     // Open the target file for storing the cleartext.
     auto_FILE FILE* outfh = fopen(aesgcm_dl->filename, "wb");
     if (outfh == NULL) {
-        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
+        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id, THEME_ERROR, ENTRY_ERROR,
                                    "Downloading '%s' failed: Unable to open "
                                    "output file at '%s' for writing (%s).",
                                    https_url, aesgcm_dl->filename,
@@ -97,7 +97,7 @@ aesgcm_file_get(void* userdata)
 
     FILE* tmpfh = fopen(tmpname, "rb");
     if (tmpfh == NULL) {
-        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
+        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id, THEME_ERROR, ENTRY_ERROR,
                                    "Downloading '%s' failed: Unable to open "
                                    "temporary file at '%s' for reading (%s).",
                                    aesgcm_dl->url, tmpname,
@@ -112,12 +112,12 @@ aesgcm_file_get(void* userdata)
     remove(tmpname);
 
     if (crypt_res != GPG_ERR_NO_ERROR) {
-        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
+        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id, THEME_ERROR, ENTRY_ERROR,
                                    "Downloading '%s' failed: Failed to decrypt "
                                    "file (%s).",
                                    aesgcm_dl->url, gcry_strerror(crypt_res));
     } else {
-        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
+        http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id, THEME_ONLINE, ENTRY_COMPLETED,
                                    "Downloading '%s': done\nSaved to '%s'",
                                    aesgcm_dl->url, aesgcm_dl->filename);
         win_mark_received(aesgcm_dl->window, aesgcm_dl->id);
@@ -130,7 +130,7 @@ aesgcm_file_get(void* userdata)
 
         // TODO: Log the error.
         if (!call_external(argv)) {
-            http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id,
+            http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id, THEME_ERROR, ENTRY_ERROR,
                                        "Downloading '%s' failed: Unable to call "
                                        "command '%s' with file at '%s' (%s).",
                                        aesgcm_dl->url,

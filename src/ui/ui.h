@@ -25,12 +25,14 @@
 #include "otr/otr.h"
 #endif
 
-#define NO_ME          1
-#define NO_DATE        2
-#define NO_EOL         4
-#define NO_COLOUR_FROM 8
-#define NO_COLOUR_DATE 16
-#define UNTRUSTED      32
+#define NO_ME           1
+#define NO_DATE         2
+#define NO_EOL          4
+#define NO_COLOUR_FROM  8
+#define NO_COLOUR_DATE  16
+#define UNTRUSTED       32
+#define ENTRY_COMPLETED 64
+#define ENTRY_ERROR     128
 
 // core UI
 void ui_init(void);
