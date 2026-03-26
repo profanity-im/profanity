@@ -726,9 +726,12 @@ if get_option('tests')
   endif
 endif
 
-run_target('doublecheck',
-  command: ['scripts/lint-and-test.sh', '--fix-formatting', '--meson']
-)
+lint_and_test = find_program('scripts/lint-and-test.sh', required: false)
+if lint_and_test.found()
+  run_target('doublecheck',
+    command: [lint_and_test, '--fix-formatting', '--meson']
+  )
+endif
 
 summary({
   'Platform': platform,
