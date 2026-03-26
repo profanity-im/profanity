@@ -271,6 +271,13 @@ prof_start(void)
 int
 init_prof_test(void** state)
 {
+    // Check if profanity binary exists and is executable
+    if (access("./build_run/profanity", X_OK) != 0 && access("./profanity", X_OK) != 0) {
+        fprintf(stderr, "ERROR: Profanity binary not found or not executable.\n");
+        fprintf(stderr, "Ensure you have built the project.\n");
+        return -1;
+    }
+
     const char* cfg = getenv("XDG_CONFIG_HOME");
     const char* dat = getenv("XDG_DATA_HOME");
     config_orig = cfg ? g_strdup(cfg) : NULL;
