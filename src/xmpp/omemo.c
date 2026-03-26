@@ -326,6 +326,10 @@ out:
 char*
 omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_error_t* error)
 {
+    if (!stanza || !trusted || !error) {
+        return NULL;
+    }
+
     char* plaintext = NULL;
     const char* type = xmpp_stanza_get_type(stanza);
     GList* keys = NULL;
