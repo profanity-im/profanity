@@ -90,6 +90,7 @@ theme_init(const char* const theme_name)
     g_hash_table_insert(defaults, strdup("mention"), strdup("yellow"));
     g_hash_table_insert(defaults, strdup("trigger"), strdup("yellow"));
     g_hash_table_insert(defaults, strdup("input.text"), strdup("default"));
+    g_hash_table_insert(defaults, strdup("input.misspelled"), strdup("red"));
     g_hash_table_insert(defaults, strdup("main.time"), strdup("default"));
     g_hash_table_insert(defaults, strdup("titlebar.text"), strdup("white"));
     g_hash_table_insert(defaults, strdup("titlebar.brackets"), strdup("cyan"));
@@ -712,6 +713,9 @@ theme_attrs(theme_item_t attrs)
         break;
     case THEME_INPUT_TEXT:
         _theme_prep_fgnd("input.text", lookup_str, &bold);
+        break;
+    case THEME_INPUT_MISSPELLED:
+        _theme_prep_fgnd("input.misspelled", lookup_str, &bold);
         break;
     case THEME_TIME:
         _theme_prep_fgnd("main.time", lookup_str, &bold);

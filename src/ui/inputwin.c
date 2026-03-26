@@ -50,6 +50,7 @@
 #include "xmpp/roster_list.h"
 #include "xmpp/chat_state.h"
 #include "tools/editor.h"
+#include "tools/spellcheck.h"
 
 static WINDOW* inp_win;
 static int pad_start = 0;
@@ -327,6 +328,8 @@ _inp_write(char* line, int offset)
     getyx(inp_win, y, x);
     col += x;
 
+    gboolean do_spell = prefs_get_boolean(PREF_SPELLCHECK_ENABLE) && (line[0] != '/');
+
     for (size_t i = 0; line[i] != '\0'; i++) {
         char* c = &line[i];
         char retc[PROF_MB_CUR_MAX] = { 0 };
@@ -346,6 +349,47 @@ _inp_write(char* line, int offset)
             }
         } else {
             i += ch_len - 1;
+        }
+
+        if (do_spell) {
+            gunichar uc = g_utf8_get_char(c);
+            if (g_unichar_isalnum(uc) || uc == '\'') {
+                // start of a word
+                size_t start = i - (ch_len - 1);
+                size_t end = start + ch_len;
+                while (line[end] != '\0') {
+                    size_t next_ch_len = mbrlen(&line[end], MB_CUR_MAX, NULL);
+                    if (next_ch_len == (size_t)-2 || next_ch_len == (size_t)-1)
+                        break;
+                    gunichar next_uc = g_utf8_get_char(&line[end]);
+                    if (!g_unichar_isalnum(next_uc) && next_uc != '\'')
+                        break;
+                    end += next_ch_len;
+                }
+
+                char* word = g_strndup(&line[start], end - start);
+                gboolean misspelled = spellcheck_is_misspelled(word);
+                g_free(word);
+
+                if (misspelled) {
+                    wattron(inp_win, theme_attrs(THEME_INPUT_MISSPELLED));
+                }
+
+                // add the word
+                size_t word_pos = start;
+                while (word_pos < end) {
+                    size_t cur_ch_len = mbrlen(&line[word_pos], MB_CUR_MAX, NULL);
+                    waddnstr(inp_win, &line[word_pos], cur_ch_len);
+                    word_pos += cur_ch_len;
+                }
+
+                if (misspelled) {
+                    wattroff(inp_win, theme_attrs(THEME_INPUT_MISSPELLED));
+                }
+
+                i = end - 1;
+                continue;
+            }
         }
 
         waddnstr(inp_win, c, ch_len);

@@ -43,6 +43,7 @@
 static char* _sub_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _notify_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _theme_autocomplete(ProfWin* window, const char* const input, gboolean previous);
+static char* _spellcheck_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _autoaway_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _autoconnect_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 static char* _account_autocomplete(ProfWin* window, const char* const input, gboolean previous);
@@ -138,6 +139,7 @@ static Autocomplete autoconnect_ac;
 static Autocomplete wintitle_ac;
 static Autocomplete theme_ac;
 static Autocomplete theme_load_ac;
+static Autocomplete spellcheck_ac;
 static Autocomplete account_ac;
 static Autocomplete account_set_ac;
 static Autocomplete account_clear_ac;
@@ -298,6 +300,7 @@ static Autocomplete* all_acs[] = {
     &autoconnect_ac,
     &wintitle_ac,
     &theme_ac,
+    &spellcheck_ac,
     &account_ac,
     &account_set_ac,
     &account_clear_ac,
@@ -562,6 +565,10 @@ cmd_ac_init(void)
     autocomplete_add(theme_ac, "list");
     autocomplete_add(theme_ac, "colours");
     autocomplete_add(theme_ac, "properties");
+
+    autocomplete_add(spellcheck_ac, "on");
+    autocomplete_add(spellcheck_ac, "off");
+    autocomplete_add(spellcheck_ac, "lang");
 
     autocomplete_add(disco_ac, "info");
     autocomplete_add(disco_ac, "items");
@@ -1749,6 +1756,16 @@ cmd_ac_complete_filepath(const char* const input, char* const startstr, gboolean
 }
 
 static char*
+_spellcheck_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+{
+    char* result = NULL;
+
+    result = autocomplete_param_with_ac(input, "/spellcheck", spellcheck_ac, TRUE, previous);
+
+    return result;
+}
+
+static char*
 _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previous)
 {
     char* result = NULL;
@@ -1765,6 +1782,11 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
         if (result) {
             return result;
         }
+    }
+
+    result = _spellcheck_autocomplete(window, input, previous);
+    if (result) {
+        return result;
     }
 
     // autocomplete nickname in chat rooms

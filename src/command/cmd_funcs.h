@@ -103,6 +103,7 @@ gboolean cmd_bookmark_ignore(ProfWin* window, const char* const command, gchar**
 gboolean cmd_roster(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_software(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_splash(ProfWin* window, const char* const command, gchar** args);
+gboolean cmd_spellcheck(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_states(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_status_get(ProfWin* window, const char* const command, gchar** args);
 gboolean cmd_status_set(ProfWin* window, const char* const command, gchar** args);

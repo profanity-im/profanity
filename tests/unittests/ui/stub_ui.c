@@ -1008,6 +1008,10 @@ cons_splash_setting(void)
 {
 }
 void
+cons_spellcheck_setting(void)
+{
+}
+void
 cons_vercheck_setting(void)
 {
 }

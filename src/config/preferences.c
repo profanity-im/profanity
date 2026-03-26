@@ -41,6 +41,7 @@
 #define PREF_GROUP_MUC           "muc"
 #define PREF_GROUP_PLUGINS       "plugins"
 #define PREF_GROUP_EXECUTABLES   "executables"
+#define PREF_GROUP_SPELLCHECK    "spellcheck"
 
 #define INPBLOCK_DEFAULT 1000
 
@@ -1909,6 +1910,9 @@ _get_group(preference_t pref)
         return PREF_GROUP_OMEMO;
     case PREF_OX_LOG:
         return PREF_GROUP_OX;
+    case PREF_SPELLCHECK_ENABLE:
+    case PREF_SPELLCHECK_LANG:
+        return PREF_GROUP_SPELLCHECK;
     default:
         return NULL;
     }
@@ -2196,6 +2200,10 @@ _get_key(preference_t pref)
         return "strophe.sm.enabled";
     case PREF_STROPHE_SM_RESEND:
         return "strophe.sm.resend";
+    case PREF_SPELLCHECK_ENABLE:
+        return "enabled";
+    case PREF_SPELLCHECK_LANG:
+        return "lang";
     default:
         return NULL;
     }
@@ -2249,6 +2257,7 @@ _get_default_boolean(preference_t pref)
     case PREF_STROPHE_SM_ENABLED:
     case PREF_STROPHE_SM_RESEND:
         return TRUE;
+    case PREF_SPELLCHECK_ENABLE:
     case PREF_PGP_PUBKEY_AUTOIMPORT:
     default:
         return FALSE;
@@ -2356,6 +2365,8 @@ _get_default_string(preference_t pref)
         return "0";
     case PREF_DBLOG:
         return "on";
+    case PREF_SPELLCHECK_LANG:
+        return "en_US";
     default:
         return NULL;
     }
