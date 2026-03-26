@@ -20,6 +20,7 @@ void spellcheck_deinit(void);
 gboolean spellcheck_is_misspelled(const char* word);
 gboolean spellcheck_set_lang(const char* lang);
 const char* spellcheck_get_lang(void);
+GList* spellcheck_get_available_langs(void);
 
 #else
 
@@ -43,6 +44,11 @@ spellcheck_set_lang(const char* lang)
 }
 static inline const char*
 spellcheck_get_lang(void)
+{
+    return NULL;
+}
+static inline GList*
+spellcheck_get_available_langs(void)
 {
     return NULL;
 }

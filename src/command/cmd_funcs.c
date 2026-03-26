@@ -6571,6 +6571,24 @@ cmd_spellcheck(ProfWin* window, const char* const command, gchar** args)
     } else if (g_strcmp0(args[0], "off") == 0) {
         prefs_set_boolean(PREF_SPELLCHECK_ENABLE, FALSE);
         cons_show("Spellcheck disabled.");
+    } else if (g_strcmp0(args[0], "list") == 0) {
+        GList* langs = spellcheck_get_available_langs();
+        if (langs == NULL) {
+            cons_show("No dictionaries found. Install Enchant-compatible dictionaries (hunspell/aspell).");
+        } else {
+            GString* lang_str = g_string_new("");
+            GList* curr = langs;
+            while (curr) {
+                g_string_append(lang_str, (char*)curr->data);
+                if (curr->next) {
+                    g_string_append(lang_str, ", ");
+                }
+                curr = g_list_next(curr);
+            }
+            cons_show("Available spellcheck dictionaries: %s", lang_str->str);
+            g_string_free(lang_str, TRUE);
+            g_list_free_full(langs, g_free);
+        }
     } else if (g_strcmp0(args[0], "lang") == 0) {
         if (args[1] == NULL) {
             cons_bad_cmd_usage(command);

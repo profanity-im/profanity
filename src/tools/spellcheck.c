@@ -93,6 +93,31 @@ spellcheck_get_lang(void)
     return current_lang;
 }
 
+static void
+_list_dicts_cb(const char* const lang_tag,
+               const char* const provider_name,
+               const char* const provider_desc,
+               const char* const provider_file,
+               void* user_data)
+{
+    GList** list = (GList**)user_data;
+    if (g_list_find_custom(*list, lang_tag, (GCompareFunc)g_strcmp0) == NULL) {
+        *list = g_list_append(*list, g_strdup(lang_tag));
+    }
+}
+
+GList*
+spellcheck_get_available_langs(void)
+{
+    if (!broker) {
+        return NULL;
+    }
+
+    GList* list = NULL;
+    enchant_broker_list_dicts(broker, _list_dicts_cb, &list);
+    return g_list_sort(list, (GCompareFunc)g_strcmp0);
+}
+
 gboolean
 spellcheck_is_misspelled(const char* word)
 {

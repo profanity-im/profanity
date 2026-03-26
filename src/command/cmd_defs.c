@@ -1458,6 +1458,7 @@ static const struct cmd_t command_defs[] = {
               CMD_TAG_UI)
       CMD_SYN(
               "/spellcheck on|off",
+              "/spellcheck list",
               "/spellcheck lang <locale>")
       CMD_DESC(
               "Enable or disable spellchecking, or set the language.")

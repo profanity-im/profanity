@@ -568,6 +568,7 @@ cmd_ac_init(void)
 
     autocomplete_add(spellcheck_ac, "on");
     autocomplete_add(spellcheck_ac, "off");
+    autocomplete_add(spellcheck_ac, "list");
     autocomplete_add(spellcheck_ac, "lang");
 
     autocomplete_add(disco_ac, "info");
