@@ -56,6 +56,8 @@ void win_sub_print(WINDOW* win, char* msg, gboolean newline, gboolean wrap, int 
 void win_sub_newline_lazy(WINDOW* win);
 void win_mark_received(ProfWin* window, const char* const id);
 void win_update_entry_message(ProfWin* window, const char* const id, const char* const message);
+void win_update_entry(ProfWin* window, const char* const id, const char* const message, theme_item_t theme_item, int flags);
+void win_print_status_with_id(ProfWin* window, const char* const message, char* id, theme_item_t theme_item, int flags);
 
 gboolean win_has_active_subwin(ProfWin* window);
 

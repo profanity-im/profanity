@@ -65,11 +65,21 @@ _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
         ulperc = (100 * ulnow) / ultotal;
     }
 
-    gchar* msg = g_strdup_printf("Uploading '%s': %d%%", upload->filename, ulperc);
+    gchar* msg = NULL;
+    theme_item_t theme = THEME_DEFAULT;
+    int flags = 0;
+    if (ulnow == ultotal && ultotal > 0) {
+        msg = g_strdup_printf("Uploading '%s': done", upload->filename);
+        theme = THEME_ONLINE;
+        flags = ENTRY_COMPLETED;
+    } else {
+        msg = g_strdup_printf("Uploading '%s': %d%%", upload->filename, ulperc);
+    }
+
     if (!msg) {
         msg = g_strdup(FALLBACK_MSG);
     }
-    win_update_entry_message(upload->window, upload->put_url, msg);
+    win_update_entry(upload->window, upload->put_url, msg, theme, flags);
     g_free(msg);
 
     pthread_mutex_unlock(&lock);
@@ -150,7 +160,7 @@ http_file_put(void* userdata)
     if (!msg) {
         msg = g_strdup(FALLBACK_MSG);
     }
-    win_print_http_transfer(upload->window, msg, upload->put_url);
+    win_print_status_with_id(upload->window, msg, upload->put_url, THEME_DEFAULT, 0);
 
     auto_gchar gchar* cert_path = prefs_get_string(PREF_TLS_CERTPATH);
     auto_gchar gchar* cafile = cafile_get_name();
@@ -278,21 +288,22 @@ http_file_put(void* userdata)
             if (!err_msg) {
                 err_msg = g_strdup(FALLBACK_MSG);
             }
+            win_update_entry(upload->window, upload->put_url, err_msg, THEME_ERROR, ENTRY_ERROR);
         } else {
             err_msg = g_strdup_printf("Uploading '%s' failed: %s", upload->filename, err);
             if (!err_msg) {
                 err_msg = g_strdup(FALLBACK_MSG);
             }
-            win_update_entry_message(upload->window, upload->put_url, err_msg);
+            win_update_entry(upload->window, upload->put_url, err_msg, THEME_ERROR, ENTRY_ERROR);
         }
         cons_show_error(err_msg);
     } else {
         if (!upload->cancel) {
-            auto_gchar gchar* status_msg = g_strdup_printf("Uploading '%s': 100%%", upload->filename);
+            auto_gchar gchar* status_msg = g_strdup_printf("Uploading '%s': done", upload->filename);
             if (!status_msg) {
                 status_msg = g_strdup(FALLBACK_MSG);
             }
-            win_update_entry_message(upload->window, upload->put_url, status_msg);
+            win_update_entry(upload->window, upload->put_url, status_msg, THEME_ONLINE, ENTRY_COMPLETED);
             win_mark_received(upload->window, upload->put_url);
 
             char* url = NULL;

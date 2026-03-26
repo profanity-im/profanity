@@ -1659,7 +1659,7 @@ win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* con
 void
 win_print_http_transfer(ProfWin* window, const char* const message, char* id)
 {
-    win_print_outgoing_with_receipt(window, "!", NULL, message, id, NULL);
+    win_print_status_with_id(window, message, id, THEME_DEFAULT, 0);
 }
 
 void
@@ -1706,6 +1706,33 @@ win_update_entry_message(ProfWin* window, const char* const id, const char* cons
         entry->message = strdup(message);
         win_redraw(window);
     }
+}
+
+void
+win_update_entry(ProfWin* window, const char* const id, const char* const message, theme_item_t theme_item, int flags)
+{
+    if (window->type == WIN_CONSOLE)
+        return;
+    ProfBuffEntry* entry = buffer_get_entry_by_id(window->layout->buffer, id);
+    if (entry) {
+        if (message) {
+            free(entry->message);
+            entry->message = strdup(message);
+        }
+        entry->theme_item = theme_item;
+        entry->flags |= flags;
+        win_redraw(window);
+    }
+}
+
+void
+win_print_status_with_id(ProfWin* window, const char* const message, char* id, theme_item_t theme_item, int flags)
+{
+    GDateTime* time = g_date_time_new_now_local();
+    int y_start_pos = getcury(window->layout->win);
+    _win_print_internal(window, "!", 0, time, flags, theme_item, NULL, message, NULL);
+    buffer_append(window->layout->buffer, "!", 0, time, flags, theme_item, NULL, NULL, message, NULL, id, y_start_pos, getcury(window->layout->win));
+    g_date_time_unref(time);
 }
 
 void

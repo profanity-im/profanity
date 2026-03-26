@@ -32,7 +32,6 @@
 #include "common.h"
 
 GSList* download_processes = NULL;
-gboolean silent = FALSE;
 
 static int
 _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow)
@@ -58,9 +57,18 @@ _xferinfo(void* userdata, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultot
         dlperc = (100 * dlnow) / dltotal;
     }
 
-    if (!silent)
-        http_print_transfer_update(download->window, download->url,
-                                   "Downloading '%s': %d%%", download->url, dlperc);
+    if (!download->silent) {
+        const char* url = download->display_url ? download->display_url : download->url;
+        if (dlnow == dltotal && dltotal > 0) {
+            if (!download->silent_done) {
+                http_print_transfer_update(download->window, download->id, THEME_ONLINE, ENTRY_COMPLETED,
+                                           "Downloading '%s': done", url);
+            }
+        } else {
+            http_print_transfer_update(download->window, download->id, THEME_DEFAULT, 0,
+                                       "Downloading '%s': %d%%", url, dlperc);
+        }
+    }
 
     pthread_mutex_unlock(&lock);
 
@@ -85,20 +93,20 @@ http_file_get(void* userdata)
 
     CURL* curl;
     CURLcode res;
-    silent = download->silent;
 
     download->cancel = 0;
     download->bytes_received = 0;
 
     pthread_mutex_lock(&lock);
-    if (!silent) {
-        http_print_transfer(download->window, download->id,
-                            "Downloading '%s': 0%%", download->url);
+    const char* display_url = download->display_url ? download->display_url : download->url;
+    if (!download->silent) {
+        http_print_transfer(download->window, download->id, THEME_DEFAULT,
+                            "Downloading '%s': 0%%", display_url);
     }
 
     FILE* outfh = fopen(download->filename, "wb");
     if (outfh == NULL) {
-        http_print_transfer_update(download->window, download->id,
+        http_print_transfer_update(download->window, download->id, THEME_ERROR, ENTRY_ERROR,
                                    "Downloading '%s' failed: Unable to open "
                                    "output file at '%s' for writing (%s).",
                                    download->url, download->filename,
@@ -169,22 +177,24 @@ http_file_get(void* userdata)
     g_free(cert_path);
     if (err) {
         if (download->cancel) {
-            http_print_transfer_update(download->window, download->id,
+            http_print_transfer_update(download->window, download->id, THEME_ERROR, ENTRY_ERROR,
                                        "Downloading '%s' failed: "
                                        "Download was canceled",
-                                       download->url);
+                                       display_url);
         } else {
-            http_print_transfer_update(download->window, download->id,
+            http_print_transfer_update(download->window, download->id, THEME_ERROR, ENTRY_ERROR,
                                        "Downloading '%s' failed: %s",
-                                       download->url, err);
+                                       display_url, err);
         }
         free(err);
     } else {
-        if (!download->cancel && !silent) {
-            http_print_transfer_update(download->window, download->id,
-                                       "Downloading '%s': done\nSaved to '%s'",
-                                       download->url, download->filename);
-            win_mark_received(download->window, download->id);
+        if (!download->cancel) {
+            if (!download->silent && !download->silent_done) {
+                http_print_transfer_update(download->window, download->id, THEME_ONLINE, ENTRY_COMPLETED,
+                                           "Downloading '%s': done\nSaved to '%s'",
+                                           display_url, download->filename);
+                win_mark_received(download->window, download->id);
+            }
             if (download->return_bytes_received) {
                 ret = malloc(sizeof(*ret));
                 if (ret) {
@@ -201,10 +211,10 @@ http_file_get(void* userdata)
 
         // TODO: Log the error.
         if (!call_external(argv)) {
-            http_print_transfer_update(download->window, download->id,
+            http_print_transfer_update(download->window, download->id, THEME_ERROR, ENTRY_ERROR,
                                        "Downloading '%s' failed: Unable to call "
                                        "command '%s' with file at '%s' (%s).",
-                                       download->url,
+                                       display_url,
                                        download->cmd_template,
                                        download->filename,
                                        "TODO: Log the error");
@@ -221,6 +231,7 @@ out:
 
     free(download->filename);
     free(download->url);
+    free(download->display_url);
     free(download->id);
     free(download);
 

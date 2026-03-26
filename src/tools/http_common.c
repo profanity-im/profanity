@@ -19,7 +19,7 @@
 #define FALLBACK_MSG ""
 
 void
-http_print_transfer_update(ProfWin* window, char* id, const char* fmt, ...)
+http_print_transfer_update(ProfWin* window, char* id, theme_item_t theme_item, int flags, const char* fmt, ...)
 {
     va_list args;
 
@@ -29,7 +29,7 @@ http_print_transfer_update(ProfWin* window, char* id, const char* fmt, ...)
     va_end(args);
 
     if (window->type != WIN_CONSOLE) {
-        win_update_entry_message(window, id, msg->str);
+        win_update_entry(window, id, msg->str, theme_item, flags);
     } else {
         cons_show("%s", msg->str);
     }
@@ -38,7 +38,7 @@ http_print_transfer_update(ProfWin* window, char* id, const char* fmt, ...)
 }
 
 void
-http_print_transfer(ProfWin* window, char* id, const char* fmt, ...)
+http_print_transfer(ProfWin* window, char* id, theme_item_t theme_item, const char* fmt, ...)
 {
     va_list args;
 
@@ -47,7 +47,7 @@ http_print_transfer(ProfWin* window, char* id, const char* fmt, ...)
     g_string_vprintf(msg, fmt, args);
     va_end(args);
 
-    win_print_http_transfer(window, msg->str, id);
+    win_print_status_with_id(window, msg->str, id, theme_item, 0);
 
     g_string_free(msg, TRUE);
 }

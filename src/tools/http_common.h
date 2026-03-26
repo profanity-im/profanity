@@ -12,7 +12,7 @@
 
 #include "ui/window.h"
 
-void http_print_transfer(ProfWin* window, char* id, const char* fmt, ...);
-void http_print_transfer_update(ProfWin* window, char* id, const char* fmt, ...);
+void http_print_transfer(ProfWin* window, char* id, theme_item_t theme_item, const char* fmt, ...);
+void http_print_transfer_update(ProfWin* window, char* id, theme_item_t theme_item, int flags, const char* fmt, ...);
 
 #endif
