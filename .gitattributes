@@ -3,9 +3,9 @@
 .codespellrc           export-ignore
 .commitlintrc.json     export-ignore
 .git-blame-ignore-revs export-ignore
-.github/*              export-ignore
+.github/               export-ignore
 CONTRIBUTING.md        export-ignore
 RELEASE_GUIDE.md       export-ignore
-ci/*                   export-ignore
+ci/                    export-ignore
 prof.supp              export-ignore
-scripts/*              export-ignore
+scripts/               export-ignore
