@@ -1,4 +1,4 @@
-name: CI
+name: Build
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
             script: ./scripts/build-configuration-matrix.sh
             omemo_env: libomemo-c
 
-    name: ${{ matrix.flavor }} | ${{ matrix.buildsystem }} | ${{ matrix.tests }} | ${{ matrix.omemo }}
+    name: ${{ matrix.flavor }} | ${{ matrix.tests }} | ${{ matrix.omemo }}
     steps:
       - uses: actions/checkout@v2
       - name: Run tests
@@ -48,7 +48,7 @@ jobs:
 
   macos-homebrew:
     runs-on: macos-latest
-    name: macos | meson | unit | libomemo
+    name: macos | unit | libomemo
     env:
       HOMEBREW_NO_AUTO_UPDATE: 1
       HOMEBREW_NO_INSTALL_CLEANUP: 1

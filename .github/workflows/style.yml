@@ -1,4 +1,4 @@
-name: Style
+name: Lint
 
 on:
   push:
