@@ -17,12 +17,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - flavor: debian
-            buildsystem: meson
-            tests: unit
-            omemo: signal
-            script: ./scripts/build-configuration-matrix.sh
-            omemo_env: libsignal
           - flavor: fedora
             buildsystem: meson
             tests: unit
