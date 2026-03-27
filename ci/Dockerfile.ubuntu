@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libgcrypt-dev \
   libglib2.0-dev \
   libgpgme11-dev \
-  libgtk2.0-dev \
+  libgtk-3-dev \
   libncursesw5-dev \
   libnotify-dev \
   libotr5-dev \
