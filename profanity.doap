@@ -483,17 +483,17 @@
       </Version>
       <Version>
         <revision>0.16.0</revision>
-        <created>2024-02-23</created>
+        <created>2026-02-23</created>
 		<file-release rdf:resource='https://profanity-im.github.io/tarballs/profanity-0.16.0.tar.gz'/>
       </Version>
       <Version>
         <revision>0.15.1</revision>
-        <created>2024-08-22</created>
+        <created>2025-08-22</created>
 		<file-release rdf:resource='https://profanity-im.github.io/tarballs/profanity-0.15.1.tar.gz'/>
       </Version>
       <Version>
         <revision>0.15.0</revision>
-        <created>2024-03-27</created>
+        <created>2025-03-27</created>
 		<file-release rdf:resource='https://profanity-im.github.io/tarballs/profanity-0.15.0.tar.gz'/>
       </Version>
 	  <Version>
