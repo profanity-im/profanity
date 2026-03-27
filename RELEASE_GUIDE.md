@@ -2,7 +2,7 @@
 
 * Release libstrophe if required
 
-* Set the correct release version in meson.build and configure.ac
+* Set the correct release version in meson.build
 
 * Run Unit tests: `meson setup build_test -Dtests=true && meson test -C build_test`
 * Run Functional tests: same as above but needs stabber installed
@@ -27,10 +27,7 @@
 * Update profanity.doap (new XEPs and latest version). Look for `DEV` which marks what is done on the development branch.
 * Add new release to profanity.doap
 
-* Set the package status to release: `meson setup build_rel --buildtype=release` and in configure.ac
-```
-PACKAGE_STATUS="release"
-```
+* Set the package status to release: `meson setup build_rel --buildtype=release`
 
 * Update date and version in man pages (profanity.1, profanity-ox-setup.1)
 * Add generated command manpages: `git add docs/profanity-*.1`
@@ -39,11 +36,6 @@ PACKAGE_STATUS="release"
 * Tag (0.1.2)
 
 * Generate tarballs: `meson dist -C build_rel --formats xztar,zip`
-
-* Set the package status for autotools back to dev:
-```
-PACKAGE_STATUS="development"
-```
 
 * Remove generated command manpages:
   `git rm docs/profanity-*.1`

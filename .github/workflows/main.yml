@@ -18,31 +18,28 @@ jobs:
       matrix:
         include:
           - flavor: debian
-            buildsystem: autotools
-            tests: unit
-            omemo: signal
-            script: ./scripts/build-configuration-matrix.sh
-          - flavor: fedora
-            buildsystem: autotools
-            tests: unit
-            omemo: signal
-            script: ./scripts/build-configuration-matrix.sh
-          - flavor: ubuntu
-            buildsystem: autotools
-            tests: unit
-            omemo: signal
-            script: ./scripts/build-configuration-matrix.sh
-          - flavor: debian
             buildsystem: meson
             tests: unit
             omemo: signal
-            script: ./scripts/build-configuration-matrix.sh meson
+            script: ./scripts/build-configuration-matrix.sh
+            omemo_env: libsignal
+          - flavor: fedora
+            buildsystem: meson
+            tests: unit
+            omemo: signal
+            script: ./scripts/build-configuration-matrix.sh
+            omemo_env: libsignal
+          - flavor: ubuntu
+            buildsystem: meson
+            tests: unit
+            omemo: signal
+            script: ./scripts/build-configuration-matrix.sh
             omemo_env: libsignal
           - flavor: debian
             buildsystem: meson
             tests: unit
             omemo: libomemo
-            script: ./scripts/build-configuration-matrix.sh meson
+            script: ./scripts/build-configuration-matrix.sh
             omemo_env: libomemo-c
 
     name: ${{ matrix.flavor }} | ${{ matrix.buildsystem }} | ${{ matrix.tests }} | ${{ matrix.omemo }}

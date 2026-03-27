@@ -9,16 +9,16 @@ Central validation script mainly for local development.
 - **Usage:** `./scripts/lint-and-test.sh [options]`
 - **Options:**
   - `--fix-formatting`: Automatically apply `clang-format` fixes.
-  - `--autotools` / `--meson`: Run unit tests using the specified build system.
+  - `--tests`: Run unit tests using Meson.
   - `--hook`: Run in "hook mode" (checks only staged files).
   - `--install`: Install the script as a git `pre-commit` hook.
 
 ## `build-configuration-matrix.sh`
-Exhaustive build configuration matrix testing. It ensures that Profanity compiles and passes unit tests across a variety of feature configurations for both Autotools and Meson.
+Exhaustive build configuration matrix testing. It ensures that Profanity compiles and passes unit tests across a variety of feature configurations for Meson.
 
 - **Purpose:** Verifies architectural compatibility by testing many combinations of build flags.
-- **Usage:** `./scripts/build-configuration-matrix.sh [autotools|meson] [extra-args]`
-- **Extra Arguments:** Any arguments passed after the build system are forwarded directly to the configuration command (`./configure` or `meson setup`).
+- **Usage:** `./scripts/build-configuration-matrix.sh [extra-args]`
+- **Extra Arguments:** Any arguments are forwarded directly to the configuration command (`meson setup`).
 - **Environment:** Primarily used in CI (GitHub Actions), but can be run locally to verify all configurations.
 
 ## `changelog-helper.py`

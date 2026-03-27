@@ -25,6 +25,8 @@ RUN dnf install -y \
   libtool \
   libuuid-devel \
   make \
+  meson \
+  ninja-build \
   ncurses-devel \
   python3 \
   python3-devel \

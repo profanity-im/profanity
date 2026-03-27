@@ -38,6 +38,8 @@ jobs:
         uses: egor-tensin/setup-cygwin@v4
         with:
           packages: >-
+            meson
+            ninja
             autoconf
             automake
             libtool
@@ -65,28 +67,14 @@ jobs:
           ./configure --prefix=$PWD/install
           make -j2 install
 
-      - name: Autotools bootstrap
-        run: |
-          cd "$GITHUB_WORKSPACE"
-          
-          # On Windows checkouts the executable bit may be lost and CRLF line endings
-          # can break shell scripts, so normalize bootstrap.sh if it exists.
-          if [ -f ./bootstrap.sh ]; then
-            sed -i 's/\r$//' ./bootstrap.sh
-            chmod +x ./bootstrap.sh
-            ./bootstrap.sh
-          else
-            autoreconf -fi
-          fi
-
-      - name: Configure
+      - name: Meson setup
         env:
           PKG_CONFIG_PATH: ${{ github.workspace }}/deps/libstrophe/install/lib/pkgconfig:$PKG_CONFIG_PATH
         run: |
           cd "$GITHUB_WORKSPACE"
-          ./configure
+          meson setup build_run
 
       - name: Build
         run: |
           cd "$GITHUB_WORKSPACE"
-          make -j2
+          meson compile -C build_run
