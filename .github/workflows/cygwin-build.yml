@@ -69,6 +69,7 @@ jobs:
 
       - name: Meson setup
         env:
+          CC: /usr/bin/gcc
           PKG_CONFIG_PATH: ${{ github.workspace }}/deps/libstrophe/install/lib/pkgconfig:$PKG_CONFIG_PATH
         run: |
           cd "$GITHUB_WORKSPACE"
