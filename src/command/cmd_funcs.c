@@ -54,6 +54,7 @@
 #include "tools/plugin_download.h"
 #include "tools/bookmark_ignore.h"
 #include "tools/editor.h"
+#include "tools/spellcheck.h"
 #include "plugins/plugins.h"
 #include "ui/inputwin.h"
 #include "ui/ui.h"
@@ -6557,6 +6558,55 @@ gboolean
 cmd_splash(ProfWin* window, const char* const command, gchar** args)
 {
     _cmd_set_boolean_preference(args[0], "Splash screen", PREF_SPLASH);
+    return TRUE;
+}
+
+gboolean
+cmd_spellcheck(ProfWin* window, const char* const command, gchar** args)
+{
+#ifdef HAVE_SPELLCHECK
+    if (g_strcmp0(args[0], "on") == 0) {
+        prefs_set_boolean(PREF_SPELLCHECK_ENABLE, TRUE);
+        cons_show("Spellcheck enabled.");
+    } else if (g_strcmp0(args[0], "off") == 0) {
+        prefs_set_boolean(PREF_SPELLCHECK_ENABLE, FALSE);
+        cons_show("Spellcheck disabled.");
+    } else if (g_strcmp0(args[0], "list") == 0) {
+        GList* langs = spellcheck_get_available_langs();
+        if (langs == NULL) {
+            cons_show("No dictionaries found. Install Enchant-compatible dictionaries (hunspell/aspell).");
+        } else {
+            GString* lang_str = g_string_new("");
+            GList* curr = langs;
+            while (curr) {
+                g_string_append(lang_str, (char*)curr->data);
+                if (curr->next) {
+                    g_string_append(lang_str, ", ");
+                }
+                curr = g_list_next(curr);
+            }
+            cons_show("Available spellcheck dictionaries: %s", lang_str->str);
+            g_string_free(lang_str, TRUE);
+            g_list_free_full(langs, g_free);
+        }
+    } else if (g_strcmp0(args[0], "lang") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+        } else {
+            if (spellcheck_set_lang(args[1])) {
+                prefs_set_string(PREF_SPELLCHECK_LANG, args[1]);
+                cons_show("Spellcheck language set to: %s", args[1]);
+            } else {
+                cons_show("Failed to set spellcheck language to: %s. Is the dictionary installed?", args[1]);
+            }
+        }
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+#else
+    cons_show("Profanity was built without spellcheck support.");
+#endif
+
     return TRUE;
 }
 

@@ -161,6 +161,8 @@ typedef enum {
     PREF_STROPHE_SM_RESEND,
     PREF_VCARD_PHOTO_CMD,
     PREF_STATUSBAR_TABMODE,
+    PREF_SPELLCHECK_ENABLE,
+    PREF_SPELLCHECK_LANG,
 } preference_t;
 
 typedef struct prof_alias_t

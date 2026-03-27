@@ -284,6 +284,7 @@ void cons_console_setting(void);
 void cons_flash_setting(void);
 void cons_tray_setting(void);
 void cons_splash_setting(void);
+void cons_spellcheck_setting(void);
 void cons_titlebar_setting(void);
 void cons_vercheck_setting(void);
 void cons_occupants_setting(void);

@@ -1271,6 +1271,21 @@ cons_splash_setting(void)
 }
 
 void
+cons_spellcheck_setting(void)
+{
+#ifdef HAVE_SPELLCHECK
+    if (prefs_get_boolean(PREF_SPELLCHECK_ENABLE)) {
+        auto_gchar gchar* lang = prefs_get_string(PREF_SPELLCHECK_LANG);
+        cons_show("Spellcheck (/spellcheck)            : ON (%s)", lang);
+    } else {
+        cons_show("Spellcheck (/spellcheck)            : OFF");
+    }
+#else
+    cons_show("Spellcheck (/spellcheck)            : built without spellcheck support");
+#endif
+}
+
+void
 cons_occupants_setting(void)
 {
     if (prefs_get_boolean(PREF_OCCUPANTS))
@@ -1589,6 +1604,7 @@ cons_show_ui_prefs(void)
     cons_beep_setting();
     cons_flash_setting();
     cons_splash_setting();
+    cons_spellcheck_setting();
     cons_winpos_setting();
     cons_wrap_setting();
     cons_time_setting();
@@ -2572,6 +2588,7 @@ cons_theme_properties(void)
     _cons_theme_prop(console, THEME_RECEIPT_SENT, "receipt.sent");
 
     _cons_theme_prop(console, THEME_INPUT_TEXT, "input.text");
+    _cons_theme_prop(console, THEME_INPUT_MISSPELLED, "input.misspelled");
 
     cons_show("");
 }

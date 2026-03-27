@@ -160,6 +160,7 @@ gdk_pixbuf_dep = disabler()
 omemo_dep = disabler()
 gcrypt_dep = disabler()
 qrencode_dep = disabler()
+enchant_dep = disabler()
 
 # Dependencies for functional tests
 stabber_dep = cc.find_library('stabber', required: false)
@@ -269,6 +270,12 @@ if get_option('omemo-qrcode').enabled()
   conf_data.set('HAVE_QRENCODE', 1)
 endif
 
+# Spellcheck support
+if get_option('spellcheck').enabled()
+  enchant_dep = dependency('enchant-2', required: true)
+  conf_data.set('HAVE_SPELLCHECK', 1)
+endif
+
 # Set installation paths
 themes_path = get_option('themes_path')
 if themes_path == ''
@@ -355,6 +362,10 @@ if qrencode_dep.found()
   profanity_deps += qrencode_dep
 endif
 
+if enchant_dep.found()
+  profanity_deps += enchant_dep
+endif
+
 # Include directories
 inc = include_directories('.', 'src')
 
@@ -419,6 +430,7 @@ core_sources = files(
   'src/tools/autocomplete.c',
   'src/tools/clipboard.c',
   'src/tools/editor.c',
+  'src/tools/spellcheck.c',
   'src/config/files.c',
   'src/config/conflists.c',
   'src/config/accounts.c',
@@ -584,6 +596,7 @@ if get_option('tests')
       'src/tools/autocomplete.c',
       'src/tools/clipboard.c',
       'src/tools/editor.c',
+      'src/tools/spellcheck.c',
       'src/tools/bookmark_ignore.c',
       'src/config/account.c',
       'src/config/files.c',

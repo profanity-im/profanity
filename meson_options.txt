@@ -66,6 +66,12 @@ option('omemo-qrcode',
   description: 'Enable ability to display OMEMO QR code'
 )
 
+option('spellcheck',
+  type: 'feature',
+  value: 'disabled',
+  description: 'Enable spellchecking support'
+)
+
 # Other:
 option('python_framework',
   type: 'string',

@@ -1451,6 +1451,23 @@ static const struct cmd_t command_defs[] = {
               { "on|off", "Enable or disable splash logo." })
     },
 
+    { CMD_PREAMBLE("/spellcheck",
+                   parse_args, 1, 2, &cons_spellcheck_setting)
+      CMD_MAINFUNC(cmd_spellcheck)
+      CMD_TAGS(
+              CMD_TAG_UI)
+      CMD_SYN(
+              "/spellcheck on|off",
+              "/spellcheck list",
+              "/spellcheck lang <locale>")
+      CMD_DESC(
+              "Enable or disable spellchecking, or set the language.")
+      CMD_ARGS(
+              { "on|off", "Enable or disable spellchecking." },
+              { "list", "List available dictionaries recognized by Enchant." },
+              { "lang <locale>", "Set the spellcheck language (en_US)." })
+    },
+
     { CMD_PREAMBLE("/autoconnect",
                    parse_args, 1, 2, &cons_autoconnect_setting)
       CMD_MAINFUNC(cmd_autoconnect)

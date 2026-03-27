@@ -30,6 +30,7 @@
 #include "config/accounts.h"
 #include "config/preferences.h"
 #include "config/theme.h"
+#include "tools/spellcheck.h"
 #include "config/tlscerts.h"
 #include "config/scripts.h"
 #include "command/cmd_defs.h"
@@ -234,6 +235,7 @@ _init(char* log_level, char* config_file, char* log_file, char* theme_name)
 #ifdef HAVE_OMEMO
     omemo_init();
 #endif
+    spellcheck_init();
     atexit(_shutdown);
     plugins_init();
 #ifdef HAVE_GTK
