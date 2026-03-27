@@ -8,7 +8,14 @@
  */
 #include <stdio.h>
 #include <stdbool.h>
+#include "config.h"
+
+#ifdef HAVE_LIBOMEMO_C
+#include <omemo/signal_protocol_types.h>
+#else
 #include <signal/signal_protocol_types.h>
+#endif
+
 #include <gcrypt.h>
 
 #define AES128_GCM_KEY_LENGTH 16
