@@ -1,33 +1,28 @@
 # Contributing to Profanity
 
 ## Build
-Profanity can be built using either **Autotools** or **Meson**.
 
 ### Build Options
-Both build systems support several features that can be enabled or disabled.
+Meson requires features to be **explicitly enabled**. Nothing is auto-enabled; if you want a feature, you must pass the corresponding `-Doption=enabled` flag.
 
-**Important Difference:**
-- **Autotools**: Features are **auto-enabled** if the required dependencies are found on your system during the `./configure` step.
-- **Meson**: Features must be **explicitly enabled**. Nothing is auto-enabled; if you want a feature, you must pass the corresponding `-Doption=enabled` flag.
-
-| Feature | Description | Autotools flag | Meson option |
-| :--- | :--- | :--- | :--- |
-| **Notifications** | Desktop notifications support | `--enable-notifications` | `-Dnotifications=enabled` |
-| **Python Plugins** | Support for Python plugins | `--enable-python-plugins` | `-Dpython-plugins=enabled` |
-| **C Plugins** | Support for C plugins | `--enable-c-plugins` | `-Dc-plugins=enabled` |
-| **OTR** | Off-the-Record encryption | `--enable-otr` | `-Dotr=enabled` |
-| **PGP** | PGP encryption support | `--enable-pgp` | `-Dpgp=enabled` |
-| **OMEMO** | OMEMO encryption support | `--enable-omemo` | `-Domemo=enabled` |
-| **OMEMO Backend** | Select OMEMO backend library | *N/A* | `-Domemo-backend=libsignal\|libomemo-c` |
-| **QR Code** | OMEMO QR code display | `--enable-omemo-qrcode` | `-Domemo-qrcode=enabled` |
-| **Icons/Clipboard** | GTK tray icons & clipboard | `--enable-icons-and-clipboard` | `-Dicons-and-clipboard=enabled` |
-| **GDK Pixbuf** | Avatar scaling support | `--enable-gdk-pixbuf` | `-Dgdk-pixbuf=enabled` |
-| **XScreenSaver** | Idle time detection | `--with-xscreensaver` | `-Dxscreensaver=enabled` |
-| **Tests** | Build unit tests | *Built by default* | `-Dtests=true` |
-| **Sanitizers** | Run-time error detection | *Via CFLAGS* | `-Db_sanitize=address,undefined` |
+| Feature | Description | Meson option |
+| :--- | :--- | :--- |
+| **Notifications** | Desktop notifications support | `-Dnotifications=enabled` |
+| **Python Plugins** | Support for Python plugins | `-Dpython-plugins=enabled` |
+| **C Plugins** | Support for C plugins | `-Dc-plugins=enabled` |
+| **OTR** | Off-the-Record encryption | `-Dotr=enabled` |
+| **PGP** | PGP encryption support | `-Dpgp=enabled` |
+| **OMEMO** | OMEMO encryption support | `-Domemo=enabled` |
+| **OMEMO Backend** | Select OMEMO backend library | `-Domemo-backend=libsignal\|libomemo-c` |
+| **QR Code** | OMEMO QR code display | `-Domemo-qrcode=enabled` |
+| **Icons/Clipboard** | GTK tray icons & clipboard | `-Dicons-and-clipboard=enabled` |
+| **GDK Pixbuf** | Avatar scaling support | `-Dgdk-pixbuf=enabled` |
+| **XScreenSaver** | Idle time detection | `-Dxscreensaver=enabled` |
+| **Tests** | Build unit tests | `-Dtests=true` |
+| **Sanitizers** | Run-time error detection | `-Db_sanitize=address,undefined` |
 
 ### Selecting OMEMO Backend
-When building with OMEMO support enabled in Meson, you can choose between two backend libraries:
+When building with OMEMO support enabled, you can choose between two backend libraries:
 - `libsignal`: The default backend using `libsignal-protocol-c`.
 - `libomemo-c`: An alternative backend using `libomemo-c`.
 
@@ -36,13 +31,7 @@ Example of choosing the `libomemo-c` backend:
 meson setup build_run -Domemo=enabled -Domemo-backend=libomemo-c
 ```
 
-### Using Autotools
-1. Generate configuration files: `./bootstrap.sh`
-2. Configure: `./configure --enable-otr --enable-omemo`
-3. Build: `make`
-4. Run: `./profanity`
-
-### Using Meson
+### Build Instructions
 1. Setup build directory: `meson setup build_run -Domemo=enabled -Dotr=enabled`
 2. Build: `meson compile -C build_run`
 3. Run: `./build_run/profanity`
@@ -171,8 +160,6 @@ Follow the style already present ;-)
 To make this easier for you we created a `.clang-format` file.
 You'll need to have `clang-format` installed. We currently use **version 21**, which is also the version enforced by our CI in `.github/workflows/main.yml`.
 
-Then just run `make format` before you do any commit.
-
 It might be a good idea to add a git pre-commit hook.
 So git automatically runs clang-format before doing a commit.
 
@@ -214,7 +201,7 @@ In cases where you want to disable automatic formatting for a specific block of 
 ## Verification & Testing
 
 ### Running unit tests
-Run `make check` to run the unit tests with your current configuration or `./scripts/build-configuration-matrix.sh [autotools|meson]` to check with different switches passed to configure.
+Run `meson test -C build_run` to run the unit tests with your current configuration or `./scripts/build-configuration-matrix.sh` to check with different switches passed to configure.
 
 ### Writing unit tests
 We use the [cmocka](https://cmocka.org/) testing framework for unit tests.
@@ -240,7 +227,7 @@ Examples:
 When adding a new test file:
 1. Create the `.c` and `.h` files in the appropriate subdirectory of `tests/unittests`.
 2. Register the test functions in `tests/unittests/unittests.c` within the `all_tests` array.
-3. Add the new source file to `unittest_sources` in both `meson.build` and `Makefile.am`.
+3. Add the new source file to `unittest_sources` in `meson.build`.
 
 ### Running functional tests
 Functional tests use [stabber](https://github.com/profanity-im/stabber) to simulate an XMPP server.
@@ -260,12 +247,6 @@ Using Meson:
 3. To run only functional tests: `meson test -C build_run "functional tests"`
 4. To run manually: `./build_run/functionaltests`
 5. To run a specific test manually: `CMOCKA_TEST_FILTER=test_name ./build_run/functionaltests` (use `./build_run/functionaltests --list` to see all available tests)
-
-Using Autotools:
-1. Configure: `./configure` (check the summary to ensure `cmocka`, `stabber` and `libutil` were found)
-2. Build and run all tests: `make check`
-3. To run manually: `./tests/functionaltests/functionaltests`
-4. To run a specific test manually: `CMOCKA_TEST_FILTER=test_name ./tests/functionaltests/functionaltests`
 
 ### Writing functional tests
 Functional tests simulate real world usage by running Profanity and interacting with it. They verify Profanitys responses to an XMPP server.
@@ -287,43 +268,32 @@ To see the complete list check `proftest.h`.
 1. Create a new test file (`test_new_feature.c` and `test_new_feature.h`) in `tests/functionaltests/`.
 2. Define your test functions using the `void test_name(void** state)` signature.
 3. Use the `PROF_FUNC_TEST(test_name)` macro to register your test in `tests/functionaltests/functionaltests.c`. This macro automatically handles the setup (`init_prof_test`) and teardown (`close_prof_test`) for each test.
-4. Add the new source file to `functionaltest_sources` in both `meson.build` and `Makefile.am`.
+4. Add the new source file to `functionaltest_sources` in `meson.build`.
 
 ### Valgrind
 We provide a suppressions file `prof.supp`. It is a combination of the suppressions for shipped with glib2, python and custom rules.
 
-`G_DEBUG=gc-friendly G_SLICE=always-malloc valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --num-callers=30 --show-leak-kinds=definite --log-file=profval --suppressions=prof.supp ./profanity`
+`G_DEBUG=gc-friendly G_SLICE=always-malloc valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --num-callers=30 --show-leak-kinds=definite --log-file=profval --suppressions=prof.supp ./build_run/profanity`
 
 There's also the option to create a "personalized" suppression file with the up-to-date glib2 and python suppressions.
-
-`make my-prof.supp`
-
-After executing this, you can replace the `--suppressions=prof.supp` argument in the above call, by `--suppressions=my-prof.supp`.
 
 ### Clang Static Analyzer
 Running the clang static code analyzer helps improving the quality too.
 
 ```
-make clean
-scan-build make
-scan-view ...
+rm -rf build_run
+scan-build meson setup build_run
+scan-build meson compile -C build_run
 ```
 
 ### Finding typos
 We include a `.codespellrc` configuration file for `codespell` in the root directory.
 Before committing it might make sense to run `codespell` to see if you made any typos.
 
-You can run the `make spell` command for this.
-
 ### Full check
 Run the central quality check script before submitting a patch. This runs the spell checker, code formatter, and unit tests.
 
-If using Autotools:
-```
-make doublecheck
-```
-
-If using Meson:
+Using Meson:
 ```
 meson compile doublecheck
 ```
@@ -331,7 +301,7 @@ meson compile doublecheck
 
 Alternatively, you can run the script directly:
 ```
-./scripts/lint-and-test.sh --fix-formatting --meson  # or --autotools
+./scripts/lint-and-test.sh --fix-formatting --tests
 ```
 
 ### Pre-commit hook

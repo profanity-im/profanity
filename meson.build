@@ -742,7 +742,7 @@ endif
 lint_and_test = find_program('scripts/lint-and-test.sh', required: false)
 if lint_and_test.found()
   run_target('doublecheck',
-    command: [lint_and_test, '--fix-formatting', '--meson']
+    command: [lint_and_test, '--fix-formatting', '--tests']
   )
 endif
 

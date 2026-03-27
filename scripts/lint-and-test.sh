@@ -17,7 +17,7 @@ usage() {
     echo ""
     echo "Description:"
     echo "  Code quality checks (spelling, formatting, and unit tests)."
-    echo "  Works with autotools and meson and can be used as a git"
+    echo "  Works with meson and can be used as a git"
     echo "  pre-commit hook."
     echo ""
     echo "Options:"
@@ -25,8 +25,7 @@ usage() {
     echo "  --no-format      Skip the formatting check/fix entirely. Use this if your local"
     echo "                   clang-format version produces different results than the CI."
     echo "                   Can also be set via SKIP_FORMAT=1 environment variable."
-    echo "  --autotools      Run unit tests using Autotools (make check-unit)"
-    echo "  --meson          Run unit tests using Meson (meson test)"
+    echo "  --tests          Run unit tests using Meson (meson test)"
     echo "  --hook           Git hook mode: Checks only staged files for spelling and"
     echo "                   formatting. Does not run tests to ensure fast commits."
     echo "  --install        Install this script as a git pre-commit hook"
@@ -37,10 +36,7 @@ run_tests() {
     local system=$1
     echo -e "${YELLOW}---> Running unit tests...${NC}"
     
-    if [ "$system" == "autotools" ]; then
-        echo "Using Autotools..."
-        make check-unit
-    elif [ "$system" == "meson" ]; then
+    if [ "$system" == "meson" ]; then
         echo "Using Meson..."
         # Uses build_run
         meson test -C build_run "unit tests"
@@ -111,8 +107,7 @@ while [[ "$#" -gt 0 ]]; do
     case $1 in
         --fix-formatting) MODE="fix" ;;
         --no-format) INTERNAL_SKIP_FORMAT=true ;;
-        --autotools) BUILD_SYSTEM="autotools" ;;
-        --meson) BUILD_SYSTEM="meson" ;;
+        --tests) BUILD_SYSTEM="meson" ;;
         --hook) HOOK=true ;;
         --install)
             echo "Installing pre-commit hook..."
