@@ -174,7 +174,6 @@
         <xmpp:status>complete</xmpp:status>
         <xmpp:version>2.4</xmpp:version>
         <xmpp:since>0.11.0</xmpp:since>
-        <xmpp:note xml:lang='en'>Only password change. On master also to create an account.</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
 
