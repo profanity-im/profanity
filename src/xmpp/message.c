@@ -1067,9 +1067,12 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
     char* stanzaid = NULL;
     xmpp_stanza_t* stanzaidst = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_STANZA_ID, STANZA_NS_STABLE_ID);
     if (stanzaidst) {
-        stanzaid = (char*)xmpp_stanza_get_attribute(stanzaidst, STANZA_ATTR_ID);
-        if (stanzaid) {
-            message->stanzaid = strdup(stanzaid);
+        const char* by = xmpp_stanza_get_attribute(stanzaidst, "by");
+        if (by && (g_strcmp0(by, from_jid->barejid) == 0)) {
+            stanzaid = (char*)xmpp_stanza_get_attribute(stanzaidst, STANZA_ATTR_ID);
+            if (stanzaid) {
+                message->stanzaid = strdup(stanzaid);
+            }
         }
     }
 
@@ -1389,9 +1392,12 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
         char* stanzaid = NULL;
         xmpp_stanza_t* stanzaidst = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_STANZA_ID, STANZA_NS_STABLE_ID);
         if (stanzaidst) {
-            stanzaid = (char*)xmpp_stanza_get_attribute(stanzaidst, STANZA_ATTR_ID);
-            if (stanzaid) {
-                message->stanzaid = strdup(stanzaid);
+            const char* by = xmpp_stanza_get_attribute(stanzaidst, "by");
+            if (by && equals_our_barejid(by)) {
+                stanzaid = (char*)xmpp_stanza_get_attribute(stanzaidst, STANZA_ATTR_ID);
+                if (stanzaid) {
+                    message->stanzaid = strdup(stanzaid);
+                }
             }
         }
     }
@@ -1524,6 +1530,20 @@ _handle_mam(xmpp_stanza_t* const stanza)
 
     // <result xmlns='urn:xmpp:mam:2' queryid='f27' id='5d398-28273-f7382'>
     // same as <stanza-id> from XEP-0359 for live messages
+    const char* by = xmpp_stanza_get_attribute(result, "by");
+    const char* from = xmpp_stanza_get_from(stanza);
+    if (by) {
+        if (g_strcmp0(by, from) != 0) {
+            log_warning("MAM result 'by' attribute (%s) does not match 'from' (%s)", by, from);
+            return TRUE;
+        }
+    } else {
+        if (from && !equals_our_barejid(from)) {
+            log_warning("MAM result from %s with no 'by' attribute (expected our own JID)", from);
+            return TRUE;
+        }
+    }
+
     const char* result_id = xmpp_stanza_get_id(result);
 
     GDateTime* timestamp = stanza_get_delay_from(forwarded, NULL);
