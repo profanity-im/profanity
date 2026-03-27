@@ -22,6 +22,8 @@ RUN dnf install -y \
   libotr-devel \
   libsignal-protocol-c-devel \
   libomemo-c-devel \
+  libasan \
+  libubsan \
   libtool \
   libuuid-devel \
   make \
