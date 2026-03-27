@@ -1,4 +1,4 @@
-name: Linux
+name: CI
 
 on:
   push:
@@ -54,3 +54,43 @@ jobs:
         run: |
           docker build -f ci/Dockerfile.${{ matrix.flavor }} -t profanity .
           docker run ${OMEMO_BACKEND:+ -e OMEMO_BACKEND} profanity ${{ matrix.script }}
+
+  macos-homebrew:
+    runs-on: macos-latest
+    name: macos | meson | unit | libomemo
+    env:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+      HOMEBREW_NO_INSTALL_CLEANUP: 1
+      HOMEBREW_NO_INSTALLED_DEPENDENTS_CHECK: 1
+    steps:
+      - name: Set up Homebrew
+        uses: Homebrew/actions/setup-homebrew@main
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew install \
+            cmocka \
+            gettext \
+            glib \
+            gpgme \
+            gtk+3 \
+            libomemo-c \
+            libotr \
+            libstrophe \
+            libxscrnsaver \
+            meson \
+            ninja \
+            pkgconf \
+            python@3.14 \
+            qrencode \
+            readline \
+            sqlite \
+            terminal-notifier
+
+      - name: Run build matrix and unit tests
+        env:
+          OMEMO_BACKEND: libomemo-c
+        shell: bash
+        run: |
+          BREW="$(command -v brew)" ./scripts/build-configuration-matrix.sh meson
