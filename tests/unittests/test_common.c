@@ -337,6 +337,18 @@ strip_arg_quotes__returns__stripped_both(void** state)
 }
 
 void
+strip_arg_quotes__unescapes(void** state)
+{
+    char* input = "\"Thor \\\"The Thunderer\\\" Odinson\"";
+
+    char* result = strip_arg_quotes(input);
+
+    assert_string_equal("Thor \"The Thunderer\" Odinson", result);
+
+    free(result);
+}
+
+void
 valid_tls_policy_option__is__correct_for_various_inputs(void** state)
 {
     // Valid inputs

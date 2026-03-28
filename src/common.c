@@ -543,26 +543,32 @@ _get_file_or_linked(gchar* loc)
 char*
 strip_arg_quotes(const char* const input)
 {
-    char* unquoted = strdup(input);
-    if (unquoted == NULL) {
+    if (input == NULL) {
         return NULL;
     }
 
-    // Remove starting quote if it exists
-    if (strchr(unquoted, '"')) {
-        if (strchr(unquoted, ' ') + 1 == strchr(unquoted, '"')) {
-            memmove(strchr(unquoted, '"'), strchr(unquoted, '"') + 1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
+    // Unescape and strip quotes
+    GString* unescaped = g_string_new("");
+    for (const char* p = input; *p; p++) {
+        if (*p == '\\' && (*(p + 1) == '"' || *(p + 1) == '\\')) {
+            p++;
+            g_string_append_c(unescaped, *p);
+        } else if (*p == '"') {
+            // Only strip if it's the first char or preceded by a space
+            if (p == input || *(p - 1) == ' ') {
+                continue;
+            }
+            // Or if it's the last char
+            if (*(p + 1) == '\0') {
+                continue;
+            }
+            g_string_append_c(unescaped, *p);
+        } else {
+            g_string_append_c(unescaped, *p);
         }
     }
 
-    // Remove ending quote if it exists
-    if (strchr(unquoted, '"')) {
-        if (strchr(unquoted, '\0') - 1 == strchr(unquoted, '"')) {
-            memmove(strchr(unquoted, '"'), strchr(unquoted, '"') + 1, strchr(unquoted, '\0') - strchr(unquoted, '"'));
-        }
-    }
-
-    return unquoted;
+    return g_string_free(unescaped, FALSE);
 }
 
 gboolean

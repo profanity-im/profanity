@@ -234,7 +234,16 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
             FREE_SET_NULL(ac->search_str);
         }
 
-        ac->search_str = strdup(search_str);
+        // unescape search string
+        GString* unescaped = g_string_new("");
+        for (const char* p = search_str; *p; p++) {
+            if (*p == '\\' && (*(p + 1) == '"' || *(p + 1) == '\\')) {
+                p++;
+            }
+            g_string_append_c(unescaped, *p);
+        }
+        ac->search_str = g_string_free(unescaped, FALSE);
+
         found = _search(ac, ac->items, quote, NEXT);
 
         return found;
@@ -403,7 +412,15 @@ _search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction
 
             // if contains space, quote before returning
             if (quote && g_strrstr(curr->data, " ")) {
-                return g_strdup_printf("\"%s\"", (gchar*)curr->data);
+                GString* escaped = g_string_new("\"");
+                for (const char* p = curr->data; *p; p++) {
+                    if (*p == '"' || *p == '\\') {
+                        g_string_append_c(escaped, '\\');
+                    }
+                    g_string_append_c(escaped, *p);
+                }
+                g_string_append_c(escaped, '"');
+                return g_string_free(escaped, FALSE);
                 // otherwise just return the string
             } else {
                 return strdup(curr->data);
