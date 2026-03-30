@@ -272,6 +272,15 @@ count_tokens(const char* const string)
         if (curr_uni == ' ') {
             if (!in_quotes) {
                 num_tokens++;
+                while (i + 1 < length) {
+                    gchar* next_ch = g_utf8_offset_to_pointer(string, i + 1);
+                    gunichar next_uni = g_utf8_get_char(next_ch);
+                    if (next_uni == ' ') {
+                        i++;
+                    } else {
+                        break;
+                    }
+                }
             }
         } else if (curr_uni == '"') {
             if (in_quotes) {
@@ -319,6 +328,18 @@ get_start(const char* const string, int tokens)
         if (curr_uni == ' ') {
             if (!in_quotes) {
                 num_tokens++;
+                while (i + 1 < length) {
+                    gchar* next_ch = g_utf8_offset_to_pointer(string, i + 1);
+                    gunichar next_uni = g_utf8_get_char(next_ch);
+                    if (next_uni == ' ') {
+                        if (num_tokens <= tokens) {
+                            g_string_append_unichar(result, next_uni);
+                        }
+                        i++;
+                    } else {
+                        break;
+                    }
+                }
             }
         } else if (curr_uni == '"') {
             if (in_quotes) {

@@ -345,3 +345,31 @@ autocomplete_complete__returns__regular_ascii(void** state)
     autocomplete_free(ac);
     free(result);
 }
+
+void
+autocomplete_complete__handles__escaped_spaces(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "Thor Odinson");
+
+    char* result = autocomplete_complete(ac, "Thor\\ ", TRUE, FALSE);
+
+    assert_string_equal("\"Thor Odinson\"", result);
+
+    autocomplete_free(ac);
+    free(result);
+}
+
+void
+autocomplete_complete__handles__escaped_quotes(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "Thor \"The Thunderer\" Odinson");
+
+    char* result = autocomplete_complete(ac, "Thor \\\"", TRUE, FALSE);
+
+    assert_string_equal("\"Thor \\\"The Thunderer\\\" Odinson\"", result);
+
+    autocomplete_free(ac);
+    free(result);
+}

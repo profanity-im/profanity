@@ -550,7 +550,7 @@ strip_arg_quotes(const char* const input)
     // Unescape and strip quotes
     GString* unescaped = g_string_new("");
     for (const char* p = input; *p; p++) {
-        if (*p == '\\' && (*(p + 1) == '"' || *(p + 1) == '\\')) {
+        if (*p == '\\' && (*(p + 1) != '\0')) {
             p++;
             g_string_append_c(unescaped, *p);
         } else if (*p == '"') {

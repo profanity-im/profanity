@@ -237,7 +237,7 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
         // unescape search string
         GString* unescaped = g_string_new("");
         for (const char* p = search_str; *p; p++) {
-            if (*p == '\\' && (*(p + 1) == '"' || *(p + 1) == '\\')) {
+            if (*p == '\\' && (*(p + 1) != '\0')) {
                 p++;
             }
             g_string_append_c(unescaped, *p);
