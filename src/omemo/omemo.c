@@ -78,6 +78,7 @@ typedef struct omemo_context
     ratchet_identity_key_pair* identity_key_pair;
     uint32_t registration_id;
     uint32_t signed_pre_key_id;
+    uint32_t max_pre_key_id;
     signal_protocol_store_context* store;
     GHashTable* session_store;
     GHashTable* pre_key_store;
@@ -323,6 +324,7 @@ omemo_generate_crypto_materials(ProfAccount* account)
     g_key_file_set_uint64(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, omemo_ctx.registration_id);
 
     /* Pre keys */
+    omemo_ctx.max_pre_key_id = 0;
     _generate_pre_keys(100);
 
     /* Signed pre key */
@@ -1095,16 +1097,17 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
                                        signal_buffer_len(identity_buffer), &omemo_ctx.identity_key_store);
         signal_buffer_free(identity_buffer);
 
-        /* Replace used pre_key in bundle */
+        /* Remove used pre_key from store */
         uint32_t pre_key_id = pre_key_signal_message_get_pre_key_id(message);
-        ec_key_pair* ec_pair;
-        session_pre_key* new_pre_key;
-        curve_generate_key_pair(omemo_ctx.signal, &ec_pair);
-        session_pre_key_create(&new_pre_key, pre_key_id, ec_pair);
-        signal_protocol_pre_key_store_key(omemo_ctx.store, new_pre_key);
-        SIGNAL_UNREF(new_pre_key);
+        signal_protocol_pre_key_remove_key(omemo_ctx.store, pre_key_id);
+
+        /* If we have few pre_keys left, generate more */
+        if (g_hash_table_size(omemo_ctx.pre_key_store) < 10) {
+            log_debug("[OMEMO] Few pre keys left, generating more");
+            _generate_pre_keys(100);
+        }
+
         SIGNAL_UNREF(message);
-        SIGNAL_UNREF(ec_pair);
         omemo_bundle_publish(TRUE);
 
         if (res == 0) {
@@ -1784,14 +1787,19 @@ _load_identity(void)
     int i;
     /* Pre keys */
     i = 0;
+    omemo_ctx.max_pre_key_id = 0;
     keys = g_key_file_get_keys(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_PREKEYS, NULL, NULL);
     if (keys) {
         for (i = 0; keys[i] != NULL; i++) {
+            uint32_t id = strtoul(keys[i], NULL, 10);
+            if (id > omemo_ctx.max_pre_key_id) {
+                omemo_ctx.max_pre_key_id = id;
+            }
             auto_gchar gchar* pre_key_b64 = g_key_file_get_string(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_PREKEYS, keys[i], NULL);
             size_t pre_key_len;
             auto_guchar guchar* pre_key = g_base64_decode(pre_key_b64, &pre_key_len);
             signal_buffer* buffer = signal_buffer_create(pre_key, pre_key_len);
-            g_hash_table_insert(omemo_ctx.pre_key_store, GINT_TO_POINTER(strtoul(keys[i], NULL, 10)), buffer);
+            g_hash_table_insert(omemo_ctx.pre_key_store, GINT_TO_POINTER(id), buffer);
         }
 
         g_strfreev(keys);
@@ -1980,8 +1988,7 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
 static void
 _generate_pre_keys(int count)
 {
-    unsigned int start;
-    gcry_randomize(&start, sizeof(unsigned int), GCRY_VERY_STRONG_RANDOM);
+    uint32_t start = omemo_ctx.max_pre_key_id + 1;
     signal_protocol_key_helper_pre_key_list_node* pre_keys_head;
     signal_protocol_key_helper_generate_pre_keys(&pre_keys_head, start, count, omemo_ctx.signal);
 
@@ -1991,6 +1998,8 @@ _generate_pre_keys(int count)
         signal_protocol_pre_key_store_key(omemo_ctx.store, prekey);
     }
     signal_protocol_key_helper_key_list_free(pre_keys_head);
+
+    omemo_ctx.max_pre_key_id += count;
 }
 
 static void
