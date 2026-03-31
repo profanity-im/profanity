@@ -11,8 +11,10 @@
 #define UI_TRAY_H
 
 #ifdef HAVE_GTK
+#include <glib.h>
 void tray_init(void);
 void tray_update(void);
+gboolean tray_gtk_ready(void);
 
 void tray_enable(void);
 void tray_disable(void);
