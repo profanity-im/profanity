@@ -159,7 +159,7 @@ log_database_init(ProfAccount* account)
     }
 
     if (db_version == -1) {
-        query = "INSERT OR IGNORE INTO `DbVersion` (`version`) VALUES ('2')";
+        query = "INSERT INTO `DbVersion` (`version`) VALUES ('2') ON CONFLICT(`version`) DO NOTHING";
         if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
             goto out;
         }
@@ -495,15 +495,17 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     }
 
     // stanza-id (XEP-0359) doesn't have to be present in the message.
-    // We use archive_id UNIQUE constraint and INSERT OR IGNORE for deduplication.
+    // We use archive_id UNIQUE constraint and ON CONFLICT DO NOTHING for deduplication.
 
     auto_sqlite char* orig_message_id = original_message_id == -1 ? NULL : sqlite3_mprintf("%d", original_message_id);
 
-    auto_sqlite char* query = sqlite3_mprintf("INSERT OR IGNORE INTO `ChatLogs` "
+    auto_sqlite char* query = sqlite3_mprintf("INSERT INTO `ChatLogs` "
                                               "(`from_jid`, `from_resource`, `to_jid`, `to_resource`, "
                                               "`message`, `timestamp`, `stanza_id`, `archive_id`, "
                                               "`replaces_db_id`, `replace_id`, `type`, `encryption`) "
-                                              "VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q)",
+                                              "VALUES (%Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q, %Q) "
+                                              "ON CONFLICT(`archive_id`) DO NOTHING "
+                                              "RETURNING id",
                                               from_jid->barejid,
                                               from_jid->resourcepart,
                                               to_jid->barejid,
@@ -523,14 +525,23 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
 
     log_debug("Writing to DB. Query: %s", query);
 
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
-        if (err_msg) {
-            log_error("SQLite error in _add_to_db(): %s", err_msg);
-            sqlite3_free(err_msg);
-        } else {
-            log_error("Unknown SQLite error in _add_to_db().");
-        }
+    sqlite3_stmt* stmt = NULL;
+    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
+        log_error("SQLite error in _add_to_db() (prepare): %s", sqlite3_errmsg(g_chatlog_database));
+        return;
     }
+
+    rc = sqlite3_step(stmt);
+    if (rc == SQLITE_ROW) {
+        log_debug("Successfully inserted message into database.");
+    } else if (rc == SQLITE_DONE) {
+        log_debug("Message already exists in database (archive_id: %s), skipping.", message->stanzaid);
+    } else {
+        log_error("SQLite error in _add_to_db() (step): %s", sqlite3_errmsg(g_chatlog_database));
+    }
+
+    sqlite3_finalize(stmt);
 }
 
 static int

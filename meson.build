@@ -92,7 +92,7 @@ endif
 glib_dep = dependency('glib-2.0', version: '>= 2.62.0')
 gio_dep = dependency('gio-2.0')
 curl_dep = dependency('libcurl', version: '>= 7.62.0')
-sqlite_dep = dependency('sqlite3', version: '>= 3.22.0')
+sqlite_dep = dependency('sqlite3', version: '>= 3.35.0')
 thread_dep = dependency('threads')
 math_dep = cc.find_library('m')
 libstrophe_dep = dependency('libstrophe', version: '>= 0.12.3')
