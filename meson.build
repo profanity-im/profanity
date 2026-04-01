@@ -5,6 +5,7 @@ project('profanity', 'c',
   default_options: [
     'c_std=gnu99',
     'warning_level=2',
+    'wrap_mode=nofallback',
   ]
 )
 
@@ -98,13 +99,17 @@ math_dep = cc.find_library('m')
 libstrophe_dep = dependency('libstrophe', version: '>= 0.12.3')
 
 # Check for XMPP_CERT_PUBKEY_FINGERPRINT_SHA256 support
-if cc.links('''
-  #include <strophe.h>
-  int main() {
-    xmpp_tlscert_get_string(NULL, XMPP_CERT_PUBKEY_FINGERPRINT_SHA256);
-    return 1;
-  }
-  ''', dependencies: libstrophe_dep)
+if libstrophe_dep.type_name() != 'internal'
+  if cc.links('''
+    #include <strophe.h>
+    int main() {
+      xmpp_tlscert_get_string(NULL, XMPP_CERT_PUBKEY_FINGERPRINT_SHA256);
+      return 1;
+    }
+    ''', dependencies: libstrophe_dep)
+    conf_data.set('HAVE_XMPP_CERT_PUBKEY_FINGERPRINT_SHA256', 1)
+  endif
+else
   conf_data.set('HAVE_XMPP_CERT_PUBKEY_FINGERPRINT_SHA256', 1)
 endif
 
