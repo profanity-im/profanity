@@ -32,8 +32,7 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
     gboolean in_token = FALSE;
     gboolean in_freetext = FALSE;
     gboolean in_quotes = FALSE;
-    char* token_start = &copy[0];
-    int token_size = 0;
+    GString* current_token = g_string_new("");
     int num_tokens = 0;
     GSList* tokens = NULL;
 
@@ -41,6 +40,23 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
     for (int i = 0; i < inp_size; i++) {
         gchar* curr_ch = g_utf8_offset_to_pointer(copy, i);
         gunichar curr_uni = g_utf8_get_char(curr_ch);
+
+        if (curr_uni == '\\' && (i + 1 < inp_size)) {
+            if (!in_token) {
+                in_token = TRUE;
+                if (with_freetext) {
+                    num_tokens++;
+                }
+                if (with_freetext && (num_tokens == max + 1)) {
+                    in_freetext = TRUE;
+                }
+            }
+            i++;
+            gchar* next_ch = g_utf8_offset_to_pointer(copy, i);
+            gunichar next_uni = g_utf8_get_char(next_ch);
+            g_string_append_unichar(current_token, next_uni);
+            continue;
+        }
 
         if (!in_token) {
             if (curr_uni == ' ') {
@@ -55,58 +71,61 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
                 } else if (curr_uni == '"') {
                     in_quotes = TRUE;
                     i++;
-                    gchar* next_ch = g_utf8_next_char(curr_ch);
-                    gunichar next_uni = g_utf8_get_char(next_ch);
+                    if (i < inp_size) {
+                        gchar* next_ch = g_utf8_offset_to_pointer(copy, i);
+                        gunichar next_uni = g_utf8_get_char(next_ch);
 
-                    if (next_uni == '"') {
-                        tokens = g_slist_append(tokens, g_strndup(curr_ch,
-                                                                  0));
-                        token_size = 0;
+                        if (next_uni == '"') {
+                            tokens = g_slist_append(tokens, g_strdup(""));
+                            in_token = FALSE;
+                            in_quotes = FALSE;
+                        } else if (next_uni == '\\' && (i + 1 < inp_size)) {
+                            i++;
+                            gchar* escaped_ch = g_utf8_offset_to_pointer(copy, i);
+                            gunichar escaped_uni = g_utf8_get_char(escaped_ch);
+                            g_string_append_unichar(current_token, escaped_uni);
+                        } else {
+                            g_string_append_unichar(current_token, next_uni);
+                        }
+                    } else {
+                        // trailing quote
+                        tokens = g_slist_append(tokens, g_strdup(""));
                         in_token = FALSE;
                         in_quotes = FALSE;
-                    } else {
-                        token_start = next_ch;
-                        token_size += g_unichar_to_utf8(next_uni, NULL);
                     }
                 }
-                if (curr_uni == '"') {
-                    gchar* next_ch = g_utf8_next_char(curr_ch);
-                    token_start = next_ch;
-                } else {
-                    token_start = curr_ch;
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
+                if (in_token && curr_uni != '"') {
+                    g_string_append_unichar(current_token, curr_uni);
                 }
             }
         } else {
             if (in_quotes) {
                 if (curr_uni == '"') {
-                    tokens = g_slist_append(tokens, g_strndup(token_start,
-                                                              token_size));
-                    token_size = 0;
+                    tokens = g_slist_append(tokens, g_string_free(current_token, FALSE));
+                    current_token = g_string_new("");
                     in_token = FALSE;
                     in_quotes = FALSE;
                 } else {
-                    if (curr_uni != '"') {
-                        token_size += g_unichar_to_utf8(curr_uni, NULL);
-                    }
+                    g_string_append_unichar(current_token, curr_uni);
                 }
             } else {
                 if (with_freetext && in_freetext) {
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
+                    g_string_append_unichar(current_token, curr_uni);
                 } else if (curr_uni == ' ') {
-                    tokens = g_slist_append(tokens, g_strndup(token_start,
-                                                              token_size));
-                    token_size = 0;
+                    tokens = g_slist_append(tokens, g_string_free(current_token, FALSE));
+                    current_token = g_string_new("");
                     in_token = FALSE;
                 } else {
-                    token_size += g_unichar_to_utf8(curr_uni, NULL);
+                    g_string_append_unichar(current_token, curr_uni);
                 }
             }
         }
     }
 
     if (in_token) {
-        tokens = g_slist_append(tokens, g_strndup(token_start, token_size));
+        tokens = g_slist_append(tokens, g_string_free(current_token, FALSE));
+    } else {
+        g_string_free(current_token, TRUE);
     }
 
     int num = g_slist_length(tokens) - 1;
@@ -245,9 +264,23 @@ count_tokens(const char* const string)
         gchar* curr_ch = g_utf8_offset_to_pointer(string, i);
         gunichar curr_uni = g_utf8_get_char(curr_ch);
 
+        if (curr_uni == '\\' && (i + 1 < length)) {
+            i++;
+            continue;
+        }
+
         if (curr_uni == ' ') {
             if (!in_quotes) {
                 num_tokens++;
+                while (i + 1 < length) {
+                    gchar* next_ch = g_utf8_offset_to_pointer(string, i + 1);
+                    gunichar next_uni = g_utf8_get_char(next_ch);
+                    if (next_uni == ' ') {
+                        i++;
+                    } else {
+                        break;
+                    }
+                }
             }
         } else if (curr_uni == '"') {
             if (in_quotes) {
@@ -276,15 +309,37 @@ get_start(const char* const string, int tokens)
         gchar* curr_ch = g_utf8_offset_to_pointer(string, i);
         gunichar curr_uni = g_utf8_get_char(curr_ch);
 
+        if (curr_uni == '\\' && (i + 1 < length)) {
+            if (num_tokens < tokens) {
+                g_string_append_unichar(result, curr_uni);
+            }
+            i++;
+            curr_ch = g_utf8_offset_to_pointer(string, i);
+            curr_uni = g_utf8_get_char(curr_ch);
+            if (num_tokens < tokens) {
+                g_string_append_unichar(result, curr_uni);
+            }
+            continue;
+        }
+
         if (num_tokens < tokens) {
-            auto_gchar gchar* uni_char = g_malloc(7);
-            int len = g_unichar_to_utf8(curr_uni, uni_char);
-            uni_char[len] = '\0';
-            g_string_append(result, uni_char);
+            g_string_append_unichar(result, curr_uni);
         }
         if (curr_uni == ' ') {
             if (!in_quotes) {
                 num_tokens++;
+                while (i + 1 < length) {
+                    gchar* next_ch = g_utf8_offset_to_pointer(string, i + 1);
+                    gunichar next_uni = g_utf8_get_char(next_ch);
+                    if (next_uni == ' ') {
+                        if (num_tokens <= tokens) {
+                            g_string_append_unichar(result, next_uni);
+                        }
+                        i++;
+                    } else {
+                        break;
+                    }
+                }
             }
         } else if (curr_uni == '"') {
             if (in_quotes) {

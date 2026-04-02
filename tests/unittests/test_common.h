@@ -43,6 +43,7 @@ void strip_arg_quotes__returns__original_when_no_quotes(void** state);
 void strip_arg_quotes__returns__stripped_first(void** state);
 void strip_arg_quotes__returns__stripped_last(void** state);
 void strip_arg_quotes__returns__stripped_both(void** state);
+void strip_arg_quotes__unescapes(void** state);
 
 void prof_occurrences__tests__partial(void** state);
 void prof_occurrences__tests__whole(void** state);

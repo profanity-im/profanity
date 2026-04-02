@@ -343,6 +343,20 @@ parse_args_with_freetext__returns__quoted_freetext(void** state)
 }
 
 void
+parse_args_with_freetext__returns__quoted_start_of_freetext(void** state)
+{
+    char* inp = "/cmd arg1 \"arg2 with space\" more text";
+    gboolean result = FALSE;
+    gchar** args = parse_args_with_freetext(inp, 1, 2, &result);
+
+    assert_true(result);
+    assert_int_equal(2, g_strv_length(args));
+    assert_string_equal("arg1", args[0]);
+    assert_string_equal("\"arg2 with space\" more text", args[1]);
+    g_strfreev(args);
+}
+
+void
 parse_args_with_freetext__returns__third_arg_quoted(void** state)
 {
     char* inp = "/group add friends \"The User\"";
@@ -387,6 +401,48 @@ parse_args_with_freetext__returns__second_and_third_arg_quoted(void** state)
     assert_string_equal("The Group", args[1]);
     assert_string_equal("The User", args[2]);
 
+    g_strfreev(args);
+}
+
+void
+parse_args__returns__escaped_quotes(void** state)
+{
+    char* inp = "/cmd \"Thor \\\"The Thunderer\\\" Odinson\" arg2";
+    gboolean result = FALSE;
+    gchar** args = parse_args(inp, 2, 2, &result);
+
+    assert_true(result);
+    assert_int_equal(2, g_strv_length(args));
+    assert_string_equal("Thor \"The Thunderer\" Odinson", args[0]);
+    assert_string_equal("arg2", args[1]);
+    g_strfreev(args);
+}
+
+void
+parse_args__returns__escaped_spaces(void** state)
+{
+    char* inp = "/cmd Thor\\ The\\ Thunderer\\ Odinson arg2";
+    gboolean result = FALSE;
+    gchar** args = parse_args(inp, 2, 2, &result);
+
+    assert_true(result);
+    assert_int_equal(2, g_strv_length(args));
+    assert_string_equal("Thor The Thunderer Odinson", args[0]);
+    assert_string_equal("arg2", args[1]);
+    g_strfreev(args);
+}
+
+void
+parse_args__returns__escaped_backslash(void** state)
+{
+    char* inp = "/cmd \"Thor \\\\ Odinson\" arg2";
+    gboolean result = FALSE;
+    gchar** args = parse_args(inp, 2, 2, &result);
+
+    assert_true(result);
+    assert_int_equal(2, g_strv_length(args));
+    assert_string_equal("Thor \\ Odinson", args[0]);
+    assert_string_equal("arg2", args[1]);
     g_strfreev(args);
 }
 
@@ -454,6 +510,24 @@ count_tokens__returns__two_tokens_both_quoted(void** state)
 }
 
 void
+count_tokens__handles__escapes(void** state)
+{
+    char* inp = "one\\ two \"three \\\" four\"";
+    int result = count_tokens(inp);
+
+    assert_int_equal(2, result);
+}
+
+void
+count_tokens__handles__multiple_spaces(void** state)
+{
+    char* inp = "one   two";
+    int result = count_tokens(inp);
+
+    assert_int_equal(2, result);
+}
+
+void
 get_start__returns__first_of_one(void** state)
 {
     char* inp = "one";
@@ -510,6 +584,26 @@ get_start__returns__first_two_of_three_first_and_second_quoted(void** state)
     char* result = get_start(inp, 3);
 
     assert_string_equal("\"one\" \"two\" ", result);
+    g_free(result);
+}
+
+void
+get_start__handles__escapes(void** state)
+{
+    char* inp = "one\\ two three";
+    char* result = get_start(inp, 2);
+
+    assert_string_equal("one\\ two ", result);
+    g_free(result);
+}
+
+void
+get_start__handles__multiple_spaces(void** state)
+{
+    char* inp = "one   two";
+    char* result = get_start(inp, 2);
+
+    assert_string_equal("one   ", result);
     g_free(result);
 }
 

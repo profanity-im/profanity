@@ -4,6 +4,8 @@
 void autocomplete_complete__returns__null_when_empty(void** state);
 void autocomplete_reset__updates__after_create(void** state);
 void autocomplete_complete__returns__null_after_create(void** state);
+void autocomplete_complete__handles__escaped_spaces(void** state);
+void autocomplete_complete__handles__escaped_quotes(void** state);
 void autocomplete_create_list__returns__null_after_create(void** state);
 void autocomplete_add__updates__one_and_complete(void** state);
 void autocomplete_complete__returns__first_of_two(void** state);
