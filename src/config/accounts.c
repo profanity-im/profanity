@@ -75,6 +75,17 @@ _accounts_save(const char* account_name)
     auto_gchar gchar* sanitized = _sanitize_account_name(account_name);
 
     if (_accounts_has_group(sanitized)) {
+        // Remove keys from file that are no longer in memory
+        gsize nkeys_disk;
+        auto_gcharv gchar** keys_disk = g_key_file_get_keys(current.keyfile, sanitized, &nkeys_disk, NULL);
+        if (keys_disk) {
+            for (gsize j = 0; j < nkeys_disk; ++j) {
+                if (!g_key_file_has_key(accounts_prof_keyfile.keyfile, sanitized, keys_disk[j], NULL)) {
+                    g_key_file_remove_key(current.keyfile, sanitized, keys_disk[j], NULL);
+                }
+            }
+        }
+
         gsize nkeys;
         auto_gcharv gchar** keys = g_key_file_get_keys(accounts_prof_keyfile.keyfile, sanitized, &nkeys, NULL);
         if (keys) {

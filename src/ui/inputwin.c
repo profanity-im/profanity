@@ -171,6 +171,12 @@ _inp_slashguard_check(void)
 char*
 inp_readline(void)
 {
+    // UI is suspended
+    if (isendwin()) {
+        g_usleep(100000); // 100ms
+        return NULL;
+    }
+
     p_rl_timeout.tv_sec = inp_timeout / 1000;
     p_rl_timeout.tv_usec = inp_timeout % 1000 * 1000;
     FD_ZERO(&fds);
@@ -996,6 +1002,16 @@ _inp_rl_down_arrow_handler(int count, int key)
     return 0;
 }
 
+static void
+_editor_finished_cb(gchar* message, void* user_data)
+{
+    if (message) {
+        rl_replace_line(message, 0);
+        rl_point = rl_end;
+        rl_forced_update_display();
+    }
+}
+
 static int
 _inp_rl_send_to_editor(int count, int key)
 {
@@ -1003,16 +1019,7 @@ _inp_rl_send_to_editor(int count, int key)
         return 0;
     }
 
-    auto_gchar gchar* message = NULL;
-
-    if (get_message_from_editor(rl_line_buffer, &message)) {
-        return 0;
-    }
-
-    rl_replace_line(message, 0);
-    ui_resize();
-    rl_point = rl_end;
-    rl_forced_update_display();
+    launch_editor(rl_line_buffer, _editor_finished_cb, NULL);
 
     return 0;
 }

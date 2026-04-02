@@ -13,6 +13,6 @@
 
 #include <glib.h>
 
-gboolean get_message_from_editor(gchar* message, gchar** returned_message);
+gboolean launch_editor(gchar* initial_content, void (*callback)(gchar* content, void* data), void* user_data);
 
 #endif

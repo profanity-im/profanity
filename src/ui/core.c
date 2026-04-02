@@ -120,6 +120,11 @@ ui_sigwinch_handler(int sig)
 void
 ui_update(void)
 {
+    // UI is suspended
+    if (isendwin()) {
+        return;
+    }
+
     ProfWin* current = wins_get_current();
     if (current->layout->paged == 0) {
         win_move_to_end(current);
@@ -172,8 +177,25 @@ ui_reset_idle_time(void)
 }
 
 void
+ui_suspend(void)
+{
+    endwin();
+}
+
+void
+ui_resume(void)
+{
+    refresh();
+}
+
+void
 ui_resize(void)
 {
+    // UI is suspended
+    if (isendwin()) {
+        return;
+    }
+
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
     erase();
@@ -192,6 +214,11 @@ ui_resize(void)
 void
 ui_redraw(void)
 {
+    // UI is suspended
+    if (isendwin()) {
+        return;
+    }
+
     title_bar_resize();
     wins_resize_all();
     status_bar_resize();
