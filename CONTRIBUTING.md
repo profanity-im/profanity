@@ -5,6 +5,8 @@
 ### Build Options
 Meson requires features to be **explicitly enabled**. Nothing is auto-enabled; if you want a feature, you must pass the corresponding `-Doption=enabled` flag.
 
+The system libstrophe is used by default; if you instead want to automatically download and link against libstrophe HEAD from upstream Git, provide `-Dforce_fallback_for=libstrophe` flag.
+
 | Feature | Description | Meson option |
 | :--- | :--- | :--- |
 | **Notifications** | Desktop notifications support | `-Dnotifications=enabled` |

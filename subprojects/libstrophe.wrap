@@ -1,0 +1,4 @@
+[wrap-git]
+url = https://github.com/strophe/libstrophe.git
+revision = HEAD
+patch_directory = libstrophe
