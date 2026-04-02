@@ -138,12 +138,22 @@ account_eval_password(ProfAccount* account)
     gchar* stdout_buf = NULL;
     GError* error = NULL;
     gint exit_status = 0;
+    gchar** argv = NULL;
 
-    if (!g_spawn_command_line_sync(account->eval_password, &stdout_buf, NULL, &exit_status, &error)) {
-        log_error("Failed to execute `eval_password` command: %s", error->message);
+    if (!g_shell_parse_argv(account->eval_password, NULL, &argv, &error)) {
+        log_error("Failed to parse `eval_password` command: %s", error->message);
         g_error_free(error);
         return FALSE;
     }
+
+    if (!g_spawn_sync(NULL, argv, NULL, G_SPAWN_SEARCH_PATH | G_SPAWN_CHILD_INHERITS_STDIN, NULL, NULL, &stdout_buf, NULL, &exit_status, &error)) {
+        log_error("Failed to execute `eval_password` command: %s", error->message);
+        g_strfreev(argv);
+        g_error_free(error);
+        return FALSE;
+    }
+
+    g_strfreev(argv);
 
     if (WIFEXITED(exit_status) && WEXITSTATUS(exit_status) == 0) {
         account->password = stdout_buf;

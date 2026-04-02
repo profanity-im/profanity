@@ -385,6 +385,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
             // use eval_password if set
         } else if (account->eval_password) {
             gboolean res = account_eval_password(account);
+            ui_resize();
             if (res) {
                 conn_status = cl_ev_connect_account(account);
                 free(account->password);
