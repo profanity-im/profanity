@@ -172,6 +172,18 @@ ui_reset_idle_time(void)
 }
 
 void
+ui_suspend(void)
+{
+    endwin();
+}
+
+void
+ui_resume(void)
+{
+    refresh();
+}
+
+void
 ui_resize(void)
 {
     struct winsize w;

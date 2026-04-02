@@ -62,6 +62,14 @@ ui_init(void)
 {
 }
 void
+ui_suspend(void)
+{
+}
+void
+ui_resume(void)
+{
+}
+void
 ui_load_colours(void)
 {
 }
