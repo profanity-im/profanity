@@ -1,71 +1,8 @@
-# git ls-files --others --exclude-from=.git/info/exclude
-# Lines that start with '#' are comments.
-# For a project mostly in C, the following would be a good set of
-# exclude patterns (uncomment them if you want to use them):
-# *.[oa]
-# *~
-
-# IDE
-.codelite/
-profanity.mk
-profanity.project
-profanity.workspace
-compile_commands.json
-.tern-port
-.tern-project
-.cproject
-.project
-.settings/
-.vscode/
-*.plist/
-
-# autotools
-.libs/
-/Makefile
-/Makefile.in
-_configs.sed
-aclocal.m4
-autom4te.cache/
-build-aux/
-config.log
-config.status
-configure
-configure*~
-libprofanity.la
-libtool
-m4/
-**/.deps/
-**.dirstamp
-src/config.h
-src/config.h.in
-src/config.h.in~
-src/gitversion.h
-src/stamp-h1
-src/plugins/profapi.lo
-
 # out-of-tree build folders
 build*/
 
-# binaries
-profanity
-**/*.o
-
-# test output
-tests/functionaltests/functionaltests
-tests/functionaltests/functionaltests.log
-tests/functionaltests/functionaltests.trs
-tests/unittests/unittests
-tests/unittests/unittests.log
-tests/unittests/unittests.trs
-test-suite.log
-
 # valgrind output
 profval*
-
-# local scripts
-clean-test.sh
-gen_docs.sh
-gitpushall.sh
 
 # website files
 main_fragment.html
@@ -88,18 +25,16 @@ apidocs/c/doxygen_sqlite3.db
 # Temp Vim files
 **/*.swp
 
-# Virtual envs
-python2/
-python3/
-
-.DS_Store
+# GDB
 .gdbinit
+
+# Misc
+.DS_Store
 *.bak
 *.orig
 *.patch
 *.rej
 breaks
-
 *.tar.*
 *.zip
 *.log*
