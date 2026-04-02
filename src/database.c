@@ -449,7 +449,6 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
         return;
     }
 
-    char* err_msg;
     auto_gchar gchar* date_fmt = prof_date_time_format_iso8601(message->timestamp);
     const char* enc = _get_message_enc_str(message->enc);
 
