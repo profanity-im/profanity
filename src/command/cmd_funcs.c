@@ -109,19 +109,26 @@ static gboolean _cmd_execute_alias(ProfWin* window, const char* const inp, gbool
 static gboolean
 _download_install_plugin(ProfWin* window, gchar* url, gchar* path);
 
+static void
+_vcard_editor_finished_cb(gchar* message, void* user_data)
+{
+    if (message) {
+        char** field = user_data;
+        if (*field) {
+            free(*field);
+        }
+        *field = g_strdup(message);
+        cons_show("Field updated. Remember to call /me save to apply changes.");
+    }
+}
+
 static gboolean
 _update_vcard_field(char** field, char* value)
 {
     if (!value) {
-        gchar* editor_value;
-        if (get_message_from_editor(*field, &editor_value)) {
+        if (launch_editor(*field, _vcard_editor_finished_cb, field)) {
             return TRUE;
         }
-
-        if (*field) {
-            free(*field);
-        }
-        *field = editor_value;
     } else {
         if (*field) {
             free(*field);
@@ -1638,6 +1645,51 @@ cmd_help(ProfWin* window, const char* const command, gchar** args)
     }
 
     return TRUE;
+}
+
+static void
+_cmd_editor_finished_cb(gchar* message, void* user_data)
+{
+    if (message) {
+        rl_insert_text(message);
+        rl_point = rl_end;
+        rl_forced_update_display();
+    }
+}
+
+typedef struct
+{
+    ProfWin* window;
+    char* roomjid;
+} EditorFinishedContext;
+
+static void
+_cmd_room_editor_finished_cb(gchar* message, void* user_data)
+{
+    EditorFinishedContext* ctx = user_data;
+    if (message && ctx->roomjid) {
+        message_send_groupchat_subject(ctx->roomjid, message);
+    }
+    if (ctx) {
+        g_free(ctx->roomjid);
+        g_free(ctx);
+    }
+}
+
+static void
+_cmd_correct_editor_finished_cb(gchar* message, void* user_data)
+{
+    EditorFinishedContext* ctx = user_data;
+    if (message && ctx->window) {
+        if (ctx->window->type == WIN_CHAT) {
+            ProfChatWin* chatwin = (ProfChatWin*)ctx->window;
+            cl_ev_send_msg_correct(chatwin, message, FALSE, TRUE);
+        } else if (ctx->window->type == WIN_MUC) {
+            ProfMucWin* mucwin = (ProfMucWin*)ctx->window;
+            cl_ev_send_muc_msg_corrected(mucwin, message, FALSE, TRUE);
+        }
+    }
+    g_free(ctx);
 }
 
 gboolean
@@ -4033,18 +4085,13 @@ cmd_subject(ProfWin* window, const char* const command, gchar** args)
     }
 
     if (g_strcmp0(args[0], "editor") == 0) {
-        gchar* message = NULL;
         char* subject = muc_subject(mucwin->roomjid);
 
-        if (get_message_from_editor(subject, &message)) {
-            return TRUE;
-        }
+        EditorFinishedContext* ctx = g_new0(EditorFinishedContext, 1);
+        ctx->roomjid = g_strdup(mucwin->roomjid);
 
-        if (message) {
-            message_send_groupchat_subject(mucwin->roomjid, message);
-        } else {
-            cons_bad_cmd_usage(command);
-        }
+        launch_editor(subject, _cmd_room_editor_finished_cb, ctx);
+
         return TRUE;
     }
 
@@ -9567,16 +9614,7 @@ cmd_change_password(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_editor(ProfWin* window, const char* const command, gchar** args)
 {
-    auto_gchar gchar* message = NULL;
-
-    if (get_message_from_editor(NULL, &message)) {
-        return TRUE;
-    }
-
-    rl_insert_text(message);
-    ui_resize();
-    rl_point = rl_end;
-    rl_forced_update_display();
+    launch_editor(NULL, _cmd_editor_finished_cb, NULL);
 
     return TRUE;
 }
@@ -9590,20 +9628,10 @@ cmd_correct_editor(ProfWin* window, const char* const command, gchar** args)
 
     gchar* initial_message = win_get_last_sent_message(window);
 
-    auto_gchar gchar* message = NULL;
-    if (get_message_from_editor(initial_message, &message)) {
-        return TRUE;
-    }
+    EditorFinishedContext* ctx = g_new0(EditorFinishedContext, 1);
+    ctx->window = window;
 
-    if (window->type == WIN_CHAT) {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
-
-        cl_ev_send_msg_correct(chatwin, message, FALSE, TRUE);
-    } else if (window->type == WIN_MUC) {
-        ProfMucWin* mucwin = (ProfMucWin*)window;
-
-        cl_ev_send_muc_msg_corrected(mucwin, message, FALSE, TRUE);
-    }
+    launch_editor(initial_message, _cmd_correct_editor_finished_cb, ctx);
 
     return TRUE;
 }
