@@ -2636,10 +2636,13 @@ iq_mam_request_older(ProfChatWin* win)
     auto_gchar gchar* enddate = NULL;
 
     // If first message found
-    if (first_msg->timestamp) {
+    if (first_msg && first_msg->timestamp) {
         firstid = first_msg->stanzaid;
         enddate = g_date_time_format(first_msg->timestamp, mam_timestamp_format_string);
     } else {
+        if (first_msg) {
+            message_free(first_msg);
+        }
         return;
     }
 
