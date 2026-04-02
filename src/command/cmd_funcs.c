@@ -109,6 +109,28 @@ static gboolean _cmd_execute_alias(ProfWin* window, const char* const inp, gbool
 static gboolean
 _download_install_plugin(ProfWin* window, gchar* url, gchar* path);
 
+static gboolean
+_update_vcard_field(char** field, char* value)
+{
+    if (!value) {
+        gchar* editor_value;
+        if (get_message_from_editor(*field, &editor_value)) {
+            return TRUE;
+        }
+
+        if (*field) {
+            free(*field);
+        }
+        *field = editor_value;
+    } else {
+        if (*field) {
+            free(*field);
+        }
+        *field = strdup(value);
+    }
+    return FALSE;
+}
+
 /**
  * @brief Processes a line of input and determines if profanity should continue.
  *
@@ -10113,21 +10135,8 @@ cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
 
             switch (element->type) {
             case VCARD_NICKNAME:
-                if (!value) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->nickname, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->nickname) {
-                        free(element->nickname);
-                    }
-                    element->nickname = editor_value;
-                } else {
-                    if (element->nickname) {
-                        free(element->nickname);
-                    }
-                    element->nickname = strdup(value);
+                if (_update_vcard_field(&element->nickname, value)) {
+                    return TRUE;
                 }
                 break;
             case VCARD_BIRTHDAY:
@@ -10143,130 +10152,38 @@ cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
                 element->birthday = g_date_time_new_local(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, 0, 0, 0);
                 break;
             case VCARD_TELEPHONE:
-                if (!value) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->telephone.number, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->telephone.number) {
-                        free(element->telephone.number);
-                    }
-                    element->telephone.number = editor_value;
-                } else {
-                    if (element->telephone.number) {
-                        free(element->telephone.number);
-                    }
-                    element->telephone.number = strdup(value);
+                if (_update_vcard_field(&element->telephone.number, value)) {
+                    return TRUE;
                 }
-
                 break;
             case VCARD_EMAIL:
-                if (!value) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->email.userid, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->email.userid) {
-                        free(element->email.userid);
-                    }
-                    element->email.userid = editor_value;
-                } else {
-                    if (element->email.userid) {
-                        free(element->email.userid);
-                    }
-                    element->email.userid = strdup(value);
+                if (_update_vcard_field(&element->email.userid, value)) {
+                    return TRUE;
                 }
                 break;
             case VCARD_JID:
-                if (!value) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->jid, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->jid) {
-                        free(element->jid);
-                    }
-                    element->jid = editor_value;
-                } else {
-                    if (element->jid) {
-                        free(element->jid);
-                    }
-                    element->jid = strdup(value);
+                if (_update_vcard_field(&element->jid, value)) {
+                    return TRUE;
                 }
                 break;
             case VCARD_TITLE:
-                if (!value) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->title, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->title) {
-                        free(element->title);
-                    }
-                    element->title = editor_value;
-                } else {
-                    if (element->title) {
-                        free(element->title);
-                    }
-                    element->title = strdup(value);
+                if (_update_vcard_field(&element->title, value)) {
+                    return TRUE;
                 }
                 break;
             case VCARD_ROLE:
-                if (!value) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->role, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->role) {
-                        free(element->role);
-                    }
-                    element->role = editor_value;
-                } else {
-                    if (element->role) {
-                        free(element->role);
-                    }
-                    element->role = strdup(value);
+                if (_update_vcard_field(&element->role, value)) {
+                    return TRUE;
                 }
                 break;
             case VCARD_NOTE:
-                if (!value) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->note, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->note) {
-                        free(element->note);
-                    }
-                    element->note = editor_value;
-                } else {
-                    if (element->note) {
-                        free(element->note);
-                    }
-                    element->note = strdup(value);
+                if (_update_vcard_field(&element->note, value)) {
+                    return TRUE;
                 }
                 break;
             case VCARD_URL:
-                if (!value) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->url, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->url) {
-                        free(element->url);
-                    }
-                    element->url = editor_value;
-                } else {
-                    if (element->url) {
-                        free(element->url);
-                    }
-                    element->url = strdup(value);
+                if (_update_vcard_field(&element->url, value)) {
+                    return TRUE;
                 }
                 break;
             default:
@@ -10274,123 +10191,32 @@ cmd_vcard_set(ProfWin* window, const char* const command, gchar** args)
             }
         } else if (value) {
             if (g_strcmp0(value, "pobox") == 0 && element->type == VCARD_ADDRESS) {
-                if (!value2) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->address.pobox, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->address.pobox) {
-                        free(element->address.pobox);
-                    }
-                    element->address.pobox = editor_value;
-                } else {
-                    if (element->address.pobox) {
-                        free(element->address.pobox);
-                    }
-                    element->address.pobox = strdup(value2);
+                if (_update_vcard_field(&element->address.pobox, value2)) {
+                    return TRUE;
                 }
             } else if (g_strcmp0(value, "extaddr") == 0 && element->type == VCARD_ADDRESS) {
-                if (!value2) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->address.extaddr, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->address.extaddr) {
-                        free(element->address.extaddr);
-                    }
-                    element->address.extaddr = editor_value;
-                } else {
-                    if (element->address.extaddr) {
-                        free(element->address.extaddr);
-                    }
-                    element->address.extaddr = strdup(value2);
+                if (_update_vcard_field(&element->address.extaddr, value2)) {
+                    return TRUE;
                 }
             } else if (g_strcmp0(value, "street") == 0 && element->type == VCARD_ADDRESS) {
-                if (!value2) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->address.street, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->address.street) {
-                        free(element->address.street);
-                    }
-                    element->address.street = editor_value;
-                } else {
-                    if (element->address.street) {
-                        free(element->address.street);
-                    }
-                    element->address.street = strdup(value2);
+                if (_update_vcard_field(&element->address.street, value2)) {
+                    return TRUE;
                 }
             } else if (g_strcmp0(value, "locality") == 0 && element->type == VCARD_ADDRESS) {
-                if (!value2) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->address.locality, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->address.locality) {
-                        free(element->address.locality);
-                    }
-                    element->address.locality = editor_value;
-                } else {
-                    if (element->address.locality) {
-                        free(element->address.locality);
-                    }
-                    element->address.locality = strdup(value2);
+                if (_update_vcard_field(&element->address.locality, value2)) {
+                    return TRUE;
                 }
             } else if (g_strcmp0(value, "region") == 0 && element->type == VCARD_ADDRESS) {
-                if (!value2) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->address.region, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->address.region) {
-                        free(element->address.region);
-                    }
-                    element->address.region = editor_value;
-                } else {
-                    if (element->address.region) {
-                        free(element->address.region);
-                    }
-                    element->address.region = strdup(value2);
+                if (_update_vcard_field(&element->address.region, value2)) {
+                    return TRUE;
                 }
             } else if (g_strcmp0(value, "pocode") == 0 && element->type == VCARD_ADDRESS) {
-                if (!value2) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->address.pcode, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->address.pcode) {
-                        free(element->address.pcode);
-                    }
-                    element->address.pcode = editor_value;
-                } else {
-                    if (element->address.pcode) {
-                        free(element->address.pcode);
-                    }
-                    element->address.pcode = strdup(value2);
+                if (_update_vcard_field(&element->address.pcode, value2)) {
+                    return TRUE;
                 }
             } else if (g_strcmp0(value, "country") == 0 && element->type == VCARD_ADDRESS) {
-                if (!value2) {
-                    gchar* editor_value;
-                    if (get_message_from_editor(element->address.country, &editor_value)) {
-                        return TRUE;
-                    }
-
-                    if (element->address.country) {
-                        free(element->address.country);
-                    }
-                    element->address.country = editor_value;
-                } else {
-                    if (element->address.country) {
-                        free(element->address.country);
-                    }
-                    element->address.country = strdup(value2);
+                if (_update_vcard_field(&element->address.country, value2)) {
+                    return TRUE;
                 }
             } else if (g_strcmp0(value, "type") == 0 && element->type == VCARD_ADDRESS) {
                 if (g_strcmp0(value2, "domestic") == 0) {
