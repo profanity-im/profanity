@@ -26,6 +26,9 @@
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
+#ifdef HAVE_GTK
+#include "ui/tray.h"
+#endif
 #include "xmpp/xmpp.h"
 #include "xmpp/muc.h"
 
@@ -54,6 +57,11 @@ _notifier_uninit(void)
 static void
 _notify(const char* const message, int timeout, const char* const category)
 {
+#ifdef HAVE_GTK
+    if (!tray_gtk_ready()) {
+        return;
+    }
+#endif
     log_debug("Attempting notification: %s", message);
     if (notify_is_initted()) {
         log_debug("Reinitialising libnotify");

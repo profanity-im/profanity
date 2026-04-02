@@ -21,6 +21,11 @@
 #include "ui/tray.h"
 #include "ui/window_list.h"
 
+#if defined(GDK_WINDOWING_X11) && defined(HAVE_XEXITHANDLER)
+#include <gdk/gdkx.h>
+#include <X11/Xlib.h>
+#endif
+
 static gboolean gtk_ready = FALSE;
 static GtkStatusIcon* prof_tray = NULL;
 static GString* icon_filename = NULL;
@@ -28,6 +33,21 @@ static GString* icon_msg_filename = NULL;
 static gint unread_messages;
 static gboolean shutting_down;
 static guint timer;
+
+#if defined(GDK_WINDOWING_X11) && defined(HAVE_XEXITHANDLER)
+static void
+_x_io_error_handler(Display* display, void* user_data)
+{
+    log_warning("Error: X Server connection lost.");
+    gtk_ready = FALSE;
+}
+
+static int
+_x_io_handler(Display* display)
+{
+    return 0;
+}
+#endif
 
 /*
  * Get icons from installation share folder or (if defined) .locale user's folder
@@ -98,7 +118,7 @@ _get_icons(void)
 gboolean
 _tray_change_icon(gpointer data)
 {
-    if (shutting_down) {
+    if (shutting_down || !gtk_ready) {
         return FALSE;
     }
 
@@ -151,6 +171,14 @@ tray_init(void)
         return;
     }
 
+#if defined(GDK_WINDOWING_X11) && defined(HAVE_XEXITHANDLER)
+    GdkDisplay* display = gdk_display_get_default();
+    if (GDK_IS_X11_DISPLAY(display)) {
+        XSetIOErrorExitHandler(GDK_DISPLAY_XDISPLAY(display), _x_io_error_handler, NULL);
+        XSetIOErrorHandler(_x_io_handler);
+    }
+#endif
+
     if (prefs_get_boolean(PREF_TRAY)) {
         log_debug("Building GTK icon");
         tray_enable();
@@ -167,9 +195,18 @@ tray_update(void)
     }
 }
 
+gboolean
+tray_gtk_ready(void)
+{
+    return gtk_ready;
+}
+
 void
 tray_set_timer(int interval)
 {
+    if (!gtk_ready) {
+        return;
+    }
     if (timer) {
         g_source_remove(timer);
     }
@@ -186,6 +223,9 @@ tray_set_timer(int interval)
 void
 tray_enable(void)
 {
+    if (!gtk_ready) {
+        return;
+    }
     prof_tray = gtk_status_icon_new_from_file(icon_filename->str);
     shutting_down = FALSE;
     _tray_change_icon(NULL);

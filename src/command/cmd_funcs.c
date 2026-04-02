@@ -6477,6 +6477,10 @@ gboolean
 cmd_tray(ProfWin* window, const char* const command, gchar** args)
 {
 #ifdef HAVE_GTK
+    if (!tray_gtk_ready()) {
+        log_warning("GTK is not ready. Tray functionality is disabled.");
+        return TRUE;
+    }
     if (g_strcmp0(args[0], "timer") == 0) {
         if (args[1] == NULL) {
             cons_bad_cmd_usage(command);
@@ -8975,6 +8979,10 @@ gboolean
 cmd_paste(ProfWin* window, const char* const command, gchar** args)
 {
 #ifdef HAVE_GTK
+    if (!tray_gtk_ready()) {
+        log_warning("GTK is not ready. Paste from clipboard is disabled.");
+        return TRUE;
+    }
     auto_char char* clipboard_buffer = clipboard_get();
 
     if (clipboard_buffer) {

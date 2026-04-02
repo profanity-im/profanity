@@ -15,6 +15,7 @@
 #include <stdlib.h>
 
 #include "log.h"
+#include "ui/tray.h"
 
 /*
 For now we rely on tray_init(void)
@@ -27,6 +28,9 @@ void clipboard_init(int argc, char **argv) {
 char*
 clipboard_get(void)
 {
+    if (!tray_gtk_ready()) {
+        return NULL;
+    }
     gchar* clip;
 
     GtkClipboard* cl = gtk_clipboard_get(GDK_SELECTION_CLIPBOARD);

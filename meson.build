@@ -188,9 +188,18 @@ if get_option('notifications').enabled()
 endif
 
 # GTK (for icons and clipboard)
+x11_extra_dep = []
 if get_option('icons-and-clipboard').enabled()
   gtk_dep = dependency('gtk+-3.0', version: '>= 3.24.0', required: true)
   conf_data.set('HAVE_GTK', 1)
+
+  x11_dep = dependency('x11', required: false)
+  if x11_dep.found()
+    if cc.has_function('XSetIOErrorExitHandler', dependencies: x11_dep)
+      conf_data.set('HAVE_XEXITHANDLER', 1)
+      x11_extra_dep = [x11_dep]
+    endif
+  endif
 endif
 
 # XScreenSaver
@@ -328,6 +337,10 @@ endif
 
 if xscrnsaver_dep.length() > 0
   profanity_deps += xscrnsaver_dep
+endif
+
+if x11_extra_dep.length() > 0
+  profanity_deps += x11_extra_dep
 endif
 
 if python_dep.found()
