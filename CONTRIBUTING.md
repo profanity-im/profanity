@@ -237,7 +237,6 @@ Functional tests use [stabber](https://github.com/profanity-im/stabber) to simul
 **Performance Note:** It is highly recommended to run functional tests **without** sanitizers (**ASan** and **UBSan**). These sanitizers add significant overhead that can cause functional tests to time out or take an excessively long time to complete.
 
 *   **Meson:** Ensure `-Db_sanitize=none` is set in your build configuration. You can check your current configuration with `meson configure build_run | grep b_sanitize`.
-*   **Autotools:** Ensure your `CFLAGS` does not contain `-fsanitize=address` or `-fsanitize=undefined`.
 
 To run functional tests, you need the same dependencies as unit tests (`cmocka`) plus `stabber` and `libutil`.
 
@@ -287,6 +286,20 @@ rm -rf build_run
 scan-build meson setup build_run
 scan-build meson compile -C build_run
 ```
+
+### Runtime Analysis with Sanitizers
+Developers and testers should compile and run Profanity with **AddressSanitizer (ASan)** and **UndefinedBehaviorSanitizer (UBSan)** enabled. While static analysis can find potential issues in the source code, sanitizers monitor the application while it is actually running.
+
+By running the application and exercising specific features, you trigger real world code paths that might contain memory leaks, buffer overflows, or undefined behavior that only manifest at runtime.
+
+To build with sanitizers enabled and enable debug logging:
+```bash
+meson setup build_run -Db_sanitize=address,undefined
+meson compile -C build_run
+./build_run/profanity -l DEBUG
+```
+
+**Performance Note:** Sanitizers add significant overhead.
 
 ### Finding typos
 We include a `.codespellrc` configuration file for `codespell` in the root directory.

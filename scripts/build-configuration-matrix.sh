@@ -94,7 +94,7 @@ fi
 if [[ "$ARCH" == linux* ]]; then
     echo -e "${YELLOW}--> Running Valgrind check with full features ${BACKEND_OPT} ${EXTRA_ARGS}${NC}"
     rm -rf build_valgrind
-    meson setup build_valgrind ${tests[0]} ${BACKEND_OPT} -Dtests=true -Db_sanitize=address,undefined ${EXTRA_ARGS}
+    meson setup build_valgrind ${tests[0]} ${BACKEND_OPT} -Dtests=true -Db_sanitize=undefined ${EXTRA_ARGS}
     meson compile -C build_valgrind
     meson test -C build_valgrind "unit tests" --print-errorlogs --wrap=valgrind || echo "Valgrind issues detected"
     rm -rf build_valgrind

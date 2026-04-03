@@ -2142,6 +2142,7 @@ static const struct cmd_t command_defs[] = {
               "/account set me status dnd",
               "/account set me dnd -1",
               "/account set me clientid \"Profanity 0.42 (Dev)\"",
+              "/account set me eval_password \"pass \\\"Test Accounts/my user\\\"\"",
               "/account rename me chattyme",
               "/account clear me pgpkeyid")
     },
