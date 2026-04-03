@@ -128,7 +128,9 @@ launch_editor(gchar* initial_content, void (*callback)(gchar* content, void* dat
         return TRUE;
     } else if (pid == 0) {
         // Child process: Inherits TTY from parent
-        execvp(editor_argv[0], editor_argv);
+        if (editor_argv && editor_argv[0]) {
+            execvp(editor_argv[0], editor_argv);
+        }
         _exit(EXIT_FAILURE);
     }
 
