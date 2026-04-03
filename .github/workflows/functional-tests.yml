@@ -1,0 +1,80 @@
+name: Build
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-func-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  functional-tests:
+    runs-on: ubuntu-latest
+    name: ubuntu | func | signal
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            libcmocka-dev libcurl4-openssl-dev libgcrypt20-dev libglib2.0-dev \
+            libgpgme-dev libgtk-3-dev libmicrohttpd-dev libncursesw5-dev \
+            libnotify-dev libotr5-dev libreadline-dev libsignal-protocol-c-dev \
+            libomemo-c-dev libssl-dev libtool libxss-dev meson ninja-build \
+            pkg-config python3-dev python-dev-is-python3 libsqlite3-dev \
+            libgdk-pixbuf-2.0-dev libqrencode-dev libenchant-2-dev \
+            autoconf autoconf-archive automake cmake expect
+            
+      - name: Install stabber
+        run: |
+          git clone --depth 1 https://github.com/profanity-im/stabber /tmp/stabber
+          cd /tmp/stabber
+          ./bootstrap.sh
+          ./configure --prefix=/usr
+          make -j$(nproc)
+          sudo make install
+          
+      - name: Install libstrophe (master)
+        run: |
+          git clone --depth 1 https://github.com/strophe/libstrophe /tmp/libstrophe
+          cd /tmp/libstrophe
+          ./bootstrap.sh
+          ./configure --prefix=/usr
+          make -j$(nproc)
+          sudo make install
+
+      - name: Configure and Build
+        run: |
+          # Use --buildtype=debugoptimized (-O2) for fast execution.
+          # Explicitly disable sanitizers to avoid the performance penalty.
+          meson setup build_run \
+            --buildtype=debugoptimized \
+            -Db_sanitize=none \
+            -Dnotifications=enabled \
+            -Dpython-plugins=enabled \
+            -Dc-plugins=enabled \
+            -Dotr=enabled \
+            -Dpgp=enabled \
+            -Domemo=enabled \
+            -Domemo-qrcode=enabled \
+            -Dicons-and-clipboard=enabled \
+            -Dgdk-pixbuf=enabled \
+            -Dxscreensaver=enabled \
+            -Dspellcheck=enabled \
+            -Dtests=true
+          meson compile -C build_run profanity:executable functionaltests
+
+      - name: Verify Profanity Binary
+        run: |
+          ./build_run/profanity --version
+
+      - name: Run Functional Tests
+        env:
+          TERM: xterm
+          LC_ALL: C.UTF-8
+        run: |
+          ./build_run/functionaltests
