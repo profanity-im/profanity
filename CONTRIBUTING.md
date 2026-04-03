@@ -287,6 +287,20 @@ scan-build meson setup build_run
 scan-build meson compile -C build_run
 ```
 
+### Runtime Analysis with Sanitizers
+Developers and testers should compile and run Profanity with **AddressSanitizer (ASan)** and **UndefinedBehaviorSanitizer (UBSan)** enabled. While static analysis can find potential issues in the source code, sanitizers monitor the application while it is actually running.
+
+By running the application and exercising specific features, you trigger real world code paths that might contain memory leaks, buffer overflows, or undefined behavior that only manifest at runtime.
+
+To build with sanitizers enabled and enable debug logging:
+```bash
+meson setup build_run -Db_sanitize=address,undefined
+meson compile -C build_run
+./build_run/profanity -l DEBUG
+```
+
+**Performance Note:** Sanitizers add significant overhead.
+
 ### Finding typos
 We include a `.codespellrc` configuration file for `codespell` in the root directory.
 Before committing it might make sense to run `codespell` to see if you made any typos.
