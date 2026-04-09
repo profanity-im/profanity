@@ -1141,16 +1141,16 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         return NULL;
     }
 
+    if (payload == NULL) {
+        signal_buffer_free(plaintext_key);
+        *error = OMEMO_ERR_KEY_TRANSPORT;
+        return NULL;
+    }
+
     if (signal_buffer_len(plaintext_key) != AES128_GCM_KEY_LENGTH + AES128_GCM_TAG_LENGTH) {
         log_error("[OMEMO][RECV] invalid key length");
         signal_buffer_free(plaintext_key);
         *error = OMEMO_ERR_DECRYPT_FAILED;
-        return NULL;
-    }
-
-    if (payload == NULL) {
-        signal_buffer_free(plaintext_key);
-        *error = OMEMO_ERR_KEY_TRANSPORT;
         return NULL;
     }
 
