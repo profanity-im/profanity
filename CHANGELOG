@@ -1,3 +1,32 @@
+0.18.0 (2026-04-10)
+===================
+
+Special thanks to our sponsor Matthew Fennell!
+
+4 people contributed to this release: @GunniBusch, @balejk, @paulfertser and @jubalh.
+
+This release can only be build with Meson. Autotools support has been removed.
+
+Features:
+- Add spellcheck highlighting support (#2132)
+- Implement asynchronous external editor support (#2145)
+
+Bug Fixes:
+- Add missing includes for libomemo-c builds (#2133)
+- Ensure consistent unescaping and space handling (#2139)
+- Fix crash when loading MAM for a contact with empty db (#2144)
+- Fix removal of entries in account file (#2145)
+- Handle X11 connection loss gracefully (#2140)
+- Ignore key contents if there is no payload (#2147)
+- Implement backslash escaping for contact names (#2139)
+- Restore TTY access for eval_password commands (#2145)
+- Standardize PreKey management to prevent decryption failures (#2137)
+- Verify 'by' attribute of stanza-id and MAM result (#2136)
+
+Chores:
+- Fix release years in doap file
+- Support building libstrophe as a subproject (#2141)
+
 0.17.0 (2026-03-26)
 ===================
 
