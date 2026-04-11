@@ -65,6 +65,7 @@ static fd_set fds;
 static int r;
 static char* inp_line = NULL;
 static gboolean get_password = FALSE;
+static gboolean is_suspended = FALSE;
 
 static void _inp_win_update_virtual(void);
 static int _inp_edited(const wint_t ch);
@@ -172,7 +173,7 @@ char*
 inp_readline(void)
 {
     // UI is suspended
-    if (isendwin()) {
+    if (is_suspended || isendwin()) {
         g_usleep(100000); // 100ms
         return NULL;
     }
@@ -270,6 +271,22 @@ inp_close(void)
     inp_win = NULL;
     fclose(discard);
     discard = NULL;
+}
+
+void
+inp_suspend(void)
+{
+    is_suspended = TRUE;
+    rl_callback_handler_remove();
+    rl_deprep_terminal();
+}
+
+void
+inp_resume(void)
+{
+    is_suspended = FALSE;
+    rl_callback_handler_install(NULL, _inp_rl_linehandler);
+    rl_prep_terminal(0);
 }
 
 char*

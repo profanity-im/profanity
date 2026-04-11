@@ -179,6 +179,7 @@ ui_reset_idle_time(void)
 void
 ui_suspend(void)
 {
+    inp_suspend();
     endwin();
 }
 
@@ -186,6 +187,7 @@ void
 ui_resume(void)
 {
     refresh();
+    inp_resume();
 }
 
 void

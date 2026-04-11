@@ -18,6 +18,8 @@ void create_input_window(void);
 void inp_close(void);
 void inp_win_resize(void);
 void inp_put_back(void);
+void inp_suspend(void);
+void inp_resume(void);
 char* inp_get_password(void);
 char* inp_get_line(void);
 
