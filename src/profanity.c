@@ -139,6 +139,8 @@ prof_run(gchar* log_level, gchar* account_name, gchar* config_file, gchar* log_f
         session_process_events();
         iq_autoping_check();
         ui_update();
+        while (g_main_context_iteration(NULL, FALSE))
+            ;
 #ifdef HAVE_GTK
         tray_update();
 #endif

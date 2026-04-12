@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <signal.h>
 
 #include "config/files.h"
 #include "config/preferences.h"
@@ -128,6 +129,12 @@ launch_editor(gchar* initial_content, void (*callback)(gchar* content, void* dat
         return TRUE;
     } else if (pid == 0) {
         // Child process: Inherits TTY from parent
+
+        // Reset signal handlers that profanity sets so the editor doesn't inherit them
+        signal(SIGINT, SIG_DFL);
+        signal(SIGTSTP, SIG_DFL);
+        signal(SIGPIPE, SIG_DFL);
+
         if (editor_argv && editor_argv[0]) {
             execvp(editor_argv[0], editor_argv);
         }
