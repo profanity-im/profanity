@@ -117,7 +117,7 @@ session_connect_with_account(const ProfAccount* const account)
     auto_char char* jid = NULL;
     if (account->resource) {
         auto_jid Jid* jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
-        jid = strdup(jidp->fulljid);
+        jid = strdup(jid_fulljid_or_barejid(jidp));
     } else {
         jid = strdup(account->jid);
     }
