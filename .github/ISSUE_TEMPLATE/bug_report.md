@@ -54,4 +54,5 @@ assignees: ''
 * Operating System/Distribution
 * glib version
 * libstrophe version
+* omemo backend
 * Some bugs might be due to specific implementation in the server. `/serversoftware example.domain` can be helpful
