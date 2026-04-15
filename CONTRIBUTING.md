@@ -17,6 +17,7 @@ The system libstrophe is used by default; if you instead want to automatically d
 | **OMEMO** | OMEMO encryption support | `-Domemo=enabled` |
 | **OMEMO Backend** | Select OMEMO backend library | `-Domemo-backend=libsignal\|libomemo-c` |
 | **QR Code** | OMEMO QR code display | `-Domemo-qrcode=enabled` |
+| **Spellcheck** | Support for spelling checks | `-Dspellcheck=enabled` |
 | **Icons/Clipboard** | GTK tray icons & clipboard | `-Dicons-and-clipboard=enabled` |
 | **GDK Pixbuf** | Avatar scaling support | `-Dgdk-pixbuf=enabled` |
 | **XScreenSaver** | Idle time detection | `-Dxscreensaver=enabled` |
