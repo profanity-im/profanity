@@ -54,4 +54,3 @@ https://github.com/profanity-im/profanity-im.github.io
 * Copy `guide/latest` to `guide/newversion`
 * Tarball location, name, checksum in index.html will be updated automatically during `make` / GH Action
 * Update profanity_version.txt
-* Take results from profanity.doap and put them into xeps.html
