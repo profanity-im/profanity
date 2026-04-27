@@ -111,7 +111,12 @@ cl_ev_send_msg_correct(ProfChatWin* chatwin, const char* const msg, const char* 
     gboolean request_receipt = prefs_get_boolean(PREF_RECEIPTS_REQUEST);
     if (request_receipt) {
         auto_char char* jid = chat_session_get_jid(chatwin->barejid);
-        request_receipt = caps_jid_has_feature(jid, XMPP_FEATURE_RECEIPTS);
+        EntityCapabilities* caps = caps_lookup(jid);
+        if (caps != NULL) {
+            GSList* found = g_slist_find_custom(caps->features, XMPP_FEATURE_RECEIPTS, (GCompareFunc)g_strcmp0);
+            request_receipt = (found != NULL);
+            caps_destroy(caps);
+        }
     }
 
     auto_char char* plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
