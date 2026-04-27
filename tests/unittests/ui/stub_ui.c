@@ -1459,3 +1459,9 @@ cons_has_alerts(void)
 {
     return FALSE;
 }
+
+gboolean
+ui_is_suspended(void)
+{
+    return FALSE;
+}
