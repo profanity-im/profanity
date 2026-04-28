@@ -750,7 +750,7 @@ if get_option('tests')
         build_by_default: false,
       )
 
-      test('functional tests', functionaltests, timeout: 1800)
+      test('functional tests', functionaltests, workdir: meson.project_source_root(), timeout: 1800)
     endif
   else
     warning('cmocka not found, tests will not be built')
