@@ -81,7 +81,9 @@ sv_ev_login_account_success(char* account_name, gboolean secured)
     omemo_on_connect(account);
 #endif
 
-    log_database_init(account);
+    if (!log_database_init(account)) {
+        log_error("Failed to initialize database for account: %s", account->jid);
+    }
     vcard_user_refresh();
     avatar_pep_subscribe();
 
