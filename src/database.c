@@ -159,10 +159,12 @@ log_database_init(ProfAccount* account)
     }
 
     if (db_version == -1) {
-        query = "INSERT INTO `DbVersion` (`version`) VALUES ('2') ON CONFLICT(`version`) DO NOTHING";
+        query = sqlite3_mprintf("INSERT INTO `DbVersion` (`version`) VALUES (%d) ON CONFLICT(`version`) DO NOTHING", latest_version);
         if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
+            sqlite3_free(query);
             goto out;
         }
+        sqlite3_free(query);
         db_version = _get_db_version();
     }
 
@@ -195,6 +197,7 @@ out:
     } else {
         log_error("Unknown SQLite error in log_database_init().");
     }
+    log_database_close();
     return FALSE;
 }
 
@@ -598,7 +601,8 @@ _migrate_to_v2(void)
         "replace_id = COALESCE(NULLIF(replace_id, ''), NULL), "
         "type = COALESCE(NULLIF(type, ''), NULL), "
         "encryption = COALESCE(NULLIF(encryption, ''), NULL);",
-        "UPDATE `DbVersion` SET `version` = 2;",
+        "DELETE FROM `DbVersion`;",
+        "INSERT INTO `DbVersion` (`version`) VALUES (2);",
         "END TRANSACTION"
     };
 
@@ -692,7 +696,8 @@ _migrate_to_v3(void)
         "WHERE id = NEW.replaces_db_id; "
         "END;",
 
-        "UPDATE `DbVersion` SET `version` = 3;",
+        "DELETE FROM `DbVersion`;",
+        "INSERT INTO `DbVersion` (`version`) VALUES (3);",
         "END TRANSACTION"
     };
 
