@@ -1,3 +1,31 @@
+0.18.1 (2026-05-15)
+===================
+
+Special thanks to our sponsor Matthew Fennell!
+We would appreciate if more people could support the development in one way or another.
+
+3 people contributed to this release: @bkmgit, @mdosch and @jubalh.
+
+Bug Fixes:
+- Fix connect with empty resource
+- Resolve issues with async editor (#2150)
+- Resolve DB migration failure (#2163)
+- Restore message receipt requests when capabilities unknown (#2161)
+
+Build System:
+- Fix running functional tests by meson (#2159)
+
+Documentation:
+- Explain how to enable spell checking (#2153)
+- XEP list does not need to be updated manually on a release (#2155)
+
+Tests:
+- Add missing stub to unit tests
+
+Chores:
+- Explain how to add a backtrace in issue template (#2151)
+- Mention omemo backend in issue template as well (#2151)
+
 0.18.0 (2026-04-10)
 ===================
 
