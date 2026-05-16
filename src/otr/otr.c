@@ -96,6 +96,16 @@ static void
 cb_inject_message(void* opdata, const char* accountname,
                   const char* protocol, const char* recipient, const char* message)
 {
+    PContact contact = roster_get_contact(recipient);
+
+    if (contact == NULL) {
+        return;
+    }
+
+    if (p_contact_subscribed(contact) == FALSE) {
+        return;
+    }
+
     free(message_send_chat_otr(recipient, message, FALSE, NULL));
 }
 
