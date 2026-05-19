@@ -68,28 +68,18 @@ static int
 cb_is_logged_in(void* opdata, const char* accountname, const char* protocol, const char* recipient)
 {
     jabber_conn_status_t conn_status = connection_get_status();
-    if (conn_status != JABBER_CONNECTED) {
-        return PRESENCE_OFFLINE;
+    if (conn_status == JABBER_CONNECTED) {
+        PContact contact = roster_get_contact(recipient);
+        if (contact) {
+            if (p_contact_subscribed(contact) == TRUE) {
+                if (g_strcmp0(p_contact_presence(contact), "offline") != 0) {
+                    return PRESENCE_ONLINE;
+                }
+            }
+        }
     }
 
-    PContact contact = roster_get_contact(recipient);
-
-    // not in roster
-    if (contact == NULL) {
-        return PRESENCE_ONLINE;
-    }
-
-    // not subscribed
-    if (p_contact_subscribed(contact) == FALSE) {
-        return PRESENCE_ONLINE;
-    }
-
-    // subscribed
-    if (g_strcmp0(p_contact_presence(contact), "offline") == 0) {
-        return PRESENCE_OFFLINE;
-    } else {
-        return PRESENCE_ONLINE;
-    }
+    return PRESENCE_OFFLINE;
 }
 
 static void
