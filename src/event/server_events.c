@@ -195,7 +195,7 @@ sv_ev_lost_connection(void)
         char* barejid = curr->data;
         ProfChatWin* chatwin = wins_get_chat(barejid);
         if (chatwin && otr_is_secure(barejid)) {
-            chatwin_otr_unsecured(chatwin);
+            chatwin_otr_unsecured(chatwin, FALSE);
             otr_end_session(barejid);
         }
         curr = g_slist_next(curr);
@@ -797,14 +797,6 @@ sv_ev_contact_offline(char* barejid, char* resource, char* status)
         plugins_on_contact_offline(barejid, resource, status);
         ui_contact_offline(barejid, resource, status);
     }
-
-#ifdef HAVE_LIBOTR
-    ProfChatWin* chatwin = wins_get_chat(barejid);
-    if (chatwin && otr_is_secure(barejid)) {
-        chatwin_otr_unsecured(chatwin);
-        otr_end_session(chatwin->barejid);
-    }
-#endif
 
     rosterwin_roster();
     chat_session_remove(barejid);

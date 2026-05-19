@@ -97,7 +97,7 @@ chatwin_otr_secured(ProfChatWin* chatwin, gboolean trusted)
 {
 }
 void
-chatwin_otr_unsecured(ProfChatWin* chatwin)
+chatwin_otr_unsecured(ProfChatWin* chatwin, gboolean disable_otr)
 {
 }
 void

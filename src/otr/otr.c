@@ -318,6 +318,12 @@ otr_on_message_send(ProfChatWin* chatwin, const char* const message, gboolean re
         return TRUE;
     }
 
+    if (chatwin->is_otr && !otr_is_secure(chatwin->barejid)) {
+        win_println((ProfWin*)chatwin, THEME_ERROR, "-", "%s", "Failed to send message: OTR session is not active.");
+        win_println((ProfWin*)chatwin, THEME_DEFAULT, "-", "%s", "Use '/otr end' to intentionally send unencrypted messages.");
+        return TRUE;
+    }
+
     // tag and send for policy opportunistic
     if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
         auto_char char* otr_tagged_msg = otr_tag_message(message);
@@ -691,7 +697,7 @@ otr_decrypt_message(const char* const from, const char* const message, gboolean*
                 otrl_context_force_plaintext(context);
                 ProfChatWin* chatwin = wins_get_chat(from);
                 if (chatwin) {
-                    chatwin_otr_unsecured(chatwin);
+                    chatwin_otr_unsecured(chatwin, FALSE);
                 }
             }
         }

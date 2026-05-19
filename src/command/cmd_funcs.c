@@ -8000,7 +8000,7 @@ cmd_otr_end(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    chatwin_otr_unsecured(chatwin);
+    chatwin_otr_unsecured(chatwin, TRUE);
     otr_end_session(chatwin->barejid);
     return TRUE;
 #else
