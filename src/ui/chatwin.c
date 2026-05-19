@@ -326,7 +326,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
             cons_show_incoming_message(display_name, num, chatwin->unread, window);
 
             if (prefs_get_boolean(PREF_FLASH)) {
-                flash();
+                ui_flash();
             }
 
             chatwin->unread++;
@@ -363,7 +363,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         wins_add_quotes_ac(window, message->plain, FALSE);
 
         if (prefs_get_boolean(PREF_BEEP)) {
-            beep();
+            ui_beep();
         }
     }
 

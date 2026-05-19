@@ -1465,3 +1465,13 @@ ui_is_suspended(void)
 {
     return FALSE;
 }
+
+void
+ui_beep(void)
+{
+}
+
+void
+ui_flash(void)
+{
+}

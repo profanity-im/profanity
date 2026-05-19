@@ -180,6 +180,7 @@ void
 ui_suspend(void)
 {
     inp_suspend();
+    doupdate();
     endwin();
 }
 
@@ -188,6 +189,22 @@ ui_resume(void)
 {
     refresh();
     inp_resume();
+}
+
+void
+ui_beep(void)
+{
+    if (!isendwin()) {
+        beep();
+    }
+}
+
+void
+ui_flash(void)
+{
+    if (!isendwin()) {
+        flash();
+    }
 }
 
 void

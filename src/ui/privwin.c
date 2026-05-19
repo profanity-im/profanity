@@ -57,7 +57,7 @@ privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
         privatewin->unread++;
 
         if (prefs_get_boolean(PREF_FLASH)) {
-            flash();
+            ui_flash();
         }
     }
 
@@ -65,7 +65,7 @@ privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
     wins_add_quotes_ac(window, message->plain, TRUE);
 
     if (prefs_get_boolean(PREF_BEEP)) {
-        beep();
+        ui_beep();
     }
 
     if (notify) {
