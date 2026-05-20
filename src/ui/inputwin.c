@@ -422,7 +422,9 @@ _inp_write(char* line, int offset)
     _inp_win_handle_scroll();
 
     _inp_win_update_virtual();
-    doupdate();
+    if (!isendwin()) {
+        doupdate();
+    }
 }
 
 static int

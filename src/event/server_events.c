@@ -348,7 +348,7 @@ sv_ev_room_message(ProfMessage* message)
         status_bar_active(num, WIN_MUC, mucwin->roomjid);
 
         if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_BEEP))) {
-            beep();
+            ui_beep();
         }
 
         // not currently on groupchat window
@@ -356,7 +356,7 @@ sv_ev_room_message(ProfMessage* message)
         status_bar_new(num, WIN_MUC, mucwin->roomjid);
 
         if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_FLASH))) {
-            flash();
+            ui_flash();
         }
 
         cons_show_incoming_room_message(message->from_jid->resourcepart, mucwin->roomjid, num, mention, triggers, mucwin->unread, window);
