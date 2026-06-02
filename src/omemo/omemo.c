@@ -1037,7 +1037,11 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
 
     if (!key) {
         log_warning("[OMEMO][RECV] received a message with no corresponding key");
-        *error = OMEMO_ERR_NO_KEY;
+        if (payload == NULL) {
+            *error = OMEMO_ERR_KEY_TRANSPORT;
+        } else {
+            *error = OMEMO_ERR_NO_KEY;
+        }
         return NULL;
     }
 
