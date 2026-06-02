@@ -1778,7 +1778,7 @@ _last_activity_get_handler(xmpp_stanza_t* const stanza)
     if (prefs_get_boolean(PREF_LASTACTIVITY)) {
         int idls_secs = ui_get_idle_time() / 1000;
         char str[50];
-        sprintf(str, "%d", idls_secs);
+        snprintf(str, sizeof(str), "%d", idls_secs);
 
         xmpp_stanza_t* response = xmpp_iq_new(ctx, STANZA_TYPE_RESULT, xmpp_stanza_get_id(stanza));
         xmpp_stanza_set_to(response, from);
