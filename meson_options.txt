@@ -96,3 +96,9 @@ option('themes_path',
   value: '',
   description: 'Custom path for themes installation (empty for default)'
 )
+
+option('docdir',
+  type: 'string',
+  value: '',
+  description: 'Custom path for documentation installation (empty for default)'
+)
