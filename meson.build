@@ -582,10 +582,15 @@ if man_pages.length() > 0 and man_pages[0] != ''
 endif
 
 # Install example config and theme template
+doc_dir = get_option('docdir')
+if doc_dir == ''
+  doc_dir = get_option('datadir') / 'doc' / meson.project_name()
+endif
+
 install_data(
   'profrc.example',
   'theme_template',
-  install_dir: get_option('datadir') / 'doc' / meson.project_name(),
+  install_dir: doc_dir,
 )
 
 # Tests
