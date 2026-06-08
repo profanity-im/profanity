@@ -1,3 +1,16 @@
+0.18.2 (2026-06-08)
+===================
+
+1 person contributed to this release: @jubalh.
+
+Bug Fixes:
+- Guard terminal writes while suspended (#2167)
+- Prevent OTR handshake from leaking presence to strangers (#2168)
+- Silence 'no key' error for key transport messages (#2171)
+
+Build System:
+- Add configurable docdir option for documentation (#2174)
+
 0.18.1 (2026-05-15)
 ===================
 
