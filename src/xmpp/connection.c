@@ -660,6 +660,13 @@ connection_request_features(void)
     /* We don't record it as a requested feature to avoid triggering th
      * sv_ev_connection_features_received too soon */
     iq_disco_info_request_onconnect(conn.domain);
+
+    const char* barejid = connection_get_barejid();
+    if (barejid && !g_hash_table_contains(conn.features_by_jid, barejid)) {
+        g_hash_table_insert(conn.features_by_jid, strdup(barejid),
+                            g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+        iq_disco_info_request_onconnect(barejid);
+    }
 }
 
 void
