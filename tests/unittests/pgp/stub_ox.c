@@ -19,3 +19,9 @@ ox_gpg_public_keys(void)
 {
     return NULL;
 }
+
+GHashTable*
+ox_gpg_list_keys(void)
+{
+    return NULL;
+}

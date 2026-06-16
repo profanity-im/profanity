@@ -7508,7 +7508,7 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
     // Should we move this to a common command
     // e.g. '/openpgp keys'?.
     else if (g_strcmp0(args[0], "keys") == 0) {
-        GHashTable* keys = p_gpg_list_keys();
+        GHashTable* keys = ox_gpg_list_keys();
         if (!keys || g_hash_table_size(keys) == 0) {
             cons_show("No keys found");
             return TRUE;

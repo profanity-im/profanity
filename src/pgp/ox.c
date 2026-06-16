@@ -28,18 +28,10 @@
 
 static gpgme_key_t _ox_key_lookup(const char* const barejid, gboolean secret_only);
 static gboolean _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret);
+static GHashTable* _ox_gpg_get_keys(gboolean check_secret);
 
-/*!
- * \brief Public keys with XMPP-URI.
- *
- * This function will look for all public key with a XMPP-URI as UID.
- *
- * @returns GHashTable* with GString* xmpp-uri and ProfPGPKey* value. Empty
- * hash, if there is no key. NULL in case of error.
- *
- */
-GHashTable*
-ox_gpg_public_keys(void)
+static GHashTable*
+_ox_gpg_get_keys(gboolean check_secret)
 {
     gpgme_error_t error;
     GHashTable* result = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)p_gpg_free_key);
@@ -112,9 +104,73 @@ ox_gpg_public_keys(void)
             error = gpgme_op_keylist_next(ctx, &key);
         }
     }
+
+    if (check_secret) {
+        // Pass 2: Check if any of these public keys also has a corresponding secret key
+        error = gpgme_op_keylist_start(ctx, NULL, 1); // 1 = secret/private keys
+        if (error == GPG_ERR_NO_ERROR) {
+            gpgme_key_t key;
+            error = gpgme_op_keylist_next(ctx, &key);
+            while (!error) {
+                gpgme_subkey_t sub = key->subkeys;
+                while (sub) {
+                    if (sub->secret) {
+                        // Match by fingerprint
+                        GList* values = g_hash_table_get_values(result);
+                        GList* curr = values;
+                        while (curr) {
+                            ProfPGPKey* pkey = curr->data;
+                            if (g_strcmp0(pkey->fp, sub->fpr) == 0) {
+                                pkey->secret = TRUE;
+                                break;
+                            }
+                            curr = curr->next;
+                        }
+                        g_list_free(values);
+                    }
+                    sub = sub->next;
+                }
+
+                gpgme_key_unref(key);
+                error = gpgme_op_keylist_next(ctx, &key);
+            }
+        }
+    }
+
     gpgme_release(ctx);
 
     return result;
+}
+
+/*!
+ * \brief Public keys with XMPP-URI.
+ *
+ * This function will look for all public key with a XMPP-URI as UID.
+ *
+ * @returns GHashTable* with GString* xmpp-uri and ProfPGPKey* value. Empty
+ * hash, if there is no key. NULL in case of error.
+ *
+ */
+GHashTable*
+ox_gpg_public_keys(void)
+{
+    return _ox_gpg_get_keys(FALSE);
+}
+
+/*!
+ * \brief List all keys with XMPP-URI and check their secret status.
+ *
+ * This function will look for all keys with a XMPP-URI as UID and determine if
+ * they have private counterparts.
+ *
+ * @returns GHashTable* with GString* xmpp-uri and ProfPGPKey* value. Empty
+ * hash, if there is no key. NULL in case of error.
+ *
+ */
+GHashTable*
+ox_gpg_list_keys(void)
+{
+    return _ox_gpg_get_keys(TRUE);
 }
 
 char*
