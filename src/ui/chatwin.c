@@ -169,11 +169,13 @@ chatwin_otr_secured(ProfChatWin* chatwin, gboolean trusted)
 }
 
 void
-chatwin_otr_unsecured(ProfChatWin* chatwin)
+chatwin_otr_unsecured(ProfChatWin* chatwin, gboolean disable_otr)
 {
     assert(chatwin != NULL);
 
-    chatwin->is_otr = FALSE;
+    if (disable_otr) {
+        chatwin->is_otr = FALSE;
+    }
     chatwin->otr_is_trusted = FALSE;
 
     ProfWin* window = (ProfWin*)chatwin;

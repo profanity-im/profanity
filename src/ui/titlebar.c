@@ -28,6 +28,9 @@
 #endif
 #include "xmpp/roster_list.h"
 #include "xmpp/chat_session.h"
+#ifdef HAVE_LIBOTR
+#include "otr/otr.h"
+#endif
 
 static WINDOW* win;
 static contact_presence_t current_presence;
@@ -454,8 +457,10 @@ _show_privacy(ProfChatWin* chatwin)
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
     int encrypted_attrs = theme_attrs(THEME_TITLE_ENCRYPTED);
     int unencrypted_attrs = theme_attrs(THEME_TITLE_UNENCRYPTED);
+#if defined(HAVE_LIBOTR) || defined(HAVE_OMEMO)
     int trusted_attrs = theme_attrs(THEME_TITLE_TRUSTED);
     int untrusted_attrs = theme_attrs(THEME_TITLE_UNTRUSTED);
+#endif
 
     if (chatwin->enctext) {
         wprintw(win, " ");
@@ -491,34 +496,61 @@ _show_privacy(ProfChatWin* chatwin)
         wprintw(win, "[");
         wattroff(win, bracket_attrs);
         wattron(win, encrypted_attrs);
+#ifdef HAVE_LIBOTR
+        if (otr_is_secure(chatwin->barejid)) {
+            wprintw(win, "OTR");
+            wattroff(win, encrypted_attrs);
+            wattron(win, bracket_attrs);
+            wprintw(win, "]");
+            wattroff(win, bracket_attrs);
+            if (chatwin->otr_is_trusted) {
+                wprintw(win, " ");
+                wattron(win, bracket_attrs);
+                wprintw(win, "[");
+                wattroff(win, bracket_attrs);
+                wattron(win, trusted_attrs);
+                wprintw(win, "trusted");
+                wattroff(win, trusted_attrs);
+                wattron(win, bracket_attrs);
+                wprintw(win, "]");
+                wattroff(win, bracket_attrs);
+            } else {
+                wprintw(win, " ");
+                wattron(win, bracket_attrs);
+                wprintw(win, "[");
+                wattroff(win, bracket_attrs);
+                wattron(win, untrusted_attrs);
+                wprintw(win, "untrusted");
+                wattroff(win, untrusted_attrs);
+                wattron(win, bracket_attrs);
+                wprintw(win, "]");
+                wattroff(win, bracket_attrs);
+            }
+        } else {
+            wprintw(win, "OTR");
+            wattroff(win, encrypted_attrs);
+            wattron(win, bracket_attrs);
+            wprintw(win, "]");
+            wattroff(win, bracket_attrs);
+
+            wprintw(win, " ");
+            wattron(win, bracket_attrs);
+            wprintw(win, "[");
+            wattroff(win, bracket_attrs);
+            wattron(win, unencrypted_attrs);
+            wprintw(win, "inactive");
+            wattroff(win, unencrypted_attrs);
+            wattron(win, bracket_attrs);
+            wprintw(win, "]");
+            wattroff(win, bracket_attrs);
+        }
+#else
         wprintw(win, "OTR");
         wattroff(win, encrypted_attrs);
         wattron(win, bracket_attrs);
         wprintw(win, "]");
         wattroff(win, bracket_attrs);
-        if (chatwin->otr_is_trusted) {
-            wprintw(win, " ");
-            wattron(win, bracket_attrs);
-            wprintw(win, "[");
-            wattroff(win, bracket_attrs);
-            wattron(win, trusted_attrs);
-            wprintw(win, "trusted");
-            wattroff(win, trusted_attrs);
-            wattron(win, bracket_attrs);
-            wprintw(win, "]");
-            wattroff(win, bracket_attrs);
-        } else {
-            wprintw(win, " ");
-            wattron(win, bracket_attrs);
-            wprintw(win, "[");
-            wattroff(win, bracket_attrs);
-            wattron(win, untrusted_attrs);
-            wprintw(win, "untrusted");
-            wattroff(win, untrusted_attrs);
-            wattron(win, bracket_attrs);
-            wprintw(win, "]");
-            wattroff(win, bracket_attrs);
-        }
+#endif
 
         return;
     }

@@ -114,7 +114,7 @@ void chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status)
 gchar* chatwin_get_string(ProfChatWin* chatwin);
 #ifdef HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin* chatwin, gboolean trusted);
-void chatwin_otr_unsecured(ProfChatWin* chatwin);
+void chatwin_otr_unsecured(ProfChatWin* chatwin, gboolean disable_otr);
 void chatwin_otr_trust(ProfChatWin* chatwin);
 void chatwin_otr_untrust(ProfChatWin* chatwin);
 void chatwin_otr_smp_event(ProfChatWin* chatwin, prof_otr_smp_event_t event, void* data);

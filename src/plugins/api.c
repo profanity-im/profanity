@@ -519,7 +519,7 @@ api_encryption_reset(const char* const barejid)
 
 #ifdef HAVE_LIBOTR
     if (chatwin->is_otr) {
-        chatwin_otr_unsecured(chatwin);
+        chatwin_otr_unsecured(chatwin, TRUE);
         otr_end_session(chatwin->barejid);
     }
 #endif
