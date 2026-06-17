@@ -849,11 +849,6 @@ prefs_get_muc_ping_interval(void)
 void
 prefs_set_muc_ping_interval(gint value)
 {
-    gint timeout = prefs_get_muc_ping_timeout();
-    if (value != 0 && value <= timeout) {
-        cons_show_error("MUC self-ping interval must be greater than timeout (%d seconds).", timeout);
-        return;
-    }
     g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "muc.ping.interval", value);
 }
 
@@ -870,11 +865,6 @@ prefs_get_muc_ping_timeout(void)
 void
 prefs_set_muc_ping_timeout(gint value)
 {
-    gint interval = prefs_get_muc_ping_interval();
-    if (interval != 0 && value >= interval) {
-        cons_show_error("MUC self-ping timeout must be less than interval (%d seconds).", interval);
-        return;
-    }
     g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "muc.ping.timeout", value);
 }
 

@@ -2034,6 +2034,28 @@ cons_autoping_setting(void)
 }
 
 void
+cons_mucping_setting(void)
+{
+    gint muc_ping_interval = prefs_get_muc_ping_interval();
+    if (muc_ping_interval == 0) {
+        cons_show("MUC selfping interval (/mucping) : OFF");
+    } else if (muc_ping_interval == 1) {
+        cons_show("MUC selfping interval (/mucping) : 1 second");
+    } else {
+        cons_show("MUC selfping interval (/mucping) : %d seconds", muc_ping_interval);
+    }
+
+    gint muc_ping_timeout = prefs_get_muc_ping_timeout();
+    if (muc_ping_timeout == 0) {
+        cons_show("MUC selfping timeout (/mucping)  : OFF");
+    } else if (muc_ping_timeout == 1) {
+        cons_show("MUC selfping timeout (/mucping)  : 1 second");
+    } else {
+        cons_show("MUC selfping timeout (/mucping)  : %d seconds", muc_ping_timeout);
+    }
+}
+
+void
 cons_color_setting(void)
 {
     auto_gchar gchar* color_pref = prefs_get_string(PREF_COLOR_NICK);
