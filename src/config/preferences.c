@@ -837,6 +837,38 @@ prefs_set_autoping_timeout(gint value)
 }
 
 gint
+prefs_get_muc_ping_interval(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_CONNECTION, "muc.ping.interval", NULL)) {
+        return 600;
+    } else {
+        return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "muc.ping.interval", NULL);
+    }
+}
+
+void
+prefs_set_muc_ping_interval(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "muc.ping.interval", value);
+}
+
+gint
+prefs_get_muc_ping_timeout(void)
+{
+    if (!g_key_file_has_key(prefs, PREF_GROUP_CONNECTION, "muc.ping.timeout", NULL)) {
+        return 60;
+    } else {
+        return g_key_file_get_integer(prefs, PREF_GROUP_CONNECTION, "muc.ping.timeout", NULL);
+    }
+}
+
+void
+prefs_set_muc_ping_timeout(gint value)
+{
+    g_key_file_set_integer(prefs, PREF_GROUP_CONNECTION, "muc.ping.timeout", value);
+}
+
+gint
 prefs_get_autoaway_time(void)
 {
     gint result = g_key_file_get_integer(prefs, PREF_GROUP_PRESENCE, "autoaway.awaytime", NULL);
