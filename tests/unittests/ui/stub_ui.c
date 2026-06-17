@@ -1116,6 +1116,10 @@ cons_autoping_setting(void)
 {
 }
 void
+cons_mucping_setting(void)
+{
+}
+void
 cons_autoconnect_setting(void)
 {
 }
