@@ -156,6 +156,14 @@ OMEMO is the only encryption option in Profanity that also supports encryption f
 .TP
 .BR OTR
 OTR (/otr) is defined in XEP-0364. It uses a combination of the AES symmetric-key algorithm, the Diffie–Hellman key exchange, and the SHA-1 hash function. It offers deniable authentication and Perfect Forward Secrecy. To initialize a session both clients need to be online at the same time. A session is between two clients, so multiclient chats are not working. Which is a feature not a bug. OTR does by design not work for MUCs.
+.PP
+The OTR session status is shown in the title bar of the chat window:
+.br
+- \fB[OTR] [inactive]\fR: OTR is enabled but the secure session is currently inactive or ended (can happen when the contact went offline). Outgoing messages are blocked from being sent in plaintext. You must start OTR again or use \fB/otr end\fR to disable the safety guard.
+.br
+- \fB[OTR] [untrusted]\fR: OTR session is active but the contact's fingerprint is unverified.
+.br
+- \fB[OTR] [trusted]\fR: OTR session is active and the contact's identity is authenticated.
 .TP
 .BR OpenPGP
 OpenPGP (/pgp) is defined in XEP-0027. Is uses a public and secret key. It is also known as Legacy OpenPGP and has been deprecated. It doesn't provide protection against replay attacks. MUCs and file transfer via HTTP upload are not specified and thus not supported.
