@@ -1465,7 +1465,31 @@ _muc_self_pong_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
     // Reset ping sent time
     muc_set_ping_sent_time(room, 0);
-    // Update activity to reset timer
+
+    const char* type = xmpp_stanza_get_type(stanza);
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        xmpp_stanza_t* error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
+        if (error_stanza) {
+            if (xmpp_stanza_get_child_by_name(error_stanza, "not-acceptable") || xmpp_stanza_get_child_by_name(error_stanza, "not-allowed") || xmpp_stanza_get_child_by_name(error_stanza, "item-not-found")) {
+
+                log_warning("MUC selfping: Disconnected from room %s (stale connection detected)", room);
+
+                ProfMucWin* mucwin = wins_get_muc(room);
+                if (mucwin) {
+                    win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "Connection to room lost. Attempting to rejoin...");
+                }
+
+                char* password = muc_password(room);
+                const char* nick = muc_nick(room);
+                if (nick) {
+                    presence_join_room(room, nick, password);
+                }
+                return 0;
+            }
+        }
+    }
+
+    // Still connected. Reset idle timer
     muc_update_activity(room);
 
     return 0;
