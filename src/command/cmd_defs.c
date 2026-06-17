@@ -2332,8 +2332,8 @@ static const struct cmd_t command_defs[] = {
         CMD_DESC(
             "OMEMO commands to manage keys, and perform encryption during chat sessions.\n"
             "The title bar will show the OMEMO session status:\n"
-            "[OMEMO][trusted]   - All active devices for the contact are trusted.\n"
-            "[OMEMO][untrusted] - One or more active devices for the contact are untrusted.\n")
+            "[OMEMO] [trusted]   - All active devices for the contact are trusted.\n"
+            "[OMEMO] [untrusted] - One or more active devices for the contact are untrusted.")
         CMD_ARGS(
             { "gen",                     "Generate OMEMO cryptographic materials for current account." },
             { "start [<contact>]",       "Start an OMEMO session with contact, or current recipient if omitted." },
