@@ -1808,7 +1808,11 @@ static const struct cmd_t command_defs[] = {
               "/otr char <char>",
               "/otr sendfile on|off")
       CMD_DESC(
-              "Off The Record (OTR) commands to manage keys, and perform OTR encryption during chat sessions.")
+              "Off The Record (OTR) commands to manage keys, and perform OTR encryption during chat sessions.\n"
+              "The title bar will show the OTR session status:\n"
+              "[OTR] [inactive]: session inactive, plaintext blocked\n"
+              "[OTR] [untrusted]: session active, unverified fingerprint\n"
+              "[OTR] [trusted]: session active, authenticated.")
       CMD_ARGS(
               { "libver", "Show which version of the libotr library is being used." },
               { "gen", "Generate your private key." },
