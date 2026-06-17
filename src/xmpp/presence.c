@@ -793,6 +793,7 @@ _muc_user_self_handler(xmpp_stanza_t* stanza)
         }
 
         if (muc_active(room)) {
+            muc_update_activity(room);
             sv_ev_muc_self_online(room, nick, config_required, role, affiliation, actor, reason, jid, show_str, status_str);
         } else {
             log_debug("presence: self-presence received for untracked room: %s", room);
@@ -816,6 +817,8 @@ _muc_user_occupant_handler(xmpp_stanza_t* stanza)
         log_warning("presence: jid without resource");
         return;
     }
+
+    muc_update_activity(room);
 
     const char* type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, STANZA_TYPE_UNAVAILABLE) == 0) {
