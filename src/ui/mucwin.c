@@ -493,8 +493,8 @@ mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* c
 
     win_print_outgoing_muc_msg(window, ch, mynick, id, replace_id, message);
 
-    // save last id and message for LMC
-    if (id) {
+    // save last id and message for LMC in case if it's not LMC message
+    if (id && !replace_id) {
         _mucwin_set_last_message(mucwin, id, message);
     }
 
