@@ -402,9 +402,10 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, const char
 
     plugins_post_chat_message_display(myjid->barejid, myjid->resourcepart, display_message);
 
-    // save last id and message for LMC in case if it's not LMC message
-    if (id && !replace_id) {
-        _chatwin_set_last_message(chatwin, id, display_message);
+    // save last id and message for LMC
+    if (id) {
+        const char* const save_id = replace_id ? replace_id : id;
+        _chatwin_set_last_message(chatwin, save_id, display_message);
     }
 }
 
@@ -609,9 +610,13 @@ chatwin_db_history(ProfChatWin* chatwin, const char* start_time, const char* end
 static void
 _chatwin_set_last_message(ProfChatWin* chatwin, const char* const id, const char* const message)
 {
-    free(chatwin->last_message);
-    chatwin->last_message = strdup(message);
+    if (chatwin->last_message != message) {
+        free(chatwin->last_message);
+        chatwin->last_message = strdup(message);
+    }
 
-    free(chatwin->last_msg_id);
-    chatwin->last_msg_id = strdup(id);
+    if (chatwin->last_msg_id != id) {
+        free(chatwin->last_msg_id);
+        chatwin->last_msg_id = strdup(id);
+    }
 }
