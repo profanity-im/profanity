@@ -1817,6 +1817,8 @@ cons_show_chat_prefs(void)
     cons_history_setting();
     cons_carbons_setting();
     cons_receipts_setting();
+    cons_mam_setting();
+    cons_silence_setting();
 
     cons_alert(NULL);
 }
