@@ -1972,10 +1972,11 @@ static const struct cmd_t command_defs[] = {
               "/mucping set <seconds>",
               "/mucping timeout <seconds>")
       CMD_DESC(
-              "Set the interval and timeout for MUC selfpings (XEP-0410). Recommended interval is between 300 and 900 seconds, with a timeout of 10 to 60 seconds.")
+              "Set the interval and timeout for MUC self-pings (XEP-0410). Recommended interval is between 300 and 900 seconds, with a timeout of 10 to 60 seconds. "
+              "Note that the interval must be greater than the timeout.")
       CMD_ARGS(
-              { "set <seconds>", "Number of seconds of idle room activity before sending a ping, a value of 0 disables MUC selfpings." },
-              { "timeout <seconds>", "Seconds to wait for MUC selfping responses, after which the room connection is considered disconnected." })
+              { "set <seconds>", "Number of seconds of idle room activity before sending a ping, a value of 0 disables MUC self-pings." },
+              { "timeout <seconds>", "Seconds to wait for MUC self-ping responses, after which the room connection is considered disconnected. A value of 0 disables MUC self-pings entirely." })
     },
 
     { CMD_PREAMBLE("/ping",

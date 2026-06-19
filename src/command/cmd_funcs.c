@@ -6367,6 +6367,13 @@ cmd_mucping(ProfWin* window, const char* const command, gchar** args)
         gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
         if (res) {
             gint timeout = prefs_get_muc_ping_timeout();
+            if (intval != 0 && timeout == 0) {
+                timeout = (intval > 60) ? 60 : (intval / 2);
+                if (timeout == 0) {
+                    timeout = 1;
+                }
+                prefs_set_muc_ping_timeout(timeout);
+            }
             if (intval != 0 && intval <= timeout) {
                 cons_show_error("MUC self-ping interval must be greater than timeout (%d seconds).", timeout);
             } else {
@@ -6385,14 +6392,20 @@ cmd_mucping(ProfWin* window, const char* const command, gchar** args)
     } else if (g_strcmp0(cmd, "timeout") == 0) {
         int intval = 0;
         auto_char char* err_msg = NULL;
-        gboolean res = strtoi_range(value, &intval, 1, INT_MAX, &err_msg);
+        gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
         if (res) {
-            gint interval = prefs_get_muc_ping_interval();
-            if (interval != 0 && intval >= interval) {
-                cons_show_error("MUC self-ping timeout must be less than interval (%d seconds).", interval);
+            if (intval == 0) {
+                prefs_set_muc_ping_interval(0);
+                prefs_set_muc_ping_timeout(0);
+                cons_show("MUC self-ping disabled.");
             } else {
-                prefs_set_muc_ping_timeout(intval);
-                cons_show("MUC self-ping timeout set to %d seconds.", intval);
+                gint interval = prefs_get_muc_ping_interval();
+                if (interval != 0 && intval >= interval) {
+                    cons_show_error("MUC self-ping timeout must be less than interval (%d seconds).", interval);
+                } else {
+                    prefs_set_muc_ping_timeout(intval);
+                    cons_show("MUC self-ping timeout set to %d seconds.", intval);
+                }
             }
         } else {
             cons_show(err_msg);

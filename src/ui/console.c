@@ -2040,20 +2040,20 @@ cons_mucping_setting(void)
 {
     gint muc_ping_interval = prefs_get_muc_ping_interval();
     if (muc_ping_interval == 0) {
-        cons_show("MUC selfping interval (/mucping) : OFF");
+        cons_show("MUC self-ping interval (/mucping) : OFF");
     } else if (muc_ping_interval == 1) {
-        cons_show("MUC selfping interval (/mucping) : 1 second");
+        cons_show("MUC self-ping interval (/mucping) : 1 second");
     } else {
-        cons_show("MUC selfping interval (/mucping) : %d seconds", muc_ping_interval);
+        cons_show("MUC self-ping interval (/mucping) : %d seconds", muc_ping_interval);
     }
 
     gint muc_ping_timeout = prefs_get_muc_ping_timeout();
     if (muc_ping_timeout == 0) {
-        cons_show("MUC selfping timeout (/mucping)  : OFF");
+        cons_show("MUC self-ping timeout (/mucping)  : OFF");
     } else if (muc_ping_timeout == 1) {
-        cons_show("MUC selfping timeout (/mucping)  : 1 second");
+        cons_show("MUC self-ping timeout (/mucping)  : 1 second");
     } else {
-        cons_show("MUC selfping timeout (/mucping)  : %d seconds", muc_ping_timeout);
+        cons_show("MUC self-ping timeout (/mucping)  : %d seconds", muc_ping_timeout);
     }
 }
 
