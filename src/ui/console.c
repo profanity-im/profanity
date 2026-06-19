@@ -2168,6 +2168,7 @@ cons_show_connection_prefs(void)
     cons_show("");
     cons_reconnect_setting();
     cons_autoping_setting();
+    cons_mucping_setting();
     cons_autoconnect_setting();
     cons_rooms_cache_setting();
     cons_strophe_setting();
