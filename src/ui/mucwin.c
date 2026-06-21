@@ -495,7 +495,8 @@ mucwin_outgoing_msg(ProfMucWin* mucwin, const char* const message, const char* c
 
     // save last id and message for LMC
     if (id) {
-        _mucwin_set_last_message(mucwin, id, message);
+        const char* const save_id = replace_id ? replace_id : id;
+        _mucwin_set_last_message(mucwin, save_id, message);
     }
 
     wins_add_quotes_ac(window, message, FALSE);
@@ -932,11 +933,15 @@ mucwin_unset_message_char(ProfMucWin* mucwin)
 static void
 _mucwin_set_last_message(ProfMucWin* mucwin, const char* const id, const char* const message)
 {
-    free(mucwin->last_message);
-    mucwin->last_message = strdup(message);
+    if (mucwin->last_message != message) {
+        free(mucwin->last_message);
+        mucwin->last_message = strdup(message);
+    }
 
-    free(mucwin->last_msg_id);
-    mucwin->last_msg_id = strdup(id);
+    if (mucwin->last_msg_id != id) {
+        free(mucwin->last_msg_id);
+        mucwin->last_msg_id = strdup(id);
+    }
 }
 
 gchar*
