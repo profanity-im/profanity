@@ -997,6 +997,8 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
         return;
     }
 
+    muc_update_activity(from_jid->barejid);
+
     // handle room subject
     xmpp_stanza_t* subject = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_SUBJECT);
     if (subject) {
@@ -1244,6 +1246,8 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
     if (!message->from_jid) {
         goto out;
     }
+
+    muc_update_activity(message->from_jid->barejid);
 
     // message stanza id
     const char* id = xmpp_stanza_get_id(stanza);

@@ -682,6 +682,7 @@ if get_option('tests')
       'tests/unittests/command/test_cmd_roster.c',
       'tests/unittests/command/test_cmd_ac.c',
       'tests/unittests/command/test_cmd_disconnect.c',
+      'tests/unittests/command/test_cmd_mucping.c',
       'tests/unittests/plugins/test_callbacks.c',
       'tests/unittests/plugins/test_plugins_disco.c',
       'tests/unittests/unittests.c',

@@ -226,6 +226,7 @@ static Autocomplete script_show_ac;
 static Autocomplete console_ac;
 static Autocomplete console_msg_ac;
 static Autocomplete autoping_ac;
+static Autocomplete mucping_ac;
 static Autocomplete plugins_ac;
 static Autocomplete plugins_load_ac;
 static Autocomplete plugins_unload_ac;
@@ -386,6 +387,7 @@ static Autocomplete* all_acs[] = {
     &console_ac,
     &console_msg_ac,
     &autoping_ac,
+    &mucping_ac,
     &plugins_ac,
     &filepath_ac,
     &blocked_ac,
@@ -1034,6 +1036,9 @@ cmd_ac_init(void)
 
     autocomplete_add(autoping_ac, "set");
     autocomplete_add(autoping_ac, "timeout");
+
+    autocomplete_add(mucping_ac, "set");
+    autocomplete_add(mucping_ac, "timeout");
 
     autocomplete_add(plugins_ac, "install");
     autocomplete_add(plugins_ac, "update");
@@ -1855,6 +1860,7 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
         { "/disco", disco_ac },
         { "/room", room_ac },
         { "/autoping", autoping_ac },
+        { "/mucping", mucping_ac },
         { "/mainwin", winpos_ac },
         { "/inputwin", winpos_ac },
     };

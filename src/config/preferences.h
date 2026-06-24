@@ -206,6 +206,10 @@ void prefs_set_autoping(gint value);
 gint prefs_get_autoping(void);
 void prefs_set_autoping_timeout(gint value);
 gint prefs_get_autoping_timeout(void);
+void prefs_set_muc_ping_interval(gint value);
+gint prefs_get_muc_ping_interval(void);
+void prefs_set_muc_ping_timeout(gint value);
+gint prefs_get_muc_ping_timeout(void);
 gint prefs_get_inpblock(void);
 void prefs_set_inpblock(gint value);
 

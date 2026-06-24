@@ -6297,7 +6297,7 @@ cmd_reconnect(ProfWin* window, const char* const command, gchar** args)
     } else if (strtoi_range(value, &intval, 0, INT_MAX, &err_msg)) {
         prefs_set_reconnect(intval);
         if (intval == 0) {
-            cons_show("Reconnect disabled.", intval);
+            cons_show("Reconnect disabled.");
         } else {
             cons_show("Reconnect interval set to %d seconds.", intval);
         }
@@ -6342,6 +6342,70 @@ cmd_autoping(ProfWin* window, const char* const command, gchar** args)
                 cons_show("Autoping timeout disabled.");
             } else {
                 cons_show("Autoping timeout set to %d seconds.", intval);
+            }
+        } else {
+            cons_show(err_msg);
+            cons_bad_cmd_usage(command);
+        }
+
+    } else {
+        cons_bad_cmd_usage(command);
+    }
+
+    return TRUE;
+}
+
+gboolean
+cmd_mucping(ProfWin* window, const char* const command, gchar** args)
+{
+    char* cmd = args[0];
+    char* value = args[1];
+
+    if (g_strcmp0(cmd, "set") == 0) {
+        int intval = 0;
+        auto_char char* err_msg = NULL;
+        gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
+        if (res) {
+            gint timeout = prefs_get_muc_ping_timeout();
+            if (intval != 0 && timeout == 0) {
+                timeout = (intval > 60) ? 60 : (intval / 2);
+                if (timeout == 0) {
+                    timeout = 1;
+                }
+                prefs_set_muc_ping_timeout(timeout);
+            }
+            if (intval != 0 && intval <= timeout) {
+                cons_show_error("MUC self-ping interval must be greater than timeout (%d seconds).", timeout);
+            } else {
+                prefs_set_muc_ping_interval(intval);
+                if (intval == 0) {
+                    cons_show("MUC self-ping disabled.");
+                } else {
+                    cons_show("MUC self-ping interval set to %d seconds.", intval);
+                }
+            }
+        } else {
+            cons_show(err_msg);
+            cons_bad_cmd_usage(command);
+        }
+
+    } else if (g_strcmp0(cmd, "timeout") == 0) {
+        int intval = 0;
+        auto_char char* err_msg = NULL;
+        gboolean res = strtoi_range(value, &intval, 0, INT_MAX, &err_msg);
+        if (res) {
+            if (intval == 0) {
+                prefs_set_muc_ping_interval(0);
+                prefs_set_muc_ping_timeout(0);
+                cons_show("MUC self-ping disabled.");
+            } else {
+                gint interval = prefs_get_muc_ping_interval();
+                if (interval != 0 && intval >= interval) {
+                    cons_show_error("MUC self-ping timeout must be less than interval (%d seconds).", interval);
+                } else {
+                    prefs_set_muc_ping_timeout(intval);
+                    cons_show("MUC self-ping timeout set to %d seconds.", intval);
+                }
             }
         } else {
             cons_show(err_msg);

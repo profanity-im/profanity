@@ -27,6 +27,7 @@
 #include "command/test_cmd_rooms.h"
 #include "command/test_cmd_sub.h"
 #include "command/test_cmd_presence.h"
+#include "command/test_cmd_mucping.h"
 #include "command/test_cmd_otr.h"
 #include "command/test_cmd_pgp.h"
 #include "xmpp/test_jid.h"
@@ -458,6 +459,17 @@ main(int argc, char* argv[])
         cmocka_unit_test(p_contact_is_available__is__false_when_highest_priority_dnd),
         cmocka_unit_test(p_contact_is_available__is__true_when_highest_priority_online),
         cmocka_unit_test(p_contact_is_available__is__true_when_highest_priority_chat),
+
+        cmocka_unit_test(cmd_mucping__shows__usage_when_invalid_interval_chars),
+        cmocka_unit_test(cmd_mucping__shows__usage_when_invalid_interval_range),
+        cmocka_unit_test(cmd_mucping__shows__usage_when_invalid_timeout_chars),
+        cmocka_unit_test(cmd_mucping__shows__usage_when_invalid_timeout_range),
+        cmocka_unit_test_setup_teardown(cmd_mucping__shows__error_when_interval_smaller_than_timeout,
+                                        load_preferences,
+                                        close_preferences),
+        cmocka_unit_test_setup_teardown(cmd_mucping__shows__error_when_timeout_greater_than_interval,
+                                        load_preferences,
+                                        close_preferences),
 
         cmocka_unit_test(cmd_presence__shows__usage_when_bad_subcmd),
         cmocka_unit_test(cmd_presence__shows__usage_when_bad_console_setting),

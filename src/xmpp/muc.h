@@ -60,6 +60,11 @@ void muc_init(void);
 void muc_join(const char* const room, const char* const nick, const char* const password, gboolean autojoin);
 void muc_leave(const char* const room);
 
+void muc_update_activity(const char* const room);
+gint64 muc_last_activity(const char* const room);
+void muc_set_ping_sent_time(const char* const room, gint64 time);
+gint64 muc_ping_sent_time(const char* const room);
+
 gboolean muc_active(const char* const room);
 gboolean muc_autojoin(const char* const room);
 

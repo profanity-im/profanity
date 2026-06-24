@@ -1817,6 +1817,8 @@ cons_show_chat_prefs(void)
     cons_history_setting();
     cons_carbons_setting();
     cons_receipts_setting();
+    cons_mam_setting();
+    cons_silence_setting();
 
     cons_alert(NULL);
 }
@@ -2034,6 +2036,28 @@ cons_autoping_setting(void)
 }
 
 void
+cons_mucping_setting(void)
+{
+    gint muc_ping_interval = prefs_get_muc_ping_interval();
+    if (muc_ping_interval == 0) {
+        cons_show("MUC self-ping interval (/mucping) : OFF");
+    } else if (muc_ping_interval == 1) {
+        cons_show("MUC self-ping interval (/mucping) : 1 second");
+    } else {
+        cons_show("MUC self-ping interval (/mucping) : %d seconds", muc_ping_interval);
+    }
+
+    gint muc_ping_timeout = prefs_get_muc_ping_timeout();
+    if (muc_ping_timeout == 0) {
+        cons_show("MUC self-ping timeout (/mucping)  : OFF");
+    } else if (muc_ping_timeout == 1) {
+        cons_show("MUC self-ping timeout (/mucping)  : 1 second");
+    } else {
+        cons_show("MUC self-ping timeout (/mucping)  : %d seconds", muc_ping_timeout);
+    }
+}
+
+void
 cons_color_setting(void)
 {
     auto_gchar gchar* color_pref = prefs_get_string(PREF_COLOR_NICK);
@@ -2146,6 +2170,7 @@ cons_show_connection_prefs(void)
     cons_show("");
     cons_reconnect_setting();
     cons_autoping_setting();
+    cons_mucping_setting();
     cons_autoconnect_setting();
     cons_rooms_cache_setting();
     cons_strophe_setting();

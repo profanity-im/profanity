@@ -135,6 +135,8 @@ static void _iq_id_handler_free(ProfIqHandler* handler);
 
 // scheduled
 static int _autoping_timed_send(xmpp_conn_t* const conn, void* const userdata);
+static int _muc_self_ping_timer_check(xmpp_conn_t* const conn, void* const userdata);
+static int _muc_self_pong_handler(xmpp_stanza_t* const stanza, void* const userdata);
 
 static void _identity_destroy(DiscoIdentity* identity);
 static void _item_destroy(DiscoItem* item);
@@ -243,6 +245,9 @@ iq_handlers_init(void)
     if (prefs_get_autoping() != 0) {
         int millis = prefs_get_autoping() * 1000;
         xmpp_timed_handler_add(conn, _autoping_timed_send, millis, ctx);
+    }
+    if (prefs_get_muc_ping_interval() != 0) {
+        xmpp_timed_handler_add(conn, _muc_self_ping_timer_check, 10000, ctx);
     }
     received_disco_items = FALSE;
 
@@ -1450,6 +1455,109 @@ autoping_timer_extend(void)
 {
     if (autoping_time)
         g_timer_start(autoping_time);
+}
+
+static int
+_muc_self_pong_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    char* room = (char*)userdata;
+    log_debug("MUC self-ping: Pong received for room %s", room);
+
+    // Reset ping sent time
+    muc_set_ping_sent_time(room, 0);
+
+    const char* type = xmpp_stanza_get_type(stanza);
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        xmpp_stanza_t* error_stanza = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_ERROR);
+        if (error_stanza) {
+            if (xmpp_stanza_get_child_by_name(error_stanza, "not-acceptable") || xmpp_stanza_get_child_by_name(error_stanza, "not-allowed") || xmpp_stanza_get_child_by_name(error_stanza, "item-not-found")) {
+
+                log_warning("MUC selfping: Disconnected from room %s (stale connection detected)", room);
+
+                ProfMucWin* mucwin = wins_get_muc(room);
+                if (mucwin) {
+                    win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "Connection to room lost. Attempting to rejoin...");
+                }
+
+                char* password = muc_password(room);
+                const char* nick = muc_nick(room);
+                if (nick) {
+                    presence_join_room(room, nick, password);
+                }
+                return 0;
+            }
+        }
+    }
+
+    // Still connected. Reset idle timer
+    muc_update_activity(room);
+
+    return 0;
+}
+
+static int
+_muc_self_ping_timer_check(xmpp_conn_t* const conn, void* const userdata)
+{
+    if (connection_get_status() != JABBER_CONNECTED) {
+        return 1;
+    }
+
+    gint64 current_time = g_get_monotonic_time() / G_TIME_SPAN_SECOND;
+    gint interval = prefs_get_muc_ping_interval();
+    gint timeout = prefs_get_muc_ping_timeout();
+
+    if (interval <= 0) {
+        return 1;
+    }
+
+    GList* rooms_list = muc_rooms();
+    GList* curr = rooms_list;
+
+    while (curr) {
+        char* room = curr->data;
+        gint64 last_act = muc_last_activity(room);
+        gint64 sent_time = muc_ping_sent_time(room);
+
+        if (sent_time > 0) {
+            // A ping is currently in flight for this room. Check for timeout.
+            if (current_time - sent_time > timeout) {
+                log_debug("MUC self-ping: Timeout for room %s", room);
+                muc_set_ping_sent_time(room, 0);
+
+                ProfMucWin* mucwin = wins_get_muc(room);
+                if (mucwin) {
+                    win_println((ProfWin*)mucwin, THEME_DEFAULT, "!", "MUC service not responding.");
+                }
+            }
+        } else {
+            // No ping is in flight. Check if room is idle.
+            if (current_time - last_act > interval) {
+                const char* nick = muc_nick(room);
+                if (nick) {
+                    auto_gchar gchar* occupant_jid = create_fulljid(room, nick);
+                    log_debug("MUC self-ping: Sending ping to %s", occupant_jid);
+
+                    xmpp_ctx_t* ctx = (xmpp_ctx_t*)userdata;
+                    xmpp_stanza_t* iq = stanza_create_ping_iq(ctx, occupant_jid);
+                    const char* id = xmpp_stanza_get_id(iq);
+
+                    // Add response handler
+                    iq_id_handler_add(id, _muc_self_pong_handler, free, strdup(room));
+
+                    iq_send_stanza(iq);
+                    xmpp_stanza_release(iq);
+
+                    muc_set_ping_sent_time(room, current_time);
+                }
+            }
+        }
+
+        curr = g_list_next(curr);
+    }
+
+    g_list_free(rooms_list);
+
+    return 1;
 }
 
 static int

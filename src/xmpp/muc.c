@@ -48,6 +48,8 @@ typedef struct _muc_room_t
     gboolean roster_received;
     muc_member_type_t member_type;
     muc_anonymity_type_t anonymity_type;
+    gint64 last_activity;
+    gint64 ping_sent_time;
 } ChatRoom;
 
 GHashTable* rooms = NULL;
@@ -212,6 +214,8 @@ muc_join(const char* const room, const char* const nick, const char* const passw
     new_room->autojoin = autojoin;
     new_room->member_type = MUC_MEMBER_TYPE_UNKNOWN;
     new_room->anonymity_type = MUC_ANONYMITY_TYPE_UNKNOWN;
+    new_room->last_activity = g_get_monotonic_time() / G_TIME_SPAN_SECOND;
+    new_room->ping_sent_time = 0;
 
     g_hash_table_insert(rooms, strdup(room), new_room);
 }
@@ -220,6 +224,58 @@ void
 muc_leave(const char* const room)
 {
     g_hash_table_remove(rooms, room);
+}
+
+void
+muc_update_activity(const char* const room)
+{
+    if (room == NULL) {
+        return;
+    }
+    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        chat_room->last_activity = g_get_monotonic_time() / G_TIME_SPAN_SECOND;
+    }
+}
+
+gint64
+muc_last_activity(const char* const room)
+{
+    if (room == NULL) {
+        return 0;
+    }
+    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        return chat_room->last_activity;
+    } else {
+        return 0;
+    }
+}
+
+void
+muc_set_ping_sent_time(const char* const room, gint64 time)
+{
+    if (room == NULL) {
+        return;
+    }
+    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        chat_room->ping_sent_time = time;
+    }
+}
+
+gint64
+muc_ping_sent_time(const char* const room)
+{
+    if (room == NULL) {
+        return 0;
+    }
+    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        return chat_room->ping_sent_time;
+    } else {
+        return 0;
+    }
 }
 
 gboolean
