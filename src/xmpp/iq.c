@@ -80,7 +80,7 @@ typedef struct mam_rsm_userdata
     char* start_datestr;
     char* end_datestr;
     gboolean fetch_next;
-    ProfChatWin* win;
+    ProfWin* win;
 } MamRsmUserdata;
 
 typedef struct late_delivery_userdata
@@ -127,7 +127,7 @@ static int _command_exec_response_handler(xmpp_stanza_t* const stanza, void* con
 static int _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _register_change_password_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 
-static void _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate);
+static void _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate);
 static void _iq_free_room_data(ProfRoomInfoData* roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet* affiliation_set);
 static void _iq_free_affiliation_list(ProfAffiliationList* affiliation_list);
@@ -2341,6 +2341,10 @@ _room_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata
                 mucwin->is_omemo = TRUE;
             }
 #endif
+            if (prefs_get_boolean(PREF_MAM) && muc_supports_mam(cb_data->room)) {
+                win_print_loading_history((ProfWin*)mucwin);
+                iq_mam_request((ProfWin*)mucwin, NULL);
+            }
             if (cb_data->display) {
                 mucwin_room_disco_info(mucwin, identities, features);
             }
@@ -2721,17 +2725,21 @@ _iq_free_affiliation_list(ProfAffiliationList* affiliation_list)
 static int
 _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
-    ProfChatWin* chatwin = (ProfChatWin*)userdata;
+    ProfWin* window = (ProfWin*)userdata;
     // Remove the "Loading messages…" message
-    buffer_remove_entry(((ProfWin*)chatwin)->layout->buffer, 0);
-    chatwin_db_history(chatwin, NULL, NULL, TRUE);
+    buffer_remove_entry(window->layout->buffer, 0);
+    if (window->type == WIN_MUC) {
+        mucwin_db_history((ProfMucWin*)window, NULL, NULL, TRUE);
+    } else {
+        chatwin_db_history((ProfChatWin*)window, NULL, NULL, TRUE);
+    }
     return 0;
 }
 
 static const gchar* mam_timestamp_format_string = "%FT%T.%f%:z";
 
 void
-iq_mam_request_older(ProfChatWin* win)
+iq_mam_request_older(ProfWin* win)
 {
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
@@ -2739,7 +2747,9 @@ iq_mam_request_older(ProfChatWin* win)
         return;
     }
 
-    ProfMessage* first_msg = log_database_get_limits_info(win->barejid, FALSE);
+    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
+
+    ProfMessage* first_msg = log_database_get_limits_info(target_jid, FALSE);
     char* firstid = NULL;
     auto_gchar gchar* enddate = NULL;
 
@@ -2755,7 +2765,12 @@ iq_mam_request_older(ProfChatWin* win)
     }
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, NULL, enddate, firstid, NULL);
+    xmpp_stanza_t* iq;
+    if (win->type == WIN_MUC) {
+        iq = stanza_create_muc_mam_iq(ctx, target_jid, NULL, enddate, firstid, NULL);
+    } else {
+        iq = stanza_create_mam_iq(ctx, target_jid, NULL, enddate, firstid, NULL);
+    }
     iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_buffer_commit_handler, NULL, win);
 
     message_free(first_msg);
@@ -2779,7 +2794,7 @@ _mam_userdata_free(MamRsmUserdata* data)
 }
 
 void
-_iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
+_iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate)
 {
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
@@ -2790,6 +2805,8 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
             g_date_time_unref(enddate);
         return;
     }
+
+    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
 
     char* firstid = "";
     char* startdate_str = NULL;
@@ -2813,13 +2830,18 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, startdate_str, enddate_str, firstid, NULL);
+    xmpp_stanza_t* iq;
+    if (win->type == WIN_MUC) {
+        iq = stanza_create_muc_mam_iq(ctx, target_jid, startdate_str, enddate_str, firstid, NULL);
+    } else {
+        iq = stanza_create_mam_iq(ctx, target_jid, startdate_str, enddate_str, firstid, NULL);
+    }
 
     MamRsmUserdata* data = g_new0(MamRsmUserdata, 1);
     if (data) {
         data->start_datestr = startdate_str;
         data->end_datestr = enddate_str;
-        data->barejid = strdup(win->barejid);
+        data->barejid = strdup(target_jid);
         data->fetch_next = fetch_next;
         data->win = win;
 
@@ -2833,9 +2855,11 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
 }
 
 void
-iq_mam_request(ProfChatWin* win, GDateTime* enddate)
+iq_mam_request(ProfWin* win, GDateTime* enddate)
 {
-    ProfMessage* last_msg = log_database_get_limits_info(win->barejid, TRUE);
+    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
+
+    ProfMessage* last_msg = log_database_get_limits_info(target_jid, TRUE);
     GDateTime* startdate = NULL;
     if (last_msg) {
         if (last_msg->timestamp)
@@ -2846,11 +2870,11 @@ iq_mam_request(ProfChatWin* win, GDateTime* enddate)
     // Save request for later if disco items haven't been received yet
     if (!received_disco_items) {
         LateDeliveryUserdata* cur_del_data = g_new0(LateDeliveryUserdata, 1);
-        cur_del_data->win = win;
+        cur_del_data->win = (ProfChatWin*)win;
         cur_del_data->enddate = enddate;
         cur_del_data->startdate = startdate;
         late_delivery_windows = g_slist_append(late_delivery_windows, cur_del_data);
-        log_debug("Save MAM request of %s for later", win->barejid);
+        log_debug("Save MAM request of %s for later", target_jid);
         return;
     }
 
