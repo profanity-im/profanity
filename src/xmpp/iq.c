@@ -2661,7 +2661,7 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
 
         while (late_delivery_windows) {
             LateDeliveryUserdata* del_data = late_delivery_windows->data;
-            _iq_mam_request(del_data->win, del_data->startdate, del_data->enddate);
+            _iq_mam_request((ProfWin*)del_data->win, del_data->startdate, del_data->enddate);
             free(del_data);
             late_delivery_windows = g_slist_delete_link(late_delivery_windows,
                                                         late_delivery_windows);
@@ -2922,11 +2922,19 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             }
 
             if (is_complete || !data->fetch_next) {
-                chatwin_db_history(data->win, is_complete ? NULL : start_str, end_str, TRUE);
+                if (window->type == WIN_MUC) {
+                    mucwin_db_history((ProfMucWin*)window, is_complete ? NULL : start_str, end_str, TRUE);
+                } else {
+                    chatwin_db_history((ProfChatWin*)window, is_complete ? NULL : start_str, end_str, TRUE);
+                }
                 return 0;
             }
 
-            chatwin_db_history(data->win, start_str, end_str, TRUE);
+            if (window->type == WIN_MUC) {
+                mucwin_db_history((ProfMucWin*)window, start_str, end_str, TRUE);
+            } else {
+                chatwin_db_history((ProfChatWin*)window, start_str, end_str, TRUE);
+            }
 
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {
@@ -2944,7 +2952,12 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                         free(data->end_datestr);
                         data->end_datestr = NULL;
                     }
-                    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
+                    xmpp_stanza_t* iq;
+                    if (window->type == WIN_MUC) {
+                        iq = stanza_create_muc_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
+                    } else {
+                        iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
+                    }
 
                     MamRsmUserdata* ndata = g_new0(MamRsmUserdata, 1);
                     *ndata = *data;

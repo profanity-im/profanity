@@ -11,6 +11,7 @@
 #include "config.h"
 
 #include "ui.h"
+#include "database.h"
 
 #include <string.h>
 #include <assert.h>
