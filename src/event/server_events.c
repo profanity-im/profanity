@@ -334,56 +334,62 @@ sv_ev_room_message(ProfMessage* message)
     GList* triggers = prefs_message_get_triggers(message->plain);
 
     _clean_incoming_message(message);
-    mucwin_incoming_msg(mucwin, message, mentions, triggers, TRUE);
+
+    if (message->is_mam) {
+        // For MAM, print to window but disable all notifications, unread count increment etc
+        // And don't filter reflection of our own sent messages (so they get displayed)
+        mucwin_incoming_msg(mucwin, message, mentions, triggers, FALSE);
+    } else {
+        mucwin_incoming_msg(mucwin, message, mentions, triggers, TRUE);
+
+        ProfWin* window = (ProfWin*)mucwin;
+        int num = wins_get_num(window);
+        gboolean is_current = FALSE;
+
+        // currently in groupchat window
+        if (wins_is_current(window)) {
+            is_current = TRUE;
+            status_bar_active(num, WIN_MUC, mucwin->roomjid);
+
+            if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_BEEP))) {
+                ui_beep();
+            }
+
+            // not currently on groupchat window
+        } else {
+            status_bar_new(num, WIN_MUC, mucwin->roomjid);
+
+            if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_FLASH))) {
+                ui_flash();
+            }
+
+            cons_show_incoming_room_message(message->from_jid->resourcepart, mucwin->roomjid, num, mention, triggers, mucwin->unread, window);
+
+            mucwin->unread++;
+
+            if (mention) {
+                mucwin->unread_mentions = TRUE;
+            }
+            if (triggers) {
+                mucwin->unread_triggers = TRUE;
+            }
+        }
+
+        // save timestamp of last received muc message
+        if (mucwin->last_msg_timestamp) {
+            g_date_time_unref(mucwin->last_msg_timestamp);
+        }
+        mucwin->last_msg_timestamp = g_date_time_new_now_local();
+
+        if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL)) {
+            auto_jid Jid* jidp = jid_create(mucwin->roomjid);
+            if (jidp) {
+                notify_room_message(message->from_jid->resourcepart, jidp->localpart, num, message->plain);
+            }
+        }
+    }
 
     g_slist_free(mentions);
-
-    ProfWin* window = (ProfWin*)mucwin;
-    int num = wins_get_num(window);
-    gboolean is_current = FALSE;
-
-    // currently in groupchat window
-    if (wins_is_current(window)) {
-        is_current = TRUE;
-        status_bar_active(num, WIN_MUC, mucwin->roomjid);
-
-        if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_BEEP))) {
-            ui_beep();
-        }
-
-        // not currently on groupchat window
-    } else {
-        status_bar_new(num, WIN_MUC, mucwin->roomjid);
-
-        if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_FLASH))) {
-            ui_flash();
-        }
-
-        cons_show_incoming_room_message(message->from_jid->resourcepart, mucwin->roomjid, num, mention, triggers, mucwin->unread, window);
-
-        mucwin->unread++;
-
-        if (mention) {
-            mucwin->unread_mentions = TRUE;
-        }
-        if (triggers) {
-            mucwin->unread_triggers = TRUE;
-        }
-    }
-
-    // save timestamp of last received muc message
-    if (mucwin->last_msg_timestamp) {
-        g_date_time_unref(mucwin->last_msg_timestamp);
-    }
-    mucwin->last_msg_timestamp = g_date_time_new_now_local();
-
-    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL)) {
-        auto_jid Jid* jidp = jid_create(mucwin->roomjid);
-        if (jidp) {
-            notify_room_message(message->from_jid->resourcepart, jidp->localpart, num, message->plain);
-        }
-    }
-
     if (triggers) {
         g_list_free_full(triggers, free);
     }
@@ -622,7 +628,7 @@ sv_ev_incoming_message(ProfMessage* message)
 
         if (prefs_get_boolean(PREF_MAM)) {
             win_print_loading_history(window);
-            iq_mam_request(chatwin, g_date_time_ref(message->timestamp)); // copy timestamp
+            iq_mam_request((ProfWin*)chatwin, g_date_time_ref(message->timestamp)); // copy timestamp
         }
 
 #ifdef HAVE_OMEMO
