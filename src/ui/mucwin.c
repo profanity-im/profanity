@@ -998,7 +998,7 @@ mucwin_db_history(ProfMucWin* mucwin, const char* start_time, const char* end_ti
         end_time = end_time_ = g_date_time_format_iso8601(buffer_get_entry(((ProfWin*)mucwin)->layout->buffer, 0)->time);
     }
 
-    GSList* history = log_database_get_previous_chat(mucwin->roomjid, start_time, end_time, !flip, flip);
+    GSList* history = log_database_get_previous_muc(mucwin->roomjid, start_time, end_time, !flip, flip);
     gboolean has_items = g_slist_length(history) != 0;
     GSList* curr = history;
 

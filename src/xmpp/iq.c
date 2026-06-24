@@ -2749,13 +2749,18 @@ iq_mam_request_older(ProfWin* win)
 
     const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
 
-    ProfMessage* first_msg = log_database_get_limits_info(target_jid, FALSE);
+    ProfMessage* first_msg;
+    if (win->type == WIN_MUC) {
+        first_msg = log_database_get_limits_info_muc(target_jid, FALSE);
+    } else {
+        first_msg = log_database_get_limits_info(target_jid, FALSE);
+    }
     char* firstid = NULL;
     auto_gchar gchar* enddate = NULL;
 
     // If first message found
     if (first_msg && first_msg->timestamp) {
-        firstid = first_msg->stanzaid;
+        firstid = first_msg->stanzaid ? first_msg->stanzaid : "";
         enddate = g_date_time_format(first_msg->timestamp, mam_timestamp_format_string);
     } else {
         if (first_msg) {
@@ -2859,7 +2864,12 @@ iq_mam_request(ProfWin* win, GDateTime* enddate)
 {
     const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
 
-    ProfMessage* last_msg = log_database_get_limits_info(target_jid, TRUE);
+    ProfMessage* last_msg;
+    if (win->type == WIN_MUC) {
+        last_msg = log_database_get_limits_info_muc(target_jid, TRUE);
+    } else {
+        last_msg = log_database_get_limits_info(target_jid, TRUE);
+    }
     GDateTime* startdate = NULL;
     if (last_msg) {
         if (last_msg->timestamp)
