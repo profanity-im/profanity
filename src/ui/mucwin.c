@@ -988,3 +988,37 @@ mucwin_set_room_name(const gchar* const muc_jid, const gchar* const new_room_nam
     }
     return TRUE;
 }
+
+gboolean
+mucwin_db_history(ProfMucWin* mucwin, const char* start_time, const char* end_time, gboolean flip)
+{
+    auto_gchar gchar* end_time_ = NULL;
+    if (!end_time && buffer_size(((ProfWin*)mucwin)->layout->buffer) != 0) {
+        end_time = end_time_ = g_date_time_format_iso8601(buffer_get_entry(((ProfWin*)mucwin)->layout->buffer, 0)->time);
+    }
+
+    GSList* history = log_database_get_previous_chat(mucwin->roomjid, start_time, end_time, !flip, flip);
+    gboolean has_items = g_slist_length(history) != 0;
+    GSList* curr = history;
+
+    while (curr) {
+        ProfMessage* msg = curr->data;
+        char* old_plain = msg->plain;
+        auto_char char* plugin_msg = plugins_pre_room_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
+        if (plugin_msg)
+            msg->plain = plugin_msg;
+        if (flip) {
+            win_print_old_history((ProfWin*)mucwin, msg);
+        } else {
+            win_print_history((ProfWin*)mucwin, msg);
+        }
+        plugins_post_room_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
+        msg->plain = old_plain;
+        curr = g_slist_next(curr);
+    }
+
+    g_slist_free_full(history, (GDestroyNotify)message_free);
+    win_redraw((ProfWin*)mucwin);
+
+    return has_items;
+}
