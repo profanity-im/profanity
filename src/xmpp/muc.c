@@ -50,6 +50,7 @@ typedef struct _muc_room_t
     muc_anonymity_type_t anonymity_type;
     gint64 last_activity;
     gint64 ping_sent_time;
+    gboolean supports_mam;
 } ChatRoom;
 
 GHashTable* rooms = NULL;
@@ -315,6 +316,22 @@ muc_set_features(const char* const room, GSList* features)
         } else {
             chat_room->anonymity_type = MUC_ANONYMITY_TYPE_UNKNOWN;
         }
+        if (g_slist_find_custom(features, "urn:xmpp:mam:2", (GCompareFunc)g_strcmp0)) {
+            chat_room->supports_mam = TRUE;
+        } else {
+            chat_room->supports_mam = FALSE;
+        }
+    }
+}
+
+gboolean
+muc_supports_mam(const char* const room)
+{
+    ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
+    if (chat_room) {
+        return chat_room->supports_mam;
+    } else {
+        return FALSE;
     }
 }
 
