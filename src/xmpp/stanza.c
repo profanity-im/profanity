@@ -509,7 +509,8 @@ stanza_create_mediated_invite(xmpp_ctx_t* ctx, const char* const room,
 
 xmpp_stanza_t*
 stanza_create_room_join_presence(xmpp_ctx_t* const ctx,
-                                 const char* const full_room_jid, const char* const passwd)
+                                 const char* const full_room_jid, const char* const passwd,
+                                 gboolean max_stanzas_zero)
 {
     xmpp_stanza_t* presence = xmpp_presence_new(ctx);
     xmpp_stanza_set_to(presence, full_room_jid);
@@ -528,6 +529,16 @@ stanza_create_room_join_presence(xmpp_ctx_t* const ctx,
         xmpp_stanza_add_child(x, pass);
         xmpp_stanza_release(text);
         xmpp_stanza_release(pass);
+    }
+
+    if (max_stanzas_zero) {
+        xmpp_stanza_t* history = xmpp_stanza_new(ctx);
+        if (history) {
+            xmpp_stanza_set_name(history, "history");
+            xmpp_stanza_set_attribute(history, "maxstanzas", "0");
+            xmpp_stanza_add_child(x, history);
+            xmpp_stanza_release(history);
+        }
     }
 
     xmpp_stanza_add_child(presence, x);
