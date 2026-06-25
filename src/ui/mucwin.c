@@ -356,7 +356,7 @@ mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message)
 }
 
 static void
-_mucwin_print_mention(ProfWin* window, const char* const message, const char* const from, const char* const mynick, GSList* mentions, const char* const ch, int flags)
+_mucwin_print_mention(ProfWin* window, const char* const message, const char* const from, const char* const mynick, GSList* mentions, const char* const ch, int flags, GDateTime* timestamp)
 {
     int last_pos = 0;
     int pos;
@@ -369,19 +369,19 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
         auto_gchar gchar* before_str = g_utf8_substring(message, last_pos, pos);
 
         if (last_pos == 0 && strncmp(before_str, "/me ", 4) == 0) {
-            win_print_them(window, THEME_ROOMMENTION, ch, flags, "");
-            win_append_highlight(window, THEME_ROOMMENTION, "*%s ", from);
-            win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str + 4);
+            win_print_them(window, THEME_ROOMMENTION, timestamp, ch, flags, "");
+            win_append_highlight(window, THEME_ROOMMENTION, timestamp, "*%s ", from);
+            win_append_highlight(window, THEME_ROOMMENTION, timestamp, "%s", before_str + 4);
         } else {
             // print time and nick only once at beginning of the line
             if (last_pos == 0) {
-                win_print_them(window, THEME_ROOMMENTION, ch, flags, from);
+                win_print_them(window, THEME_ROOMMENTION, timestamp, ch, flags, from);
             }
-            win_append_highlight(window, THEME_ROOMMENTION, "%s", before_str);
+            win_append_highlight(window, THEME_ROOMMENTION, timestamp, "%s", before_str);
         }
 
         auto_gchar gchar* mynick_str = g_utf8_substring(message, pos, pos + mynick_len);
-        win_append_highlight(window, THEME_ROOMMENTION_TERM, "%s", mynick_str);
+        win_append_highlight(window, THEME_ROOMMENTION_TERM, timestamp, "%s", mynick_str);
 
         last_pos = pos + mynick_len;
 
@@ -392,9 +392,9 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
     if (last_pos < message_len) {
         // get tail without allocating a new string
         gchar* rest = g_utf8_offset_to_pointer(message, last_pos);
-        win_appendln_highlight(window, THEME_ROOMMENTION, "%s", rest);
+        win_appendln_highlight(window, THEME_ROOMMENTION, timestamp, "%s", rest);
     } else {
-        win_appendln_highlight(window, THEME_ROOMMENTION, "");
+        win_appendln_highlight(window, THEME_ROOMMENTION, timestamp, "");
     }
 }
 
@@ -413,7 +413,7 @@ _cmp_trigger_weight(gconstpointer a, gconstpointer b)
 }
 
 static void
-_mucwin_print_triggers(ProfWin* window, const char* const message, GList* triggers)
+_mucwin_print_triggers(ProfWin* window, const char* const message, GList* triggers, GDateTime* timestamp)
 {
     GList* weighted_triggers = NULL;
     GList* curr = triggers;
@@ -452,7 +452,7 @@ _mucwin_print_triggers(ProfWin* window, const char* const message, GList* trigge
 
     // no triggers found
     if (first_trigger_pos == -1) {
-        win_appendln_highlight(window, THEME_ROOMTRIGGER, "%s", message);
+        win_appendln_highlight(window, THEME_ROOMTRIGGER, timestamp, "%s", message);
     } else {
         if (first_trigger_pos > 0) {
             char message_section[strlen(message) + 1];
@@ -462,7 +462,7 @@ _mucwin_print_triggers(ProfWin* window, const char* const message, GList* trigge
                 i++;
             }
             message_section[i] = '\0';
-            win_append_highlight(window, THEME_ROOMTRIGGER, "%s", message_section);
+            win_append_highlight(window, THEME_ROOMTRIGGER, timestamp, "%s", message_section);
         }
         char trigger_section[first_trigger_len + 1];
         int i = 0;
@@ -473,10 +473,10 @@ _mucwin_print_triggers(ProfWin* window, const char* const message, GList* trigge
         trigger_section[i] = '\0';
 
         if (first_trigger_pos + first_trigger_len < (int)strlen(message)) {
-            win_append_highlight(window, THEME_ROOMTRIGGER_TERM, "%s", trigger_section);
-            _mucwin_print_triggers(window, &message[first_trigger_pos + first_trigger_len], triggers);
+            win_append_highlight(window, THEME_ROOMTRIGGER_TERM, timestamp, "%s", trigger_section);
+            _mucwin_print_triggers(window, &message[first_trigger_pos + first_trigger_len], triggers, timestamp);
         } else {
-            win_appendln_highlight(window, THEME_ROOMTRIGGER_TERM, "%s", trigger_section);
+            win_appendln_highlight(window, THEME_ROOMTRIGGER_TERM, timestamp, "%s", trigger_section);
         }
     }
 }
@@ -533,10 +533,10 @@ mucwin_incoming_msg(ProfMucWin* mucwin, const ProfMessage* const message, GSList
     wins_add_quotes_ac(window, message->plain, FALSE);
 
     if (g_slist_length(mentions) > 0) {
-        _mucwin_print_mention(window, message->plain, message->from_jid->resourcepart, mynick, mentions, ch, flags);
+        _mucwin_print_mention(window, message->plain, message->from_jid->resourcepart, mynick, mentions, ch, flags, message->timestamp);
     } else if (triggers) {
-        win_print_them(window, THEME_ROOMTRIGGER, ch, flags, message->from_jid->resourcepart);
-        _mucwin_print_triggers(window, message->plain, triggers);
+        win_print_them(window, THEME_ROOMTRIGGER, message->timestamp, ch, flags, message->from_jid->resourcepart);
+        _mucwin_print_triggers(window, message->plain, triggers, message->timestamp);
     } else {
         win_println_incoming_muc_msg(window, ch, flags, message);
     }

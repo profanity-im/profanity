@@ -1493,9 +1493,9 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
 }
 
 void
-win_print_them(ProfWin* window, theme_item_t theme_item, const char* const show_char, int flags, const char* const them)
+win_print_them(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const show_char, int flags, const char* const them)
 {
-    _win_printf(window, show_char, 0, NULL, flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, "");
+    _win_printf(window, show_char, 0, timestamp, flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, "");
 }
 
 void
@@ -1576,9 +1576,13 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
 }
 
 static void
-win_println_va_internal(ProfWin* window, theme_item_t theme_item, int pad, int flags, const char* show_char, const char* const message, va_list arg)
+win_println_va_internal_with_timestamp(ProfWin* window, theme_item_t theme_item, int pad, int flags, const char* show_char, GDateTime* timestamp, const char* const message, va_list arg)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    gboolean created_timestamp = FALSE;
+    if (!timestamp) {
+        timestamp = g_date_time_new_now_local();
+        created_timestamp = TRUE;
+    }
 
     auto_gchar gchar* msg = g_strdup_vprintf(message, arg);
 
@@ -1587,7 +1591,15 @@ win_println_va_internal(ProfWin* window, theme_item_t theme_item, int pad, int f
     buffer_append(window->layout->buffer, show_char, pad, timestamp, flags, theme_item, "", NULL, msg, NULL, NULL, y_start_pos, getcury(window->layout->win));
 
     inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
+    if (created_timestamp) {
+        g_date_time_unref(timestamp);
+    }
+}
+
+static void
+win_println_va_internal(ProfWin* window, theme_item_t theme_item, int pad, int flags, const char* show_char, const char* const message, va_list arg)
+{
+    win_println_va_internal_with_timestamp(window, theme_item, pad, flags, show_char, NULL, message, arg);
 }
 
 void
@@ -1642,20 +1654,20 @@ win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message
 }
 
 void
-win_append_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_append_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const message, ...)
 {
     va_list arg;
     va_start(arg, message);
-    win_println_va_internal(window, theme_item, 0, NO_DATE | NO_ME | NO_EOL, "-", message, arg);
+    win_println_va_internal_with_timestamp(window, theme_item, 0, NO_DATE | NO_ME | NO_EOL, "-", timestamp, message, arg);
     va_end(arg);
 }
 
 void
-win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_appendln_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const message, ...)
 {
     va_list arg;
     va_start(arg, message);
-    win_println_va_internal(window, theme_item, 0, NO_DATE | NO_ME, "-", message, arg);
+    win_println_va_internal_with_timestamp(window, theme_item, 0, NO_DATE | NO_ME, "-", timestamp, message, arg);
     va_end(arg);
 }
 

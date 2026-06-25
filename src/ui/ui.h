@@ -383,8 +383,8 @@ void win_println_va(ProfWin* window, theme_item_t theme_item, const char* show_c
 void win_append(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
 void win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
 
-void win_append_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
-void win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...);
+void win_append_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const message, ...);
+void win_appendln_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const message, ...);
 
 gchar* win_get_title(ProfWin* window);
 void win_show_occupant(ProfWin* window, Occupant* occupant);
