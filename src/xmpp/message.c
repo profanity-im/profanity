@@ -1585,6 +1585,15 @@ _handle_mam(xmpp_stanza_t* const stanza)
     xmpp_stanza_t* message_stanza = xmpp_stanza_get_child_by_ns(forwarded, "jabber:client");
 
     const char* inner_type = xmpp_stanza_get_type(message_stanza);
+
+    if (from && muc_active(from)) {
+        if (!inner_type || g_strcmp0(inner_type, STANZA_TYPE_GROUPCHAT) != 0) {
+            log_warning("Ignoring non-groupchat MAM message of type '%s' from MUC archive '%s' to prevent PM leak.",
+                        inner_type ? inner_type : "none", from);
+            return TRUE;
+        }
+    }
+
     if (inner_type && g_strcmp0(inner_type, STANZA_TYPE_GROUPCHAT) == 0) {
         _handle_groupchat(message_stanza, TRUE, result_id, timestamp);
     } else {
