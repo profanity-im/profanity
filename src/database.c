@@ -482,6 +482,57 @@ log_database_get_previous_muc(const gchar* const room_jid, const char* start_tim
     return history;
 }
 
+int
+log_database_get_chat_count(const gchar* const contact_barejid, const char* start_time, const char* end_time)
+{
+    sqlite3_stmt* stmt = NULL;
+    const Jid* myjid = connection_get_jid();
+    if (!myjid->str)
+        return 0;
+
+    auto_sqlite char* query = sqlite3_mprintf("SELECT COUNT(*) FROM `ChatLogs` WHERE "
+                                              "`type` = 'chat' AND ("
+                                              "(`from_jid` = %Q AND `to_jid` = %Q) OR "
+                                              "(`from_jid` = %Q AND `to_jid` = %Q)) "
+                                              "AND `timestamp` >= %Q AND `timestamp` <= %Q;",
+                                              contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, start_time, end_time);
+
+    int count = 0;
+    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
+    if (rc == SQLITE_OK) {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            count = sqlite3_column_int(stmt, 0);
+        }
+    }
+    sqlite3_finalize(stmt);
+    return count;
+}
+
+int
+log_database_get_muc_count(const gchar* const room_jid, const char* start_time, const char* end_time)
+{
+    sqlite3_stmt* stmt = NULL;
+    const Jid* myjid = connection_get_jid();
+    if (!myjid->str)
+        return 0;
+
+    auto_sqlite char* query = sqlite3_mprintf("SELECT COUNT(*) FROM `ChatLogs` WHERE "
+                                              "`type` = 'muc' AND "
+                                              "(`from_jid` = %Q OR `to_jid` = %Q) "
+                                              "AND `timestamp` >= %Q AND `timestamp` <= %Q;",
+                                              room_jid, room_jid, start_time, end_time);
+
+    int count = 0;
+    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
+    if (rc == SQLITE_OK) {
+        if (sqlite3_step(stmt) == SQLITE_ROW) {
+            count = sqlite3_column_int(stmt, 0);
+        }
+    }
+    sqlite3_finalize(stmt);
+    return count;
+}
+
 static const char*
 _get_message_type_str(prof_msg_type_t type)
 {

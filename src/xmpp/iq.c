@@ -2815,6 +2815,109 @@ _mam_userdata_free(MamRsmUserdata* data)
     free(data);
 }
 
+typedef struct mam_verify_userdata
+{
+    char* barejid;
+    char* start_datestr;
+    char* end_datestr;
+    gboolean is_muc;
+    ProfWin* win;
+} MamVerifyUserdata;
+
+static void
+_mam_verify_userdata_free(MamVerifyUserdata* data)
+{
+    free(data->start_datestr);
+    free(data->end_datestr);
+    free(data->barejid);
+    free(data);
+}
+
+static int
+_mam_verify_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    MamVerifyUserdata* data = (MamVerifyUserdata*)userdata;
+    ProfWin* window = data->win;
+    if (wins_get_num(window) == -1) {
+        log_error("Window %p is not active anymore", window);
+        return 0;
+    }
+
+    const char* type = xmpp_stanza_get_type(stanza);
+    if (g_strcmp0(type, "error") == 0) {
+        auto_char char* error_message = stanza_get_error_message(stanza);
+        cons_show_error("MAM verification failed: %s", error_message);
+        return 0;
+    }
+
+    xmpp_stanza_t* fin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
+    if (fin) {
+        xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
+        if (set) {
+            xmpp_stanza_t* count_st = xmpp_stanza_get_child_by_name(set, "count");
+            if (count_st) {
+                char* count_str = xmpp_stanza_get_text(count_st);
+                int server_count = count_str ? atoi(count_str) : 0;
+
+                int local_count = 0;
+                if (data->is_muc) {
+                    local_count = log_database_get_muc_count(data->barejid, data->start_datestr, data->end_datestr);
+                } else {
+                    local_count = log_database_get_chat_count(data->barejid, data->start_datestr, data->end_datestr);
+                }
+
+                if (local_count >= server_count) {
+                    cons_show("MAM Verification for %s: History is contiguous and complete (verified %d messages).",
+                              data->barejid, local_count);
+                } else {
+                    int missing = server_count - local_count;
+                    cons_show("MAM Verification for %s: Missing %d messages. Initiating auto-repair...",
+                              data->barejid, missing);
+
+                    GDateTime* start = g_date_time_new_from_iso8601(data->start_datestr, NULL);
+                    GDateTime* end = g_date_time_new_from_iso8601(data->end_datestr, NULL);
+                    if (start && end) {
+                        win_print_loading_history(window);
+                        _iq_mam_request(window, start, end);
+                    } else {
+                        if (start)
+                            g_date_time_unref(start);
+                        if (end)
+                            g_date_time_unref(end);
+                    }
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
+void
+iq_mam_verify_request(ProfWin* win, const char* const startdate, const char* const enddate)
+{
+    gboolean is_muc = (win->type == WIN_MUC);
+    char* barejid = is_muc ? strdup(((ProfMucWin*)win)->roomjid) : strdup(((ProfChatWin*)win)->barejid);
+
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    xmpp_stanza_t* iq = stanza_create_mam_count_iq(ctx, barejid, startdate, enddate, is_muc);
+
+    MamVerifyUserdata* data = g_new0(MamVerifyUserdata, 1);
+    if (data) {
+        data->barejid = strdup(barejid);
+        data->start_datestr = strdup(startdate);
+        data->end_datestr = strdup(enddate);
+        data->is_muc = is_muc;
+        data->win = win;
+
+        iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_verify_id_handler, (ProfIqFreeCallback)_mam_verify_userdata_free, data);
+    }
+
+    iq_send_stanza(iq);
+    free(barejid);
+    xmpp_stanza_release(iq);
+}
+
 void
 _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate)
 {

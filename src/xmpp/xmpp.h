@@ -255,6 +255,7 @@ void iq_command_list(const char* const target);
 void iq_command_exec(const char* const target, const char* const command);
 void iq_mam_request(ProfWin* win, GDateTime* enddate);
 void iq_mam_request_older(ProfWin* win);
+void iq_mam_verify_request(ProfWin* win, const char* const startdate, const char* const enddate);
 void iq_register_change_password(const char* const user, const char* const password);
 void iq_muc_register_nick(const char* const roomjid);
 

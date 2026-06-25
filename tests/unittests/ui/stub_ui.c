@@ -1479,3 +1479,15 @@ void
 ui_flash(void)
 {
 }
+
+unsigned int
+buffer_size(ProfBuff buffer)
+{
+    return 0;
+}
+
+ProfBuffEntry*
+buffer_get_entry(ProfBuff buffer, unsigned int index)
+{
+    return NULL;
+}

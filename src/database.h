@@ -23,6 +23,8 @@ void log_database_add_outgoing_muc(const char* const id, const char* const barej
 void log_database_add_outgoing_muc_pm(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc);
 GSList* log_database_get_previous_chat(const gchar* const contact_barejid, const char* start_time, const char* end_time, gboolean from_start, gboolean flip);
 GSList* log_database_get_previous_muc(const gchar* const room_jid, const char* start_time, const char* end_time, gboolean from_start, gboolean flip);
+int log_database_get_chat_count(const gchar* const contact_barejid, const char* start_time, const char* end_time);
+int log_database_get_muc_count(const gchar* const room_jid, const char* start_time, const char* end_time);
 ProfMessage* log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_last);
 ProfMessage* log_database_get_limits_info_muc(const gchar* const room_jid, gboolean is_last);
 void log_database_close(void);

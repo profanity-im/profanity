@@ -452,6 +452,11 @@ iq_mam_request(ProfWin* win, GDateTime* enddate)
 }
 
 void
+iq_mam_verify_request(ProfWin* win, const char* const startdate, const char* const enddate)
+{
+}
+
+void
 iq_feature_retrieval_complete_handler(void)
 {
 }
