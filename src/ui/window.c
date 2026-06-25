@@ -2098,6 +2098,36 @@ win_print_loading_history(ProfWin* window)
     win_redraw(window);
 }
 
+void
+win_print_end_of_archive(ProfWin* window)
+{
+    GDateTime* timestamp;
+    gboolean is_buffer_empty = buffer_size(window->layout->buffer) == 0;
+
+    if (!is_buffer_empty) {
+        timestamp = buffer_get_entry(window->layout->buffer, 0)->time;
+    } else {
+        timestamp = g_date_time_new_now_local();
+    }
+
+    if (!is_buffer_empty) {
+        ProfBuffEntry* first_entry = buffer_get_entry(window->layout->buffer, 0);
+        if (first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, "End of archive reached") == 0) {
+            if (is_buffer_empty)
+                g_date_time_unref(timestamp);
+            return;
+        }
+    }
+
+    int cur_y = getcury(window->layout->win);
+    buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE, THEME_ROOMINFO, NULL, NULL, "End of archive reached", NULL, NULL, cur_y, cur_y + 1);
+
+    if (is_buffer_empty)
+        g_date_time_unref(timestamp);
+
+    win_redraw(window);
+}
+
 gboolean
 win_has_active_subwin(ProfWin* window)
 {

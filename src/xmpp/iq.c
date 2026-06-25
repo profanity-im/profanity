@@ -2726,13 +2726,30 @@ static int
 _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
     ProfWin* window = (ProfWin*)userdata;
+    if (wins_get_num(window) == -1) {
+        log_error("Window %p should not get any events anymore", window);
+        return 0;
+    }
+
     // Remove the "Loading messages…" message
     buffer_remove_entry(window->layout->buffer, 0);
+
+    xmpp_stanza_t* fin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
+    gboolean is_complete = FALSE;
+    if (fin) {
+        is_complete = g_strcmp0(xmpp_stanza_get_attribute(fin, "complete"), "true") == 0;
+    }
+
     if (window->type == WIN_MUC) {
         mucwin_db_history((ProfMucWin*)window, NULL, NULL, TRUE);
     } else {
         chatwin_db_history((ProfChatWin*)window, NULL, NULL, TRUE);
     }
+
+    if (is_complete) {
+        win_print_end_of_archive(window);
+    }
+
     return 0;
 }
 

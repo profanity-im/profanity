@@ -50,6 +50,7 @@ void win_print_http_transfer(ProfWin* window, const char* const message, char* i
 void win_newline(ProfWin* window);
 void win_redraw(ProfWin* window);
 void win_print_loading_history(ProfWin* window);
+void win_print_end_of_archive(ProfWin* window);
 int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_sub_print(WINDOW* win, char* msg, gboolean newline, gboolean wrap, int indent);
