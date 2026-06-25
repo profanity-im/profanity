@@ -2624,11 +2624,11 @@ static const struct cmd_t command_defs[] = {
                "/mam <on>|<off>",
                "/mam verify")
        CMD_DESC(
-               "Enable/Disable Message Archive Management (XEP-0313), or verify history integrity. "
+               "Enable or disable Message Archive Management (XEP-0313), or verify loaded history. "
                "Use the PG UP key to load more history.")
        CMD_ARGS(
                { "on|off", "Enable or disable MAM" },
-               { "verify", "Verify scrollback history integrity and auto-repair any gaps" })
+               { "verify", "Verify history between the oldest and newest loaded messages in the current window and fetch any missing ones from the server" })
      },
 
     { CMD_PREAMBLE("/changepassword",
