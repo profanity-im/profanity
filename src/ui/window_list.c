@@ -847,6 +847,10 @@ wins_reestablished_connection(void)
             }
 #endif
 
+            if (prefs_get_boolean(PREF_MAM) && (window->type == WIN_CHAT || window->type == WIN_MUC)) {
+                iq_mam_request(window, NULL);
+            }
+
             // if current win, set current_win_dirty
             if (wins_is_current(window)) {
                 win_update_virtual(window);
