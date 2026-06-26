@@ -331,10 +331,6 @@ session_login_success(gboolean secured)
     const char* domain = connection_get_domain();
     iq_disco_items_request_onconnect(domain);
 
-    if (prefs_get_boolean(PREF_CARBONS)) {
-        iq_enable_carbons();
-    }
-
     if ((prefs_get_reconnect() != 0) && reconnect_timer) {
         g_timer_destroy(reconnect_timer);
         reconnect_timer = NULL;

@@ -39,6 +39,7 @@
 #include "xmpp/avatar.h"
 #include "xmpp/vcard_funcs.h"
 #include "xmpp/bookmark.h"
+#include "xmpp/stanza.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -183,6 +184,10 @@ sv_ev_connection_features_received(void)
     omemo_publish_crypto_materials();
 #endif
     bookmark_request();
+
+    if (prefs_get_boolean(PREF_CARBONS) && connection_supports(STANZA_NS_CARBONS)) {
+        iq_enable_carbons();
+    }
 }
 
 void
