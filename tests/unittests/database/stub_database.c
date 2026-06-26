@@ -16,9 +16,10 @@ log_database_init(ProfAccount* account)
 {
     return TRUE;
 }
-void
+gboolean
 log_database_add_incoming(ProfMessage* message)
 {
+    return TRUE;
 }
 void
 log_database_add_outgoing_chat(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)

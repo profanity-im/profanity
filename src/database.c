@@ -29,7 +29,7 @@
 
 static sqlite3* g_chatlog_database;
 
-static void _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Jid* const to_jid);
+static gboolean _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Jid* const to_jid);
 static char* _get_db_filename(ProfAccount* account);
 static prof_msg_type_t _get_message_type_type(const char* const type);
 static prof_enc_t _get_message_enc_type(const char* const encstr);
@@ -211,13 +211,13 @@ log_database_close(void)
     }
 }
 
-void
+gboolean
 log_database_add_incoming(ProfMessage* message)
 {
     if (message->to_jid) {
-        _add_to_db(message, NULL, message->from_jid, message->to_jid);
+        return _add_to_db(message, NULL, message->from_jid, message->to_jid);
     } else {
-        _add_to_db(message, NULL, message->from_jid, connection_get_jid());
+        return _add_to_db(message, NULL, message->from_jid, connection_get_jid());
     }
 }
 
@@ -598,14 +598,14 @@ _get_message_enc_type(const char* const encstr)
     return PROF_MSG_ENC_NONE;
 }
 
-static void
+static gboolean
 _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Jid* const to_jid)
 {
     auto_gchar gchar* pref_dblog = prefs_get_string(PREF_DBLOG);
     sqlite_int64 original_message_id = -1;
 
     if (g_strcmp0(pref_dblog, "off") == 0) {
-        return;
+        return TRUE;
     } else if (g_strcmp0(pref_dblog, "redact") == 0) {
         if (message->plain) {
             free(message->plain);
@@ -615,7 +615,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
 
     if (!g_chatlog_database) {
         log_debug("log_database_add() called but db is not initialized");
-        return;
+        return TRUE;
     }
 
     auto_gchar gchar* date_fmt = prof_date_time_format_iso8601(message->timestamp);
@@ -632,14 +632,14 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
 
         if (!replace_check_query) {
             log_error("Could not allocate memory for SQL replace query in log_database_add()");
-            return;
+            return FALSE;
         }
 
         sqlite3_stmt* lmc_stmt = NULL;
 
         if (SQLITE_OK != sqlite3_prepare_v2(g_chatlog_database, replace_check_query, -1, &lmc_stmt, NULL)) {
             log_error("SQLite error in _add_to_db() on selecting original message: %s", sqlite3_errmsg(g_chatlog_database));
-            return;
+            return FALSE;
         }
 
         if (sqlite3_step(lmc_stmt) == SQLITE_ROW) {
@@ -654,7 +654,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                 log_error("Mismatch in sender JIDs when trying to do LMC. Corrected message sender: %s. Original message sender: %s. Replace-ID: %s. Message: %s", from_jid->barejid, from_jid_orig, message->replace_id, message->plain);
                 cons_show_error("%s sent a message correction with mismatched sender. See log for details.", from_jid->barejid);
                 sqlite3_finalize(lmc_stmt);
-                return;
+                return FALSE;
             }
         } else {
             log_warning("Got LMC message that does not have original message counterpart in the database from %s", message->from_jid->fulljid);
@@ -688,7 +688,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
                                               enc);
     if (!query) {
         log_error("Could not allocate memory for SQL insert query in log_database_add()");
-        return;
+        return FALSE;
     }
 
     log_debug("Writing to DB. Query: %s", query);
@@ -697,19 +697,23 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
         log_error("SQLite error in _add_to_db() (prepare): %s", sqlite3_errmsg(g_chatlog_database));
-        return;
+        return FALSE;
     }
 
+    gboolean is_new = TRUE;
     rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
         log_debug("Successfully inserted message into database.");
     } else if (rc == SQLITE_DONE) {
         log_debug("Message already exists in database (archive_id: %s), skipping.", message->stanzaid);
+        is_new = FALSE;
     } else {
         log_error("SQLite error in _add_to_db() (step): %s", sqlite3_errmsg(g_chatlog_database));
+        is_new = FALSE;
     }
 
     sqlite3_finalize(stmt);
+    return is_new;
 }
 
 static int

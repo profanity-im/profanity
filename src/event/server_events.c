@@ -304,7 +304,7 @@ sv_ev_room_history(ProfMessage* message)
     }
 }
 
-static void
+static gboolean
 _log_muc(ProfMessage* message)
 {
     if (message->enc == PROF_MSG_ENC_OMEMO) {
@@ -312,7 +312,7 @@ _log_muc(ProfMessage* message)
     } else {
         groupchat_log_msg_in(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
     }
-    log_database_add_incoming(message);
+    return log_database_add_incoming(message);
 }
 
 void
@@ -325,10 +325,14 @@ sv_ev_room_message(ProfMessage* message)
 
     const char* const mynick = muc_nick(mucwin->roomjid);
 
+    gboolean is_duplicate = FALSE;
+
     // only log message not coming from this client (but maybe same account, different client)
     // our messages are logged when outgoing
     if (!(g_strcmp0(mynick, message->from_jid->resourcepart) == 0 && message_is_sent_by_us(message, TRUE))) {
-        _log_muc(message);
+        if (!_log_muc(message)) {
+            is_duplicate = TRUE;
+        }
     }
 
     char* old_plain = message->plain;
@@ -341,6 +345,17 @@ sv_ev_room_message(ProfMessage* message)
     GList* triggers = prefs_message_get_triggers(message->plain);
 
     _clean_incoming_message(message);
+
+    if (is_duplicate) {
+        log_debug("Skipping duplicate room message display: JID=%s, message=%s",
+                  message->from_jid->barejid, message->plain);
+        g_slist_free(mentions);
+        if (triggers) {
+            g_list_free_full(triggers, free);
+        }
+        message->plain = old_plain;
+        return;
+    }
 
     if (message->is_mam) {
         // For MAM, print to window but disable all notifications, unread count increment etc
