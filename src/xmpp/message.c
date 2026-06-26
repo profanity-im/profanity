@@ -1572,8 +1572,8 @@ _handle_mam(xmpp_stanza_t* const stanza)
             return TRUE;
         }
     } else {
-        if (from && !equals_our_barejid(from)) {
-            log_warning("MAM result from %s with no 'by' attribute (expected our own JID)", from);
+        if (from && !equals_our_barejid(from) && !muc_active(from)) {
+            log_warning("MAM result from %s with no 'by' attribute (expected our own JID or active MUC JID)", from);
             return TRUE;
         }
     }
