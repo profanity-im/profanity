@@ -2117,6 +2117,10 @@ win_print_end_of_archive(ProfWin* window)
     GDateTime* timestamp;
     gboolean is_buffer_empty = buffer_size(window->layout->buffer) == 0;
 
+    // Reset scroll position and exit paged state to make the banner visible!
+    window->layout->y_pos = 0;
+    window->layout->paged = 0;
+
     if (!is_buffer_empty) {
         timestamp = buffer_get_entry(window->layout->buffer, 0)->time;
     } else {
@@ -2128,6 +2132,7 @@ win_print_end_of_archive(ProfWin* window)
         if (first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, END_OF_ARCHIVE_MESSAGE) == 0) {
             if (is_buffer_empty)
                 g_date_time_unref(timestamp);
+            win_redraw(window);
             return;
         }
     }
