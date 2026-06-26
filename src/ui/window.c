@@ -65,6 +65,7 @@ _win_ensure_pad_capacity(ProfWin* window, WINDOW* win, int lines_needed)
     }
 }
 static const char* LOADING_MESSAGE = "Loading older messages…";
+static const char* END_OF_ARCHIVE_MESSAGE = "End of archive reached";
 static const char* CONS_WIN_TITLE = "Profanity. Type /help for help information.";
 static const char* XML_WIN_TITLE = "XML Console";
 
@@ -2124,7 +2125,7 @@ win_print_end_of_archive(ProfWin* window)
 
     if (!is_buffer_empty) {
         ProfBuffEntry* first_entry = buffer_get_entry(window->layout->buffer, 0);
-        if (first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, "End of archive reached") == 0) {
+        if (first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, END_OF_ARCHIVE_MESSAGE) == 0) {
             if (is_buffer_empty)
                 g_date_time_unref(timestamp);
             return;
@@ -2132,7 +2133,7 @@ win_print_end_of_archive(ProfWin* window)
     }
 
     int cur_y = getcury(window->layout->win);
-    buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE, THEME_ROOMINFO, NULL, NULL, "End of archive reached", NULL, NULL, cur_y, cur_y + 1);
+    buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE, THEME_ROOMINFO, NULL, NULL, END_OF_ARCHIVE_MESSAGE, NULL, NULL, cur_y, cur_y + 1);
 
     if (is_buffer_empty)
         g_date_time_unref(timestamp);
