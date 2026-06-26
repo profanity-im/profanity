@@ -38,6 +38,7 @@
 #include "xmpp/roster_list.h"
 #include "xmpp/avatar.h"
 #include "xmpp/vcard_funcs.h"
+#include "xmpp/bookmark.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -181,6 +182,7 @@ sv_ev_connection_features_received(void)
 #ifdef HAVE_OMEMO
     omemo_publish_crypto_materials();
 #endif
+    bookmark_request();
 }
 
 void

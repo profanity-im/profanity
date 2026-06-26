@@ -552,6 +552,11 @@ bookmark_autocomplete_reset(void)
 }
 
 void
+bookmark_request(void)
+{
+}
+
+void
 roster_send_name_change(const char* const barejid, const char* const new_name, GSList* groups)
 {
     check_expected(barejid);

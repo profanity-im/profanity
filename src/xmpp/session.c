@@ -324,7 +324,6 @@ session_login_success(gboolean secured)
     }
 
     roster_request();
-    bookmark_request();
     blocking_request();
 
     // items discovery
