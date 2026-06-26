@@ -50,7 +50,7 @@ typedef struct p_message_handle_t
 
 static int _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata);
 static void _handle_error(xmpp_stanza_t* const stanza);
-static void _handle_groupchat(xmpp_stanza_t* const stanza);
+static void _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* result_id, GDateTime* timestamp);
 static void _handle_muc_user(xmpp_stanza_t* const stanza);
 static void _handle_muc_private_message(xmpp_stanza_t* const stanza);
 static void _handle_conference(xmpp_stanza_t* const stanza);
@@ -75,6 +75,18 @@ static GHashTable* pubsub_event_handlers;
 gchar*
 get_display_name(const ProfMessage* const message, int* flags)
 {
+    if (message->type == PROF_MSG_TYPE_MUC) {
+        const char* const mynick = muc_nick(message->from_jid->barejid);
+        gboolean is_me = (g_strcmp0(mynick, message->from_jid->resourcepart) == 0);
+        if (is_me) {
+            return prefs_get_string(PREF_OUTGOING_STAMP);
+        } else {
+            if (flags)
+                *flags = NO_ME;
+            return g_strdup(message->from_jid->resourcepart);
+        }
+    }
+
     if (equals_our_barejid(message->from_jid->barejid)) {
         return prefs_get_string(PREF_OUTGOING_STAMP);
     } else {
@@ -152,7 +164,7 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
         _handle_error(stanza);
     } else if (type && g_strcmp0(type, STANZA_TYPE_GROUPCHAT) == 0) {
         // XEP-0045: Multi-User Chat
-        _handle_groupchat(stanza);
+        _handle_groupchat(stanza, FALSE, NULL, NULL);
 
     } else if (type && g_strcmp0(type, STANZA_TYPE_HEADLINE) == 0) {
         xmpp_stanza_t* event = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB_EVENT);
@@ -984,7 +996,7 @@ _room_config_handler(xmpp_stanza_t* const stanza, void* const userdata)
 }
 
 static void
-_handle_groupchat(xmpp_stanza_t* const stanza)
+_handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* result_id, GDateTime* timestamp)
 {
     xmpp_ctx_t* ctx = connection_get_ctx();
 
@@ -1057,6 +1069,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
     }
 
     ProfMessage* message = message_init();
+    message->is_mam = is_mam;
     jid_ref(from_jid);
     message->from_jid = from_jid;
     message->type = PROF_MSG_TYPE_MUC;
@@ -1066,14 +1079,22 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
         message->id = strdup(id);
     }
 
-    char* stanzaid = NULL;
-    xmpp_stanza_t* stanzaidst = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_STANZA_ID, STANZA_NS_STABLE_ID);
-    if (stanzaidst) {
-        const char* by = xmpp_stanza_get_attribute(stanzaidst, "by");
-        if (by && (g_strcmp0(by, from_jid->barejid) == 0)) {
-            stanzaid = (char*)xmpp_stanza_get_attribute(stanzaidst, STANZA_ATTR_ID);
-            if (stanzaid) {
-                message->stanzaid = strdup(stanzaid);
+    if (is_mam) {
+        if (result_id) {
+            message->stanzaid = strdup(result_id);
+        } else {
+            log_warning("MAM received with no result id");
+        }
+    } else {
+        char* stanzaid = NULL;
+        xmpp_stanza_t* stanzaidst = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_STANZA_ID, STANZA_NS_STABLE_ID);
+        if (stanzaidst) {
+            const char* by = xmpp_stanza_get_attribute(stanzaidst, "by");
+            if (by && (g_strcmp0(by, from_jid->barejid) == 0)) {
+                stanzaid = (char*)xmpp_stanza_get_attribute(stanzaidst, STANZA_ATTR_ID);
+                if (stanzaid) {
+                    message->stanzaid = strdup(stanzaid);
+                }
             }
         }
     }
@@ -1108,42 +1129,51 @@ _handle_groupchat(xmpp_stanza_t* const stanza)
         message->plain = strdup(message->body);
     }
 
-    // determine if the notifications happened whilst offline (MUC history)
-    message->timestamp = stanza_get_delay_from(stanza, from_jid->barejid);
-    if (message->timestamp == NULL) {
-        // checking the domainpart is a workaround for some prosody versions (gh#1190)
-        message->timestamp = stanza_get_delay_from(stanza, from_jid->domainpart);
-    }
-
-    bool is_muc_history = FALSE;
-    if (message->timestamp != NULL) {
-        is_muc_history = TRUE;
-        g_date_time_unref(message->timestamp);
-        message->timestamp = NULL;
-    }
-
-    // we want to display the oldest delay
-    message->timestamp = stanza_get_oldest_delay(stanza);
-
-    // now this has nothing to do with MUC history
-    // it's just setting the time to the received time so upon displaying we can use this time
-    // for example in win_println_incoming_muc_msg()
-    if (!message->timestamp) {
-        message->timestamp = g_date_time_new_now_local();
-    }
-
-    if (is_muc_history) {
-        sv_ev_room_history(message);
-    } else {
-        // XEP-0308 states: `corrections must not be allowed (by the receiver) for messages received before the sender joined the room`
-        xmpp_stanza_t* replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
-        if (replace_id_stanza) {
-            const char* replace_id = xmpp_stanza_get_id(replace_id_stanza);
-            if (replace_id) {
-                message->replace_id = strdup(replace_id);
-            }
+    if (is_mam) {
+        if (timestamp) {
+            message->timestamp = timestamp;
+        } else {
+            message->timestamp = g_date_time_new_now_local();
         }
         sv_ev_room_message(message);
+    } else {
+        // determine if the notifications happened whilst offline (MUC history)
+        message->timestamp = stanza_get_delay_from(stanza, from_jid->barejid);
+        if (message->timestamp == NULL) {
+            // checking the domainpart is a workaround for some prosody versions (gh#1190)
+            message->timestamp = stanza_get_delay_from(stanza, from_jid->domainpart);
+        }
+
+        bool is_muc_history = FALSE;
+        if (message->timestamp != NULL) {
+            is_muc_history = TRUE;
+            g_date_time_unref(message->timestamp);
+            message->timestamp = NULL;
+        }
+
+        // we want to display the oldest delay
+        message->timestamp = stanza_get_oldest_delay(stanza);
+
+        // now this has nothing to do with MUC history
+        // it's just setting the time to the received time so upon displaying we can use this time
+        // for example in win_println_incoming_muc_msg()
+        if (!message->timestamp) {
+            message->timestamp = g_date_time_new_now_local();
+        }
+
+        if (is_muc_history) {
+            sv_ev_room_history(message);
+        } else {
+            // XEP-0308 states: `corrections must not be allowed (by the receiver) for messages received before the sender joined the room`
+            xmpp_stanza_t* replace_id_stanza = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_LAST_MESSAGE_CORRECTION);
+            if (replace_id_stanza) {
+                const char* replace_id = xmpp_stanza_get_id(replace_id_stanza);
+                if (replace_id) {
+                    message->replace_id = strdup(replace_id);
+                }
+            }
+            sv_ev_room_message(message);
+        }
     }
 
 out:
@@ -1542,8 +1572,8 @@ _handle_mam(xmpp_stanza_t* const stanza)
             return TRUE;
         }
     } else {
-        if (from && !equals_our_barejid(from)) {
-            log_warning("MAM result from %s with no 'by' attribute (expected our own JID)", from);
+        if (from && !equals_our_barejid(from) && !muc_active(from)) {
+            log_warning("MAM result from %s with no 'by' attribute (expected our own JID or active MUC JID)", from);
             return TRUE;
         }
     }
@@ -1554,7 +1584,21 @@ _handle_mam(xmpp_stanza_t* const stanza)
 
     xmpp_stanza_t* message_stanza = xmpp_stanza_get_child_by_ns(forwarded, "jabber:client");
 
-    _handle_chat(message_stanza, TRUE, FALSE, result_id, timestamp);
+    const char* inner_type = xmpp_stanza_get_type(message_stanza);
+
+    if (from && muc_active(from)) {
+        if (!inner_type || g_strcmp0(inner_type, STANZA_TYPE_GROUPCHAT) != 0) {
+            log_warning("Ignoring non-groupchat MAM message of type '%s' from MUC archive '%s' to prevent PM leak.",
+                        inner_type ? inner_type : "none", from);
+            return TRUE;
+        }
+    }
+
+    if (inner_type && g_strcmp0(inner_type, STANZA_TYPE_GROUPCHAT) == 0) {
+        _handle_groupchat(message_stanza, TRUE, result_id, timestamp);
+    } else {
+        _handle_chat(message_stanza, TRUE, FALSE, result_id, timestamp);
+    }
 
     return TRUE;
 }

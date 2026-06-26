@@ -360,7 +360,7 @@
         <xmpp:status>partial</xmpp:status>
         <xmpp:version>1.1.0</xmpp:version>
         <xmpp:since>0.14.0</xmpp:since>
-        <xmpp:note xml:lang='en'>No MUC MAM</xmpp:note>
+        <xmpp:note xml:lang='en'>MAM since 0.14.0. MUC MAM since DEV</xmpp:note>
       </xmpp:SupportedXep>
     </implements>
 

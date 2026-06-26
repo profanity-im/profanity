@@ -9648,6 +9648,61 @@ cmd_executable_vcard_photo(ProfWin* window, const char* const command, gchar** a
 gboolean
 cmd_mam(ProfWin* window, const char* const command, gchar** args)
 {
+    if (g_strcmp0(args[0], "verify") == 0) {
+        if (connection_get_status() != JABBER_CONNECTED) {
+            cons_show("You are not currently connected.");
+            return TRUE;
+        }
+        if (window->type != WIN_CHAT && window->type != WIN_MUC) {
+            cons_show("MAM verification can only be performed in chat or groupchat windows.");
+            return TRUE;
+        }
+        if (!prefs_get_boolean(PREF_MAM)) {
+            cons_show("Message Archive Management (MAM) is currently disabled.");
+            return TRUE;
+        }
+        if (!connection_supports(XMPP_FEATURE_MAM2)) {
+            cons_show("Your server does not support Message Archive Management (MAM2).");
+            return TRUE;
+        }
+
+        unsigned int buf_size = buffer_size(window->layout->buffer);
+        if (buf_size == 0) {
+            cons_show("No loaded history in this window to verify.");
+            return TRUE;
+        }
+
+        ProfBuffEntry* first_msg = NULL;
+        ProfBuffEntry* last_msg = NULL;
+
+        for (unsigned int i = 0; i < buf_size; i++) {
+            ProfBuffEntry* entry = buffer_get_entry(window->layout->buffer, i);
+            if (entry && entry->message && entry->message[0] != '-') {
+                if (!first_msg) {
+                    first_msg = entry;
+                }
+                last_msg = entry;
+            }
+        }
+
+        if (!first_msg || !last_msg) {
+            cons_show("No messages found in the active scrollback buffer.");
+            return TRUE;
+        }
+
+        GDateTime* utc_start = g_date_time_to_timezone(first_msg->time, g_time_zone_new_utc());
+        GDateTime* utc_end = g_date_time_to_timezone(last_msg->time, g_time_zone_new_utc());
+        auto_gchar gchar* start_str = g_date_time_format(utc_start, "%FT%T.%f%:z");
+        auto_gchar gchar* end_str = g_date_time_format(utc_end, "%FT%T.%f%:z");
+        g_date_time_unref(utc_start);
+        g_date_time_unref(utc_end);
+
+        cons_show("Verifying history from %s to %s...", start_str, end_str);
+        iq_mam_verify_request(window, start_str, end_str);
+
+        return TRUE;
+    }
+
     _cmd_set_boolean_preference(args[0], "Message Archive Management", PREF_MAM);
 
     return TRUE;

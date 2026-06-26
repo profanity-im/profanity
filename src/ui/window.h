@@ -36,7 +36,7 @@ void win_show_status_string(ProfWin* window, const char* const from,
                             GDateTime* last_activity, const char* const pre,
                             const char* const default_show);
 
-void win_print_them(ProfWin* window, theme_item_t theme_item, const char* const show_char, int flags, const char* const them);
+void win_print_them(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const show_char, int flags, const char* const them);
 void win_print_incoming(ProfWin* window, const char* const from, ProfMessage* message);
 void win_print_outgoing(ProfWin* window, const char* show_char, const char* const id, const char* const replace_id, const char* const message);
 void win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const char* const from, const char* const message, const char* id, const char* const replace_id);
@@ -50,6 +50,7 @@ void win_print_http_transfer(ProfWin* window, const char* const message, char* i
 void win_newline(ProfWin* window);
 void win_redraw(ProfWin* window);
 void win_print_loading_history(ProfWin* window);
+void win_print_end_of_archive(ProfWin* window);
 int win_roster_cols(void);
 int win_occpuants_cols(void);
 void win_sub_print(WINDOW* win, char* msg, gboolean newline, gboolean wrap, int indent);

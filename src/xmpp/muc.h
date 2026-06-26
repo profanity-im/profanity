@@ -71,6 +71,7 @@ gboolean muc_autojoin(const char* const room);
 GList* muc_rooms(void);
 
 void muc_set_features(const char* const room, GSList* features);
+gboolean muc_supports_mam(const char* const room);
 
 const char* muc_nick(const char* const room);
 char* muc_password(const char* const room);

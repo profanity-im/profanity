@@ -281,7 +281,8 @@ xmpp_stanza_t* stanza_attach_origin_id(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza, c
 xmpp_stanza_t* stanza_attach_correction(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza, const char* const replace_id);
 
 xmpp_stanza_t* stanza_create_room_join_presence(xmpp_ctx_t* const ctx,
-                                                const char* const full_room_jid, const char* const passwd);
+                                                const char* const full_room_jid, const char* const passwd,
+                                                gboolean max_stanzas_zero);
 
 xmpp_stanza_t* stanza_create_room_newnick_presence(xmpp_ctx_t* ctx,
                                                    const char* const full_room_jid);
@@ -397,6 +398,8 @@ xmpp_stanza_t* stanza_create_avatar_metadata_publish_iq(xmpp_ctx_t* ctx, const c
 xmpp_stanza_t* stanza_disable_avatar_publish_iq(xmpp_ctx_t* ctx);
 xmpp_stanza_t* stanza_create_vcard_request_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const stanza_id);
 xmpp_stanza_t* stanza_create_mam_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const enddate, const char* const firstid, const char* const lastid);
+xmpp_stanza_t* stanza_create_muc_mam_iq(xmpp_ctx_t* ctx, const char* const room, const char* const startdate, const char* const enddate, const char* const firstid, const char* const lastid);
+xmpp_stanza_t* stanza_create_mam_count_iq(xmpp_ctx_t* ctx, const char* const jid, const char* const startdate, const char* const enddate, gboolean is_muc);
 xmpp_stanza_t* stanza_change_password(xmpp_ctx_t* ctx, const char* const user, const char* const password);
 xmpp_stanza_t* stanza_register_new_account(xmpp_ctx_t* ctx, const char* const user, const char* const password);
 xmpp_stanza_t* stanza_request_voice(xmpp_ctx_t* ctx, const char* const room);
