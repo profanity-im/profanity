@@ -692,8 +692,9 @@ win_page_up(ProfWin* window, int scroll_size)
     if (*page_start == -scroll_size && (window->type == WIN_CHAT || window->type == WIN_MUC)) {
         ProfBuffEntry* first_entry = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0) : NULL;
 
-        // Don't do anything if still fetching mam messages
-        if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, LOADING_MESSAGE) == 0)) {
+        // Don't do anything if still fetching mam messages or if end of archive is reached
+        if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, LOADING_MESSAGE) == 0)
+            && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, END_OF_ARCHIVE_MESSAGE) == 0)) {
             if (*scroll_state != WIN_SCROLL_REACHED_TOP) {
                 if (window->type == WIN_MUC) {
                     *scroll_state = !mucwin_db_history((ProfMucWin*)window, NULL, NULL, TRUE) ? WIN_SCROLL_REACHED_TOP : WIN_SCROLL_INNER;
