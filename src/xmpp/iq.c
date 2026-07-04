@@ -3070,10 +3070,10 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             if (set) {
                 win_print_loading_history(window);
 
-                auto_char char* firstid = NULL;
-                xmpp_stanza_t* first = xmpp_stanza_get_child_by_name(set, STANZA_NAME_FIRST);
-                if (first) {
-                    firstid = xmpp_stanza_get_text(first);
+                auto_char char* lastid = NULL;
+                xmpp_stanza_t* last = xmpp_stanza_get_child_by_name(set, STANZA_NAME_LAST);
+                if (last) {
+                    lastid = xmpp_stanza_get_text(last);
 
                     // 4.3.2. send same stanza with set,max stanza
                     xmpp_ctx_t* const ctx = connection_get_ctx();
@@ -3084,9 +3084,9 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                     }
                     xmpp_stanza_t* iq;
                     if (window->type == WIN_MUC) {
-                        iq = stanza_create_muc_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
+                        iq = stanza_create_muc_mam_iq(ctx, data->barejid, data->start_datestr, NULL, NULL, lastid);
                     } else {
-                        iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
+                        iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, NULL, lastid);
                     }
 
                     MamRsmUserdata* ndata = g_new0(MamRsmUserdata, 1);
