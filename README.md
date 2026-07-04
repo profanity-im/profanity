@@ -33,8 +33,14 @@ For more technical details check out our [CONTRIBUTING.md](CONTRIBUTING.md) file
 
 ## Getting help
 To get help, first read our [User Guide](https://profanity-im.github.io/userguide.html) then check out the [FAQ](https://profanity-im.github.io/faq.html).
-If you have are having a problem then first search the [issue tracker](https://github.com/profanity-im/profanity/issues).
-If you don't find anything there either come to our [MUC](xmpp:profanity@rooms.dismail.de?join) or create a new issue depending on what your problem is.
+If you are having a problem, first search the [issue tracker](https://github.com/profanity-im/profanity/issues).
+
+If you don't find any existing issue, you can report it:
+- **With a GitHub account:** Create a new issue directly on our [issue tracker](https://github.com/profanity-im/profanity/issues). This is what you **should** do. If you don't have an account, create one! It makes our life much easier.
+- **Without a GitHub account:**
+  1. Copy our [Bug Report Template](.github/ISSUE_TEMPLATE/bug_report.md) (ignoring the header block between `---`), and fill it out.
+  2. Include your preferred name, MUC nickname, or JID in the **Reporter** field.
+  3. Send the filled out template to our mailing list at `profanity@lists.posteo.de`, or join our MUC and ask someone to submit it on your behalf.
 
 ## Links
 
