@@ -2277,6 +2277,12 @@ cons_show_ox_prefs(void)
     auto_gchar gchar* ch = prefs_get_ox_char();
     cons_show("OX char (/ox char)     : %s", ch);
 
+    if (prefs_get_boolean(PREF_OX_ENCRYPTFILE)) {
+        cons_show("OX encrypt file (/ox encryptfile): ON");
+    } else {
+        cons_show("OX encrypt file (/ox encryptfile): OFF");
+    }
+
     cons_alert(NULL);
 }
 

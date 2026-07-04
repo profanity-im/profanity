@@ -1941,6 +1941,7 @@ _get_group(preference_t pref)
     case PREF_OMEMO_TRUST_MODE:
         return PREF_GROUP_OMEMO;
     case PREF_OX_LOG:
+    case PREF_OX_ENCRYPTFILE:
         return PREF_GROUP_OX;
     case PREF_SPELLCHECK_ENABLE:
     case PREF_SPELLCHECK_LANG:
@@ -2222,6 +2223,8 @@ _get_key(preference_t pref)
         return "stamp.incoming";
     case PREF_OX_LOG:
         return "log";
+    case PREF_OX_ENCRYPTFILE:
+        return "encryptfile";
     case PREF_MOOD:
         return "mood";
     case PREF_VCARD_PHOTO_CMD:
@@ -2293,6 +2296,12 @@ _get_default_boolean(preference_t pref)
     case PREF_PGP_PUBKEY_AUTOIMPORT:
     default:
         return FALSE;
+    case PREF_OX_ENCRYPTFILE:
+#ifdef HAVE_OMEMO
+        return TRUE;
+#else
+        return FALSE;
+#endif
     }
 }
 

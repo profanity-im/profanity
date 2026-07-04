@@ -985,6 +985,7 @@ cmd_ac_init(void)
     autocomplete_add(ox_ac, "announce");
     autocomplete_add(ox_ac, "discover");
     autocomplete_add(ox_ac, "request");
+    autocomplete_add(ox_ac, "encryptfile");
 
     autocomplete_add(ox_log_ac, "on");
     autocomplete_add(ox_log_ac, "off");
@@ -2578,6 +2579,11 @@ _ox_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     found = autocomplete_param_with_ac(input, "/ox log", ox_log_ac, TRUE, previous);
+    if (found) {
+        return found;
+    }
+
+    found = autocomplete_param_with_func(input, "/ox encryptfile", prefs_autocomplete_boolean_choice, previous, NULL);
     if (found) {
         return found;
     }
