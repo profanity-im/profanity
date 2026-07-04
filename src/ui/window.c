@@ -748,14 +748,22 @@ win_page_down(ProfWin* window, int scroll_size)
     *page_start += scroll_size;
 
     // Scrolled down after reaching the bottom of the page
-    if ((*page_start > total_rows - page_space || (*page_start == page_space && *page_start >= total_rows)) && window->type == WIN_CHAT) {
+    if ((*page_start > total_rows - page_space || (*page_start == page_space && *page_start >= total_rows)) && (window->type == WIN_CHAT || window->type == WIN_MUC)) {
         unsigned int bf_size = buffer_size(window->layout->buffer);
         if (bf_size != 0) {
             ProfBuffEntry* last_entry = buffer_get_entry(window->layout->buffer, bf_size - 1);
             auto_gchar gchar* start = g_date_time_format_iso8601(last_entry->time);
             auto_gchar gchar* end_date = prof_date_time_format_iso8601(NULL);
-            if (*scroll_state != WIN_SCROLL_REACHED_BOTTOM && !chatwin_db_history((ProfChatWin*)window, start, end_date, FALSE)) {
-                *scroll_state = WIN_SCROLL_REACHED_BOTTOM;
+            if (*scroll_state != WIN_SCROLL_REACHED_BOTTOM) {
+                gboolean has_items;
+                if (window->type == WIN_MUC) {
+                    has_items = mucwin_db_history((ProfMucWin*)window, start, end_date, FALSE);
+                } else {
+                    has_items = chatwin_db_history((ProfChatWin*)window, start, end_date, FALSE);
+                }
+                if (!has_items) {
+                    *scroll_state = WIN_SCROLL_REACHED_BOTTOM;
+                }
             }
 
             int offset = last_entry->y_end_pos - 1;
