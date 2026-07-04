@@ -477,18 +477,37 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
             xmpp_stanza_add_child(message, x);
             xmpp_stanza_release(x);
         } else {
-            message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
-            xmpp_message_set_body(message, msg);
+            ProfChatWin* chatwin = wins_get_chat(barejid);
+            if (chatwin) {
+                win_println((ProfWin*)chatwin, THEME_ERROR, "!", "PGP encryption failed. Message not sent.");
+            } else {
+                cons_show_error("PGP encryption failed. Message not sent.");
+            }
+            g_free(id);
+            account_free(account);
+            return NULL;
         }
     } else {
-        message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
-        xmpp_message_set_body(message, msg);
+        ProfChatWin* chatwin = wins_get_chat(barejid);
+        if (chatwin) {
+            win_println((ProfWin*)chatwin, THEME_ERROR, "!", "PGP key ID not set for account. Message not sent.");
+        } else {
+            cons_show_error("PGP key ID not set for account. Message not sent.");
+        }
+        g_free(id);
+        account_free(account);
+        return NULL;
     }
     account_free(account);
 #else
-    // ?
-    message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
-    xmpp_message_set_body(message, msg);
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        win_println((ProfWin*)chatwin, THEME_ERROR, "!", "PGP support is not included in this build. Message not sent.");
+    } else {
+        cons_show_error("PGP support is not included in this build. Message not sent.");
+    }
+    g_free(id);
+    return NULL;
 #endif
 
     if (state) {
