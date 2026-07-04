@@ -243,6 +243,7 @@ _show_scrolled(ProfWin* current)
         int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
         int scrolled_attrs = theme_attrs(THEME_TITLE_SCROLLED);
 
+        wprintw(win, " ");
         wattron(win, bracket_attrs);
         wprintw(win, "[");
         wattroff(win, bracket_attrs);

@@ -80,7 +80,7 @@ typedef struct mam_rsm_userdata
     char* start_datestr;
     char* end_datestr;
     gboolean fetch_next;
-    ProfChatWin* win;
+    ProfWin* win;
 } MamRsmUserdata;
 
 typedef struct late_delivery_userdata
@@ -127,7 +127,7 @@ static int _command_exec_response_handler(xmpp_stanza_t* const stanza, void* con
 static int _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _register_change_password_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 
-static void _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate);
+static void _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate);
 static void _iq_free_room_data(ProfRoomInfoData* roominfo);
 static void _iq_free_affiliation_set(ProfPrivilegeSet* affiliation_set);
 static void _iq_free_affiliation_list(ProfAffiliationList* affiliation_list);
@@ -2341,6 +2341,10 @@ _room_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata
                 mucwin->is_omemo = TRUE;
             }
 #endif
+            if (prefs_get_boolean(PREF_MAM) && muc_supports_mam(cb_data->room)) {
+                win_print_loading_history((ProfWin*)mucwin);
+                iq_mam_request((ProfWin*)mucwin, NULL);
+            }
             if (cb_data->display) {
                 mucwin_room_disco_info(mucwin, identities, features);
             }
@@ -2657,7 +2661,7 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
 
         while (late_delivery_windows) {
             LateDeliveryUserdata* del_data = late_delivery_windows->data;
-            _iq_mam_request(del_data->win, del_data->startdate, del_data->enddate);
+            _iq_mam_request((ProfWin*)del_data->win, del_data->startdate, del_data->enddate);
             free(del_data);
             late_delivery_windows = g_slist_delete_link(late_delivery_windows,
                                                         late_delivery_windows);
@@ -2721,17 +2725,38 @@ _iq_free_affiliation_list(ProfAffiliationList* affiliation_list)
 static int
 _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
-    ProfChatWin* chatwin = (ProfChatWin*)userdata;
+    ProfWin* window = (ProfWin*)userdata;
+    if (wins_get_num(window) == -1) {
+        log_error("Window %p should not get any events anymore", window);
+        return 0;
+    }
+
     // Remove the "Loading messages…" message
-    buffer_remove_entry(((ProfWin*)chatwin)->layout->buffer, 0);
-    chatwin_db_history(chatwin, NULL, NULL, TRUE);
+    buffer_remove_entry(window->layout->buffer, 0);
+
+    xmpp_stanza_t* fin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
+    gboolean is_complete = FALSE;
+    if (fin) {
+        is_complete = g_strcmp0(xmpp_stanza_get_attribute(fin, "complete"), "true") == 0;
+    }
+
+    if (window->type == WIN_MUC) {
+        mucwin_db_history((ProfMucWin*)window, NULL, NULL, TRUE);
+    } else {
+        chatwin_db_history((ProfChatWin*)window, NULL, NULL, TRUE);
+    }
+
+    if (is_complete) {
+        win_print_end_of_archive(window);
+    }
+
     return 0;
 }
 
 static const gchar* mam_timestamp_format_string = "%FT%T.%f%:z";
 
 void
-iq_mam_request_older(ProfChatWin* win)
+iq_mam_request_older(ProfWin* win)
 {
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
@@ -2739,13 +2764,20 @@ iq_mam_request_older(ProfChatWin* win)
         return;
     }
 
-    ProfMessage* first_msg = log_database_get_limits_info(win->barejid, FALSE);
+    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
+
+    ProfMessage* first_msg;
+    if (win->type == WIN_MUC) {
+        first_msg = log_database_get_limits_info_muc(target_jid, FALSE);
+    } else {
+        first_msg = log_database_get_limits_info(target_jid, FALSE);
+    }
     char* firstid = NULL;
     auto_gchar gchar* enddate = NULL;
 
     // If first message found
     if (first_msg && first_msg->timestamp) {
-        firstid = first_msg->stanzaid;
+        firstid = first_msg->stanzaid ? first_msg->stanzaid : "";
         enddate = g_date_time_format(first_msg->timestamp, mam_timestamp_format_string);
     } else {
         if (first_msg) {
@@ -2755,7 +2787,12 @@ iq_mam_request_older(ProfChatWin* win)
     }
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, NULL, enddate, firstid, NULL);
+    xmpp_stanza_t* iq;
+    if (win->type == WIN_MUC) {
+        iq = stanza_create_muc_mam_iq(ctx, target_jid, NULL, enddate, firstid, NULL);
+    } else {
+        iq = stanza_create_mam_iq(ctx, target_jid, NULL, enddate, firstid, NULL);
+    }
     iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_buffer_commit_handler, NULL, win);
 
     message_free(first_msg);
@@ -2778,8 +2815,111 @@ _mam_userdata_free(MamRsmUserdata* data)
     free(data);
 }
 
+typedef struct mam_verify_userdata
+{
+    char* barejid;
+    char* start_datestr;
+    char* end_datestr;
+    gboolean is_muc;
+    ProfWin* win;
+} MamVerifyUserdata;
+
+static void
+_mam_verify_userdata_free(MamVerifyUserdata* data)
+{
+    free(data->start_datestr);
+    free(data->end_datestr);
+    free(data->barejid);
+    free(data);
+}
+
+static int
+_mam_verify_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    MamVerifyUserdata* data = (MamVerifyUserdata*)userdata;
+    ProfWin* window = data->win;
+    if (wins_get_num(window) == -1) {
+        log_error("Window %p is not active anymore", window);
+        return 0;
+    }
+
+    const char* type = xmpp_stanza_get_type(stanza);
+    if (g_strcmp0(type, "error") == 0) {
+        auto_char char* error_message = stanza_get_error_message(stanza);
+        cons_show_error("MAM verification failed: %s", error_message);
+        return 0;
+    }
+
+    xmpp_stanza_t* fin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
+    if (fin) {
+        xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
+        if (set) {
+            xmpp_stanza_t* count_st = xmpp_stanza_get_child_by_name(set, "count");
+            if (count_st) {
+                char* count_str = xmpp_stanza_get_text(count_st);
+                int server_count = count_str ? atoi(count_str) : 0;
+
+                int local_count = 0;
+                if (data->is_muc) {
+                    local_count = log_database_get_muc_count(data->barejid, data->start_datestr, data->end_datestr);
+                } else {
+                    local_count = log_database_get_chat_count(data->barejid, data->start_datestr, data->end_datestr);
+                }
+
+                if (local_count >= server_count) {
+                    cons_show("MAM Verification for %s: History is contiguous and complete (verified %d messages).",
+                              data->barejid, local_count);
+                } else {
+                    int missing = server_count - local_count;
+                    cons_show("MAM Verification for %s: Missing %d messages. Initiating auto-repair...",
+                              data->barejid, missing);
+
+                    GDateTime* start = g_date_time_new_from_iso8601(data->start_datestr, NULL);
+                    GDateTime* end = g_date_time_new_from_iso8601(data->end_datestr, NULL);
+                    if (start && end) {
+                        win_print_loading_history(window);
+                        _iq_mam_request(window, start, end);
+                    } else {
+                        if (start)
+                            g_date_time_unref(start);
+                        if (end)
+                            g_date_time_unref(end);
+                    }
+                }
+            }
+        }
+    }
+
+    return 0;
+}
+
 void
-_iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
+iq_mam_verify_request(ProfWin* win, const char* const startdate, const char* const enddate)
+{
+    gboolean is_muc = (win->type == WIN_MUC);
+    char* barejid = is_muc ? strdup(((ProfMucWin*)win)->roomjid) : strdup(((ProfChatWin*)win)->barejid);
+
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    xmpp_stanza_t* iq = stanza_create_mam_count_iq(ctx, barejid, startdate, enddate, is_muc);
+
+    MamVerifyUserdata* data = g_new0(MamVerifyUserdata, 1);
+    if (data) {
+        data->barejid = strdup(barejid);
+        data->start_datestr = strdup(startdate);
+        data->end_datestr = strdup(enddate);
+        data->is_muc = is_muc;
+        data->win = win;
+
+        iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_verify_id_handler, (ProfIqFreeCallback)_mam_verify_userdata_free, data);
+    }
+
+    iq_send_stanza(iq);
+    free(barejid);
+    xmpp_stanza_release(iq);
+}
+
+void
+_iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate)
 {
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
@@ -2790,6 +2930,8 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
             g_date_time_unref(enddate);
         return;
     }
+
+    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
 
     char* firstid = "";
     char* startdate_str = NULL;
@@ -2813,13 +2955,18 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, win->barejid, startdate_str, enddate_str, firstid, NULL);
+    xmpp_stanza_t* iq;
+    if (win->type == WIN_MUC) {
+        iq = stanza_create_muc_mam_iq(ctx, target_jid, startdate_str, enddate_str, firstid, NULL);
+    } else {
+        iq = stanza_create_mam_iq(ctx, target_jid, startdate_str, enddate_str, firstid, NULL);
+    }
 
     MamRsmUserdata* data = g_new0(MamRsmUserdata, 1);
     if (data) {
         data->start_datestr = startdate_str;
         data->end_datestr = enddate_str;
-        data->barejid = strdup(win->barejid);
+        data->barejid = strdup(target_jid);
         data->fetch_next = fetch_next;
         data->win = win;
 
@@ -2833,9 +2980,16 @@ _iq_mam_request(ProfChatWin* win, GDateTime* startdate, GDateTime* enddate)
 }
 
 void
-iq_mam_request(ProfChatWin* win, GDateTime* enddate)
+iq_mam_request(ProfWin* win, GDateTime* enddate)
 {
-    ProfMessage* last_msg = log_database_get_limits_info(win->barejid, TRUE);
+    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
+
+    ProfMessage* last_msg;
+    if (win->type == WIN_MUC) {
+        last_msg = log_database_get_limits_info_muc(target_jid, TRUE);
+    } else {
+        last_msg = log_database_get_limits_info(target_jid, TRUE);
+    }
     GDateTime* startdate = NULL;
     if (last_msg) {
         if (last_msg->timestamp)
@@ -2846,11 +3000,11 @@ iq_mam_request(ProfChatWin* win, GDateTime* enddate)
     // Save request for later if disco items haven't been received yet
     if (!received_disco_items) {
         LateDeliveryUserdata* cur_del_data = g_new0(LateDeliveryUserdata, 1);
-        cur_del_data->win = win;
+        cur_del_data->win = (ProfChatWin*)win;
         cur_del_data->enddate = enddate;
         cur_del_data->startdate = startdate;
         late_delivery_windows = g_slist_append(late_delivery_windows, cur_del_data);
-        log_debug("Save MAM request of %s for later", win->barejid);
+        log_debug("Save MAM request of %s for later", target_jid);
         return;
     }
 
@@ -2898,11 +3052,19 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             }
 
             if (is_complete || !data->fetch_next) {
-                chatwin_db_history(data->win, is_complete ? NULL : start_str, end_str, TRUE);
+                if (window->type == WIN_MUC) {
+                    mucwin_db_history((ProfMucWin*)window, is_complete ? NULL : start_str, end_str, TRUE);
+                } else {
+                    chatwin_db_history((ProfChatWin*)window, is_complete ? NULL : start_str, end_str, TRUE);
+                }
                 return 0;
             }
 
-            chatwin_db_history(data->win, start_str, end_str, TRUE);
+            if (window->type == WIN_MUC) {
+                mucwin_db_history((ProfMucWin*)window, start_str, end_str, TRUE);
+            } else {
+                chatwin_db_history((ProfChatWin*)window, start_str, end_str, TRUE);
+            }
 
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
             if (set) {
@@ -2920,7 +3082,12 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                         free(data->end_datestr);
                         data->end_datestr = NULL;
                     }
-                    xmpp_stanza_t* iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
+                    xmpp_stanza_t* iq;
+                    if (window->type == WIN_MUC) {
+                        iq = stanza_create_muc_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
+                    } else {
+                        iq = stanza_create_mam_iq(ctx, data->barejid, data->start_datestr, NULL, firstid, NULL);
+                    }
 
                     MamRsmUserdata* ndata = g_new0(MamRsmUserdata, 1);
                     *ndata = *data;

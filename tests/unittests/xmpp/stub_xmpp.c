@@ -447,7 +447,12 @@ iq_muc_register_nick(const char* const roomjid)
 }
 
 void
-iq_mam_request(ProfChatWin* win, GDateTime* enddate)
+iq_mam_request(ProfWin* win, GDateTime* enddate)
+{
+}
+
+void
+iq_mam_verify_request(ProfWin* win, const char* const startdate, const char* const enddate)
 {
 }
 
@@ -543,6 +548,11 @@ bookmark_find(const char* const search_str, gboolean previous, void* context)
 
 void
 bookmark_autocomplete_reset(void)
+{
+}
+
+void
+bookmark_request(void)
 {
 }
 

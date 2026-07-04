@@ -65,6 +65,7 @@ _win_ensure_pad_capacity(ProfWin* window, WINDOW* win, int lines_needed)
     }
 }
 static const char* LOADING_MESSAGE = "Loading older messages…";
+static const char* END_OF_ARCHIVE_MESSAGE = "End of archive reached";
 static const char* CONS_WIN_TITLE = "Profanity. Type /help for help information.";
 static const char* XML_WIN_TITLE = "XML Console";
 
@@ -688,19 +689,23 @@ win_page_up(ProfWin* window, int scroll_size)
     *scroll_state = (*scroll_state == WIN_SCROLL_REACHED_BOTTOM) ? WIN_SCROLL_INNER : *scroll_state;
     *page_start -= scroll_size;
 
-    if (*page_start == -scroll_size && window->type == WIN_CHAT) {
-        ProfChatWin* chatwin = (ProfChatWin*)window;
+    if (*page_start == -scroll_size && (window->type == WIN_CHAT || window->type == WIN_MUC)) {
         ProfBuffEntry* first_entry = buffer_size(window->layout->buffer) != 0 ? buffer_get_entry(window->layout->buffer, 0) : NULL;
 
-        // Don't do anything if still fetching mam messages
-        if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, LOADING_MESSAGE) == 0)) {
+        // Don't do anything if still fetching mam messages or if end of archive is reached
+        if (first_entry && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, LOADING_MESSAGE) == 0)
+            && !(first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, END_OF_ARCHIVE_MESSAGE) == 0)) {
             if (*scroll_state != WIN_SCROLL_REACHED_TOP) {
-                *scroll_state = !chatwin_db_history(chatwin, NULL, NULL, TRUE) ? WIN_SCROLL_REACHED_TOP : WIN_SCROLL_INNER;
+                if (window->type == WIN_MUC) {
+                    *scroll_state = !mucwin_db_history((ProfMucWin*)window, NULL, NULL, TRUE) ? WIN_SCROLL_REACHED_TOP : WIN_SCROLL_INNER;
+                } else {
+                    *scroll_state = !chatwin_db_history((ProfChatWin*)window, NULL, NULL, TRUE) ? WIN_SCROLL_REACHED_TOP : WIN_SCROLL_INNER;
+                }
             }
 
             if (*scroll_state == WIN_SCROLL_REACHED_TOP && prefs_get_boolean(PREF_MAM)) {
                 win_print_loading_history(window);
-                iq_mam_request_older(chatwin);
+                iq_mam_request_older(window);
             }
 
             unsigned int buff_size = buffer_size(window->layout->buffer);
@@ -1490,9 +1495,9 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
 }
 
 void
-win_print_them(ProfWin* window, theme_item_t theme_item, const char* const show_char, int flags, const char* const them)
+win_print_them(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const show_char, int flags, const char* const them)
 {
-    _win_printf(window, show_char, 0, NULL, flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, "");
+    _win_printf(window, show_char, 0, timestamp, flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, "");
 }
 
 void
@@ -1573,9 +1578,13 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
 }
 
 static void
-win_println_va_internal(ProfWin* window, theme_item_t theme_item, int pad, int flags, const char* show_char, const char* const message, va_list arg)
+win_println_va_internal_with_timestamp(ProfWin* window, theme_item_t theme_item, int pad, int flags, const char* show_char, GDateTime* timestamp, const char* const message, va_list arg)
 {
-    GDateTime* timestamp = g_date_time_new_now_local();
+    gboolean created_timestamp = FALSE;
+    if (!timestamp) {
+        timestamp = g_date_time_new_now_local();
+        created_timestamp = TRUE;
+    }
 
     auto_gchar gchar* msg = g_strdup_vprintf(message, arg);
 
@@ -1584,7 +1593,15 @@ win_println_va_internal(ProfWin* window, theme_item_t theme_item, int pad, int f
     buffer_append(window->layout->buffer, show_char, pad, timestamp, flags, theme_item, "", NULL, msg, NULL, NULL, y_start_pos, getcury(window->layout->win));
 
     inp_nonblocking(TRUE);
-    g_date_time_unref(timestamp);
+    if (created_timestamp) {
+        g_date_time_unref(timestamp);
+    }
+}
+
+static void
+win_println_va_internal(ProfWin* window, theme_item_t theme_item, int pad, int flags, const char* show_char, const char* const message, va_list arg)
+{
+    win_println_va_internal_with_timestamp(window, theme_item, pad, flags, show_char, NULL, message, arg);
 }
 
 void
@@ -1639,20 +1656,20 @@ win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message
 }
 
 void
-win_append_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_append_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const message, ...)
 {
     va_list arg;
     va_start(arg, message);
-    win_println_va_internal(window, theme_item, 0, NO_DATE | NO_ME | NO_EOL, "-", message, arg);
+    win_println_va_internal_with_timestamp(window, theme_item, 0, NO_DATE | NO_ME | NO_EOL, "-", timestamp, message, arg);
     va_end(arg);
 }
 
 void
-win_appendln_highlight(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_appendln_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const message, ...)
 {
     va_list arg;
     va_start(arg, message);
-    win_println_va_internal(window, theme_item, 0, NO_DATE | NO_ME, "-", message, arg);
+    win_println_va_internal_with_timestamp(window, theme_item, 0, NO_DATE | NO_ME, "-", timestamp, message, arg);
     va_end(arg);
 }
 
@@ -2088,6 +2105,41 @@ win_print_loading_history(ProfWin* window)
 
     int cur_y = getcury(window->layout->win);
     buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE, THEME_ROOMINFO, NULL, NULL, LOADING_MESSAGE, NULL, NULL, cur_y, cur_y + 1);
+
+    if (is_buffer_empty)
+        g_date_time_unref(timestamp);
+
+    win_redraw(window);
+}
+
+void
+win_print_end_of_archive(ProfWin* window)
+{
+    GDateTime* timestamp;
+    gboolean is_buffer_empty = buffer_size(window->layout->buffer) == 0;
+
+    // Reset scroll position and exit paged state to make the banner visible!
+    window->layout->y_pos = 0;
+    window->layout->paged = 0;
+
+    if (!is_buffer_empty) {
+        timestamp = buffer_get_entry(window->layout->buffer, 0)->time;
+    } else {
+        timestamp = g_date_time_new_now_local();
+    }
+
+    if (!is_buffer_empty) {
+        ProfBuffEntry* first_entry = buffer_get_entry(window->layout->buffer, 0);
+        if (first_entry->theme_item == THEME_ROOMINFO && g_strcmp0(first_entry->message, END_OF_ARCHIVE_MESSAGE) == 0) {
+            if (is_buffer_empty)
+                g_date_time_unref(timestamp);
+            win_redraw(window);
+            return;
+        }
+    }
+
+    int cur_y = getcury(window->layout->win);
+    buffer_prepend(window->layout->buffer, "-", 0, timestamp, NO_DATE, THEME_ROOMINFO, NULL, NULL, END_OF_ARCHIVE_MESSAGE, NULL, NULL, cur_y, cur_y + 1);
 
     if (is_buffer_empty)
         g_date_time_unref(timestamp);

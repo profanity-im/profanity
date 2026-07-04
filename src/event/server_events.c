@@ -38,6 +38,8 @@
 #include "xmpp/roster_list.h"
 #include "xmpp/avatar.h"
 #include "xmpp/vcard_funcs.h"
+#include "xmpp/bookmark.h"
+#include "xmpp/stanza.h"
 
 #ifdef HAVE_LIBOTR
 #include "otr/otr.h"
@@ -181,6 +183,11 @@ sv_ev_connection_features_received(void)
 #ifdef HAVE_OMEMO
     omemo_publish_crypto_materials();
 #endif
+    bookmark_request();
+
+    if (prefs_get_boolean(PREF_CARBONS) && connection_supports(STANZA_NS_CARBONS)) {
+        iq_enable_carbons();
+    }
 }
 
 void
@@ -297,7 +304,7 @@ sv_ev_room_history(ProfMessage* message)
     }
 }
 
-static void
+static gboolean
 _log_muc(ProfMessage* message)
 {
     if (message->enc == PROF_MSG_ENC_OMEMO) {
@@ -305,7 +312,7 @@ _log_muc(ProfMessage* message)
     } else {
         groupchat_log_msg_in(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
     }
-    log_database_add_incoming(message);
+    return log_database_add_incoming(message);
 }
 
 void
@@ -318,10 +325,14 @@ sv_ev_room_message(ProfMessage* message)
 
     const char* const mynick = muc_nick(mucwin->roomjid);
 
+    gboolean is_duplicate = FALSE;
+
     // only log message not coming from this client (but maybe same account, different client)
     // our messages are logged when outgoing
     if (!(g_strcmp0(mynick, message->from_jid->resourcepart) == 0 && message_is_sent_by_us(message, TRUE))) {
-        _log_muc(message);
+        if (!_log_muc(message)) {
+            is_duplicate = TRUE;
+        }
     }
 
     char* old_plain = message->plain;
@@ -334,56 +345,73 @@ sv_ev_room_message(ProfMessage* message)
     GList* triggers = prefs_message_get_triggers(message->plain);
 
     _clean_incoming_message(message);
-    mucwin_incoming_msg(mucwin, message, mentions, triggers, TRUE);
+
+    if (is_duplicate) {
+        log_debug("Skipping duplicate room message display: JID=%s, message=%s",
+                  message->from_jid->barejid, message->plain);
+        g_slist_free(mentions);
+        if (triggers) {
+            g_list_free_full(triggers, free);
+        }
+        message->plain = old_plain;
+        return;
+    }
+
+    if (message->is_mam) {
+        // For MAM, print to window but disable all notifications, unread count increment etc
+        // And don't filter reflection of our own sent messages (so they get displayed)
+        mucwin_incoming_msg(mucwin, message, mentions, triggers, FALSE);
+    } else {
+        mucwin_incoming_msg(mucwin, message, mentions, triggers, TRUE);
+
+        ProfWin* window = (ProfWin*)mucwin;
+        int num = wins_get_num(window);
+        gboolean is_current = FALSE;
+
+        // currently in groupchat window
+        if (wins_is_current(window)) {
+            is_current = TRUE;
+            status_bar_active(num, WIN_MUC, mucwin->roomjid);
+
+            if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_BEEP))) {
+                ui_beep();
+            }
+
+            // not currently on groupchat window
+        } else {
+            status_bar_new(num, WIN_MUC, mucwin->roomjid);
+
+            if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_FLASH))) {
+                ui_flash();
+            }
+
+            cons_show_incoming_room_message(message->from_jid->resourcepart, mucwin->roomjid, num, mention, triggers, mucwin->unread, window);
+
+            mucwin->unread++;
+
+            if (mention) {
+                mucwin->unread_mentions = TRUE;
+            }
+            if (triggers) {
+                mucwin->unread_triggers = TRUE;
+            }
+        }
+
+        // save timestamp of last received muc message
+        if (mucwin->last_msg_timestamp) {
+            g_date_time_unref(mucwin->last_msg_timestamp);
+        }
+        mucwin->last_msg_timestamp = g_date_time_new_now_local();
+
+        if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL)) {
+            auto_jid Jid* jidp = jid_create(mucwin->roomjid);
+            if (jidp) {
+                notify_room_message(message->from_jid->resourcepart, jidp->localpart, num, message->plain);
+            }
+        }
+    }
 
     g_slist_free(mentions);
-
-    ProfWin* window = (ProfWin*)mucwin;
-    int num = wins_get_num(window);
-    gboolean is_current = FALSE;
-
-    // currently in groupchat window
-    if (wins_is_current(window)) {
-        is_current = TRUE;
-        status_bar_active(num, WIN_MUC, mucwin->roomjid);
-
-        if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_BEEP))) {
-            ui_beep();
-        }
-
-        // not currently on groupchat window
-    } else {
-        status_bar_new(num, WIN_MUC, mucwin->roomjid);
-
-        if ((g_strcmp0(mynick, message->from_jid->resourcepart) != 0) && (prefs_get_boolean(PREF_FLASH))) {
-            ui_flash();
-        }
-
-        cons_show_incoming_room_message(message->from_jid->resourcepart, mucwin->roomjid, num, mention, triggers, mucwin->unread, window);
-
-        mucwin->unread++;
-
-        if (mention) {
-            mucwin->unread_mentions = TRUE;
-        }
-        if (triggers) {
-            mucwin->unread_triggers = TRUE;
-        }
-    }
-
-    // save timestamp of last received muc message
-    if (mucwin->last_msg_timestamp) {
-        g_date_time_unref(mucwin->last_msg_timestamp);
-    }
-    mucwin->last_msg_timestamp = g_date_time_new_now_local();
-
-    if (prefs_do_room_notify(is_current, mucwin->roomjid, mynick, message->from_jid->resourcepart, message->plain, mention, triggers != NULL)) {
-        auto_jid Jid* jidp = jid_create(mucwin->roomjid);
-        if (jidp) {
-            notify_room_message(message->from_jid->resourcepart, jidp->localpart, num, message->plain);
-        }
-    }
-
     if (triggers) {
         g_list_free_full(triggers, free);
     }
@@ -622,7 +650,7 @@ sv_ev_incoming_message(ProfMessage* message)
 
         if (prefs_get_boolean(PREF_MAM)) {
             win_print_loading_history(window);
-            iq_mam_request(chatwin, g_date_time_ref(message->timestamp)); // copy timestamp
+            iq_mam_request((ProfWin*)chatwin, g_date_time_ref(message->timestamp)); // copy timestamp
         }
 
 #ifdef HAVE_OMEMO

@@ -266,7 +266,8 @@ presence_join_room(const char* const room, const char* const nick, const char* c
     int pri = accounts_get_priority_for_presence_type(session_get_account_name(), presence_type);
 
     xmpp_ctx_t* ctx = connection_get_ctx();
-    xmpp_stanza_t* presence = stanza_create_room_join_presence(ctx, jid->fulljid, passwd);
+    gboolean max_stanzas_zero = prefs_get_boolean(PREF_MAM) && connection_supports(XMPP_FEATURE_MAM2);
+    xmpp_stanza_t* presence = stanza_create_room_join_presence(ctx, jid->fulljid, passwd, max_stanzas_zero);
     stanza_attach_show(ctx, presence, show);
     stanza_attach_status(ctx, presence, status);
     stanza_attach_priority(ctx, presence, pri);
