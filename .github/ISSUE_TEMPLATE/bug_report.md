@@ -56,3 +56,6 @@ assignees: ''
 * libstrophe version
 * omemo backend
 * Some bugs might be due to specific implementation in the server. `/serversoftware example.domain` can be helpful
+
+## Reporter (optional)
+<!--- If this issue is being submitted on behalf of someone else (from the MUC), please mention their nickname or JID here if they wish to share it. -->

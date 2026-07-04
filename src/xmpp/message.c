@@ -76,6 +76,10 @@ gchar*
 get_display_name(const ProfMessage* const message, int* flags)
 {
     if (message->type == PROF_MSG_TYPE_MUC) {
+        if (equals_our_barejid(message->from_jid->barejid)) {
+            return prefs_get_string(PREF_OUTGOING_STAMP);
+        }
+
         const char* const mynick = muc_nick(message->from_jid->barejid);
         gboolean is_me = (g_strcmp0(mynick, message->from_jid->resourcepart) == 0);
         if (is_me) {
