@@ -4897,6 +4897,8 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
     }
 
     gboolean omemo_enabled = FALSE;
+    gboolean ox_enabled = FALSE;
+    gboolean ox_encryptfile = FALSE;
     gboolean sendfile_enabled = TRUE;
 
     switch (window->type) {
@@ -4912,6 +4914,8 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         ProfChatWin* chatwin = (ProfChatWin*)window;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         omemo_enabled = chatwin->is_omemo == TRUE;
+        ox_enabled = chatwin->is_ox == TRUE;
+        ox_encryptfile = prefs_get_boolean(PREF_OX_ENCRYPTFILE) == TRUE;
         sendfile_enabled = !((chatwin->pgp_send == TRUE && !prefs_get_boolean(PREF_PGP_SENDFILE))
                              || (chatwin->is_otr == TRUE && !prefs_get_boolean(PREF_OTR_SENDFILE)));
         break;
@@ -4936,7 +4940,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         goto out;
     }
 
-    if (omemo_enabled) {
+    if (omemo_enabled || (ox_enabled && ox_encryptfile)) {
 #ifdef HAVE_OMEMO
         char* err = NULL;
         alt_scheme = OMEMO_AESGCM_URL_SCHEME;
@@ -4944,6 +4948,15 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         if (err != NULL) {
             cons_show_error(err);
             win_println(window, THEME_ERROR, "-", err);
+            if (fh) {
+                fclose(fh);
+            }
+            goto out;
+        }
+#else
+        if (ox_enabled && ox_encryptfile) {
+            cons_show_error("OX encrypted file sharing requires OMEMO to be enabled at compile time (for AES-GCM file encryption helper).");
+            win_println(window, THEME_ERROR, "-", "To send raw files with only the link encrypted, run '/ox encryptfile off'.");
             if (fh) {
                 fclose(fh);
             }
@@ -7565,6 +7578,15 @@ cmd_ox(ProfWin* window, const char* const command, gchar** args)
             return TRUE;
         }
         cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    else if (g_strcmp0(args[0], "encryptfile") == 0) {
+        if (args[1] == NULL) {
+            cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+        _cmd_set_boolean_preference(args[1], "Encrypting files locally using AES-GCM before sending via OX", PREF_OX_ENCRYPTFILE);
         return TRUE;
     }
 
