@@ -3,6 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2019 - 2026 Michael Vetter <jubalh@iodoru.org>
  *
  * SPDX-License-Identifier: GPL-3.0-or-later WITH OpenSSL-exception
  */
@@ -69,6 +70,7 @@ static GTimer* reconnect_timer;
 static activity_state_t activity_state;
 static resource_presence_t saved_presence;
 static char* saved_status;
+static GHashTable* last_moods = NULL;
 
 static void _session_free_internals(void);
 static void _session_free_saved_details(void);
@@ -270,6 +272,15 @@ _receive_mood(xmpp_stanza_t* const stanza, void* const userdata)
     }
 
     const char* from = xmpp_stanza_get_from(stanza);
+    if (!from) {
+        return TRUE;
+    }
+
+    auto_jid Jid* jidp = jid_create(from);
+    if (!jidp) {
+        return TRUE;
+    }
+
     xmpp_stanza_t* event = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_EVENT, STANZA_NS_PUBSUB_EVENT);
     if (event) {
         xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(event, STANZA_NAME_ITEMS);
@@ -282,11 +293,40 @@ _receive_mood(xmpp_stanza_t* const stanza, void* const userdata)
                     if (c) {
                         const char* m = xmpp_stanza_get_name(c);
                         xmpp_stanza_t* t = xmpp_stanza_get_child_by_name(mood, STANZA_NAME_TEXT);
+                        auto_char char* text = NULL;
                         if (t) {
-                            auto_char char* text = xmpp_stanza_get_text(t);
+                            text = xmpp_stanza_get_text(t);
+                        }
+
+                        gchar* current_mood = NULL;
+                        if (text) {
+                            current_mood = g_strdup_printf("%s (%s)", m, text);
+                        } else {
+                            current_mood = g_strdup(m);
+                        }
+
+                        if (last_moods == NULL) {
+                            last_moods = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+                        }
+
+                        const char* last_mood = g_hash_table_lookup(last_moods, jidp->barejid);
+                        if (g_strcmp0(last_mood, current_mood) == 0) {
+                            g_free(current_mood);
+                            return TRUE;
+                        }
+
+                        g_hash_table_insert(last_moods, g_strdup(jidp->barejid), g_strdup(current_mood));
+
+                        if (text) {
                             cons_show("Mood from %s %s (%s)", from, m, text);
                         } else {
                             cons_show("Mood from %s %s", from, m);
+                        }
+
+                        g_free(current_mood);
+                    } else {
+                        if (last_moods) {
+                            g_hash_table_remove(last_moods, jidp->barejid);
                         }
                     }
                 }
@@ -566,6 +606,10 @@ _session_free_internals(void)
     FREE_SET_NULL(saved_account.name);
     FREE_SET_NULL(saved_account.passwd);
     GFREE_SET_NULL(reconnect.altdomain);
+    if (last_moods) {
+        g_hash_table_destroy(last_moods);
+        last_moods = NULL;
+    }
     _session_free_saved_details();
 }
 
