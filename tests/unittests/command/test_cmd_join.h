@@ -10,5 +10,8 @@ void cmd_join__tests__uses_account_mucservice_when_no_service_specified(void** s
 void cmd_join__tests__uses_supplied_nick(void** state);
 void cmd_join__tests__uses_account_nick_when_not_supplied(void** state);
 void cmd_join__tests__uses_password_when_supplied(void** state);
+void cmd_join__tests__xmpp_uri_join(void** state);
+void cmd_join__tests__xmpp_uri_join_with_password(void** state);
+void cmd_join__tests__xmpp_uri_invalid_query_type(void** state);
 
 #endif

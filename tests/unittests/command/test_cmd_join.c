@@ -158,3 +158,68 @@ cmd_join__tests__uses_password_when_supplied(void** state)
     gboolean result = cmd_join(NULL, CMD_JOIN, args);
     assert_true(result);
 }
+
+void
+cmd_join__tests__xmpp_uri_join(void** state)
+{
+    gchar* account_name = g_strdup("an_account");
+    char* room_uri = "xmpp:room@conf.server.org?join";
+    char* expected_room = "room@conf.server.org";
+    gchar* account_nick = g_strdup("a_nick");
+    gchar* args[] = { room_uri, NULL };
+    ProfAccount* account = account_new(account_name, g_strdup("user@server.org"), NULL, NULL,
+                                       TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, NULL, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, account_name);
+
+    expect_string(accounts_get_account, name, account_name);
+    will_return(accounts_get_account, account);
+
+    expect_string(presence_join_room, room, expected_room);
+    expect_string(presence_join_room, nick, account_nick);
+    expect_value(presence_join_room, passwd, NULL);
+
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
+    assert_true(result);
+}
+
+void
+cmd_join__tests__xmpp_uri_join_with_password(void** state)
+{
+    gchar* account_name = g_strdup("an_account");
+    char* room_uri = "xmpp:room@conf.server.org?join;password=secret";
+    char* expected_room = "room@conf.server.org";
+    char* expected_password = "secret";
+    gchar* account_nick = g_strdup("a_nick");
+    gchar* args[] = { room_uri, NULL };
+    ProfAccount* account = account_new(account_name, g_strdup("user@server.org"), NULL, NULL,
+                                       TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, NULL, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, account_name);
+
+    expect_string(accounts_get_account, name, account_name);
+    will_return(accounts_get_account, account);
+
+    expect_string(presence_join_room, room, expected_room);
+    expect_string(presence_join_room, nick, account_nick);
+    expect_string(presence_join_room, passwd, expected_password);
+
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
+    assert_true(result);
+}
+
+void
+cmd_join__tests__xmpp_uri_invalid_query_type(void** state)
+{
+    char* room_uri = "xmpp:room@conf.server.org?message";
+    gchar* args[] = { room_uri, NULL };
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+
+    expect_cons_show_error("Unsupported or invalid XMPP URI query type. Only 'join' is supported.");
+
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
+    assert_true(result);
+}
