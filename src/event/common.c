@@ -18,6 +18,7 @@
 #include "xmpp/vcard_funcs.h"
 #include "database.h"
 #include "tools/bookmark_ignore.h"
+#include "event/server_events.h"
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"
@@ -49,6 +50,7 @@ ev_disconnect_cleanup(void)
     log_database_close();
     bookmark_ignore_on_disconnect();
     vcard_user_free();
+    autojoin_queue_clear();
 }
 
 gboolean

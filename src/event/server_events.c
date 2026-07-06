@@ -1304,6 +1304,73 @@ sv_ev_lastactivity_response(const char* const from, const int seconds, const cha
     g_date_time_unref(active);
 }
 
+typedef struct
+{
+    gchar* barejid;
+    gchar* nick;
+    gchar* password;
+} AutojoinItem;
+
+static GQueue* autojoin_queue = NULL;
+static guint autojoin_timeout_id = 0;
+
+static void
+_free_autojoin_item(AutojoinItem* item)
+{
+    if (item) {
+        g_free(item->barejid);
+        g_free(item->nick);
+        g_free(item->password);
+        g_free(item);
+    }
+}
+
+void
+autojoin_queue_clear(void)
+{
+    if (autojoin_timeout_id != 0) {
+        g_source_remove(autojoin_timeout_id);
+        autojoin_timeout_id = 0;
+    }
+    if (autojoin_queue) {
+        while (!g_queue_is_empty(autojoin_queue)) {
+            AutojoinItem* item = g_queue_pop_head(autojoin_queue);
+            _free_autojoin_item(item);
+        }
+        g_queue_free(autojoin_queue);
+        autojoin_queue = NULL;
+    }
+}
+
+static gboolean
+_autojoin_timeout_cb(gpointer user_data)
+{
+    if (!autojoin_queue || g_queue_is_empty(autojoin_queue)) {
+        autojoin_timeout_id = 0;
+        return G_SOURCE_REMOVE;
+    }
+
+    AutojoinItem* item = g_queue_pop_head(autojoin_queue);
+    if (item) {
+        log_debug("Autojoin processing staggered item: %s with nick=%s", item->barejid, item->nick);
+        if (!muc_active(item->barejid)) {
+            muc_join(item->barejid, item->nick, item->password, TRUE);
+            presence_join_room(item->barejid, item->nick, item->password);
+            iq_room_affiliation_list(item->barejid, "member", false);
+            iq_room_affiliation_list(item->barejid, "admin", false);
+            iq_room_affiliation_list(item->barejid, "owner", false);
+        }
+        _free_autojoin_item(item);
+    }
+
+    if (g_queue_is_empty(autojoin_queue)) {
+        autojoin_timeout_id = 0;
+        return G_SOURCE_REMOVE;
+    }
+
+    return G_SOURCE_CONTINUE;
+}
+
 void
 sv_ev_bookmark_autojoin(Bookmark* bookmark)
 {
@@ -1311,23 +1378,29 @@ sv_ev_bookmark_autojoin(Bookmark* bookmark)
         return;
     }
 
-    auto_char char* nick = NULL;
+    if (!autojoin_queue) {
+        autojoin_queue = g_queue_new();
+    }
+
+    auto_gchar gchar* nick = NULL;
 
     if (bookmark->nick) {
-        nick = strdup(bookmark->nick);
+        nick = g_strdup(bookmark->nick);
     } else {
         ProfAccount* account = accounts_get_account(session_get_account_name());
-        nick = strdup(account->muc_nick);
+        nick = g_strdup(account->muc_nick);
         account_free(account);
     }
 
-    log_debug("Autojoin %s with nick=%s", bookmark->barejid, nick);
-    if (!muc_active(bookmark->barejid)) {
-        muc_join(bookmark->barejid, nick, bookmark->password, TRUE);
-        presence_join_room(bookmark->barejid, nick, bookmark->password);
-        iq_room_affiliation_list(bookmark->barejid, "member", false);
-        iq_room_affiliation_list(bookmark->barejid, "admin", false);
-        iq_room_affiliation_list(bookmark->barejid, "owner", false);
+    AutojoinItem* item = g_new0(AutojoinItem, 1);
+    item->barejid = g_strdup(bookmark->barejid);
+    item->nick = g_strdup(nick);
+    item->password = bookmark->password ? g_strdup(bookmark->password) : NULL;
+
+    g_queue_push_tail(autojoin_queue, item);
+
+    if (autojoin_timeout_id == 0) {
+        autojoin_timeout_id = g_timeout_add(200, _autojoin_timeout_cb, NULL);
     }
 }
 

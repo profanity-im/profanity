@@ -63,5 +63,6 @@ void sv_ev_connection_features_received(void);
 int sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert);
 void sv_ev_lastactivity_response(const char* const from, const int seconds, const char* const msg);
 void sv_ev_bookmark_autojoin(Bookmark* bookmark);
+void autojoin_queue_clear(void);
 
 #endif
