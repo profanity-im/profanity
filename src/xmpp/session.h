@@ -12,6 +12,8 @@
 
 #include <glib.h>
 
+#include "common.h"
+
 void session_login_success(gboolean secured);
 void session_login_failed(void);
 void session_lost_connection(void);
@@ -19,6 +21,7 @@ void session_autoping_fail(void);
 
 void session_init_activity(void);
 void session_check_autoaway(void);
+void session_set_activity_state_for_presence(resource_presence_t presence);
 
 void session_reconnect(gchar* altdomain, unsigned short altport);
 

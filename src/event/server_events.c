@@ -32,6 +32,7 @@
 #include "ui/window.h"
 #include "tools/bookmark_ignore.h"
 #include "xmpp/xmpp.h"
+#include "xmpp/session.h"
 #include "xmpp/iq.h"
 #include "xmpp/muc.h"
 #include "xmpp/chat_session.h"
@@ -152,6 +153,7 @@ sv_ev_roster_received(void)
 
     // send initial presence
     resource_presence_t conn_presence = accounts_get_login_presence(account_name);
+    session_set_activity_state_for_presence(conn_presence);
     auto_gchar gchar* last_activity_str = accounts_get_last_activity(account_name);
     auto_gchar gchar* status_message = accounts_get_login_status(account_name);
     int diff_secs = 0;
