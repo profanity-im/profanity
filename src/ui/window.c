@@ -2002,8 +2002,11 @@ _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pa
                             _win_indent(win, indent + pad_indent);
                         }
 
-                        gchar copy[wordi + 1];
-                        g_utf8_strncpy(copy, word_ch, 1);
+                        gchar* next = g_utf8_next_char(word_ch);
+                        gsize bytes_to_copy = next - word_ch;
+                        gchar copy[bytes_to_copy + 1];
+                        memcpy(copy, word_ch, bytes_to_copy);
+                        copy[bytes_to_copy] = '\0';
                         waddstr(win, copy);
 
                         word_ch = g_utf8_next_char(word_ch);

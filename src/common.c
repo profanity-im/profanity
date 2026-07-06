@@ -445,6 +445,21 @@ str_xml_sanitize(const char* const str)
     return g_string_free(sanitized, FALSE);
 }
 
+gint
+str_ascii_casecmp0(const char* s1, const char* s2)
+{
+    if (s1 == s2) {
+        return 0;
+    }
+    if (s1 == NULL) {
+        return -1;
+    }
+    if (s2 == NULL) {
+        return 1;
+    }
+    return g_ascii_strcasecmp(s1, s2);
+}
+
 char*
 release_get_latest(void)
 {
