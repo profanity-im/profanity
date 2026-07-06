@@ -160,6 +160,7 @@ char* str_replace(const char* string, const char* substr, const char* replacemen
 gboolean strtoi_range(const char* str, int* saveptr, int min, int max, char** err_msg);
 int utf8_display_len(const char* const str);
 gchar* str_xml_sanitize(const char* const str);
+gint str_ascii_casecmp0(const char* s1, const char* s2);
 
 gboolean string_matches_one_of(const char* what, const char* is, gboolean is_can_be_null, const char* first, ...) __attribute__((sentinel));
 gboolean valid_tls_policy_option(const char* is);

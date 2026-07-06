@@ -101,7 +101,7 @@ wins_get_chat(const char* const barejid)
         ProfWin* window = curr->data;
         if (window->type == WIN_CHAT) {
             ProfChatWin* chatwin = (ProfChatWin*)window;
-            if (g_strcmp0(chatwin->barejid, barejid) == 0) {
+            if (str_ascii_casecmp0(chatwin->barejid, barejid) == 0) {
                 return chatwin;
             }
         }
@@ -147,7 +147,7 @@ wins_get_conf(const char* const roomjid)
         ProfWin* window = curr->data;
         if (window->type == WIN_CONFIG) {
             ProfConfWin* confwin = (ProfConfWin*)window;
-            if (g_strcmp0(confwin->roomjid, roomjid) == 0) {
+            if (str_ascii_casecmp0(confwin->roomjid, roomjid) == 0) {
                 return confwin;
             }
         }
@@ -166,7 +166,7 @@ wins_get_muc(const char* const roomjid)
         ProfWin* window = curr->data;
         if (window->type == WIN_MUC) {
             ProfMucWin* mucwin = (ProfMucWin*)window;
-            if (g_strcmp0(mucwin->roomjid, roomjid) == 0) {
+            if (str_ascii_casecmp0(mucwin->roomjid, roomjid) == 0) {
                 return mucwin;
             }
         }
