@@ -3540,6 +3540,51 @@ cmd_serversoftware(ProfWin* window, const char* const command, gchar** args)
     return TRUE;
 }
 
+static gboolean
+_xmpp_uri_parse_join(const gchar* uri, gchar** out_room, gchar** out_password)
+{
+    if (g_ascii_strncasecmp(uri, "xmpp:", 5) != 0) {
+        return FALSE;
+    }
+
+    const gchar* body = uri + 5;
+    const gchar* query = strchr(body, '?');
+
+    if (query == NULL) {
+        *out_room = g_uri_unescape_string(body, NULL);
+        *out_password = NULL;
+        return TRUE;
+    }
+
+    gchar* room_escaped = g_strndup(body, query - body);
+    *out_room = g_uri_unescape_string(room_escaped, NULL);
+    g_free(room_escaped);
+
+    const gchar* query_str = query + 1;
+    auto_gcharv gchar** parts = g_strsplit(query_str, ";", -1);
+
+    if (parts[0] == NULL || g_strcmp0(parts[0], "join") != 0) {
+        g_free(*out_room);
+        *out_room = NULL;
+        return FALSE;
+    }
+
+    gchar* password = NULL;
+    for (int i = 1; parts[i] != NULL; i++) {
+        gchar* eq = strchr(parts[i], '=');
+        if (eq != NULL) {
+            gchar* key = g_strndup(parts[i], eq - parts[i]);
+            if (g_strcmp0(key, "password") == 0) {
+                password = g_uri_unescape_string(eq + 1, NULL);
+            }
+            g_free(key);
+        }
+    }
+
+    *out_password = password;
+    return TRUE;
+}
+
 gboolean
 cmd_join(ProfWin* window, const char* const command, gchar** args)
 {
@@ -3566,7 +3611,19 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
         return TRUE;
     }
 
-    auto_jid Jid* room_arg = jid_create(args[0]);
+    auto_gchar gchar* room_jid = NULL;
+    auto_gchar gchar* uri_password = NULL;
+
+    if (g_ascii_strncasecmp(args[0], "xmpp:", 5) == 0) {
+        if (!_xmpp_uri_parse_join(args[0], &room_jid, &uri_password)) {
+            cons_show_error("Unsupported or invalid XMPP URI query type. Only 'join' is supported.");
+            return TRUE;
+        }
+    } else {
+        room_jid = g_strdup(args[0]);
+    }
+
+    auto_jid Jid* room_arg = jid_create(room_jid);
     if (room_arg == NULL) {
         cons_show_error("Specified room has incorrect format.");
         cons_show("");
@@ -3580,11 +3637,11 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
 
     // full room jid supplied (room@server)
     if (room_arg->localpart) {
-        room = g_strdup(args[0]);
+        room = g_strdup(room_jid);
 
         // server not supplied (room), use account preference
     } else if (account->muc_service) {
-        room = g_strdup_printf("%s@%s", args[0], account->muc_service);
+        room = g_strdup_printf("%s@%s", room_jid, account->muc_service);
 
         // no account preference
     } else {
@@ -3611,6 +3668,10 @@ cmd_join(ProfWin* window, const char* const command, gchar** args)
     // In the case that a nick wasn't provided by the optional args...
     if (!nick) {
         nick = account->muc_nick;
+    }
+
+    if (!passwd) {
+        passwd = uri_password;
     }
 
     // When no password, check for invite with password
