@@ -23,6 +23,10 @@ void
 session_check_autoaway(void)
 {
 }
+void
+session_set_activity_state_for_presence(resource_presence_t presence)
+{
+}
 
 jabber_conn_status_t
 session_connect_with_details(const char* const jid,

@@ -422,6 +422,18 @@ session_init_activity(void)
 }
 
 void
+session_set_activity_state_for_presence(resource_presence_t presence)
+{
+    if (presence == RESOURCE_AWAY) {
+        activity_state = ACTIVITY_ST_AWAY;
+    } else if (presence == RESOURCE_XA) {
+        activity_state = ACTIVITY_ST_XA;
+    } else {
+        activity_state = ACTIVITY_ST_ACTIVE;
+    }
+}
+
+void
 session_check_autoaway(void)
 {
     jabber_conn_status_t conn_status = connection_get_status();
