@@ -37,3 +37,15 @@ void
 log_database_close(void)
 {
 }
+
+gboolean
+log_database_update_archive_id(const prof_msg_type_t type, const char* const room_or_contact_jid, const char* const stanza_id, const char* const archive_id)
+{
+    return FALSE;
+}
+
+char*
+log_database_get_decrypted_message(const prof_msg_type_t type, const char* const from_jid, const char* const to_jid, const char* const stanza_id, const char* const archive_id)
+{
+    return NULL;
+}

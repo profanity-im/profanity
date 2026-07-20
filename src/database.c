@@ -896,3 +896,90 @@ cleanup:
 
     return FALSE;
 }
+
+gboolean
+log_database_update_archive_id(const prof_msg_type_t type, const char* const room_or_contact_jid, const char* const stanza_id, const char* const archive_id)
+{
+    if (!g_chatlog_database || !stanza_id || !archive_id || !room_or_contact_jid) {
+        return FALSE;
+    }
+
+    const char* our_barejid = connection_get_jid()->barejid;
+    sqlite3_stmt* stmt = NULL;
+    gboolean success = FALSE;
+    const char* type_str = _get_message_type_str(type);
+
+    if (!type_str) {
+        return FALSE;
+    }
+
+    auto_sqlite char* query = sqlite3_mprintf(
+        "UPDATE `ChatLogs` "
+        "SET `archive_id` = %Q "
+        "WHERE `stanza_id` = %Q "
+        "  AND `from_jid` = %Q "
+        "  AND `to_jid` = %Q "
+        "  AND `type` = %Q "
+        "  AND `archive_id` IS NULL",
+        archive_id, stanza_id, our_barejid, room_or_contact_jid, type_str);
+
+    if (query) {
+        if (SQLITE_OK == sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL)) {
+            if (sqlite3_step(stmt) == SQLITE_DONE) {
+                success = TRUE;
+            }
+            sqlite3_finalize(stmt);
+        }
+    }
+
+    return success;
+}
+
+char*
+log_database_get_decrypted_message(const prof_msg_type_t type, const char* const from_jid, const char* const to_jid, const char* const stanza_id, const char* const archive_id)
+{
+    if (!g_chatlog_database || !from_jid || !to_jid) {
+        return NULL;
+    }
+
+    sqlite3_stmt* stmt = NULL;
+    char* decrypted_text = NULL;
+    auto_sqlite char* query = NULL;
+    const char* type_str = _get_message_type_str(type);
+
+    if (!type_str) {
+        return NULL;
+    }
+
+    if (stanza_id && strlen(stanza_id) > 0) {
+        query = sqlite3_mprintf(
+            "SELECT `message` FROM `ChatLogs` "
+            "WHERE `stanza_id` = %Q "
+            "  AND `type` = %Q "
+            "  AND ((`from_jid` = %Q AND `to_jid` = %Q) OR (`from_jid` = %Q AND `to_jid` = %Q)) "
+            "LIMIT 1",
+            stanza_id, type_str, from_jid, to_jid, to_jid, from_jid);
+    } else if (archive_id && strlen(archive_id) > 0) {
+        query = sqlite3_mprintf(
+            "SELECT `message` FROM `ChatLogs` "
+            "WHERE `archive_id` = %Q "
+            "  AND `type` = %Q "
+            "  AND ((`from_jid` = %Q AND `to_jid` = %Q) OR (`from_jid` = %Q AND `to_jid` = %Q)) "
+            "LIMIT 1",
+            archive_id, type_str, from_jid, to_jid, to_jid, from_jid);
+    }
+
+    if (query) {
+        if (SQLITE_OK == sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL)) {
+            if (sqlite3_step(stmt) == SQLITE_ROW) {
+                const char* text = (const char*)sqlite3_column_text(stmt, 0);
+                if (text) {
+                    decrypted_text = strdup(text);
+                }
+            }
+            sqlite3_finalize(stmt);
+        }
+    }
+
+    return decrypted_text;
+}
