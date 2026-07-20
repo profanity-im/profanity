@@ -3739,6 +3739,8 @@ cmd_invite(ProfWin* window, const char* const command, gchar** args)
             muc_invites_remove(args[1]);
             cons_show("Declined invite to %s.", args[1]);
         }
+    } else {
+        cons_bad_cmd_usage(command);
     }
 
     return TRUE;
