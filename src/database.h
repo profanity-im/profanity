@@ -27,6 +27,8 @@ int log_database_get_chat_count(const gchar* const contact_barejid, const char* 
 int log_database_get_muc_count(const gchar* const room_jid, const char* start_time, const char* end_time);
 ProfMessage* log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_last);
 ProfMessage* log_database_get_limits_info_muc(const gchar* const room_jid, gboolean is_last);
+gboolean log_database_update_archive_id(const prof_msg_type_t type, const char* const room_or_contact_jid, const char* const stanza_id, const char* const archive_id);
+char* log_database_get_decrypted_message(const prof_msg_type_t type, const char* const from_jid, const char* const to_jid, const char* const stanza_id, const char* const archive_id);
 void log_database_close(void);
 
 #endif // DATABASE_H

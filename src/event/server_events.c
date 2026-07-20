@@ -330,8 +330,14 @@ sv_ev_room_message(ProfMessage* message)
     gboolean is_duplicate = FALSE;
 
     // only log message not coming from this client (but maybe same account, different client)
-    // our messages are logged when outgoing
-    if (!(g_strcmp0(mynick, message->from_jid->resourcepart) == 0 && message_is_sent_by_us(message, TRUE))) {
+    // our messages are logged when outgoing, and we update them when reflected
+    gboolean is_self_reflection = (g_strcmp0(mynick, message->from_jid->resourcepart) == 0 && message_is_sent_by_us(message, TRUE));
+
+    if (is_self_reflection) {
+        if (message->id && message->stanzaid) {
+            log_database_update_archive_id(PROF_MSG_TYPE_MUC, message->from_jid->barejid, message->id, message->stanzaid);
+        }
+    } else {
         if (!_log_muc(message)) {
             is_duplicate = TRUE;
         }
@@ -651,6 +657,16 @@ _sv_ev_incoming_plain(ProfChatWin* chatwin, gboolean new_win, ProfMessage* messa
 void
 sv_ev_incoming_message(ProfMessage* message)
 {
+    gboolean is_self_reflection = (message->is_mam && equals_our_barejid(message->from_jid->barejid));
+
+    if (is_self_reflection) {
+        if (message->id && message->stanzaid && message->to_jid) {
+            log_database_update_archive_id(PROF_MSG_TYPE_CHAT, message->to_jid->barejid, message->id, message->stanzaid);
+        }
+        rosterwin_roster();
+        return;
+    }
+
     gboolean new_win = FALSE;
     ProfChatWin* chatwin;
     char* looking_for_jid = message->from_jid->barejid;

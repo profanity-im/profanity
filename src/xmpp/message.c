@@ -35,6 +35,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/form.h"
 #include "xmpp/iq.h"
+#include "database.h"
 
 #ifdef HAVE_OMEMO
 #include "xmpp/omemo.h"
@@ -1136,9 +1137,27 @@ _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* resu
 #ifdef HAVE_OMEMO
     message->plain = omemo_receive_message(stanza, &message->trusted, &message->omemo_err);
     if (message->omemo_err != OMEMO_ERR_NONE) {
-        message->enc = PROF_MSG_ENC_OMEMO;
-        if (message->plain == NULL) {
-            message->plain = omemo_error_to_string(message->omemo_err);
+        // Get previously decrypted plaintext from database
+        // Historical replays (MAM and standard delayed MUC history) fail decryption due to OMEMO key deletion.
+        // Realtime messages skip this.
+        char* db_decrypted = log_database_get_decrypted_message(
+            PROF_MSG_TYPE_MUC,
+            from_jid->barejid,
+            connection_get_jid()->barejid,
+            message->id,
+            message->stanzaid);
+        if (db_decrypted) {
+            if (message->plain) {
+                free(message->plain);
+            }
+            message->plain = db_decrypted;
+            message->omemo_err = OMEMO_ERR_NONE;
+            message->enc = PROF_MSG_ENC_OMEMO;
+        } else {
+            message->enc = PROF_MSG_ENC_OMEMO;
+            if (message->plain == NULL) {
+                message->plain = omemo_error_to_string(message->omemo_err);
+            }
         }
     } else if (message->plain != NULL) {
         message->enc = PROF_MSG_ENC_OMEMO;
@@ -1487,9 +1506,26 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
     // check omemo encryption
     message->plain = omemo_receive_message(stanza, &message->trusted, &message->omemo_err);
     if (message->omemo_err != OMEMO_ERR_NONE) {
-        message->enc = PROF_MSG_ENC_OMEMO;
-        if (message->plain == NULL) {
-            message->plain = omemo_error_to_string(message->omemo_err);
+        // Get previously decrypted plaintext from database
+        // Historical replays (MAM) fail decryption due to OMEMO key deletion/self-reflections.
+        char* db_decrypted = log_database_get_decrypted_message(
+            PROF_MSG_TYPE_CHAT,
+            message->from_jid->barejid,
+            message->to_jid ? message->to_jid->barejid : connection_get_jid()->barejid,
+            message->id,
+            message->stanzaid);
+        if (db_decrypted) {
+            if (message->plain) {
+                free(message->plain);
+            }
+            message->plain = db_decrypted;
+            message->omemo_err = OMEMO_ERR_NONE;
+            message->enc = PROF_MSG_ENC_OMEMO;
+        } else {
+            message->enc = PROF_MSG_ENC_OMEMO;
+            if (message->plain == NULL) {
+                message->plain = omemo_error_to_string(message->omemo_err);
+            }
         }
     } else if (message->plain != NULL) {
         message->enc = PROF_MSG_ENC_OMEMO;
