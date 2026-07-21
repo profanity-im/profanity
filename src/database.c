@@ -316,6 +316,37 @@ log_database_get_limits_info_muc(const gchar* const room_jid, gboolean is_last)
     return _db_get_limits_info(PROF_MSG_TYPE_MUC, room_jid, is_last);
 }
 
+static GSList*
+_db_parse_history_messages(sqlite3_stmt* stmt)
+{
+    GSList* history = NULL;
+
+    while (sqlite3_step(stmt) == SQLITE_ROW) {
+        char* message = (char*)sqlite3_column_text(stmt, 0);
+        char* date = (char*)sqlite3_column_text(stmt, 1);
+        char* from_jid = (char*)sqlite3_column_text(stmt, 2);
+        char* from_resource = (char*)sqlite3_column_text(stmt, 3);
+        char* to_jid = (char*)sqlite3_column_text(stmt, 4);
+        char* to_resource = (char*)sqlite3_column_text(stmt, 5);
+        char* type = (char*)sqlite3_column_text(stmt, 6);
+        char* encryption = (char*)sqlite3_column_text(stmt, 7);
+        char* id = (char*)sqlite3_column_text(stmt, 8);
+
+        ProfMessage* msg = message_init();
+        msg->id = id ? strdup(id) : NULL;
+        msg->from_jid = jid_create_from_bare_and_resource(from_jid, from_resource);
+        msg->to_jid = jid_create_from_bare_and_resource(to_jid, to_resource);
+        msg->plain = strdup(message ?: "");
+        msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
+        msg->type = _get_message_type_type(type);
+        msg->enc = _get_message_enc_type(encryption);
+
+        history = g_slist_append(history, msg);
+    }
+
+    return history;
+}
+
 // Query previous chats, constraints start_time and end_time. If end_time is
 // null the current time is used. from_start gets first few messages if true
 // otherwise the last ones. Flip flips the order of the results
@@ -355,30 +386,7 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
         return NULL;
     }
 
-    GSList* history = NULL;
-
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        char* message = (char*)sqlite3_column_text(stmt, 0);
-        char* date = (char*)sqlite3_column_text(stmt, 1);
-        char* from_jid = (char*)sqlite3_column_text(stmt, 2);
-        char* from_resource = (char*)sqlite3_column_text(stmt, 3);
-        char* to_jid = (char*)sqlite3_column_text(stmt, 4);
-        char* to_resource = (char*)sqlite3_column_text(stmt, 5);
-        char* type = (char*)sqlite3_column_text(stmt, 6);
-        char* encryption = (char*)sqlite3_column_text(stmt, 7);
-        char* id = (char*)sqlite3_column_text(stmt, 8);
-
-        ProfMessage* msg = message_init();
-        msg->id = id ? strdup(id) : NULL;
-        msg->from_jid = jid_create_from_bare_and_resource(from_jid, from_resource);
-        msg->to_jid = jid_create_from_bare_and_resource(to_jid, to_resource);
-        msg->plain = strdup(message ?: "");
-        msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
-        msg->type = _get_message_type_type(type);
-        msg->enc = _get_message_enc_type(encryption);
-
-        history = g_slist_append(history, msg);
-    }
+    GSList* history = _db_parse_history_messages(stmt);
     sqlite3_finalize(stmt);
 
     return history;
@@ -423,30 +431,7 @@ log_database_get_previous_muc(const gchar* const room_jid, const char* start_tim
         return NULL;
     }
 
-    GSList* history = NULL;
-
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        char* message = (char*)sqlite3_column_text(stmt, 0);
-        char* date = (char*)sqlite3_column_text(stmt, 1);
-        char* from_jid = (char*)sqlite3_column_text(stmt, 2);
-        char* from_resource = (char*)sqlite3_column_text(stmt, 3);
-        char* to_jid = (char*)sqlite3_column_text(stmt, 4);
-        char* to_resource = (char*)sqlite3_column_text(stmt, 5);
-        char* type = (char*)sqlite3_column_text(stmt, 6);
-        char* encryption = (char*)sqlite3_column_text(stmt, 7);
-        char* id = (char*)sqlite3_column_text(stmt, 8);
-
-        ProfMessage* msg = message_init();
-        msg->id = id ? strdup(id) : NULL;
-        msg->from_jid = jid_create_from_bare_and_resource(from_jid, from_resource);
-        msg->to_jid = jid_create_from_bare_and_resource(to_jid, to_resource);
-        msg->plain = strdup(message ?: "");
-        msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
-        msg->type = _get_message_type_type(type);
-        msg->enc = _get_message_enc_type(encryption);
-
-        history = g_slist_append(history, msg);
-    }
+    GSList* history = _db_parse_history_messages(stmt);
     sqlite3_finalize(stmt);
 
     return history;
