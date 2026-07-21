@@ -21,7 +21,12 @@ Our [user guide](https://profanity-im.github.io/userguide.html) contains an [ins
 We would highly appreciate if you support us via [GitHub Sponsors](https://github.com/sponsors/jubalh/). Especially if you make feature requests or need help using Profanity.
 Sponsoring enables us to spend time on Profanity.
 
-An alternative way to support us would be to ask for our IBAN or use Bitcoin: `bc1qx265eat7hfasqkqmk9qf38delydnrnuvzhzy0x`.
+An alternative way to support us would be:
+* to ask for our IBAN
+* Bitcoin: `bc1qx265eat7hfasqkqmk9qf38delydnrnuvzhzy0x`
+* Monero (XMR): `85Mz3CXUrom2LJSJRBqcbWj5rg7PfkkVrUzAW5MyGzZiTFxbXjkGckAiLFfze6bjAuLTmPoZ4VNgXZVKHhPWgeWg2nWeU69`
+
+Also see [https://profanity-im.github.io/donate](https://profanity-im.github.io/donate).
 
 Thank you! <3
 
