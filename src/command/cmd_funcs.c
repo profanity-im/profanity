@@ -4747,7 +4747,8 @@ cmd_bookmark(ProfWin* window, const char* const command, gchar** args)
         cons_alert(NULL);
         return TRUE;
     }
-    if (strchr(jid, '@') == NULL) {
+    auto_jid Jid* jidp = jid_create(jid);
+    if (!jid_is_valid_user_jid(jid) || jidp->resourcepart != NULL) {
         cons_show("Invalid room, must be of the form room@domain.tld");
         cons_show("");
         cons_alert(NULL);
