@@ -2010,9 +2010,7 @@ static void
 _generate_signed_pre_key(void)
 {
     session_signed_pre_key* signed_pre_key;
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    unsigned long long timestamp = (unsigned long long)(tv.tv_sec) * 1000 + (unsigned long long)(tv.tv_usec) / 1000;
+    unsigned long long timestamp = g_get_real_time() / 1000;
 
     omemo_ctx.signed_pre_key_id = 1;
     signal_protocol_key_helper_generate_signed_pre_key(&signed_pre_key, omemo_ctx.identity_key_pair, omemo_ctx.signed_pre_key_id, timestamp, omemo_ctx.signal);
