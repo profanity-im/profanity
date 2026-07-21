@@ -1131,34 +1131,13 @@ stanza_get_delay(xmpp_stanza_t* const stanza)
 }
 
 static GDateTime*
-_stanza_get_delay_timestamp_xep0203(xmpp_stanza_t* const delay_stanza)
+_stanza_get_delay_timestamp(xmpp_stanza_t* const delay_stanza, const char* const expected_xmlns)
 {
     const char* xmlns = xmpp_stanza_get_attribute(delay_stanza, STANZA_ATTR_XMLNS);
 
-    if (xmlns && (g_strcmp0(xmlns, "urn:xmpp:delay") == 0)) {
+    if (xmlns && (g_strcmp0(xmlns, expected_xmlns) == 0)) {
         const char* stamp = xmpp_stanza_get_attribute(delay_stanza, STANZA_ATTR_STAMP);
 
-        if (stamp) {
-            GDateTime* datetime = g_date_time_new_from_iso8601(stamp, NULL);
-            if (datetime) {
-                GDateTime* local_datetime = g_date_time_to_local(datetime);
-                g_date_time_unref(datetime);
-
-                return local_datetime;
-            }
-        }
-    }
-
-    return NULL;
-}
-
-static GDateTime*
-_stanza_get_delay_timestamp_xep0091(xmpp_stanza_t* const x_stanza)
-{
-    const char* xmlns = xmpp_stanza_get_attribute(x_stanza, STANZA_ATTR_XMLNS);
-
-    if (xmlns && (g_strcmp0(xmlns, "jabber:x:delay") == 0)) {
-        const char* stamp = xmpp_stanza_get_attribute(x_stanza, STANZA_ATTR_STAMP);
         if (stamp) {
             GDateTime* datetime = g_date_time_new_from_iso8601(stamp, NULL);
             if (datetime) {
@@ -1186,7 +1165,7 @@ stanza_get_delay_from(xmpp_stanza_t* const stanza, gchar* from)
     }
 
     if (delay) {
-        return _stanza_get_delay_timestamp_xep0203(delay);
+        return _stanza_get_delay_timestamp(delay, STANZA_NS_DELAY);
     }
 
     // otherwise check for XEP-0091 legacy delayed delivery
@@ -1198,7 +1177,7 @@ stanza_get_delay_from(xmpp_stanza_t* const stanza, gchar* from)
     }
 
     if (delay) {
-        return _stanza_get_delay_timestamp_xep0091(delay);
+        return _stanza_get_delay_timestamp(delay, STANZA_NS_X_DELAY);
     }
 
     return NULL;
@@ -1216,7 +1195,7 @@ stanza_get_oldest_delay(xmpp_stanza_t* const stanza)
         child_name = xmpp_stanza_get_name(child);
 
         if (child_name && g_strcmp0(child_name, STANZA_NAME_DELAY) == 0) {
-            GDateTime* tmp = _stanza_get_delay_timestamp_xep0203(child);
+            GDateTime* tmp = _stanza_get_delay_timestamp(child, STANZA_NS_DELAY);
 
             if (oldest == NULL) {
                 oldest = tmp;
@@ -1229,7 +1208,7 @@ stanza_get_oldest_delay(xmpp_stanza_t* const stanza)
         }
 
         if (child_name && g_strcmp0(child_name, STANZA_NAME_X) == 0) {
-            GDateTime* tmp = _stanza_get_delay_timestamp_xep0091(child);
+            GDateTime* tmp = _stanza_get_delay_timestamp(child, STANZA_NS_X_DELAY);
 
             if (oldest == NULL) {
                 oldest = tmp;

@@ -203,6 +203,8 @@
 #define STANZA_NS_RECEIPTS     "urn:xmpp:receipts"
 #define STANZA_NS_SIGNED       "jabber:x:signed"
 #define STANZA_NS_ENCRYPTED    "jabber:x:encrypted"
+#define STANZA_NS_DELAY        "urn:xmpp:delay"
+#define STANZA_NS_X_DELAY      "jabber:x:delay"
 // XEP-0373: OpenPGP for XMPP
 #define STANZA_NS_OPENPGP_0               "urn:xmpp:openpgp:0"
 #define STANZA_NS_OPENPGP_0_PUBLIC_KEYS   "urn:xmpp:openpgp:0:public-keys"
