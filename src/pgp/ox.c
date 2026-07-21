@@ -203,13 +203,8 @@ p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient
     gpgme_set_offline(ctx, 1);
     gpgme_set_keylist_mode(ctx, GPGME_KEYLIST_MODE_LOCAL);
 
-    char* xmpp_jid_me = alloca((strlen(sender_barejid) + 6) * sizeof(char));
-    char* xmpp_jid_recipient = alloca((strlen(recipient_barejid) + 6) * sizeof(char));
-
-    strcpy(xmpp_jid_me, "xmpp:");
-    strcpy(xmpp_jid_recipient, "xmpp:");
-    strcat(xmpp_jid_me, sender_barejid);
-    strcat(xmpp_jid_recipient, recipient_barejid);
+    gchar* xmpp_jid_me = g_strconcat("xmpp:", sender_barejid, NULL);
+    gchar* xmpp_jid_recipient = g_strconcat("xmpp:", recipient_barejid, NULL);
 
     gpgme_signers_clear(ctx);
 
@@ -269,6 +264,8 @@ p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient
     result = g_base64_encode((unsigned char*)cipher_str, len);
 
 cleanup:
+    g_free(xmpp_jid_me);
+    g_free(xmpp_jid_recipient);
     if (cipher_str)
         gpgme_free(cipher_str);
     if (plain)
