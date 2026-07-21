@@ -1133,19 +1133,19 @@ stanza_get_delay(xmpp_stanza_t* const stanza)
 static GDateTime*
 _stanza_get_delay_timestamp_xep0203(xmpp_stanza_t* const delay_stanza)
 {
-    GTimeVal utc_stamp;
     const char* xmlns = xmpp_stanza_get_attribute(delay_stanza, STANZA_ATTR_XMLNS);
 
     if (xmlns && (g_strcmp0(xmlns, "urn:xmpp:delay") == 0)) {
         const char* stamp = xmpp_stanza_get_attribute(delay_stanza, STANZA_ATTR_STAMP);
 
-        if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
-
+        if (stamp) {
             GDateTime* datetime = g_date_time_new_from_iso8601(stamp, NULL);
-            GDateTime* local_datetime = g_date_time_to_local(datetime);
-            g_date_time_unref(datetime);
+            if (datetime) {
+                GDateTime* local_datetime = g_date_time_to_local(datetime);
+                g_date_time_unref(datetime);
 
-            return local_datetime;
+                return local_datetime;
+            }
         }
     }
 
@@ -1155,18 +1155,18 @@ _stanza_get_delay_timestamp_xep0203(xmpp_stanza_t* const delay_stanza)
 static GDateTime*
 _stanza_get_delay_timestamp_xep0091(xmpp_stanza_t* const x_stanza)
 {
-    GTimeVal utc_stamp;
     const char* xmlns = xmpp_stanza_get_attribute(x_stanza, STANZA_ATTR_XMLNS);
 
     if (xmlns && (g_strcmp0(xmlns, "jabber:x:delay") == 0)) {
         const char* stamp = xmpp_stanza_get_attribute(x_stanza, STANZA_ATTR_STAMP);
-        if (stamp && (g_time_val_from_iso8601(stamp, &utc_stamp))) {
-
+        if (stamp) {
             GDateTime* datetime = g_date_time_new_from_iso8601(stamp, NULL);
-            GDateTime* local_datetime = g_date_time_to_local(datetime);
-            g_date_time_unref(datetime);
+            if (datetime) {
+                GDateTime* local_datetime = g_date_time_to_local(datetime);
+                g_date_time_unref(datetime);
 
-            return local_datetime;
+                return local_datetime;
+            }
         }
     }
 
