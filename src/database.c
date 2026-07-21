@@ -32,6 +32,7 @@ static sqlite3* g_chatlog_database;
 static gboolean _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Jid* const to_jid);
 static char* _get_db_filename(ProfAccount* account);
 static prof_msg_type_t _get_message_type_type(const char* const type);
+static const char* _get_message_type_str(prof_msg_type_t type);
 static prof_enc_t _get_message_enc_type(const char* const encstr);
 static int _get_db_version(void);
 static gboolean _migrate_to_v2(void);
@@ -256,31 +257,31 @@ log_database_add_outgoing_muc_pm(const char* const id, const char* const barejid
     _log_database_add_outgoing("mucpm", id, barejid, message, replace_id, enc);
 }
 
-// Get info (timestamp and stanza_id) of the first or last message in db (personal chats)
-ProfMessage*
-log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_last)
+static ProfMessage*
+_db_get_limits_info(prof_msg_type_t type, const char* const jid, gboolean is_last)
 {
     sqlite3_stmt* stmt = NULL;
     const Jid* myjid = connection_get_jid();
     if (!myjid->str)
         return NULL;
 
+    const char* type_str = _get_message_type_str(type);
     const char* order = is_last ? "DESC" : "ASC";
     auto_sqlite char* query = sqlite3_mprintf("SELECT `archive_id`, `timestamp` FROM `ChatLogs` WHERE "
-                                              "`type` = 'chat' AND ("
+                                              "`type` = %Q AND ("
                                               "(`from_jid` = %Q AND `to_jid` = %Q) OR "
                                               "(`from_jid` = %Q AND `to_jid` = %Q)) "
                                               "ORDER BY `timestamp` %s LIMIT 1;",
-                                              contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, order);
+                                              type_str, jid, myjid->barejid, myjid->barejid, jid, order);
 
     if (!query) {
-        log_error("Could not allocate memory for SQL query in log_database_get_limits_info()");
+        log_error("Could not allocate memory for SQL query in _db_get_limits_info()");
         return NULL;
     }
 
     int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
     if (rc != SQLITE_OK) {
-        log_error("Unknown SQLite error in log_database_get_last_info().");
+        log_error("Unknown SQLite error in _db_get_limits_info().");
         return NULL;
     }
 
@@ -301,49 +302,18 @@ log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_las
     return msg;
 }
 
+// Get info (timestamp and stanza_id) of the first or last message in db (personal chats)
+ProfMessage*
+log_database_get_limits_info(const gchar* const contact_barejid, gboolean is_last)
+{
+    return _db_get_limits_info(PROF_MSG_TYPE_CHAT, contact_barejid, is_last);
+}
+
 // Get info (timestamp and stanza_id) of the first or last message in db (MUCs)
 ProfMessage*
 log_database_get_limits_info_muc(const gchar* const room_jid, gboolean is_last)
 {
-    sqlite3_stmt* stmt = NULL;
-    const Jid* myjid = connection_get_jid();
-    if (!myjid->str)
-        return NULL;
-
-    const char* order = is_last ? "DESC" : "ASC";
-    auto_sqlite char* query = sqlite3_mprintf("SELECT `archive_id`, `timestamp` FROM `ChatLogs` WHERE "
-                                              "`type` = 'muc' AND ("
-                                              "(`from_jid` = %Q AND `to_jid` = %Q) OR "
-                                              "(`from_jid` = %Q AND `to_jid` = %Q)) "
-                                              "ORDER BY `timestamp` %s LIMIT 1;",
-                                              room_jid, myjid->barejid, myjid->barejid, room_jid, order);
-
-    if (!query) {
-        log_error("Could not allocate memory for SQL query in log_database_get_limits_info_muc()");
-        return NULL;
-    }
-
-    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        log_error("Unknown SQLite error in log_database_get_limits_info_muc().");
-        return NULL;
-    }
-
-    ProfMessage* msg = message_init();
-
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        char* archive_id = (char*)sqlite3_column_text(stmt, 0);
-        char* date = (char*)sqlite3_column_text(stmt, 1);
-
-        msg->stanzaid = _db_strdup(archive_id);
-        msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
-    } else {
-        message_free(msg);
-        msg = NULL;
-    }
-    sqlite3_finalize(stmt);
-
-    return msg;
+    return _db_get_limits_info(PROF_MSG_TYPE_MUC, room_jid, is_last);
 }
 
 // Query previous chats, constraints start_time and end_time. If end_time is
@@ -482,21 +452,10 @@ log_database_get_previous_muc(const gchar* const room_jid, const char* start_tim
     return history;
 }
 
-int
-log_database_get_chat_count(const gchar* const contact_barejid, const char* start_time, const char* end_time)
+static int
+_db_get_int_result(const char* query)
 {
     sqlite3_stmt* stmt = NULL;
-    const Jid* myjid = connection_get_jid();
-    if (!myjid->str)
-        return 0;
-
-    auto_sqlite char* query = sqlite3_mprintf("SELECT COUNT(*) FROM `ChatLogs` WHERE "
-                                              "`type` = 'chat' AND ("
-                                              "(`from_jid` = %Q AND `to_jid` = %Q) OR "
-                                              "(`from_jid` = %Q AND `to_jid` = %Q)) "
-                                              "AND `timestamp` >= %Q AND `timestamp` <= %Q;",
-                                              contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, start_time, end_time);
-
     int count = 0;
     int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
     if (rc == SQLITE_OK) {
@@ -509,9 +468,25 @@ log_database_get_chat_count(const gchar* const contact_barejid, const char* star
 }
 
 int
+log_database_get_chat_count(const gchar* const contact_barejid, const char* start_time, const char* end_time)
+{
+    const Jid* myjid = connection_get_jid();
+    if (!myjid->str)
+        return 0;
+
+    auto_sqlite char* query = sqlite3_mprintf("SELECT COUNT(*) FROM `ChatLogs` WHERE "
+                                              "`type` = 'chat' AND ("
+                                              "(`from_jid` = %Q AND `to_jid` = %Q) OR "
+                                              "(`from_jid` = %Q AND `to_jid` = %Q)) "
+                                              "AND `timestamp` >= %Q AND `timestamp` <= %Q;",
+                                              contact_barejid, myjid->barejid, myjid->barejid, contact_barejid, start_time, end_time);
+
+    return _db_get_int_result(query);
+}
+
+int
 log_database_get_muc_count(const gchar* const room_jid, const char* start_time, const char* end_time)
 {
-    sqlite3_stmt* stmt = NULL;
     const Jid* myjid = connection_get_jid();
     if (!myjid->str)
         return 0;
@@ -522,15 +497,7 @@ log_database_get_muc_count(const gchar* const room_jid, const char* start_time, 
                                               "AND `timestamp` >= %Q AND `timestamp` <= %Q;",
                                               room_jid, room_jid, start_time, end_time);
 
-    int count = 0;
-    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
-    if (rc == SQLITE_OK) {
-        if (sqlite3_step(stmt) == SQLITE_ROW) {
-            count = sqlite3_column_int(stmt, 0);
-        }
-    }
-    sqlite3_finalize(stmt);
-    return count;
+    return _db_get_int_result(query);
 }
 
 static const char*
