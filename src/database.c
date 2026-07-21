@@ -926,7 +926,7 @@ log_database_update_archive_id(const prof_msg_type_t type, const char* const roo
     if (query) {
         if (SQLITE_OK == sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL)) {
             if (sqlite3_step(stmt) == SQLITE_DONE) {
-                success = TRUE;
+                success = (sqlite3_changes(g_chatlog_database) > 0);
             }
             sqlite3_finalize(stmt);
         }
