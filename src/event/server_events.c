@@ -660,11 +660,14 @@ sv_ev_incoming_message(ProfMessage* message)
     gboolean is_self_reflection = (message->is_mam && equals_our_barejid(message->from_jid->barejid));
 
     if (is_self_reflection) {
+        gboolean updated = FALSE;
         if (message->id && message->stanzaid && message->to_jid) {
-            log_database_update_archive_id(PROF_MSG_TYPE_CHAT, message->to_jid->barejid, message->id, message->stanzaid);
+            updated = log_database_update_archive_id(PROF_MSG_TYPE_CHAT, message->to_jid->barejid, message->id, message->stanzaid);
         }
-        rosterwin_roster();
-        return;
+        if (updated) {
+            rosterwin_roster();
+            return;
+        }
     }
 
     gboolean new_win = FALSE;
