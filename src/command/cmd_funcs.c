@@ -2864,6 +2864,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
         gchar* jid = args[1];
         if (jid == NULL) {
             cons_bad_cmd_usage(command);
+        } else if (!jid_is_valid_user_jid(jid)) {
+            cons_show_error("Not a valid JID: %s", jid);
         } else {
             gchar* name = args[2];
             roster_send_add_new(jid, name);
