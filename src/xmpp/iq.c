@@ -17,6 +17,7 @@
 #include <strophe.h>
 
 #include "profanity.h"
+#include "common.h"
 #include "log.h"
 #include "config/preferences.h"
 #include "event/server_events.h"
@@ -3034,20 +3035,20 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
             buffer_remove_entry(window->layout->buffer, 0);
 
-            auto_char char* start_str = NULL;
+            auto_gchar gchar* start_str = NULL;
             if (data->start_datestr) {
-                start_str = strdup(data->start_datestr);
-                // Convert to iso8601
-                if (start_str && strlen(start_str) >= 3) {
-                    start_str[strlen(start_str) - 3] = '\0';
+                GDateTime* dt = g_date_time_new_from_iso8601(data->start_datestr, NULL);
+                if (dt) {
+                    start_str = prof_date_time_format_iso8601(dt);
+                    g_date_time_unref(dt);
                 }
             }
-            auto_char char* end_str = NULL;
+            auto_gchar gchar* end_str = NULL;
             if (data->end_datestr) {
-                end_str = strdup(data->end_datestr);
-                // Convert to iso8601
-                if (end_str && strlen(end_str) >= 3) {
-                    end_str[strlen(end_str) - 3] = '\0';
+                GDateTime* dt = g_date_time_new_from_iso8601(data->end_datestr, NULL);
+                if (dt) {
+                    end_str = prof_date_time_format_iso8601(dt);
+                    g_date_time_unref(dt);
                 }
             }
 
