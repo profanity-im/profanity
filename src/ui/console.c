@@ -342,6 +342,7 @@ cons_about(void)
     win_println(console, THEME_DEFAULT, "-", "This is free software; you are free to change and redistribute it.");
     win_println(console, THEME_DEFAULT, "-", "There is NO WARRANTY, to the extent permitted by law.");
     win_println(console, THEME_DEFAULT, "-", "");
+    win_println(console, THEME_DEFAULT, "-", "Please consider supporting our development: <https://profanity-im.github.io/donate>");
     win_println(console, THEME_DEFAULT, "-", "Type '/help' to show complete help.");
     win_println(console, THEME_DEFAULT, "-", "");
 
