@@ -338,7 +338,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         // Need to figure out:
         // 1) only send IQ once
         // 2) sort incoming messages on timestamp
-        // for now if experimental MAM is enabled we dont show no history from sql either
+        // for now if MAM is enabled we dont show no history from sql either
 
         // MUCPMs also get printed here. In their case we don't save any logs (because nick owners can change) and thus we shouldn't read logs
         // (and if we do we need to check the resourcepart)
