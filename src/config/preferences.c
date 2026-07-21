@@ -2291,6 +2291,7 @@ _get_default_boolean(preference_t pref)
     case PREF_MOOD:
     case PREF_STROPHE_SM_ENABLED:
     case PREF_STROPHE_SM_RESEND:
+    case PREF_MAM:
         return TRUE;
     case PREF_SPELLCHECK_ENABLE:
     case PREF_PGP_PUBKEY_AUTOIMPORT:
