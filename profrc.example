@@ -1,62 +1,631 @@
+# ==============================================================================
+# [ui] - User Interface
+# ==============================================================================
 [ui]
+# Show splash screen on startup.
+# Possible values: true, false (Default: true)
 splash=true
-intype=true
-beep=false
-statuses.muc=all
-theme=default
-history=true
-titlebar=true
-mouse=false
-flash=false
-vercheck=false
-statuses.console=all
-statuses.chat=all
-color.nick=true
 
+# Theme name to load from the themes folder.
+# Possible values: default, aqua, gruvbox, solarized-dark, etc. (Default: default)
+theme=default
+
+# Show active conversation/window title in terminal emulator title.
+# Possible values: true, false (Default: true)
+wintitle.show=true
+
+# Set terminal window title to "Goodbye" on exit.
+# Possible values: true, false (Default: true)
+wintitle.goodbye=true
+
+# Beep on message notifications.
+# Possible values: true, false (Default: false)
+beep=false
+
+# Flash terminal/window manager on new messages.
+# Possible values: true, false (Default: false)
+flash=false
+
+# Use interactive text input system in chat windows.
+# Possible values: true, false (Default: true)
+intype=true
+
+# Use interactive text input system in console window.
+# Possible values: true, false (Default: true)
+intype.console=true
+
+# Save and reload scrollback history for windows.
+# Possible values: true, false (Default: true)
+history=true
+
+# Clear saved scrollback history files on clean exit.
+# Possible values: true, false (Default: false)
+clear.persist_history=false
+
+# Check for Profanity updates on startup.
+# Possible values: true, false (Default: false)
+vercheck=false
+
+# Guard against accidentally sending slash commands as raw text.
+# Possible values: true, false (Default: false)
+slashguard=false
+
+# Wrap text lines in chat/MUC window output.
+# Possible values: true, false (Default: true)
+wrap=true
+
+# Enable mood publishing and display support (XEP-0107).
+# Possible values: true, false (Default: true)
+mood=true
+
+# Milliseconds to wait/block input during UI lag protection.
+# Possible values: Integer in milliseconds (Default: 1000)
+inpblock=1000
+
+# Use dynamic typing blocks.
+# Possible values: true, false (Default: true)
+inpblock.dynamic=true
+
+# Warn when sending unencrypted messages to encrypted contacts.
+# Possible values: true, false (Default: true)
+enc.warn=true
+
+# Show TLS certificate information upon successful connection.
+# Possible values: true, false (Default: true)
+tls.show=true
+
+# Default UI logging verbosity.
+# Possible values: all, none (Default: all)
+console.chat=all
+console.muc=all
+console.private=all
+
+# Color contact nicknames in chat windows.
+# Possible values: true, false, theme (Default: false)
+color.nick=false
+
+# Color your own nickname in windows.
+# Possible values: true, false (Default: true)
+color.nick.own=true
+
+# Use nick colors in the roster view.
+# Possible values: true, false (Default: false)
+color.roster.nick=false
+
+# Use nick colors in the MUC occupants list view.
+# Possible values: true, false (Default: false)
+color.occupants.nick=false
+
+# Enable the roster view panel on the side.
+# Possible values: true, false (Default: true)
+roster=true
+
+# Width of the roster panel in characters (0 for automatic/default).
+# Possible values: Integer (Default: 0)
+roster.size=0
+
+# Show offline contacts in the roster.
+# Possible values: true, false (Default: true)
+roster.offline=true
+
+# Show empty groups in the roster.
+# Possible values: true, false (Default: true)
+roster.empty=true
+
+# Show connected resources/clients for roster contacts.
+# Possible values: true, false (Default: false)
+roster.resource=false
+
+# Show presence icon/indicator next to roster names.
+# Possible values: true, false (Default: false)
+roster.presence=false
+
+# Show status messages directly in the roster.
+# Possible values: true, false (Default: false)
+roster.status=false
+
+# Group/Sort roster.
+# Possible values: presence, name (Default: presence)
+roster.by=presence
+
+# Sort contacts order in roster.
+# Possible values: presence, name (Default: presence)
+roster.order=presence
+
+# Order unread items position.
+# Possible values: after, before, none (Default: after)
+roster.unread=after
+
+# Unread items counting format.
+# Possible values: unread, all, none (Default: unread)
+roster.count=unread
+
+# Show unread badge count even when it is 0.
+# Possible values: true, false (Default: true)
+roster.count.zero=true
+
+# Show presence priority for contact resources.
+# Possible values: true, false (Default: true)
+roster.priority=true
+
+# Wrap long roster entries.
+# Possible values: true, false (Default: false)
+roster.wrap=false
+
+# Join multiple resources into a comma-separated list.
+# Possible values: true, false (Default: true)
+roster.resource.join=true
+
+# Show the standard roster contact list.
+# Possible values: true, false (Default: true)
+roster.contacts=true
+
+# Show unsubscribed contacts in the roster.
+# Possible values: true, false (Default: true)
+roster.unsubscribed=true
+
+# Show chat rooms list in the roster panel.
+# Possible values: true, false (Default: true)
+roster.rooms=true
+
+# Position of the room list in the roster panel.
+# Possible values: last, first (Default: last)
+roster.rooms.pos=last
+
+# Sort room list in the roster panel.
+# Possible values: name, none (Default: none)
+roster.rooms.by=none
+
+# Sort room list order in the roster panel.
+# Possible values: name (Default: name)
+roster.rooms.order=name
+
+# Order unread rooms position.
+# Possible values: after, before, none (Default: after)
+roster.rooms.unread=after
+
+# Display format for room titles in the roster.
+# Possible values: name, jid (Default: name)
+roster.rooms.title=name
+
+# Placement of private MUC occupant chats in the roster.
+# Possible values: room, roster, none (Default: room)
+roster.private=room
+
+# Show occupants list in active MUC chat windows.
+# Possible values: true, false (Default: true)
+occupants=true
+
+# Width of occupants panel in characters (0 for automatic/default).
+# Possible values: Integer (Default: 0)
+occupants.size=0
+
+# Show occupant real JIDs when room privileges permit.
+# Possible values: true, false (Default: false)
+occupants.jid=false
+
+# Show offline occupants in MUC windows.
+# Possible values: true, false (Default: false)
+occupants.offline=false
+
+# Wrap occupant nicknames in occupants panel.
+# Possible values: true, false (Default: false)
+occupants.wrap=false
+
+# Show MUC room privilege and role modifications.
+# Possible values: true, false (Default: true)
+privileges=true
+
+# Show contact presence updates inside active conversation windows.
+# Possible values: true, false (Default: true)
+presence=true
+
+# Resource display toggles.
+# Possible values: true, false (Default: true)
+resource.title=true
+resource.message=true
+
+# Show the connected account JID/name in the statusbar.
+# Possible values: true, false (Default: false)
+statusbar.show.name=false
+
+# Show window numbers in the statusbar.
+# Possible values: true, false (Default: true)
+statusbar.show.number=true
+
+# Show read/unread indicators in the statusbar.
+# Possible values: true, false (Default: true)
+statusbar.show.read=true
+
+# Display format for own information.
+# Possible values: fulljid, barejid, nick, none (Default: fulljid)
+statusbar.self=fulljid
+
+# Display format for active 1:1 chat windows.
+# Possible values: user, barejid, fulljid (Default: user)
+statusbar.chat=user
+
+# Display format for active room windows.
+# Possible values: name, jid (Default: name)
+statusbar.room.title=name
+
+# Multi-window tab display mode.
+# Possible values: default, titles, numbers (Default: default)
+statusbar.tabmode=default
+
+# Limit the number of statusbar tabs shown (0 for unlimited).
+# Possible values: Integer (Default: 0)
+statusbar.tabs=0
+
+# Limit the character length of statusbar tab titles (0 for unlimited).
+# Possible values: Integer (Default: 0)
+statusbar.tablen=0
+
+# Room title layout shown in the titlebar.
+# Possible values: name, jid (Default: name)
+titlebar.muc.title=name
+
+# --- Custom prefix characters for list views ---
+# Example values:
+# roster.header.char=>
+# roster.contact.char=*
+# roster.resource.char=-
+# roster.private.char=p
+# roster.rooms.char=#
+# roster.rooms.private.char=x
+# occupants.char=+
+# occupants.header.char=@
+# correction.char=*
+
+# --- Window placements/positions ---
+# Integer coordinate/order of UI panes (1-4)
+titlebar.position=1
+mainwin.position=2
+statusbar.position=3
+inputwin.position=4
+
+
+# ==============================================================================
+# [connection] - XMPP Connectivity, Features & Extensions
+# ==============================================================================
 [connection]
-autoping=60
-reconnect=5
+# The default account profile to log in with (profile defined in account storage).
+# Possible values: account profile name, e.g., me@server.org (Default: NULL)
 account=me@server.org
 
+# Default global account profile.
+# Possible values: profile JID (Default: NULL)
+defaccount=
+
+# Keep-alive ping interval in seconds (0 to disable).
+# Possible values: Integer (Default: 60)
+autoping=60
+
+# Keep-alive ping response timeout limit in seconds.
+# Possible values: Integer (Default: 0 - libstrophe default)
+autoping.timeout=0
+
+# MUC room ping check interval/timeout.
+# Possible values: Integer in seconds (Default: 0 - disabled)
+muc.ping.interval=0
+muc.ping.timeout=0
+
+# Reconnection attempt interval in seconds (0 to disable).
+# Possible values: Integer (Default: 5)
+reconnect=5
+
+# Enable Message Carbons (XEP-0280) to sync chats on other devices.
+# Possible values: true, false (Default: true)
+carbons=true
+
+# Automatically send delivery receipts to requestors (XEP-0184).
+# Possible values: true, false (Default: true)
+receipts.send=true
+
+# Automatically request delivery receipts on outgoing messages.
+# Possible values: true, false (Default: false)
+receipts.request=false
+
+# Reveal local OS name via Software Version query responses (XEP-0092).
+# Possible values: true, false (Default: true)
+reveal.os=true
+
+# Custom directory/file path to trusted CA TLS certificate bundle.
+# Possible values: Path to CA file/directory (Default: NULL)
+tls.certpath=
+
+# Support Last Message Correction (XEP-0308).
+# Possible values: true, false (Default: true)
+correction.allow=true
+
+# Support Message Archive Management queries (XEP-0313).
+# Possible values: true, false (Default: true)
+mam=true
+
+# Silently discard all incoming messages from non-contacts.
+# Possible values: true, false (Default: false)
+silence.incoming.nonroster=false
+
+# libstrophe parser logging verbosity.
+# Possible values: Integer, e.g., 0, 1, 2, 3 (Default: 0 - disabled)
+strophe.verbosity=0
+
+# Enable Stream Management (XEP-0198).
+# Possible values: true, false (Default: true)
+strophe.sm.enabled=true
+
+# Automatically resend unacknowledged messages upon recovery.
+# Possible values: true, false (Default: true)
+strophe.sm.resend=true
+
+
+# ==============================================================================
+# [chatstates] - Chat State Notifications (XEP-0085)
+# ==============================================================================
 [chatstates]
+# Send chat state notifications (active, typing, paused, gone).
+# Possible values: true, false (Default: true)
 enabled=true
+
+# Send state notifications in group/MUC chats.
+# Possible values: true, false (Default: false)
 outtype=false
+
+# Idle minutes before sending "gone" state notification.
+# Possible values: Integer in minutes (Default: 10)
 gone=10
 
+
+# ==============================================================================
+# [notifications] - Desktop, Tray, and UI Notification settings
+# ==============================================================================
 [notifications]
+# Notification reminder interval in seconds (0 to disable).
+# Possible values: Integer (Default: 60)
 remind=60
+
+# Notify on incoming chat room invitation.
+# Possible values: true, false (Default: true)
 invite=true
+
+# Notify on incoming subscription requests.
+# Possible values: true, false (Default: true)
 sub=true
+
+# Notify on incoming 1:1 messages.
+# Possible values: true, false (Default: true)
 message=true
-room=mention
+
+# Notify even if the active, focused window receives the message.
+# Possible values: true, false (Default: true)
 message.current=true
-room.current=true
-typing=true
-typing.current=false
+
+# Include message content text inside notifications.
+# Possible values: true, false (Default: true)
 message.text=true
-room.text=true
+
+# Notify on any incoming MUC messages.
+# Possible values: true, false (Default: false)
+room=false
+
+# Notify only when your nickname is mentioned in a MUC.
+# Possible values: true, false (Default: true)
+room.mention=true
+
+# Enable strict nickname casing match for mentions.
+# Possible values: true, false (Default: false)
+room.mention.casesensitive=false
+
+# Require nickname mention to be isolated whole words.
+# Possible values: true, false (Default: true)
+room.mention.wholeword=true
+
+# Notify when a keyword from the trigger list is matched in MUC.
+# Possible values: true, false (Default: false)
+room.trigger=false
+
+# Notify if you receive groupchat messages while being offline.
+# Possible values: true, false (Default: true)
 room.offline=true
 
+# Notify even if active focused MUC window receives a message.
+# Possible values: true, false (Default: true)
+room.current=true
+
+# Include room message content text inside notifications.
+# Possible values: true, false (Default: true)
+room.text=true
+
+# Show typing notifications from contacts.
+# Possible values: true, false (Default: true)
+typing=true
+
+# Show typing notifications even in focused active chat window.
+# Possible values: true, false (Default: false)
+typing.current=false
+
+# Enable system tray icon notification support.
+# Possible values: true, false (Default: false)
+tray=false
+
+# Clear tray icon status when the conversation is marked read.
+# Possible values: true, false (Default: true)
+tray.read=true
+
+# Limit system tray notification display duration (0 to disable).
+# Possible values: Integer in seconds (Default: 0)
+tray.timer=0
+
+# Notify on capabilities/disco changes.
+# Possible values: true, false (Default: false)
+adv.notify.discoversion=false
+
+
+# ==============================================================================
+# [logging] - Logging
+# ==============================================================================
+[logging]
+# Enable file logging of 1:1 chat conversations.
+# Possible values: true, false (Default: false)
+chlog=true
+
+# Enable file logging of MUC (group) chat conversations.
+# Possible values: true, false (Default: false)
+grlog=true
+
+# Save message history in internal SQLite database.
+# Possible values: on, off (Default: on)
+dblog=on
+
+# Maximum log file size in bytes before auto-rotation.
+# Possible values: Integer, minimum 64 (Default: 0 - disable limit, Example: 1048580)
+maxsize=1048580
+
+# Rotate logs when maxsize limit is reached.
+# Possible values: true, false (Default: true)
+rotate=true
+
+# Share logs across accounts.
+# Possible values: true, false (Default: true)
+shared=true
+
+
+# ==============================================================================
+# [presence] - User Auto-Away Status Customization
+# ==============================================================================
+[presence]
+# Behavior for auto-away.
+# Possible values: away, xa (extended away), off (Default: off)
+autoaway.mode=away
+
+# Check keyboard/screen idle states for autoaway.
+# Possible values: true, false (Default: true)
+autoaway.check=true
+
+# Idle minutes before switching to "away".
+# Possible values: Integer in minutes (Default: 15)
+autoaway.awaytime=15
+
+# Status message when automatically set to "away".
+# Possible values: String (Default: "Away from computer")
+autoaway.awaymessage=Away from computer
+
+# Idle minutes before switching to "xa" (extended away).
+# Possible values: Integer in minutes (Default: 45)
+autoaway.xatime=45
+
+# Status message when automatically set to "xa" (extended away).
+# Possible values: String (Default: "Extended away")
+autoaway.xamessage=Extended away
+
+# Enable Last Activity tracking (XEP-0012).
+# Possible values: true, false (Default: true)
+lastactivity=true
+
+
+# ==============================================================================
+# [otr] - Off-the-Record (OTR) Encryption
+# ==============================================================================
+[otr]
+# OTR conversation logging behavior.
+# Possible values: on (unencrypted/decrypted), redact (metadata only), off (Default: on)
+log=redact
+
+# OTR usage policy.
+# Possible values: manual, opportunistic, always (Default: manual)
+policy=manual
+
+# Encrypt OTR files.
+# Possible values: true, false (Default: false)
+sendfile=false
+
+
+# ==============================================================================
+# [pgp] - Legacy OpenPGP Encryption (XEP-0027)
+# ==============================================================================
+[pgp]
+# Legacy PGP conversation logging behavior.
+# Possible values: on, redact, off (Default: on)
+log=on
+
+# Encrypt PGP files.
+# Possible values: true, false (Default: false)
+sendfile=false
+
+# Automatically import received PGP keys.
+# Possible values: true, false (Default: false)
+pgp.pubkey.autoimport=false
+
+
+# ==============================================================================
+# [omemo] - OMEMO Encryption (XEP-0384)
+# ==============================================================================
+[omemo]
+# OMEMO conversation logging behavior.
+# Possible values: on, redact, off (Default: on)
+log=on
+
+# OMEMO usage policy.
+# Possible values: manual, automatic, always (Default: automatic)
+policy=automatic
+
+# Security device/key verification trust policy.
+# Possible values: manual, first-use, blind (Default: manual)
+trustmode=manual
+
+
+# ==============================================================================
+# [ox] - OpenPGP for XMPP Encryption (XEP-0373)
+# ==============================================================================
+[ox]
+# OX conversation logging behavior.
+# Possible values: on, redact, off (Default: on)
+log=on
+
+# Automatically encrypt files sent during an OX session.
+# Possible values: true, false (Default: true if OMEMO enabled, else false)
+encryptfile=true
+
+
+# ==============================================================================
+# [spellcheck] - Interactive Spell Checking
+# ==============================================================================
+[spellcheck]
+# Enable live terminal typing spell check checking.
+# Possible values: true, false (Default: false)
+enabled=false
+
+# Dictionary locale used for spell checks.
+# Possible values: Language code, e.g., en_US, en_GB, de_DE (Default: en_US)
+lang=en_US
+
+
+# ==============================================================================
+# [executables] - Executables
+# ==============================================================================
+[executables]
+# Command used to open clicked or selected links.
+# Possible values: Shell command with %u placeholder (Default: "xdg-open %u")
+url.open.cmd=xdg-open %u
+
+# Command used to download/save incoming files/URLs.
+# Possible values: Shell command with placeholders, or empty for built-in downloader. (Default: empty)
+url.save.cmd=
+
+# Command used to display contact avatar image files.
+# Possible values: Shell command with %p placeholder (Default: "xdg-open %p")
+avatar.cmd=xdg-open %p
+
+# Command used to open vCard profile photos.
+# Possible values: Shell command with %p placeholder (Default: "xdg-open %p")
+vcard.photo.cmd=xdg-open %p
+
+
+# ==============================================================================
+# [alias] - Custom Command Shortcuts
+# ==============================================================================
 [alias]
 colour=/color
 topic=/subject
 friends=/who online friends
 bob=/msg bob@server.org hey wassup?
-
-[logging]
-chlog=true
-grlog=true
-maxsize=1048580
-rotate=true
-shared=true
-
-[otr]
-warn=true
-log=redact
-policy=manual
-
-[presence]
-autoaway.mode=away
-autoaway.time=15
-autoaway.message=Away from computer
-autoaway.check=true

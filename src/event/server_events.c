@@ -159,12 +159,10 @@ sv_ev_roster_received(void)
     int diff_secs = 0;
 
     if (prefs_get_boolean(PREF_LASTACTIVITY) && last_activity_str) {
-        GTimeVal lasttv;
         GDateTime* nowdt = g_date_time_new_now_utc();
-        gboolean res = g_time_val_from_iso8601(last_activity_str, &lasttv);
+        GDateTime* lastdt = g_date_time_new_from_iso8601(last_activity_str, NULL);
 
-        if (res) {
-            GDateTime* lastdt = g_date_time_new_from_timeval_utc(&lasttv);
+        if (lastdt) {
             GTimeSpan diff_micros = g_date_time_difference(nowdt, lastdt);
 
             diff_secs = (diff_micros / 1000) / 1000;
@@ -268,10 +266,9 @@ sv_ev_room_history(ProfMessage* message)
         int msg_is_new = 0;
 
         if (last_activity) {
-            GTimeVal lasttv;
+            GDateTime* lastdt = g_date_time_new_from_iso8601(last_activity, NULL);
 
-            if (g_time_val_from_iso8601(last_activity, &lasttv)) {
-                GDateTime* lastdt = g_date_time_new_from_timeval_utc(&lasttv);
+            if (lastdt) {
                 GDateTime* msgdt = message->timestamp;
                 GTimeSpan time_diff = g_date_time_difference(msgdt, lastdt);
 

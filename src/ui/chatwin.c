@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "common.h"
 #include "xmpp/chat_session.h"
 #include "window_list.h"
 #include "xmpp/roster_list.h"
@@ -504,10 +505,7 @@ chatwin_set_enctext(ProfChatWin* chatwin, const char* const enctext)
 void
 chatwin_unset_enctext(ProfChatWin* chatwin)
 {
-    if (chatwin->enctext) {
-        free(chatwin->enctext);
-        chatwin->enctext = NULL;
-    }
+    FREE_SET_NULL(chatwin->enctext);
 }
 
 void
@@ -522,10 +520,7 @@ chatwin_set_incoming_char(ProfChatWin* chatwin, const char* const ch)
 void
 chatwin_unset_incoming_char(ProfChatWin* chatwin)
 {
-    if (chatwin->incoming_char) {
-        free(chatwin->incoming_char);
-        chatwin->incoming_char = NULL;
-    }
+    FREE_SET_NULL(chatwin->incoming_char);
 }
 
 void
@@ -540,10 +535,7 @@ chatwin_set_outgoing_char(ProfChatWin* chatwin, const char* const ch)
 void
 chatwin_unset_outgoing_char(ProfChatWin* chatwin)
 {
-    if (chatwin->outgoing_char) {
-        free(chatwin->outgoing_char);
-        chatwin->outgoing_char = NULL;
-    }
+    FREE_SET_NULL(chatwin->outgoing_char);
 }
 
 static void

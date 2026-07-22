@@ -1742,10 +1742,9 @@ message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
 static xmpp_stanza_t*
 _ox_openpgp_signcrypt(xmpp_ctx_t* ctx, const char* const to, const char* const text)
 {
-    time_t now = time(NULL);
-    struct tm* tm = localtime(&now);
-    char buf[255];
-    strftime(buf, sizeof(buf), "%FT%T%z", tm);
+    GDateTime* nowdt = g_date_time_new_now_local();
+    auto_gchar gchar* buf = g_date_time_format(nowdt, "%FT%T%z");
+    g_date_time_unref(nowdt);
 
     // build rpad
     int randnr = (rand() % 100) + 1;

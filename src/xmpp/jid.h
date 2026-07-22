@@ -37,8 +37,6 @@ void jid_auto_destroy(Jid** str);
 
 gboolean jid_is_valid_room_form(Jid* jid);
 gchar* create_fulljid(const gchar* const barejid, const gchar* const resource);
-gchar* get_nick_from_full_jid(const gchar* const full_room_jid);
-
 const gchar* jid_fulljid_or_barejid(Jid* jid);
 gchar* jid_random_resource(void);
 

@@ -144,7 +144,7 @@ We will then pull from your repository and merge manually.
 * When fixing a bug, describe it and how your patch fixes it.
 * When fixing a reported issue add an `Fixes https://github.com/profanity-im/profanity/issues/23` in the commit body.
 * When adding a new feature add a description of the feature and how it should be used (workflow).
-* If your patch adds a new configuration option add this to the `profrc.example` file.
+* If your patch adds or changes a configuration option update the `profrc.example` file.
 * If your patch adds a new theming option add this to the `theme_template` file.
 * Each patch or pull request should only contain related modifications.
 * Run the tests and code formatters before submitting (c.f. Chapter 'Check everything' of this README).

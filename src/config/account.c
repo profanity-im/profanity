@@ -160,8 +160,7 @@ account_eval_password(ProfAccount* account)
         g_strstrip(account->password);
         if (account->password[0] == '\0') {
             log_error("Empty password returned by `eval_password` command.");
-            g_free(account->password);
-            account->password = NULL;
+            GFREE_SET_NULL(account->password);
             return FALSE;
         }
         return TRUE;

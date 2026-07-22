@@ -44,13 +44,31 @@ def get_last_tag():
     return output[0] if output else None
 
 def get_commits(revision_range):
-    """Get list of (hash, subject) tuples."""
-    lines = git_run(["log", revision_range, "--format=%H %s"])
+    """Get list of (hash, subject, body) tuples."""
+    try:
+        result = subprocess.run(
+            ["git", "log", revision_range, "--format=%H%n%s%n%b%n@@@COMMIT-DELIMITER@@@"],
+            capture_output=True, text=True, check=True
+        )
+        raw_output = result.stdout.strip()
+    except subprocess.CalledProcessError:
+        return []
+
     commits = []
-    for line in lines:
-        parts = line.split(' ', 1)
-        if len(parts) == 2:
-            commits.append(parts)
+    if not raw_output:
+        return commits
+
+    raw_commits = raw_output.split("@@@COMMIT-DELIMITER@@@")
+    for raw_c in raw_commits:
+        raw_c = raw_c.strip()
+        if not raw_c:
+            continue
+        parts = raw_c.split('\n', 2)
+        if len(parts) >= 2:
+            c_hash = parts[0].strip()
+            c_subject = parts[1].strip()
+            c_body = parts[2].strip() if len(parts) == 3 else ""
+            commits.append((c_hash, c_subject, c_body))
     return commits
 
 def get_pr_mappings(revision_range):
@@ -97,14 +115,15 @@ def format_description(description):
 def main():
     parser = argparse.ArgumentParser(description="Generate a sorted changelog from git commits.")
     parser.add_argument("--pr", action="store_true", help="Append PR number to each commit.")
+    parser.add_argument("--issue", action="store_true", help="Append issue number from Fixes: to each commit.")
     args = parser.parse_args()
 
     last_tag = get_last_tag()
     if not last_tag:
         print("No tags found in the repository.", file=sys.stderr)
-    
+
     revision_range = f"{last_tag}..HEAD" if last_tag else "HEAD"
-    
+
     commits = get_commits(revision_range)
     if not commits:
         print(f"No commits found since {last_tag if last_tag else 'the beginning'}.")
@@ -114,25 +133,38 @@ def main():
 
     # Conventional Commit regex: type(scope): description
     commit_re = re.compile(r'^(\w+)(?:\(([^)]+)\))?:\s*(.*)$')
+    # Regex to extract issue/PR number from Fixes: tags in body
+    fixes_re = re.compile(r'^[Ff]ixes:\s*(?:https?://\S+/(?:issues|pull)/|#)(\d+)', re.MULTILINE)
 
     grouped = defaultdict(list)
     others = []
 
-    for c_hash, c_subject in commits:
+    for c_hash, c_subject, c_body in commits:
         # Skip merge commits in the output
         if c_subject.startswith(("Merge pull request", "Merge branch")):
             continue
 
-        pr_suffix = f" (#{pr_map[c_hash]})" if c_hash in pr_map else ""
+        suffix = ""
+        assoc_numbers = []
+        if args.pr and c_hash in pr_map:
+            assoc_numbers.append(pr_map[c_hash])
+        if args.issue:
+            fixes_numbers = fixes_re.findall(c_body)
+            for num in fixes_numbers:
+                if num not in assoc_numbers:
+                    assoc_numbers.append(num)
+        if assoc_numbers:
+            suffix = f" (#" + ", #".join(assoc_numbers) + ")"
+
         match = commit_re.match(c_subject)
 
         if match:
             ctype = match.group(1).lower()
             ctype = CORRECTIONS.get(ctype, ctype)
             description = format_description(match.group(3))
-            grouped[ctype].append(f"{description}{pr_suffix}")
+            grouped[ctype].append(f"{description}{suffix}")
         else:
-            others.append(f"{c_subject}{pr_suffix}")
+            others.append(f"{c_subject}{suffix}")
 
     # Output sections in ordered priority
     all_types = TYPE_ORDER + sorted([t for t in grouped if t not in TYPE_ORDER])

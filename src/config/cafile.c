@@ -74,8 +74,7 @@ cafile_get_name(void)
          * of servers you're trying to connect to are in your OS trust-store
          */
         log_debug("[CAfile] file %s not created yet", cafile);
-        g_free(cafile);
-        cafile = NULL;
+        GFREE_SET_NULL(cafile);
     }
     return cafile;
 }

@@ -194,8 +194,7 @@ log_get_filter(void)
 void
 log_close(void)
 {
-    g_free(mainlogfile);
-    mainlogfile = NULL;
+    GFREE_SET_NULL(mainlogfile);
     if (logp) {
         fclose(logp);
     }

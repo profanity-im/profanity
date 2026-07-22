@@ -1188,6 +1188,11 @@ cmd_sub(ProfWin* window, const char* const command, gchar** args)
         jid = chatwin->barejid;
     }
 
+    if (!jid_is_valid_user_jid(jid)) {
+        cons_show_error("Not a valid JID: %s", jid);
+        return TRUE;
+    }
+
     auto_jid Jid* jidp = jid_create(jid);
     if (!jidp) {
         cons_bad_cmd_usage(command);
@@ -2864,6 +2869,8 @@ cmd_roster(ProfWin* window, const char* const command, gchar** args)
         gchar* jid = args[1];
         if (jid == NULL) {
             cons_bad_cmd_usage(command);
+        } else if (!jid_is_valid_user_jid(jid)) {
+            cons_show_error("Not a valid JID: %s", jid);
         } else {
             gchar* name = args[2];
             roster_send_add_new(jid, name);
@@ -3011,6 +3018,11 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
             return TRUE;
         }
 
+        if (!jid_is_valid(jid)) {
+            cons_show_error("Not a valid JID: %s", jid);
+            return TRUE;
+        }
+
         gboolean res = blocked_add(jid, br, NULL);
         if (!res) {
             cons_show("User %s already blocked.", jid);
@@ -3022,6 +3034,11 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
     if (g_strcmp0(args[0], "remove") == 0) {
         if (args[1] == NULL) {
             cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        if (!jid_is_valid(args[1])) {
+            cons_show_error("Not a valid JID: %s", args[1]);
             return TRUE;
         }
 
@@ -3042,6 +3059,11 @@ cmd_blocked(ProfWin* window, const char* const command, gchar** args)
             jid = args[1];
         } else {
             cons_bad_cmd_usage(command);
+            return TRUE;
+        }
+
+        if (!jid_is_valid(jid)) {
+            cons_show_error("Not a valid JID: %s", jid);
             return TRUE;
         }
 
@@ -4745,7 +4767,8 @@ cmd_bookmark(ProfWin* window, const char* const command, gchar** args)
         cons_alert(NULL);
         return TRUE;
     }
-    if (strchr(jid, '@') == NULL) {
+    auto_jid Jid* jidp = jid_create(jid);
+    if (!jid_is_valid_user_jid(jid) || jidp->resourcepart != NULL) {
         cons_show("Invalid room, must be of the form room@domain.tld");
         cons_show("");
         cons_alert(NULL);

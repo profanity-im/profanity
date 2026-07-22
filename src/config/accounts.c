@@ -824,12 +824,10 @@ accounts_set_last_activity(const char* const account_name)
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
         GDateTime* nowdt = g_date_time_new_now_utc();
-        GTimeVal nowtv;
-        gboolean res = g_date_time_to_timeval(nowdt, &nowtv);
+        auto_gchar gchar* timestr = prof_date_time_format_iso8601(nowdt);
         g_date_time_unref(nowdt);
 
-        if (res) {
-            auto_char char* timestr = g_time_val_to_iso8601(&nowtv);
+        if (timestr) {
             g_key_file_set_string(accounts, sanitized_account_name, "last.activity", timestr);
             _accounts_save(account_name);
         }

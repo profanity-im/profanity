@@ -658,12 +658,7 @@ void
 plugins_on_room_history_message(const char* const barejid, const char* const nick, const char* const message,
                                 GDateTime* timestamp)
 {
-    char* timestamp_str = NULL;
-    GTimeVal timestamp_tv;
-    gboolean res = g_date_time_to_timeval(timestamp, &timestamp_tv);
-    if (res) {
-        timestamp_str = g_time_val_to_iso8601(&timestamp_tv);
-    }
+    auto_gchar gchar* timestamp_str = prof_date_time_format_iso8601(timestamp);
 
     GList* values = g_hash_table_get_values(plugins);
     GList* curr = values;
@@ -673,8 +668,6 @@ plugins_on_room_history_message(const char* const barejid, const char* const nic
         curr = g_list_next(curr);
     }
     g_list_free(values);
-
-    g_free(timestamp_str);
 }
 
 char*

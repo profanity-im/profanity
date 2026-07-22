@@ -24,6 +24,7 @@
 
 #include "config/theme.h"
 #include "config/preferences.h"
+#include "common.h"
 #include "ui/ui.h"
 #include "ui/statusbar.h"
 #include "ui/inputwin.h"
@@ -471,10 +472,7 @@ _status_bar_draw_time(guint pos)
         return pos;
     }
 
-    if (statusbar->time) {
-        g_free(statusbar->time);
-        statusbar->time = NULL;
-    }
+    GFREE_SET_NULL(statusbar->time);
 
     GDateTime* datetime = g_date_time_new_now(tz);
     statusbar->time = g_date_time_format(datetime, time_pref);

@@ -232,26 +232,6 @@ create_fulljid(const gchar* const barejid, const gchar* const resource)
 }
 
 /*
- * Get the nickname part of the full JID, e.g.
- * Full JID = "test@conference.server/person"
- * returns "person"
- */
-gchar*
-get_nick_from_full_jid(const gchar* const full_room_jid)
-{
-    auto_gcharv gchar** tokens = g_strsplit(full_room_jid, "/", 0);
-    gchar* nick_part = NULL;
-
-    if (tokens) {
-        if (tokens[0] && tokens[1]) {
-            nick_part = strdup(tokens[1]);
-        }
-    }
-
-    return nick_part;
-}
-
-/*
  * get the fulljid, fall back to the barejid
  */
 const gchar*
