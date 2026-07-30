@@ -101,10 +101,12 @@ _p_gpg_close(void)
     key_ac = NULL;
 
     if (passphrase) {
+        prof_wipe_string(passphrase);
         GFREE_SET_NULL(passphrase);
     }
 
     if (passphrase_attempt) {
+        prof_wipe_string(passphrase_attempt);
         GFREE_SET_NULL(passphrase_attempt);
     }
 }

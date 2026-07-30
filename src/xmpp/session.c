@@ -616,6 +616,7 @@ static void
 _session_free_internals(void)
 {
     FREE_SET_NULL(saved_account.name);
+    prof_wipe_string(saved_account.passwd);
     FREE_SET_NULL(saved_account.passwd);
     GFREE_SET_NULL(reconnect.altdomain);
     if (last_moods) {
@@ -630,6 +631,7 @@ _session_free_saved_details(void)
 {
     FREE_SET_NULL(saved_details.name);
     FREE_SET_NULL(saved_details.jid);
+    prof_wipe_string(saved_details.passwd);
     FREE_SET_NULL(saved_details.passwd);
     FREE_SET_NULL(saved_details.altdomain);
     FREE_SET_NULL(saved_details.tls_policy);

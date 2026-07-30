@@ -180,6 +180,7 @@ account_free(ProfAccount* account)
 
     free(account->name);
     free(account->jid);
+    prof_wipe_string(account->password);
     free(account->password);
     free(account->eval_password);
     free(account->resource);

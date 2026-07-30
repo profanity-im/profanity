@@ -30,6 +30,7 @@
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "common.h"
+#include "log.h"
 
 void*
 aesgcm_file_get(void* userdata)
@@ -116,30 +117,35 @@ aesgcm_file_get(void* userdata)
                                    "Downloading '%s' failed: Failed to decrypt "
                                    "file (%s).",
                                    aesgcm_dl->url, gcry_strerror(crypt_res));
+        log_error("OMEMO: AESGCM download file integrity check failed for '%s': %s",
+                  aesgcm_dl->url, gcry_strerror(crypt_res));
+        remove(aesgcm_dl->filename);
     } else {
         http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id, THEME_ONLINE, ENTRY_COMPLETED,
                                    "Downloading '%s': done\nSaved to '%s'",
                                    aesgcm_dl->url, aesgcm_dl->filename);
         win_mark_received(aesgcm_dl->window, aesgcm_dl->id);
+
+        if (aesgcm_dl->cmd_template != NULL) {
+            gchar** argv = format_call_external_argv(aesgcm_dl->cmd_template,
+                                                     aesgcm_dl->filename,
+                                                     aesgcm_dl->filename);
+
+            if (!call_external(argv)) {
+                http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id, THEME_ERROR, ENTRY_ERROR,
+                                           "Downloading '%s' failed: Unable to call "
+                                           "command '%s' with file at '%s' (%s).",
+                                           aesgcm_dl->url,
+                                           aesgcm_dl->cmd_template,
+                                           aesgcm_dl->filename,
+                                           "Failed to run command");
+            }
+
+            g_strfreev(argv);
+        }
     }
 
     if (aesgcm_dl->cmd_template != NULL) {
-        gchar** argv = format_call_external_argv(aesgcm_dl->cmd_template,
-                                                 aesgcm_dl->filename,
-                                                 aesgcm_dl->filename);
-
-        // TODO: Log the error.
-        if (!call_external(argv)) {
-            http_print_transfer_update(aesgcm_dl->window, aesgcm_dl->id, THEME_ERROR, ENTRY_ERROR,
-                                       "Downloading '%s' failed: Unable to call "
-                                       "command '%s' with file at '%s' (%s).",
-                                       aesgcm_dl->url,
-                                       aesgcm_dl->cmd_template,
-                                       aesgcm_dl->filename,
-                                       "TODO: Log the error");
-        }
-
-        g_strfreev(argv);
         free(aesgcm_dl->cmd_template);
     }
 

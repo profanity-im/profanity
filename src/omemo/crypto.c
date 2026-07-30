@@ -210,7 +210,7 @@ omemo_encrypt_func(signal_buffer** output, int cipher, const uint8_t* key, size_
         assert(FALSE);
     }
 
-    padded_plaintext = malloc(plaintext_len + padding);
+    padded_plaintext = gcry_malloc_secure(plaintext_len + padding);
     memcpy(padded_plaintext, plaintext, plaintext_len);
     memset(padded_plaintext + plaintext_len, padding, padding);
 
@@ -219,7 +219,7 @@ omemo_encrypt_func(signal_buffer** output, int cipher, const uint8_t* key, size_
     gcry_cipher_encrypt(hd, ciphertext, ciphertext_len, padded_plaintext, plaintext_len + padding);
 
     *output = signal_buffer_create(ciphertext, ciphertext_len);
-    free(padded_plaintext);
+    gcry_free(padded_plaintext);
     free(ciphertext);
 
     gcry_cipher_close(hd);
@@ -268,15 +268,24 @@ omemo_decrypt_func(signal_buffer** output, int cipher, const uint8_t* key, size_
     }
 
     plaintext_len = ciphertext_len;
-    plaintext = malloc(plaintext_len);
+    plaintext = gcry_malloc_secure(plaintext_len);
     gcry_cipher_decrypt(hd, plaintext, plaintext_len, ciphertext, ciphertext_len);
 
     switch (cipher) {
     case SG_CIPHER_AES_CBC_PKCS5:
+        if (plaintext_len == 0) {
+            ret = SG_ERR_UNKNOWN;
+            goto out;
+        }
         padding = plaintext[plaintext_len - 1];
         break;
     default:
         assert(FALSE);
+    }
+
+    if (padding == 0 || padding > 16 || padding > plaintext_len) {
+        ret = SG_ERR_UNKNOWN;
+        goto out;
     }
 
     for (int i = 0; i < padding; i++) {
@@ -289,7 +298,7 @@ omemo_decrypt_func(signal_buffer** output, int cipher, const uint8_t* key, size_
     *output = signal_buffer_create(plaintext, plaintext_len - padding);
 
 out:
-    free(plaintext);
+    gcry_free(plaintext);
 
     gcry_cipher_close(hd);
 

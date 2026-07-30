@@ -942,3 +942,14 @@ prof_get_version(void)
         return g_strdup_printf("%s", PACKAGE_VERSION);
     }
 }
+
+void
+prof_wipe_string(char* str)
+{
+    if (str) {
+        volatile char* p = (volatile char*)str;
+        while (*p) {
+            *p++ = 0;
+        }
+    }
+}

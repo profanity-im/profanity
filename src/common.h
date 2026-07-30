@@ -135,6 +135,8 @@ free_keyfile(prof_keyfile_t* keyfile);
         resource = NULL;         \
     } while (0)
 
+void prof_wipe_string(char* str);
+
 typedef enum {
     CONTACT_OFFLINE,
     CONTACT_ONLINE,
