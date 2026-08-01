@@ -791,6 +791,7 @@ summary({
   'GTK': gtk_dep.found(),
   'GDK Pixbuf': gdk_pixbuf_dep.found(),
   'QR Code': qrencode_dep.found(),
+  'Spellcheck': enchant_dep.found(),
 }, section: 'Features')
 
 summary({
