@@ -141,8 +141,14 @@ void
 connection_shutdown(void)
 {
     connection_clear_data();
-    g_hash_table_destroy(conn.requested_features);
-    g_hash_table_destroy(conn.available_resources);
+    if (conn.requested_features) {
+        g_hash_table_destroy(conn.requested_features);
+        conn.requested_features = NULL;
+    }
+    if (conn.available_resources) {
+        g_hash_table_destroy(conn.available_resources);
+        conn.available_resources = NULL;
+    }
     if (conn.sm_state) {
         xmpp_free_sm_state(conn.sm_state);
         conn.sm_state = NULL;
@@ -163,6 +169,13 @@ connection_shutdown(void)
 static gboolean
 _conn_apply_settings(const char* const jid, const char* const passwd, const char* const tls_policy, const char* const auth_policy)
 {
+    if (conn.available_resources == NULL) {
+        conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
+    }
+    if (conn.requested_features == NULL) {
+        conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    }
+
     auto_jid Jid* jidp = jid_create(jid);
     if (jidp == NULL) {
         log_error("Malformed JID not able to connect: %s", jid);
@@ -608,6 +621,9 @@ connection_send_stanza(const char* const stanza)
 gboolean
 connection_supports(const char* const feature)
 {
+    if (conn.features_by_jid == NULL) {
+        return FALSE;
+    }
     gboolean ret = FALSE;
     GList* jids = g_hash_table_get_keys(conn.features_by_jid);
 
@@ -662,7 +678,7 @@ connection_request_features(void)
     iq_disco_info_request_onconnect(conn.domain);
 
     const char* barejid = connection_get_barejid();
-    if (barejid && !g_hash_table_contains(conn.features_by_jid, barejid)) {
+    if (conn.features_by_jid && barejid && !g_hash_table_contains(conn.features_by_jid, barejid)) {
         g_hash_table_insert(conn.features_by_jid, strdup(barejid),
                             g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
         iq_disco_info_request_onconnect(barejid);
@@ -672,12 +688,17 @@ connection_request_features(void)
 void
 connection_set_disco_items(GSList* items)
 {
+    if (conn.requested_features == NULL) {
+        return;
+    }
     GSList* curr = items;
     while (curr) {
         DiscoItem* item = curr->data;
         g_hash_table_insert(conn.requested_features, strdup(item->jid), NULL);
-        g_hash_table_insert(conn.features_by_jid, strdup(item->jid),
-                            g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+        if (conn.features_by_jid) {
+            g_hash_table_insert(conn.features_by_jid, strdup(item->jid),
+                                g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+        }
 
         iq_disco_info_request_onconnect(item->jid);
 
@@ -762,6 +783,9 @@ void
 connection_features_received(const char* const jid)
 {
     log_info("[CONNECTION] connection_features_received %s", jid);
+    if (conn.requested_features == NULL) {
+        return;
+    }
     if (g_hash_table_remove(conn.requested_features, jid) && g_hash_table_size(conn.requested_features) == 0) {
         sv_ev_connection_features_received();
     }
@@ -770,31 +794,44 @@ connection_features_received(const char* const jid)
 GHashTable*
 connection_get_features(const char* const jid)
 {
+    if (conn.features_by_jid == NULL) {
+        return NULL;
+    }
     return g_hash_table_lookup(conn.features_by_jid, jid);
 }
 
 GList*
 connection_get_available_resources(void)
 {
+    if (conn.available_resources == NULL) {
+        return NULL;
+    }
     return g_hash_table_get_values(conn.available_resources);
 }
 
 int
 connection_count_available_resources(void)
 {
+    if (conn.available_resources == NULL) {
+        return 0;
+    }
     return g_hash_table_size(conn.available_resources);
 }
 
 void
 connection_add_available_resource(Resource* resource)
 {
-    g_hash_table_replace(conn.available_resources, strdup(resource->name), resource);
+    if (conn.available_resources) {
+        g_hash_table_replace(conn.available_resources, strdup(resource->name), resource);
+    }
 }
 
 void
 connection_remove_available_resource(const char* const resource)
 {
-    g_hash_table_remove(conn.available_resources, resource);
+    if (conn.available_resources) {
+        g_hash_table_remove(conn.available_resources, resource);
+    }
 }
 
 char*
@@ -964,6 +1001,12 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         connection_clear_data();
         conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
         g_hash_table_insert(conn.features_by_jid, strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+        if (conn.available_resources == NULL) {
+            conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
+        }
+        if (conn.requested_features == NULL) {
+            conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+        }
 
         session_login_success(connection_is_secured());
 
@@ -991,6 +1034,12 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         connection_clear_data();
         conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
         g_hash_table_insert(conn.features_by_jid, strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+        if (conn.available_resources == NULL) {
+            conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
+        }
+        if (conn.requested_features == NULL) {
+            conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+        }
 
         xmpp_conn_open_stream_default(xmpp_conn);
 
