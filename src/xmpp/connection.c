@@ -417,6 +417,14 @@ _register_handle_features(xmpp_conn_t* xmpp_conn, xmpp_stanza_t* stanza, void* u
         return 0;
     }
 
+    if ((xmpp_conn_get_flags(xmpp_conn) & XMPP_CONN_FLAG_MANDATORY_TLS)
+        && !xmpp_conn_is_secured(xmpp_conn)) {
+        log_debug("Server does not advertise STARTTLS but TLS is mandatory.");
+        cons_show_error("Server does not advertise STARTTLS, aborting registration.");
+        xmpp_disconnect(xmpp_conn);
+        return 0;
+    }
+
     /* check whether server supports in-band registration */
     child = xmpp_stanza_get_child_by_name(stanza, "register");
     if (!child) {
