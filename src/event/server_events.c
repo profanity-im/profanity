@@ -1433,5 +1433,6 @@ _clean_incoming_message(ProfMessage* message)
         return;
     }
 
+    str_clean_terminal_control_chars(message->plain);
     str_clean_directional_chars(message->plain);
 }

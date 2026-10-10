@@ -476,6 +476,44 @@ str_clean_directional_chars(char* str)
     *dst = '\0';
 }
 
+/**
+ * Strips terminal control characters
+ * - C0 control characters (0x01 - 0x1F), preserving 0x09 (\t) and 0x0A (\n).
+ * - ASCII DEL (0x7F).
+ * - C1 control characters (U+0080 - U+009F).
+ *
+ * Certain sequences are allowed by XML and can occur in normal
+ * messages: entity-encoded carriage return (&#xD; / \r), DEL (0x7F), and C1
+ * controls (U+0080 - U+009F).
+ * OTR and PGP decrypt arbitrary raw bytes directly into message->plain without
+ * passing through an XML parser, allowing ANSI escape sequences to bypass XML
+ * validation.
+ */
+void
+str_clean_terminal_control_chars(char* str)
+{
+    if (str == NULL) {
+        return;
+    }
+
+    gchar* src = str;
+    gchar* dst = str;
+
+    while (*src != '\0') {
+        gunichar ch = g_utf8_get_char(src);
+        gchar* next = g_utf8_next_char(src);
+
+        if ((ch < 0x20 && ch != '\t' && ch != '\n') || ch == 0x7F || (ch >= 0x80 && ch <= 0x9F)) {
+            src = next;
+        } else {
+            while (src < next) {
+                *dst++ = *src++;
+            }
+        }
+    }
+    *dst = '\0';
+}
+
 gint
 str_ascii_casecmp0(const char* s1, const char* s2)
 {

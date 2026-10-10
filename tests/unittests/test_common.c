@@ -1404,3 +1404,59 @@ str_clean_directional_chars__tests(void** state)
     str_clean_directional_chars(buf15);
     assert_string_equal("مرحبا שלום", buf15);
 }
+
+void
+str_clean_terminal_control_chars__tests(void** state)
+{
+    // Test NULL input
+    str_clean_terminal_control_chars(NULL);
+
+    // Test empty string
+    char buf1[] = "";
+    str_clean_terminal_control_chars(buf1);
+    assert_string_equal("", buf1);
+
+    // Test normal string without controls
+    char buf2[] = "Hello World!";
+    str_clean_terminal_control_chars(buf2);
+    assert_string_equal("Hello World!", buf2);
+
+    // Test preserving \t and \n
+    char buf3[] = "Line 1\twith tab\nLine 2\n";
+    str_clean_terminal_control_chars(buf3);
+    assert_string_equal("Line 1\twith tab\nLine 2\n", buf3);
+
+    // Test stripping ANSI escape character (0x1B ESC)
+    char buf4[] = "\x1b[31mRed Text\x1b[0m";
+    str_clean_terminal_control_chars(buf4);
+    assert_string_equal("[31mRed Text[0m", buf4);
+
+    // Test stripping carriage return (0x0D \r)
+    char buf5[] = "hello\rworld";
+    str_clean_terminal_control_chars(buf5);
+    assert_string_equal("helloworld", buf5);
+
+    // Test stripping bell (0x07), backspace (0x08), form feed (0x0C)
+    char buf6[] = "bell\x07"
+                  "bs\x08"
+                  "ff\x0c"
+                  "end";
+    str_clean_terminal_control_chars(buf6);
+    assert_string_equal("bellbsffend", buf6);
+
+    // Test stripping ASCII DEL (0x7F)
+    char buf7[] = "del\x7f"
+                  "char";
+    str_clean_terminal_control_chars(buf7);
+    assert_string_equal("delchar", buf7);
+
+    // Test stripping C1 controls (U+0080 to U+009F)
+    char buf8[] = "c1_\u0080_\u009B_\u009F_end";
+    str_clean_terminal_control_chars(buf8);
+    assert_string_equal("c1____end", buf8);
+
+    // Test that legitimate UTF-8 multibyte characters are preserved
+    char buf9[] = "üñîçøðé 🚀 مرحبا שלום";
+    str_clean_terminal_control_chars(buf9);
+    assert_string_equal("üñîçøðé 🚀 مرحبا שלום", buf9);
+}
