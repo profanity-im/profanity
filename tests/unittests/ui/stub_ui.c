@@ -1020,6 +1020,10 @@ cons_spellcheck_setting(void)
 {
 }
 void
+cons_url_setting(void)
+{
+}
+void
 cons_vercheck_setting(void)
 {
 }

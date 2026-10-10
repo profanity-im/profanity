@@ -9697,6 +9697,13 @@ cmd_url_save(ProfWin* window, const char* const command, gchar** args)
 }
 
 gboolean
+cmd_url_own(ProfWin* window, const char* const command, gchar** args)
+{
+    _cmd_set_boolean_preference(args[1], "Tab-complete own URLs", PREF_URL_OWN);
+    return TRUE;
+}
+
+gboolean
 _cmd_executable_template(const preference_t setting, const char* command, gchar** args)
 {
     guint num_args = g_strv_length(args);

@@ -50,6 +50,10 @@ vercheck=false
 # Possible values: true, false (Default: false)
 slashguard=false
 
+# Include URLs sent by self in tab-completion.
+# Possible values: true, false (Default: false)
+url.own=false
+
 # Wrap text lines in chat/MUC window output.
 # Possible values: true, false (Default: true)
 wrap=true
