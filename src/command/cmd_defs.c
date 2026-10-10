@@ -2678,7 +2678,7 @@ static const struct cmd_t command_defs[] = {
       CMD_SYN(
               "/silence on|off")
       CMD_DESC(
-              "Let's you silence all message attempts from people who are not in your roster.")
+              "Lets you silence all message attempts from people who are not in your roster.")
     },
 
     { CMD_PREAMBLE("/register",
