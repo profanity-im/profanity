@@ -362,7 +362,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     }
 
     if (!message->is_mam) {
-        wins_add_urls_ac(window, message, FALSE);
+        wins_add_urls_ac(window, message->plain, FALSE);
         wins_add_quotes_ac(window, message->plain, FALSE);
 
         if (prefs_get_boolean(PREF_BEEP)) {
@@ -387,6 +387,10 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, const char
 
     ProfWin* window = (ProfWin*)chatwin;
     wins_add_quotes_ac(window, message, FALSE);
+
+    if (prefs_get_boolean(PREF_URL_OWN)) {
+        wins_add_urls_ac(window, message, FALSE);
+    }
 
     auto_char char* enc_char = get_enc_char(enc_mode, chatwin->outgoing_char);
 

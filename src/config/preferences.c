@@ -1871,6 +1871,7 @@ _get_group(preference_t pref)
     case PREF_OUTGOING_STAMP:
     case PREF_INCOMING_STAMP:
     case PREF_MOOD:
+    case PREF_URL_OWN:
         return PREF_GROUP_UI;
     case PREF_STATES:
     case PREF_OUTTYPE:
@@ -2213,6 +2214,8 @@ _get_key(preference_t pref)
         return "url.open.cmd";
     case PREF_URL_SAVE_CMD:
         return "url.save.cmd";
+    case PREF_URL_OWN:
+        return "url.own";
     case PREF_COMPOSE_EDITOR:
         return "compose.editor";
     case PREF_SILENCE_NON_ROSTER:
@@ -2295,6 +2298,7 @@ _get_default_boolean(preference_t pref)
         return TRUE;
     case PREF_SPELLCHECK_ENABLE:
     case PREF_PGP_PUBKEY_AUTOIMPORT:
+    case PREF_URL_OWN:
     default:
         return FALSE;
     case PREF_OX_ENCRYPTFILE:

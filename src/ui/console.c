@@ -1403,6 +1403,15 @@ cons_time_setting(void)
 }
 
 void
+cons_url_setting(void)
+{
+    if (prefs_get_boolean(PREF_URL_OWN))
+        cons_show("Tab-complete own URLs (/url own)    : ON");
+    else
+        cons_show("Tab-complete own URLs (/url own)    : OFF");
+}
+
+void
 cons_vercheck_setting(void)
 {
     if (prefs_get_boolean(PREF_VERCHECK))

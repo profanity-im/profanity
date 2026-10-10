@@ -2596,24 +2596,28 @@ static const struct cmd_t command_defs[] = {
     },
 
     { CMD_PREAMBLE("/url",
-                   parse_args, 2, 3, NULL)
+                   parse_args, 2, 3, cons_url_setting)
       CMD_SUBFUNCS(
               { "open", cmd_url_open },
-              { "save", cmd_url_save })
+              { "save", cmd_url_save },
+              { "own", cmd_url_own })
       CMD_TAGS(
               CMD_TAG_CHAT,
               CMD_TAG_GROUPCHAT)
       CMD_SYN(
               "/url open <url>",
-              "/url save <url> [<path>]")
+              "/url save <url> [<path>]",
+              "/url own on|off")
       CMD_DESC(
               "Open or save URLs. This works with OMEMO encrypted files as well.")
       CMD_ARGS(
               { "open", "Open URL with predefined executable." },
-              { "save", "Save URL to optional path. The location is displayed after successful download." })
+              { "save", "Save URL to optional path. The location is displayed after successful download." },
+              { "own", "Include URLs sent by self in tab-completion. Takes effect only for messages received or loaded from history after the change." })
       CMD_EXAMPLES(
               "/url open https://profanity-im.github.io",
-              "/url save https://profanity-im.github.io/guide/latest/userguide.html /home/user/Download/")
+              "/url save https://profanity-im.github.io/guide/latest/userguide.html /home/user/Download/",
+              "/url own on")
     },
 
     { CMD_PREAMBLE("/mam",

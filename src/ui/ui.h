@@ -308,6 +308,7 @@ void cons_history_setting(void);
 void cons_carbons_setting(void);
 void cons_receipts_setting(void);
 void cons_log_setting(void);
+void cons_url_setting(void);
 void cons_logging_setting(void);
 void cons_autoaway_setting(void);
 void cons_reconnect_setting(void);
