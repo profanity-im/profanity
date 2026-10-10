@@ -445,6 +445,29 @@ str_xml_sanitize(const char* const str)
     return g_string_free(sanitized, FALSE);
 }
 
+/**
+ * Strips invisible Unicode directional marks (U+200E (left) and U+200F (right))
+ */
+void
+str_clean_directional_chars(char* str)
+{
+    if (str == NULL) {
+        return;
+    }
+
+    gchar* src = str;
+    gchar* dst = str;
+
+    while (*src != '\0') {
+        if ((guchar)src[0] == 0xE2 && (guchar)src[1] == 0x80 && ((guchar)src[2] == 0x8E || (guchar)src[2] == 0x8F)) {
+            src += 3;
+        } else {
+            *dst++ = *src++;
+        }
+    }
+    *dst = '\0';
+}
+
 gint
 str_ascii_casecmp0(const char* s1, const char* s2)
 {

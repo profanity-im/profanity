@@ -1325,3 +1325,61 @@ str_xml_sanitize__strips_illegal_characters(void** state)
     assert_string_equal("UTF-8: üñîçøðé  and more", res5);
     g_free(res5);
 }
+
+void
+str_clean_directional_chars__tests(void** state)
+{
+    // Test NULL input
+    str_clean_directional_chars(NULL);
+
+    // Test empty string
+    char buf1[] = "";
+    str_clean_directional_chars(buf1);
+    assert_string_equal("", buf1);
+
+    // Test string without directional marks
+    char buf2[] = "Hello World!";
+    str_clean_directional_chars(buf2);
+    assert_string_equal("Hello World!", buf2);
+
+    // Test string with U+200E (LEFT-TO-RIGHT MARK)
+    char buf3[] = "aspallyo\u200E: test message";
+    str_clean_directional_chars(buf3);
+    assert_string_equal("aspallyo: test message", buf3);
+
+    // Test string with U+200F (RIGHT-TO-LEFT MARK)
+    char buf4[] = "start\u200Fmid\u200Fend";
+    str_clean_directional_chars(buf4);
+    assert_string_equal("startmidend", buf4);
+
+    // Test leading and trailing directional marks
+    char buf5[] = "\u200E\u200Fonly text\u200E";
+    str_clean_directional_chars(buf5);
+    assert_string_equal("only text", buf5);
+
+    // Test string containing only directional marks
+    char buf6[] = "\u200E\u200F\u200E";
+    str_clean_directional_chars(buf6);
+    assert_string_equal("", buf6);
+
+    // Test multibyte UTF-8 characters preserved
+    char buf7[] = "üñîçøðé \u200E with \u200F symbols: 🚀";
+    str_clean_directional_chars(buf7);
+    assert_string_equal("üñîçøðé  with  symbols: 🚀", buf7);
+
+    // Test raw byte sequence with separated literals
+    char buf8[] = "start\xE2\x80\x8E"
+                  "mid\xE2\x80\x8F"
+                  "end";
+    str_clean_directional_chars(buf8);
+    assert_string_equal("startmidend", buf8);
+
+    // Test incomplete/partial UTF-8 sequence starting with \xE2
+    char buf9[] = "prefix \xE2";
+    str_clean_directional_chars(buf9);
+    assert_string_equal("prefix \xE2", buf9);
+
+    char buf10[] = "prefix \xE2\x80";
+    str_clean_directional_chars(buf10);
+    assert_string_equal("prefix \xE2\x80", buf10);
+}

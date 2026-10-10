@@ -62,5 +62,6 @@ void valid_tls_policy_option__is__correct_for_various_inputs(void** state);
 void get_mentions__tests__various(void** state);
 void release_is_new__tests__various(void** state);
 void str_xml_sanitize__strips_illegal_characters(void** state);
+void str_clean_directional_chars__tests(void** state);
 
 #endif
