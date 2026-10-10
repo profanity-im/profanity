@@ -1379,7 +1379,28 @@ str_clean_directional_chars__tests(void** state)
     str_clean_directional_chars(buf9);
     assert_string_equal("prefix \xE2", buf9);
 
-    char buf10[] = "prefix \xE2\x80";
-    str_clean_directional_chars(buf10);
-    assert_string_equal("prefix \xE2\x80", buf10);
+    // Test Arabic Letter Mark (U+061C)
+    char buf11[] = "text\u061Cwith\u061Calm";
+    str_clean_directional_chars(buf11);
+    assert_string_equal("textwithalm", buf11);
+
+    // Test Bidi embeddings and overrides (U+202A - U+202E)
+    // e.g. Trojan Source RLO test: "file_\u202Ecod.exe" -> "file_cod.exe"
+    char buf12[] = "file_\u202Ecod.exe";
+    str_clean_directional_chars(buf12);
+    assert_string_equal("file_cod.exe", buf12);
+
+    char buf13[] = "\u202Aembed\u202Boverride\u202Cpop\u202Dlr\u202Erl";
+    str_clean_directional_chars(buf13);
+    assert_string_equal("embedoverridepoplrrl", buf13);
+
+    // Test Bidi isolates (U+2066 - U+2069)
+    char buf14[] = "\u2066lri\u2067rli\u2068fsi\u2069pdi";
+    str_clean_directional_chars(buf14);
+    assert_string_equal("lrirlifsipdi", buf14);
+
+    // Test that legitimate Arabic and Hebrew characters are preserved
+    char buf15[] = "مرحبا שלום";
+    str_clean_directional_chars(buf15);
+    assert_string_equal("مرحبا שלום", buf15);
 }

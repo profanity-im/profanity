@@ -446,7 +446,10 @@ str_xml_sanitize(const char* const str)
 }
 
 /**
- * Strips invisible Unicode directional marks (U+200E (left) and U+200F (right))
+ * Strips Unicode Bidirectional control characters
+ * - Marks: U+061C (ALM), U+200E (LRM), U+200F (RLM)
+ * - Embeddings & Overrides: U+202A (LRE) through U+202E (RLO)
+ * - Isolates: U+2066 (LRI) through U+2069 (PDI)
  */
 void
 str_clean_directional_chars(char* str)
@@ -459,10 +462,15 @@ str_clean_directional_chars(char* str)
     gchar* dst = str;
 
     while (*src != '\0') {
-        if ((guchar)src[0] == 0xE2 && (guchar)src[1] == 0x80 && ((guchar)src[2] == 0x8E || (guchar)src[2] == 0x8F)) {
-            src += 3;
+        gunichar ch = g_utf8_get_char(src);
+        gchar* next = g_utf8_next_char(src);
+
+        if (ch == 0x061C || ch == 0x200E || ch == 0x200F || (ch >= 0x202A && ch <= 0x202E) || (ch >= 0x2066 && ch <= 0x2069)) {
+            src = next;
         } else {
-            *dst++ = *src++;
+            while (src < next) {
+                *dst++ = *src++;
+            }
         }
     }
     *dst = '\0';
