@@ -320,7 +320,7 @@ accounts_get_account(const char* const account_name)
 
         gchar* startscript = g_key_file_get_string(accounts, sanitized_account_name, "script.start", NULL);
 
-        gchar* client = g_key_file_get_string(accounts, sanitized_account_name, "client.account_name", NULL);
+        gchar* client = g_key_file_get_string(accounts, sanitized_account_name, "client.name", NULL);
 
         gchar* theme = g_key_file_get_string(accounts, sanitized_account_name, "theme", NULL);
 
