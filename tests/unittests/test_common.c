@@ -1451,7 +1451,7 @@ str_clean_terminal_control_chars__tests(void** state)
     assert_string_equal("delchar", buf7);
 
     // Test stripping C1 controls (U+0080 to U+009F)
-    char buf8[] = "c1_\u0080_\u009B_\u009F_end";
+    char buf8[] = "c1_\xc2\x80_\xc2\x9b_\xc2\x9f_end";
     str_clean_terminal_control_chars(buf8);
     assert_string_equal("c1____end", buf8);
 
