@@ -1325,3 +1325,138 @@ str_xml_sanitize__strips_illegal_characters(void** state)
     assert_string_equal("UTF-8: üñîçøðé  and more", res5);
     g_free(res5);
 }
+
+void
+str_clean_directional_chars__tests(void** state)
+{
+    // Test NULL input
+    str_clean_directional_chars(NULL);
+
+    // Test empty string
+    char buf1[] = "";
+    str_clean_directional_chars(buf1);
+    assert_string_equal("", buf1);
+
+    // Test string without directional marks
+    char buf2[] = "Hello World!";
+    str_clean_directional_chars(buf2);
+    assert_string_equal("Hello World!", buf2);
+
+    // Test string with U+200E (LEFT-TO-RIGHT MARK)
+    char buf3[] = "aspallyo\u200E: test message";
+    str_clean_directional_chars(buf3);
+    assert_string_equal("aspallyo: test message", buf3);
+
+    // Test string with U+200F (RIGHT-TO-LEFT MARK)
+    char buf4[] = "start\u200Fmid\u200Fend";
+    str_clean_directional_chars(buf4);
+    assert_string_equal("startmidend", buf4);
+
+    // Test leading and trailing directional marks
+    char buf5[] = "\u200E\u200Fonly text\u200E";
+    str_clean_directional_chars(buf5);
+    assert_string_equal("only text", buf5);
+
+    // Test string containing only directional marks
+    char buf6[] = "\u200E\u200F\u200E";
+    str_clean_directional_chars(buf6);
+    assert_string_equal("", buf6);
+
+    // Test multibyte UTF-8 characters preserved
+    char buf7[] = "üñîçøðé \u200E with \u200F symbols: 🚀";
+    str_clean_directional_chars(buf7);
+    assert_string_equal("üñîçøðé  with  symbols: 🚀", buf7);
+
+    // Test raw byte sequence with separated literals
+    char buf8[] = "start\xE2\x80\x8E"
+                  "mid\xE2\x80\x8F"
+                  "end";
+    str_clean_directional_chars(buf8);
+    assert_string_equal("startmidend", buf8);
+
+    // Test incomplete/partial UTF-8 sequence starting with \xE2
+    char buf9[] = "prefix \xE2";
+    str_clean_directional_chars(buf9);
+    assert_string_equal("prefix \xE2", buf9);
+
+    // Test Arabic Letter Mark (U+061C)
+    char buf11[] = "text\u061Cwith\u061Calm";
+    str_clean_directional_chars(buf11);
+    assert_string_equal("textwithalm", buf11);
+
+    // Test Bidi embeddings and overrides (U+202A - U+202E)
+    // e.g. Trojan Source RLO test: "file_\u202Ecod.exe" -> "file_cod.exe"
+    char buf12[] = "file_\u202Ecod.exe";
+    str_clean_directional_chars(buf12);
+    assert_string_equal("file_cod.exe", buf12);
+
+    char buf13[] = "\u202Aembed\u202Boverride\u202Cpop\u202Dlr\u202Erl";
+    str_clean_directional_chars(buf13);
+    assert_string_equal("embedoverridepoplrrl", buf13);
+
+    // Test Bidi isolates (U+2066 - U+2069)
+    char buf14[] = "\u2066lri\u2067rli\u2068fsi\u2069pdi";
+    str_clean_directional_chars(buf14);
+    assert_string_equal("lrirlifsipdi", buf14);
+
+    // Test that legitimate Arabic and Hebrew characters are preserved
+    char buf15[] = "مرحبا שלום";
+    str_clean_directional_chars(buf15);
+    assert_string_equal("مرحبا שלום", buf15);
+}
+
+void
+str_clean_terminal_control_chars__tests(void** state)
+{
+    // Test NULL input
+    str_clean_terminal_control_chars(NULL);
+
+    // Test empty string
+    char buf1[] = "";
+    str_clean_terminal_control_chars(buf1);
+    assert_string_equal("", buf1);
+
+    // Test normal string without controls
+    char buf2[] = "Hello World!";
+    str_clean_terminal_control_chars(buf2);
+    assert_string_equal("Hello World!", buf2);
+
+    // Test preserving \t and \n
+    char buf3[] = "Line 1\twith tab\nLine 2\n";
+    str_clean_terminal_control_chars(buf3);
+    assert_string_equal("Line 1\twith tab\nLine 2\n", buf3);
+
+    // Test stripping ANSI escape character (0x1B ESC)
+    char buf4[] = "\x1b[31mRed Text\x1b[0m";
+    str_clean_terminal_control_chars(buf4);
+    assert_string_equal("[31mRed Text[0m", buf4);
+
+    // Test stripping carriage return (0x0D \r)
+    char buf5[] = "hello\rworld";
+    str_clean_terminal_control_chars(buf5);
+    assert_string_equal("helloworld", buf5);
+
+    // Test stripping bell (0x07), backspace (0x08), form feed (0x0C)
+    char buf6[] = "bell\x07"
+                  "bs\x08"
+                  "ff\x0c"
+                  "end";
+    str_clean_terminal_control_chars(buf6);
+    assert_string_equal("bellbsffend", buf6);
+
+    // Test stripping ASCII DEL (0x7F)
+    char buf7[] = "del\x7f"
+                  "char";
+    str_clean_terminal_control_chars(buf7);
+    assert_string_equal("delchar", buf7);
+
+    // Test stripping C1 controls (U+0080 to U+009F)
+    char buf8[] = "c1_\xc2\x80_\xc2\x9b_\xc2\x9f_end";
+    str_clean_terminal_control_chars(buf8);
+    assert_string_equal("c1____end", buf8);
+
+    // Test that legitimate UTF-8 multibyte characters are preserved
+    char buf9[] = "üñîçøðé 🚀 مرحبا שלום";
+    str_clean_terminal_control_chars(buf9);
+    assert_string_equal("üñîçøðé 🚀 مرحبا שלום", buf9);
+}

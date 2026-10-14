@@ -445,6 +445,76 @@ str_xml_sanitize(const char* const str)
     return g_string_free(sanitized, FALSE);
 }
 
+typedef gboolean (*CharFilterFunc)(gunichar ch);
+
+static void
+_str_clean_chars(char* str, CharFilterFunc filter_func)
+{
+    if (str == NULL || filter_func == NULL) {
+        return;
+    }
+
+    gchar* src = str;
+    gchar* dst = str;
+
+    while (*src != '\0') {
+        gunichar ch = g_utf8_get_char(src);
+        gchar* next = g_utf8_next_char(src);
+
+        if (filter_func(ch)) {
+            src = next;
+        } else {
+            while (src < next) {
+                *dst++ = *src++;
+            }
+        }
+    }
+    *dst = '\0';
+}
+
+static gboolean
+_is_directional_char(gunichar ch)
+{
+    return (ch == 0x061C || ch == 0x200E || ch == 0x200F || (ch >= 0x202A && ch <= 0x202E) || (ch >= 0x2066 && ch <= 0x2069));
+}
+
+static gboolean
+_is_terminal_control_char(gunichar ch)
+{
+    return ((ch < 0x20 && ch != '\t' && ch != '\n') || ch == 0x7F || (ch >= 0x80 && ch <= 0x9F));
+}
+
+/**
+ * Strips Unicode Bidirectional control characters
+ * - Marks: U+061C (ALM), U+200E (LRM), U+200F (RLM)
+ * - Embeddings & Overrides: U+202A (LRE) through U+202E (RLO)
+ * - Isolates: U+2066 (LRI) through U+2069 (PDI)
+ */
+void
+str_clean_directional_chars(char* str)
+{
+    _str_clean_chars(str, _is_directional_char);
+}
+
+/**
+ * Strips terminal control characters
+ * - C0 control characters (0x01 - 0x1F), preserving 0x09 (\t) and 0x0A (\n).
+ * - ASCII DEL (0x7F).
+ * - C1 control characters (U+0080 - U+009F).
+ *
+ * Certain sequences are allowed by XML and can occur in normal
+ * messages: entity-encoded carriage return (&#xD; / \r), DEL (0x7F), and C1
+ * controls (U+0080 - U+009F).
+ * OTR and PGP decrypt arbitrary raw bytes directly into message->plain without
+ * passing through an XML parser, allowing ANSI escape sequences to bypass XML
+ * validation.
+ */
+void
+str_clean_terminal_control_chars(char* str)
+{
+    _str_clean_chars(str, _is_terminal_control_char);
+}
+
 gint
 str_ascii_casecmp0(const char* s1, const char* s2)
 {

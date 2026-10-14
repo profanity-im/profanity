@@ -24,6 +24,7 @@
 #include "config/account.h"
 #include "config/cafile.h"
 #include "config/scripts.h"
+#include "common.h"
 #include "event/client_events.h"
 #include "event/server_events.h"
 #include "event/common.h"
@@ -259,6 +260,8 @@ sv_ev_room_subject(const char* const room, const char* const nick, const char* c
 void
 sv_ev_room_history(ProfMessage* message)
 {
+    _clean_incoming_message(message);
+
     if (prefs_get_boolean(PREF_NOTIFY_ROOM_OFFLINE)) {
         // check if this message was sent while we were offline.
         // if so, treat it as a new message rather than a history event.
@@ -322,6 +325,8 @@ sv_ev_room_message(ProfMessage* message)
         return;
     }
 
+    _clean_incoming_message(message);
+
     const char* const mynick = muc_nick(mucwin->roomjid);
 
     gboolean is_duplicate = FALSE;
@@ -348,8 +353,6 @@ sv_ev_room_message(ProfMessage* message)
     GSList* mentions = get_mentions(prefs_get_boolean(PREF_NOTIFY_MENTION_WHOLE_WORD), prefs_get_boolean(PREF_NOTIFY_MENTION_CASE_SENSITIVE), message->plain, mynick);
     gboolean mention = g_slist_length(mentions) > 0;
     GList* triggers = prefs_message_get_triggers(message->plain);
-
-    _clean_incoming_message(message);
 
     if (is_duplicate) {
         log_debug("Skipping duplicate room message display: JID=%s, message=%s",
@@ -434,6 +437,8 @@ sv_ev_room_message(ProfMessage* message)
 static void
 _sv_ev_private_message(ProfMessage* message)
 {
+    _clean_incoming_message(message);
+
     char* old_plain = message->plain;
     auto_char char* plugin_msg = plugins_pre_priv_message_display(message->from_jid->fulljid, message->plain);
     if (plugin_msg)
@@ -445,7 +450,6 @@ _sv_ev_private_message(ProfMessage* message)
         privatewin = (ProfPrivateWin*)window;
     }
 
-    _clean_incoming_message(message);
     privwin_incoming_msg(privatewin, message);
     // Intentionally skipping log to DB because we can't authenticate the sender
     chat_log_msg_in(message);
@@ -1423,22 +1427,12 @@ sv_ev_bookmark_autojoin(Bookmark* bookmark)
 }
 
 static void
-_cut(ProfMessage* message, const char* cut)
+_clean_incoming_message(ProfMessage* message)
 {
-    if (message->plain == NULL) {
+    if (message == NULL || message->plain == NULL) {
         return;
     }
 
-    if (strstr(message->plain, cut)) {
-        auto_gcharv gchar** split = g_strsplit(message->plain, cut, -1);
-        free(message->plain);
-        message->plain = g_strjoinv("", split);
-    }
-}
-
-static void
-_clean_incoming_message(ProfMessage* message)
-{
-    _cut(message, "\u200E");
-    _cut(message, "\u200F");
+    str_clean_terminal_control_chars(message->plain);
+    str_clean_directional_chars(message->plain);
 }
