@@ -64,6 +64,7 @@ static gboolean _handle_device_list_start_session(const char* const jid, GList* 
 static char* _omemo_fingerprint(ec_public_key* identity, gboolean formatted);
 static unsigned char* _omemo_fingerprint_decode(const char* const fingerprint, size_t* len);
 static char* _omemo_unformat_fingerprint(const char* const fingerprint_formatted);
+static void _omemo_trust(const char* const jid, uint32_t device_id, const char* const fingerprint);
 static void _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key* identity);
 static void _acquire_sender_devices_list(void);
 
@@ -585,7 +586,7 @@ omemo_set_device_list(const char* const from, GList* device_list)
                                 char* formatted = omemo_format_fingerprint(key);
                                 if (formatted) {
                                     cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, formatted);
-                                    omemo_trust(jid->barejid, formatted);
+                                    _omemo_trust(jid->barejid, GPOINTER_TO_INT(device_id->data), formatted);
                                     free(formatted);
                                 }
                             }
@@ -1466,14 +1467,40 @@ _omemo_fingerprint_decode(const char* const fingerprint, size_t* len)
     return output;
 }
 
+static void
+_omemo_trust(const char* const jid, uint32_t device_id, const char* const fingerprint)
+{
+    if (!jid || !device_id || !fingerprint) {
+        return;
+    }
+
+    /* TODO should not hardcode DJB_TYPE here
+     * should instead store identity key in known_identities along with
+     * device_id */
+    signal_protocol_address address = {
+        .name = jid,
+        .name_len = strlen(jid),
+        .device_id = device_id,
+    };
+
+    size_t len;
+    unsigned char* fingerprint_raw = _omemo_fingerprint_decode(fingerprint, &len);
+    unsigned char djb_type[] = { '\x05' };
+    signal_buffer* buffer = signal_buffer_create(djb_type, 1);
+    buffer = signal_buffer_append(buffer, fingerprint_raw, len);
+    save_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
+    free(fingerprint_raw);
+    signal_buffer_free(buffer);
+
+    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, free, strdup(jid));
+}
+
 void
 omemo_trust(const char* const jid, const char* const fingerprint_formatted)
 {
     if (!jid || !fingerprint_formatted) {
         return;
     }
-
-    size_t len;
 
     GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
     if (!known_identities) {
@@ -1498,24 +1525,7 @@ omemo_trust(const char* const jid, const char* const fingerprint_formatted)
         return;
     }
 
-    /* TODO should not hardcode DJB_TYPE here
-     * should instead store identity key in known_identities along with
-     * device_id */
-    signal_protocol_address address = {
-        .name = jid,
-        .name_len = strlen(jid),
-        .device_id = device_id,
-    };
-
-    unsigned char* fingerprint_raw = _omemo_fingerprint_decode(fingerprint_formatted, &len);
-    unsigned char djb_type[] = { '\x05' };
-    signal_buffer* buffer = signal_buffer_create(djb_type, 1);
-    buffer = signal_buffer_append(buffer, fingerprint_raw, len);
-    save_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
-    free(fingerprint_raw);
-    signal_buffer_free(buffer);
-
-    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, free, strdup(jid));
+    _omemo_trust(jid, device_id, fingerprint_formatted);
 
     wins_omemo_trust_changed(jid);
 }
