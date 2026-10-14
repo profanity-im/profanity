@@ -2903,10 +2903,6 @@ iq_mam_verify_request(ProfWin* win, const char* const startdate, const char* con
     gboolean is_muc = (win->type == WIN_MUC);
     char* barejid = is_muc ? strdup(((ProfMucWin*)win)->roomjid) : strdup(((ProfChatWin*)win)->barejid);
 
-    if (barejid == NULL) {
-        return;
-    }
-
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_stanza_t* iq = stanza_create_mam_count_iq(ctx, barejid, startdate, enddate, is_muc);
 
@@ -3052,14 +3048,36 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
             buffer_remove_entry(window->layout->buffer, 0);
 
-            if (is_complete) {
-                if (window->type == WIN_MUC) {
-                    mucwin_db_history((ProfMucWin*)window, NULL, NULL, TRUE);
-                } else {
-                    chatwin_db_history((ProfChatWin*)window, NULL, NULL, TRUE);
+            auto_gchar gchar* start_str = NULL;
+            if (data->start_datestr) {
+                GDateTime* dt = g_date_time_new_from_iso8601(data->start_datestr, NULL);
+                if (dt) {
+                    start_str = prof_date_time_format_iso8601(dt);
+                    g_date_time_unref(dt);
                 }
-                win_print_end_of_archive(window);
+            }
+            auto_gchar gchar* end_str = NULL;
+            if (data->end_datestr) {
+                GDateTime* dt = g_date_time_new_from_iso8601(data->end_datestr, NULL);
+                if (dt) {
+                    end_str = prof_date_time_format_iso8601(dt);
+                    g_date_time_unref(dt);
+                }
+            }
+
+            if (is_complete || !data->fetch_next) {
+                if (window->type == WIN_MUC) {
+                    mucwin_db_history((ProfMucWin*)window, is_complete ? NULL : start_str, end_str, TRUE);
+                } else {
+                    chatwin_db_history((ProfChatWin*)window, is_complete ? NULL : start_str, end_str, TRUE);
+                }
                 return 0;
+            }
+
+            if (window->type == WIN_MUC) {
+                mucwin_db_history((ProfMucWin*)window, start_str, end_str, TRUE);
+            } else {
+                chatwin_db_history((ProfChatWin*)window, start_str, end_str, TRUE);
             }
 
             xmpp_stanza_t* set = xmpp_stanza_get_child_by_name_and_ns(fin, STANZA_TYPE_SET, STANZA_NS_RSM);
