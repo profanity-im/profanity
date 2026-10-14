@@ -570,7 +570,7 @@ log=on
 policy=automatic
 
 # Security device/key verification trust policy.
-# Possible values: manual, first-use, blind (Default: manual)
+# Possible values: manual, firstusage, blind (Default: manual)
 trustmode=manual
 
 
