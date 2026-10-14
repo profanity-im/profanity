@@ -568,7 +568,6 @@ omemo_set_device_list(const char* const from, GList* device_list)
         if (trusted) {
             if (g_hash_table_size(trusted) > 0) {
                 log_debug("[OMEMO] Found trusted device for %s - skip firstusage", jid->barejid);
-                return;
             }
         } else {
             if (device_list) {
