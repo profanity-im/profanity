@@ -1,0 +1,27 @@
+.TH man 1 "2026-10-15" "0.19.0" "Profanity XMPP client"
+
+.SH NAME
+/mucping
+
+.SH DESCRIPTION
+Set the interval and timeout for MUC self-pings (XEP-0410). Recommended interval is between 300 and 900 seconds, with a timeout of 10 to 60 seconds. Note that the interval must be greater than the timeout.
+
+.SH SYNOPSIS
+/mucping set <seconds>
+
+.LP
+/mucping timeout <seconds>
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBset <seconds>\fR
+.RS 4
+Number of seconds of idle room activity before sending a ping, a value of 0 disables MUC self-pings.
+.RE
+.PP
+\fBtimeout <seconds>\fR
+.RS 4
+Seconds to wait for MUC self-ping responses, after which the room connection is considered disconnected. A value of 0 disables MUC self-pings entirely.
+.RE

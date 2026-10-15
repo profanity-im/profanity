@@ -1,3 +1,123 @@
+0.19.0 (2026-10-15)
+===================
+
+4 people contributed to this release: onf, Jiho Kim, @YHNdnzj and @jubalh.
+
+This is the first release that supports MUC MAM!
+
+Features:
+- Add `/mam verify` autocompleter (#2181)
+- Add `/mucping` command (#2179)
+- Add end of archive visual indicator (#2181)
+- Add state management for activity aware selfpings (#2179)
+- Add support for encrypted file sharing via HTTP upload (#2186, #2175)
+- Deduplicate user mood notifications (#2189)
+- Display correct timestamps on historical mentions and triggers (#2181)
+- Distinguish between MAM and regular MUC message (#2181)
+- Enable MAM by default
+- Generalize mam and rsm functions to work on more window types (#2181)
+- Implement XEP-0410 timer loop (#2179)
+- Implement ondemand history loading (#2181)
+- Implement pong handler and autorejoin recovery (#2179)
+- Implement room-targeted MAM stanza creation (#2181)
+- Make AES-256-GCM file encryption optional for OX sendfile (#2186)
+- Print MAM and Silence setting in /prefs chat (#2179)
+- Print message when voice is requested in MUC (#2216)
+- Print mucping setting in /prefs conn (#2179)
+- Strip all unicode bidi control characters in messages (#2217)
+- Strip terminal control characters in incoming messages (#2217)
+- Support XMPP URI 'join' query type in `/join` (#2190, #1782)
+- Suppress duplicate history replay on room join (#2181)
+- Track MAM support for MUCs (#2181)
+- Trigger MAM queries on joined MUC rooms (#2181)
+- Trigger automatic MAM catchup sync on reconnection (#2181)
+- Update `/mam` command description (#2181)
+- Update room activity on incoming messages and presence (#2179)
+- Validate MUC selfping interval and timeout range (#2179)
+
+Bug Fixes:
+- Accept MAM results without 'by' attribute for active MUCs (#2181)
+- Add space between titlebar name and SCROLLED indicator (#2181)
+- Align autoaway state on reconnect (#2192, #2073)
+- Correct RSM pagination to use last and after (#2185)
+- Correctly display our own sent OMEMO messages in MUCs and 1:1 chats (#2195)
+- Correctly roll the groupchat log (#2219)
+- Delay bookmark autojoin to prevent muc history (#2181)
+- Do not discard self sent messages received via MAM if sent offline (#2196)
+- Enable message carbons conditionally (#2181)
+- Enforce mandatory TLS during in-band registration (#2209)
+- Ensure cleanup and prevent command execution on GCM verification failure (#2203)
+- Ensure end of archive is visible and redrawn correctly (#2181)
+- Filter keys listed by `/ox keys` to those matching `xmpp:` prefix (#2178, #2177)
+- Filter out non-groupchat messages from MUC archives (#2181)
+- Fix client name not getting loaded from config (#2213)
+- Fix compiler warnings and add missing casts (#2181)
+- Fix rendering corruption when wrapping long words (#2191, #1949)
+- Fix repeated message corrections in MUCs (#2180)
+- Implement join queue for autojoined bookmarks (#2188, #1776)
+- Make connection metadata lifecycle safer (#2207, #2205)
+- Mitigate sensitive memory exposure and add padding bounds check (#2203)
+- Only autocomplete open windows for /win (#2197)
+- Optimize MAM history fetching (#2208)
+- Prevent double free on incoming messages during cleanup (#2217, #2210)
+- Prevent duplicate messages if MAM is enabled (#2181)
+- Prevent duplicated and out-of-order history messages (#2183)
+- Prevent plaintext fallback on encryption failure (#2182)
+- Prevent redundant MAM requests after archive ends (#2181)
+- Prevent sending message when contact goes offline (#2169, #952)
+- Print message when /invite is used incorrectly (#2194)
+- Query bare JID for PEP features during discovery (#2176)
+- Resolve endless loading and database log pollution (#2181)
+- Resolve outgoing display name in history (#2185, #2184)
+- Revert "Optimize MAM history fetching"
+- Support scrollback pagination for MUC windows in win_page_down (#2185)
+- Use RSM for catch-up to prevent duplicate message fetch (#2204)
+- Use case insensitive window lookup for JIDs (#2191)
+- Use raw UTF-8 bytes for C1 control characters (#2217)
+- Zeroize account passwords and GPG passphrases on destruction (#2203)
+
+Documentation:
+- Explain OMEMO titlebar status in manpage (#2169)
+- Explain OTR titlebar meanings in /help otr (#2169)
+- Explain OTR titlebar status in manpage (#2169)
+- Fix grammar in /help silence (#2215)
+
+Refactorings:
+- Actually make it possible to disable MUC self-pings (#2179)
+- Add JID validation to /sub and /blocked (#2197)
+- Check the JID in bookmark command in a better way (#2197)
+- Consolidate SQLite history parsing functions (#2197)
+- Consolidate database limit and count functions (#2197)
+- DRY up delay timestamp parsing in stanza.c (#2197)
+- Deduplicate string cleaner functions (#2217)
+- Don't duplicate JID in iq_mam_verify_request (#2219)
+- Format openpgp timestamp thread safely (#2197)
+- Guard /roster add against invalid JIDs (#2197)
+- Make MAM timestamp conversion robust (#2197)
+- Modernise string concatenation with g_strconcat (#2197)
+- Modernise timestamp and ISO8601 conversions (#2197)
+- Permit editing of latest correction in LMC (#2180)
+- Remove not used parameter (#2179)
+- Remove unused function get_nick_from_full_jid() (#2197)
+- Replace obsolete gettimeofday with g_get_real_time (#2197)
+- Resolve NULL pointer warnings and memory management in chatlog (#2219)
+- Use FREE_SET_NULL and GFREE_SET_NULL macros (#2197)
+- Use a const for "End of archive reached" (#2181)
+
+Cleanup:
+- Move NULL check from _muc_occupant_new to muc_roster_add (#2219)
+
+Tests:
+- Add unit tests for `/mucping` (#2179)
+
+Chores:
+- Add --issue option to changelog-helper.py (#2197)
+- Add XEP-0410 to DOAP (#2179)
+- Describe a way to report bugs for non GH users (#2185)
+- Fix bogus hint for omemo.trustmode (first-use -> firstusage) (#2218)
+- Heavily extend the profrc.example file (#2197)
+- Improve OMEMO help formatting (#2169)
+
 0.18.2 (2026-06-08)
 ===================
 
