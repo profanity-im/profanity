@@ -2670,9 +2670,8 @@ cons_theme_colours(void)
 
     if (COLORS >= 256) {
         cons_show("Your terminal supports 256 colours.");
-        cons_show("But only basic colours are printed here.");
-        cons_show("To use them use their Xterm colour name.");
-        cons_show("See https://jonasjacek.github.io/colors/");
+        cons_show("Use any colour by number: color0 to color255");
+        cons_show("Or use the standard xterm colour names (e.g. navyblue, gold3).");
     }
 
     cons_show("");
