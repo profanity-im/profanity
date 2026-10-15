@@ -305,7 +305,7 @@ omemo_generate_crypto_materials(ProfAccount* account)
     gcry_randomize(&omemo_ctx.device_id, 4, GCRY_VERY_STRONG_RANDOM);
     omemo_ctx.device_id &= 0x7fffffff;
     g_key_file_set_uint64(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_DEVICE_ID, omemo_ctx.device_id);
-    log_info("[OMEMO] device id: %d", omemo_ctx.device_id);
+    log_info("[OMEMO] device id: %u", omemo_ctx.device_id);
 
     /* Identity key */
     signal_protocol_key_helper_generate_identity_key_pair(&omemo_ctx.identity_key_pair, omemo_ctx.signal);
@@ -400,7 +400,7 @@ omemo_start_session(const char* const barejid)
 
         GList* device_id;
         for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
-            omemo_bundle_request(barejid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(barejid));
+            omemo_bundle_request(barejid, GPOINTER_TO_UINT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(barejid));
         }
     }
 }
@@ -585,8 +585,8 @@ omemo_set_device_list(const char* const from, GList* device_list)
                             if (device_id->data == value) {
                                 char* formatted = omemo_format_fingerprint(key);
                                 if (formatted) {
-                                    cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, formatted);
-                                    _omemo_trust(jid->barejid, GPOINTER_TO_INT(device_id->data), formatted);
+                                    cons_show("OMEMO: Adding firstusage trust for %s device %u - Fingerprint %s", jid->barejid, GPOINTER_TO_UINT(device_id->data), formatted);
+                                    _omemo_trust(jid->barejid, GPOINTER_TO_UINT(device_id->data), formatted);
                                     free(formatted);
                                 }
                             }
@@ -653,7 +653,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
                            const unsigned char* const signature, size_t signature_len,
                            const unsigned char* const identity_key_raw, size_t identity_key_len)
 {
-    log_debug("[OMEMO] Starting device session for %s with device %d", jid, device_id);
+    log_debug("[OMEMO] Starting device session for %s with device %u", jid, device_id);
     signal_protocol_address jid_address = {
         .name = jid,
         .name_len = strlen(jid),
@@ -670,18 +670,18 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     _cache_device_identity(jid, device_id, identity_key);
 
     gboolean trusted = is_trusted_identity(&jid_address, (uint8_t*)identity_key_raw, identity_key_len, &omemo_ctx.identity_key_store);
-    log_debug("[OMEMO] Trust %s (%d): %d", jid, device_id, trusted);
+    log_debug("[OMEMO] Trust %s (%u): %d", jid, device_id, trusted);
 
     auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
     if ((g_strcmp0(trust_mode, "blind") == 0) && !trusted) {
         auto_char char* fp = _omemo_fingerprint(identity_key, TRUE);
-        cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
+        cons_show("Blind trust for %s device %u (%s)", jid, device_id, fp);
         omemo_trust(jid, fp);
         trusted = TRUE;
     }
 
     if (!trusted) {
-        log_debug("[OMEMO] We don't trust device %d for %s\n", device_id, jid);
+        log_debug("[OMEMO] We don't trust device %u for %s\n", device_id, jid);
         goto out;
     }
 
@@ -703,14 +703,14 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
 
         res = session_builder_create(&builder, omemo_ctx.store, address, omemo_ctx.signal);
         if (res != 0) {
-            log_error("[OMEMO] cannot create session builder for %s device %d", jid, device_id);
+            log_error("[OMEMO] cannot create session builder for %s device %u", jid, device_id);
             goto out;
         }
 
         int prekey_index;
         size_t prekeys_len = g_list_length(prekeys);
         if (prekeys_len == 0) {
-            log_error("[OMEMO] No prekeys found for %s device %d", jid, device_id);
+            log_error("[OMEMO] No prekeys found for %s device %u", jid, device_id);
             goto out;
         }
         gcry_randomize(&prekey_index, sizeof(int), GCRY_STRONG_RANDOM);
@@ -722,17 +722,17 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
 
         res = session_pre_key_bundle_create(&bundle, 0, device_id, prekey->id, prekey_public, signed_prekey_id, signed_prekey, signature, signature_len, identity_key);
         if (res != 0) {
-            log_error("[OMEMO] cannot create pre key bundle for %s device %d", jid, device_id);
+            log_error("[OMEMO] cannot create pre key bundle for %s device %u", jid, device_id);
             goto out;
         }
 
         res = session_builder_process_pre_key_bundle(builder, bundle);
         if (res != 0) {
-            log_error("[OMEMO] cannot process pre key bundle for %s device %d", jid, device_id);
+            log_error("[OMEMO] cannot process pre key bundle for %s device %u", jid, device_id);
             goto out;
         }
 
-        log_debug("[OMEMO] create session with %s device %d", jid, device_id);
+        log_debug("[OMEMO] create session with %s device %u", jid, device_id);
         if (omemo_ctx.notifying) {
             ProfChatWin* chatwin = wins_get_chat(jid);
             if (chatwin) {
@@ -745,7 +745,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
             }
         }
     } else {
-        log_debug("[OMEMO] session with %s device %d exists", jid, device_id);
+        log_debug("[OMEMO] session with %s device %u exists", jid, device_id);
     }
 
 out:
@@ -844,20 +844,20 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             signal_protocol_address address = {
                 .name = recipients_iter->data,
                 .name_len = strlen(recipients_iter->data),
-                .device_id = GPOINTER_TO_INT(device_ids_iter->data)
+                .device_id = GPOINTER_TO_UINT(device_ids_iter->data)
             };
 
             // Don't encrypt for this device (according to
             // <https://xmpp.org/extensions/xep-0384.html#encrypt>).
             // Yourself as recipients in case of MUC
             if (equals_our_barejid(recipients_iter->data)) {
-                if ((uint32_t)GPOINTER_TO_INT(device_ids_iter->data) == omemo_ctx.device_id) {
-                    log_debug("[OMEMO][SEND] Skipping %d (my device) ", GPOINTER_TO_INT(device_ids_iter->data));
+                if (GPOINTER_TO_UINT(device_ids_iter->data) == omemo_ctx.device_id) {
+                    log_debug("[OMEMO][SEND] Skipping %u (my device) ", GPOINTER_TO_UINT(device_ids_iter->data));
                     continue;
                 }
             }
 
-            log_debug("[OMEMO][SEND] recipients with device id %d for %s", GPOINTER_TO_INT(device_ids_iter->data), recipients_iter->data);
+            log_debug("[OMEMO][SEND] recipients with device id %u for %s", GPOINTER_TO_UINT(device_ids_iter->data), recipients_iter->data);
             res = session_cipher_create(&cipher, omemo_ctx.store, &address, omemo_ctx.signal);
             if (res != SG_SUCCESS) {
                 log_error("[OMEMO][SEND] cannot create cipher for %s device id %d - code: %d", address.name, address.device_id, res);
@@ -884,7 +884,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 continue;
             }
             memcpy(key->data, signal_buffer_data(buffer), key->length);
-            key->device_id = GPOINTER_TO_INT(device_ids_iter->data);
+            key->device_id = GPOINTER_TO_UINT(device_ids_iter->data);
             key->prekey = ciphertext_message_get_type(ciphertext) == CIPHERTEXT_PREKEY_TYPE;
             keys = g_list_append(keys, key);
             SIGNAL_UNREF(ciphertext);
@@ -946,7 +946,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             signal_protocol_address address = {
                 .name = jid->barejid,
                 .name_len = strlen(jid->barejid),
-                .device_id = GPOINTER_TO_INT(device_ids_iter->data)
+                .device_id = GPOINTER_TO_UINT(device_ids_iter->data)
             };
             log_debug("[OMEMO][SEND][Sender] Sending to device %d for %s ", address.device_id, address.name);
             // Don't encrypt for this device (according to
@@ -981,7 +981,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 continue;
             }
             memcpy(key->data, signal_buffer_data(buffer), key->length);
-            key->device_id = GPOINTER_TO_INT(device_ids_iter->data);
+            key->device_id = GPOINTER_TO_UINT(device_ids_iter->data);
             key->prekey = ciphertext_message_get_type(ciphertext) == CIPHERTEXT_PREKEY_TYPE;
             keys = g_list_append(keys, key);
             SIGNAL_UNREF(ciphertext);
@@ -1246,7 +1246,7 @@ omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
         return FALSE;
     }
 
-    void* device_id = g_hash_table_lookup(known_identities, fingerprint);
+    uint32_t device_id = GPOINTER_TO_UINT(g_hash_table_lookup(known_identities, fingerprint));
     if (!device_id) {
         return FALSE;
     }
@@ -1254,7 +1254,7 @@ omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
     signal_protocol_address address = {
         .name = jid,
         .name_len = strlen(jid),
-        .device_id = GPOINTER_TO_UINT(device_id),
+        .device_id = device_id,
     };
 
     size_t fingerprint_len;
@@ -1264,7 +1264,7 @@ omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
     buffer = signal_buffer_append(buffer, fingerprint_raw, fingerprint_len);
 
     gboolean trusted = is_trusted_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
-    log_debug("[OMEMO] Device trusted %s (%u): %d", jid, GPOINTER_TO_UINT(device_id), trusted);
+    log_debug("[OMEMO] Device trusted %s (%u): %d", jid, device_id, trusted);
 
     free(fingerprint_raw);
     signal_buffer_free(buffer);
@@ -1516,7 +1516,7 @@ omemo_trust(const char* const jid, const char* const fingerprint_formatted)
         return;
     }
 
-    uint32_t device_id = GPOINTER_TO_INT(g_hash_table_lookup(known_identities, fingerprint));
+    uint32_t device_id = GPOINTER_TO_UINT(g_hash_table_lookup(known_identities, fingerprint));
     free(fingerprint);
 
     if (!device_id) {
@@ -1573,7 +1573,7 @@ omemo_untrust(const char* const jid, const char* const fingerprint_formatted)
         return;
     }
 
-    uint32_t device_id = GPOINTER_TO_INT(g_hash_table_lookup(known_identities, fingerprint));
+    uint32_t device_id = GPOINTER_TO_UINT(g_hash_table_lookup(known_identities, fingerprint));
     if (!device_id) {
         log_error("[OMEMO] cannot find device id while untrusting a fingerprint");
         return;
@@ -1587,7 +1587,7 @@ omemo_untrust(const char* const jid, const char* const fingerprint_formatted)
     delete_session(&address, omemo_ctx.session_store);
 
     /* Remove from keyfile */
-    auto_gchar gchar* device_id_str = g_strdup_printf("%d", device_id);
+    auto_gchar gchar* device_id_str = g_strdup_printf("%u", device_id);
     g_key_file_remove_key(omemo_ctx.trust.keyfile, jid, device_id_str, NULL);
     omemo_trust_keyfile_save();
 
@@ -1630,11 +1630,11 @@ static gboolean
 _handle_own_device_list(const char* const jid, GList* device_list)
 {
     // We didn't find the own device id -> publish
-    if (!g_list_find(device_list, GINT_TO_POINTER(omemo_ctx.device_id))) {
+    if (!g_list_find(device_list, GUINT_TO_POINTER(omemo_ctx.device_id))) {
         cons_show("Could not find own OMEMO device ID. Going to publish own device ID: %u", omemo_ctx.device_id);
         log_debug("[OMEMO] No device ID for our device. Publishing device list");
         device_list = g_list_copy(device_list);
-        device_list = g_list_append(device_list, GINT_TO_POINTER(omemo_ctx.device_id));
+        device_list = g_list_append(device_list, GUINT_TO_POINTER(omemo_ctx.device_id));
         g_hash_table_insert(omemo_ctx.device_list, strdup(jid), device_list);
         omemo_devicelist_publish(device_list);
     }
@@ -1642,7 +1642,7 @@ _handle_own_device_list(const char* const jid, GList* device_list)
     log_debug("[OMEMO] Request OMEMO Bundles for our devices");
     GList* device_id;
     for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
-        omemo_bundle_request(jid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(jid));
+        omemo_bundle_request(jid, GPOINTER_TO_UINT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(jid));
     }
 
     return TRUE;
@@ -1764,7 +1764,7 @@ _load_identity(void)
         log_error("[OMEMO] cannot load device id: %s", error->message);
         return FALSE;
     }
-    log_debug("[OMEMO] device id: %d", omemo_ctx.device_id);
+    log_debug("[OMEMO] device id: %u", omemo_ctx.device_id);
 
     /* Registration ID */
     omemo_ctx.registration_id = g_key_file_get_uint64(omemo_ctx.identity.keyfile, OMEMO_STORE_GROUP_IDENTITY, OMEMO_STORE_KEY_REGISTRATION_ID, &error);
@@ -1879,7 +1879,7 @@ _load_trust(void)
             auto_guchar guchar* key = g_base64_decode(key_b64, &key_len);
             signal_buffer* buffer = signal_buffer_create(key, key_len);
             uint32_t device_id = strtoul(keys[j], NULL, 10);
-            g_hash_table_insert(trusted, GINT_TO_POINTER(device_id), buffer);
+            g_hash_table_insert(trusted, GUINT_TO_POINTER(device_id), buffer);
         }
     }
 }
@@ -1909,7 +1909,7 @@ _load_sessions(void)
             size_t record_len;
             auto_guchar guchar* record = g_base64_decode(record_b64, &record_len);
             signal_buffer* buffer = signal_buffer_create(record, record_len);
-            g_hash_table_insert(device_store, GINT_TO_POINTER(id), buffer);
+            g_hash_table_insert(device_store, GUINT_TO_POINTER(id), buffer);
         }
     }
 }
@@ -1936,7 +1936,7 @@ _load_known_devices(void)
         for (int j = 0; keys[j] != NULL; j++) {
             uint32_t device_id = strtoul(keys[j], NULL, 10);
             auto_gchar gchar* fingerprint = g_key_file_get_string(omemo_ctx.knowndevices.keyfile, groups[i], keys[j], NULL);
-            g_hash_table_insert(known_identities, strdup(fingerprint), GINT_TO_POINTER(device_id));
+            g_hash_table_insert(known_identities, strdup(fingerprint), GUINT_TO_POINTER(device_id));
         }
     }
 }
@@ -1975,10 +1975,10 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
         }
     }
 
-    log_debug("[OMEMO] cache identity for %s:%d: %s", jid, device_id, fingerprint);
-    g_hash_table_insert(known_identities, strdup(fingerprint), GINT_TO_POINTER(device_id));
+    log_debug("[OMEMO] cache identity for %s:%u: %s", jid, device_id, fingerprint);
+    g_hash_table_insert(known_identities, strdup(fingerprint), GUINT_TO_POINTER(device_id));
 
-    auto_gchar gchar* device_id_str = g_strdup_printf("%d", device_id);
+    auto_gchar gchar* device_id_str = g_strdup_printf("%u", device_id);
     g_key_file_set_string(omemo_ctx.knowndevices.keyfile, jid, device_id_str, fingerprint);
     omemo_known_devices_keyfile_save();
 
@@ -2172,7 +2172,7 @@ omemo_qrcode_str()
     auto_char char* fingerprint = omemo_own_fingerprint(FALSE);
     uint32_t sid = omemo_device_id();
 
-    char* qrstr = g_strdup_printf("xmpp:%s?omemo-sid-%d=%s", connection_get_barejid(), sid, fingerprint);
+    char* qrstr = g_strdup_printf("xmpp:%s?omemo-sid-%u=%s", connection_get_barejid(), sid, fingerprint);
 
     return qrstr;
 }

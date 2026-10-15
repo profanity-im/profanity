@@ -518,7 +518,7 @@ _omemo_receive_devicelist(xmpp_stanza_t* const stanza, void* const userdata)
 
         const char* id = xmpp_stanza_get_id(device);
         if (id != NULL) {
-            device_list = g_list_append(device_list, GINT_TO_POINTER(strtoul(id, NULL, 10)));
+            device_list = g_list_append(device_list, GUINT_TO_POINTER(strtoul(id, NULL, 10)));
         } else {
             log_error("[OMEMO] received device without ID");
         }
