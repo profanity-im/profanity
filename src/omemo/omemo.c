@@ -1618,7 +1618,7 @@ _handle_own_device_list(const char* const jid, GList* device_list)
 {
     // We didn't find the own device id -> publish
     if (!g_list_find(device_list, GINT_TO_POINTER(omemo_ctx.device_id))) {
-        cons_show("Could not find own OMEMO device ID. Going to publish own device ID: %d", GINT_TO_POINTER(omemo_ctx.device_id));
+        cons_show("Could not find own OMEMO device ID. Going to publish own device ID: %u", omemo_ctx.device_id);
         log_debug("[OMEMO] No device ID for our device. Publishing device list");
         device_list = g_list_copy(device_list);
         device_list = g_list_append(device_list, GINT_TO_POINTER(omemo_ctx.device_id));
