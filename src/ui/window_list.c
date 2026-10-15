@@ -232,7 +232,7 @@ GList*
 wins_get_private_chats(const char* const roomjid)
 {
     GList* result = NULL;
-    auto_gchar gchar* prefix = g_strdup_printf("%s/", roomjid);
+    auto_gchar gchar* prefix = g_strdup_printf("%s/", roomjid != NULL ? roomjid : "");
     GList* curr = values;
 
     while (curr) {
