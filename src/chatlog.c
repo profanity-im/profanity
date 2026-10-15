@@ -336,7 +336,7 @@ _groupchat_log_chat(const gchar* const login, const gchar* const room, const gch
         // log exists but needs rolling
     } else if (_log_roll_needed(dated_log)) {
         dated_log = _create_groupchat_log(room, login);
-        g_hash_table_replace(logs, strdup(room), dated_log);
+        g_hash_table_replace(groupchat_logs, strdup(room), dated_log);
     }
 
     auto_gchar gchar* date_fmt = prof_date_time_format_iso8601(NULL);
