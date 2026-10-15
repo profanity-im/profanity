@@ -336,7 +336,7 @@ _groupchat_log_chat(const gchar* const login, const gchar* const room, const gch
         // log exists but needs rolling
     } else if (_log_roll_needed(dated_log)) {
         dated_log = _create_groupchat_log(room, login);
-        g_hash_table_replace(logs, strdup(room), dated_log);
+        g_hash_table_replace(groupchat_logs, strdup(room), dated_log);
     }
 
     auto_gchar gchar* date_fmt = prof_date_time_format_iso8601(NULL);
@@ -358,30 +358,26 @@ _groupchat_log_chat(const gchar* const login, const gchar* const room, const gch
     }
 }
 
-static char*
+static gchar*
 _get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean is_room)
 {
     auto_gchar gchar* chatlogs_dir = files_file_in_account_data_path(DIR_CHATLOGS, login, is_room ? "rooms" : NULL);
     auto_gchar gchar* logfile_name = g_date_time_format(dt, "%Y_%m_%d.log");
     auto_char char* other_ = str_replace(other, "@", "_at_");
     auto_gchar gchar* logs_path = g_strdup_printf("%s/%s", chatlogs_dir, other_);
-    gchar* logfile_path = NULL;
 
-    if (create_dir(logs_path)) {
-        logfile_path = g_strdup_printf("%s/%s", logs_path, logfile_name);
-    }
+    create_dir(logs_path);
 
-    return logfile_path;
+    return g_strdup_printf("%s/%s", logs_path, logfile_name);
 }
 
 static struct dated_chat_log*
 _create_chatlog(const char* const other, const char* const login)
 {
     GDateTime* now = g_date_time_new_now_local();
-    auto_char char* filename = _get_log_filename(other, login, now, FALSE);
 
     struct dated_chat_log* new_log = g_new0(struct dated_chat_log, 1);
-    new_log->filename = strdup(filename);
+    new_log->filename = _get_log_filename(other, login, now, FALSE);
     new_log->date = now;
 
     return new_log;
@@ -391,10 +387,9 @@ static struct dated_chat_log*
 _create_groupchat_log(const char* const room, const char* const login)
 {
     GDateTime* now = g_date_time_new_now_local();
-    auto_char char* filename = _get_log_filename(room, login, now, TRUE);
 
     struct dated_chat_log* new_log = g_new0(struct dated_chat_log, 1);
-    new_log->filename = strdup(filename);
+    new_log->filename = _get_log_filename(room, login, now, TRUE);
     new_log->date = now;
 
     return new_log;
@@ -422,7 +417,7 @@ _free_chat_log(struct dated_chat_log* dated_log)
             g_date_time_unref(dated_log->date);
             dated_log->date = NULL;
         }
-        free(dated_log);
+        g_free(dated_log);
     }
 }
 

@@ -85,3 +85,25 @@ muc_active__is__true_when_joined(void** state)
 
     assert_true(room_is_active);
 }
+
+void
+muc_roster_add__returns_false_when_room_or_nick_null(void** state)
+{
+    gboolean res1 = muc_roster_add(NULL, "bob", NULL, NULL, NULL, NULL, NULL);
+    assert_false(res1);
+
+    gboolean res2 = muc_roster_add("room@server.org", NULL, NULL, NULL, NULL, NULL, NULL);
+    assert_false(res2);
+}
+
+void
+muc_roster_add__adds_occupant_to_room_roster(void** state)
+{
+    char* room = "room@server.org";
+    char* nick = "bob";
+    muc_join(room, nick, NULL, FALSE);
+
+    gboolean added = muc_roster_add(room, "alice", NULL, "participant", "member", "chat", "online");
+    assert_true(added);
+    assert_true(muc_roster_contains_nick(room, "alice"));
+}

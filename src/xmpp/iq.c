@@ -2901,7 +2901,7 @@ void
 iq_mam_verify_request(ProfWin* win, const char* const startdate, const char* const enddate)
 {
     gboolean is_muc = (win->type == WIN_MUC);
-    char* barejid = is_muc ? strdup(((ProfMucWin*)win)->roomjid) : strdup(((ProfChatWin*)win)->barejid);
+    const char* barejid = is_muc ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_stanza_t* iq = stanza_create_mam_count_iq(ctx, barejid, startdate, enddate, is_muc);
@@ -2918,7 +2918,6 @@ iq_mam_verify_request(ProfWin* win, const char* const startdate, const char* con
     }
 
     iq_send_stanza(iq);
-    free(barejid);
     xmpp_stanza_release(iq);
 }
 

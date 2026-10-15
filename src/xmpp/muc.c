@@ -522,6 +522,10 @@ gboolean
 muc_roster_add(const char* const room, const char* const nick, const char* const jid, const char* const role,
                const char* const affiliation, const char* const show, const char* const status)
 {
+    if (!room || !nick) {
+        return FALSE;
+    }
+
     ChatRoom* chat_room = g_hash_table_lookup(rooms, room);
     gboolean updated = FALSE;
     resource_presence_t new_presence = resource_presence_from_string(show);
@@ -540,7 +544,7 @@ muc_roster_add(const char* const room, const char* const nick, const char* const
         muc_role_t role_t = _role_from_string(role);
         muc_affiliation_t affiliation_t = _affiliation_from_string(affiliation);
         Occupant* occupant = _muc_occupant_new(nick, jid, role_t, affiliation_t, presence, status);
-        g_hash_table_replace(chat_room->roster, strdup(nick), occupant);
+        g_hash_table_replace(chat_room->roster, g_strdup(nick), occupant);
 
         if (jid) {
             auto_jid Jid* jidp = jid_create(jid);
@@ -1095,13 +1099,8 @@ _muc_occupant_new(const char* const nick, const char* const jid, muc_role_t role
 {
     Occupant* occupant = g_new0(Occupant, 1);
 
-    if (nick) {
-        occupant->nick = strdup(nick);
-        occupant->nick_collate_key = g_utf8_collate_key(occupant->nick, -1);
-    } else {
-        occupant->nick = NULL;
-        occupant->nick_collate_key = NULL;
-    }
+    occupant->nick = strdup(nick);
+    occupant->nick_collate_key = g_utf8_collate_key(occupant->nick, -1);
 
     if (jid) {
         occupant->jid = strdup(jid);
