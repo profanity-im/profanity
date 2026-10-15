@@ -10,5 +10,7 @@ void muc_invites_count__returns__0_when_no_invites(void** state);
 void muc_invites_count__returns__5_when_five_invites_added(void** state);
 void muc_active__is__false_when_not_joined(void** state);
 void muc_active__is__true_when_joined(void** state);
+void muc_roster_add__returns_false_when_room_or_nick_null(void** state);
+void muc_roster_add__adds_occupant_to_room_roster(void** state);
 
 #endif

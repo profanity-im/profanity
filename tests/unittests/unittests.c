@@ -555,6 +555,8 @@ main(int argc, char* argv[])
         cmocka_unit_test_setup_teardown(muc_invites_count__returns__5_when_five_invites_added, muc_before_test, muc_after_test),
         cmocka_unit_test_setup_teardown(muc_active__is__false_when_not_joined, muc_before_test, muc_after_test),
         cmocka_unit_test_setup_teardown(muc_active__is__true_when_joined, muc_before_test, muc_after_test),
+        cmocka_unit_test_setup_teardown(muc_roster_add__returns_false_when_room_or_nick_null, muc_before_test, muc_after_test),
+        cmocka_unit_test_setup_teardown(muc_roster_add__adds_occupant_to_room_roster, muc_before_test, muc_after_test),
 
         cmocka_unit_test(cmd_bookmark__shows__message_when_disconnected),
         cmocka_unit_test(cmd_bookmark__shows__message_when_disconnecting),
