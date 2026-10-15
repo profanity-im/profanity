@@ -576,10 +576,13 @@ omemo_set_device_list(const char* const from, GList* device_list)
                 for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
                     GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid->barejid);
                     if (known_identities) {
-                        GList* fp = NULL;
-                        for (fp = g_hash_table_get_keys(known_identities); fp != NULL; fp = fp->next) {
-                            if (device_id->data == g_hash_table_lookup(known_identities, fp->data)) {
-                                char* formatted = omemo_format_fingerprint(fp->data);
+                        GHashTableIter iter;
+                        gpointer key, value;
+
+                        g_hash_table_iter_init(&iter, known_identities);
+                        while (g_hash_table_iter_next(&iter, &key, &value)) {
+                            if (device_id->data == value) {
+                                char* formatted = omemo_format_fingerprint(key);
                                 if (formatted) {
                                     cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, formatted);
                                     omemo_trust(jid->barejid, formatted);
@@ -1293,19 +1296,19 @@ omemo_is_jid_trusted(const char* const jid)
         }
 
         gboolean found = FALSE;
-        GList* fp_list = g_hash_table_get_keys(known_identities);
-        GList* fp_iter;
-        for (fp_iter = fp_list; fp_iter != NULL; fp_iter = fp_iter->next) {
-            if (device_id == GPOINTER_TO_UINT(g_hash_table_lookup(known_identities, fp_iter->data))) {
-                if (!omemo_is_trusted_identity(jid, fp_iter->data)) {
-                    g_list_free(fp_list);
+        GHashTableIter iter;
+        gpointer key, value;
+
+        g_hash_table_iter_init(&iter, known_identities);
+        while (g_hash_table_iter_next(&iter, &key, &value)) {
+            if (device_id == GPOINTER_TO_UINT(value)) {
+                if (!omemo_is_trusted_identity(jid, key)) {
                     return FALSE;
                 }
                 found = TRUE;
                 break;
             }
         }
-        g_list_free(fp_list);
 
         if (!found) {
             return FALSE;
@@ -1340,17 +1343,18 @@ omemo_get_jid_untrusted_fingerprints(const char* const jid)
             continue;
         }
 
-        GList* fp_list = g_hash_table_get_keys(known_identities);
-        GList* fp_iter;
-        for (fp_iter = fp_list; fp_iter != NULL; fp_iter = fp_iter->next) {
-            if (device_id == GPOINTER_TO_UINT(g_hash_table_lookup(known_identities, fp_iter->data))) {
-                if (!omemo_is_trusted_identity(jid, fp_iter->data)) {
-                    untrusted_fps = g_list_append(untrusted_fps, g_strdup(fp_iter->data));
+        GHashTableIter iter;
+        gpointer key, value;
+
+        g_hash_table_iter_init(&iter, known_identities);
+        while (g_hash_table_iter_next(&iter, &key, &value)) {
+            if (device_id == GPOINTER_TO_UINT(value)) {
+                if (!omemo_is_trusted_identity(jid, key)) {
+                    untrusted_fps = g_list_append(untrusted_fps, g_strdup(key));
                 }
                 break;
             }
         }
-        g_list_free(fp_list);
     }
 
     return untrusted_fps;
