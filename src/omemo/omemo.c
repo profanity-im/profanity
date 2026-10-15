@@ -500,7 +500,7 @@ omemo_prekeys(GList** prekeys, GList** ids, GList** lengths)
         signal_buffer_free(public_key);
 
         *prekeys = g_list_append(*prekeys, prekey_value);
-        *ids = g_list_append(*ids, GINT_TO_POINTER(id));
+        *ids = g_list_append(*ids, id);
         *lengths = g_list_append(*lengths, GINT_TO_POINTER(length));
     }
 }
