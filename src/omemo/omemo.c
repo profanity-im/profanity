@@ -64,6 +64,7 @@ static gboolean _handle_device_list_start_session(const char* const jid, GList* 
 static char* _omemo_fingerprint(ec_public_key* identity, gboolean formatted);
 static unsigned char* _omemo_fingerprint_decode(const char* const fingerprint, size_t* len);
 static char* _omemo_unformat_fingerprint(const char* const fingerprint_formatted);
+static void _omemo_trust(const char* const jid, uint32_t device_id, const char* const fingerprint);
 static void _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key* identity);
 static void _acquire_sender_devices_list(void);
 
@@ -568,7 +569,6 @@ omemo_set_device_list(const char* const from, GList* device_list)
         if (trusted) {
             if (g_hash_table_size(trusted) > 0) {
                 log_debug("[OMEMO] Found trusted device for %s - skip firstusage", jid->barejid);
-                return;
             }
         } else {
             if (device_list) {
@@ -577,13 +577,16 @@ omemo_set_device_list(const char* const from, GList* device_list)
                 for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
                     GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid->barejid);
                     if (known_identities) {
-                        GList* fp = NULL;
-                        for (fp = g_hash_table_get_keys(known_identities); fp != NULL; fp = fp->next) {
-                            if (device_id->data == g_hash_table_lookup(known_identities, fp->data)) {
-                                char* formatted = omemo_format_fingerprint(fp->data);
+                        GHashTableIter iter;
+                        gpointer key, value;
+
+                        g_hash_table_iter_init(&iter, known_identities);
+                        while (g_hash_table_iter_next(&iter, &key, &value)) {
+                            if (device_id->data == value) {
+                                char* formatted = omemo_format_fingerprint(key);
                                 if (formatted) {
                                     cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, formatted);
-                                    omemo_trust(jid->barejid, formatted);
+                                    _omemo_trust(jid->barejid, GPOINTER_TO_INT(device_id->data), formatted);
                                     free(formatted);
                                 }
                             }
@@ -1294,19 +1297,19 @@ omemo_is_jid_trusted(const char* const jid)
         }
 
         gboolean found = FALSE;
-        GList* fp_list = g_hash_table_get_keys(known_identities);
-        GList* fp_iter;
-        for (fp_iter = fp_list; fp_iter != NULL; fp_iter = fp_iter->next) {
-            if (device_id == GPOINTER_TO_UINT(g_hash_table_lookup(known_identities, fp_iter->data))) {
-                if (!omemo_is_trusted_identity(jid, fp_iter->data)) {
-                    g_list_free(fp_list);
+        GHashTableIter iter;
+        gpointer key, value;
+
+        g_hash_table_iter_init(&iter, known_identities);
+        while (g_hash_table_iter_next(&iter, &key, &value)) {
+            if (device_id == GPOINTER_TO_UINT(value)) {
+                if (!omemo_is_trusted_identity(jid, key)) {
                     return FALSE;
                 }
                 found = TRUE;
                 break;
             }
         }
-        g_list_free(fp_list);
 
         if (!found) {
             return FALSE;
@@ -1341,17 +1344,18 @@ omemo_get_jid_untrusted_fingerprints(const char* const jid)
             continue;
         }
 
-        GList* fp_list = g_hash_table_get_keys(known_identities);
-        GList* fp_iter;
-        for (fp_iter = fp_list; fp_iter != NULL; fp_iter = fp_iter->next) {
-            if (device_id == GPOINTER_TO_UINT(g_hash_table_lookup(known_identities, fp_iter->data))) {
-                if (!omemo_is_trusted_identity(jid, fp_iter->data)) {
-                    untrusted_fps = g_list_append(untrusted_fps, g_strdup(fp_iter->data));
+        GHashTableIter iter;
+        gpointer key, value;
+
+        g_hash_table_iter_init(&iter, known_identities);
+        while (g_hash_table_iter_next(&iter, &key, &value)) {
+            if (device_id == GPOINTER_TO_UINT(value)) {
+                if (!omemo_is_trusted_identity(jid, key)) {
+                    untrusted_fps = g_list_append(untrusted_fps, g_strdup(key));
                 }
                 break;
             }
         }
-        g_list_free(fp_list);
     }
 
     return untrusted_fps;
@@ -1463,14 +1467,40 @@ _omemo_fingerprint_decode(const char* const fingerprint, size_t* len)
     return output;
 }
 
+static void
+_omemo_trust(const char* const jid, uint32_t device_id, const char* const fingerprint)
+{
+    if (!jid || !device_id || !fingerprint) {
+        return;
+    }
+
+    /* TODO should not hardcode DJB_TYPE here
+     * should instead store identity key in known_identities along with
+     * device_id */
+    signal_protocol_address address = {
+        .name = jid,
+        .name_len = strlen(jid),
+        .device_id = device_id,
+    };
+
+    size_t len;
+    unsigned char* fingerprint_raw = _omemo_fingerprint_decode(fingerprint, &len);
+    unsigned char djb_type[] = { '\x05' };
+    signal_buffer* buffer = signal_buffer_create(djb_type, 1);
+    buffer = signal_buffer_append(buffer, fingerprint_raw, len);
+    save_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
+    free(fingerprint_raw);
+    signal_buffer_free(buffer);
+
+    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, free, strdup(jid));
+}
+
 void
 omemo_trust(const char* const jid, const char* const fingerprint_formatted)
 {
     if (!jid || !fingerprint_formatted) {
         return;
     }
-
-    size_t len;
 
     GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
     if (!known_identities) {
@@ -1495,24 +1525,7 @@ omemo_trust(const char* const jid, const char* const fingerprint_formatted)
         return;
     }
 
-    /* TODO should not hardcode DJB_TYPE here
-     * should instead store identity key in known_identities along with
-     * device_id */
-    signal_protocol_address address = {
-        .name = jid,
-        .name_len = strlen(jid),
-        .device_id = device_id,
-    };
-
-    unsigned char* fingerprint_raw = _omemo_fingerprint_decode(fingerprint_formatted, &len);
-    unsigned char djb_type[] = { '\x05' };
-    signal_buffer* buffer = signal_buffer_create(djb_type, 1);
-    buffer = signal_buffer_append(buffer, fingerprint_raw, len);
-    save_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
-    free(fingerprint_raw);
-    signal_buffer_free(buffer);
-
-    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, free, strdup(jid));
+    _omemo_trust(jid, device_id, fingerprint_formatted);
 
     wins_omemo_trust_changed(jid);
 }
