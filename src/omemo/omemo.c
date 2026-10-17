@@ -391,7 +391,7 @@ omemo_start_session(const char* const barejid)
             log_debug("[OMEMO] missing device list for %s", barejid);
             // Own devices are handled by _handle_own_device_list
             // We won't add _handle_device_list_start_session for ourself
-            if (equals_our_barejid(barejid)) {
+            if (!equals_our_barejid(barejid)) {
                 g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
             }
             omemo_devicelist_request(barejid);
