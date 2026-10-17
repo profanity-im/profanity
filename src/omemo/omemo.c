@@ -398,8 +398,40 @@ omemo_start_session(const char* const barejid)
             return;
         }
 
-        GList* device_id;
-        for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
+        auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
+        gboolean is_trust_firstusage = g_strcmp0(trust_mode, "firstusage") == 0;
+
+        for (GList* device_id = device_list; device_id != NULL; device_id = device_id->next) {
+            // OMEMO trustmode ToFu
+            if (is_trust_firstusage) {
+                log_debug("[OMEMO] Checking firstusage state for %s", barejid);
+                GHashTable* trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, barejid);
+                if (trusted) {
+                    if (g_hash_table_size(trusted) > 0) {
+                        log_debug("[OMEMO] Found trusted device for %s - skip firstusage", barejid);
+                    }
+                } else {
+                    cons_show("OMEMO: No trusted devices found for %s", barejid);
+                    GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, barejid);
+                    if (known_identities) {
+                        GHashTableIter iter;
+                        gpointer key, value;
+
+                        g_hash_table_iter_init(&iter, known_identities);
+                        while (g_hash_table_iter_next(&iter, &key, &value)) {
+                            if (device_id->data == value) {
+                                char* formatted = omemo_format_fingerprint(key);
+                                if (formatted) {
+                                    cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", barejid, device_id->data, formatted);
+                                    _omemo_trust(barejid, GPOINTER_TO_INT(device_id->data), formatted);
+                                    free(formatted);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             omemo_bundle_request(barejid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(barejid));
         }
     }
@@ -559,42 +591,6 @@ omemo_set_device_list(const char* const from, GList* device_list)
         }
     } else {
         log_debug("[OMEMO] No Device List Handler for %s", STR_MAYBE_NULL(from));
-    }
-
-    // OMEMO trustmode ToFu
-    auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
-    if (g_strcmp0(trust_mode, "firstusage") == 0) {
-        log_debug("[OMEMO] Checking firstusage state for %s", jid->barejid);
-        GHashTable* trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid->barejid);
-        if (trusted) {
-            if (g_hash_table_size(trusted) > 0) {
-                log_debug("[OMEMO] Found trusted device for %s - skip firstusage", jid->barejid);
-            }
-        } else {
-            if (device_list) {
-                cons_show("OMEMO: No trusted devices found for %s", jid->barejid);
-                GList* device_id;
-                for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
-                    GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid->barejid);
-                    if (known_identities) {
-                        GHashTableIter iter;
-                        gpointer key, value;
-
-                        g_hash_table_iter_init(&iter, known_identities);
-                        while (g_hash_table_iter_next(&iter, &key, &value)) {
-                            if (device_id->data == value) {
-                                char* formatted = omemo_format_fingerprint(key);
-                                if (formatted) {
-                                    cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, formatted);
-                                    _omemo_trust(jid->barejid, GPOINTER_TO_INT(device_id->data), formatted);
-                                    free(formatted);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
     }
 
     wins_omemo_trust_changed(jid->barejid);
