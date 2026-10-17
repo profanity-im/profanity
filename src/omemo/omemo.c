@@ -672,7 +672,8 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     if ((g_strcmp0(trust_mode, "blind") == 0) && !trusted) {
         auto_char char* fp = _omemo_fingerprint(identity_key, TRUE);
         cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
-        omemo_trust(jid, fp);
+        _omemo_trust(jid, device_id, fp);
+        wins_omemo_trust_changed(jid); // XXX: ideally we'd only update once after all device sessions are dispatched
         trusted = TRUE;
     }
 
@@ -1487,8 +1488,6 @@ _omemo_trust(const char* const jid, uint32_t device_id, const char* const finger
     save_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
     free(fingerprint_raw);
     signal_buffer_free(buffer);
-
-    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, free, strdup(jid));
 }
 
 void
@@ -1522,6 +1521,7 @@ omemo_trust(const char* const jid, const char* const fingerprint_formatted)
     }
 
     _omemo_trust(jid, device_id, fingerprint_formatted);
+    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, free, strdup(jid));
 
     wins_omemo_trust_changed(jid);
 }
