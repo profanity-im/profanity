@@ -257,6 +257,7 @@ static Autocomplete color_ac;
 static Autocomplete correction_ac;
 static Autocomplete avatar_ac;
 static Autocomplete url_ac;
+static Autocomplete url_own_ac;
 static Autocomplete executable_ac;
 static Autocomplete executable_param_ac;
 static Autocomplete intype_ac;
@@ -416,6 +417,7 @@ static Autocomplete* all_acs[] = {
     &correction_ac,
     &avatar_ac,
     &url_ac,
+    &url_own_ac,
     &executable_ac,
     &executable_param_ac,
     &intype_ac,
@@ -1154,6 +1156,9 @@ cmd_ac_init(void)
 
     autocomplete_add(url_ac, "open");
     autocomplete_add(url_ac, "save");
+    autocomplete_add(url_ac, "own");
+    autocomplete_add(url_own_ac, "on");
+    autocomplete_add(url_own_ac, "off");
 
     autocomplete_add(executable_ac, "avatar");
     autocomplete_add(executable_ac, "urlopen");
@@ -4148,6 +4153,11 @@ _url_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     char* result = NULL;
 
     result = autocomplete_param_with_ac(input, "/url", url_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/url own", url_own_ac, TRUE, previous);
     if (result) {
         return result;
     }
