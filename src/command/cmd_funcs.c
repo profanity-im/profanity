@@ -9612,14 +9612,14 @@ _url_external_method(const char* cmd_template, const char* url, gchar* filename)
 gboolean
 cmd_url_open(ProfWin* window, const char* const command, gchar** args)
 {
-    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
-        cons_show_error("url open not supported in this window");
-        return TRUE;
-    }
-
     gchar* url = args[1];
     if (url == NULL) {
         cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
+        cons_show_error("`/url open` not supported in this window");
         return TRUE;
     }
 
@@ -9655,13 +9655,13 @@ cmd_url_open(ProfWin* window, const char* const command, gchar** args)
 gboolean
 cmd_url_save(ProfWin* window, const char* const command, gchar** args)
 {
-    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
-        cons_show_error("`/url save` is not supported in this window.");
+    if (args[1] == NULL) {
+        cons_bad_cmd_usage(command);
         return TRUE;
     }
 
-    if (args[1] == NULL) {
-        cons_bad_cmd_usage(command);
+    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
+        cons_show_error("`/url save` is not supported in this window.");
         return TRUE;
     }
 
