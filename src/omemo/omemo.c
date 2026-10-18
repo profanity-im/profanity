@@ -1651,8 +1651,10 @@ _handle_own_device_list(const char* const jid, GList* device_list)
 static gboolean
 _handle_device_list_start_session(const char* const jid, GList* device_list)
 {
-    log_debug("[OMEMO] Start session for %s - device_list", jid);
-    omemo_start_session(jid);
+    if (device_list) {
+        log_debug("[OMEMO] Start session for %s - device_list", jid);
+        omemo_start_session(jid);
+    }
 
     return FALSE;
 }
