@@ -344,8 +344,8 @@ void title_bar_set_presence(contact_presence_t presence);
 
 // status bar
 void status_bar_inactive(const int win);
-void status_bar_active(const int win, win_type_t wintype, char* identifier);
-void status_bar_new(const int win, win_type_t wintype, char* identifier);
+void status_bar_active(const int win, win_type_t wintype, const gchar* const identifier);
+void status_bar_new(const int win, win_type_t wintype, const gchar* const identifier);
 void status_bar_set_all_inactive(void);
 
 // roster window

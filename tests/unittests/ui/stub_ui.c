@@ -1218,11 +1218,11 @@ status_bar_inactive(const int win)
 {
 }
 void
-status_bar_active(const int win, win_type_t type, char* identifier)
+status_bar_active(const int win, win_type_t type, const gchar* const identifier)
 {
 }
 void
-status_bar_new(const int win, win_type_t type, char* identifier)
+status_bar_new(const int win, win_type_t type, const gchar* const identifier)
 {
 }
 void

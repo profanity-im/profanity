@@ -155,7 +155,7 @@ status_bar_inactive(const int win)
 }
 
 void
-_create_tab(const int win, win_type_t wintype, char* identifier, gboolean highlight)
+_create_tab(const int win, win_type_t wintype, const gchar* const identifier, gboolean highlight)
 {
     int true_win = win == 0 ? 10 : win;
 
@@ -194,13 +194,13 @@ _create_tab(const int win, win_type_t wintype, char* identifier, gboolean highli
 }
 
 void
-status_bar_active(const int win, win_type_t wintype, char* identifier)
+status_bar_active(const int win, win_type_t wintype, const gchar* const identifier)
 {
     _create_tab(win, wintype, identifier, FALSE);
 }
 
 void
-status_bar_new(const int win, win_type_t wintype, char* identifier)
+status_bar_new(const int win, win_type_t wintype, const gchar* const identifier)
 {
     _create_tab(win, wintype, identifier, TRUE);
 }
