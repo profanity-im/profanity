@@ -391,15 +391,50 @@ omemo_start_session(const char* const barejid)
             log_debug("[OMEMO] missing device list for %s", barejid);
             // Own devices are handled by _handle_own_device_list
             // We won't add _handle_device_list_start_session for ourself
-            if (equals_our_barejid(barejid)) {
+            if (!equals_our_barejid(barejid)) {
                 g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
             }
             omemo_devicelist_request(barejid);
             return;
         }
 
-        GList* device_id;
-        for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
+        auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
+        gboolean is_trust_firstusage = g_strcmp0(trust_mode, "firstusage") == 0;
+        if (is_trust_firstusage) {
+            log_debug("[OMEMO] Checking firstusage state for %s", barejid);
+            GHashTable* trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, barejid);
+            if (trusted) {
+                if (g_hash_table_size(trusted) > 0) {
+                    log_debug("[OMEMO] Found trusted device for %s - skip firstusage", barejid);
+                }
+                is_trust_firstusage = FALSE;
+            } else {
+                cons_show("OMEMO: No trusted devices found for %s", barejid);
+            }
+        }
+
+        for (GList* device_id = device_list; device_id != NULL; device_id = device_id->next) {
+            // OMEMO trustmode ToFu
+            if (is_trust_firstusage) {
+                GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, barejid);
+                if (known_identities) {
+                    GHashTableIter iter;
+                    gpointer key, value;
+
+                    g_hash_table_iter_init(&iter, known_identities);
+                    while (g_hash_table_iter_next(&iter, &key, &value)) {
+                        if (device_id->data == value) {
+                            char* formatted = omemo_format_fingerprint(key);
+                            if (formatted) {
+                                cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", barejid, device_id->data, formatted);
+                                _omemo_trust(barejid, GPOINTER_TO_INT(device_id->data), formatted);
+                                free(formatted);
+                            }
+                        }
+                    }
+                }
+            }
+
             omemo_bundle_request(barejid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(barejid));
         }
     }
@@ -561,42 +596,6 @@ omemo_set_device_list(const char* const from, GList* device_list)
         log_debug("[OMEMO] No Device List Handler for %s", STR_MAYBE_NULL(from));
     }
 
-    // OMEMO trustmode ToFu
-    auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
-    if (g_strcmp0(trust_mode, "firstusage") == 0) {
-        log_debug("[OMEMO] Checking firstusage state for %s", jid->barejid);
-        GHashTable* trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid->barejid);
-        if (trusted) {
-            if (g_hash_table_size(trusted) > 0) {
-                log_debug("[OMEMO] Found trusted device for %s - skip firstusage", jid->barejid);
-            }
-        } else {
-            if (device_list) {
-                cons_show("OMEMO: No trusted devices found for %s", jid->barejid);
-                GList* device_id;
-                for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
-                    GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid->barejid);
-                    if (known_identities) {
-                        GHashTableIter iter;
-                        gpointer key, value;
-
-                        g_hash_table_iter_init(&iter, known_identities);
-                        while (g_hash_table_iter_next(&iter, &key, &value)) {
-                            if (device_id->data == value) {
-                                char* formatted = omemo_format_fingerprint(key);
-                                if (formatted) {
-                                    cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, formatted);
-                                    _omemo_trust(jid->barejid, GPOINTER_TO_INT(device_id->data), formatted);
-                                    free(formatted);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     wins_omemo_trust_changed(jid->barejid);
 }
 
@@ -676,7 +675,8 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     if ((g_strcmp0(trust_mode, "blind") == 0) && !trusted) {
         auto_char char* fp = _omemo_fingerprint(identity_key, TRUE);
         cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
-        omemo_trust(jid, fp);
+        _omemo_trust(jid, device_id, fp);
+        wins_omemo_trust_changed(jid); // XXX: ideally we'd only update once after all device sessions are dispatched
         trusted = TRUE;
     }
 
@@ -1491,8 +1491,6 @@ _omemo_trust(const char* const jid, uint32_t device_id, const char* const finger
     save_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
     free(fingerprint_raw);
     signal_buffer_free(buffer);
-
-    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, free, strdup(jid));
 }
 
 void
@@ -1526,6 +1524,7 @@ omemo_trust(const char* const jid, const char* const fingerprint_formatted)
     }
 
     _omemo_trust(jid, device_id, fingerprint_formatted);
+    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, free, strdup(jid));
 
     wins_omemo_trust_changed(jid);
 }
@@ -1651,8 +1650,10 @@ _handle_own_device_list(const char* const jid, GList* device_list)
 static gboolean
 _handle_device_list_start_session(const char* const jid, GList* device_list)
 {
-    log_debug("[OMEMO] Start session for %s - device_list", jid);
-    omemo_start_session(jid);
+    if (device_list) {
+        log_debug("[OMEMO] Start session for %s - device_list", jid);
+        omemo_start_session(jid);
+    }
 
     return FALSE;
 }
