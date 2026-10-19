@@ -25,7 +25,7 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
     }
 
     // copy and strip input of leading/trailing whitespace
-    auto_char char* copy = strdup(inp);
+    auto_gchar gchar* copy = g_strdup(inp);
     g_strstrip(copy);
 
     int inp_size = g_utf8_strlen(copy, -1);
@@ -132,13 +132,13 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
 
     // if num args not valid return NULL
     if ((num < min) || (num > max)) {
-        g_slist_free_full(tokens, free);
+        g_slist_free_full(tokens, g_free);
         *result = FALSE;
         return NULL;
 
         // if min allowed is 0 and 0 found, return empty char* array
     } else if (min == 0 && num == 0) {
-        g_slist_free_full(tokens, free);
+        g_slist_free_full(tokens, g_free);
         gchar** args = g_malloc((num + 1) * sizeof(*args));
         args[0] = NULL;
         *result = TRUE;
@@ -147,17 +147,22 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
         // otherwise return args array
     } else {
         gchar** args = g_malloc((num + 1) * sizeof(*args));
-        GSList* token = tokens;
-        token = g_slist_next(token);
+
+        // Free token 0 (the command itself)
+        if (tokens) {
+            g_free(tokens->data);
+        }
+
+        GSList* token = g_slist_next(tokens);
         int arg_count = 0;
 
         while (token) {
-            args[arg_count++] = strdup(token->data);
+            args[arg_count++] = token->data;
             token = g_slist_next(token);
         }
 
         args[arg_count] = NULL;
-        g_slist_free_full(tokens, free);
+        g_slist_free(tokens);
         *result = TRUE;
         return args;
     }

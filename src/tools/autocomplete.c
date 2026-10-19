@@ -83,16 +83,13 @@ autocomplete_length(Autocomplete ac)
 void
 autocomplete_update(Autocomplete ac, char** items)
 {
-    auto_gchar gchar* last_found = NULL;
-    auto_gchar gchar* search_str = NULL;
-
-    if (ac->last_found) {
-        last_found = strdup(ac->last_found->data);
+    if (!ac) {
+        return;
     }
 
-    if (ac->search_str) {
-        search_str = strdup(ac->search_str);
-    }
+    auto_gchar gchar* last_found = ac->last_found ? g_strdup(ac->last_found->data) : NULL;
+    gchar* search_str = ac->search_str;
+    ac->search_str = NULL;
 
     autocomplete_clear(ac);
     autocomplete_add_all(ac, items);
@@ -102,9 +99,7 @@ autocomplete_update(Autocomplete ac, char** items)
         ac->last_found = g_list_find_custom(ac->items, last_found, (GCompareFunc)strcmp);
     }
 
-    if (search_str) {
-        ac->search_str = strdup(search_str);
-    }
+    ac->search_str = search_str;
 }
 
 void
