@@ -1374,6 +1374,10 @@ win_get_title(ProfWin* window)
 {
     return NULL;
 }
+void
+win_title_append(ProfWin* window, GString* target)
+{
+}
 char*
 win_get_last_sent_message(ProfWin* window)
 {

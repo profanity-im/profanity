@@ -312,17 +312,23 @@ win_create_vcard(vCard* vcard)
     return &new_win->window;
 }
 
-gchar*
-win_get_title(ProfWin* window)
+void
+win_title_append(ProfWin* window, GString* target)
 {
+    if (target == NULL) {
+        return;
+    }
+
     if (window == NULL) {
-        return g_strdup(CONS_WIN_TITLE);
+        g_string_append(target, CONS_WIN_TITLE);
+        return;
     }
 
     switch (window->type) {
     case WIN_CONSOLE:
     {
-        return g_strdup(CONS_WIN_TITLE);
+        g_string_append(target, CONS_WIN_TITLE);
+        return;
     }
     case WIN_CHAT:
     {
@@ -333,65 +339,88 @@ win_get_title(ProfWin* window)
             contact = roster_get_contact(chatwin->barejid);
         }
         if (!contact) {
-            return g_strdup(chatwin->barejid);
+            g_string_append(target, chatwin->barejid);
+            return;
         }
         const char* name = p_contact_name(contact);
         if (!name) {
-            return g_strdup(chatwin->barejid);
+            g_string_append(target, chatwin->barejid);
+            return;
         }
-        return g_strconcat(name, " <", chatwin->barejid, ">", NULL);
+        g_string_append(target, name);
+        g_string_append(target, " <");
+        g_string_append(target, chatwin->barejid);
+        g_string_append(target, ">");
+        return;
     }
     case WIN_MUC:
     {
         const ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        return mucwin_generate_title(mucwin->roomjid, PREF_TITLEBAR_MUC_TITLE);
+        mucwin_title_append(mucwin->roomjid, PREF_TITLEBAR_MUC_TITLE, target);
+        return;
     }
     case WIN_CONFIG:
     {
         const ProfConfWin* confwin = (ProfConfWin*)window;
         assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
-        auto_gchar gchar* mucwin_title = mucwin_generate_title(confwin->roomjid, PREF_TITLEBAR_MUC_TITLE);
+        mucwin_title_append(confwin->roomjid, PREF_TITLEBAR_MUC_TITLE, target);
         if (confwin->form->modified) {
-            return g_strconcat(mucwin_title, " config *", NULL);
+            g_string_append(target, " config *");
+        } else {
+            g_string_append(target, " config");
         }
-        return g_strconcat(mucwin_title, " config", NULL);
+        return;
     }
     case WIN_PRIVATE:
     {
         const ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        auto_jid Jid* jid = jid_create(privatewin->fulljid);
-        auto_gchar gchar* mucwin_title = mucwin_generate_title(jid->barejid, PREF_TITLEBAR_MUC_TITLE);
-        return g_strconcat(mucwin_title, "/", jid->resourcepart, NULL);
+        const gchar* slash = strchr(privatewin->fulljid, '/');
+        if (slash) {
+            auto_gchar gchar* bare = g_strndup(privatewin->fulljid, slash - privatewin->fulljid);
+            mucwin_title_append(bare, PREF_TITLEBAR_MUC_TITLE, target);
+            g_string_append(target, slash);
+        } else {
+            mucwin_title_append(privatewin->fulljid, PREF_TITLEBAR_MUC_TITLE, target);
+        }
+        return;
     }
     case WIN_XML:
     {
-        return g_strdup(XML_WIN_TITLE);
+        g_string_append(target, XML_WIN_TITLE);
+        return;
     }
     case WIN_PLUGIN:
     {
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
         assert(pluginwin->memcheck == PROFPLUGINWIN_MEMCHECK);
-        return g_strdup(pluginwin->tag);
+        g_string_append(target, pluginwin->tag);
+        return;
     }
     case WIN_VCARD:
     {
         ProfVcardWin* vcardwin = (ProfVcardWin*)window;
         assert(vcardwin->memcheck == PROFVCARDWIN_MEMCHECK);
 
-        GString* title = g_string_new("vCard ");
-
-        g_string_append(title, connection_get_barejid());
+        g_string_append(target, "vCard ");
+        g_string_append(target, connection_get_barejid());
 
         if (vcardwin->vcard->modified) {
-            g_string_append(title, " *");
+            g_string_append(target, " *");
         }
-
-        return g_string_free(title, FALSE);
+        return;
     }
     }
     assert(FALSE);
+}
+
+gchar*
+win_get_title(ProfWin* window)
+{
+    GString* title = g_string_new("");
+    win_title_append(window, title);
+    return g_string_free(title, FALSE);
 }
 
 const gchar*

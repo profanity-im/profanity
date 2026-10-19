@@ -945,31 +945,46 @@ _mucwin_set_last_message(ProfMucWin* mucwin, const char* const id, const char* c
     }
 }
 
-gchar*
-mucwin_generate_title(const gchar* const muc_jid, const preference_t pref)
+void
+mucwin_title_append(const gchar* const muc_jid, const preference_t pref, GString* target)
 {
+    if (muc_jid == NULL || target == NULL) {
+        return;
+    }
+
     auto_gchar gchar* pref_val = prefs_get_string(pref);
     if (g_strcmp0(pref_val, "name") == 0) {
         const ProfMucWin* mucwin = wins_get_muc(muc_jid);
         if (mucwin && mucwin->room_name) {
-            return g_strdup(mucwin->room_name);
+            g_string_append(target, mucwin->room_name);
+            return;
         }
     } else if (g_strcmp0(pref_val, "bookmark") == 0) {
         const Bookmark* bookmark = bookmark_get_by_jid(muc_jid);
         if (bookmark && bookmark->name) {
-            return g_strdup(bookmark->name);
+            g_string_append(target, bookmark->name);
+            return;
         }
     }
 
     auto_gchar gchar* roster_room_by = prefs_get_string(PREF_ROSTER_ROOMS_BY);
     if (g_strcmp0(pref_val, "localpart") == 0 || (g_strcmp0(roster_room_by, "service") == 0 && pref == PREF_ROSTER_ROOMS_TITLE)) {
-        auto_jid Jid* jid = jid_create(muc_jid);
-        if (jid && jid->localpart) {
-            return g_strdup(jid->localpart);
+        const gchar* at = strchr(muc_jid, '@');
+        if (at && at != muc_jid) {
+            g_string_append_len(target, muc_jid, at - muc_jid);
+            return;
         }
     }
 
-    return g_strdup(muc_jid);
+    g_string_append(target, muc_jid);
+}
+
+gchar*
+mucwin_generate_title(const gchar* const muc_jid, const preference_t pref)
+{
+    GString* title = g_string_new("");
+    mucwin_title_append(muc_jid, pref, title);
+    return g_string_free(title, FALSE);
 }
 
 gboolean
