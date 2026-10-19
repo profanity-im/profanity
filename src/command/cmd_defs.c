@@ -3023,9 +3023,8 @@ command_docgen(void)
         fputs("<p><pre><code>", main_fragment);
         int i = 0;
         while (pcmd->help.synopsis[i]) {
-            char* str1 = str_replace(pcmd->help.synopsis[i], "<", "&lt;");
-            char* str2 = str_replace(str1, ">", "&gt;");
-            fprintf(main_fragment, "%s\n", str2);
+            auto_gchar gchar* escaped = g_markup_escape_text(pcmd->help.synopsis[i], -1);
+            fprintf(main_fragment, "%s\n", escaped);
             i++;
         }
         fputs("</code></pre></p>\n", main_fragment);
@@ -3042,9 +3041,8 @@ command_docgen(void)
                 fputs("<tr>", main_fragment);
                 fputs("<td>", main_fragment);
                 fputs("<code>", main_fragment);
-                char* str1 = str_replace(pcmd->help.args[i][0], "<", "&lt;");
-                char* str2 = str_replace(str1, ">", "&gt;");
-                fprintf(main_fragment, "%s", str2);
+                auto_gchar gchar* escaped = g_markup_escape_text(pcmd->help.args[i][0], -1);
+                fprintf(main_fragment, "%s", escaped);
                 fputs("</code>", main_fragment);
                 fputs("</td>", main_fragment);
                 fputs("<td>", main_fragment);
