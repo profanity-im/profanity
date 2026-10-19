@@ -380,7 +380,7 @@ static const struct cmd_t command_defs[] = {
               "/blocked remove <jid>")
       CMD_DESC(
               "Manage blocked users (XEP-0191), calling with no arguments shows the current list of blocked users. "
-              "To blog a certain user in a MUC use the following as jid: room@conference.example.org/spammy-user"
+              "To block a certain user in a MUC use the following as jid: room@conference.example.org/spammy-user. "
               "It is also possible to block and report (XEP-0377) a user with the report-abuse and report-spam commands. "
               "For spam reporting, please include the content of the spam message as evidence for the service operator.")
       CMD_ARGS(
