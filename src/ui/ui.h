@@ -394,7 +394,7 @@ void win_show_info(ProfWin* window, PContact contact);
 void win_show_vcard(ProfWin* window, vCard* vcard);
 
 void win_clear(ProfWin* window);
-char* win_get_tab_identifier(ProfWin* window);
+const gchar* win_get_tab_identifier(ProfWin* window);
 gchar* win_to_string(ProfWin* window);
 void win_command_list_error(ProfWin* window, const char* const error);
 void win_command_exec_error(ProfWin* window, const char* const command, const char* const error, ...);

@@ -874,7 +874,7 @@ wins_swap(int source_win, int target_win)
             g_hash_table_steal(windows, GINT_TO_POINTER(source_win));
             _wins_htable_insert(windows, GINT_TO_POINTER(target_win), source);
             status_bar_inactive(source_win);
-            auto_char char* identifier = win_get_tab_identifier(source);
+            const gchar* identifier = win_get_tab_identifier(source);
             if (win_unread(source) > 0) {
                 status_bar_new(target_win, source->type, identifier);
             } else {
@@ -891,8 +891,8 @@ wins_swap(int source_win, int target_win)
             g_hash_table_steal(windows, GINT_TO_POINTER(target_win));
             g_hash_table_insert(windows, GINT_TO_POINTER(source_win), target);
             _wins_htable_insert(windows, GINT_TO_POINTER(target_win), source);
-            auto_char char* source_identifier = win_get_tab_identifier(source);
-            auto_char char* target_identifier = win_get_tab_identifier(target);
+            const gchar* source_identifier = win_get_tab_identifier(source);
+            const gchar* target_identifier = win_get_tab_identifier(target);
             if (win_unread(source) > 0) {
                 status_bar_new(target_win, source->type, source_identifier);
             } else {
@@ -1022,7 +1022,7 @@ wins_tidy(void)
         GList* curr = keys;
         while (curr) {
             ProfWin* window = g_hash_table_lookup(windows, curr->data);
-            auto_char char* identifier = win_get_tab_identifier(window);
+            const gchar* identifier = win_get_tab_identifier(window);
             g_hash_table_steal(windows, curr->data);
             if (num == 10) {
                 g_hash_table_insert(new_windows, GINT_TO_POINTER(0), window);

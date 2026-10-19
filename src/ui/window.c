@@ -394,7 +394,7 @@ win_get_title(ProfWin* window)
     assert(FALSE);
 }
 
-char*
+const gchar*
 win_get_tab_identifier(ProfWin* window)
 {
     assert(window != NULL);
@@ -402,43 +402,44 @@ win_get_tab_identifier(ProfWin* window)
     switch (window->type) {
     case WIN_CONSOLE:
     {
-        return strdup("console");
+        return "console";
     }
     case WIN_CHAT:
     {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        return strdup(chatwin->barejid);
+        return chatwin->barejid;
     }
     case WIN_MUC:
     {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        return strdup(mucwin->roomjid);
+        return mucwin->roomjid;
     }
     case WIN_CONFIG:
     {
         ProfConfWin* confwin = (ProfConfWin*)window;
-        return strdup(confwin->roomjid);
+        return confwin->roomjid;
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin* privwin = (ProfPrivateWin*)window;
-        return strdup(privwin->fulljid);
+        return privwin->fulljid;
     }
     case WIN_PLUGIN:
     {
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
-        return strdup(pluginwin->tag);
+        return pluginwin->tag;
     }
     case WIN_XML:
     {
-        return strdup("xmlconsole");
+        return "xmlconsole";
     }
     case WIN_VCARD:
     {
-        return strdup("vcard");
+        return "vcard";
     }
     }
     assert(FALSE);
+    return NULL;
 }
 
 char*

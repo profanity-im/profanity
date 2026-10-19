@@ -1288,7 +1288,7 @@ win_create_vcard(vCard* vcard)
     return NULL;
 }
 
-char*
+const gchar*
 win_get_tab_identifier(ProfWin* window)
 {
     return NULL;

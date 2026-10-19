@@ -713,7 +713,7 @@ ui_focus_win(ProfWin* window)
     }
     status_bar_current(i);
 
-    auto_char char* identifier = win_get_tab_identifier(window);
+    const gchar* identifier = win_get_tab_identifier(window);
     status_bar_active(i, window->type, identifier);
 }
 
