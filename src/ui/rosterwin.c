@@ -719,8 +719,7 @@ _rosterwin_room(ProfLayoutSplit* layout, ProfMucWin* mucwin)
         g_string_append_printf(msg, "(%d) ", mucwin->unread);
     }
 
-    auto_gchar gchar* mucwin_title = mucwin_generate_title(mucwin->roomjid, PREF_ROSTER_ROOMS_TITLE);
-    g_string_append(msg, mucwin_title);
+    mucwin_title_append(mucwin->roomjid, PREF_ROSTER_ROOMS_TITLE, msg);
 
     if ((g_strcmp0(unreadpos, "after") == 0) && mucwin->unread > 0) {
         g_string_append_printf(msg, " (%d)", mucwin->unread);

@@ -233,14 +233,14 @@ gchar** prefs_get_plugins(void);
 void prefs_add_plugin(const gchar* const name);
 void prefs_remove_plugin(const gchar* const name);
 
-gchar* prefs_get_otr_char(void);
+const gchar* prefs_get_otr_char(void);
 gboolean prefs_set_otr_char(gchar* ch);
-gchar* prefs_get_pgp_char(void);
+const gchar* prefs_get_pgp_char(void);
 gboolean prefs_set_pgp_char(gchar* ch);
-gchar* prefs_get_omemo_char(void);
+const gchar* prefs_get_omemo_char(void);
 gboolean prefs_set_omemo_char(gchar* ch);
 // XEP-0373: OpenPGP for XMPP
-char* prefs_get_ox_char(void);
+const gchar* prefs_get_ox_char(void);
 gboolean prefs_set_ox_char(gchar* ch);
 
 gchar* prefs_get_roster_header_char(void);

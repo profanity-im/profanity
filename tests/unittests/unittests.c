@@ -512,6 +512,12 @@ main(int argc, char* argv[])
         cmocka_unit_test_setup_teardown(prefs_get_string__returns__none_for_muc_default,
                                         load_preferences,
                                         close_preferences),
+        cmocka_unit_test_setup_teardown(prefs_encryption_chars__return__defaults,
+                                        load_preferences,
+                                        close_preferences),
+        cmocka_unit_test_setup_teardown(prefs_encryption_chars__update__when_set,
+                                        load_preferences,
+                                        close_preferences),
 
         cmocka_unit_test_setup_teardown(sv_ev_contact_online__shows__presence_in_console_when_set_online,
                                         load_preferences,

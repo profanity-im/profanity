@@ -181,6 +181,7 @@ void mucwin_unset_enctext(ProfMucWin* mucwin);
 void mucwin_set_message_char(ProfMucWin* mucwin, const char* const ch);
 void mucwin_unset_message_char(ProfMucWin* mucwin);
 gchar* mucwin_generate_title(const gchar* const muc_jid, const preference_t pref);
+void mucwin_title_append(const gchar* const muc_jid, const preference_t pref, GString* target);
 gboolean mucwin_set_room_name(const gchar* const muc_jid, const gchar* const new_room_name);
 
 // MUC private chat window
@@ -344,8 +345,8 @@ void title_bar_set_presence(contact_presence_t presence);
 
 // status bar
 void status_bar_inactive(const int win);
-void status_bar_active(const int win, win_type_t wintype, char* identifier);
-void status_bar_new(const int win, win_type_t wintype, char* identifier);
+void status_bar_active(const int win, win_type_t wintype, const gchar* const identifier);
+void status_bar_new(const int win, win_type_t wintype, const gchar* const identifier);
 void status_bar_set_all_inactive(void);
 
 // roster window
@@ -387,6 +388,7 @@ void win_append_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* t
 void win_appendln_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const message, ...);
 
 gchar* win_get_title(ProfWin* window);
+void win_title_append(ProfWin* window, GString* target);
 void win_show_occupant(ProfWin* window, Occupant* occupant);
 void win_show_occupant_info(ProfWin* window, const char* const room, Occupant* occupant);
 void win_show_contact(ProfWin* window, PContact contact);
@@ -394,7 +396,7 @@ void win_show_info(ProfWin* window, PContact contact);
 void win_show_vcard(ProfWin* window, vCard* vcard);
 
 void win_clear(ProfWin* window);
-char* win_get_tab_identifier(ProfWin* window);
+const gchar* win_get_tab_identifier(ProfWin* window);
 gchar* win_to_string(ProfWin* window);
 void win_command_list_error(ProfWin* window, const char* const error);
 void win_command_exec_error(ProfWin* window, const char* const command, const char* const error, ...);

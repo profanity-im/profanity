@@ -33,6 +33,7 @@
 #endif
 
 static WINDOW* win;
+static GString* title_buf;
 static contact_presence_t current_presence;
 static gboolean tls_secured;
 static gboolean is_connected;
@@ -57,6 +58,7 @@ create_title_bar(void)
     int row = screen_titlebar_row();
     win = newwin(1, cols, row, 0);
     wbkgd(win, theme_attrs(THEME_TITLE_TEXT));
+    title_buf = g_string_sized_new(64);
     title_bar_console();
     title_bar_set_presence(CONTACT_OFFLINE);
     title_bar_set_tls(FALSE);
@@ -68,6 +70,10 @@ create_title_bar(void)
 void
 free_title_bar(void)
 {
+    if (title_buf) {
+        g_string_free(title_buf, TRUE);
+        title_buf = NULL;
+    }
     delwin(win);
     win = NULL;
 }
@@ -182,10 +188,11 @@ _title_bar_draw(void)
         waddch(win, ' ');
     }
 
-    auto_gchar gchar* title = win_get_title(current);
+    g_string_truncate(title_buf, 0);
+    win_title_append(current, title_buf);
 
-    mvwprintw(win, 0, 0, " %s", title);
-    pos = strlen(title) + 1;
+    mvwprintw(win, 0, 0, " %s", title_buf->str);
+    pos = title_buf->len + 1;
 
     // presence is written from the right side
     // calculate it first so we have a maxposition

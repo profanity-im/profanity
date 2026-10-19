@@ -1218,11 +1218,11 @@ status_bar_inactive(const int win)
 {
 }
 void
-status_bar_active(const int win, win_type_t type, char* identifier)
+status_bar_active(const int win, win_type_t type, const gchar* const identifier)
 {
 }
 void
-status_bar_new(const int win, win_type_t type, char* identifier)
+status_bar_new(const int win, win_type_t type, const gchar* const identifier)
 {
 }
 void
@@ -1288,7 +1288,7 @@ win_create_vcard(vCard* vcard)
     return NULL;
 }
 
-char*
+const gchar*
 win_get_tab_identifier(ProfWin* window)
 {
     return NULL;
@@ -1373,6 +1373,10 @@ char*
 win_get_title(ProfWin* window)
 {
     return NULL;
+}
+void
+win_title_append(ProfWin* window, GString* target)
+{
 }
 char*
 win_get_last_sent_message(ProfWin* window)

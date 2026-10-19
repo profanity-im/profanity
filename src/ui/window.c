@@ -312,17 +312,23 @@ win_create_vcard(vCard* vcard)
     return &new_win->window;
 }
 
-gchar*
-win_get_title(ProfWin* window)
+void
+win_title_append(ProfWin* window, GString* target)
 {
+    if (target == NULL) {
+        return;
+    }
+
     if (window == NULL) {
-        return g_strdup(CONS_WIN_TITLE);
+        g_string_append(target, CONS_WIN_TITLE);
+        return;
     }
 
     switch (window->type) {
     case WIN_CONSOLE:
     {
-        return g_strdup(CONS_WIN_TITLE);
+        g_string_append(target, CONS_WIN_TITLE);
+        return;
     }
     case WIN_CHAT:
     {
@@ -333,68 +339,91 @@ win_get_title(ProfWin* window)
             contact = roster_get_contact(chatwin->barejid);
         }
         if (!contact) {
-            return g_strdup(chatwin->barejid);
+            g_string_append(target, chatwin->barejid);
+            return;
         }
         const char* name = p_contact_name(contact);
         if (!name) {
-            return g_strdup(chatwin->barejid);
+            g_string_append(target, chatwin->barejid);
+            return;
         }
-        return g_strconcat(name, " <", chatwin->barejid, ">", NULL);
+        g_string_append(target, name);
+        g_string_append(target, " <");
+        g_string_append(target, chatwin->barejid);
+        g_string_append(target, ">");
+        return;
     }
     case WIN_MUC:
     {
         const ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        return mucwin_generate_title(mucwin->roomjid, PREF_TITLEBAR_MUC_TITLE);
+        mucwin_title_append(mucwin->roomjid, PREF_TITLEBAR_MUC_TITLE, target);
+        return;
     }
     case WIN_CONFIG:
     {
         const ProfConfWin* confwin = (ProfConfWin*)window;
         assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
-        auto_gchar gchar* mucwin_title = mucwin_generate_title(confwin->roomjid, PREF_TITLEBAR_MUC_TITLE);
+        mucwin_title_append(confwin->roomjid, PREF_TITLEBAR_MUC_TITLE, target);
         if (confwin->form->modified) {
-            return g_strconcat(mucwin_title, " config *", NULL);
+            g_string_append(target, " config *");
+        } else {
+            g_string_append(target, " config");
         }
-        return g_strconcat(mucwin_title, " config", NULL);
+        return;
     }
     case WIN_PRIVATE:
     {
         const ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
         assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
-        auto_jid Jid* jid = jid_create(privatewin->fulljid);
-        auto_gchar gchar* mucwin_title = mucwin_generate_title(jid->barejid, PREF_TITLEBAR_MUC_TITLE);
-        return g_strconcat(mucwin_title, "/", jid->resourcepart, NULL);
+        const gchar* slash = strchr(privatewin->fulljid, '/');
+        if (slash) {
+            auto_gchar gchar* bare = g_strndup(privatewin->fulljid, slash - privatewin->fulljid);
+            mucwin_title_append(bare, PREF_TITLEBAR_MUC_TITLE, target);
+            g_string_append(target, slash);
+        } else {
+            mucwin_title_append(privatewin->fulljid, PREF_TITLEBAR_MUC_TITLE, target);
+        }
+        return;
     }
     case WIN_XML:
     {
-        return g_strdup(XML_WIN_TITLE);
+        g_string_append(target, XML_WIN_TITLE);
+        return;
     }
     case WIN_PLUGIN:
     {
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
         assert(pluginwin->memcheck == PROFPLUGINWIN_MEMCHECK);
-        return g_strdup(pluginwin->tag);
+        g_string_append(target, pluginwin->tag);
+        return;
     }
     case WIN_VCARD:
     {
         ProfVcardWin* vcardwin = (ProfVcardWin*)window;
         assert(vcardwin->memcheck == PROFVCARDWIN_MEMCHECK);
 
-        GString* title = g_string_new("vCard ");
-
-        g_string_append(title, connection_get_barejid());
+        g_string_append(target, "vCard ");
+        g_string_append(target, connection_get_barejid());
 
         if (vcardwin->vcard->modified) {
-            g_string_append(title, " *");
+            g_string_append(target, " *");
         }
-
-        return g_string_free(title, FALSE);
+        return;
     }
     }
     assert(FALSE);
 }
 
-char*
+gchar*
+win_get_title(ProfWin* window)
+{
+    GString* title = g_string_new("");
+    win_title_append(window, title);
+    return g_string_free(title, FALSE);
+}
+
+const gchar*
 win_get_tab_identifier(ProfWin* window)
 {
     assert(window != NULL);
@@ -402,43 +431,44 @@ win_get_tab_identifier(ProfWin* window)
     switch (window->type) {
     case WIN_CONSOLE:
     {
-        return strdup("console");
+        return "console";
     }
     case WIN_CHAT:
     {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        return strdup(chatwin->barejid);
+        return chatwin->barejid;
     }
     case WIN_MUC:
     {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        return strdup(mucwin->roomjid);
+        return mucwin->roomjid;
     }
     case WIN_CONFIG:
     {
         ProfConfWin* confwin = (ProfConfWin*)window;
-        return strdup(confwin->roomjid);
+        return confwin->roomjid;
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin* privwin = (ProfPrivateWin*)window;
-        return strdup(privwin->fulljid);
+        return privwin->fulljid;
     }
     case WIN_PLUGIN:
     {
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
-        return strdup(pluginwin->tag);
+        return pluginwin->tag;
     }
     case WIN_XML:
     {
-        return strdup("xmlconsole");
+        return "xmlconsole";
     }
     case WIN_VCARD:
     {
-        return strdup("vcard");
+        return "vcard";
     }
     }
     assert(FALSE);
+    return NULL;
 }
 
 char*
@@ -1483,7 +1513,7 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
     case WIN_CHAT:
     {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        auto_char char* enc_char = get_enc_char(message->enc, chatwin->incoming_char);
+        const gchar* enc_char = get_enc_char(message->enc, chatwin->incoming_char);
 
         if (!prefs_get_boolean(PREF_CORRECTION_ALLOW) || !_win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->barejid)) {
             // Prevent duplicate messages when current client is sending a message or if it's mam
@@ -1509,7 +1539,7 @@ win_print_them(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, c
 }
 
 void
-win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const ProfMessage* const message)
+win_println_incoming_muc_msg(ProfWin* window, const char* show_char, int flags, const ProfMessage* const message)
 {
     if (!prefs_get_boolean(PREF_CORRECTION_ALLOW) || !_win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->fulljid)) {
         _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->from_jid->resourcepart, message->from_jid->fulljid, message->id, "%s", message->plain);
@@ -1519,7 +1549,7 @@ win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const 
 }
 
 void
-win_print_outgoing_muc_msg(ProfWin* window, char* show_char, const char* const me, const char* const id, const char* const replace_id, const char* const message)
+win_print_outgoing_muc_msg(ProfWin* window, const char* show_char, const char* const me, const char* const id, const char* const replace_id, const char* const message)
 {
     GDateTime* timestamp = g_date_time_new_now_local();
 
@@ -1553,7 +1583,7 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
 
     int flags = 0;
     auto_gchar gchar* display_name = get_display_name(message, &flags);
-    auto_char char* ch = get_show_char(message->enc);
+    const gchar* ch = get_show_char(message->enc);
 
     wins_add_urls_ac(window, message, FALSE);
     wins_add_quotes_ac(window, message->plain, FALSE);
@@ -1573,7 +1603,7 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
     int flags = 0;
     auto_gchar gchar* display_name = get_display_name(message, &flags);
 
-    auto_char char* ch = get_show_char(message->enc);
+    const gchar* ch = get_show_char(message->enc);
 
     int y_start_pos = getcury(window->layout->win);
     wins_add_urls_ac(window, message, TRUE);
@@ -2394,32 +2424,29 @@ win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previo
     return g_strdup_printf("> %s\n", quoted_result);
 }
 
-// Derive encryption char from encryption mode. Output needs to be freed by caller.
-char*
+// Derive encryption char from encryption mode.
+const gchar*
 get_show_char(prof_enc_t encryption_mode)
 {
-    char* enc_char;
-
     if (encryption_mode == PROF_MSG_ENC_OTR) {
-        enc_char = prefs_get_otr_char();
+        return prefs_get_otr_char();
     } else if (encryption_mode == PROF_MSG_ENC_PGP) {
-        enc_char = prefs_get_pgp_char();
+        return prefs_get_pgp_char();
     } else if (encryption_mode == PROF_MSG_ENC_OMEMO) {
-        enc_char = prefs_get_omemo_char();
+        return prefs_get_omemo_char();
     } else if (encryption_mode == PROF_MSG_ENC_OX) {
-        enc_char = prefs_get_ox_char();
+        return prefs_get_ox_char();
     } else {
-        enc_char = strdup("-");
+        return "-";
     }
-
-    return enc_char;
 }
 
-char*
+const gchar*
 get_enc_char(prof_enc_t enc_mode, const char* alt)
 {
-    if (alt)
-        return strdup(alt);
-    else
+    if (alt) {
+        return alt;
+    } else {
         return get_show_char(enc_mode);
+    }
 }
