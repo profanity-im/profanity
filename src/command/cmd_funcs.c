@@ -8609,8 +8609,7 @@ _cmd_execute_alias(ProfWin* window, const char* const inp, gboolean* ran)
         return TRUE;
     }
 
-    auto_char char* alias = strdup(inp + 1);
-    auto_gcharv char** alias_parts = g_strsplit(alias, " ", 2);
+    auto_gcharv char** alias_parts = g_strsplit(inp + 1, " ", 2);
     auto_gchar gchar* value = prefs_get_alias(alias_parts[0]);
 
     if (!value) {
@@ -8622,8 +8621,7 @@ _cmd_execute_alias(ProfWin* window, const char* const inp, gboolean* ran)
     auto_gchar gchar* full_cmd = params ? g_strdup_printf("%s %s", value, params) : g_strdup(value);
 
     *ran = TRUE;
-    gboolean result = cmd_process_input(window, full_cmd);
-    return result;
+    return cmd_process_input(window, full_cmd);
 }
 
 // helper function for status change commands
