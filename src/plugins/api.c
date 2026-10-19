@@ -37,6 +37,19 @@ api_cons_alert(void)
     cons_alert(NULL);
 }
 
+static const gchar*
+_normalize_crlf(const gchar* const message, gchar** to_free)
+{
+    *to_free = NULL;
+    if (message == NULL || strstr(message, "\r\n") == NULL) {
+        return message;
+    }
+
+    auto_gcharv gchar** parts = g_strsplit(message, "\r\n", -1);
+    *to_free = g_strjoinv("\n", parts);
+    return *to_free;
+}
+
 int
 api_cons_show(const char* const message)
 {
@@ -45,7 +58,8 @@ api_cons_show(const char* const message)
         return 0;
     }
 
-    auto_char char* parsed = str_replace(message, "\r\n", "\n");
+    auto_gchar gchar* to_free = NULL;
+    const gchar* parsed = _normalize_crlf(message, &to_free);
     cons_show("%s", parsed);
 
     return 1;
@@ -59,7 +73,8 @@ api_cons_show_themed(const char* const group, const char* const key, const char*
         return 0;
     }
 
-    auto_char char* parsed = str_replace(message, "\r\n", "\n");
+    auto_gchar gchar* to_free = NULL;
+    const gchar* parsed = _normalize_crlf(message, &to_free);
     theme_item_t themeitem = plugin_themes_get(group, key, def);
     ProfWin* console = wins_get_console();
     win_println(console, themeitem, "-", "%s", parsed);
@@ -774,7 +789,8 @@ api_chat_show(const char* const barejid, const char* message)
         return 0;
     }
 
-    auto_char char* parsed = str_replace(message, "\r\n", "\n");
+    auto_gchar gchar* to_free = NULL;
+    const gchar* parsed = _normalize_crlf(message, &to_free);
     win_println((ProfWin*)chatwin, THEME_TEXT, "-", "%s", parsed);
 
     return 1;
@@ -810,7 +826,8 @@ api_chat_show_themed(const char* const barejid, const char* const group, const c
         return 0;
     }
 
-    auto_char char* parsed = str_replace(message, "\r\n", "\n");
+    auto_gchar gchar* to_free = NULL;
+    const gchar* parsed = _normalize_crlf(message, &to_free);
     theme_item_t themeitem = plugin_themes_get(group, key, def);
 
     win_println((ProfWin*)chatwin, themeitem, show_ch, "%s", parsed);
@@ -837,7 +854,8 @@ api_room_show(const char* const roomjid, const char* message)
         return 0;
     }
 
-    auto_char char* parsed = str_replace(message, "\r\n", "\n");
+    auto_gchar gchar* to_free = NULL;
+    const gchar* parsed = _normalize_crlf(message, &to_free);
     win_println((ProfWin*)mucwin, THEME_TEXT, "-", "%s", parsed);
 
     return 1;
@@ -873,7 +891,8 @@ api_room_show_themed(const char* const roomjid, const char* const group, const c
         return 0;
     }
 
-    auto_char char* parsed = str_replace(message, "\r\n", "\n");
+    auto_gchar gchar* to_free = NULL;
+    const gchar* parsed = _normalize_crlf(message, &to_free);
     theme_item_t themeitem = plugin_themes_get(group, key, def);
 
     win_println((ProfWin*)mucwin, themeitem, show_ch, "%s", parsed);
