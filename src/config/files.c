@@ -139,12 +139,25 @@ files_get_data_path(const char* const location)
 }
 
 gchar*
+files_sanitize_jid(const char* const jid)
+{
+    if (jid == NULL) {
+        return NULL;
+    }
+
+    GString* s = g_string_new(jid);
+    g_string_replace(s, "@", "_at_", 0);
+
+    return g_string_free(s, FALSE);
+}
+
+gchar*
 files_get_download_path(const char* const jid)
 {
     auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
 
     if (jid) {
-        auto_char char* account_dir = str_replace(jid, "@", "_at_");
+        auto_gchar gchar* account_dir = files_sanitize_jid(jid);
         GDateTime* now = g_date_time_new_now_local();
         auto_gchar gchar* date = g_date_time_format(now, "%Y_%m_%d");
         g_date_time_unref(now);
@@ -158,7 +171,7 @@ gchar*
 files_get_account_data_path(const char* const specific_dir, const char* const jid)
 {
     auto_gchar gchar* data_dir = files_get_data_path(specific_dir);
-    auto_char char* account_dir = str_replace(jid, "@", "_at_");
+    auto_gchar gchar* account_dir = files_sanitize_jid(jid);
 
     return g_strdup_printf("%s/%s", data_dir, account_dir);
 }
