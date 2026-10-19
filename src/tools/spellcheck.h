@@ -17,9 +17,9 @@
 
 void spellcheck_init(void);
 void spellcheck_deinit(void);
-gboolean spellcheck_is_misspelled(const char* word);
-gboolean spellcheck_set_lang(const char* lang);
-const char* spellcheck_get_lang(void);
+gboolean spellcheck_is_misspelled(const gchar* word);
+gboolean spellcheck_set_lang(const gchar* lang);
+const gchar* spellcheck_get_lang(void);
 GList* spellcheck_get_available_langs(void);
 
 #else
@@ -33,16 +33,16 @@ spellcheck_deinit(void)
 {
 }
 static inline gboolean
-spellcheck_is_misspelled(const char* word)
+spellcheck_is_misspelled(const gchar* word)
 {
     return FALSE;
 }
 static inline gboolean
-spellcheck_set_lang(const char* lang)
+spellcheck_set_lang(const gchar* lang)
 {
     return FALSE;
 }
-static inline const char*
+static inline const gchar*
 spellcheck_get_lang(void)
 {
     return NULL;

@@ -65,11 +65,11 @@ _editor_exit_cb(GPid pid, gint status, gpointer data)
 
 // Returns true if an error occurred
 gboolean
-launch_editor(gchar* initial_content, void (*callback)(gchar* content, void* data), void* user_data)
+launch_editor(const gchar* initial_content, void (*callback)(gchar* content, void* data), void* user_data)
 {
     auto_gchar gchar* filename = NULL;
     auto_gerror GError* glib_error = NULL;
-    const char* jid = connection_get_barejid();
+    const gchar* jid = connection_get_barejid();
     if (jid) {
         filename = files_file_in_account_data_path(DIR_EDITOR, jid, "compose.md");
     } else {

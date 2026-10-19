@@ -25,7 +25,7 @@ void clipboard_init(int argc, char **argv) {
 }
 */
 
-char*
+gchar*
 clipboard_get(void)
 {
     if (!tray_gtk_ready()) {

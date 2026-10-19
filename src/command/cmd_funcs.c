@@ -9224,7 +9224,7 @@ cmd_paste(ProfWin* window, const char* const command, gchar** args)
         log_warning("GTK is not ready. Paste from clipboard is disabled.");
         return TRUE;
     }
-    auto_char char* clipboard_buffer = clipboard_get();
+    auto_gchar gchar* clipboard_buffer = clipboard_get();
 
     if (clipboard_buffer) {
         switch (window->type) {
