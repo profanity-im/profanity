@@ -111,61 +111,61 @@ utf8_display_len__returns__correct_for_all_wide(void** state)
 void
 strip_arg_quotes__returns__original_when_no_quotes(void** state)
 {
-    char* input = "/cmd test string";
+    const gchar* input = "/cmd test string";
 
-    char* result = strip_arg_quotes(input);
+    gchar* result = strip_arg_quotes(input);
 
     assert_string_equal("/cmd test string", result);
 
-    free(result);
+    g_free(result);
 }
 
 void
 strip_arg_quotes__returns__stripped_first(void** state)
 {
-    char* input = "/cmd \"test string";
+    const gchar* input = "/cmd \"test string";
 
-    char* result = strip_arg_quotes(input);
+    gchar* result = strip_arg_quotes(input);
 
     assert_string_equal("/cmd test string", result);
 
-    free(result);
+    g_free(result);
 }
 
 void
 strip_arg_quotes__returns__stripped_last(void** state)
 {
-    char* input = "/cmd test string\"";
+    const gchar* input = "/cmd test string\"";
 
-    char* result = strip_arg_quotes(input);
+    gchar* result = strip_arg_quotes(input);
 
     assert_string_equal("/cmd test string", result);
 
-    free(result);
+    g_free(result);
 }
 
 void
 strip_arg_quotes__returns__stripped_both(void** state)
 {
-    char* input = "/cmd \"test string\"";
+    const gchar* input = "/cmd \"test string\"";
 
-    char* result = strip_arg_quotes(input);
+    gchar* result = strip_arg_quotes(input);
 
     assert_string_equal("/cmd test string", result);
 
-    free(result);
+    g_free(result);
 }
 
 void
 strip_arg_quotes__unescapes(void** state)
 {
-    char* input = "\"Thor \\\"The Thunderer\\\" Odinson\"";
+    const gchar* input = "\"Thor \\\"The Thunderer\\\" Odinson\"";
 
-    char* result = strip_arg_quotes(input);
+    gchar* result = strip_arg_quotes(input);
 
     assert_string_equal("Thor \"The Thunderer\" Odinson", result);
 
-    free(result);
+    g_free(result);
 }
 
 void

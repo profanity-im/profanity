@@ -361,7 +361,7 @@ void
 cons_check_version(gboolean not_available_msg)
 {
     ProfWin* console = wins_get_console();
-    auto_char char* latest_release = release_get_latest();
+    auto_gchar gchar* latest_release = release_get_latest();
 
     if (!latest_release) {
         return;

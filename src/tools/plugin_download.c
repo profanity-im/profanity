@@ -44,7 +44,7 @@ plugin_download_install(void* userdata)
 
     if (is_regular_file(path)) {
         GString* error_message = g_string_new(NULL);
-        auto_char char* plugin_name = basename_from_url(https_url);
+        auto_gchar gchar* plugin_name = basename_from_url(https_url);
         gboolean result = plugins_install(plugin_name, path, error_message);
         if (result) {
             cons_show("Plugin installed and loaded: %s", plugin_name);

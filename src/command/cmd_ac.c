@@ -1823,35 +1823,30 @@ _cmd_ac_complete_params(ProfWin* window, const char* const input, gboolean previ
             gchar* nick_choices[] = { "/msg", "/info", "/caps" };
 
             // Remove quote character before and after names when doing autocomplete
-            char* unquoted = strip_arg_quotes(input);
+            auto_gchar gchar* unquoted = strip_arg_quotes(input);
             for (size_t i = 0; i < ARRAY_SIZE(nick_choices); i++) {
                 result = autocomplete_param_with_ac(unquoted, nick_choices[i], nick_ac, TRUE, previous);
                 if (result) {
-                    free(unquoted);
                     return result;
                 }
             }
-            free(unquoted);
         }
 
         // otherwise autocomplete using roster
     } else if (conn_status == JABBER_CONNECTED) {
         gchar* contact_choices[] = { "/msg", "/info" };
         // Remove quote character before and after names when doing autocomplete
-        char* unquoted = strip_arg_quotes(input);
+        auto_gchar gchar* unquoted = strip_arg_quotes(input);
         for (size_t i = 0; i < ARRAY_SIZE(contact_choices); i++) {
             result = autocomplete_param_with_func(unquoted, contact_choices[i], roster_contact_autocomplete, previous, NULL);
             if (result) {
-                free(unquoted);
                 return result;
             }
             result = autocomplete_param_with_func(unquoted, contact_choices[i], roster_barejid_autocomplete, previous, NULL);
             if (result) {
-                free(unquoted);
                 return result;
             }
         }
-        free(unquoted);
 
         gchar* resource_choices[] = { "/caps", "/ping" };
         for (size_t i = 0; i < ARRAY_SIZE(resource_choices); i++) {
@@ -3975,7 +3970,7 @@ _status_autocomplete(ProfWin* window, const char* const input, gboolean previous
         }
 
         // Remove quote character before and after names when doing autocomplete
-        char* unquoted = strip_arg_quotes(input);
+        auto_gchar gchar* unquoted = strip_arg_quotes(input);
 
         // MUC completion with nicknames
         if (window->type == WIN_MUC) {
@@ -3985,7 +3980,6 @@ _status_autocomplete(ProfWin* window, const char* const input, gboolean previous
             if (nick_ac) {
                 result = autocomplete_param_with_ac(unquoted, "/status get", nick_ac, TRUE, previous);
                 if (result) {
-                    free(unquoted);
                     return result;
                 }
             }
@@ -3993,12 +3987,9 @@ _status_autocomplete(ProfWin* window, const char* const input, gboolean previous
         } else {
             result = autocomplete_param_with_func(unquoted, "/status get", roster_contact_autocomplete, previous, NULL);
             if (result) {
-                free(unquoted);
                 return result;
             }
         }
-
-        free(unquoted);
     }
 
     return NULL;
@@ -4381,7 +4372,7 @@ _vcard_autocomplete(ProfWin* window, const char* const input, gboolean previous)
     }
 
     if (window->type == WIN_MUC) {
-        char* unquoted = strip_arg_quotes(input);
+        auto_gchar gchar* unquoted = strip_arg_quotes(input);
 
         ProfMucWin* mucwin = (ProfMucWin*)window;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
@@ -4390,44 +4381,36 @@ _vcard_autocomplete(ProfWin* window, const char* const input, gboolean previous)
         if (nick_ac) {
             result = autocomplete_param_with_ac(unquoted, "/vcard get", nick_ac, TRUE, previous);
             if (result) {
-                free(unquoted);
                 return result;
             }
 
             result = autocomplete_param_with_ac(unquoted, "/vcard photo open", nick_ac, TRUE, previous);
             if (result) {
-                free(unquoted);
                 return result;
             }
 
             result = autocomplete_param_with_ac(unquoted, "/vcard photo save", nick_ac, TRUE, previous);
             if (result) {
-                free(unquoted);
                 return result;
             }
         }
-        free(unquoted);
     } else {
-        char* unquoted = strip_arg_quotes(input);
+        auto_gchar gchar* unquoted = strip_arg_quotes(input);
 
         result = autocomplete_param_with_func(unquoted, "/vcard get", roster_contact_autocomplete, previous, NULL);
         if (result) {
-            free(unquoted);
             return result;
         }
 
         result = autocomplete_param_with_func(unquoted, "/vcard photo open", roster_contact_autocomplete, previous, NULL);
         if (result) {
-            free(unquoted);
             return result;
         }
 
         result = autocomplete_param_with_func(unquoted, "/vcard photo save", roster_contact_autocomplete, previous, NULL);
         if (result) {
-            free(unquoted);
             return result;
         }
-        free(unquoted);
     }
 
     result = autocomplete_param_with_ac(input, "/vcard photo", vcard_photo_ac, TRUE, previous);

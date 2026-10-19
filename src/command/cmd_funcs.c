@@ -7106,7 +7106,7 @@ cmd_plugins_update(ProfWin* window, const char* const command, gchar** args)
 
     auto_gchar gchar* scheme = g_uri_parse_scheme(args[1]);
     if (_http_based_uri_scheme(scheme)) {
-        auto_char char* plugin_name = basename_from_url(args[1]);
+        auto_gchar gchar* plugin_name = basename_from_url(args[1]);
         if (!_is_correct_plugin_extension(plugin_name)) {
             cons_show("Please, use url ending with correct file name. Plugins must have one of the following extensions: \".py\" or \".so\".");
             return TRUE;
