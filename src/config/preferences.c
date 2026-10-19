@@ -49,6 +49,11 @@ static prof_keyfile_t prefs_prof_keyfile;
 static GKeyFile* prefs;
 gint log_maxsize = 0;
 
+static gchar* pref_otr_char;
+static gchar* pref_pgp_char;
+static gchar* pref_ox_char;
+static gchar* pref_omemo_char;
+
 static Autocomplete boolean_choice_ac;
 static Autocomplete room_trigger_ac;
 
@@ -231,12 +236,29 @@ _prefs_load(void)
     for (gsize i = 0; i < len; i++) {
         autocomplete_add(room_trigger_ac, triggers[i]);
     }
+
+    GFREE_SET_NULL(pref_otr_char);
+    pref_otr_char = g_key_file_get_string(prefs, PREF_GROUP_OTR, "otr.char", NULL);
+
+    GFREE_SET_NULL(pref_pgp_char);
+    pref_pgp_char = g_key_file_get_string(prefs, PREF_GROUP_PGP, "pgp.char", NULL);
+
+    GFREE_SET_NULL(pref_ox_char);
+    pref_ox_char = g_key_file_get_string(prefs, PREF_GROUP_OX, "ox.char", NULL);
+
+    GFREE_SET_NULL(pref_omemo_char);
+    pref_omemo_char = g_key_file_get_string(prefs, PREF_GROUP_OMEMO, "omemo.char", NULL);
 }
 
 /* Clean up after _prefs_load() */
 static void
 _prefs_close(void)
 {
+    GFREE_SET_NULL(pref_otr_char);
+    GFREE_SET_NULL(pref_pgp_char);
+    GFREE_SET_NULL(pref_ox_char);
+    GFREE_SET_NULL(pref_omemo_char);
+
     autocomplete_free(boolean_choice_ac);
     autocomplete_free(room_trigger_ac);
 }
@@ -1081,26 +1103,13 @@ prefs_get_roster_size(void)
     }
 }
 
-static gchar*
-_prefs_get_encryption_char(const gchar* const ch, const gchar* const pref_group, const gchar* const key)
-{
-    gchar* result = NULL;
-
-    gchar* resultstr = g_key_file_get_string(prefs, pref_group, key, NULL);
-    if (!resultstr) {
-        result = g_strdup(ch);
-    } else {
-        result = resultstr;
-    }
-
-    return result;
-}
-
 static gboolean
-_prefs_set_encryption_char(const gchar* const ch, const gchar* const pref_group, const gchar* const key)
+_prefs_set_encryption_char(gchar** cached_var, const gchar* const ch, const gchar* const pref_group, const gchar* const key)
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, pref_group, key, ch);
+        GFREE_SET_NULL(*cached_var);
+        *cached_var = g_strdup(ch);
         return TRUE;
     } else {
         log_error("Could not set %s encryption char to: %s", key, ch);
@@ -1108,52 +1117,52 @@ _prefs_set_encryption_char(const gchar* const ch, const gchar* const pref_group,
     return FALSE;
 }
 
-gchar*
+const gchar*
 prefs_get_otr_char(void)
 {
-    return _prefs_get_encryption_char("~", PREF_GROUP_OTR, "otr.char");
+    return pref_otr_char ? pref_otr_char : "~";
 }
 
 gboolean
 prefs_set_otr_char(gchar* ch)
 {
-    return _prefs_set_encryption_char(ch, PREF_GROUP_OTR, "otr.char");
+    return _prefs_set_encryption_char(&pref_otr_char, ch, PREF_GROUP_OTR, "otr.char");
 }
 
-gchar*
+const gchar*
 prefs_get_pgp_char(void)
 {
-    return _prefs_get_encryption_char("~", PREF_GROUP_PGP, "pgp.char");
+    return pref_pgp_char ? pref_pgp_char : "~";
 }
 
 gboolean
 prefs_set_pgp_char(gchar* ch)
 {
-    return _prefs_set_encryption_char(ch, PREF_GROUP_PGP, "pgp.char");
+    return _prefs_set_encryption_char(&pref_pgp_char, ch, PREF_GROUP_PGP, "pgp.char");
 }
 
-gchar*
+const gchar*
 prefs_get_ox_char(void)
 {
-    return _prefs_get_encryption_char("%", PREF_GROUP_OX, "ox.char");
+    return pref_ox_char ? pref_ox_char : "%";
 }
 
 gboolean
 prefs_set_ox_char(gchar* ch)
 {
-    return _prefs_set_encryption_char(ch, PREF_GROUP_OX, "ox.char");
+    return _prefs_set_encryption_char(&pref_ox_char, ch, PREF_GROUP_OX, "ox.char");
 }
 
-gchar*
+const gchar*
 prefs_get_omemo_char(void)
 {
-    return _prefs_get_encryption_char("~", PREF_GROUP_OMEMO, "omemo.char");
+    return pref_omemo_char ? pref_omemo_char : "~";
 }
 
 gboolean
 prefs_set_omemo_char(gchar* ch)
 {
-    return _prefs_set_encryption_char(ch, PREF_GROUP_OMEMO, "omemo.char");
+    return _prefs_set_encryption_char(&pref_omemo_char, ch, PREF_GROUP_OMEMO, "omemo.char");
 }
 
 gchar*

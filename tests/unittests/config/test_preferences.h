@@ -4,5 +4,7 @@
 void prefs_get_string__returns__all_for_console_default(void** state);
 void prefs_get_string__returns__none_for_chat_default(void** state);
 void prefs_get_string__returns__none_for_muc_default(void** state);
+void prefs_encryption_chars__return__defaults(void** state);
+void prefs_encryption_chars__update__when_set(void** state);
 
 #endif

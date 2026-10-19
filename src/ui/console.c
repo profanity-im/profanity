@@ -2197,7 +2197,7 @@ cons_show_otr_prefs(void)
         cons_show("OTR logging (/otr log)   : Redacted");
     }
 
-    auto_gchar gchar* ch = prefs_get_otr_char();
+    const gchar* ch = prefs_get_otr_char();
     cons_show("OTR char (/otr char)     : %s", ch);
 
     if (prefs_get_boolean(PREF_OTR_SENDFILE)) {
@@ -2224,7 +2224,7 @@ cons_show_pgp_prefs(void)
         cons_show("PGP logging (/pgp log)   : Redacted");
     }
 
-    auto_gchar gchar* ch = prefs_get_pgp_char();
+    const gchar* ch = prefs_get_pgp_char();
     cons_show("PGP char (/pgp char)     : %s", ch);
 
     if (prefs_get_boolean(PREF_PGP_SENDFILE)) {
@@ -2254,7 +2254,7 @@ cons_show_omemo_prefs(void)
         cons_show("OMEMO logging (/omemo log)   : Redacted");
     }
 
-    auto_gchar gchar* ch = prefs_get_omemo_char();
+    const gchar* ch = prefs_get_omemo_char();
     cons_show("OMEMO char (/omemo char)     : %s", ch);
 
     cons_alert(NULL);
@@ -2275,7 +2275,7 @@ cons_show_ox_prefs(void)
         cons_show("OX logging (/ox log)   : Redacted");
     }
 
-    auto_gchar gchar* ch = prefs_get_ox_char();
+    const gchar* ch = prefs_get_ox_char();
     cons_show("OX char (/ox char)     : %s", ch);
 
     if (prefs_get_boolean(PREF_OX_ENCRYPTFILE)) {

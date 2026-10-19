@@ -40,8 +40,8 @@ void win_print_them(ProfWin* window, theme_item_t theme_item, GDateTime* timesta
 void win_print_incoming(ProfWin* window, const char* const from, ProfMessage* message);
 void win_print_outgoing(ProfWin* window, const char* show_char, const char* const id, const char* const replace_id, const char* const message);
 void win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const char* const from, const char* const message, const char* id, const char* const replace_id);
-void win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const ProfMessage* const message);
-void win_print_outgoing_muc_msg(ProfWin* window, char* show_char, const char* const me, const char* const id, const char* const replace_id, const char* const message);
+void win_println_incoming_muc_msg(ProfWin* window, const char* show_char, int flags, const ProfMessage* const message);
+void win_print_outgoing_muc_msg(ProfWin* window, const char* show_char, const char* const me, const char* const id, const char* const replace_id, const char* const message);
 void win_print_history(ProfWin* window, const ProfMessage* const message);
 void win_print_old_history(ProfWin* window, const ProfMessage* const message);
 
@@ -76,7 +76,7 @@ void win_remove_entry_message(ProfWin* window, const char* const id);
 
 char* win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previous);
 
-char* get_show_char(prof_enc_t encryption_mode);
-char* get_enc_char(prof_enc_t enc_mode, const char* alt);
+const gchar* get_show_char(prof_enc_t encryption_mode);
+const gchar* get_enc_char(prof_enc_t enc_mode, const char* alt);
 
 #endif

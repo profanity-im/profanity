@@ -1484,7 +1484,7 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
     case WIN_CHAT:
     {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        auto_char char* enc_char = get_enc_char(message->enc, chatwin->incoming_char);
+        const gchar* enc_char = get_enc_char(message->enc, chatwin->incoming_char);
 
         if (!prefs_get_boolean(PREF_CORRECTION_ALLOW) || !_win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->barejid)) {
             // Prevent duplicate messages when current client is sending a message or if it's mam
@@ -1510,7 +1510,7 @@ win_print_them(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, c
 }
 
 void
-win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const ProfMessage* const message)
+win_println_incoming_muc_msg(ProfWin* window, const char* show_char, int flags, const ProfMessage* const message)
 {
     if (!prefs_get_boolean(PREF_CORRECTION_ALLOW) || !_win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->fulljid)) {
         _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->from_jid->resourcepart, message->from_jid->fulljid, message->id, "%s", message->plain);
@@ -1520,7 +1520,7 @@ win_println_incoming_muc_msg(ProfWin* window, char* show_char, int flags, const 
 }
 
 void
-win_print_outgoing_muc_msg(ProfWin* window, char* show_char, const char* const me, const char* const id, const char* const replace_id, const char* const message)
+win_print_outgoing_muc_msg(ProfWin* window, const char* show_char, const char* const me, const char* const id, const char* const replace_id, const char* const message)
 {
     GDateTime* timestamp = g_date_time_new_now_local();
 
@@ -1554,7 +1554,7 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
 
     int flags = 0;
     auto_gchar gchar* display_name = get_display_name(message, &flags);
-    auto_char char* ch = get_show_char(message->enc);
+    const gchar* ch = get_show_char(message->enc);
 
     wins_add_urls_ac(window, message, FALSE);
     wins_add_quotes_ac(window, message->plain, FALSE);
@@ -1574,7 +1574,7 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
     int flags = 0;
     auto_gchar gchar* display_name = get_display_name(message, &flags);
 
-    auto_char char* ch = get_show_char(message->enc);
+    const gchar* ch = get_show_char(message->enc);
 
     int y_start_pos = getcury(window->layout->win);
     wins_add_urls_ac(window, message, TRUE);
@@ -2395,32 +2395,29 @@ win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previo
     return g_strdup_printf("> %s\n", quoted_result);
 }
 
-// Derive encryption char from encryption mode. Output needs to be freed by caller.
-char*
+// Derive encryption char from encryption mode.
+const gchar*
 get_show_char(prof_enc_t encryption_mode)
 {
-    char* enc_char;
-
     if (encryption_mode == PROF_MSG_ENC_OTR) {
-        enc_char = prefs_get_otr_char();
+        return prefs_get_otr_char();
     } else if (encryption_mode == PROF_MSG_ENC_PGP) {
-        enc_char = prefs_get_pgp_char();
+        return prefs_get_pgp_char();
     } else if (encryption_mode == PROF_MSG_ENC_OMEMO) {
-        enc_char = prefs_get_omemo_char();
+        return prefs_get_omemo_char();
     } else if (encryption_mode == PROF_MSG_ENC_OX) {
-        enc_char = prefs_get_ox_char();
+        return prefs_get_ox_char();
     } else {
-        enc_char = strdup("-");
+        return "-";
     }
-
-    return enc_char;
 }
 
-char*
+const gchar*
 get_enc_char(prof_enc_t enc_mode, const char* alt)
 {
-    if (alt)
-        return strdup(alt);
-    else
+    if (alt) {
+        return alt;
+    } else {
         return get_show_char(enc_mode);
+    }
 }

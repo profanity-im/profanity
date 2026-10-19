@@ -388,7 +388,7 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, const char
     ProfWin* window = (ProfWin*)chatwin;
     wins_add_quotes_ac(window, message, FALSE);
 
-    auto_char char* enc_char = get_enc_char(enc_mode, chatwin->outgoing_char);
+    const gchar* enc_char = get_enc_char(enc_mode, chatwin->outgoing_char);
 
     const Jid* myjid = connection_get_jid();
     auto_char char* plugin_message = plugins_pre_chat_message_display(myjid->barejid, myjid->resourcepart, message);
@@ -415,16 +415,7 @@ chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message)
 {
     assert(chatwin != NULL);
 
-    auto_char char* enc_char = NULL;
-    if (message->enc == PROF_MSG_ENC_PGP) {
-        enc_char = prefs_get_pgp_char();
-    } else if (message->enc == PROF_MSG_ENC_OMEMO) {
-        enc_char = prefs_get_omemo_char();
-    } else if (message->enc == PROF_MSG_ENC_OX) {
-        enc_char = prefs_get_ox_char();
-    } else {
-        enc_char = strdup("-");
-    }
+    const gchar* enc_char = get_show_char(message->enc);
 
     ProfWin* window = (ProfWin*)chatwin;
 
