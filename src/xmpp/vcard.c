@@ -1292,10 +1292,13 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
                 g_string_free(filename, TRUE);
             }
         }
-        auto_char char* from1 = str_replace(from, "@", "_at_");
-        auto_char char* from2 = str_replace(from1, "/", "_slash_");
-
-        g_string_append(filename, from2);
+        if (from) {
+            GString* from_clean = g_string_new(from);
+            g_string_replace(from_clean, "@", "_at_", 0);
+            g_string_replace(from_clean, "/", "_slash_", 0);
+            g_string_append(filename, from_clean->str);
+            g_string_free(from_clean, TRUE);
+        }
     } else {
         filename = g_string_new(data->filename);
     }
