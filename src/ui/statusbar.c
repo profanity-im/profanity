@@ -64,7 +64,8 @@ static void _destroy_tab(StatusBarTab* tab);
 static guint _tabs_width(guint start, guint end);
 static guint _count_digits(guint number);
 static guint _count_digits_in_range(guint start, guint end);
-static gchar* _display_name(StatusBarTab* tab);
+static void _tab_update_display_name(StatusBarTab* tab);
+static const gchar* _display_name(const StatusBarTab* const tab);
 static gboolean _tabmode_is_actlist(void);
 
 void
@@ -81,6 +82,7 @@ status_bar_init(void)
     console->window_type = WIN_CONSOLE;
     console->identifier = g_strdup("console");
     console->display_name = NULL;
+    _tab_update_display_name(console);
     g_hash_table_insert(statusbar->tabs, GINT_TO_POINTER(1), console);
     statusbar->current_tab = 1;
 
@@ -119,6 +121,15 @@ status_bar_resize(void)
     int row = screen_statusbar_row();
     wresize(statusbar_win, 1, cols);
     mvwin(statusbar_win, row, 0);
+
+    if (statusbar && statusbar->tabs) {
+        GHashTableIter iter;
+        gpointer key, value;
+        g_hash_table_iter_init(&iter, statusbar->tabs);
+        while (g_hash_table_iter_next(&iter, &key, &value)) {
+            _tab_update_display_name((StatusBarTab*)value);
+        }
+    }
 
     status_bar_draw();
 }
@@ -165,28 +176,7 @@ _create_tab(const int win, win_type_t wintype, const gchar* const identifier, gb
     tab->window_type = wintype;
     tab->display_name = NULL;
 
-    if (tab->window_type == WIN_CHAT) {
-        PContact contact = NULL;
-        if (roster_exists()) {
-            contact = roster_get_contact(tab->identifier);
-        }
-        const char* pcontact_name = contact ? p_contact_name(contact) : NULL;
-        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_CHAT);
-        if (g_strcmp0("user", pref) == 0) {
-            if (pcontact_name) {
-                tab->display_name = g_strdup(pcontact_name);
-            } else {
-                auto_jid Jid* jidp = jid_create(tab->identifier);
-                if (jidp) {
-                    tab->display_name = jidp->localpart != NULL ? g_strdup(jidp->localpart) : g_strdup(jidp->barejid);
-                } else {
-                    tab->display_name = g_strdup(tab->identifier);
-                }
-            }
-        } else {
-            tab->display_name = g_strdup(tab->identifier);
-        }
-    }
+    _tab_update_display_name(tab);
 
     g_hash_table_replace(statusbar->tabs, GINT_TO_POINTER(true_win), tab);
 
@@ -417,7 +407,7 @@ _status_bar_draw_tab(StatusBarTab* tab, guint pos, guint num, gboolean include_b
         pos++;
     }
     if (show_name) {
-        auto_gchar gchar* display_name = _display_name(tab);
+        const gchar* display_name = _display_name(tab);
         mvwprintw(statusbar_win, 0, pos, "%s", display_name);
         pos += utf8_display_len(display_name);
     }
@@ -566,7 +556,7 @@ _tabs_width(guint start, guint end)
                 if (!show_read && !is_current && !tab->highlight)
                     continue;
 
-                auto_gchar gchar* display_name = _display_name(tab);
+                const gchar* display_name = _display_name(tab);
                 width += utf8_display_len(display_name);
                 width += 3 + _count_digits(i);
             }
@@ -583,7 +573,7 @@ _tabs_width(guint start, guint end)
                 if (!show_read && !is_current && !tab->highlight)
                     continue;
 
-                auto_gchar gchar* display_name = _display_name(tab);
+                const gchar* display_name = _display_name(tab);
                 width += utf8_display_len(display_name);
                 width += 2;
             }
@@ -599,9 +589,13 @@ _tabs_width(guint start, guint end)
     return opened_tabs * 3 + 1;
 }
 
-static gchar*
-_display_name(StatusBarTab* tab)
+static void
+_tab_update_display_name(StatusBarTab* tab)
 {
+    if (tab == NULL) {
+        return;
+    }
+
     gchar* fullname = NULL;
 
     if (tab->window_type == WIN_CONSOLE) {
@@ -611,8 +605,25 @@ _display_name(StatusBarTab* tab)
     } else if (tab->window_type == WIN_PLUGIN) {
         fullname = g_strdup(tab->identifier);
     } else if (tab->window_type == WIN_CHAT) {
-        if (tab && tab->display_name) {
-            fullname = g_strdup(tab->display_name);
+        PContact contact = NULL;
+        if (roster_exists()) {
+            contact = roster_get_contact(tab->identifier);
+        }
+        const char* pcontact_name = contact ? p_contact_name(contact) : NULL;
+        auto_gchar gchar* pref = prefs_get_string(PREF_STATUSBAR_CHAT);
+        if (g_strcmp0("user", pref) == 0) {
+            if (pcontact_name) {
+                fullname = g_strdup(pcontact_name);
+            } else {
+                auto_jid Jid* jidp = jid_create(tab->identifier);
+                if (jidp) {
+                    fullname = jidp->localpart != NULL ? g_strdup(jidp->localpart) : g_strdup(jidp->barejid);
+                } else {
+                    fullname = g_strdup(tab->identifier);
+                }
+            }
+        } else {
+            fullname = g_strdup(tab->identifier);
         }
     } else if (tab->window_type == WIN_MUC) {
         fullname = mucwin_generate_title(tab->identifier, PREF_STATUSBAR_ROOM_TITLE);
@@ -628,19 +639,26 @@ _display_name(StatusBarTab* tab)
     }
 
     gint tablen = prefs_get_statusbartablen();
-    if (tablen == 0) {
-        return fullname;
+    if (tablen > 0) {
+        int namelen = utf8_display_len(fullname);
+        if (namelen >= tablen) {
+            gchar* trimmed = g_utf8_substring(fullname, 0, tablen);
+            g_free(fullname);
+            fullname = trimmed;
+        }
     }
 
-    int namelen = utf8_display_len(fullname);
-    if (namelen < tablen) {
-        return fullname;
+    g_free(tab->display_name);
+    tab->display_name = fullname;
+}
+
+static const gchar*
+_display_name(const StatusBarTab* const tab)
+{
+    if (tab && tab->display_name) {
+        return tab->display_name;
     }
-
-    gchar* trimmed = g_utf8_substring(fullname, 0, tablen);
-    g_free(fullname);
-
-    return trimmed;
+    return "window";
 }
 
 void
