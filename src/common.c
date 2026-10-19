@@ -565,6 +565,10 @@ strip_arg_quotes(const gchar* const input)
         return NULL;
     }
 
+    if (strchr(input, '"') == NULL && strchr(input, '\\') == NULL) {
+        return g_strdup(input);
+    }
+
     // Unescape and strip quotes
     GString* unescaped = g_string_new("");
     for (const gchar* p = input; *p; p++) {

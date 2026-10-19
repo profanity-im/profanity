@@ -56,7 +56,7 @@ void
 autocomplete_reset(Autocomplete ac)
 {
     ac->last_found = NULL;
-    FREE_SET_NULL(ac->search_str);
+    GFREE_SET_NULL(ac->search_str);
 }
 
 void
@@ -226,7 +226,7 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
     // first search attempt
     if (!ac->last_found) {
         if (ac->search_str) {
-            FREE_SET_NULL(ac->search_str);
+            GFREE_SET_NULL(ac->search_str);
         }
 
         // unescape search string
@@ -285,27 +285,20 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
 static char*
 _autocomplete_param_common(const char* const input, char* command, autocomplete_func func, Autocomplete ac, gboolean quote, gboolean previous, void* context)
 {
-    int len;
     auto_gchar gchar* command_cpy = g_strdup_printf("%s ", command);
     if (!command_cpy) {
         return NULL;
     }
 
-    len = strlen(command_cpy);
+    int len = strlen(command_cpy);
 
     if (strncmp(input, command_cpy, len) == 0) {
-        int inp_len = strlen(input);
-        auto_char char* found = NULL;
-        auto_char char* prefix = malloc(inp_len + 1);
+        auto_gchar gchar* prefix = strip_arg_quotes(input + len);
         if (!prefix) {
             return NULL;
         }
 
-        for (int i = len; i < inp_len; i++) {
-            prefix[i - len] = input[i];
-        }
-
-        prefix[inp_len - len] = '\0';
+        auto_gchar gchar* found = NULL;
 
         if (func) {
             found = func(prefix, previous, context);
@@ -418,7 +411,7 @@ _search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction
                 return g_string_free(escaped, FALSE);
                 // otherwise just return the string
             } else {
-                return strdup(curr->data);
+                return g_strdup(curr->data);
             }
         }
 

@@ -373,3 +373,31 @@ autocomplete_complete__handles__escaped_quotes(void** state)
     autocomplete_free(ac);
     free(result);
 }
+
+void
+autocomplete_param_with_ac__handles__quoted_input(void** state)
+{
+    Autocomplete ac = autocomplete_new();
+    autocomplete_add(ac, "John Doe");
+    autocomplete_add(ac, "Jane Roe");
+
+    // Unquoted partial match
+    char* result1 = autocomplete_param_with_ac("/msg Joh", "/msg", ac, TRUE, FALSE);
+    assert_non_null(result1);
+    assert_string_equal("/msg \"John Doe\"", result1);
+    g_free(result1);
+
+    // Quoted partial match
+    char* result2 = autocomplete_param_with_ac("/msg \"Joh", "/msg", ac, TRUE, FALSE);
+    assert_non_null(result2);
+    assert_string_equal("/msg \"John Doe\"", result2);
+    g_free(result2);
+
+    // Cycle from completed quoted name to next match
+    char* result3 = autocomplete_param_with_ac("/msg \"Jane Roe\"", "/msg", ac, TRUE, FALSE);
+    assert_non_null(result3);
+    assert_string_equal("/msg \"John Doe\"", result3);
+    g_free(result3);
+
+    autocomplete_free(ac);
+}
