@@ -9,20 +9,6 @@
 #ifndef TESTS_TEST_COMMON_H
 #define TESTS_TEST_COMMON_H
 
-void str_replace__returns__one_substr(void** state);
-void str_replace__returns__one_substr_beginning(void** state);
-void str_replace__returns__one_substr_end(void** state);
-void str_replace__returns__two_substr(void** state);
-void str_replace__returns__char(void** state);
-void str_replace__returns__original_when_none(void** state);
-void str_replace__returns__replaced_when_match(void** state);
-void str_replace__returns__empty_when_string_empty(void** state);
-void str_replace__returns__null_when_string_null(void** state);
-void str_replace__returns__original_when_sub_empty(void** state);
-void str_replace__returns__original_when_sub_null(void** state);
-void str_replace__returns__empty_when_new_empty(void** state);
-void str_replace__returns__original_when_new_null(void** state);
-
 void valid_resource_presence_string__is__true_for_online(void** state);
 void valid_resource_presence_string__is__true_for_chat(void** state);
 void valid_resource_presence_string__is__true_for_away(void** state);

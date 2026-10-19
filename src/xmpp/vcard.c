@@ -1292,10 +1292,13 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
                 g_string_free(filename, TRUE);
             }
         }
-        auto_char char* from1 = str_replace(from, "@", "_at_");
-        auto_char char* from2 = str_replace(from1, "/", "_slash_");
-
-        g_string_append(filename, from2);
+        if (from) {
+            GString* from_clean = g_string_new(from);
+            g_string_replace(from_clean, "@", "_at_", 0);
+            g_string_replace(from_clean, "/", "_slash_", 0);
+            g_string_append(filename, from_clean->str);
+            g_string_free(from_clean, TRUE);
+        }
     } else {
         filename = g_string_new(data->filename);
     }
@@ -1321,22 +1324,11 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
     }
 
     if (data->open) {
-        auto_gcharv gchar** argv = NULL;
-        gint argc;
-
         auto_gchar gchar* cmdtemplate = prefs_get_string(PREF_VCARD_PHOTO_CMD);
+        auto_gcharv gchar** argv = format_call_external_argv(cmdtemplate, NULL, filename->str);
 
-        // this makes it work with filenames that contain spaces
-        g_string_prepend(filename, "\"");
-        g_string_append(filename, "\"");
-        auto_char char* cmd = str_replace(cmdtemplate, "%p", filename->str);
-
-        if (g_shell_parse_argv(cmd, &argc, &argv, NULL) == FALSE) {
-            cons_show_error("Failed to parse command template");
-        } else {
-            if (!call_external(argv)) {
-                cons_show_error("Unable to execute command");
-            }
+        if (!call_external(argv)) {
+            cons_show_error("Unable to execute command");
         }
     }
 

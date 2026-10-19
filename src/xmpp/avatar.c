@@ -299,8 +299,10 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
         }
     }
 
-    auto_char char* from = str_replace(from_attr, "@", "_at_");
-    g_string_append(filename, from);
+    GString* from = g_string_new(from_attr);
+    g_string_replace(from, "@", "_at_", 0);
+    g_string_append(filename, from->str);
+    g_string_free(from, TRUE);
 
     avatar_metadata* data = (avatar_metadata*)userdata;
 

@@ -71,19 +71,6 @@ main(int argc, char* argv[])
 
     const struct CMUnitTest all_tests[] = {
 
-        cmocka_unit_test(str_replace__returns__one_substr),
-        cmocka_unit_test(str_replace__returns__one_substr_beginning),
-        cmocka_unit_test(str_replace__returns__one_substr_end),
-        cmocka_unit_test(str_replace__returns__two_substr),
-        cmocka_unit_test(str_replace__returns__char),
-        cmocka_unit_test(str_replace__returns__original_when_none),
-        cmocka_unit_test(str_replace__returns__replaced_when_match),
-        cmocka_unit_test(str_replace__returns__empty_when_string_empty),
-        cmocka_unit_test(str_replace__returns__null_when_string_null),
-        cmocka_unit_test(str_replace__returns__original_when_sub_empty),
-        cmocka_unit_test(str_replace__returns__original_when_sub_null),
-        cmocka_unit_test(str_replace__returns__empty_when_new_empty),
-        cmocka_unit_test(str_replace__returns__original_when_new_null),
         cmocka_unit_test(valid_resource_presence_string__is__true_for_online),
         cmocka_unit_test(valid_resource_presence_string__is__true_for_chat),
         cmocka_unit_test(valid_resource_presence_string__is__true_for_away),

@@ -122,27 +122,14 @@ _notify(const char* const message, int timeout, const char* const category)
 static void
 _notify(const char* const message, int timeout, const char* const category)
 {
-    GString* notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message '");
-
-    auto_char char* escaped_single = str_replace(message, "'", "'\\''");
-
-    if (escaped_single[0] == '<') {
-        g_string_append(notify_command, "\\<");
-        g_string_append(notify_command, &escaped_single[1]);
-    } else if (escaped_single[0] == '[') {
-        g_string_append(notify_command, "\\[");
-        g_string_append(notify_command, &escaped_single[1]);
-    } else if (escaped_single[0] == '(') {
-        g_string_append(notify_command, "\\(");
-        g_string_append(notify_command, &escaped_single[1]);
-    } else if (escaped_single[0] == '{') {
-        g_string_append(notify_command, "\\{");
-        g_string_append(notify_command, &escaped_single[1]);
-    } else {
-        g_string_append(notify_command, escaped_single);
+    auto_gchar gchar* msg = NULL;
+    if (message && (message[0] == '<' || message[0] == '[' || message[0] == '(' || message[0] == '{')) {
+        msg = g_strdup_printf("\\%s", message);
     }
+    auto_gchar gchar* quoted = g_shell_quote(msg ? msg : message);
 
-    g_string_append(notify_command, "'");
+    GString* notify_command = g_string_new("terminal-notifier -title \"Profanity\" -message ");
+    g_string_append(notify_command, quoted);
 
     char* term_name = getenv("TERM_PROGRAM");
     char* app_id = NULL;
