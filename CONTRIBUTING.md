@@ -224,7 +224,7 @@ Examples:
 - `jid_create__returns__null_from_null`
 - `p_contact_is_available__is__false_when_offline`
 - `cmd_connect__shows__usage_when_no_server_value`
-- `str_replace__returns__one_substr`
+- `utf8_display_len__returns__0_for_null`
 
 #### Adding a new test
 When adding a new test file:

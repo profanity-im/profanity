@@ -158,7 +158,6 @@ gboolean string_to_verbosity(const char* cmd, int* verbosity, gchar** err_msg);
 
 gboolean create_dir(const char* name);
 gboolean copy_file(const char* const src, const char* const target, const gboolean overwrite_existing);
-char* str_replace(const char* string, const char* substr, const char* replacement);
 gboolean strtoi_range(const char* str, int* saveptr, int min, int max, char** err_msg);
 int utf8_display_len(const char* const str);
 gchar* str_xml_sanitize(const char* const str);
