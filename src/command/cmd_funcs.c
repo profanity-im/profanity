@@ -392,10 +392,9 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
     }
 
     auto_gchar gchar* jid = NULL;
-    auto_char char* user = strdup(user_orig);
 
     // connect with account
-    ProfAccount* account = accounts_get_account(user);
+    ProfAccount* account = accounts_get_account(user_orig);
     if (account) {
         // override account options with connect options
         if (altdomain != NULL)
@@ -441,7 +440,7 @@ cmd_connect(ProfWin* window, const char* const command, gchar** args)
 
         // connect with JID
     } else {
-        jid = g_utf8_strdown(user, -1);
+        jid = g_utf8_strdown(user_orig, -1);
         auto_char char* passwd = ui_ask_password(FALSE);
         conn_status = cl_ev_connect_jid(jid, passwd, altdomain, port, tls_policy, auth_policy);
     }
