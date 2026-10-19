@@ -731,12 +731,19 @@ GSList*
 get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const message, const char* const nick)
 {
     GSList* mentions = NULL;
-    auto_gchar gchar* message_search = case_sensitive ? g_strdup(message) : g_utf8_strdown(message, -1);
-    auto_gchar gchar* mynick_search = case_sensitive ? g_strdup(nick) : g_utf8_strdown(nick, -1);
 
-    mentions = prof_occurrences(mynick_search, message_search, 0, whole_word, &mentions);
+    if (message == NULL || nick == NULL) {
+        return NULL;
+    }
 
-    return mentions;
+    if (case_sensitive) {
+        return prof_occurrences(nick, message, 0, whole_word, &mentions);
+    }
+
+    auto_gchar gchar* message_lower = g_utf8_strdown(message, -1);
+    auto_gchar gchar* nick_lower = g_utf8_strdown(nick, -1);
+
+    return prof_occurrences(nick_lower, message_lower, 0, whole_word, &mentions);
 }
 
 gboolean
