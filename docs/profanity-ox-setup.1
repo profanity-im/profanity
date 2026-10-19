@@ -32,11 +32,9 @@ The first step is to create a OpenPGP key pair.
 The key pair generation will be done with the \f[V]gpg\f[R] command of
 GnuPG.
 .IP
-.nf
-\f[C]
+.EX
 gpg --quick-generate-key xmpp:alice\[at]domain.tld future-default default 3y
-\f[R]
-.fi
+.EE
 .PP
 This command will generated a OpenPGP key with a UID
 \f[V]xmpp:alice\[at]domain.tld\f[R].
@@ -49,14 +47,12 @@ Replace the Jabber ID with your JID and do \f[B]not\f[R] forget the URI
 .PP
 Example output:
 .IP
-.nf
-\f[C]
+.EX
 pub   ed25519 2021-09-21 [SC] [verf\[:a]llt: 2024-09-20]
       583BAE703A801095B6B71A56BD801174B1A0B84A
 uid                      xmpp:alice\[at]domain.tld
 sub   cv25519 2021-09-21 [E]
-\f[R]
-.fi
+.EE
 .SH Export your public key
 .PP
 You need to export your public key so you can later upload it into a PEP
@@ -67,16 +63,14 @@ Use the command below to export public key:
 .PP
 Example command:
 .IP
-.nf
-\f[C]
+.EX
 gpg --export \[rs]
   --export-options export-minimal \[rs]
   --export-filter \[aq]keep-uid=uid =\[ti] xmpp:alice\[at]domain.tld\[aq] \[rs]
   --export-filter \[aq]drop-subkey=usage =\[ti] a\[aq] \[rs]
   583BAE703A801095B6B71A56BD801174B1A0B84A \[rs]
   > /tmp/pep-key.gpg
-\f[R]
-.fi
+.EE
 .PP
 The key will be exported to \f[V]/tmp/pep-key.gpg\f[R].
 You may check the key with the command below:
@@ -94,11 +88,9 @@ You can use profanity to publish your exported key into your account
 (PEP).
 The \f[V]/ox announce\f[R] command will publish your key.
 .IP
-.nf
-\f[C]
+.EX
 /ox announce /tmp/pep-key.gpg
-\f[R]
-.fi
+.EE
 .PP
 The command will create two PEP node records to store the key.
 .SH Discover keys
@@ -108,24 +100,20 @@ command.
 .PP
 Example output:
 .IP
-.nf
-\f[C]
+.EX
 /ox discover buddy\[at]domain.tld
-Discovering Public Key for buddy\[at]domain.tld 
+Discovering Public Key for buddy\[at]domain.tld
 1234567890ABCDEF1234567890ABCDEF12345678
-\f[R]
-.fi
+.EE
 .PP
 To request and import a key, you can use the \f[V]/ox request\f[R]
 command.
 .IP
-.nf
-\f[C]
+.EX
 /ox request buddy\[at]domain.tld 1234567890ABCDEF1234567890ABCDEF12345678
 Requesting Public Key 1234567890ABCDEF1234567890ABCDEF12345678 for buddy\[at]domain.tld
-Public Key imported 
-\f[R]
-.fi
+Public Key imported
+.EE
 .PP
 The key will be imported into your gnupg keyring.
 .SH Sign the imported key
@@ -135,11 +123,9 @@ The key can been shown via gpg
 Make sure the key is the key of your buddy and sign the key with your
 key.
 .IP
-.nf
-\f[C]
+.EX
 gpg --ask-cert-level --default-key 583BAE703A801095B6B71A56BD801174B1A0B84A --sign-key 1234567890ABCDEF1234567890ABCDEF12345678
-\f[R]
-.fi
+.EE
 .PP
 The command \f[V]/ox contacts\f[R] will show the keys with XMPP-UID.
 The command \f[V]/ox keys\f[R] will show all known OpenPGP keys.
