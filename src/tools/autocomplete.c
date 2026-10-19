@@ -44,7 +44,7 @@ autocomplete_clear(Autocomplete ac)
 {
     if (ac) {
         if (ac->items) {
-            g_list_free_full(ac->items, free);
+            g_list_free_full(ac->items, g_free);
             ac->items = NULL;
         }
 
@@ -64,7 +64,7 @@ autocomplete_free(Autocomplete ac)
 {
     if (ac) {
         autocomplete_clear(ac);
-        free(ac);
+        g_free(ac);
     }
 }
 
@@ -81,7 +81,7 @@ autocomplete_length(Autocomplete ac)
 }
 
 void
-autocomplete_update(Autocomplete ac, char** items)
+autocomplete_update(Autocomplete ac, gchar** items)
 {
     if (!ac) {
         return;
@@ -103,10 +103,10 @@ autocomplete_update(Autocomplete ac, char** items)
 }
 
 void
-autocomplete_add_unsorted(Autocomplete ac, const char* item, const gboolean is_reversed)
+autocomplete_add_unsorted(Autocomplete ac, const gchar* item, const gboolean is_reversed)
 {
     if (ac) {
-        char* item_cpy;
+        gchar* item_cpy;
         GList* curr = g_list_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
         // if item already exists
@@ -114,7 +114,7 @@ autocomplete_add_unsorted(Autocomplete ac, const char* item, const gboolean is_r
             return;
         }
 
-        item_cpy = strdup(item);
+        item_cpy = g_strdup(item);
 
         if (is_reversed) {
             ac->items = g_list_prepend(ac->items, item_cpy);
@@ -125,10 +125,10 @@ autocomplete_add_unsorted(Autocomplete ac, const char* item, const gboolean is_r
 }
 
 void
-autocomplete_add(Autocomplete ac, const char* item)
+autocomplete_add(Autocomplete ac, const gchar* item)
 {
     if (ac) {
-        char* item_cpy;
+        gchar* item_cpy;
         GList* curr = g_list_find_custom(ac->items, item, (GCompareFunc)strcmp);
 
         // if item already exists
@@ -136,13 +136,13 @@ autocomplete_add(Autocomplete ac, const char* item)
             return;
         }
 
-        item_cpy = strdup(item);
+        item_cpy = g_strdup(item);
         ac->items = g_list_insert_sorted(ac->items, item_cpy, (GCompareFunc)strcmp);
     }
 }
 
 void
-autocomplete_add_all(Autocomplete ac, char** items)
+autocomplete_add_all(Autocomplete ac, gchar** items)
 {
     for (guint i = 0; i < g_strv_length(items); i++) {
         autocomplete_add(ac, items[i]);
@@ -150,7 +150,7 @@ autocomplete_add_all(Autocomplete ac, char** items)
 }
 
 void
-autocomplete_remove(Autocomplete ac, const char* const item)
+autocomplete_remove(Autocomplete ac, const gchar* const item)
 {
     if (ac) {
         GList* curr = g_list_find_custom(ac->items, item, (GCompareFunc)strcmp);
@@ -164,7 +164,7 @@ autocomplete_remove(Autocomplete ac, const char* const item)
             ac->last_found = NULL;
         }
 
-        free(curr->data);
+        g_free(curr->data);
         ac->items = g_list_delete_link(ac->items, curr);
     }
 
@@ -172,7 +172,7 @@ autocomplete_remove(Autocomplete ac, const char* const item)
 }
 
 void
-autocomplete_remove_all(Autocomplete ac, char** items)
+autocomplete_remove_all(Autocomplete ac, gchar** items)
 {
     for (guint i = 0; i < g_strv_length(items); i++) {
         autocomplete_remove(ac, items[i]);
@@ -186,7 +186,7 @@ autocomplete_create_list(Autocomplete ac)
     GList* curr = ac->items;
 
     while (curr) {
-        copy = g_list_append(copy, strdup(curr->data));
+        copy = g_list_append(copy, g_strdup(curr->data));
         curr = g_list_next(curr);
     }
 
@@ -194,7 +194,7 @@ autocomplete_create_list(Autocomplete ac)
 }
 
 gboolean
-autocomplete_contains(Autocomplete ac, const char* value)
+autocomplete_contains(Autocomplete ac, const gchar* value)
 {
     GList* curr = ac->items;
 
@@ -282,8 +282,8 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
 
 // autocomplete_func func is used -> autocomplete_param_with_func
 // Autocomplete ac, gboolean quote are used -> autocomplete_param_with_ac
-static char*
-_autocomplete_param_common(const char* const input, char* command, autocomplete_func func, Autocomplete ac, gboolean quote, gboolean previous, void* context)
+static gchar*
+_autocomplete_param_common(const gchar* const input, const gchar* command, autocomplete_func func, Autocomplete ac, gboolean quote, gboolean previous, void* context)
 {
     auto_gchar gchar* command_cpy = g_strdup_printf("%s ", command);
     if (!command_cpy) {
@@ -314,20 +314,20 @@ _autocomplete_param_common(const char* const input, char* command, autocomplete_
     return NULL;
 }
 
-char*
-autocomplete_param_with_func(const char* const input, char* command, autocomplete_func func, gboolean previous, void* context)
+gchar*
+autocomplete_param_with_func(const gchar* const input, const gchar* command, autocomplete_func func, gboolean previous, void* context)
 {
     return _autocomplete_param_common(input, command, func, NULL, FALSE, previous, context);
 }
 
-char*
-autocomplete_param_with_ac(const char* const input, char* command, Autocomplete ac, gboolean quote, gboolean previous)
+gchar*
+autocomplete_param_with_ac(const gchar* const input, const gchar* command, Autocomplete ac, gboolean quote, gboolean previous)
 {
     return _autocomplete_param_common(input, command, NULL, ac, quote, previous, NULL);
 }
 
-char*
-autocomplete_param_no_with_func(const char* const input, char* command, int arg_number, autocomplete_func func, gboolean previous, void* context)
+gchar*
+autocomplete_param_no_with_func(const gchar* const input, const gchar* command, int arg_number, autocomplete_func func, gboolean previous, void* context)
 {
     if (strncmp(input, command, strlen(command)) == 0) {
         // count tokens properly
@@ -358,7 +358,7 @@ autocomplete_remove_older_than_max_reverse(Autocomplete ac, int maxsize)
     if (autocomplete_length(ac) > maxsize) {
         GList* last = g_list_last(ac->items);
         if (last) {
-            free(last->data);
+            g_free(last->data);
             ac->items = g_list_delete_link(ac->items, last);
         }
     }
