@@ -1223,14 +1223,14 @@ wins_get_next_attention(void)
 }
 
 void
-wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message, const gboolean flip)
+wins_add_urls_ac(const ProfWin* const win, const char* const message, const gboolean flip)
 {
     GRegex* regex;
     GMatchInfo* match_info;
 
     // https://stackoverflow.com/questions/43588699/regex-for-matching-any-url-character
     regex = g_regex_new("(https?|aesgcm)://[\\w\\-.~:/?#\\[\\]@!$&'()*+,;=%]+", 0, 0, NULL);
-    g_regex_match(regex, message->plain, 0, &match_info);
+    g_regex_match(regex, message, 0, &match_info);
 
     while (g_match_info_matches(match_info)) {
         auto_gchar gchar* word = g_match_info_fetch(match_info, 0);
