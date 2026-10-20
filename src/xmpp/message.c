@@ -348,7 +348,7 @@ message_init(void)
 
     message->enc = PROF_MSG_ENC_NONE;
     message->omemo_err = OMEMO_ERR_NONE;
-    message->trusted = true;
+    message->trusted = TRUE;
     message->type = PROF_MSG_TYPE_UNINITIALIZED;
 
     return message;
@@ -1186,7 +1186,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* resu
             message->timestamp = stanza_get_delay_from(stanza, from_jid->domainpart);
         }
 
-        bool is_muc_history = FALSE;
+        gboolean is_muc_history = FALSE;
         if (message->timestamp != NULL) {
             is_muc_history = TRUE;
             g_date_time_unref(message->timestamp);
@@ -1702,13 +1702,13 @@ _send_message_stanza(xmpp_stanza_t* const stanza)
     xmpp_free(connection_get_ctx(), text);
 }
 
-/* ckeckOID = true: check origin-id
- * checkOID = false: check regular id
+/* checkOID = TRUE: check origin-id
+ * checkOID = FALSE: check regular id
  */
-bool
-message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
+gboolean
+message_is_sent_by_us(const ProfMessage* const message, gboolean checkOID)
 {
-    bool ret = FALSE;
+    gboolean ret = FALSE;
 
     // we check the </origin-id> for this we calculate a hash into it so we can detect
     // whether this client sent it. See connection_create_stanza_id()

@@ -550,9 +550,9 @@ _omemo_devicelist_publish_result(xmpp_stanza_t* const stanza, void* const userda
         }
 
         if (g_strcmp0(xmpp_stanza_get_name(pubsub_error), "precondition-not-met") == 0) {
-            static gboolean reconfigured = false;
+            static gboolean reconfigured = FALSE;
             if (!reconfigured) {
-                reconfigured = true;
+                reconfigured = TRUE;
                 cons_show_error("Unable to publish own OMEMO device list, reconfiguring node");
                 log_error("[OMEMO] Unable to publish own OMEMO device list, reconfiguring node");
                 omemo_devicelist_configure();

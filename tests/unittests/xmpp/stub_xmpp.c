@@ -254,8 +254,8 @@ message_request_voice(const char* const roomjid)
 {
 }
 
-bool
-message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
+gboolean
+message_is_sent_by_us(const ProfMessage* const message, gboolean checkOID)
 {
     return TRUE;
 }
@@ -395,7 +395,7 @@ iq_room_info_request(const char* const room, gboolean display)
 {
 }
 void
-iq_room_affiliation_list(const char* const room, char* affiliation, bool show)
+iq_room_affiliation_list(const char* const room, char* affiliation, gboolean show)
 {
 }
 void

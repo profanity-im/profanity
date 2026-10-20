@@ -945,7 +945,7 @@ stanza_create_caps_query_element(xmpp_ctx_t* ctx)
 
     ProfAccount* account = accounts_get_account(session_get_account_name());
     gchar* client = account->client;
-    bool is_custom_client = client != NULL;
+    gboolean is_custom_client = client != NULL;
 
     GString* name_str = g_string_new(is_custom_client ? client : "Profanity ");
     if (!is_custom_client) {

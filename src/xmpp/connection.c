@@ -969,25 +969,25 @@ _split_url(const char* alturi, gchar** host, gint* port)
 }
 #endif
 
-static bool
+static gboolean
 _get_other_host(xmpp_stanza_t* error_stanza, gchar** host, int* port)
 {
     xmpp_stanza_t* soh_error = _get_soh_error(error_stanza);
     if (!soh_error || !xmpp_stanza_get_children(soh_error)) {
         log_debug("_get_other_host: stream-error contains no see-other-host");
-        return false;
+        return FALSE;
     }
     const char* alturi = xmpp_stanza_get_text_ptr(xmpp_stanza_get_children(soh_error));
     if (!alturi) {
         log_debug("_get_other_host: see-other-host contains no text");
-        return false;
+        return FALSE;
     }
 
     if (!_split_url(alturi, host, port)) {
         log_debug("_get_other_host: Could not split \"%s\"", alturi);
-        return false;
+        return FALSE;
     }
-    return true;
+    return TRUE;
 }
 
 static void

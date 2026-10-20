@@ -343,9 +343,9 @@ save_identity(const signal_protocol_address* address, uint8_t* key_data,
     if (identity_key_store->recv) {
         /* Do not trust identity automatically */
         /* Instead we perform a real trust check */
-        identity_key_store->recv = false;
+        identity_key_store->recv = FALSE;
         int trusted = is_trusted_identity(address, key_data, key_len, user_data);
-        identity_key_store->recv = true;
+        identity_key_store->recv = TRUE;
         if (trusted == 0) {
             log_debug("[OMEMO][STORE] trusted 0");
             /* If not trusted we just don't save the identity */

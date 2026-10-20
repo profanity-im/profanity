@@ -211,7 +211,7 @@ void message_send_gone(const char* const jid);
 void message_send_invite(const char* const room, const char* const contact, const char* const reason);
 void message_request_voice(const char* const roomjid);
 
-bool message_is_sent_by_us(const ProfMessage* const message, bool checkOID);
+gboolean message_is_sent_by_us(const ProfMessage* const message, gboolean checkOID);
 
 void presence_subscription(const char* const jid, const jabber_subscr_t action);
 GList* presence_get_subscription_requests(void);
@@ -242,7 +242,7 @@ void iq_submit_room_config(ProfConfWin* confwin);
 void iq_room_config_cancel(ProfConfWin* confwin);
 void iq_send_ping(const char* const target);
 void iq_room_info_request(const char* const room, gboolean display_result);
-void iq_room_affiliation_list(const char* const room, char* affiliation, bool show);
+void iq_room_affiliation_list(const char* const room, char* affiliation, gboolean show);
 void iq_room_affiliation_set(const char* const room, const char* const jid, char* affiliation,
                              const char* const reason);
 void iq_room_kick_occupant(const char* const room, const char* const nick, const char* const reason);

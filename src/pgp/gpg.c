@@ -746,12 +746,12 @@ gboolean
 p_gpg_is_public_key_format(const gchar* buffer)
 {
     if (buffer == NULL || buffer[0] == '\0') {
-        return false;
+        return FALSE;
     }
 
     const gchar* headerPos = strstr(buffer, PGP_PUBLIC_KEY_HEADER);
     if (headerPos == NULL) {
-        return false;
+        return FALSE;
     }
 
     const gchar* footerPos = strstr(buffer, PGP_PUBLIC_KEY_FOOTER);

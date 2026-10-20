@@ -66,7 +66,7 @@ typedef struct privilege_set_t
 typedef struct affiliation_list_t
 {
     char* affiliation;
-    bool show_ui_message;
+    gboolean show_ui_message;
 } ProfAffiliationList;
 
 typedef struct command_config_data_t
@@ -720,7 +720,7 @@ iq_room_config_cancel(ProfConfWin* confwin)
 }
 
 void
-iq_room_affiliation_list(const char* const room, char* affiliation, bool show_ui_message)
+iq_room_affiliation_list(const char* const room, char* affiliation, gboolean show_ui_message)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_stanza_t* iq = stanza_create_room_affiliation_list_iq(ctx, room, affiliation);
@@ -1753,7 +1753,7 @@ _version_get_handler(xmpp_stanza_t* const stanza)
     ProfAccount* account = accounts_get_account(session_get_account_name());
     auto_char char* client = account->client != NULL ? g_strdup(account->client) : NULL;
     account_free(account);
-    bool is_custom_client = client != NULL;
+    gboolean is_custom_client = client != NULL;
     gchar* custom_version_str = NULL;
     if (is_custom_client) {
         custom_version_str = strstr(client, " ");
@@ -1789,7 +1789,7 @@ _version_get_handler(xmpp_stanza_t* const stanza)
     xmpp_stanza_set_text(name_txt, is_custom_client ? client : "Profanity");
     xmpp_stanza_add_child(name, name_txt);
     xmpp_stanza_add_child(query, name);
-    bool include_os = prefs_get_boolean(PREF_REVEAL_OS) && !is_custom_client;
+    gboolean include_os = prefs_get_boolean(PREF_REVEAL_OS) && !is_custom_client;
     xmpp_stanza_t* os = NULL;
     xmpp_stanza_t* os_txt = NULL;
     xmpp_stanza_t* version = xmpp_stanza_new(ctx);

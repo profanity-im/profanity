@@ -288,7 +288,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     if (new_plain)
         message->plain = new_plain;
 
-    gboolean show_message = true;
+    gboolean show_message = TRUE;
 
     ProfWin* window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
@@ -300,7 +300,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         if (p_gpg_is_public_key_format(message->plain)) {
             ProfPGPKey* key = p_gpg_import_pubkey(message->plain);
             if (key != NULL) {
-                show_message = false;
+                show_message = FALSE;
                 win_println(window, THEME_DEFAULT, "-", "Received and imported PGP key %s: \"%s\". To assign it to the correspondent using /pgp setkey %s %s", key->fp, key->name, display_name, key->id);
                 p_gpg_free_key(key);
             } else {

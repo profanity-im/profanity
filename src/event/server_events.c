@@ -1378,9 +1378,9 @@ _autojoin_timeout_cb(gpointer user_data)
         if (!muc_active(item->barejid)) {
             muc_join(item->barejid, item->nick, item->password, TRUE);
             presence_join_room(item->barejid, item->nick, item->password);
-            iq_room_affiliation_list(item->barejid, "member", false);
-            iq_room_affiliation_list(item->barejid, "admin", false);
-            iq_room_affiliation_list(item->barejid, "owner", false);
+            iq_room_affiliation_list(item->barejid, "member", FALSE);
+            iq_room_affiliation_list(item->barejid, "admin", FALSE);
+            iq_room_affiliation_list(item->barejid, "owner", FALSE);
         }
         _free_autojoin_item(item);
     }
