@@ -488,9 +488,9 @@ void
 chatwin_set_enctext(ProfChatWin* chatwin, const char* const enctext)
 {
     if (chatwin->enctext) {
-        free(chatwin->enctext);
+        g_free(chatwin->enctext);
     }
-    chatwin->enctext = strdup(enctext);
+    chatwin->enctext = g_strdup(enctext);
 }
 
 void
@@ -503,9 +503,9 @@ void
 chatwin_set_incoming_char(ProfChatWin* chatwin, const char* const ch)
 {
     if (chatwin->incoming_char) {
-        free(chatwin->incoming_char);
+        g_free(chatwin->incoming_char);
     }
-    chatwin->incoming_char = strdup(ch);
+    chatwin->incoming_char = g_strdup(ch);
 }
 
 void
@@ -518,9 +518,9 @@ void
 chatwin_set_outgoing_char(ProfChatWin* chatwin, const char* const ch)
 {
     if (chatwin->outgoing_char) {
-        free(chatwin->outgoing_char);
+        g_free(chatwin->outgoing_char);
     }
-    chatwin->outgoing_char = strdup(ch);
+    chatwin->outgoing_char = g_strdup(ch);
 }
 
 void
@@ -594,12 +594,12 @@ static void
 _chatwin_set_last_message(ProfChatWin* chatwin, const char* const id, const char* const message)
 {
     if (chatwin->last_message != message) {
-        free(chatwin->last_message);
-        chatwin->last_message = strdup(message);
+        g_free(chatwin->last_message);
+        chatwin->last_message = g_strdup(message);
     }
 
     if (chatwin->last_msg_id != id) {
-        free(chatwin->last_msg_id);
-        chatwin->last_msg_id = strdup(id);
+        g_free(chatwin->last_msg_id);
+        chatwin->last_msg_id = g_strdup(id);
     }
 }
