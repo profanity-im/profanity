@@ -1424,16 +1424,16 @@ notifier_uninit(void)
 }
 
 void
-notify_typing(const char* const handle)
+notify_typing(const gchar* const handle)
 {
 }
 void
-notify_message(const char* const name, int win, const char* const text)
+notify_message(const gchar* const name, int win, const gchar* const text)
 {
 }
 void
-notify_room_message(const char* const handle, const char* const room,
-                    int win, const char* const text)
+notify_room_message(const gchar* const handle, const gchar* const room,
+                    int win, const gchar* const text)
 {
 }
 void
@@ -1441,17 +1441,17 @@ notify_remind(void)
 {
 }
 void
-notify_invite(const char* const from, const char* const room,
-              const char* const reason)
+notify_invite(const gchar* const from, const gchar* const room,
+              const gchar* const reason)
 {
 }
 void
-notify_subscription(const char* const from)
+notify_subscription(const gchar* const from)
 {
 }
 void
-notify(const char* const message, int timeout,
-       const char* const category)
+notify(const gchar* const message, int timeout,
+       const gchar* const category)
 {
 }
 void

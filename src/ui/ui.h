@@ -408,12 +408,12 @@ char* win_get_last_sent_message(ProfWin* window);
 // desktop notifications
 void notifier_initialise(void);
 void notifier_uninit(void);
-void notify_typing(const char* const name);
-void notify_message(const char* const name, int win, const char* const text);
-void notify_room_message(const char* const nick, const char* const room, int win, const char* const text);
+void notify_typing(const gchar* const name);
+void notify_message(const gchar* const name, int win, const gchar* const text);
+void notify_room_message(const gchar* const nick, const gchar* const room, int win, const gchar* const text);
 void notify_remind(void);
-void notify_invite(const char* const from, const char* const room, const char* const reason);
-void notify(const char* const message, int timeout, const char* const category);
-void notify_subscription(const char* const from);
+void notify_invite(const gchar* const from, const gchar* const room, const gchar* const reason);
+void notify(const gchar* const message, int timeout, const gchar* const category);
+void notify_subscription(const gchar* const from);
 
 #endif
