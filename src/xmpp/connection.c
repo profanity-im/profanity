@@ -39,9 +39,9 @@ typedef struct prof_conn_t
     gboolean xmpp_in_event_loop;
     jabber_conn_status_t conn_status;
     xmpp_conn_event_t conn_last_event;
-    char* presence_message;
+    gchar* presence_message;
     int priority;
-    char* domain;
+    gchar* domain;
     Jid* jid;
     GHashTable* available_resources;
     GHashTable* features_by_jid;
@@ -50,8 +50,8 @@ typedef struct prof_conn_t
 
 typedef struct
 {
-    const char* username;
-    const char* password;
+    const gchar* username;
+    const gchar* password;
 } prof_reg_t;
 
 static ProfConnection conn;
@@ -68,7 +68,7 @@ static int _connection_certfail_cb(const xmpp_tlscert_t* xmpptlscert, const char
 
 static void _random_bytes_init(void);
 static void _random_bytes_close(void);
-static void _compute_identifier(const char* barejid);
+static void _compute_identifier(const gchar* barejid);
 
 static void*
 _xmalloc(size_t size, void* userdata)
@@ -112,8 +112,8 @@ connection_init(void)
     conn.domain = NULL;
     conn.jid = NULL;
     conn.features_by_jid = NULL;
-    conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
-    conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+    conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)resource_destroy);
+    conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
 
     conn.xmpp_ctx = xmpp_ctx_new(&prof_mem, &prof_log);
     auto_gchar gchar* v = prefs_get_string(PREF_STROPHE_VERBOSITY);
@@ -167,13 +167,13 @@ connection_shutdown(void)
 }
 
 static gboolean
-_conn_apply_settings(const char* const jid, const char* const passwd, const char* const tls_policy, const char* const auth_policy)
+_conn_apply_settings(const gchar* const jid, const gchar* const passwd, const gchar* const tls_policy, const gchar* const auth_policy)
 {
     if (conn.available_resources == NULL) {
-        conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
+        conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)resource_destroy);
     }
     if (conn.requested_features == NULL) {
-        conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+        conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     }
 
     auto_jid Jid* jidp = jid_create(jid);
@@ -436,7 +436,7 @@ _register_handle_features(xmpp_conn_t* xmpp_conn, xmpp_stanza_t* stanza, void* u
 
     log_debug("Server supports in-band registration. Attempting registration.");
 
-    domain = strdup(conn.domain);
+    domain = g_strdup(conn.domain);
     iq = xmpp_iq_new(ctx, "get", "reg1");
     xmpp_stanza_set_to(iq, domain);
     child = xmpp_stanza_new(ctx);
@@ -485,7 +485,7 @@ _register_handler(xmpp_conn_t* xmpp_conn,
                   secured ? "secured" : "NOT secured");
 
         Jid* my_jid = jid_create(xmpp_conn_get_jid(xmpp_conn));
-        conn.domain = strdup(my_jid->domainpart);
+        conn.domain = g_strdup(my_jid->domainpart);
         jid_destroy(my_jid);
 
         xmpp_handler_add(xmpp_conn, _register_handle_error, XMPP_NS_STREAMS, "error", NULL,
@@ -507,8 +507,8 @@ _register_handler(xmpp_conn_t* xmpp_conn,
 }
 
 jabber_conn_status_t
-connection_register(const char* const altdomain, int port, const char* const tls_policy,
-                    const char* const username, const char* const password)
+connection_register(const gchar* const altdomain, int port, const gchar* const tls_policy,
+                    const gchar* const username, const gchar* const password)
 {
     _conn_apply_settings(altdomain, NULL, tls_policy, NULL);
 
@@ -520,8 +520,8 @@ connection_register(const char* const altdomain, int port, const char* const tls
         return JABBER_DISCONNECTED;
     }
 
-    reg->username = strdup(username);
-    reg->password = strdup(password);
+    reg->username = g_strdup(username);
+    reg->password = g_strdup(password);
 
     int connect_status = xmpp_connect_raw(
         conn.xmpp_conn,
@@ -573,8 +573,8 @@ connection_disconnect(void)
 void
 connection_set_disconnected(void)
 {
-    FREE_SET_NULL(conn.presence_message);
-    FREE_SET_NULL(conn.domain);
+    GFREE_SET_NULL(conn.presence_message);
+    GFREE_SET_NULL(conn.domain);
     conn.conn_status = JABBER_DISCONNECTED;
 }
 
@@ -687,8 +687,8 @@ connection_request_features(void)
 
     const char* barejid = connection_get_barejid();
     if (conn.features_by_jid && barejid && !g_hash_table_contains(conn.features_by_jid, barejid)) {
-        g_hash_table_insert(conn.features_by_jid, strdup(barejid),
-                            g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+        g_hash_table_insert(conn.features_by_jid, g_strdup(barejid),
+                            g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL));
         iq_disco_info_request_onconnect(barejid);
     }
 }
@@ -702,10 +702,10 @@ connection_set_disco_items(GSList* items)
     GSList* curr = items;
     while (curr) {
         DiscoItem* item = curr->data;
-        g_hash_table_insert(conn.requested_features, strdup(item->jid), NULL);
+        g_hash_table_insert(conn.requested_features, g_strdup(item->jid), NULL);
         if (conn.features_by_jid) {
-            g_hash_table_insert(conn.features_by_jid, strdup(item->jid),
-                                g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+            g_hash_table_insert(conn.features_by_jid, g_strdup(item->jid),
+                                g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL));
         }
 
         iq_disco_info_request_onconnect(item->jid);
@@ -788,7 +788,7 @@ connection_get_user(void)
 }
 
 void
-connection_features_received(const char* const jid)
+connection_features_received(const gchar* const jid)
 {
     log_info("[CONNECTION] connection_features_received %s", jid);
     if (conn.requested_features == NULL) {
@@ -800,7 +800,7 @@ connection_features_received(const char* const jid)
 }
 
 GHashTable*
-connection_get_features(const char* const jid)
+connection_get_features(const gchar* const jid)
 {
     if (conn.features_by_jid == NULL) {
         return NULL;
@@ -830,12 +830,12 @@ void
 connection_add_available_resource(Resource* resource)
 {
     if (conn.available_resources) {
-        g_hash_table_replace(conn.available_resources, strdup(resource->name), resource);
+        g_hash_table_replace(conn.available_resources, g_strdup(resource->name), resource);
     }
 }
 
 void
-connection_remove_available_resource(const char* const resource)
+connection_remove_available_resource(const gchar* const resource)
 {
     if (conn.available_resources) {
         g_hash_table_remove(conn.available_resources, resource);
@@ -869,7 +869,7 @@ connection_create_stanza_id(void)
     return g_strdup_printf("%s%s", rndid, hmac);
 }
 
-const char*
+const gchar*
 connection_get_domain(void)
 {
     return conn.domain;
@@ -882,11 +882,11 @@ connection_get_presence_msg(void)
 }
 
 void
-connection_set_presence_msg(const char* const message)
+connection_set_presence_msg(const gchar* const message)
 {
-    FREE_SET_NULL(conn.presence_message);
+    GFREE_SET_NULL(conn.presence_message);
     if (message) {
-        conn.presence_message = strdup(message);
+        conn.presence_message = g_strdup(message);
     }
 }
 
@@ -1004,16 +1004,16 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         conn.conn_status = JABBER_CONNECTED;
 
         connection_get_jid();
-        conn.domain = strdup(conn.jid->domainpart);
+        conn.domain = g_strdup(conn.jid->domainpart);
 
         connection_clear_data();
-        conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
-        g_hash_table_insert(conn.features_by_jid, strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+        conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)g_hash_table_destroy);
+        g_hash_table_insert(conn.features_by_jid, g_strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL));
         if (conn.available_resources == NULL) {
-            conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
+            conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)resource_destroy);
         }
         if (conn.requested_features == NULL) {
-            conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+            conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
         }
 
         session_login_success(connection_is_secured());
@@ -1037,16 +1037,16 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         connection_get_jid();
         conn.jid = jid_create(xmpp_conn_get_jid(conn.xmpp_conn));
         log_debug("jid: %s", conn.jid->str);
-        conn.domain = strdup(conn.jid->domainpart);
+        conn.domain = g_strdup(conn.jid->domainpart);
 
         connection_clear_data();
-        conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
-        g_hash_table_insert(conn.features_by_jid, strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL));
+        conn.features_by_jid = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)g_hash_table_destroy);
+        g_hash_table_insert(conn.features_by_jid, g_strdup(conn.domain), g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL));
         if (conn.available_resources == NULL) {
-            conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)resource_destroy);
+            conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)resource_destroy);
         }
         if (conn.requested_features == NULL) {
-            conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
+            conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
         }
 
         xmpp_conn_open_stream_default(xmpp_conn);
@@ -1196,7 +1196,7 @@ _random_bytes_close(void)
 }
 
 static void
-_compute_identifier(const char* barejid)
+_compute_identifier(const gchar* barejid)
 {
     // in case of reconnect (lost connection)
     g_free(prof_identifier);

@@ -29,9 +29,9 @@ session_set_activity_state_for_presence(resource_presence_t presence)
 }
 
 jabber_conn_status_t
-session_connect_with_details(const char* const jid,
-                             const char* const passwd, const char* const altdomain, const int port, const char* const tls_policy,
-                             const char* const auth_policy)
+session_connect_with_details(const gchar* const jid,
+                             const gchar* const passwd, const gchar* const altdomain, const int port, const gchar* const tls_policy,
+                             const gchar* const auth_policy)
 {
     check_expected(jid);
     check_expected(passwd);
@@ -92,7 +92,7 @@ connection_get_user(void)
     return mock_ptr_type(const char*);
 }
 
-const char*
+const gchar*
 connection_get_domain(void)
 {
     return NULL;

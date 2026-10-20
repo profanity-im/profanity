@@ -165,13 +165,13 @@ typedef struct prof_message_t
 } ProfMessage;
 
 void session_init(void);
-jabber_conn_status_t session_connect_with_details(const char* const jid, const char* const passwd,
-                                                  const char* const altdomain, const int port, const char* const tls_policy, const char* const auth_policy);
+jabber_conn_status_t session_connect_with_details(const gchar* const jid, const gchar* const passwd,
+                                                  const gchar* const altdomain, const int port, const gchar* const tls_policy, const gchar* const auth_policy);
 jabber_conn_status_t session_connect_with_account(const ProfAccount* const account);
 
 void session_disconnect(void);
 void session_process_events(void);
-const char* session_get_account_name(void);
+const gchar* session_get_account_name(void);
 void session_reconnect_now(void);
 
 void connection_disconnect(void);
