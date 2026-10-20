@@ -22,7 +22,7 @@
 GHashTable*
 session_store_new(void)
 {
-    return g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
+    return g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)g_hash_table_destroy);
 }
 
 GHashTable*
@@ -40,7 +40,7 @@ signed_pre_key_store_new(void)
 void
 identity_key_store_new(identity_key_store_t* identity_key_store)
 {
-    identity_key_store->trusted = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
+    identity_key_store->trusted = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)g_hash_table_destroy);
     identity_key_store->private = NULL;
     identity_key_store->public = NULL;
 }
@@ -116,7 +116,7 @@ store_session(const signal_protocol_address* address,
     device_store = g_hash_table_lookup(session_store, (void*)address->name);
     if (!device_store) {
         device_store = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
-        g_hash_table_insert(session_store, strdup(address->name), device_store);
+        g_hash_table_insert(session_store, g_strdup(address->name), device_store);
     }
 
     signal_buffer* buffer = signal_buffer_create(record, record_len);
@@ -358,7 +358,7 @@ save_identity(const signal_protocol_address* address, uint8_t* key_data,
     GHashTable* trusted = g_hash_table_lookup(identity_key_store->trusted, address->name);
     if (!trusted) {
         trusted = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
-        g_hash_table_insert(identity_key_store->trusted, strdup(address->name), trusted);
+        g_hash_table_insert(identity_key_store->trusted, g_strdup(address->name), trusted);
     }
     g_hash_table_insert(trusted, GINT_TO_POINTER(address->device_id), buffer);
 

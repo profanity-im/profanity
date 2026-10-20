@@ -129,7 +129,7 @@ omemo_init(void)
     pthread_mutexattr_settype(&omemo_static_data.attr, PTHREAD_MUTEX_RECURSIVE);
     pthread_mutex_init(&omemo_static_data.lock, &omemo_static_data.attr);
 
-    omemo_static_data.fingerprint_ac = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)autocomplete_free);
+    omemo_static_data.fingerprint_ac = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)autocomplete_free);
 
     wins_omemo_trust_changed(NULL);
 }
@@ -246,9 +246,9 @@ omemo_on_connect(ProfAccount* account)
 
     omemo_ctx.loaded = FALSE;
     omemo_ctx.notifying = FALSE;
-    omemo_ctx.device_list = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_list_free);
-    omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-    omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)g_hash_table_destroy);
+    omemo_ctx.device_list = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)g_list_free);
+    omemo_ctx.device_list_handler = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    omemo_ctx.known_devices = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)g_hash_table_destroy);
 
     auto_gchar gchar* omemo_dir = files_file_in_account_data_path(DIR_OMEMO, account->jid, NULL);
     if (!omemo_dir) {
@@ -357,7 +357,7 @@ _acquire_sender_devices_list(void)
 {
     const char* barejid = connection_get_barejid();
 
-    g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_own_device_list);
+    g_hash_table_insert(omemo_ctx.device_list_handler, g_strdup(barejid), _handle_own_device_list);
     omemo_devicelist_request(barejid);
 }
 
@@ -382,7 +382,7 @@ omemo_start_sessions(void)
 }
 
 void
-omemo_start_session(const char* const barejid)
+omemo_start_session(const gchar* const barejid)
 {
     if (omemo_loaded()) {
         log_debug("[OMEMO] start session with %s", barejid);
@@ -392,7 +392,7 @@ omemo_start_session(const char* const barejid)
             // Own devices are handled by _handle_own_device_list
             // We won't add _handle_device_list_start_session for ourself
             if (equals_our_barejid(barejid)) {
-                g_hash_table_insert(omemo_ctx.device_list_handler, strdup(barejid), _handle_device_list_start_session);
+                g_hash_table_insert(omemo_ctx.device_list_handler, g_strdup(barejid), _handle_device_list_start_session);
             }
             omemo_devicelist_request(barejid);
             return;
@@ -400,13 +400,13 @@ omemo_start_session(const char* const barejid)
 
         GList* device_id;
         for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
-            omemo_bundle_request(barejid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(barejid));
+            omemo_bundle_request(barejid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(barejid));
         }
     }
 }
 
 void
-omemo_start_muc_sessions(const char* const roomjid)
+omemo_start_muc_sessions(const gchar* const roomjid)
 {
     GList* members = muc_members(roomjid);
     GList* iter;
@@ -549,7 +549,7 @@ omemo_set_device_list(const char* const from, GList* device_list)
         }
     }
 
-    g_hash_table_insert(omemo_ctx.device_list, strdup(jid->barejid), device_list);
+    g_hash_table_insert(omemo_ctx.device_list, g_strdup(jid->barejid), device_list);
 
     OmemoDeviceListHandler handler = g_hash_table_lookup(omemo_ctx.device_list_handler, jid->barejid);
     if (handler) {
@@ -587,7 +587,7 @@ omemo_set_device_list(const char* const from, GList* device_list)
                                 if (formatted) {
                                     cons_show("OMEMO: Adding firstusage trust for %s device %d - Fingerprint %s", jid->barejid, device_id->data, formatted);
                                     _omemo_trust(jid->barejid, GPOINTER_TO_INT(device_id->data), formatted);
-                                    free(formatted);
+                                    g_free(formatted);
                                 }
                             }
                         }
@@ -694,7 +694,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
             goto out;
         }
 
-        address->name = strdup(jid);
+        address->name = g_strdup(jid);
         if (!address->name) {
             goto out;
         }
@@ -762,8 +762,8 @@ out:
     SIGNAL_UNREF(identity_key);
 }
 
-char*
-omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_receipt, gboolean muc, const char* const replace_id)
+gchar*
+omemo_on_message_send(ProfWin* win, const gchar* const message, gboolean request_receipt, gboolean muc, const gchar* const replace_id)
 {
     char* id = NULL;
     int res;
@@ -809,13 +809,13 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
         GList* iter;
         for (iter = members; iter != NULL; iter = iter->next) {
             auto_jid Jid* jidp = jid_create(iter->data);
-            recipients = g_list_append(recipients, strdup(jidp->barejid));
+            recipients = g_list_append(recipients, g_strdup(jidp->barejid));
         }
         g_list_free(members);
     } else {
         ProfChatWin* chatwin = (ProfChatWin*)win;
         assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        recipients = g_list_append(recipients, strdup(chatwin->barejid));
+        recipients = g_list_append(recipients, g_strdup(chatwin->barejid));
     }
 
     GList* device_ids_iter;
@@ -871,15 +871,15 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 continue;
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);
-            omemo_key_t* key = malloc(sizeof(omemo_key_t));
+            omemo_key_t* key = g_new0(omemo_key_t, 1);
             if (!key) {
                 SIGNAL_UNREF(ciphertext);
                 continue;
             }
             key->length = signal_buffer_len(buffer);
-            key->data = malloc(key->length);
+            key->data = g_malloc(key->length);
             if (!key->data) {
-                free(key);
+                g_free(key);
                 SIGNAL_UNREF(ciphertext);
                 continue;
             }
@@ -906,12 +906,12 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
             GList* iter;
             for (iter = members; iter != NULL; iter = iter->next) {
                 auto_jid Jid* jidp = jid_create(iter->data);
-                recipients = g_list_append(recipients, strdup(jidp->barejid));
+                recipients = g_list_append(recipients, g_strdup(jidp->barejid));
             }
             g_list_free(members);
         } else {
             ProfChatWin* chatwin = (ProfChatWin*)win;
-            recipients = g_list_append(recipients, strdup(chatwin->barejid));
+            recipients = g_list_append(recipients, g_strdup(chatwin->barejid));
         }
 
         GList* rec_iter;
@@ -923,7 +923,7 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 for (fp_iter = untrusted; fp_iter != NULL; fp_iter = fp_iter->next) {
                     char* formatted = omemo_format_fingerprint(fp_iter->data);
                     win_println(win, THEME_ERROR, "!", "  - %s", formatted);
-                    free(formatted);
+                    g_free(formatted);
                 }
                 win_println(win, THEME_ERROR, "!", "Use \"/omemo trust %s <fingerprint>\" to trust them.", (char*)rec_iter->data);
                 g_list_free_full(untrusted, free);
@@ -968,15 +968,15 @@ omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_
                 continue;
             }
             signal_buffer* buffer = ciphertext_message_get_serialized(ciphertext);
-            omemo_key_t* key = malloc(sizeof(omemo_key_t));
+            omemo_key_t* key = g_new0(omemo_key_t, 1);
             if (!key) {
                 SIGNAL_UNREF(ciphertext);
                 continue;
             }
             key->length = signal_buffer_len(buffer);
-            key->data = malloc(key->length);
+            key->data = g_malloc(key->length);
             if (!key->data) {
-                free(key);
+                g_free(key);
                 SIGNAL_UNREF(ciphertext);
                 continue;
             }
@@ -1003,7 +1003,7 @@ out:
     omemo_sessions_keyfile_save_disable = FALSE;
     omemo_sessions_keyfile_save();
     g_list_free_full(keys, (GDestroyNotify)omemo_key_free);
-    free(ciphertext);
+    g_free(ciphertext);
     gcry_free(key);
     gcry_free(tag);
     gcry_free(key_tag);
@@ -1120,7 +1120,7 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         if (res == 0) {
             /* Start a new session */
             log_debug("[OMEMO][RECV] Res is 0 => omemo_bundle_request");
-            omemo_bundle_request(sender->barejid, sid, omemo_start_device_session_handle_bundle, free, strdup(sender->barejid));
+            omemo_bundle_request(sender->barejid, sid, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(sender->barejid));
         }
     } else {
         log_debug("[OMEMO][RECV] decrypting message with existing session");
@@ -1179,10 +1179,10 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
     return (char*)plaintext;
 }
 
-char*
-omemo_format_fingerprint(const char* const fingerprint)
+gchar*
+omemo_format_fingerprint(const gchar* const fingerprint)
 {
-    char* output = malloc(strlen(fingerprint) + strlen(fingerprint) / 8 + 1);
+    gchar* output = g_malloc0(strlen(fingerprint) + strlen(fingerprint) / 8 + 1);
     if (!output)
         return NULL;
 
@@ -1220,7 +1220,7 @@ _omemo_unformat_fingerprint(const char* const fingerprint_formatted)
     return fingerprint;
 }
 
-char*
+gchar*
 omemo_own_fingerprint(gboolean formatted)
 {
     ec_public_key* identity = ratchet_identity_key_pair_get_public(omemo_ctx.identity_key_pair);
@@ -1228,7 +1228,7 @@ omemo_own_fingerprint(gboolean formatted)
 }
 
 GList*
-omemo_known_device_identities(const char* const jid)
+omemo_known_device_identities(const gchar* const jid)
 {
     GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
     if (!known_identities) {
@@ -1239,7 +1239,7 @@ omemo_known_device_identities(const char* const jid)
 }
 
 gboolean
-omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
+omemo_is_trusted_identity(const gchar* const jid, const gchar* const fingerprint)
 {
     GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
     if (!known_identities) {
@@ -1266,14 +1266,14 @@ omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
     gboolean trusted = is_trusted_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
     log_debug("[OMEMO] Device trusted %s (%u): %d", jid, GPOINTER_TO_UINT(device_id), trusted);
 
-    free(fingerprint_raw);
+    g_free(fingerprint_raw);
     signal_buffer_free(buffer);
 
     return trusted;
 }
 
 gboolean
-omemo_is_jid_trusted(const char* const jid)
+omemo_is_jid_trusted(const gchar* const jid)
 {
     if (!omemo_loaded()) {
         return FALSE;
@@ -1320,7 +1320,7 @@ omemo_is_jid_trusted(const char* const jid)
 }
 
 GList*
-omemo_get_jid_untrusted_fingerprints(const char* const jid)
+omemo_get_jid_untrusted_fingerprints(const gchar* const jid)
 {
     if (!omemo_loaded()) {
         return NULL;
@@ -1362,7 +1362,7 @@ omemo_get_jid_untrusted_fingerprints(const char* const jid)
 }
 
 gboolean
-omemo_is_device_active(const char* const jid, const char* const fingerprint)
+omemo_is_device_active(const gchar* const jid, const gchar* const fingerprint)
 {
     if (!omemo_loaded()) {
         return FALSE;
@@ -1435,7 +1435,7 @@ _omemo_fingerprint(ec_public_key* identity, gboolean formatted)
         return fingerprint;
     } else {
         char* formatted_fingerprint = omemo_format_fingerprint(fingerprint);
-        free(fingerprint);
+        g_free(fingerprint);
         return formatted_fingerprint;
     }
 }
@@ -1489,14 +1489,14 @@ _omemo_trust(const char* const jid, uint32_t device_id, const char* const finger
     signal_buffer* buffer = signal_buffer_create(djb_type, 1);
     buffer = signal_buffer_append(buffer, fingerprint_raw, len);
     save_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
-    free(fingerprint_raw);
+    g_free(fingerprint_raw);
     signal_buffer_free(buffer);
 
-    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, free, strdup(jid));
+    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(jid));
 }
 
 void
-omemo_trust(const char* const jid, const char* const fingerprint_formatted)
+omemo_trust(const gchar* const jid, const gchar* const fingerprint_formatted)
 {
     if (!jid || !fingerprint_formatted) {
         return;
@@ -1517,7 +1517,7 @@ omemo_trust(const char* const jid, const char* const fingerprint_formatted)
     }
 
     uint32_t device_id = GPOINTER_TO_INT(g_hash_table_lookup(known_identities, fingerprint));
-    free(fingerprint);
+    g_free(fingerprint);
 
     if (!device_id) {
         log_warning("[OMEMO] cannot trust unknown device: %s", fingerprint_formatted);
@@ -1531,7 +1531,7 @@ omemo_trust(const char* const jid, const char* const fingerprint_formatted)
 }
 
 void
-omemo_untrust(const char* const jid, const char* const fingerprint_formatted)
+omemo_untrust(const gchar* const jid, const gchar* const fingerprint_formatted)
 {
     size_t len;
     unsigned char* identity = _omemo_fingerprint_decode(fingerprint_formatted, &len);
@@ -1543,7 +1543,7 @@ omemo_untrust(const char* const jid, const char* const fingerprint_formatted)
 
     GHashTable* trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid);
     if (!trusted) {
-        free(identity);
+        g_free(identity);
         return;
     }
 
@@ -1557,7 +1557,7 @@ omemo_untrust(const char* const jid, const char* const fingerprint_formatted)
             g_hash_table_remove(trusted, key);
         }
     }
-    free(identity);
+    g_free(identity);
 
     auto_char char* fingerprint = _omemo_unformat_fingerprint(fingerprint_formatted);
     if (!fingerprint) {
@@ -1635,14 +1635,14 @@ _handle_own_device_list(const char* const jid, GList* device_list)
         log_debug("[OMEMO] No device ID for our device. Publishing device list");
         device_list = g_list_copy(device_list);
         device_list = g_list_append(device_list, GINT_TO_POINTER(omemo_ctx.device_id));
-        g_hash_table_insert(omemo_ctx.device_list, strdup(jid), device_list);
+        g_hash_table_insert(omemo_ctx.device_list, g_strdup(jid), device_list);
         omemo_devicelist_publish(device_list);
     }
 
     log_debug("[OMEMO] Request OMEMO Bundles for our devices");
     GList* device_id;
     for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
-        omemo_bundle_request(jid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, free, strdup(jid));
+        omemo_bundle_request(jid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(jid));
     }
 
     return TRUE;
@@ -1664,12 +1664,12 @@ omemo_key_free(omemo_key_t* key)
         return;
     }
 
-    free(key->data);
-    free(key);
+    g_free(key->data);
+    g_free(key);
 }
 
-char*
-omemo_fingerprint_autocomplete(const char* const search_str, gboolean previous, void* context)
+gchar*
+omemo_fingerprint_autocomplete(const gchar* const search_str, gboolean previous, void* context)
 {
     Autocomplete ac = g_hash_table_lookup(omemo_static_data.fingerprint_ac, context);
     if (ac != NULL) {
@@ -1695,7 +1695,7 @@ omemo_fingerprint_autocomplete_reset(void)
 }
 
 gboolean
-omemo_automatic_start(const char* const recipient)
+omemo_automatic_start(const gchar* const recipient)
 {
     gboolean result = FALSE;
     ProfAccount* account = accounts_get_account(session_get_account_name());
@@ -1869,7 +1869,7 @@ _load_trust(void)
         trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, groups[i]);
         if (!trusted) {
             trusted = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
-            g_hash_table_insert(omemo_ctx.identity_key_store.trusted, strdup(groups[i]), trusted);
+            g_hash_table_insert(omemo_ctx.identity_key_store.trusted, g_strdup(groups[i]), trusted);
         }
 
         auto_gcharv gchar** keys = g_key_file_get_keys(omemo_ctx.trust.keyfile, groups[i], NULL, NULL);
@@ -1899,7 +1899,7 @@ _load_sessions(void)
         device_store = g_hash_table_lookup(omemo_ctx.session_store, groups[i]);
         if (!device_store) {
             device_store = g_hash_table_new_full(g_direct_hash, g_direct_equal, NULL, (GDestroyNotify)signal_buffer_free);
-            g_hash_table_insert(omemo_ctx.session_store, strdup(groups[i]), device_store);
+            g_hash_table_insert(omemo_ctx.session_store, g_strdup(groups[i]), device_store);
         }
 
         auto_gcharv gchar** keys = g_key_file_get_keys(omemo_ctx.sessions.keyfile, groups[i], NULL, NULL);
@@ -1929,14 +1929,14 @@ _load_known_devices(void)
         known_identities = g_hash_table_lookup(omemo_ctx.known_devices, groups[i]);
         if (!known_identities) {
             known_identities = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-            g_hash_table_insert(omemo_ctx.known_devices, strdup(groups[i]), known_identities);
+            g_hash_table_insert(omemo_ctx.known_devices, g_strdup(groups[i]), known_identities);
         }
 
         auto_gcharv gchar** keys = g_key_file_get_keys(omemo_ctx.knowndevices.keyfile, groups[i], NULL, NULL);
         for (int j = 0; keys[j] != NULL; j++) {
             uint32_t device_id = strtoul(keys[j], NULL, 10);
             auto_gchar gchar* fingerprint = g_key_file_get_string(omemo_ctx.knowndevices.keyfile, groups[i], keys[j], NULL);
-            g_hash_table_insert(known_identities, strdup(fingerprint), GINT_TO_POINTER(device_id));
+            g_hash_table_insert(known_identities, g_strdup(fingerprint), GINT_TO_POINTER(device_id));
         }
     }
 }
@@ -1947,7 +1947,7 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
     GHashTable* known_identities = g_hash_table_lookup(omemo_ctx.known_devices, jid);
     if (!known_identities) {
         known_identities = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-        g_hash_table_insert(omemo_ctx.known_devices, strdup(jid), known_identities);
+        g_hash_table_insert(omemo_ctx.known_devices, g_strdup(jid), known_identities);
     }
 
     char* fingerprint = _omemo_fingerprint(identity, FALSE);
@@ -1971,12 +1971,12 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
                     }
                 }
             }
-            free(formatted);
+            g_free(formatted);
         }
     }
 
     log_debug("[OMEMO] cache identity for %s:%d: %s", jid, device_id, fingerprint);
-    g_hash_table_insert(known_identities, strdup(fingerprint), GINT_TO_POINTER(device_id));
+    g_hash_table_insert(known_identities, g_strdup(fingerprint), GINT_TO_POINTER(device_id));
 
     auto_gchar gchar* device_id_str = g_strdup_printf("%d", device_id);
     g_key_file_set_string(omemo_ctx.knowndevices.keyfile, jid, device_id_str, fingerprint);
@@ -1985,7 +1985,7 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
     Autocomplete ac = g_hash_table_lookup(omemo_static_data.fingerprint_ac, jid);
     if (ac == NULL) {
         ac = autocomplete_new();
-        g_hash_table_insert(omemo_static_data.fingerprint_ac, strdup(jid), ac);
+        g_hash_table_insert(omemo_static_data.fingerprint_ac, g_strdup(jid), ac);
     }
 
     if (!fingerprint) {
@@ -1995,9 +1995,9 @@ _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key*
     char* formatted_fingerprint = omemo_format_fingerprint(fingerprint);
     if (formatted_fingerprint) {
         autocomplete_add(ac, formatted_fingerprint);
-        free(formatted_fingerprint);
+        g_free(formatted_fingerprint);
     }
-    free(fingerprint);
+    g_free(fingerprint);
 
     wins_omemo_trust_changed(jid);
 }
@@ -2166,7 +2166,7 @@ out:
 /* returns a string in the format `xmpp:<user@server>?omemo-sid-<numerical-sid>=<omemo-fingerprint-hex-string>`
  * used for verification over QR codes
  */
-char*
+gchar*
 omemo_qrcode_str()
 {
     auto_char char* fingerprint = omemo_own_fingerprint(FALSE);

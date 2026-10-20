@@ -8,8 +8,8 @@ omemo_init(void)
 {
 }
 
-char*
-omemo_fingerprint_autocomplete(const char* const search_str, gboolean previous, void* context)
+gchar*
+omemo_fingerprint_autocomplete(const gchar* const search_str, gboolean previous, void* context)
 {
     return NULL;
 }
@@ -19,8 +19,8 @@ omemo_fingerprint_autocomplete_reset(void)
 {
 }
 
-char*
-omemo_format_fingerprint(const char* const fingerprint)
+gchar*
+omemo_format_fingerprint(const gchar* const fingerprint)
 {
     return NULL;
 }
@@ -31,37 +31,37 @@ omemo_generate_crypto_materials(ProfAccount* account)
 }
 
 gboolean
-omemo_automatic_start(const char* const jid)
+omemo_automatic_start(const gchar* const jid)
 {
     return TRUE;
 }
 
 gboolean
-omemo_is_trusted_identity(const char* const jid, const char* const fingerprint)
+omemo_is_trusted_identity(const gchar* const jid, const gchar* const fingerprint)
 {
     return TRUE;
 }
 
 gboolean
-omemo_is_jid_trusted(const char* const jid)
+omemo_is_jid_trusted(const gchar* const jid)
 {
     return TRUE;
 }
 
 GList*
-omemo_get_jid_untrusted_fingerprints(const char* const jid)
+omemo_get_jid_untrusted_fingerprints(const gchar* const jid)
 {
     return NULL;
 }
 
 GList*
-omemo_known_device_identities(const char* const jid)
+omemo_known_device_identities(const gchar* const jid)
 {
     return NULL;
 }
 
 gboolean
-omemo_is_device_active(const char* const jid, const char* const fingerprint)
+omemo_is_device_active(const gchar* const jid, const gchar* const fingerprint)
 {
     return TRUE;
 }
@@ -81,32 +81,32 @@ omemo_on_disconnect(void)
 {
 }
 
-char*
-omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_receipt, gboolean muc, const char* const replace_id)
+gchar*
+omemo_on_message_send(ProfWin* win, const gchar* const message, gboolean request_receipt, gboolean muc, const gchar* const replace_id)
 {
     return NULL;
 }
 
-char*
+gchar*
 omemo_own_fingerprint(gboolean formatted)
 {
     return NULL;
 }
 
 void
-omemo_start_muc_sessions(const char* const roomjid)
+omemo_start_muc_sessions(const gchar* const roomjid)
 {
 }
 void
-omemo_start_session(const char* const barejid)
+omemo_start_session(const gchar* const barejid)
 {
 }
 void
-omemo_trust(const char* const jid, const char* const fingerprint_formatted)
+omemo_trust(const gchar* const jid, const gchar* const fingerprint_formatted)
 {
 }
 void
-omemo_untrust(const char* const jid, const char* const fingerprint_formatted)
+omemo_untrust(const gchar* const jid, const gchar* const fingerprint_formatted)
 {
 }
 void
@@ -130,7 +130,7 @@ omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res)
 void omemo_free(void* a) {};
 
 char*
-omemo_on_message_recv(const char* const from, uint32_t sid,
+omemo_on_message_recv(const gchar* const from, uint32_t sid,
                       const unsigned char* const iv, size_t iv_len,
                       GList* keys, const unsigned char* const payload,
                       size_t payload_len, gboolean muc, gboolean* trusted, omemo_error_t* error)
@@ -152,7 +152,7 @@ omemo_device_id()
     return 123;
 }
 
-char*
+gchar*
 omemo_qrcode_str()
 {
     return NULL;
