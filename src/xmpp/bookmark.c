@@ -56,7 +56,7 @@ bookmark_request(void)
     if (bookmarks) {
         g_hash_table_destroy(bookmarks);
     }
-    bookmarks = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_bookmark_destroy);
+    bookmarks = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_bookmark_destroy);
 
     autocomplete_free(bookmark_ac);
     bookmark_ac = autocomplete_new();
@@ -87,19 +87,19 @@ bookmark_add(const char* jid, const char* nick, const char* password, const char
     }
 
     Bookmark* bookmark = g_new0(Bookmark, 1);
-    bookmark->barejid = strdup(jid);
+    bookmark->barejid = g_strdup(jid);
     if (nick) {
-        bookmark->nick = strdup(nick);
+        bookmark->nick = g_strdup(nick);
     } else {
         bookmark->nick = NULL;
     }
     if (password) {
-        bookmark->password = strdup(password);
+        bookmark->password = g_strdup(password);
     } else {
         bookmark->password = NULL;
     }
     if (name) {
-        bookmark->name = strdup(name);
+        bookmark->name = g_strdup(name);
     } else {
         bookmark->name = NULL;
     }
@@ -111,7 +111,7 @@ bookmark_add(const char* jid, const char* nick, const char* password, const char
         bookmark->autojoin = FALSE;
     }
 
-    g_hash_table_insert(bookmarks, strdup(jid), bookmark);
+    g_hash_table_insert(bookmarks, g_strdup(jid), bookmark);
     autocomplete_add(bookmark_ac, jid);
 
     _send_bookmarks();
@@ -130,16 +130,16 @@ bookmark_update(const char* jid, const char* nick, const char* password, const c
     }
 
     if (nick) {
-        free(bookmark->nick);
-        bookmark->nick = strdup(nick);
+        g_free(bookmark->nick);
+        bookmark->nick = g_strdup(nick);
     }
     if (password) {
-        free(bookmark->password);
-        bookmark->password = strdup(password);
+        g_free(bookmark->password);
+        bookmark->password = g_strdup(password);
     }
     if (name) {
-        free(bookmark->name);
-        bookmark->name = strdup(name);
+        g_free(bookmark->name);
+        bookmark->name = g_strdup(name);
     }
     if (autojoin_str) {
         if (g_strcmp0(autojoin_str, "on") == 0) {
@@ -304,13 +304,13 @@ _bookmark_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
         autocomplete_add(bookmark_ac, barejid);
         Bookmark* bookmark = g_new0(Bookmark, 1);
-        bookmark->barejid = strdup(barejid);
+        bookmark->barejid = g_strdup(barejid);
         bookmark->nick = nick;
         bookmark->password = password;
-        bookmark->name = room_name ? strdup(room_name) : NULL;
+        bookmark->name = room_name ? g_strdup(room_name) : NULL;
         bookmark->autojoin = autojoin_val;
         bookmark->ext_gajim_minimize = minimize;
-        g_hash_table_insert(bookmarks, strdup(barejid), bookmark);
+        g_hash_table_insert(bookmarks, g_strdup(barejid), bookmark);
 
         if (autojoin_val) {
             sv_ev_bookmark_autojoin(bookmark);
@@ -331,11 +331,11 @@ static void
 _bookmark_destroy(Bookmark* bookmark)
 {
     if (bookmark) {
-        free(bookmark->barejid);
-        free(bookmark->nick);
-        free(bookmark->password);
-        free(bookmark->name);
-        free(bookmark);
+        g_free(bookmark->barejid);
+        g_free(bookmark->nick);
+        g_free(bookmark->password);
+        g_free(bookmark->name);
+        g_free(bookmark);
     }
 }
 
@@ -344,7 +344,7 @@ _send_bookmarks(void)
 {
     xmpp_ctx_t* ctx = connection_get_ctx();
 
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
 
     xmpp_stanza_t* query = xmpp_stanza_new(ctx);

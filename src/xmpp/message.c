@@ -1156,7 +1156,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* resu
         } else {
             message->enc = PROF_MSG_ENC_OMEMO;
             if (message->plain == NULL) {
-                message->plain = omemo_error_to_string(message->omemo_err);
+                message->plain = g_strdup(omemo_error_to_string(message->omemo_err));
             }
         }
     } else if (message->plain != NULL) {
@@ -1333,7 +1333,7 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
     if (message->omemo_err != OMEMO_ERR_NONE) {
         message->enc = PROF_MSG_ENC_OMEMO;
         if (message->plain == NULL) {
-            message->plain = omemo_error_to_string(message->omemo_err);
+            message->plain = g_strdup(omemo_error_to_string(message->omemo_err));
         }
     } else if (message->plain != NULL) {
         message->enc = PROF_MSG_ENC_OMEMO;
@@ -1524,7 +1524,7 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
         } else {
             message->enc = PROF_MSG_ENC_OMEMO;
             if (message->plain == NULL) {
-                message->plain = omemo_error_to_string(message->omemo_err);
+                message->plain = g_strdup(omemo_error_to_string(message->omemo_err));
             }
         }
     } else if (message->plain != NULL) {

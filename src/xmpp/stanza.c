@@ -1392,7 +1392,7 @@ stanza_get_status_codes_by_ns(xmpp_stanza_t* const stanza, char* ns)
         if (g_strcmp0(name, STANZA_NAME_STATUS) == 0) {
             const char* code = xmpp_stanza_get_attribute(child, STANZA_ATTR_CODE);
             if (code) {
-                codes = g_slist_append(codes, strdup(code));
+                codes = g_slist_append(codes, g_strdup(code));
             }
         }
         child = xmpp_stanza_get_next(child);
@@ -2033,15 +2033,15 @@ stanza_resource_from_presence(XMPPPresence* presence)
     return resource;
 }
 
-char*
+gchar*
 stanza_text_strdup(xmpp_stanza_t* stanza)
 {
     xmpp_ctx_t* ctx = connection_get_ctx();
 
-    char* string = NULL;
+    gchar* string = NULL;
     char* stanza_text = xmpp_stanza_get_text(stanza);
     if (stanza_text) {
-        string = strdup(stanza_text);
+        string = g_strdup(stanza_text);
         xmpp_free(ctx, stanza_text);
     }
 

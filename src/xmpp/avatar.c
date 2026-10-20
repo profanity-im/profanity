@@ -46,8 +46,9 @@ static void
 _free_avatar_data(avatar_metadata* data)
 {
     if (data) {
-        free(data->type);
-        free(data);
+        g_free(data->type);
+        g_free(data->id);
+        g_free(data);
     }
 }
 
@@ -80,7 +81,7 @@ avatar_pep_subscribe(void)
 
 #ifdef HAVE_PIXBUF
 gboolean
-avatar_set(const char* path)
+avatar_set(const gchar* path)
 {
     auto_char char* expanded_path = get_expanded_path(path);
 
@@ -142,19 +143,19 @@ avatar_publishing_disable()
 }
 
 gboolean
-avatar_get_by_nick(const char* nick, gboolean open)
+avatar_get_by_nick(const gchar* nick, gboolean open)
 {
     // in case we set the feature, remove it
     caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 
     // save nick in list so we look for this one
-    g_hash_table_insert(looking_for, strdup(nick), NULL);
+    g_hash_table_insert(looking_for, g_strdup(nick), NULL);
 
     // add the feature. this will trigger the _avatar_metadata_notfication_handler handler
     caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 
     if (open) {
-        g_hash_table_insert(shall_open, strdup(nick), NULL);
+        g_hash_table_insert(shall_open, g_strdup(nick), NULL);
     }
 
     return TRUE;
@@ -208,8 +209,8 @@ _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
                     avatar_metadata* data = g_new0(avatar_metadata, 1);
                     if (data) {
-                        data->type = strdup(type);
-                        data->id = strdup(id);
+                        data->type = g_strdup(type);
+                        data->id = g_strdup(id);
 
                         // request the actual (image) data
                         _avatar_request_item_by_id(from, data);
@@ -232,7 +233,7 @@ _avatar_request_item_by_id(const char* jid, avatar_metadata* data)
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    auto_char char* uid = connection_create_stanza_id();
+    auto_gchar gchar* uid = connection_create_stanza_id();
 
     xmpp_stanza_t* iq = stanza_create_avatar_retrieve_data_request(ctx, uid, data->id, jid);
     iq_id_handler_add(uid, _avatar_request_item_result_handler, (ProfIqFreeCallback)_free_avatar_data, data);

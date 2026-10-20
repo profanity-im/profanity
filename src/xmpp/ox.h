@@ -29,7 +29,7 @@
  * \return TRUE: success; FALSE: failed
  */
 
-gboolean ox_announce_public_key(const char* const filename);
+gboolean ox_announce_public_key(const gchar* const filename);
 
 /*!
  * \brief Discovering Public Keys of a User.
@@ -39,6 +39,6 @@ gboolean ox_announce_public_key(const char* const filename);
  * \param jid JID
  */
 
-void ox_discover_public_key(const char* const jid);
+void ox_discover_public_key(const gchar* const jid);
 
-void ox_request_public_key(const char* const jid, const char* const fingerprint);
+void ox_request_public_key(const gchar* const jid, const gchar* const fingerprint);

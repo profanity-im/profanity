@@ -39,8 +39,8 @@ static GHashTable* prof_features;
 static gchar* my_sha1;
 
 static void _save_cache(void);
-static EntityCapabilities* _caps_by_ver(const char* const ver);
-static EntityCapabilities* _caps_by_jid(const char* const jid);
+static EntityCapabilities* _caps_by_ver(const gchar* const ver);
+static EntityCapabilities* _caps_by_jid(const gchar* const jid);
 static EntityCapabilities* _caps_copy(EntityCapabilities* caps);
 
 static void
@@ -67,30 +67,30 @@ caps_init(void)
     load_data_keyfile(&caps_prof_keyfile, FILE_CAPSCACHE);
     cache = caps_prof_keyfile.keyfile;
 
-    jid_to_ver = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
-    jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)caps_destroy);
+    jid_to_ver = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)caps_destroy);
 
-    prof_features = g_hash_table_new_full(g_str_hash, g_str_equal, free, NULL);
-    g_hash_table_add(prof_features, strdup(STANZA_NS_CAPS));
-    g_hash_table_add(prof_features, strdup(XMPP_NS_DISCO_INFO));
-    g_hash_table_add(prof_features, strdup(XMPP_NS_DISCO_ITEMS));
-    g_hash_table_add(prof_features, strdup(STANZA_NS_MUC));
-    g_hash_table_add(prof_features, strdup(STANZA_NS_CONFERENCE));
-    g_hash_table_add(prof_features, strdup(STANZA_NS_VERSION));
-    g_hash_table_add(prof_features, strdup(STANZA_NS_CHATSTATES));
-    g_hash_table_add(prof_features, strdup(STANZA_NS_PING));
-    g_hash_table_add(prof_features, strdup(STANZA_NS_STABLE_ID));
+    prof_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    g_hash_table_add(prof_features, g_strdup(STANZA_NS_CAPS));
+    g_hash_table_add(prof_features, g_strdup(XMPP_NS_DISCO_INFO));
+    g_hash_table_add(prof_features, g_strdup(XMPP_NS_DISCO_ITEMS));
+    g_hash_table_add(prof_features, g_strdup(STANZA_NS_MUC));
+    g_hash_table_add(prof_features, g_strdup(STANZA_NS_CONFERENCE));
+    g_hash_table_add(prof_features, g_strdup(STANZA_NS_VERSION));
+    g_hash_table_add(prof_features, g_strdup(STANZA_NS_CHATSTATES));
+    g_hash_table_add(prof_features, g_strdup(STANZA_NS_PING));
+    g_hash_table_add(prof_features, g_strdup(STANZA_NS_STABLE_ID));
 
     if (prefs_get_boolean(PREF_RECEIPTS_SEND)) {
-        g_hash_table_add(prof_features, strdup(STANZA_NS_RECEIPTS));
+        g_hash_table_add(prof_features, g_strdup(STANZA_NS_RECEIPTS));
     }
 
     if (prefs_get_boolean(PREF_LASTACTIVITY)) {
-        g_hash_table_add(prof_features, strdup(STANZA_NS_LASTACTIVITY));
+        g_hash_table_add(prof_features, g_strdup(STANZA_NS_LASTACTIVITY));
     }
 
     if (prefs_get_boolean(PREF_CORRECTION_ALLOW)) {
-        g_hash_table_add(prof_features, strdup(STANZA_NS_LAST_MESSAGE_CORRECTION));
+        g_hash_table_add(prof_features, g_strdup(STANZA_NS_LAST_MESSAGE_CORRECTION));
     }
 
     my_sha1 = NULL;
@@ -103,7 +103,7 @@ caps_add_feature(char* feature)
         return;
     }
 
-    g_hash_table_add(prof_features, strdup(feature));
+    g_hash_table_add(prof_features, g_strdup(feature));
 
     caps_reset_ver();
 
@@ -140,7 +140,7 @@ caps_get_features(void)
     GList* features_as_list = g_hash_table_get_keys(prof_features);
     GList* curr = features_as_list;
     while (curr) {
-        result = g_list_append(result, strdup(curr->data));
+        result = g_list_append(result, g_strdup(curr->data));
         curr = g_list_next(curr);
     }
     g_list_free(features_as_list);
@@ -148,7 +148,7 @@ caps_get_features(void)
     GList* plugin_features = plugins_get_disco_features();
     curr = plugin_features;
     while (curr) {
-        result = g_list_append(result, strdup(curr->data));
+        result = g_list_append(result, g_strdup(curr->data));
         curr = g_list_next(curr);
     }
 
@@ -158,18 +158,18 @@ caps_get_features(void)
 }
 
 EntityCapabilities*
-caps_create(const char* const category, const char* const type, const char* const name,
-            const char* const software, const char* const software_version,
-            const char* const os, const char* const os_version,
+caps_create(const gchar* const category, const gchar* const type, const gchar* const name,
+            const gchar* const software, const gchar* const software_version,
+            const gchar* const os, const gchar* const os_version,
             GSList* features)
 {
     EntityCapabilities* result = g_new0(EntityCapabilities, 1);
 
     if (category || type || name) {
         DiscoIdentity* identity = g_new0(DiscoIdentity, 1);
-        identity->category = category ? strdup(category) : NULL;
-        identity->type = type ? strdup(type) : NULL;
-        identity->name = name ? strdup(name) : NULL;
+        identity->category = category ? g_strdup(category) : NULL;
+        identity->type = type ? g_strdup(type) : NULL;
+        identity->name = name ? g_strdup(name) : NULL;
         result->identity = identity;
     } else {
         result->identity = NULL;
@@ -177,10 +177,10 @@ caps_create(const char* const category, const char* const type, const char* cons
 
     if (software || software_version || os || os_version) {
         SoftwareVersion* software_versionp = g_new0(SoftwareVersion, 1);
-        software_versionp->software = software ? strdup(software) : NULL;
-        software_versionp->software_version = software_version ? strdup(software_version) : NULL;
-        software_versionp->os = os ? strdup(os) : NULL;
-        software_versionp->os_version = os_version ? strdup(os_version) : NULL;
+        software_versionp->software = software ? g_strdup(software) : NULL;
+        software_versionp->software_version = software_version ? g_strdup(software_version) : NULL;
+        software_versionp->os = os ? g_strdup(os) : NULL;
+        software_versionp->os_version = os_version ? g_strdup(os_version) : NULL;
         result->software_version = software_versionp;
     } else {
         result->software_version = NULL;
@@ -189,7 +189,7 @@ caps_create(const char* const category, const char* const type, const char* cons
     result->features = NULL;
     GSList* curr = features;
     while (curr) {
-        result->features = g_slist_append(result->features, strdup(curr->data));
+        result->features = g_slist_append(result->features, g_strdup(curr->data));
         curr = g_slist_next(curr);
     }
 
@@ -197,7 +197,7 @@ caps_create(const char* const category, const char* const type, const char* cons
 }
 
 void
-caps_add_by_ver(const char* const ver, EntityCapabilities* caps)
+caps_add_by_ver(const gchar* const ver, EntityCapabilities* caps)
 {
     if (ver == NULL || caps == NULL) {
         return;
@@ -253,25 +253,25 @@ caps_add_by_ver(const char* const ver, EntityCapabilities* caps)
 }
 
 void
-caps_add_by_jid(const char* const jid, EntityCapabilities* caps)
+caps_add_by_jid(const gchar* const jid, EntityCapabilities* caps)
 {
-    g_hash_table_insert(jid_to_caps, strdup(jid), caps);
+    g_hash_table_insert(jid_to_caps, g_strdup(jid), caps);
 }
 
 void
-caps_map_jid_to_ver(const char* const jid, const char* const ver)
+caps_map_jid_to_ver(const gchar* const jid, const gchar* const ver)
 {
-    g_hash_table_insert(jid_to_ver, strdup(jid), strdup(ver));
+    g_hash_table_insert(jid_to_ver, g_strdup(jid), g_strdup(ver));
 }
 
 gboolean
-caps_cache_contains(const char* const ver)
+caps_cache_contains(const gchar* const ver)
 {
     return (g_key_file_has_group(cache, ver));
 }
 
 EntityCapabilities*
-caps_lookup(const char* const jid)
+caps_lookup(const gchar* const jid)
 {
     char* ver = g_hash_table_lookup(jid_to_ver, jid);
     if (ver) {
@@ -293,7 +293,7 @@ caps_lookup(const char* const jid)
 }
 
 gboolean
-caps_jid_has_feature(const char* const jid, const char* const feature)
+caps_jid_has_feature(const gchar* const jid, const gchar* const feature)
 {
     EntityCapabilities* caps = caps_lookup(jid);
 
@@ -309,7 +309,7 @@ caps_jid_has_feature(const char* const jid, const char* const feature)
     return result;
 }
 
-char*
+gchar*
 caps_get_my_sha1(xmpp_ctx_t* const ctx)
 {
     if (my_sha1 == NULL) {
@@ -331,7 +331,7 @@ caps_reset_ver(void)
 }
 
 static EntityCapabilities*
-_caps_by_ver(const char* const ver)
+_caps_by_ver(const gchar* const ver)
 {
     if (!g_key_file_has_group(cache, ver)) {
         return NULL;
@@ -366,7 +366,7 @@ _caps_by_ver(const char* const ver)
 }
 
 static EntityCapabilities*
-_caps_by_jid(const char* const jid)
+_caps_by_jid(const gchar* const jid)
 {
     return g_hash_table_lookup(jid_to_caps, jid);
 }
@@ -378,14 +378,14 @@ _caps_copy(EntityCapabilities* caps)
         return NULL;
     }
 
-    const char* const categoty = caps->identity ? caps->identity->category : NULL;
-    const char* const type = caps->identity ? caps->identity->type : NULL;
-    const char* const name = caps->identity ? caps->identity->name : NULL;
+    const gchar* const categoty = caps->identity ? caps->identity->category : NULL;
+    const gchar* const type = caps->identity ? caps->identity->type : NULL;
+    const gchar* const name = caps->identity ? caps->identity->name : NULL;
 
-    const char* const software = caps->software_version ? caps->software_version->software : NULL;
-    const char* const software_version = caps->software_version ? caps->software_version->software_version : NULL;
-    const char* const os = caps->software_version ? caps->software_version->os : NULL;
-    const char* const os_version = caps->software_version ? caps->software_version->os_version : NULL;
+    const gchar* const software = caps->software_version ? caps->software_version->software : NULL;
+    const gchar* const software_version = caps->software_version ? caps->software_version->software_version : NULL;
+    const gchar* const os = caps->software_version ? caps->software_version->os : NULL;
+    const gchar* const os_version = caps->software_version ? caps->software_version->os_version : NULL;
 
     return caps_create(categoty, type, name, software, software_version, os, os_version, caps->features);
 }
@@ -394,10 +394,10 @@ static void
 _disco_identity_destroy(DiscoIdentity* disco_identity)
 {
     if (disco_identity) {
-        free(disco_identity->category);
-        free(disco_identity->name);
-        free(disco_identity->type);
-        free(disco_identity);
+        g_free(disco_identity->category);
+        g_free(disco_identity->name);
+        g_free(disco_identity->type);
+        g_free(disco_identity);
     }
 }
 
@@ -405,11 +405,11 @@ static void
 _software_version_destroy(SoftwareVersion* software_version)
 {
     if (software_version) {
-        free(software_version->software);
-        free(software_version->software_version);
-        free(software_version->os);
-        free(software_version->os_version);
-        free(software_version);
+        g_free(software_version->software);
+        g_free(software_version->software_version);
+        g_free(software_version->os);
+        g_free(software_version->os_version);
+        g_free(software_version);
     }
 }
 
@@ -420,9 +420,9 @@ caps_destroy(EntityCapabilities* caps)
         _disco_identity_destroy(caps->identity);
         _software_version_destroy(caps->software_version);
         if (caps->features) {
-            g_slist_free_full(caps->features, free);
+            g_slist_free_full(caps->features, g_free);
         }
-        free(caps);
+        g_free(caps);
     }
 }
 

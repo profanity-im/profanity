@@ -255,8 +255,8 @@ iq_handlers_init(void)
 
     iq_handlers_clear();
 
-    id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_iq_id_handler_free);
-    rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, free, _xmpp_stanza_release_destroy_notify);
+    id_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_iq_id_handler_free);
+    rooms_cache = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, _xmpp_stanza_release_destroy_notify);
 }
 
 struct iq_win_finder
@@ -288,8 +288,8 @@ _free_late_delivery_userdata(LateDeliveryUserdata* d)
         g_date_time_unref(d->enddate);
     if (d->startdate)
         g_date_time_unref(d->startdate);
-    free(d->lastid);
-    free(d);
+    g_free(d->lastid);
+    g_free(d);
 }
 
 void
@@ -345,7 +345,7 @@ _iq_id_handler_free(ProfIqHandler* handler)
     if (handler->free_func && handler->userdata) {
         handler->free_func(handler->userdata);
     }
-    free(handler);
+    g_free(handler);
 }
 
 void
@@ -363,7 +363,7 @@ iq_id_handler_add(const char* const id, ProfIqCallback func, ProfIqFreeCallback 
     handler->free_func = free_func;
     handler->userdata = userdata;
 
-    g_hash_table_insert(id_handlers, strdup(id), handler);
+    g_hash_table_insert(id_handlers, g_strdup(id), handler);
 }
 
 void
@@ -442,7 +442,7 @@ iq_room_list_request(const char* conferencejid, char* filter)
     log_debug("Rooms request not cached for: %s", conferencejid);
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_disco_items_iq(ctx, id, conferencejid, NULL);
 
     iq_id_handler_add(id, _room_list_id_handler, NULL, filter);
@@ -487,7 +487,7 @@ iq_http_upload_request(HTTPUpload* upload)
     }
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_http_upload_request(ctx, id, jid, upload);
     iq_id_handler_add(id, _http_upload_response_id_handler, NULL, upload);
 
@@ -501,7 +501,7 @@ void
 iq_disco_info_request(const char* jid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, id, jid, NULL);
 
     iq_id_handler_add(id, _disco_info_response_id_handler, NULL, NULL);
@@ -514,7 +514,7 @@ void
 iq_disco_info_request_onconnect(const char* jid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, id, jid, NULL);
 
     iq_id_handler_add(id, _disco_info_response_id_handler_onconnect, NULL, NULL);
@@ -527,7 +527,7 @@ void
 iq_last_activity_request(const char* jid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_last_activity_iq(ctx, id, jid);
 
     iq_id_handler_add(id, _last_activity_response_id_handler, NULL, NULL);
@@ -540,12 +540,12 @@ void
 iq_room_info_request(const char* const room, gboolean display_result)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, id, room, NULL);
 
     ProfRoomInfoData* cb_data = g_new0(ProfRoomInfoData, 1);
     if (cb_data) {
-        cb_data->room = strdup(room);
+        cb_data->room = g_strdup(room);
         cb_data->display = display_result;
 
         iq_id_handler_add(id, _room_info_response_id_handler, (ProfIqFreeCallback)_iq_free_room_data, cb_data);
@@ -575,7 +575,7 @@ iq_send_caps_request_for_jid(const char* const to, const char* const id,
     xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, id, to, node_str->str);
     g_string_free(node_str, TRUE);
 
-    iq_id_handler_add(id, _caps_response_for_jid_id_handler, free, strdup(to));
+    iq_id_handler_add(id, _caps_response_for_jid_id_handler, (ProfIqFreeCallback)g_free, g_strdup(to));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -656,7 +656,7 @@ iq_send_software_version(const char* const fulljid)
     xmpp_stanza_t* iq = stanza_create_software_version_iq(ctx, fulljid);
 
     const char* id = xmpp_stanza_get_id(iq);
-    iq_id_handler_add(id, _version_result_id_handler, free, strdup(fulljid));
+    iq_id_handler_add(id, _version_result_id_handler, (ProfIqFreeCallback)g_free, g_strdup(fulljid));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -729,7 +729,7 @@ iq_room_affiliation_list(const char* const room, char* affiliation, bool show_ui
 
     ProfAffiliationList* affiliation_list = g_new0(ProfAffiliationList, 1);
     if (affiliation_list) {
-        affiliation_list->affiliation = strdup(affiliation);
+        affiliation_list->affiliation = g_strdup(affiliation);
         affiliation_list->show_ui_message = show_ui_message;
 
         iq_id_handler_add(id, _room_affiliation_list_result_id_handler, (ProfIqFreeCallback)_iq_free_affiliation_list, affiliation_list);
@@ -746,7 +746,7 @@ iq_room_kick_occupant(const char* const room, const char* const nick, const char
     xmpp_stanza_t* iq = stanza_create_room_kick_iq(ctx, room, nick, reason);
 
     const char* id = xmpp_stanza_get_id(iq);
-    iq_id_handler_add(id, _room_kick_result_id_handler, free, strdup(nick));
+    iq_id_handler_add(id, _room_kick_result_id_handler, (ProfIqFreeCallback)g_free, g_strdup(nick));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -763,8 +763,8 @@ iq_room_affiliation_set(const char* const room, const char* const jid, char* aff
 
     ProfPrivilegeSet* affiliation_set = g_new0(struct privilege_set_t, 1);
     if (affiliation_set) {
-        affiliation_set->item = strdup(jid);
-        affiliation_set->privilege = strdup(affiliation);
+        affiliation_set->item = g_strdup(jid);
+        affiliation_set->privilege = g_strdup(affiliation);
 
         iq_id_handler_add(id, _room_affiliation_set_result_id_handler, (ProfIqFreeCallback)_iq_free_affiliation_set, affiliation_set);
 
@@ -784,8 +784,8 @@ iq_room_role_set(const char* const room, const char* const nick, char* role,
 
     struct privilege_set_t* role_set = g_new0(ProfPrivilegeSet, 1);
     if (role_set) {
-        role_set->item = strdup(nick);
-        role_set->privilege = strdup(role);
+        role_set->item = g_strdup(nick);
+        role_set->privilege = g_strdup(role);
 
         iq_id_handler_add(id, _room_role_set_result_id_handler, (ProfIqFreeCallback)_iq_free_affiliation_set, role_set);
 
@@ -801,7 +801,7 @@ iq_room_role_list(const char* const room, char* role)
     xmpp_stanza_t* iq = stanza_create_room_role_list_iq(ctx, room, role);
 
     const char* id = xmpp_stanza_get_id(iq);
-    iq_id_handler_add(id, _room_role_list_result_id_handler, free, strdup(role));
+    iq_id_handler_add(id, _room_role_list_result_id_handler, (ProfIqFreeCallback)g_free, g_strdup(role));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -825,7 +825,7 @@ void
 iq_command_list(const char* const target)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    const char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_disco_items_iq(ctx, id, target, STANZA_NS_COMMAND);
 
     iq_id_handler_add(id, _command_list_result_handler, NULL, NULL);
@@ -841,7 +841,7 @@ iq_command_exec(const char* const target, const char* const command)
     xmpp_stanza_t* iq = stanza_create_command_exec_iq(ctx, target, command);
     const char* id = xmpp_stanza_get_id(iq);
 
-    iq_id_handler_add(id, _command_exec_response_handler, free, strdup(command));
+    iq_id_handler_add(id, _command_exec_response_handler, (ProfIqFreeCallback)g_free, g_strdup(command));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -855,13 +855,13 @@ iq_submit_command_config(ProfConfWin* confwin)
     xmpp_stanza_t* iq = stanza_create_command_config_submit_iq(ctx, confwin->roomjid, data->command, data->sessionid, confwin->form);
 
     const char* id = xmpp_stanza_get_id(iq);
-    iq_id_handler_add(id, _command_exec_response_handler, free, strdup(data->command));
+    iq_id_handler_add(id, _command_exec_response_handler, (ProfIqFreeCallback)g_free, g_strdup(data->command));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
-    free(data->sessionid);
-    free(data->command);
-    free(data);
+    g_free(data->sessionid);
+    g_free(data->command);
+    g_free(data);
 }
 
 void
@@ -872,9 +872,9 @@ iq_cancel_command_config(ProfConfWin* confwin)
     xmpp_stanza_t* iq = stanza_create_room_config_cancel_iq(ctx, confwin->roomjid);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
-    free(data->sessionid);
-    free(data->command);
-    free(data);
+    g_free(data->sessionid);
+    g_free(data->command);
+    g_free(data);
 }
 
 static void
@@ -1097,7 +1097,7 @@ _room_list_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
     const char* from = xmpp_stanza_get_from(stanza);
 
     if (prefs_get_boolean(PREF_ROOM_LIST_CACHE) && !g_hash_table_contains(rooms_cache, from)) {
-        g_hash_table_insert(rooms_cache, strdup(from), xmpp_stanza_copy(stanza));
+        g_hash_table_insert(rooms_cache, g_strdup(from), xmpp_stanza_copy(stanza));
     }
 
     log_debug("Response to query: %s", id);
@@ -1180,7 +1180,7 @@ _command_list_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
     const char* id = xmpp_stanza_get_id(stanza);
     const char* type = xmpp_stanza_get_type(stanza);
-    auto_char char* from = strdup(xmpp_stanza_get_from(stanza));
+    auto_char char* from = g_strdup(xmpp_stanza_get_from(stanza));
 
     if (id) {
         log_debug("IQ command list result handler fired, id: %s.", id);
@@ -1329,9 +1329,9 @@ _command_exec_response_handler(xmpp_stanza_t* const stanza, void* const userdata
         if (sessionid == NULL) {
             data->sessionid = NULL;
         } else {
-            data->sessionid = strdup(sessionid);
+            data->sessionid = g_strdup(sessionid);
         }
-        data->command = strdup(command);
+        data->command = g_strdup(command);
         ProfConfWin* confwin = (ProfConfWin*)wins_new_config(from, form, iq_submit_command_config, iq_cancel_command_config, data);
         confwin_handle_configuration(confwin, form);
     } else if (g_strcmp0(status, "canceled") == 0) {
@@ -1545,7 +1545,7 @@ _muc_self_ping_timer_check(xmpp_conn_t* const conn, void* const userdata)
                     const char* id = xmpp_stanza_get_id(iq);
 
                     // Add response handler
-                    iq_id_handler_add(id, _muc_self_pong_handler, free, strdup(room));
+                    iq_id_handler_add(id, _muc_self_pong_handler, (ProfIqFreeCallback)g_free, g_strdup(room));
 
                     iq_send_stanza(iq);
                     xmpp_stanza_release(iq);
@@ -1751,7 +1751,7 @@ _version_get_handler(xmpp_stanza_t* const stanza)
     const char* id = xmpp_stanza_get_id(stanza);
     const char* from = xmpp_stanza_get_from(stanza);
     ProfAccount* account = accounts_get_account(session_get_account_name());
-    auto_char char* client = account->client != NULL ? strdup(account->client) : NULL;
+    auto_char char* client = account->client != NULL ? g_strdup(account->client) : NULL;
     account_free(account);
     bool is_custom_client = client != NULL;
     gchar* custom_version_str = NULL;
@@ -2254,10 +2254,10 @@ static void
 _identity_destroy(DiscoIdentity* identity)
 {
     if (identity) {
-        free(identity->name);
-        free(identity->type);
-        free(identity->category);
-        free(identity);
+        g_free(identity->name);
+        g_free(identity->type);
+        g_free(identity->category);
+        g_free(identity);
     }
 }
 
@@ -2265,9 +2265,9 @@ static void
 _item_destroy(DiscoItem* item)
 {
     if (item) {
-        free(item->jid);
-        free(item->name);
-        free(item);
+        g_free(item->jid);
+        g_free(item->name);
+        g_free(item);
     }
 }
 
@@ -2299,7 +2299,7 @@ _room_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata
             if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
                 const char* var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
                 if (var) {
-                    features = g_slist_append(features, strdup(var));
+                    features = g_slist_append(features, g_strdup(var));
                 }
             } else if (g_strcmp0(stanza_name, STANZA_NAME_IDENTITY) == 0) {
                 const char* name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
@@ -2311,18 +2311,18 @@ _room_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata
 
                     if (identity) {
                         if (name) {
-                            identity->name = strdup(name);
+                            identity->name = g_strdup(name);
                             mucwin_set_room_name(cb_data->room, name);
                         } else {
                             identity->name = NULL;
                         }
                         if (category) {
-                            identity->category = strdup(category);
+                            identity->category = g_strdup(category);
                         } else {
                             identity->category = NULL;
                         }
                         if (type) {
-                            identity->type = strdup(type);
+                            identity->type = g_strdup(type);
                         } else {
                             identity->type = NULL;
                         }
@@ -2353,7 +2353,7 @@ _room_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata
             }
         }
 
-        g_slist_free_full(features, free);
+        g_slist_free_full(features, g_free);
         g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
     }
 
@@ -2449,7 +2449,7 @@ _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdat
             if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
                 const char* var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
                 if (var) {
-                    features = g_slist_append(features, strdup(var));
+                    features = g_slist_append(features, g_strdup(var));
                 }
             } else if (g_strcmp0(stanza_name, STANZA_NAME_IDENTITY) == 0) {
                 const char* name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
@@ -2460,17 +2460,17 @@ _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdat
 
                     if (identity) {
                         if (name) {
-                            identity->name = strdup(name);
+                            identity->name = g_strdup(name);
                         } else {
                             identity->name = NULL;
                         }
                         if (category) {
-                            identity->category = strdup(category);
+                            identity->category = g_strdup(category);
                         } else {
                             identity->category = NULL;
                         }
                         if (child_type) {
-                            identity->type = strdup(child_type);
+                            identity->type = g_strdup(child_type);
                         } else {
                             identity->type = NULL;
                         }
@@ -2489,7 +2489,7 @@ _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdat
 
         cons_show_disco_info(from, identities, features);
 
-        g_slist_free_full(features, free);
+        g_slist_free_full(features, g_free);
         g_slist_free_full(identities, (GDestroyNotify)_identity_destroy);
     }
 
@@ -2534,7 +2534,7 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* con
             if (g_strcmp0(stanza_name, STANZA_NAME_FEATURE) == 0) {
                 const char* var = xmpp_stanza_get_attribute(child, STANZA_ATTR_VAR);
                 if (var) {
-                    g_hash_table_add(features, strdup(var));
+                    g_hash_table_add(features, g_strdup(var));
                 }
             }
             child = xmpp_stanza_get_next(child);
@@ -2578,9 +2578,9 @@ _http_upload_response_id_handler(xmpp_stanza_t* const stanza, void* const userda
 
         if (put && get) {
             const char* put_url = xmpp_stanza_get_attribute(put, "url");
-            upload->put_url = strdup(put_url);
+            upload->put_url = g_strdup(put_url);
             const char* get_url = xmpp_stanza_get_attribute(get, "url");
-            upload->get_url = strdup(get_url);
+            upload->get_url = g_strdup(get_url);
 
             // Optional "authorization", "cookie", "expires" headers
             upload->authorization = upload->cookie = upload->expires = NULL;
@@ -2642,10 +2642,10 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
             if (item_jid) {
                 DiscoItem* item = g_new0(struct disco_item_t, 1);
                 if (item) {
-                    item->jid = strdup(item_jid);
+                    item->jid = g_strdup(item_jid);
                     const char* item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
                     if (item_name) {
-                        item->name = strdup(item_name);
+                        item->name = g_strdup(item_name);
                     } else {
                         item->name = NULL;
                     }
@@ -2665,8 +2665,8 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
         while (late_delivery_windows) {
             LateDeliveryUserdata* del_data = late_delivery_windows->data;
             _iq_mam_request((ProfWin*)del_data->win, del_data->startdate, del_data->enddate, del_data->lastid);
-            free(del_data->lastid);
-            free(del_data);
+            g_free(del_data->lastid);
+            g_free(del_data);
             late_delivery_windows = g_slist_delete_link(late_delivery_windows,
                                                         late_delivery_windows);
         }
@@ -2702,8 +2702,8 @@ static void
 _iq_free_room_data(ProfRoomInfoData* roominfo)
 {
     if (roominfo) {
-        free(roominfo->room);
-        free(roominfo);
+        g_free(roominfo->room);
+        g_free(roominfo);
     }
 }
 
@@ -2711,9 +2711,9 @@ static void
 _iq_free_affiliation_set(ProfPrivilegeSet* affiliation_set)
 {
     if (affiliation_set) {
-        free(affiliation_set->item);
-        free(affiliation_set->privilege);
-        free(affiliation_set);
+        g_free(affiliation_set->item);
+        g_free(affiliation_set->privilege);
+        g_free(affiliation_set);
     }
 }
 
@@ -2721,8 +2721,8 @@ static void
 _iq_free_affiliation_list(ProfAffiliationList* affiliation_list)
 {
     if (affiliation_list) {
-        free(affiliation_list->affiliation);
-        free(affiliation_list);
+        g_free(affiliation_list->affiliation);
+        g_free(affiliation_list);
     }
 }
 
@@ -2810,13 +2810,13 @@ iq_mam_request_older(ProfWin* win)
 static void
 _mam_userdata_free(MamRsmUserdata* data)
 {
-    free(data->end_datestr);
+    g_free(data->end_datestr);
     data->end_datestr = NULL;
-    free(data->start_datestr);
+    g_free(data->start_datestr);
     data->start_datestr = NULL;
-    free(data->barejid);
+    g_free(data->barejid);
     data->barejid = NULL;
-    free(data);
+    g_free(data);
 }
 
 typedef struct mam_verify_userdata
@@ -2831,10 +2831,10 @@ typedef struct mam_verify_userdata
 static void
 _mam_verify_userdata_free(MamVerifyUserdata* data)
 {
-    free(data->start_datestr);
-    free(data->end_datestr);
-    free(data->barejid);
-    free(data);
+    g_free(data->start_datestr);
+    g_free(data->end_datestr);
+    g_free(data->barejid);
+    g_free(data);
 }
 
 static int
@@ -2908,9 +2908,9 @@ iq_mam_verify_request(ProfWin* win, const char* const startdate, const char* con
 
     MamVerifyUserdata* data = g_new0(MamVerifyUserdata, 1);
     if (data) {
-        data->barejid = strdup(barejid);
-        data->start_datestr = strdup(startdate);
-        data->end_datestr = strdup(enddate);
+        data->barejid = g_strdup(barejid);
+        data->start_datestr = g_strdup(startdate);
+        data->end_datestr = g_strdup(enddate);
         data->is_muc = is_muc;
         data->win = win;
 
@@ -2973,7 +2973,7 @@ _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate, const ch
     if (data) {
         data->start_datestr = startdate_str;
         data->end_datestr = enddate_str;
-        data->barejid = strdup(target_jid);
+        data->barejid = g_strdup(target_jid);
         data->fetch_next = fetch_next;
         data->win = win;
 
@@ -3001,7 +3001,7 @@ iq_mam_request(ProfWin* win, GDateTime* enddate)
     char* lastid = NULL;
     if (last_msg) {
         if (last_msg->stanzaid) {
-            lastid = strdup(last_msg->stanzaid);
+            lastid = g_strdup(last_msg->stanzaid);
         } else if (last_msg->timestamp) {
             startdate = g_date_time_add_seconds(last_msg->timestamp, 1);
         }
@@ -3021,7 +3021,7 @@ iq_mam_request(ProfWin* win, GDateTime* enddate)
     }
 
     _iq_mam_request(win, startdate, enddate, lastid);
-    free(lastid);
+    g_free(lastid);
 
     return;
 }
@@ -3092,7 +3092,7 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                     xmpp_ctx_t* const ctx = connection_get_ctx();
 
                     if (data->end_datestr) {
-                        free(data->end_datestr);
+                        g_free(data->end_datestr);
                         data->end_datestr = NULL;
                     }
                     xmpp_stanza_t* iq;
@@ -3105,11 +3105,11 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                     MamRsmUserdata* ndata = g_new0(MamRsmUserdata, 1);
                     *ndata = *data;
                     if (data->end_datestr)
-                        ndata->end_datestr = strdup(data->end_datestr);
+                        ndata->end_datestr = g_strdup(data->end_datestr);
                     if (data->start_datestr)
-                        ndata->start_datestr = strdup(data->start_datestr);
+                        ndata->start_datestr = g_strdup(data->start_datestr);
                     if (data->barejid)
-                        ndata->barejid = strdup(data->barejid);
+                        ndata->barejid = g_strdup(data->barejid);
                     iq_id_handler_add(xmpp_stanza_get_id(iq), _mam_rsm_id_handler, (ProfIqFreeCallback)_mam_userdata_free, ndata);
 
                     iq_send_stanza(iq);
@@ -3190,7 +3190,7 @@ _muc_register_nick_response_handler(xmpp_stanza_t* const stanza, void* const use
 void
 iq_submit_muc_register_nick_form(ProfConfWin* confwin)
 {
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
     xmpp_stanza_t* iq = stanza_create_muc_register_nick(ctx, id, confwin->roomjid, NULL, confwin->form);
@@ -3255,7 +3255,7 @@ iq_muc_register_nick(const char* const roomjid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
 
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, id);
     xmpp_stanza_set_to(iq, roomjid);
@@ -3277,7 +3277,7 @@ void
 publish_user_mood(const char* const mood, const char* const text)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
 
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
 

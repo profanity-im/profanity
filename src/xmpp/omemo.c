@@ -60,7 +60,7 @@ void
 omemo_devicelist_configure(void)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
 
     xmpp_stanza_t* iq = stanza_create_pubsub_configure_request(ctx, id, connection_get_jid()->barejid, STANZA_NS_OMEMO_DEVICELIST);
 
@@ -72,10 +72,10 @@ omemo_devicelist_configure(void)
 }
 
 void
-omemo_devicelist_request(const char* const jid)
+omemo_devicelist_request(const gchar* const jid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
 
     log_debug("[OMEMO] request device list for jid: %s", jid);
 
@@ -110,7 +110,7 @@ omemo_bundle_publish(gboolean first)
     omemo_signed_prekey_signature(&signed_prekey_signature, &signed_prekey_signature_length);
     omemo_prekeys(&prekeys, &ids, &lengths);
 
-    char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_omemo_bundle_publish(ctx, id,
                                                            omemo_device_id(), identity_key, identity_key_length, signed_prekey,
                                                            signed_prekey_length, signed_prekey_signature,
@@ -137,10 +137,10 @@ omemo_bundle_publish(gboolean first)
 }
 
 void
-omemo_bundle_request(const char* const jid, uint32_t device_id, ProfIqCallback func, ProfIqFreeCallback free_func, void* userdata)
+omemo_bundle_request(const gchar* const jid, uint32_t device_id, ProfIqCallback func, ProfIqFreeCallback free_func, void* userdata)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
 
     log_debug("[OMEMO] request omemo bundle (jid: %s, device: %d)", jid, device_id);
 
@@ -323,7 +323,7 @@ out:
     return 1;
 }
 
-char*
+gchar*
 omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_error_t* error)
 {
     if (!stanza || !trusted || !error) {
@@ -591,7 +591,7 @@ _omemo_devicelist_configure_submit(xmpp_stanza_t* const stanza, void* const user
     form_set_value(form, "pubsub#access_model", "open");
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_pubsub_configure_submit(ctx, id, connection_get_jid()->barejid, STANZA_NS_OMEMO_DEVICELIST, form);
 
     iq_id_handler_add(id, _omemo_devicelist_configure_result, NULL, NULL);
@@ -639,7 +639,7 @@ _omemo_bundle_publish_result(xmpp_stanza_t* const stanza, void* const userdata)
 
     log_debug("[OMEMO] cannot publish bundle with open access model, trying to configure node");
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     auto_gchar gchar* node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
     log_debug("[OMEMO] node: %s", node);
 
@@ -678,7 +678,7 @@ _omemo_bundle_publish_configure(xmpp_stanza_t* const stanza, void* const userdat
     form_set_value(form, "pubsub#access_model", "open");
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     auto_gchar gchar* node = g_strdup_printf("%s:%d", STANZA_NS_OMEMO_BUNDLES, omemo_device_id());
     xmpp_stanza_t* iq = stanza_create_pubsub_configure_submit(ctx, id, connection_get_jid()->barejid, node, form);
 
@@ -708,7 +708,7 @@ _omemo_bundle_publish_configure_result(xmpp_stanza_t* const stanza, void* const 
     return 0;
 }
 
-char*
+const gchar*
 omemo_error_to_string(omemo_error_t error)
 {
     switch (error) {
