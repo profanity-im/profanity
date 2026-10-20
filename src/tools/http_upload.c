@@ -35,7 +35,7 @@
 
 struct curl_data_t
 {
-    char* buffer;
+    gchar* buffer;
     size_t size;
 };
 
@@ -100,7 +100,7 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
 {
     size_t realsize = size * nmemb;
     struct curl_data_t* mem = (struct curl_data_t*)data;
-    mem->buffer = realloc(mem->buffer, mem->size + realsize + 1);
+    mem->buffer = g_realloc(mem->buffer, mem->size + realsize + 1);
 
     if (mem->buffer) {
         memcpy(&(mem->buffer[mem->size]), ptr, realsize);
@@ -277,7 +277,7 @@ http_file_put(void* userdata)
     if (fh) {
         fclose(fh);
     }
-    free(output.buffer);
+    g_free(output.buffer);
 
     pthread_mutex_lock(&lock);
 
@@ -348,40 +348,37 @@ http_file_put(void* userdata)
     upload_processes = g_slist_remove(upload_processes, upload);
     pthread_mutex_unlock(&lock);
 
-    free(upload->filename);
-    free(upload->mime_type);
-    free(upload->get_url);
-    free(upload->put_url);
-    free(upload->alt_scheme);
-    free(upload->alt_fragment);
-    free(upload->authorization);
-    free(upload->cookie);
-    free(upload->expires);
-    free(upload);
+    g_free(upload->filename);
+    g_free(upload->mime_type);
+    g_free(upload->get_url);
+    g_free(upload->put_url);
+    g_free(upload->alt_scheme);
+    g_free(upload->alt_fragment);
+    g_free(upload->authorization);
+    g_free(upload->cookie);
+    g_free(upload->expires);
+    g_free(upload);
 
     return NULL;
 }
 
-char*
-file_mime_type(const char* const filename)
+gchar*
+file_mime_type(const gchar* const filename)
 {
-    char* out_mime_type;
-    char file_header[FILE_HEADER_BYTES];
-    FILE* fh;
-    if (!(fh = fopen(filename, "rb"))) {
-        return strdup(FALLBACK_MIMETYPE);
+    gchar file_header[FILE_HEADER_BYTES];
+    FILE* fh = fopen(filename, "rb");
+    if (!fh) {
+        return g_strdup(FALLBACK_MIMETYPE);
     }
     size_t file_header_size = fread(file_header, 1, FILE_HEADER_BYTES, fh);
     fclose(fh);
 
-    auto_gchar gchar* content_type = g_content_type_guess(filename, (unsigned char*)file_header, file_header_size, NULL);
+    auto_gchar gchar* content_type = g_content_type_guess(filename, (const guchar*)file_header, file_header_size, NULL);
     if (content_type != NULL) {
-        auto_gchar gchar* mime_type = g_content_type_get_mime_type(content_type);
-        out_mime_type = strdup(mime_type);
+        return g_content_type_get_mime_type(content_type);
     } else {
-        return strdup(FALLBACK_MIMETYPE);
+        return g_strdup(FALLBACK_MIMETYPE);
     }
-    return out_mime_type;
 }
 
 off_t

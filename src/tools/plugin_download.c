@@ -37,8 +37,8 @@ plugin_download_install(void* userdata)
     HTTPDownload* plugin_dl = (HTTPDownload*)userdata;
 
     /* We need to dup those, because they're free'd inside `http_file_get()` */
-    auto_char char* path = strdup(plugin_dl->filename);
-    auto_char char* https_url = strdup(plugin_dl->url);
+    auto_gchar gchar* path = g_strdup(plugin_dl->filename);
+    auto_gchar gchar* https_url = g_strdup(plugin_dl->url);
 
     http_file_get(plugin_dl);
 

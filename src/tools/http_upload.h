@@ -21,28 +21,28 @@
 
 typedef struct http_upload_t
 {
-    char* filename;
+    gchar* filename;
     FILE* filehandle;
     off_t filesize;
     curl_off_t bytes_sent;
-    char* mime_type;
-    char* get_url;
-    char* put_url;
-    char* alt_scheme;
-    char* alt_fragment;
+    gchar* mime_type;
+    gchar* get_url;
+    gchar* put_url;
+    gchar* alt_scheme;
+    gchar* alt_fragment;
     ProfWin* window;
     pthread_t worker;
     int cancel;
     // Additional headers
     // (NULL if they shouldn't be send in the PUT)
-    char* authorization;
-    char* cookie;
-    char* expires;
+    gchar* authorization;
+    gchar* cookie;
+    gchar* expires;
 } HTTPUpload;
 
 void* http_file_put(void* userdata);
 
-char* file_mime_type(const char* const filename);
+gchar* file_mime_type(const gchar* const filename);
 off_t file_size(int filedes);
 
 void http_upload_cancel_processes(ProfWin* window);

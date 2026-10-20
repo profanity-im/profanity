@@ -25,9 +25,9 @@
 typedef struct aesgcm_download_t
 {
     gchar* id;
-    char* url;
-    char* filename;
-    char* cmd_template;
+    gchar* url;
+    gchar* filename;
+    gchar* cmd_template;
     ProfWin* window;
     pthread_t worker;
     HTTPDownload* http_dl;

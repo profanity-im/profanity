@@ -19,7 +19,7 @@
 #define FALLBACK_MSG ""
 
 void
-http_print_transfer_update(ProfWin* window, char* id, theme_item_t theme_item, int flags, const char* fmt, ...)
+http_print_transfer_update(ProfWin* window, gchar* id, theme_item_t theme_item, int flags, const gchar* fmt, ...)
 {
     va_list args;
 
@@ -38,7 +38,7 @@ http_print_transfer_update(ProfWin* window, char* id, theme_item_t theme_item, i
 }
 
 void
-http_print_transfer(ProfWin* window, char* id, theme_item_t theme_item, const char* fmt, ...)
+http_print_transfer(ProfWin* window, gchar* id, theme_item_t theme_item, const gchar* fmt, ...)
 {
     va_list args;
 

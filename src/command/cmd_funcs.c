@@ -5061,7 +5061,7 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
 
     upload->window = window;
 
-    upload->filename = strdup(filename);
+    upload->filename = g_strdup(filename);
     upload->filehandle = fh;
     upload->filesize = file_size(fd);
     upload->mime_type = file_mime_type(filename);
@@ -5071,20 +5071,20 @@ cmd_sendfile(ProfWin* window, const char* const command, gchar** args)
         if (fh) {
             fclose(fh);
         }
-        free(upload->filename);
-        free(upload->mime_type);
-        free(upload);
+        g_free(upload->filename);
+        g_free(upload->mime_type);
+        g_free(upload);
         goto out;
     }
 
     if (alt_scheme != NULL) {
-        upload->alt_scheme = strdup(alt_scheme);
+        upload->alt_scheme = g_strdup(alt_scheme);
     } else {
         upload->alt_scheme = NULL;
     }
 
     if (alt_fragment != NULL) {
-        upload->alt_fragment = strdup(alt_fragment);
+        upload->alt_fragment = g_strdup(alt_fragment);
     } else {
         upload->alt_fragment = NULL;
     }
@@ -9543,10 +9543,10 @@ _url_aesgcm_method(ProfWin* window, const char* cmd_template, gchar* url, gchar*
         return;
     AESGCMDownload* download = g_new0(AESGCMDownload, 1);
     download->id = get_random_string(4);
-    download->url = strdup(url);
-    download->filename = strdup(filename);
+    download->url = g_strdup(url);
+    download->filename = g_strdup(filename);
     if (cmd_template != NULL) {
-        download->cmd_template = strdup(cmd_template);
+        download->cmd_template = g_strdup(cmd_template);
     } else {
         download->cmd_template = NULL;
     }
@@ -9565,8 +9565,8 @@ _download_install_plugin(ProfWin* window, gchar* url, gchar* path)
         return FALSE;
     HTTPDownload* download = g_new0(HTTPDownload, 1);
     download->id = get_random_string(4);
-    download->url = strdup(url);
-    download->filename = strdup(filename);
+    download->url = g_strdup(url);
+    download->filename = g_strdup(filename);
     download->cmd_template = NULL;
     download->window = window;
     download->silent = TRUE;
@@ -9584,9 +9584,9 @@ _url_http_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* p
         return;
     HTTPDownload* download = g_new0(HTTPDownload, 1);
     download->id = get_random_string(4);
-    download->url = strdup(url);
-    download->filename = strdup(filename);
-    download->cmd_template = cmd_template ? strdup(cmd_template) : NULL;
+    download->url = g_strdup(url);
+    download->filename = g_strdup(filename);
+    download->cmd_template = cmd_template ? g_strdup(cmd_template) : NULL;
     download->window = window;
     download->silent = FALSE;
 
