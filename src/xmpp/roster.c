@@ -110,6 +110,7 @@ roster_send_add_to_group(const char* const group, PContact contact)
                                                  p_contact_name(contact), new_groups);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+    g_slist_free_full(new_groups, g_free);
 }
 
 static int
@@ -151,6 +152,7 @@ roster_send_remove_from_group(const char* const group, PContact contact)
                                                  p_contact_name(contact), new_groups);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+    g_slist_free_full(new_groups, g_free);
 }
 
 static int
