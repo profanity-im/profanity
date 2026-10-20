@@ -134,21 +134,21 @@ cmd_bookmark_list__shows__bookmarks(void** state)
     gboolean result = cmd_bookmark(&window, CMD_BOOKMARK, args);
     assert_true(result);
 
-    free(bm1->barejid);
-    free(bm1->nick);
-    free(bm1);
-    free(bm2->barejid);
-    free(bm2->nick);
-    free(bm2);
-    free(bm3->barejid);
-    free(bm3->nick);
-    free(bm3);
-    free(bm4->barejid);
-    free(bm4->nick);
-    free(bm4);
-    free(bm5->barejid);
-    free(bm5->nick);
-    free(bm5);
+    g_free(bm1->barejid);
+    g_free(bm1->nick);
+    g_free(bm1);
+    g_free(bm2->barejid);
+    g_free(bm2->nick);
+    g_free(bm2);
+    g_free(bm3->barejid);
+    g_free(bm3->nick);
+    g_free(bm3);
+    g_free(bm4->barejid);
+    g_free(bm4->nick);
+    g_free(bm4);
+    g_free(bm5->barejid);
+    g_free(bm5->nick);
+    g_free(bm5);
 }
 
 void

@@ -17,15 +17,15 @@
 
 void cmd_init(void);
 
-Command* cmd_get(const char* const command);
-GList* cmd_get_ordered(const char* const tag);
+Command* cmd_get(const gchar* const command);
+GList* cmd_get_ordered(const gchar* const tag);
 
-gboolean cmd_valid_tag(const char* const str);
+gboolean cmd_valid_tag(const gchar* const str);
 
 void command_docgen(void);
 void command_mangen(void);
 
-GList* cmd_search_index_all(char* term);
-GList* cmd_search_index_any(char* term);
+GList* cmd_search_index_all(const gchar* const term);
+GList* cmd_search_index_any(const gchar* const term);
 
 #endif

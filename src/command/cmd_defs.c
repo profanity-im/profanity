@@ -73,7 +73,7 @@
 
 GHashTable* commands = NULL;
 
-static gboolean _cmd_has_tag(Command* pcmd, const char* const tag);
+static gboolean _cmd_has_tag(Command* pcmd, const gchar* const tag);
 
 /*
  * Command list
@@ -2828,7 +2828,7 @@ _cmd_index(const Command* cmd)
 }
 
 GList*
-cmd_search_index_any(char* term)
+cmd_search_index_any(const gchar* const term)
 {
     GList* results = NULL;
 
@@ -2852,7 +2852,7 @@ cmd_search_index_any(char* term)
 }
 
 GList*
-cmd_search_index_all(char* term)
+cmd_search_index_all(const gchar* const term)
 {
     GList* results = NULL;
 
@@ -2903,7 +2903,7 @@ cmd_init(void)
 
     cmd_ac_init();
 
-    search_index = g_hash_table_new_full(g_str_hash, g_str_equal, free, g_free);
+    search_index = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 
     // load command defs into hash table
     commands = g_hash_table_new(g_str_hash, g_str_equal);
@@ -2914,7 +2914,7 @@ cmd_init(void)
         g_hash_table_insert(commands, pcmd->cmd, (gpointer)pcmd);
 
         // add to search index
-        g_hash_table_insert(search_index, strdup(pcmd->cmd), _cmd_index(pcmd));
+        g_hash_table_insert(search_index, g_strdup(pcmd->cmd), _cmd_index(pcmd));
 
         // add to commands and help autocompleters
         cmd_ac_add_cmd(pcmd);
@@ -2932,13 +2932,13 @@ cmd_init(void)
 }
 
 gboolean
-cmd_valid_tag(const char* const str)
+cmd_valid_tag(const gchar* const str)
 {
     return ((g_strcmp0(str, CMD_TAG_CHAT) == 0) || (g_strcmp0(str, CMD_TAG_GROUPCHAT) == 0) || (g_strcmp0(str, CMD_TAG_PRESENCE) == 0) || (g_strcmp0(str, CMD_TAG_ROSTER) == 0) || (g_strcmp0(str, CMD_TAG_DISCOVERY) == 0) || (g_strcmp0(str, CMD_TAG_CONNECTION) == 0) || (g_strcmp0(str, CMD_TAG_UI) == 0) || (g_strcmp0(str, CMD_TAG_PLUGINS) == 0));
 }
 
 Command*
-cmd_get(const char* const command)
+cmd_get(const gchar* const command)
 {
     if (commands) {
         return g_hash_table_lookup(commands, command);
@@ -2948,7 +2948,7 @@ cmd_get(const char* const command)
 }
 
 GList*
-cmd_get_ordered(const char* const tag)
+cmd_get_ordered(const gchar* const tag)
 {
     GList* ordered_commands = NULL;
 
@@ -2972,7 +2972,7 @@ cmd_get_ordered(const char* const tag)
 }
 
 static gboolean
-_cmd_has_tag(Command* pcmd, const char* const tag)
+_cmd_has_tag(Command* pcmd, const gchar* const tag)
 {
     for (int i = 0; pcmd->help.tags[i] != NULL; i++) {
         if (g_strcmp0(tag, pcmd->help.tags[i]) == 0) {
