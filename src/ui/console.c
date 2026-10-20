@@ -2447,7 +2447,7 @@ void
 cons_show_contact_online(PContact contact, Resource* resource, GDateTime* last_activity)
 {
     const char* show = string_from_resource_presence(resource->presence);
-    auto_char char* display_str = p_contact_create_display_string(contact, resource->name);
+    auto_gchar gchar* display_str = p_contact_create_display_string(contact, resource->name);
 
     ProfWin* console = wins_get_console();
     win_show_status_string(console, display_str, show, resource->status, last_activity,
@@ -2457,7 +2457,7 @@ cons_show_contact_online(PContact contact, Resource* resource, GDateTime* last_a
 void
 cons_show_contact_offline(PContact contact, char* resource, char* status)
 {
-    auto_char char* display_str = p_contact_create_display_string(contact, resource);
+    auto_gchar gchar* display_str = p_contact_create_display_string(contact, resource);
 
     ProfWin* console = wins_get_console();
     win_show_status_string(console, display_str, "offline", status, NULL, "--",

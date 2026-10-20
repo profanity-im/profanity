@@ -440,7 +440,7 @@ chatwin_contact_online(ProfChatWin* chatwin, Resource* resource, GDateTime* last
 
     const char* show = string_from_resource_presence(resource->presence);
     PContact contact = roster_get_contact(chatwin->barejid);
-    auto_char char* display_str = p_contact_create_display_string(contact, resource->name);
+    auto_gchar gchar* display_str = p_contact_create_display_string(contact, resource->name);
 
     win_show_status_string((ProfWin*)chatwin, display_str, show, resource->status, last_activity, "++", "online");
 }
@@ -451,7 +451,7 @@ chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status)
     assert(chatwin != NULL);
 
     PContact contact = roster_get_contact(chatwin->barejid);
-    auto_char char* display_str = p_contact_create_display_string(contact, resource);
+    auto_gchar gchar* display_str = p_contact_create_display_string(contact, resource);
 
     win_show_status_string((ProfWin*)chatwin, display_str, "offline", status, NULL, "--", "offline");
 }

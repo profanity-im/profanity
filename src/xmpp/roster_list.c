@@ -47,7 +47,7 @@ typedef struct prof_roster_t
 
 typedef struct pending_presence
 {
-    char* barejid;
+    gchar* barejid;
     Resource* resource;
     GDateTime* last_activity;
 } ProfPendingPresence;
@@ -58,8 +58,8 @@ static GSList* roster_pending_presence = NULL;
 
 static gboolean _key_equals(void* key1, void* key2);
 static gboolean _datetimes_equal(GDateTime* dt1, GDateTime* dt2);
-static void _replace_name(const char* const current_name, const char* const new_name, const char* const barejid);
-static void _add_name_and_barejid(const char* const name, const char* const barejid);
+static void _replace_name(const gchar* const current_name, const gchar* const new_name, const gchar* const barejid);
+static void _add_name_and_barejid(const gchar* const name, const gchar* const barejid);
 
 void
 roster_create(void)
@@ -86,9 +86,9 @@ _pendingPresence_free(ProfPendingPresence* presence)
         return;
     if (presence->last_activity)
         g_date_time_unref(presence->last_activity);
-    free(presence->barejid);
+    g_free(presence->barejid);
     resource_destroy(presence->resource);
-    free(presence);
+    g_free(presence);
 }
 
 void
@@ -104,7 +104,7 @@ roster_destroy(void)
     autocomplete_free(roster->groups_ac);
     g_hash_table_destroy(roster->group_count);
 
-    free(roster);
+    g_free(roster);
     roster = NULL;
 
     if (roster_pending_presence)
@@ -113,7 +113,7 @@ roster_destroy(void)
 }
 
 gboolean
-roster_update_presence(const char* const barejid, Resource* resource, GDateTime* last_activity)
+roster_update_presence(const gchar* const barejid, Resource* resource, GDateTime* last_activity)
 {
     assert(roster != NULL);
 
@@ -122,7 +122,7 @@ roster_update_presence(const char* const barejid, Resource* resource, GDateTime*
 
     if (!roster_received) {
         ProfPendingPresence* presence = g_new0(ProfPendingPresence, 1);
-        presence->barejid = strdup(barejid);
+        presence->barejid = g_strdup(barejid);
         presence->resource = resource;
         presence->last_activity = last_activity;
         if (last_activity) {
@@ -149,7 +149,7 @@ roster_update_presence(const char* const barejid, Resource* resource, GDateTime*
 }
 
 PContact
-roster_get_contact(const char* const barejid)
+roster_get_contact(const gchar* const barejid)
 {
     assert(roster != NULL);
 
@@ -159,8 +159,8 @@ roster_get_contact(const char* const barejid)
     return contact;
 }
 
-const char*
-roster_get_display_name(const char* const barejid)
+const gchar*
+roster_get_display_name(const gchar* const barejid)
 {
     assert(roster != NULL);
 
@@ -168,7 +168,7 @@ roster_get_display_name(const char* const barejid)
 }
 
 gchar*
-roster_get_msg_display_name(const char* const barejid, const char* const resource)
+roster_get_msg_display_name(const gchar* const barejid, const gchar* const resource)
 {
     assert(roster != NULL);
 
@@ -187,7 +187,7 @@ roster_get_msg_display_name(const char* const barejid, const char* const resourc
 }
 
 gboolean
-roster_contact_offline(const char* const barejid, const char* const resource, const char* const status)
+roster_contact_offline(const gchar* const barejid, const gchar* const resource, const gchar* const status)
 {
     assert(roster != NULL);
 
@@ -221,7 +221,7 @@ roster_reset_search_attempts(void)
 }
 
 void
-roster_change_name(PContact contact, const char* const new_name)
+roster_change_name(PContact contact, const gchar* const new_name)
 {
     assert(roster != NULL);
     assert(contact != NULL);
@@ -230,7 +230,7 @@ roster_change_name(PContact contact, const char* const new_name)
     const char* barejid = p_contact_barejid(contact);
 
     if (p_contact_name(contact)) {
-        current_name = strdup(p_contact_name(contact));
+        current_name = g_strdup(p_contact_name(contact));
     }
 
     p_contact_set_name(contact, new_name);
@@ -238,7 +238,7 @@ roster_change_name(PContact contact, const char* const new_name)
 }
 
 void
-roster_remove(const char* const name, const char* const barejid)
+roster_remove(const gchar* const name, const gchar* const barejid)
 {
     assert(roster != NULL);
 
@@ -268,7 +268,7 @@ roster_remove(const char* const name, const char* const barejid)
                     g_hash_table_remove(roster->group_count, group);
                     autocomplete_remove(roster->groups_ac, group);
                 } else {
-                    g_hash_table_insert(roster->group_count, strdup(group), GINT_TO_POINTER(count));
+                    g_hash_table_insert(roster->group_count, g_strdup(group), GINT_TO_POINTER(count));
                 }
             }
             curr = g_slist_next(curr);
@@ -280,7 +280,7 @@ roster_remove(const char* const name, const char* const barejid)
 }
 
 void
-roster_update(const char* const barejid, const char* const name, GSList* groups, const char* const subscription,
+roster_update(const gchar* const barejid, const gchar* const name, GSList* groups, const gchar* const subscription,
               gboolean pending_out)
 {
     assert(roster != NULL);
@@ -302,13 +302,13 @@ roster_update(const char* const barejid, const char* const name, GSList* groups,
 
             // group doesn't yet exist
             if (!g_hash_table_contains(roster->group_count, new_group)) {
-                g_hash_table_insert(roster->group_count, strdup(new_group), GINT_TO_POINTER(1));
+                g_hash_table_insert(roster->group_count, g_strdup(new_group), GINT_TO_POINTER(1));
                 autocomplete_add(roster->groups_ac, curr_new_group->data);
 
                 // increment count
             } else {
                 int count = GPOINTER_TO_INT(g_hash_table_lookup(roster->group_count, new_group));
-                g_hash_table_insert(roster->group_count, strdup(new_group), GINT_TO_POINTER(count + 1));
+                g_hash_table_insert(roster->group_count, g_strdup(new_group), GINT_TO_POINTER(count + 1));
             }
         }
         curr_new_group = g_slist_next(curr_new_group);
@@ -327,7 +327,7 @@ roster_update(const char* const barejid, const char* const name, GSList* groups,
                     g_hash_table_remove(roster->group_count, old_group);
                     autocomplete_remove(roster->groups_ac, old_group);
                 } else {
-                    g_hash_table_insert(roster->group_count, strdup(old_group), GINT_TO_POINTER(count));
+                    g_hash_table_insert(roster->group_count, g_strdup(old_group), GINT_TO_POINTER(count));
                 }
             }
         }
@@ -339,7 +339,7 @@ roster_update(const char* const barejid, const char* const name, GSList* groups,
 }
 
 gboolean
-roster_add(const char* const barejid, const char* const name, GSList* groups, const char* const subscription,
+roster_add(const gchar* const barejid, const gchar* const name, GSList* groups, const gchar* const subscription,
            gboolean pending_out)
 {
     assert(roster != NULL);
@@ -357,16 +357,16 @@ roster_add(const char* const barejid, const char* const name, GSList* groups, co
         char* new_group = curr_new_group->data;
         if (g_hash_table_contains(roster->group_count, new_group)) {
             int count = GPOINTER_TO_INT(g_hash_table_lookup(roster->group_count, new_group));
-            g_hash_table_insert(roster->group_count, strdup(new_group), GINT_TO_POINTER(count + 1));
+            g_hash_table_insert(roster->group_count, g_strdup(new_group), GINT_TO_POINTER(count + 1));
         } else {
-            g_hash_table_insert(roster->group_count, strdup(new_group), GINT_TO_POINTER(1));
+            g_hash_table_insert(roster->group_count, g_strdup(new_group), GINT_TO_POINTER(1));
             autocomplete_add(roster->groups_ac, new_group);
         }
 
         curr_new_group = g_slist_next(curr_new_group);
     }
 
-    g_hash_table_insert(roster->contacts, strdup(barejid), contact);
+    g_hash_table_insert(roster->contacts, g_strdup(barejid), contact);
 
     if (equals_our_barejid(barejid)) {
         GList* resources = connection_get_available_resources();
@@ -395,8 +395,8 @@ roster_add(const char* const barejid, const char* const name, GSList* groups, co
  * @note The returned value should not be freed explicitly. The memory
  *       management is handled by the underlying hash table.
  */
-char*
-roster_barejid_from_name(const char* const name)
+gchar*
+roster_barejid_from_name(const gchar* const name)
 {
     assert(roster != NULL);
 
@@ -408,7 +408,7 @@ roster_barejid_from_name(const char* const name)
 }
 
 GSList*
-roster_get_contacts_by_presence(const char* const presence)
+roster_get_contacts_by_presence(const gchar* const presence)
 {
     assert(roster != NULL);
 
@@ -495,16 +495,16 @@ roster_has_pending_subscriptions(void)
     return FALSE;
 }
 
-char*
-roster_contact_autocomplete(const char* const search_str, gboolean previous, void* context)
+gchar*
+roster_contact_autocomplete(const gchar* const search_str, gboolean previous, void* context)
 {
     assert(roster != NULL);
 
     return autocomplete_complete(roster->name_ac, search_str, TRUE, previous);
 }
 
-char*
-roster_fulljid_autocomplete(const char* const search_str, gboolean previous, void* context)
+gchar*
+roster_fulljid_autocomplete(const gchar* const search_str, gboolean previous, void* context)
 {
     assert(roster != NULL);
 
@@ -512,7 +512,7 @@ roster_fulljid_autocomplete(const char* const search_str, gboolean previous, voi
 }
 
 GSList*
-roster_get_group(const char* const group, roster_ord_t order)
+roster_get_group(const gchar* const group, roster_ord_t order)
 {
     assert(roster != NULL);
 
@@ -558,16 +558,16 @@ roster_get_groups(void)
     return autocomplete_create_list(roster->groups_ac);
 }
 
-char*
-roster_group_autocomplete(const char* const search_str, gboolean previous, void* context)
+gchar*
+roster_group_autocomplete(const gchar* const search_str, gboolean previous, void* context)
 {
     assert(roster != NULL);
 
     return autocomplete_complete(roster->groups_ac, search_str, TRUE, previous);
 }
 
-char*
-roster_barejid_autocomplete(const char* const search_str, gboolean previous, void* context)
+gchar*
+roster_barejid_autocomplete(const gchar* const search_str, gboolean previous, void* context)
 {
     assert(roster != NULL);
 
@@ -598,7 +598,7 @@ _datetimes_equal(GDateTime* dt1, GDateTime* dt2)
 }
 
 static void
-_replace_name(const char* const current_name, const char* const new_name, const char* const barejid)
+_replace_name(const gchar* const current_name, const gchar* const new_name, const gchar* const barejid)
 {
     assert(roster != NULL);
 
@@ -616,16 +616,16 @@ _replace_name(const char* const current_name, const char* const new_name, const 
 }
 
 static void
-_add_name_and_barejid(const char* const name, const char* const barejid)
+_add_name_and_barejid(const gchar* const name, const gchar* const barejid)
 {
     assert(roster != NULL);
 
     if (name) {
         autocomplete_add(roster->name_ac, name);
-        g_hash_table_insert(roster->name_to_barejid, strdup(name), strdup(barejid));
+        g_hash_table_insert(roster->name_to_barejid, g_strdup(name), g_strdup(barejid));
     } else {
         autocomplete_add(roster->name_ac, barejid);
-        g_hash_table_insert(roster->name_to_barejid, strdup(barejid), strdup(barejid));
+        g_hash_table_insert(roster->name_to_barejid, g_strdup(barejid), g_strdup(barejid));
     }
 }
 

@@ -43,7 +43,7 @@ p_contact_name_or_jid__returns__name_when_exists(void** state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
 
-    const char* name = p_contact_name_or_jid(contact);
+    const gchar* name = p_contact_name_or_jid(contact);
 
     assert_string_equal("bob", name);
 
@@ -56,7 +56,7 @@ p_contact_name_or_jid__returns__jid_when_name_not_exists(void** state)
     PContact contact = p_contact_new("bob@server.com", NULL, NULL, "both",
                                      "is offline", FALSE);
 
-    const char* jid = p_contact_name_or_jid(contact);
+    const gchar* jid = p_contact_name_or_jid(contact);
 
     assert_string_equal("bob@server.com", jid);
 
@@ -69,7 +69,7 @@ p_contact_create_display_string__returns__name_and_resource_when_name_exists(voi
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
 
-    char* str = p_contact_create_display_string(contact, "laptop");
+    gchar* str = p_contact_create_display_string(contact, "laptop");
 
     assert_string_equal("bob (laptop)", str);
 
@@ -83,7 +83,7 @@ p_contact_create_display_string__returns__jid_and_resource_when_name_not_exists(
     PContact contact = p_contact_new("bob@server.com", NULL, NULL, "both",
                                      "is offline", FALSE);
 
-    char* str = p_contact_create_display_string(contact, "laptop");
+    gchar* str = p_contact_create_display_string(contact, "laptop");
 
     assert_string_equal("bob@server.com (laptop)", str);
 
@@ -97,7 +97,7 @@ p_contact_create_display_string__returns__name_when_default_resource(void** stat
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
 
-    char* str = p_contact_create_display_string(contact, "__prof_default");
+    gchar* str = p_contact_create_display_string(contact, "__prof_default");
 
     assert_string_equal("bob", str);
 
@@ -111,7 +111,7 @@ p_contact_presence__returns__offline_when_no_resources(void** state)
     PContact contact = p_contact_new("bob@server.com", "bob", NULL, "both",
                                      "is offline", FALSE);
 
-    const char* presence = p_contact_presence(contact);
+    const gchar* presence = p_contact_presence(contact);
 
     assert_string_equal("offline", presence);
 
@@ -135,7 +135,7 @@ p_contact_presence__returns__highest_priority_presence(void** state)
     p_contact_set_presence(contact, resource1);
     p_contact_set_presence(contact, resource2);
 
-    const char* presence = p_contact_presence(contact);
+    const gchar* presence = p_contact_presence(contact);
 
     assert_string_equal("away", presence);
 
@@ -159,7 +159,7 @@ p_contact_presence__returns__chat_when_same_priority(void** state)
     p_contact_set_presence(contact, resource_xa);
     p_contact_set_presence(contact, resource_dnd);
 
-    const char* presence = p_contact_presence(contact);
+    const gchar* presence = p_contact_presence(contact);
 
     assert_string_equal("chat", presence);
 
@@ -181,7 +181,7 @@ p_contact_presence__returns__online_when_same_priority(void** state)
     p_contact_set_presence(contact, resource_xa);
     p_contact_set_presence(contact, resource_dnd);
 
-    const char* presence = p_contact_presence(contact);
+    const gchar* presence = p_contact_presence(contact);
 
     assert_string_equal("online", presence);
 
@@ -201,7 +201,7 @@ p_contact_presence__returns__away_when_same_priority(void** state)
     p_contact_set_presence(contact, resource_xa);
     p_contact_set_presence(contact, resource_dnd);
 
-    const char* presence = p_contact_presence(contact);
+    const gchar* presence = p_contact_presence(contact);
 
     assert_string_equal("away", presence);
 
@@ -219,7 +219,7 @@ p_contact_presence__returns__xa_when_same_priority(void** state)
     p_contact_set_presence(contact, resource_xa);
     p_contact_set_presence(contact, resource_dnd);
 
-    const char* presence = p_contact_presence(contact);
+    const gchar* presence = p_contact_presence(contact);
 
     assert_string_equal("xa", presence);
 
@@ -235,7 +235,7 @@ p_contact_presence__returns__dnd(void** state)
     Resource* resource_dnd = resource_new("resource_dnd", RESOURCE_DND, NULL, 10);
     p_contact_set_presence(contact, resource_dnd);
 
-    const char* presence = p_contact_presence(contact);
+    const gchar* presence = p_contact_presence(contact);
 
     assert_string_equal("dnd", presence);
 

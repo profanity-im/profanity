@@ -206,7 +206,7 @@ jid_destroy(Jid* jid)
     g_free(jid->resourcepart);
     g_free(jid->barejid);
     g_free(jid->fulljid);
-    free(jid);
+    g_free(jid);
 }
 
 gboolean
