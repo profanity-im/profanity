@@ -12,7 +12,7 @@
 
 #include "xmpp/xmpp.h"
 
-jabber_conn_status_t cl_ev_connect_jid(const char* const jid, const char* const passwd, const char* const altdomain, const int port, const char* const tls_policy, const char* const auth_policy);
+jabber_conn_status_t cl_ev_connect_jid(const gchar* const jid, const gchar* const passwd, const gchar* const altdomain, const int port, const gchar* const tls_policy, const gchar* const auth_policy);
 jabber_conn_status_t cl_ev_connect_account(ProfAccount* account);
 
 void cl_ev_disconnect(void);
@@ -20,10 +20,10 @@ void cl_ev_reconnect(void);
 
 void cl_ev_presence_send(const resource_presence_t presence_type, const int idle_secs);
 
-void cl_ev_send_msg_correct(ProfChatWin* chatwin, const char* const msg, const char* const oob_url, gboolean correct_last_msg);
-void cl_ev_send_msg(ProfChatWin* chatwin, const char* const msg, const char* const oob_url);
-void cl_ev_send_muc_msg_corrected(ProfMucWin* mucwin, const char* const msg, const char* const oob_url, gboolean correct_last_msg);
-void cl_ev_send_muc_msg(ProfMucWin* mucwin, const char* const msg, const char* const oob_url);
-void cl_ev_send_priv_msg(ProfPrivateWin* privwin, const char* const msg, const char* const oob_url);
+void cl_ev_send_msg_correct(ProfChatWin* chatwin, const gchar* const msg, const gchar* const oob_url, gboolean correct_last_msg);
+void cl_ev_send_msg(ProfChatWin* chatwin, const gchar* const msg, const gchar* const oob_url);
+void cl_ev_send_muc_msg_corrected(ProfMucWin* mucwin, const gchar* const msg, const gchar* const oob_url, gboolean correct_last_msg);
+void cl_ev_send_muc_msg(ProfMucWin* mucwin, const gchar* const msg, const gchar* const oob_url);
+void cl_ev_send_priv_msg(ProfPrivateWin* privwin, const gchar* const msg, const gchar* const oob_url);
 
 #endif

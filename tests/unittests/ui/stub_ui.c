@@ -257,7 +257,7 @@ xmlwin_show(ProfXMLWin* xmlwin, const char* const msg)
 
 // ui events
 void
-ui_contact_online(char* barejid, Resource* resource, GDateTime* last_activity)
+ui_contact_online(const gchar* const barejid, Resource* resource, GDateTime* last_activity)
 {
     check_expected(barejid);
     check_expected(resource);
@@ -541,12 +541,12 @@ chatwin_contact_online(ProfChatWin* chatwin, Resource* resource, GDateTime* last
 {
 }
 void
-chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status)
+chatwin_contact_offline(ProfChatWin* chatwin, const gchar* const resource, const gchar* const status)
 {
 }
 
 void
-ui_contact_offline(char* barejid, char* resource, char* status)
+ui_contact_offline(const gchar* const barejid, const gchar* const resource, const gchar* const status)
 {
 }
 
@@ -1194,7 +1194,7 @@ cons_show_contact_online(PContact contact, Resource* resource, GDateTime* last_a
 }
 
 void
-cons_show_contact_offline(PContact contact, char* resource, char* status)
+cons_show_contact_offline(PContact contact, const gchar* const resource, const gchar* const status)
 {
 }
 void

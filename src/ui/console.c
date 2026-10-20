@@ -2455,7 +2455,7 @@ cons_show_contact_online(PContact contact, Resource* resource, GDateTime* last_a
 }
 
 void
-cons_show_contact_offline(PContact contact, char* resource, char* status)
+cons_show_contact_offline(PContact contact, const gchar* const resource, const gchar* const status)
 {
     auto_gchar gchar* display_str = p_contact_create_display_string(contact, resource);
 

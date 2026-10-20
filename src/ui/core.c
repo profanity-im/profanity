@@ -255,7 +255,7 @@ ui_load_colours(void)
 }
 
 void
-ui_contact_online(char* barejid, Resource* resource, GDateTime* last_activity)
+ui_contact_online(const gchar* const barejid, Resource* resource, GDateTime* last_activity)
 {
     auto_gchar gchar* show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
     auto_gchar gchar* show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);
@@ -1061,7 +1061,7 @@ ui_ask_pgp_passphrase(const char* hint, int prev_fail)
 }
 
 void
-ui_contact_offline(char* barejid, char* resource, char* status)
+ui_contact_offline(const gchar* const barejid, const gchar* const resource, const gchar* const status)
 {
     auto_gchar gchar* show_console = prefs_get_string(PREF_STATUSES_CONSOLE);
     auto_gchar gchar* show_chat_win = prefs_get_string(PREF_STATUSES_CHAT);

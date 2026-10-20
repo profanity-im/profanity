@@ -446,7 +446,7 @@ chatwin_contact_online(ProfChatWin* chatwin, Resource* resource, GDateTime* last
 }
 
 void
-chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status)
+chatwin_contact_offline(ProfChatWin* chatwin, const gchar* const resource, const gchar* const status)
 {
     assert(chatwin != NULL);
 
