@@ -535,8 +535,8 @@ c_plugin_destroy(ProfPlugin* plugin)
         log_warning("dlclose failed to close `%s' with `%s'", plugin->name, dlerror());
     }
 
-    free(plugin->name);
-    free(plugin);
+    g_free(plugin->name);
+    g_free(plugin);
 }
 
 void

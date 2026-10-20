@@ -233,7 +233,7 @@ api_get_barejid_from_roster(const char* name)
     return roster_barejid_from_name(name);
 }
 
-char**
+gchar**
 api_get_current_occupants(void)
 {
     ProfWin* current = wins_get_current();
@@ -241,7 +241,7 @@ api_get_current_occupants(void)
         ProfMucWin* mucwin = (ProfMucWin*)current;
         assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         GList* occupants_list = muc_roster(mucwin->roomjid);
-        char** result = malloc((g_list_length(occupants_list) + 1) * sizeof(char*));
+        gchar** result = g_new0(gchar*, g_list_length(occupants_list) + 1);
         if (result == NULL) {
             g_list_free(occupants_list);
             return NULL;

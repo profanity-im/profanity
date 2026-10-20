@@ -463,7 +463,7 @@ static PyObject*
 python_api_get_current_occupants(PyObject* self, PyObject* args)
 {
     allow_python_threads();
-    char** occupants = api_get_current_occupants();
+    auto_gcharv gchar** occupants = api_get_current_occupants();
     disable_python_threads();
     PyObject* result = PyList_New(0);
     if (occupants) {

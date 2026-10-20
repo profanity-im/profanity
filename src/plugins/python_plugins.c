@@ -69,7 +69,7 @@ _unref_module(PyObject* module)
 void
 python_env_init(void)
 {
-    loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)_unref_module);
+    loaded_modules = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_unref_module);
 
     python_init_prof();
 
@@ -97,7 +97,7 @@ python_plugin_create(const char* const filename)
         gchar* module_name = g_strndup(filename, strlen(filename) - 3);
         p_module = PyImport_ImportModule(module_name);
         if (p_module) {
-            g_hash_table_insert(loaded_modules, strdup(filename), p_module);
+            g_hash_table_insert(loaded_modules, g_strdup(filename), p_module);
         }
         g_free(module_name);
     }
@@ -839,8 +839,8 @@ python_plugin_destroy(ProfPlugin* plugin)
     disable_python_threads();
     callbacks_remove(plugin->name);
     disco_remove_features(plugin->name);
-    free(plugin->name);
-    free(plugin);
+    g_free(plugin->name);
+    g_free(plugin);
     allow_python_threads();
 }
 
