@@ -46,102 +46,102 @@ typedef enum {
 
 typedef struct _muc_occupant_t
 {
-    char* nick;
+    gchar* nick;
     gchar* nick_collate_key;
-    char* jid;
+    gchar* jid;
     muc_role_t role;
     muc_affiliation_t affiliation;
     resource_presence_t presence;
-    char* status;
+    gchar* status;
 } Occupant;
 
 void muc_init(void);
 
-void muc_join(const char* const room, const char* const nick, const char* const password, gboolean autojoin);
-void muc_leave(const char* const room);
+void muc_join(const gchar* const room, const gchar* const nick, const gchar* const password, gboolean autojoin);
+void muc_leave(const gchar* const room);
 
-void muc_update_activity(const char* const room);
-gint64 muc_last_activity(const char* const room);
-void muc_set_ping_sent_time(const char* const room, gint64 time);
-gint64 muc_ping_sent_time(const char* const room);
+void muc_update_activity(const gchar* const room);
+gint64 muc_last_activity(const gchar* const room);
+void muc_set_ping_sent_time(const gchar* const room, gint64 time);
+gint64 muc_ping_sent_time(const gchar* const room);
 
-gboolean muc_active(const char* const room);
-gboolean muc_autojoin(const char* const room);
+gboolean muc_active(const gchar* const room);
+gboolean muc_autojoin(const gchar* const room);
 
 GList* muc_rooms(void);
 
-void muc_set_features(const char* const room, GSList* features);
-gboolean muc_supports_mam(const char* const room);
+void muc_set_features(const gchar* const room, GSList* features);
+gboolean muc_supports_mam(const gchar* const room);
 
-const char* muc_nick(const char* const room);
-char* muc_password(const char* const room);
+const gchar* muc_nick(const gchar* const room);
+gchar* muc_password(const gchar* const room);
 
-void muc_nick_change_start(const char* const room, const char* const new_nick);
-void muc_nick_change_complete(const char* const room, const char* const nick);
-gboolean muc_nick_change_pending(const char* const room);
-char* muc_old_nick(const char* const room, const char* const new_nick);
+void muc_nick_change_start(const gchar* const room, const gchar* const new_nick);
+void muc_nick_change_complete(const gchar* const room, const gchar* const nick);
+gboolean muc_nick_change_pending(const gchar* const room);
+gchar* muc_old_nick(const gchar* const room, const gchar* const new_nick);
 
-gboolean muc_roster_contains_nick(const char* const room, const char* const nick);
-gboolean muc_roster_complete(const char* const room);
-gboolean muc_roster_add(const char* const room, const char* const nick, const char* const jid, const char* const role,
-                        const char* const affiliation, const char* const show, const char* const status);
-void muc_roster_remove(const char* const room, const char* const nick);
-void muc_roster_set_complete(const char* const room);
-GList* muc_roster(const char* const room);
-Autocomplete muc_roster_ac(const char* const room);
-Autocomplete muc_roster_jid_ac(const char* const room);
-void muc_jid_autocomplete_reset(const char* const room);
-void muc_jid_autocomplete_add_all(const char* const room, GSList* jids);
+gboolean muc_roster_contains_nick(const gchar* const room, const gchar* const nick);
+gboolean muc_roster_complete(const gchar* const room);
+gboolean muc_roster_add(const gchar* const room, const gchar* const nick, const gchar* const jid, const gchar* const role,
+                        const gchar* const affiliation, const gchar* const show, const gchar* const status);
+void muc_roster_remove(const gchar* const room, const gchar* const nick);
+void muc_roster_set_complete(const gchar* const room);
+GList* muc_roster(const gchar* const room);
+Autocomplete muc_roster_ac(const gchar* const room);
+Autocomplete muc_roster_jid_ac(const gchar* const room);
+void muc_jid_autocomplete_reset(const gchar* const room);
+void muc_jid_autocomplete_add_all(const gchar* const room, GSList* jids);
 
-Occupant* muc_roster_item(const char* const room, const char* const nick);
+Occupant* muc_roster_item(const gchar* const room, const gchar* const nick);
 
 gboolean muc_occupant_available(Occupant* occupant);
-const char* muc_occupant_affiliation_str(Occupant* occupant);
-const char* muc_occupant_role_str(Occupant* occupant);
-GSList* muc_occupants_by_role(const char* const room, muc_role_t role);
-GSList* muc_occupants_by_affiliation(const char* const room, muc_affiliation_t affiliation);
+const gchar* muc_occupant_affiliation_str(Occupant* occupant);
+const gchar* muc_occupant_role_str(Occupant* occupant);
+GSList* muc_occupants_by_role(const gchar* const room, muc_role_t role);
+GSList* muc_occupants_by_affiliation(const gchar* const room, muc_affiliation_t affiliation);
 
-void muc_occupant_nick_change_start(const char* const room, const char* const new_nick, const char* const old_nick);
-char* muc_roster_nick_change_complete(const char* const room, const char* const nick);
+void muc_occupant_nick_change_start(const gchar* const room, const gchar* const new_nick, const gchar* const old_nick);
+gchar* muc_roster_nick_change_complete(const gchar* const room, const gchar* const nick);
 
-void muc_confserver_add(const char* const server);
+void muc_confserver_add(const gchar* const server);
 void muc_confserver_reset_ac(void);
-char* muc_confserver_find(const char* const search_str, gboolean previous, void* context);
+gchar* muc_confserver_find(const gchar* const search_str, gboolean previous, void* context);
 void muc_confserver_clear(void);
 
-void muc_invites_add(const char* const room, const char* const password);
-void muc_invites_remove(const char* const room);
+void muc_invites_add(const gchar* const room, const gchar* const password);
+void muc_invites_remove(const gchar* const room);
 gint muc_invites_count(void);
 GList* muc_invites(void);
-gboolean muc_invites_contain(const char* const room);
+gboolean muc_invites_contain(const gchar* const room);
 void muc_invites_reset_ac(void);
-char* muc_invites_find(const char* const search_str, gboolean previous, void* context);
+gchar* muc_invites_find(const gchar* const search_str, gboolean previous, void* context);
 void muc_invites_clear(void);
-char* muc_invite_password(const char* const room);
+gchar* muc_invite_password(const gchar* const room);
 
-void muc_set_subject(const char* const room, const char* const subject);
-char* muc_subject(const char* const room);
+void muc_set_subject(const gchar* const room, const gchar* const subject);
+gchar* muc_subject(const gchar* const room);
 
-void muc_pending_broadcasts_add(const char* const room, const char* const message);
-GList* muc_pending_broadcasts(const char* const room);
+void muc_pending_broadcasts_add(const gchar* const room, const gchar* const message);
+GList* muc_pending_broadcasts(const gchar* const room);
 
-char* muc_autocomplete(ProfWin* window, const char* const input, gboolean previous);
-void muc_autocomplete_reset(const char* const room);
+gchar* muc_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
+void muc_autocomplete_reset(const gchar* const room);
 
-gboolean muc_requires_config(const char* const room);
-void muc_set_requires_config(const char* const room, gboolean val);
+gboolean muc_requires_config(const gchar* const room);
+void muc_set_requires_config(const gchar* const room, gboolean val);
 
-void muc_set_role(const char* const room, const char* const role);
-void muc_set_affiliation(const char* const room, const char* const affiliation);
-char* muc_role_str(const char* const room);
-char* muc_affiliation_str(const char* const room);
+void muc_set_role(const gchar* const room, const gchar* const role);
+void muc_set_affiliation(const gchar* const room, const gchar* const affiliation);
+gchar* muc_role_str(const gchar* const room);
+gchar* muc_affiliation_str(const gchar* const room);
 
-muc_member_type_t muc_member_type(const char* const room);
-muc_anonymity_type_t muc_anonymity_type(const char* const room);
+muc_member_type_t muc_member_type(const gchar* const room);
+muc_anonymity_type_t muc_anonymity_type(const gchar* const room);
 
-GList* muc_members(const char* const room);
-void muc_members_add(const char* const room, const char* const jid);
-void muc_members_remove(const char* const room, const char* const jid);
-void muc_members_update(const char* const room, const char* const jid, const char* const affiliation);
+GList* muc_members(const gchar* const room);
+void muc_members_add(const gchar* const room, const gchar* const jid);
+void muc_members_remove(const gchar* const room, const gchar* const jid);
+void muc_members_update(const gchar* const room, const gchar* const jid, const gchar* const affiliation);
 
 #endif

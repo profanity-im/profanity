@@ -1162,14 +1162,14 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
     }
 
     size_t plaintext_len = payload_len;
-    plaintext = malloc(plaintext_len + 1);
+    plaintext = g_malloc0(plaintext_len + 1);
     res = aes128gcm_decrypt(plaintext, &plaintext_len, payload, payload_len, iv,
                             iv_len, signal_buffer_data(plaintext_key),
                             signal_buffer_data(plaintext_key) + AES128_GCM_KEY_LENGTH);
     signal_buffer_free(plaintext_key);
     if (res != 0) {
         log_error("[OMEMO][RECV] cannot decrypt message: %s", gcry_strerror(res));
-        free(plaintext);
+        g_free(plaintext);
         *error = OMEMO_ERR_DECRYPT_FAILED;
         return NULL;
     }

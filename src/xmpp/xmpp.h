@@ -141,21 +141,21 @@ typedef struct prof_message_t
     Jid* from_jid;
     Jid* to_jid;
     /* regular <message id=""> */
-    char* id;
+    gchar* id;
     /* </origin-id> XEP-0359 */
-    char* originid;
+    gchar* originid;
     /* <replace id> XEP-0308 LMC */
-    char* replace_id;
+    gchar* replace_id;
     /* stanza-id from XEP 0359. Used for MAM. archive_id in our database (see database.c)
      * coming in as <stanza-id> for live messages
      * coming in as <result id=""> for MAM messages*/
-    char* stanzaid;
+    gchar* stanzaid;
     /* The raw body from xmpp message, either plaintext or OTR encrypted text */
-    char* body;
+    gchar* body;
     /* The encrypted message as for PGP */
-    char* encrypted;
+    gchar* encrypted;
     /* The message that will be printed on screen and logs */
-    char* plain;
+    gchar* plain;
     GDateTime* timestamp;
     prof_enc_t enc;
     omemo_error_t omemo_err;

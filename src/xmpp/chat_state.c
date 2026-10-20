@@ -24,7 +24,7 @@
 #define PAUSED_TIMEOUT   10.0
 #define INACTIVE_TIMEOUT 30.0
 
-static void _send_if_supported(const char* const barejid, void (*send_func)(const char* const));
+static void _send_if_supported(const gchar* const barejid, void (*send_func)(const gchar* const));
 
 ChatState*
 chat_state_new(void)
@@ -42,11 +42,11 @@ chat_state_free(ChatState* state)
     if (state && state->timer != NULL) {
         g_timer_destroy(state->timer);
     }
-    free(state);
+    g_free(state);
 }
 
 void
-chat_state_handle_idle(const char* const barejid, ChatState* state)
+chat_state_handle_idle(const gchar* const barejid, ChatState* state)
 {
     gdouble elapsed = g_timer_elapsed(state->timer, NULL);
 
@@ -97,7 +97,7 @@ chat_state_handle_idle(const char* const barejid, ChatState* state)
 }
 
 void
-chat_state_handle_typing(const char* const barejid, ChatState* state)
+chat_state_handle_typing(const gchar* const barejid, ChatState* state)
 {
     // ACTIVE|INACTIVE|PAUSED|GONE -> COMPOSING
     if (state->type != CHAT_STATE_COMPOSING) {
@@ -117,7 +117,7 @@ chat_state_active(ChatState* state)
 }
 
 void
-chat_state_gone(const char* const barejid, ChatState* state)
+chat_state_gone(const gchar* const barejid, ChatState* state)
 {
     if (state->type != CHAT_STATE_GONE) {
         if (prefs_get_boolean(PREF_STATES)) {
@@ -163,7 +163,7 @@ chat_state_activity(void)
 }
 
 static void
-_send_if_supported(const char* const barejid, void (*send_func)(const char* const))
+_send_if_supported(const gchar* const barejid, void (*send_func)(const gchar* const))
 {
     gboolean send = TRUE;
     GString* jid = g_string_new(barejid);

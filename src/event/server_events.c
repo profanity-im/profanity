@@ -498,13 +498,13 @@ sv_ev_outgoing_carbon(ProfMessage* message)
                 return;
             }
             message->enc = PROF_MSG_ENC_NONE;
-            message->plain = strdup(message->body);
+            message->plain = g_strdup(message->body);
             chatwin_outgoing_carbon(chatwin, message);
         }
 #endif
     } else {
         message->enc = PROF_MSG_ENC_NONE;
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
         chatwin_outgoing_carbon(chatwin, message);
     }
 
@@ -544,7 +544,7 @@ _sv_ev_incoming_pgp(ProfChatWin* chatwin, gboolean new_win, ProfMessage* message
             return;
         }
         message->enc = PROF_MSG_ENC_NONE;
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
         _clean_incoming_message(message);
         if (!message->is_mam) {
             chatwin_incoming_msg(chatwin, message, new_win);
@@ -567,7 +567,7 @@ _sv_ev_incoming_ox(ProfChatWin* chatwin, gboolean new_win, ProfMessage* message,
             log_error("Couldn't decrypt OX message and body was empty");
             return;
         }
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
     }
 
     //_clean_incoming_message(message);
@@ -639,7 +639,7 @@ _sv_ev_incoming_plain(ProfChatWin* chatwin, gboolean new_win, ProfMessage* messa
 {
     if (message->body) {
         message->enc = PROF_MSG_ENC_NONE;
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
         if (message->plain == NULL) {
             return;
         }
