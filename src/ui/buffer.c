@@ -29,7 +29,7 @@
 #include "ui/buffer.h"
 
 #define MAX_BUFFER_SIZE     200
-#define STRDUP_OR_NULL(str) ((str) ? strdup(str) : NULL)
+#define STRDUP_OR_NULL(str) ((str) ? g_strdup(str) : NULL)
 
 struct prof_buff_t
 {
@@ -38,13 +38,13 @@ struct prof_buff_t
 };
 
 static void _free_entry(ProfBuffEntry* entry);
-static ProfBuffEntry* _create_entry(const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos);
-static void _buffer_add(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos, gboolean append);
+static ProfBuffEntry* _create_entry(const gchar* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const gchar* const display_from, const gchar* const from_jid, const gchar* const message, DeliveryReceipt* receipt, const gchar* const id, int y_start_pos, int y_end_pos);
+static void _buffer_add(ProfBuff buffer, const gchar* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const gchar* const display_from, const gchar* const from_jid, const gchar* const message, DeliveryReceipt* receipt, const gchar* const id, int y_start_pos, int y_end_pos, gboolean append);
 
 ProfBuff
 buffer_create(void)
 {
-    ProfBuff new_buff = malloc(sizeof(struct prof_buff_t));
+    ProfBuff new_buff = g_new0(struct prof_buff_t, 1);
     new_buff->entries = NULL;
     new_buff->lines = 0;
     return new_buff;
@@ -60,23 +60,23 @@ void
 buffer_free(ProfBuff buffer)
 {
     g_slist_free_full(buffer->entries, (GDestroyNotify)_free_entry);
-    free(buffer);
+    g_free(buffer);
 }
 
 void
-buffer_append(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos)
+buffer_append(ProfBuff buffer, const gchar* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const gchar* const display_from, const gchar* const from_jid, const gchar* const message, DeliveryReceipt* receipt, const gchar* const id, int y_start_pos, int y_end_pos)
 {
     _buffer_add(buffer, show_char, pad_indent, time, flags, theme_item, display_from, from_jid, message, receipt, id, y_start_pos, y_end_pos, TRUE);
 }
 
 void
-buffer_prepend(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos)
+buffer_prepend(ProfBuff buffer, const gchar* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const gchar* const display_from, const gchar* const from_jid, const gchar* const message, DeliveryReceipt* receipt, const gchar* const id, int y_start_pos, int y_end_pos)
 {
     _buffer_add(buffer, show_char, pad_indent, time, flags, theme_item, display_from, from_jid, message, receipt, id, y_start_pos, y_end_pos, FALSE);
 }
 
 static void
-_buffer_add(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos, gboolean append)
+_buffer_add(ProfBuff buffer, const gchar* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const gchar* const display_from, const gchar* const from_jid, const gchar* const message, DeliveryReceipt* receipt, const gchar* const id, int y_start_pos, int y_end_pos, gboolean append)
 {
     ProfBuffEntry* e = _create_entry(show_char, pad_indent, time, flags, theme_item, display_from, from_jid, message, receipt, id, y_start_pos, y_end_pos);
 
@@ -98,7 +98,7 @@ _buffer_add(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* t
 }
 
 void
-buffer_remove_entry_by_id(ProfBuff buffer, const char* const id)
+buffer_remove_entry_by_id(ProfBuff buffer, const gchar* const id)
 {
     GSList* entries = buffer->entries;
     while (entries) {
@@ -124,7 +124,7 @@ buffer_remove_entry(ProfBuff buffer, unsigned int entry)
 }
 
 gboolean
-buffer_mark_received(ProfBuff buffer, const char* const id)
+buffer_mark_received(ProfBuff buffer, const gchar* const id)
 {
     GSList* entries = buffer->entries;
     while (entries) {
@@ -149,7 +149,7 @@ buffer_get_entry(ProfBuff buffer, unsigned int entry)
 }
 
 ProfBuffEntry*
-buffer_get_entry_by_id(ProfBuff buffer, const char* const id)
+buffer_get_entry_by_id(ProfBuff buffer, const gchar* const id)
 {
     GSList* entries = buffer->entries;
     while (entries) {
@@ -164,7 +164,7 @@ buffer_get_entry_by_id(ProfBuff buffer, const char* const id)
 }
 
 static ProfBuffEntry*
-_create_entry(const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos)
+_create_entry(const gchar* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const gchar* const display_from, const gchar* const from_jid, const gchar* const message, DeliveryReceipt* receipt, const gchar* const id, int y_start_pos, int y_end_pos)
 {
     ProfBuffEntry* e = g_new0(ProfBuffEntry, 1);
     e->show_char = STRDUP_OR_NULL(show_char);
@@ -187,12 +187,12 @@ _create_entry(const char* show_char, int pad_indent, GDateTime* time, int flags,
 static void
 _free_entry(ProfBuffEntry* entry)
 {
-    free(entry->id);
-    free(entry->message);
-    free(entry->from_jid);
-    free(entry->display_from);
+    g_free(entry->id);
+    g_free(entry->message);
+    g_free(entry->from_jid);
+    g_free(entry->display_from);
     g_date_time_unref(entry->time);
-    free(entry->show_char);
-    free(entry->receipt);
-    free(entry);
+    g_free(entry->show_char);
+    g_free(entry->receipt);
+    g_free(entry);
 }

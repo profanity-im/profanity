@@ -26,15 +26,15 @@
 #include "config/files.h"
 #include "ui/ui.h"
 
-static gpgme_key_t _ox_key_lookup(const char* const barejid, gboolean secret_only);
-static gboolean _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret);
+static gpgme_key_t _ox_key_lookup(const gchar* const barejid, gboolean secret_only);
+static gboolean _ox_key_is_usable(gpgme_key_t key, const gchar* const barejid, gboolean secret);
 static GHashTable* _ox_gpg_get_keys(gboolean check_secret);
 
 static GHashTable*
 _ox_gpg_get_keys(gboolean check_secret)
 {
     gpgme_error_t error;
-    GHashTable* result = g_hash_table_new_full(g_str_hash, g_str_equal, free, (GDestroyNotify)p_gpg_free_key);
+    GHashTable* result = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)p_gpg_free_key);
 
     gpgme_ctx_t ctx;
     error = gpgme_new(&ctx);
@@ -72,9 +72,9 @@ _ox_gpg_get_keys(gboolean check_secret)
                 gpgme_subkey_t sub = key->subkeys;
 
                 ProfPGPKey* p_pgpkey = p_gpg_key_new();
-                p_pgpkey->id = strdup(sub->keyid);
-                p_pgpkey->name = strdup(xmppid->uid);
-                p_pgpkey->fp = strdup(sub->fpr);
+                p_pgpkey->id = g_strdup(sub->keyid);
+                p_pgpkey->name = g_strdup(xmppid->uid);
+                p_pgpkey->fp = g_strdup(sub->fpr);
                 if (sub->can_encrypt)
                     p_pgpkey->encrypt = TRUE;
                 if (sub->can_authenticate)
@@ -98,7 +98,7 @@ _ox_gpg_get_keys(gboolean check_secret)
                     sub = sub->next;
                 }
 
-                g_hash_table_insert(result, strdup(p_pgpkey->name), p_pgpkey);
+                g_hash_table_insert(result, g_strdup(p_pgpkey->name), p_pgpkey);
             }
             gpgme_key_unref(key);
             error = gpgme_op_keylist_next(ctx, &key);
@@ -173,10 +173,10 @@ ox_gpg_list_keys(void)
     return _ox_gpg_get_keys(TRUE);
 }
 
-char*
-p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient_barejid, const char* const message)
+gchar*
+p_ox_gpg_signcrypt(const gchar* const sender_barejid, const gchar* const recipient_barejid, const gchar* const message)
 {
-    char* result = NULL;
+    gchar* result = NULL;
     gpgme_ctx_t ctx = NULL;
     gpgme_key_t recp[3] = { NULL, NULL, NULL };
     gpgme_data_t plain = NULL;
@@ -283,7 +283,7 @@ cleanup:
 }
 
 gboolean
-ox_is_private_key_available(const char* const barejid)
+ox_is_private_key_available(const gchar* const barejid)
 {
     g_assert(barejid);
     gboolean result = FALSE;
@@ -300,7 +300,7 @@ ox_is_private_key_available(const char* const barejid)
 }
 
 gboolean
-ox_is_public_key_available(const char* const barejid)
+ox_is_public_key_available(const gchar* const barejid)
 {
     g_assert(barejid);
     gboolean result = FALSE;
@@ -315,7 +315,7 @@ ox_is_public_key_available(const char* const barejid)
 }
 
 static gpgme_key_t
-_ox_key_lookup(const char* const barejid, gboolean secret_only)
+_ox_key_lookup(const gchar* const barejid, gboolean secret_only)
 {
     g_assert(barejid);
     log_debug("OX: Looking for %s key: %s", secret_only == TRUE ? "Private" : "Public", barejid);
@@ -366,7 +366,7 @@ _ox_key_lookup(const char* const barejid, gboolean secret_only)
 }
 
 static gboolean
-_ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret)
+_ox_key_is_usable(gpgme_key_t key, const gchar* const barejid, gboolean secret)
 {
     gboolean result = TRUE;
 
@@ -397,10 +397,10 @@ _ox_key_is_usable(gpgme_key_t key, const char* const barejid, gboolean secret)
  *
  * @result decrypt XMPP OX Message NULL terminated C-String
  */
-char*
-p_ox_gpg_decrypt(char* base64)
+gchar*
+p_ox_gpg_decrypt(const gchar* base64)
 {
-    char* result = NULL;
+    gchar* result = NULL;
     gpgme_ctx_t ctx = NULL;
     gpgme_data_t plain = NULL;
     gpgme_data_t cipher = NULL;
@@ -459,7 +459,7 @@ p_ox_gpg_decrypt(char* base64)
     plain_str = gpgme_data_release_and_get_mem(plain, &len);
     plain = NULL; // Already released by gpgme_data_release_and_get_mem
     if (plain_str) {
-        result = strndup(plain_str, len);
+        result = g_strndup(plain_str, len);
     }
 
 cleanup:
@@ -500,7 +500,7 @@ cleanup:
  *
  */
 void
-p_ox_gpg_readkey(const char* const filename, char** key, char** fp)
+p_ox_gpg_readkey(const gchar* const filename, gchar** key, gchar** fp)
 {
     log_info("PX: Read OpenPGP Key from file %s", filename);
 
@@ -565,11 +565,8 @@ p_ox_gpg_readkey(const char* const filename, char** key, char** fp)
             goto cleanup;
         }
 
-        gchar* keybase64 = g_base64_encode((const guchar*)data, size);
-
-        *key = strdup(keybase64);
-        *fp = strdup(gkey->fpr);
-        g_free(keybase64);
+        *key = g_base64_encode((const guchar*)data, size);
+        *fp = g_strdup(gkey->fpr);
     } else {
         log_error("OX: Read OpenPGP key from file: Unable to read file: %s", gerr->message);
         g_error_free(gerr);
@@ -589,7 +586,7 @@ cleanup:
 }
 
 gboolean
-p_ox_gpg_import(char* base64_public_key)
+p_ox_gpg_import(const gchar* base64_public_key)
 {
     gsize size = -1;
     guchar* key = g_base64_decode(base64_public_key, &size);

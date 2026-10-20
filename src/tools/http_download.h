@@ -23,11 +23,11 @@
 
 typedef struct http_download_t
 {
-    char* id;
-    char* url;
-    char* display_url;
-    char* filename;
-    char* cmd_template;
+    gchar* id;
+    gchar* url;
+    gchar* display_url;
+    gchar* filename;
+    gchar* cmd_template;
     curl_off_t bytes_received;
     ProfWin* window;
     pthread_t worker;

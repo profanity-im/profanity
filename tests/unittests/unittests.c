@@ -110,6 +110,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(autocomplete_complete__returns__null_after_create),
         cmocka_unit_test(autocomplete_complete__handles__escaped_spaces),
         cmocka_unit_test(autocomplete_complete__handles__escaped_quotes),
+        cmocka_unit_test(autocomplete_param_with_ac__handles__quoted_input),
         cmocka_unit_test(autocomplete_create_list__returns__null_after_create),
         cmocka_unit_test(autocomplete_add__updates__one_and_complete),
         cmocka_unit_test(autocomplete_complete__returns__first_of_two),

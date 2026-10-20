@@ -35,7 +35,7 @@
 
 static OtrlUserState user_state;
 static OtrlMessageAppOps ops;
-static char* jid;
+static gchar* jid;
 static gboolean data_loaded;
 static GHashTable* smp_initiators;
 
@@ -135,7 +135,7 @@ _otr_shutdown(void)
 {
     g_hash_table_destroy(smp_initiators);
     if (jid) {
-        free(jid);
+        g_free(jid);
         jid = NULL;
     }
     if (user_state) {
@@ -178,9 +178,9 @@ void
 otr_on_connect(ProfAccount* account)
 {
     if (jid) {
-        free(jid);
+        g_free(jid);
     }
-    jid = strdup(account->jid);
+    jid = g_strdup(account->jid);
     log_info("Loading OTR key for %s", jid);
 
     auto_gchar gchar* otr_dir = files_file_in_account_data_path(DIR_OTR, jid, NULL);
@@ -251,8 +251,8 @@ otr_on_connect(ProfAccount* account)
     return;
 }
 
-char*
-otr_on_message_recv(const char* const barejid, const char* const resource, const char* const message, gboolean* decrypted)
+gchar*
+otr_on_message_recv(const gchar* const barejid, const gchar* const resource, const gchar* const message, gboolean* decrypted)
 {
     prof_otrpolicy_t policy = otr_get_policy(barejid);
     char* whitespace_base = strstr(message, OTRL_MESSAGE_TAG_BASE);
@@ -276,7 +276,7 @@ otr_on_message_recv(const char* const barejid, const char* const resource, const
         }
     }
 
-    char* newmessage = otr_decrypt_message(barejid, message, decrypted);
+    gchar* newmessage = otr_decrypt_message(barejid, message, decrypted);
     if (!newmessage) { // internal OTR message
         return NULL;
     }
@@ -291,14 +291,14 @@ otr_on_message_recv(const char* const barejid, const char* const resource, const
 }
 
 gboolean
-otr_on_message_send(ProfChatWin* chatwin, const char* const message, gboolean request_receipt, const char* const replace_id)
+otr_on_message_send(ProfChatWin* chatwin, const gchar* const message, gboolean request_receipt, const gchar* const replace_id)
 {
     auto_char char* id = NULL;
     prof_otrpolicy_t policy = otr_get_policy(chatwin->barejid);
 
     // Send encrypted message
     if (otr_is_secure(chatwin->barejid)) {
-        char* encrypted = otr_encrypt_message(chatwin->barejid, message);
+        gchar* encrypted = otr_encrypt_message(chatwin->barejid, message);
         if (encrypted) {
             id = message_send_chat_otr(chatwin->barejid, encrypted, request_receipt, replace_id);
             chat_log_otr_msg_out(chatwin->barejid, message, NULL);
@@ -326,7 +326,7 @@ otr_on_message_send(ProfChatWin* chatwin, const char* const message, gboolean re
 
     // tag and send for policy opportunistic
     if (policy == PROF_OTRPOLICY_OPPORTUNISTIC) {
-        auto_char char* otr_tagged_msg = otr_tag_message(message);
+        auto_gchar gchar* otr_tagged_msg = otr_tag_message(message);
         id = message_send_chat_otr(chatwin->barejid, otr_tagged_msg, request_receipt, replace_id);
         chatwin_outgoing_msg(chatwin, message, id, PROF_MSG_ENC_NONE, request_receipt, replace_id);
         chat_log_msg_out(chatwin->barejid, message, NULL);
@@ -344,8 +344,8 @@ otr_keygen(ProfAccount* account)
         return;
     }
 
-    free(jid);
-    jid = strdup(account->jid);
+    g_free(jid);
+    jid = g_strdup(account->jid);
     log_info("Generating OTR key for %s", jid);
 
     auto_gchar gchar* otr_dir = files_file_in_account_data_path(DIR_OTR, jid, NULL);
@@ -416,14 +416,14 @@ otr_key_loaded(void)
     return data_loaded;
 }
 
-char*
-otr_tag_message(const char* const msg)
+gchar*
+otr_tag_message(const gchar* const msg)
 {
     return g_strdup_printf("%s%s%s", msg, OTRL_MESSAGE_TAG_BASE, OTRL_MESSAGE_TAG_V2);
 }
 
 gboolean
-otr_is_secure(const char* const recipient)
+otr_is_secure(const gchar* const recipient)
 {
     ConnContext* context = otrlib_context_find(user_state, recipient, jid);
 
@@ -439,7 +439,7 @@ otr_is_secure(const char* const recipient)
 }
 
 gboolean
-otr_is_trusted(const char* const recipient)
+otr_is_trusted(const gchar* const recipient)
 {
     ConnContext* context = otrlib_context_find(user_state, recipient, jid);
 
@@ -465,7 +465,7 @@ otr_is_trusted(const char* const recipient)
 }
 
 void
-otr_trust(const char* const recipient)
+otr_trust(const gchar* const recipient)
 {
     ConnContext* context = otrlib_context_find(user_state, recipient, jid);
 
@@ -489,7 +489,7 @@ otr_trust(const char* const recipient)
 }
 
 void
-otr_untrust(const char* const recipient)
+otr_untrust(const gchar* const recipient)
 {
     ConnContext* context = otrlib_context_find(user_state, recipient, jid);
 
@@ -513,7 +513,7 @@ otr_untrust(const char* const recipient)
 }
 
 void
-otr_smp_secret(const char* const recipient, const char* secret)
+otr_smp_secret(const gchar* const recipient, const gchar* secret)
 {
     ConnContext* context = otrlib_context_find(user_state, recipient, jid);
 
@@ -542,7 +542,7 @@ otr_smp_secret(const char* const recipient, const char* secret)
 }
 
 void
-otr_smp_question(const char* const recipient, const char* question, const char* answer)
+otr_smp_question(const gchar* const recipient, const gchar* question, const gchar* answer)
 {
     ConnContext* context = otrlib_context_find(user_state, recipient, jid);
 
@@ -562,7 +562,7 @@ otr_smp_question(const char* const recipient, const char* question, const char* 
 }
 
 void
-otr_smp_answer(const char* const recipient, const char* answer)
+otr_smp_answer(const gchar* const recipient, const gchar* answer)
 {
     ConnContext* context = otrlib_context_find(user_state, recipient, jid);
 
@@ -579,23 +579,23 @@ otr_smp_answer(const char* const recipient, const char* answer)
 }
 
 void
-otr_end_session(const char* const recipient)
+otr_end_session(const gchar* const recipient)
 {
     otrlib_end_session(user_state, recipient, jid, &ops);
 }
 
-char*
+gchar*
 otr_get_my_fingerprint(void)
 {
     char fingerprint[45];
     otrl_privkey_fingerprint(user_state, fingerprint, jid, "xmpp");
-    char* result = strdup(fingerprint);
+    gchar* result = g_strdup(fingerprint);
 
     return result;
 }
 
-char*
-otr_get_their_fingerprint(const char* const recipient)
+gchar*
+otr_get_their_fingerprint(const gchar* const recipient)
 {
     ConnContext* context = otrlib_context_find(user_state, recipient, jid);
 
@@ -603,14 +603,14 @@ otr_get_their_fingerprint(const char* const recipient)
         Fingerprint* fingerprint = context->active_fingerprint;
         char readable[45];
         otrl_privkey_hash_to_human(readable, fingerprint->fingerprint);
-        return strdup(readable);
+        return g_strdup(readable);
     } else {
         return NULL;
     }
 }
 
 prof_otrpolicy_t
-otr_get_policy(const char* const recipient)
+otr_get_policy(const gchar* const recipient)
 {
     ProfAccount* account = accounts_get_account(session_get_account_name());
     // check contact specific setting
@@ -657,16 +657,18 @@ otr_get_policy(const char* const recipient)
     return result;
 }
 
-char*
-otr_encrypt_message(const char* const to, const char* const message)
+gchar*
+otr_encrypt_message(const gchar* const to, const gchar* const message)
 {
     char* newmessage = NULL;
     gcry_error_t err = otrlib_encrypt_message(user_state, &ops, jid, to, message, &newmessage);
 
-    if (err != 0) {
+    if (err != 0 || !newmessage) {
         return NULL;
     } else {
-        return newmessage;
+        gchar* result = g_strdup(newmessage);
+        otrl_message_free(newmessage);
+        return result;
     }
 }
 
@@ -678,8 +680,8 @@ _otr_tlv_free(OtrlTLV* tlvs)
     }
 }
 
-char*
-otr_decrypt_message(const char* const from, const char* const message, gboolean* decrypted)
+gchar*
+otr_decrypt_message(const gchar* const from, const gchar* const message, gboolean* decrypted)
 {
     char* newmessage = NULL;
     OtrlTLV* tlvs = NULL;
@@ -714,18 +716,20 @@ otr_decrypt_message(const char* const from, const char* const message, gboolean*
         if (g_str_has_prefix(message, "?OTR:")) {
             *decrypted = TRUE;
         }
-        return newmessage;
+        gchar* result = g_strdup(newmessage);
+        otrl_message_free(newmessage);
+        return result;
 
         // normal non OTR message
     } else {
         _otr_tlv_free(tlvs);
         *decrypted = FALSE;
-        return strdup(message);
+        return g_strdup(message);
     }
 }
 
 void
-otr_free_message(char* message)
+otr_free_message(gchar* message)
 {
-    otrl_message_free(message);
+    g_free(message);
 }

@@ -71,7 +71,7 @@ c_api_register_command(const char* filename, const char* command_name, int min_a
     CommandWrapper* wrapper = g_new0(CommandWrapper, 1);
     wrapper->func = callback;
     api_register_command(plugin_name, command_name, min_args, max_args, synopsis,
-                         description, arguments, examples, wrapper, c_command_callback, free);
+                         description, arguments, examples, wrapper, c_command_callback, (GDestroyNotify)g_free);
 }
 
 static void
@@ -82,7 +82,7 @@ c_api_register_timed(const char* filename, void (*callback)(void), int interval_
 
     TimedWrapper* wrapper = g_new0(TimedWrapper, 1);
     wrapper->func = callback;
-    api_register_timed(plugin_name, wrapper, interval_seconds, c_timed_callback, free);
+    api_register_timed(plugin_name, wrapper, interval_seconds, c_timed_callback, (GDestroyNotify)g_free);
 }
 
 static void
@@ -172,7 +172,7 @@ c_api_get_barejid_from_roster(const char* name)
 static char**
 c_api_get_current_occupants(void)
 {
-    return api_get_current_occupants();
+    return (char**)api_get_current_occupants();
 }
 
 static char*
@@ -218,7 +218,7 @@ c_api_win_create(const char* filename, char* tag, void (*callback)(char* tag, ch
 
     WindowWrapper* wrapper = g_new0(WindowWrapper, 1);
     wrapper->func = callback;
-    api_win_create(plugin_name, tag, wrapper, c_window_callback, free);
+    api_win_create(plugin_name, tag, wrapper, c_window_callback, (GDestroyNotify)g_free);
 }
 
 static int

@@ -124,7 +124,7 @@ occupantswin_occupants(const char* const roomjid)
                 while (roster_curr) {
                     Occupant* occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_MODERATOR) {
-                        _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, false);
+                        _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, FALSE);
                     }
                     roster_curr = g_list_next(roster_curr);
                     online_occupants = g_list_append(online_occupants, occupant->jid);
@@ -142,7 +142,7 @@ occupantswin_occupants(const char* const roomjid)
                 while (roster_curr) {
                     Occupant* occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_PARTICIPANT) {
-                        _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, false);
+                        _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, FALSE);
                     }
                     roster_curr = g_list_next(roster_curr);
                     online_occupants = g_list_append(online_occupants, occupant->jid);
@@ -160,7 +160,7 @@ occupantswin_occupants(const char* const roomjid)
                 while (roster_curr) {
                     Occupant* occupant = roster_curr->data;
                     if (occupant->role == MUC_ROLE_VISITOR) {
-                        _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, false);
+                        _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, FALSE);
                     }
                     roster_curr = g_list_next(roster_curr);
                     online_occupants = g_list_append(online_occupants, occupant->jid);
@@ -182,17 +182,17 @@ occupantswin_occupants(const char* const roomjid)
                     roster_curr = members;
                     while (roster_curr) {
                         auto_jid Jid* jid = jid_create(roster_curr->data);
-                        gboolean found = false;
+                        gboolean found = FALSE;
                         GList* iter = online_occupants;
                         for (; iter != NULL; iter = iter->next) {
                             if (strstr(iter->data, jid->barejid)) {
-                                found = true;
+                                found = TRUE;
                                 break;
                             }
                         }
 
                         if (!found && g_list_index(offline_occupants, jid->barejid) == -1) {
-                            _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, true);
+                            _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, TRUE);
                             offline_occupants = g_list_append(offline_occupants, jid->barejid);
                         }
 
@@ -215,7 +215,7 @@ occupantswin_occupants(const char* const roomjid)
 
                 GList* roster_curr = occupants;
                 while (roster_curr) {
-                    _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, false);
+                    _occuptantswin_occupant(layout, roster_curr, mucwin->showjid, FALSE);
                     roster_curr = g_list_next(roster_curr);
                 }
             }

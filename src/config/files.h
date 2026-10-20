@@ -38,16 +38,16 @@
 
 void files_create_directories(void);
 
-gchar* files_get_config_path(const char* const config_base);
-gchar* files_get_data_path(const char* const location);
-gchar* files_get_download_path(const char* const jid);
-gchar* files_get_account_data_path(const char* const specific_dir, const char* const jid);
-gchar* files_sanitize_jid(const char* const jid);
+gchar* files_get_config_path(const gchar* const config_base);
+gchar* files_get_data_path(const gchar* const location);
+gchar* files_get_download_path(const gchar* const jid);
+gchar* files_get_account_data_path(const gchar* const specific_dir, const gchar* const jid);
+gchar* files_sanitize_jid(const gchar* const jid);
 
-gchar* files_get_log_file(const char* const log_file);
+gchar* files_get_log_file(const gchar* const log_file);
 gchar* files_get_inputrc_file(void);
 
 gchar*
-files_file_in_account_data_path(const char* const specific_dir, const char* const jid, const char* const file_name);
+files_file_in_account_data_path(const gchar* const specific_dir, const gchar* const jid, const gchar* const file_name);
 
 #endif

@@ -104,7 +104,7 @@ presence_subscription(const char* const jid, const jabber_subscr_t action)
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_stanza_t* presence = xmpp_presence_new(ctx);
 
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_set_id(presence, id);
 
     xmpp_stanza_set_type(presence, type);
@@ -185,7 +185,7 @@ presence_send(const resource_presence_t presence_type, const int idle, char* sig
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_stanza_t* presence = xmpp_presence_new(ctx);
 
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_set_id(presence, id);
 
     const char* show = stanza_get_presence_string_from_type(presence_type);
@@ -537,7 +537,7 @@ _handle_caps(const char* const jid, XMPPCaps* caps)
                 caps_map_jid_to_ver(jid, caps->ver);
             } else {
                 log_debug("Capabilities cache miss: %s, for %s, sending service discovery request", caps->ver, jid);
-                auto_char char* id = connection_create_stanza_id();
+                auto_gchar gchar* id = connection_create_stanza_id();
                 iq_send_caps_request(jid, id, caps->node, caps->ver);
             }
         }
@@ -545,13 +545,13 @@ _handle_caps(const char* const jid, XMPPCaps* caps)
         // unsupported hash, xep-0115, associate with JID, no cache
     } else if (caps->hash) {
         log_info("Hash %s not supported: %s, sending service discovery request", caps->hash, jid);
-        auto_char char* id = connection_create_stanza_id();
+        auto_gchar gchar* id = connection_create_stanza_id();
         iq_send_caps_request_for_jid(jid, id, caps->node, caps->ver);
 
         // no hash, legacy caps, cache against node#ver
     } else if (caps->node && caps->ver) {
         log_info("No hash specified: %s, legacy request made for %s#%s", jid, caps->node, caps->ver);
-        auto_char char* id = connection_create_stanza_id();
+        auto_gchar gchar* id = connection_create_stanza_id();
         iq_send_caps_request_legacy(jid, id, caps->node, caps->ver);
     } else {
         log_info("No hash specified: %s, could not create ver string, not sending service discovery request.", jid);
@@ -765,7 +765,7 @@ _muc_user_self_handler(xmpp_stanza_t* stanza)
                 sv_ev_leave_room(room);
             }
 
-            g_slist_free_full(status_codes, free);
+            g_slist_free_full(status_codes, g_free);
         }
     } else {
         char* nick = from_jid->resourcepart;
@@ -850,7 +850,7 @@ _muc_user_occupant_handler(xmpp_stanza_t* stanza)
                 sv_ev_room_occupant_offline(room, nick, "offline", status_str);
             }
 
-            g_slist_free_full(status_codes, free);
+            g_slist_free_full(status_codes, g_free);
         }
 
         // room occupant online

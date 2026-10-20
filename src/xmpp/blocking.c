@@ -35,7 +35,7 @@ static void
 _blocking_shutdown(void)
 {
     if (blocked) {
-        g_list_free_full(blocked, free);
+        g_list_free_full(blocked, g_free);
     }
     autocomplete_free(blocked_ac);
 }
@@ -45,7 +45,7 @@ blocking_request(void)
 {
     prof_add_shutdown_routine(_blocking_shutdown);
     if (blocked) {
-        g_list_free_full(blocked, free);
+        g_list_free_full(blocked, g_free);
         blocked = NULL;
     }
 
@@ -54,7 +54,7 @@ blocking_request(void)
     }
     blocked_ac = autocomplete_new();
 
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     iq_id_handler_add(id, _blocklist_result_handler, NULL, NULL);
 
     xmpp_ctx_t* ctx = connection_get_ctx();
@@ -95,7 +95,7 @@ blocked_add(char* jid, blocked_report reportkind, const char* const message)
 
     xmpp_ctx_t* ctx = connection_get_ctx();
 
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
 
     xmpp_stanza_t* block = xmpp_stanza_new(ctx);
@@ -155,7 +155,7 @@ blocked_add(char* jid, blocked_report reportkind, const char* const message)
     xmpp_stanza_add_child(iq, block);
     xmpp_stanza_release(block);
 
-    iq_id_handler_add(id, _block_add_result_handler, free, strdup(jid));
+    iq_id_handler_add(id, _block_add_result_handler, (ProfIqFreeCallback)g_free, g_strdup(jid));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -173,7 +173,7 @@ blocked_remove(char* jid)
 
     xmpp_ctx_t* ctx = connection_get_ctx();
 
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
 
     xmpp_stanza_t* block = xmpp_stanza_new(ctx);
@@ -190,7 +190,7 @@ blocked_remove(char* jid)
     xmpp_stanza_add_child(iq, block);
     xmpp_stanza_release(block);
 
-    iq_id_handler_add(id, _block_remove_result_handler, free, strdup(jid));
+    iq_id_handler_add(id, _block_remove_result_handler, (ProfIqFreeCallback)g_free, g_strdup(jid));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -208,7 +208,7 @@ blocked_set_handler(xmpp_stanza_t* stanza)
             if (g_strcmp0(xmpp_stanza_get_name(child), STANZA_NAME_ITEM) == 0) {
                 const char* jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
                 if (jid) {
-                    blocked = g_list_append(blocked, strdup(jid));
+                    blocked = g_list_append(blocked, g_strdup(jid));
                     autocomplete_add(blocked_ac, jid);
                 }
             }
@@ -221,7 +221,7 @@ blocked_set_handler(xmpp_stanza_t* stanza)
     if (unblock) {
         xmpp_stanza_t* child = xmpp_stanza_get_children(unblock);
         if (!child) {
-            g_list_free_full(blocked, free);
+            g_list_free_full(blocked, g_free);
             blocked = NULL;
             autocomplete_clear(blocked_ac);
         } else {
@@ -232,7 +232,7 @@ blocked_set_handler(xmpp_stanza_t* stanza)
                         GList* found = g_list_find_custom(blocked, jid, (GCompareFunc)g_strcmp0);
                         if (found) {
                             blocked = g_list_remove_link(blocked, found);
-                            g_list_free_full(found, free);
+                            g_list_free_full(found, g_free);
                             autocomplete_remove(blocked_ac, jid);
                         }
                     }
@@ -306,7 +306,7 @@ _blocklist_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
     }
 
     if (blocked) {
-        g_list_free_full(blocked, free);
+        g_list_free_full(blocked, g_free);
         blocked = NULL;
     }
 
@@ -322,7 +322,7 @@ _blocklist_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
         if (g_strcmp0(name, "item") == 0) {
             const char* jid = xmpp_stanza_get_attribute(curr, STANZA_ATTR_JID);
             if (jid) {
-                blocked = g_list_append(blocked, strdup(jid));
+                blocked = g_list_append(blocked, g_strdup(jid));
                 autocomplete_add(blocked_ac, jid);
             }
         }

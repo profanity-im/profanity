@@ -117,7 +117,7 @@ rosterwin_roster(void)
                 _rosterwin_contacts_by_group(layout, curr_group->data);
                 curr_group = g_list_next(curr_group);
             }
-            g_list_free_full(groups, free);
+            g_list_free_full(groups, g_free);
             _rosterwin_contacts_by_group(layout, NULL);
         } else {
             _rosterwin_contacts_all(layout);
@@ -652,7 +652,7 @@ _rosterwin_rooms_by_service(ProfLayoutSplit* layout)
         auto_jid Jid* jidp = jid_create(roomjid);
 
         if (!g_list_find_custom(services, jidp->domainpart, (GCompareFunc)g_strcmp0)) {
-            services = g_list_insert_sorted(services, strdup(jidp->domainpart), (GCompareFunc)g_strcmp0);
+            services = g_list_insert_sorted(services, g_strdup(jidp->domainpart), (GCompareFunc)g_strcmp0);
         }
 
         curr = g_list_next(curr);
@@ -669,7 +669,7 @@ _rosterwin_rooms_by_service(ProfLayoutSplit* layout)
             auto_jid Jid* jidp = jid_create(roomjid);
 
             if (g_strcmp0(curr_service->data, jidp->domainpart) == 0) {
-                filtered_rooms = g_list_append(filtered_rooms, strdup(jidp->barejid));
+                filtered_rooms = g_list_append(filtered_rooms, g_strdup(jidp->barejid));
             }
 
             curr = g_list_next(curr);
@@ -677,12 +677,12 @@ _rosterwin_rooms_by_service(ProfLayoutSplit* layout)
 
         _rosterwin_rooms(layout, service, filtered_rooms);
 
-        g_list_free_full(filtered_rooms, free);
+        g_list_free_full(filtered_rooms, g_free);
         curr_service = g_list_next(curr_service);
     }
 
     g_list_free(rooms);
-    g_list_free_full(services, free);
+    g_list_free_full(services, g_free);
 }
 
 static void

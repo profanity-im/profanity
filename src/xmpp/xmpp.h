@@ -141,21 +141,21 @@ typedef struct prof_message_t
     Jid* from_jid;
     Jid* to_jid;
     /* regular <message id=""> */
-    char* id;
+    gchar* id;
     /* </origin-id> XEP-0359 */
-    char* originid;
+    gchar* originid;
     /* <replace id> XEP-0308 LMC */
-    char* replace_id;
+    gchar* replace_id;
     /* stanza-id from XEP 0359. Used for MAM. archive_id in our database (see database.c)
      * coming in as <stanza-id> for live messages
      * coming in as <result id=""> for MAM messages*/
-    char* stanzaid;
+    gchar* stanzaid;
     /* The raw body from xmpp message, either plaintext or OTR encrypted text */
-    char* body;
+    gchar* body;
     /* The encrypted message as for PGP */
-    char* encrypted;
+    gchar* encrypted;
     /* The message that will be printed on screen and logs */
-    char* plain;
+    gchar* plain;
     GDateTime* timestamp;
     prof_enc_t enc;
     omemo_error_t omemo_err;
@@ -165,13 +165,13 @@ typedef struct prof_message_t
 } ProfMessage;
 
 void session_init(void);
-jabber_conn_status_t session_connect_with_details(const char* const jid, const char* const passwd,
-                                                  const char* const altdomain, const int port, const char* const tls_policy, const char* const auth_policy);
+jabber_conn_status_t session_connect_with_details(const gchar* const jid, const gchar* const passwd,
+                                                  const gchar* const altdomain, const int port, const gchar* const tls_policy, const gchar* const auth_policy);
 jabber_conn_status_t session_connect_with_account(const ProfAccount* const account);
 
 void session_disconnect(void);
 void session_process_events(void);
-const char* session_get_account_name(void);
+const gchar* session_get_account_name(void);
 void session_reconnect_now(void);
 
 void connection_disconnect(void);
@@ -211,7 +211,7 @@ void message_send_gone(const char* const jid);
 void message_send_invite(const char* const room, const char* const contact, const char* const reason);
 void message_request_voice(const char* const roomjid);
 
-bool message_is_sent_by_us(const ProfMessage* const message, bool checkOID);
+gboolean message_is_sent_by_us(const ProfMessage* const message, gboolean checkOID);
 
 void presence_subscription(const char* const jid, const jabber_subscr_t action);
 GList* presence_get_subscription_requests(void);
@@ -242,7 +242,7 @@ void iq_submit_room_config(ProfConfWin* confwin);
 void iq_room_config_cancel(ProfConfWin* confwin);
 void iq_send_ping(const char* const target);
 void iq_room_info_request(const char* const room, gboolean display_result);
-void iq_room_affiliation_list(const char* const room, char* affiliation, bool show);
+void iq_room_affiliation_list(const char* const room, char* affiliation, gboolean show);
 void iq_room_affiliation_set(const char* const room, const char* const jid, char* affiliation,
                              const char* const reason);
 void iq_room_kick_occupant(const char* const room, const char* const nick, const char* const reason);

@@ -21,7 +21,7 @@ sv_ev_contact_online__shows__presence_in_console_when_set_online(void** state)
     plugins_init();
     roster_create();
     roster_process_pending_presence();
-    char* barejid = "test1@server";
+    const gchar* barejid = "test1@server";
     roster_add(barejid, "bob", NULL, "both", FALSE);
     Resource* resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10);
 
@@ -41,7 +41,7 @@ sv_ev_contact_online__shows__presence_in_console_when_set_all(void** state)
     plugins_init();
     roster_create();
     roster_process_pending_presence();
-    char* barejid = "test1@server";
+    const gchar* barejid = "test1@server";
     roster_add(barejid, "bob", NULL, "both", FALSE);
     Resource* resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10);
 
@@ -61,7 +61,7 @@ sv_ev_contact_online__shows__dnd_presence_in_console_when_set_all(void** state)
     plugins_init();
     roster_create();
     roster_process_pending_presence();
-    char* barejid = "test1@server";
+    const gchar* barejid = "test1@server";
     roster_add(barejid, "bob", NULL, "both", FALSE);
     Resource* resource = resource_new("resource", RESOURCE_ONLINE, NULL, 10);
 
@@ -81,8 +81,8 @@ sv_ev_contact_offline__updates__removes_chat_session(void** state)
     roster_create();
     roster_process_pending_presence();
     chat_sessions_init();
-    char* barejid = "friend@server.chat.com";
-    char* resource = "home";
+    const gchar* barejid = "friend@server.chat.com";
+    const gchar* resource = "home";
     roster_add(barejid, "bob", NULL, "both", FALSE);
     Resource* resourcep = resource_new(resource, RESOURCE_ONLINE, NULL, 10);
     roster_update_presence(barejid, resourcep, NULL);

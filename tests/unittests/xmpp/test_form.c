@@ -46,7 +46,7 @@ form_get_form_type_field__returns__null_no_fields(void** state)
 {
     DataForm* form = _new_form();
 
-    char* result = form_get_form_type_field(form);
+    gchar* result = form_get_form_type_field(form);
 
     assert_null(result);
 
@@ -62,7 +62,7 @@ form_get_form_type_field__returns__null_when_not_present(void** state)
     field->values = g_slist_append(field->values, g_strdup("value1"));
     form->fields = g_slist_append(form->fields, field);
 
-    char* result = form_get_form_type_field(form);
+    gchar* result = form_get_form_type_field(form);
 
     assert_null(result);
 
@@ -89,7 +89,7 @@ form_get_form_type_field__returns__value_when_present(void** state)
     field3->values = g_slist_append(field3->values, g_strdup("value3"));
     form->fields = g_slist_append(form->fields, field3);
 
-    char* result = form_get_form_type_field(form);
+    gchar* result = form_get_form_type_field(form);
 
     assert_string_equal(result, "value2");
 

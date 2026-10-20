@@ -36,8 +36,8 @@
 // callback data for group commands
 typedef struct _group_data
 {
-    char* name;
-    char* group;
+    gchar* name;
+    gchar* group;
 } GroupData;
 
 // id handlers
@@ -58,7 +58,7 @@ void
 roster_send_add_new(const char* const barejid, const char* const name)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_roster_set(ctx, id, barejid, name, NULL);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -77,7 +77,7 @@ void
 roster_send_name_change(const char* const barejid, const char* const new_name, GSList* groups)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_roster_set(ctx, id, barejid, new_name, groups);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -89,19 +89,19 @@ roster_send_add_to_group(const char* const group, PContact contact)
     GSList* groups = p_contact_groups(contact);
     GSList* new_groups = NULL;
     while (groups) {
-        new_groups = g_slist_append(new_groups, strdup(groups->data));
+        new_groups = g_slist_append(new_groups, g_strdup(groups->data));
         groups = g_slist_next(groups);
     }
 
-    new_groups = g_slist_append(new_groups, strdup(group));
+    new_groups = g_slist_append(new_groups, g_strdup(group));
     // add an id handler to handle the response
-    auto_char char* unique_id = connection_create_stanza_id();
+    auto_gchar gchar* unique_id = connection_create_stanza_id();
     GroupData* data = g_new0(GroupData, 1);
-    data->group = strdup(group);
+    data->group = g_strdup(group);
     if (p_contact_name(contact)) {
-        data->name = strdup(p_contact_name(contact));
+        data->name = g_strdup(p_contact_name(contact));
     } else {
-        data->name = strdup(p_contact_barejid(contact));
+        data->name = g_strdup(p_contact_barejid(contact));
     }
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
@@ -110,6 +110,7 @@ roster_send_add_to_group(const char* const group, PContact contact)
                                                  p_contact_name(contact), new_groups);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+    g_slist_free_full(new_groups, g_free);
 }
 
 static int
@@ -129,7 +130,7 @@ roster_send_remove_from_group(const char* const group, PContact contact)
     GSList* new_groups = NULL;
     while (groups) {
         if (strcmp(groups->data, group) != 0) {
-            new_groups = g_slist_append(new_groups, strdup(groups->data));
+            new_groups = g_slist_append(new_groups, g_strdup(groups->data));
         }
         groups = g_slist_next(groups);
     }
@@ -137,13 +138,13 @@ roster_send_remove_from_group(const char* const group, PContact contact)
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
     // add an id handler to handle the response
-    auto_char char* unique_id = connection_create_stanza_id();
+    auto_gchar gchar* unique_id = connection_create_stanza_id();
     GroupData* data = g_new0(GroupData, 1);
-    data->group = strdup(group);
+    data->group = g_strdup(group);
     if (p_contact_name(contact)) {
-        data->name = strdup(p_contact_name(contact));
+        data->name = g_strdup(p_contact_name(contact));
     } else {
-        data->name = strdup(p_contact_barejid(contact));
+        data->name = g_strdup(p_contact_barejid(contact));
     }
 
     iq_id_handler_add(unique_id, _group_remove_id_handler, (ProfIqFreeCallback)_free_group_data, data);
@@ -151,6 +152,7 @@ roster_send_remove_from_group(const char* const group, PContact contact)
                                                  p_contact_name(contact), new_groups);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+    g_slist_free_full(new_groups, g_free);
 }
 
 static int
@@ -293,8 +295,8 @@ static void
 _free_group_data(GroupData* data)
 {
     if (data) {
-        free(data->group);
-        free(data->name);
-        free(data);
+        g_free(data->group);
+        g_free(data->name);
+        g_free(data);
     }
 }

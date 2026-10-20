@@ -646,7 +646,7 @@ static void
 _show_contact_presence(ProfChatWin* chatwin, int pos, int maxpos)
 {
     int bracket_attrs = theme_attrs(THEME_TITLE_BRACKET);
-    char* resource = NULL;
+    gchar* resource = NULL;
 
     ChatSession* session = chat_session_get(chatwin->barejid);
     if (chatwin->resource_override) {
@@ -665,7 +665,7 @@ _show_contact_presence(ProfChatWin* chatwin, int pos, int maxpos)
 
     if (prefs_get_boolean(PREF_PRESENCE)) {
         theme_item_t presence_colour = THEME_TITLE_OFFLINE;
-        const char* presence = "offline";
+        const gchar* presence = "offline";
 
         jabber_conn_status_t conn_status = connection_get_status();
         if (conn_status == JABBER_CONNECTED) {

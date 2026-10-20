@@ -10,6 +10,8 @@
 #ifndef OTR_OTRLIB_H
 #define OTR_OTRLIB_H
 
+#include <glib.h>
+
 OtrlPolicy otrlib_policy(void);
 
 char* otrlib_start_query(void);
@@ -20,15 +22,15 @@ void otrlib_init_timer(void);
 void otrlib_poll(void);
 void otrlib_shutdown(void);
 
-ConnContext* otrlib_context_find(OtrlUserState user_state, const char* const recipient, char* jid);
+ConnContext* otrlib_context_find(OtrlUserState user_state, const gchar* const recipient, const gchar* jid);
 
-void otrlib_end_session(OtrlUserState user_state, const char* const recipient, char* jid, OtrlMessageAppOps* ops);
+void otrlib_end_session(OtrlUserState user_state, const gchar* const recipient, const gchar* jid, OtrlMessageAppOps* ops);
 
-gcry_error_t otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps* ops, char* jid, const char* const to,
-                                    const char* const message, char** newmessage);
+gcry_error_t otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps* ops, const gchar* jid, const gchar* const to,
+                                    const gchar* const message, char** newmessage);
 
-int otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps* ops, char* jid, const char* const from,
-                           const char* const message, char** decrypted, OtrlTLV** tlvs);
+int otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps* ops, const gchar* jid, const gchar* const from,
+                           const gchar* const message, char** decrypted, OtrlTLV** tlvs);
 
 void otrlib_handle_tlvs(OtrlUserState user_state, OtrlMessageAppOps* ops, ConnContext* context, OtrlTLV* tlvs, GHashTable* smp_initiators);
 

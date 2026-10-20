@@ -71,7 +71,7 @@ _get_property(xmpp_stanza_t* const stanza, const char* const property)
     if (child) {
         char* child_text = xmpp_stanza_get_text(child);
         if (child_text) {
-            result = strdup(child_text);
+            result = g_strdup(child_text);
             xmpp_free(ctx, child_text);
         }
     }
@@ -84,7 +84,7 @@ _get_attr(xmpp_stanza_t* const stanza, const char* const attr)
 {
     const char* result = xmpp_stanza_get_attribute(stanza, attr);
     if (result) {
-        return strdup(result);
+        return g_strdup(result);
     } else {
         return NULL;
     }
@@ -150,8 +150,8 @@ form_create(xmpp_stanza_t* const form_stanza)
     form->type = _get_attr(form_stanza, "type");
     form->title = _get_property(form_stanza, "title");
     form->instructions = _get_property(form_stanza, "instructions");
-    form->var_to_tag = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
-    form->tag_to_var = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+    form->var_to_tag = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    form->tag_to_var = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
     form->tag_ac = autocomplete_new();
     form->modified = FALSE;
 
@@ -175,8 +175,8 @@ form_create(xmpp_stanza_t* const form_stanza)
             if (field->type_t != FIELD_HIDDEN && field->var) {
                 GString* tag = g_string_new("");
                 g_string_printf(tag, "field%d", tag_num++);
-                g_hash_table_insert(form->var_to_tag, strdup(field->var), strdup(tag->str));
-                g_hash_table_insert(form->tag_to_var, strdup(tag->str), strdup(field->var));
+                g_hash_table_insert(form->var_to_tag, g_strdup(field->var), g_strdup(tag->str));
+                g_hash_table_insert(form->tag_to_var, g_strdup(tag->str), g_strdup(field->var));
                 autocomplete_add(form->tag_ac, tag->str);
                 g_string_free(tag, TRUE);
             }
@@ -194,7 +194,7 @@ form_create(xmpp_stanza_t* const form_stanza)
                 if (g_strcmp0(child_name, "value") == 0) {
                     char* value = xmpp_stanza_get_text(field_child);
                     if (value) {
-                        field->values = g_slist_append(field->values, strdup(value));
+                        field->values = g_slist_append(field->values, g_strdup(value));
 
                         if (field->type_t == FIELD_TEXT_MULTI) {
                             GString* ac_val = g_string_new("");
@@ -319,9 +319,9 @@ static void
 _free_option(FormOption* option)
 {
     if (option) {
-        free(option->label);
-        free(option->value);
-        free(option);
+        g_free(option->label);
+        g_free(option->value);
+        g_free(option);
     }
 }
 
@@ -329,14 +329,14 @@ static void
 _free_field(FormField* field)
 {
     if (field) {
-        free(field->label);
-        free(field->type);
-        free(field->var);
-        free(field->description);
-        g_slist_free_full(field->values, free);
+        g_free(field->label);
+        g_free(field->type);
+        g_free(field->var);
+        g_free(field->description);
+        g_slist_free_full(field->values, g_free);
         g_slist_free_full(field->options, (GDestroyNotify)_free_option);
         autocomplete_free(field->value_ac);
-        free(field);
+        g_free(field);
     }
 }
 
@@ -344,14 +344,14 @@ void
 form_destroy(DataForm* form)
 {
     if (form) {
-        free(form->type);
-        free(form->title);
-        free(form->instructions);
+        g_free(form->type);
+        g_free(form->title);
+        g_free(form->instructions);
         g_slist_free_full(form->fields, (GDestroyNotify)_free_field);
         g_hash_table_destroy(form->var_to_tag);
         g_hash_table_destroy(form->tag_to_var);
         autocomplete_free(form->tag_ac);
-        free(form);
+        g_free(form);
     }
 }
 
@@ -393,7 +393,7 @@ form_get_field_values_sorted(FormField* field)
     return sorted;
 }
 
-char*
+gchar*
 form_get_form_type_field(DataForm* form)
 {
     GSList* curr = form->fields;
@@ -452,10 +452,10 @@ form_set_value(DataForm* form, const char* const tag, char* value)
             FormField* field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
                 if (field->values) {
-                    g_slist_free_full(field->values, free);
+                    g_slist_free_full(field->values, g_free);
                     field->values = NULL;
                 }
-                field->values = g_slist_append(NULL, strdup(value));
+                field->values = g_slist_append(NULL, g_strdup(value));
                 form->modified = TRUE;
                 return;
             }
@@ -473,7 +473,7 @@ form_add_value(DataForm* form, const char* const tag, char* value)
         while (curr) {
             FormField* field = curr->data;
             if (g_strcmp0(field->var, var) == 0) {
-                field->values = g_slist_append(field->values, strdup(value));
+                field->values = g_slist_append(field->values, g_strdup(value));
                 if (field->type_t == FIELD_TEXT_MULTI) {
                     int total = g_slist_length(field->values);
                     GString* value_index = g_string_new("");
@@ -506,7 +506,7 @@ form_add_unique_value(DataForm* form, const char* const tag, char* value)
                     curr_value = g_slist_next(curr_value);
                 }
 
-                field->values = g_slist_append(field->values, strdup(value));
+                field->values = g_slist_append(field->values, g_strdup(value));
                 if (field->type_t == FIELD_JID_MULTI) {
                     autocomplete_add(field->value_ac, value);
                 }
@@ -531,7 +531,7 @@ form_remove_value(DataForm* form, const char* const tag, char* value)
             if (g_strcmp0(field->var, var) == 0) {
                 GSList* found = g_slist_find_custom(field->values, value, (GCompareFunc)g_strcmp0);
                 if (found) {
-                    free(found->data);
+                    g_free(found->data);
                     found->data = NULL;
                     field->values = g_slist_delete_link(field->values, found);
                     if (field->type_t == FIELD_JID_MULTI) {
@@ -562,7 +562,7 @@ form_remove_text_multi_value(DataForm* form, const char* const tag, int index)
             if (g_strcmp0(field->var, var) == 0) {
                 GSList* item = g_slist_nth(field->values, index);
                 if (item) {
-                    free(item->data);
+                    g_free(item->data);
                     item->data = NULL;
                     field->values = g_slist_delete_link(field->values, item);
                     GString* value_index = g_string_new("");

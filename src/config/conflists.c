@@ -15,7 +15,7 @@
 #include <glib.h>
 
 gboolean
-conf_string_list_add(GKeyFile* keyfile, const char* const group, const char* const key, const char* const item)
+conf_string_list_add(GKeyFile* keyfile, const gchar* const group, const gchar* const key, const gchar* const item)
 {
     if (!item) {
         log_warning("Invalid parameter in `conf_string_list_add`: item is NULL. group=%s, key=%s", group, key);
@@ -52,7 +52,7 @@ conf_string_list_add(GKeyFile* keyfile, const char* const group, const char* con
 }
 
 gboolean
-conf_string_list_remove(GKeyFile* keyfile, const char* const group, const char* const key, const char* const item)
+conf_string_list_remove(GKeyFile* keyfile, const gchar* const group, const gchar* const key, const gchar* const item)
 {
     gsize length;
     auto_gcharv gchar** list = g_key_file_get_string_list(keyfile, group, key, &length, NULL);

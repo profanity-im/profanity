@@ -37,14 +37,14 @@ plugin_download_install(void* userdata)
     HTTPDownload* plugin_dl = (HTTPDownload*)userdata;
 
     /* We need to dup those, because they're free'd inside `http_file_get()` */
-    auto_char char* path = strdup(plugin_dl->filename);
-    auto_char char* https_url = strdup(plugin_dl->url);
+    auto_gchar gchar* path = g_strdup(plugin_dl->filename);
+    auto_gchar gchar* https_url = g_strdup(plugin_dl->url);
 
     http_file_get(plugin_dl);
 
     if (is_regular_file(path)) {
         GString* error_message = g_string_new(NULL);
-        auto_char char* plugin_name = basename_from_url(https_url);
+        auto_gchar gchar* plugin_name = basename_from_url(https_url);
         gboolean result = plugins_install(plugin_name, path, error_message);
         if (result) {
             cons_show("Plugin installed and loaded: %s", plugin_name);

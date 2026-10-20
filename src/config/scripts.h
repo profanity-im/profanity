@@ -14,7 +14,7 @@
 
 void scripts_init(void);
 GSList* scripts_list(void);
-GSList* scripts_read(const char* const script);
-gboolean scripts_exec(const char* const script);
+GSList* scripts_read(const gchar* const script);
+gboolean scripts_exec(const gchar* const script);
 
 #endif

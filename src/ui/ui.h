@@ -59,7 +59,7 @@ gboolean win_toggle_attention(ProfWin* window);
 char* ui_ask_password(gboolean confirm);
 char* ui_get_line(void);
 char* ui_ask_pgp_passphrase(const char* hint, int prev_fail);
-void ui_contact_online(char* barejid, Resource* resource, GDateTime* last_activity);
+void ui_contact_online(const gchar* const barejid, Resource* resource, GDateTime* last_activity);
 void ui_contact_typing(const char* const barejid, const char* const resource);
 void ui_disconnected(void);
 void ui_room_join(const char* const roomjid, gboolean focus);
@@ -78,7 +78,7 @@ void ui_contact_already_in_group(const char* const contact, const char* const gr
 void ui_contact_not_in_group(const char* const contact, const char* const group);
 void ui_group_added(const char* const contact, const char* const group);
 void ui_group_removed(const char* const contact, const char* const group);
-void ui_contact_offline(char* barejid, char* resource, char* status);
+void ui_contact_offline(const gchar* const barejid, const gchar* const resource, const gchar* const status);
 void ui_handle_recipient_error(const char* const recipient, const char* const err_msg);
 void ui_handle_error(const char* const err_msg);
 void ui_clear_win_title(void);
@@ -110,7 +110,7 @@ void chatwin_recipient_gone(ProfChatWin* chatwin);
 void chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, const char* id, prof_enc_t enc_mode, gboolean request_receipt, const char* const replace_id);
 void chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message);
 void chatwin_contact_online(ProfChatWin* chatwin, Resource* resource, GDateTime* last_activity);
-void chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status);
+void chatwin_contact_offline(ProfChatWin* chatwin, const gchar* const resource, const gchar* const status);
 gchar* chatwin_get_string(ProfChatWin* chatwin);
 #ifdef HAVE_LIBOTR
 void chatwin_otr_secured(ProfChatWin* chatwin, gboolean trusted);
@@ -329,7 +329,7 @@ void cons_mood_setting(void);
 void cons_strophe_setting(void);
 void cons_privacy_setting(void);
 void cons_show_contact_online(PContact contact, Resource* resource, GDateTime* last_activity);
-void cons_show_contact_offline(PContact contact, char* resource, char* status);
+void cons_show_contact_offline(PContact contact, const gchar* const resource, const gchar* const status);
 void cons_theme_properties(void);
 void cons_theme_colours(void);
 void cons_show_tlscert(const TLSCertificate* cert);
@@ -408,12 +408,12 @@ char* win_get_last_sent_message(ProfWin* window);
 // desktop notifications
 void notifier_initialise(void);
 void notifier_uninit(void);
-void notify_typing(const char* const name);
-void notify_message(const char* const name, int win, const char* const text);
-void notify_room_message(const char* const nick, const char* const room, int win, const char* const text);
+void notify_typing(const gchar* const name);
+void notify_message(const gchar* const name, int win, const gchar* const text);
+void notify_room_message(const gchar* const nick, const gchar* const room, int win, const gchar* const text);
 void notify_remind(void);
-void notify_invite(const char* const from, const char* const room, const char* const reason);
-void notify(const char* const message, int timeout, const char* const category);
-void notify_subscription(const char* const from);
+void notify_invite(const gchar* const from, const gchar* const room, const gchar* const reason);
+void notify(const gchar* const message, int timeout, const gchar* const category);
+void notify_subscription(const gchar* const from);
 
 #endif

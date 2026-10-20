@@ -257,7 +257,7 @@ xmlwin_show(ProfXMLWin* xmlwin, const char* const msg)
 
 // ui events
 void
-ui_contact_online(char* barejid, Resource* resource, GDateTime* last_activity)
+ui_contact_online(const gchar* const barejid, Resource* resource, GDateTime* last_activity)
 {
     check_expected(barejid);
     check_expected(resource);
@@ -499,9 +499,9 @@ mucwin_unset_message_char(ProfMucWin* mucwin)
 {
 }
 
-void win_update_entry_message(ProfWin* window, const char* const id, const char* const message) {};
+void win_update_entry_message(ProfWin* window, const gchar* const id, const gchar* const message) {};
 void win_mark_received(ProfWin* window, const char* const id) {};
-void win_print_http_transfer(ProfWin* window, const char* const message, char* id) {};
+void win_print_http_transfer(ProfWin* window, const gchar* const message, const gchar* const id) {};
 void win_print_loading_history(ProfWin* window) {};
 
 void
@@ -541,12 +541,12 @@ chatwin_contact_online(ProfChatWin* chatwin, Resource* resource, GDateTime* last
 {
 }
 void
-chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status)
+chatwin_contact_offline(ProfChatWin* chatwin, const gchar* const resource, const gchar* const status)
 {
 }
 
 void
-ui_contact_offline(char* barejid, char* resource, char* status)
+ui_contact_offline(const gchar* const barejid, const gchar* const resource, const gchar* const status)
 {
 }
 
@@ -1194,7 +1194,7 @@ cons_show_contact_online(PContact contact, Resource* resource, GDateTime* last_a
 }
 
 void
-cons_show_contact_offline(PContact contact, char* resource, char* status)
+cons_show_contact_offline(PContact contact, const gchar* const resource, const gchar* const status)
 {
 }
 void
@@ -1424,16 +1424,16 @@ notifier_uninit(void)
 }
 
 void
-notify_typing(const char* const handle)
+notify_typing(const gchar* const handle)
 {
 }
 void
-notify_message(const char* const name, int win, const char* const text)
+notify_message(const gchar* const name, int win, const gchar* const text)
 {
 }
 void
-notify_room_message(const char* const handle, const char* const room,
-                    int win, const char* const text)
+notify_room_message(const gchar* const handle, const gchar* const room,
+                    int win, const gchar* const text)
 {
 }
 void
@@ -1441,17 +1441,17 @@ notify_remind(void)
 {
 }
 void
-notify_invite(const char* const from, const char* const room,
-              const char* const reason)
+notify_invite(const gchar* const from, const gchar* const room,
+              const gchar* const reason)
 {
 }
 void
-notify_subscription(const char* const from)
+notify_subscription(const gchar* const from)
 {
 }
 void
-notify(const char* const message, int timeout,
-       const char* const category)
+notify(const gchar* const message, int timeout,
+       const gchar* const category)
 {
 }
 void

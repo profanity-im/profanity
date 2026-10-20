@@ -31,7 +31,7 @@ _free_window_callback(PluginWindowCallback* window_callback)
     if (window_callback->callback_destroy) {
         window_callback->callback_destroy(window_callback->callback);
     }
-    free(window_callback);
+    g_free(window_callback);
 }
 
 static void
@@ -45,29 +45,29 @@ _free_command_help(CommandHelp* help)
 {
     int i = 0;
     while (help->tags[i] != NULL) {
-        free(help->tags[i++]);
+        g_free(help->tags[i++]);
     }
 
     i = 0;
     while (help->synopsis[i] != NULL) {
-        free(help->synopsis[i++]);
+        g_free(help->synopsis[i++]);
     }
 
-    free(help->desc);
+    g_free(help->desc);
 
     i = 0;
     while (help->args[i][0] != NULL) {
-        free(help->args[i][0]);
-        free(help->args[i][1]);
+        g_free(help->args[i][0]);
+        g_free(help->args[i][1]);
         i++;
     }
 
     i = 0;
     while (help->examples[i] != NULL) {
-        free(help->examples[i++]);
+        g_free(help->examples[i++]);
     }
 
-    free(help);
+    g_free(help);
 }
 
 static void
@@ -76,12 +76,12 @@ _free_command(PluginCommand* command)
     if (command->callback_destroy) {
         command->callback_destroy(command->callback);
     }
-    free(command->command_name);
+    g_free(command->command_name);
 
     if (command->help)
         _free_command_help(command->help);
 
-    free(command);
+    g_free(command);
 }
 
 static void
@@ -101,7 +101,7 @@ _free_timed_function(PluginTimedFunction* timed_function)
 
     g_timer_destroy(timed_function->timer);
 
-    free(timed_function);
+    g_free(timed_function);
 }
 
 static void

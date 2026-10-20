@@ -350,7 +350,7 @@ mucwin_history(ProfMucWin* mucwin, const ProfMessage* const message)
     mucwin_incoming_msg(mucwin, message, mentions, triggers, FALSE);
 
     g_slist_free(mentions);
-    g_list_free_full(triggers, free);
+    g_list_free_full(triggers, g_free);
 
     plugins_on_room_history_message(mucwin->roomjid, nick, message->plain, message->timestamp);
 }
@@ -899,16 +899,16 @@ void
 mucwin_set_enctext(ProfMucWin* mucwin, const char* const enctext)
 {
     if (mucwin->enctext) {
-        free(mucwin->enctext);
+        g_free(mucwin->enctext);
     }
-    mucwin->enctext = strdup(enctext);
+    mucwin->enctext = g_strdup(enctext);
 }
 
 void
 mucwin_unset_enctext(ProfMucWin* mucwin)
 {
     if (mucwin->enctext) {
-        free(mucwin->enctext);
+        g_free(mucwin->enctext);
         mucwin->enctext = NULL;
     }
 }
@@ -917,16 +917,16 @@ void
 mucwin_set_message_char(ProfMucWin* mucwin, const char* const ch)
 {
     if (mucwin->message_char) {
-        free(mucwin->message_char);
+        g_free(mucwin->message_char);
     }
-    mucwin->message_char = strdup(ch);
+    mucwin->message_char = g_strdup(ch);
 }
 
 void
 mucwin_unset_message_char(ProfMucWin* mucwin)
 {
     if (mucwin->message_char) {
-        free(mucwin->message_char);
+        g_free(mucwin->message_char);
         mucwin->message_char = NULL;
     }
 }
@@ -935,13 +935,13 @@ static void
 _mucwin_set_last_message(ProfMucWin* mucwin, const char* const id, const char* const message)
 {
     if (mucwin->last_message != message) {
-        free(mucwin->last_message);
-        mucwin->last_message = strdup(message);
+        g_free(mucwin->last_message);
+        mucwin->last_message = g_strdup(message);
     }
 
     if (mucwin->last_msg_id != id) {
-        free(mucwin->last_msg_id);
-        mucwin->last_msg_id = strdup(id);
+        g_free(mucwin->last_msg_id);
+        mucwin->last_msg_id = g_strdup(id);
     }
 }
 
@@ -996,9 +996,9 @@ mucwin_set_room_name(const gchar* const muc_jid, const gchar* const new_room_nam
         return FALSE;
     }
 
-    free(mucwin->room_name);
+    g_free(mucwin->room_name);
     if (new_room_name) {
-        mucwin->room_name = strdup(new_room_name);
+        mucwin->room_name = g_strdup(new_room_name);
     } else {
         mucwin->room_name = NULL;
     }

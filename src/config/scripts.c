@@ -54,7 +54,7 @@ scripts_list(void)
     if (scripts) {
         const gchar* script = g_dir_read_name(scripts);
         while (script) {
-            result = g_slist_append(result, strdup(script));
+            result = g_slist_append(result, g_strdup(script));
             script = g_dir_read_name(scripts);
         }
         g_dir_close(scripts);
@@ -64,7 +64,7 @@ scripts_list(void)
 }
 
 GSList*
-scripts_read(const char* const script)
+scripts_read(const gchar* const script)
 {
     auto_gchar gchar* scriptsdir = files_get_data_path(DIR_SCRIPTS);
     GString* scriptpath = g_string_new(scriptsdir);
@@ -88,7 +88,7 @@ scripts_read(const char* const script)
         if (g_str_has_suffix(line, "\n")) {
             result = g_slist_append(result, g_strndup(line, strlen(line) - 1));
         } else {
-            result = g_slist_append(result, strdup(line));
+            result = g_slist_append(result, g_strdup(line));
         }
     }
 
@@ -98,7 +98,7 @@ scripts_read(const char* const script)
 }
 
 gboolean
-scripts_exec(const char* const script)
+scripts_exec(const gchar* const script)
 {
     auto_gchar gchar* scriptsdir = files_get_data_path(DIR_SCRIPTS);
     GString* scriptpath = g_string_new(scriptsdir);

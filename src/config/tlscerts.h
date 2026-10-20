@@ -45,10 +45,10 @@ typedef struct tls_cert_t
 
 void tlscerts_init(void);
 
-TLSCertificate* tlscerts_new(const char* fingerprint_sha1, int version, const char* serialnumber, const char* subjectname,
-                             const char* issuername, const char* notbefore, const char* notafter,
-                             const char* key_alg, const char* signature_alg, const char* pem,
-                             const char* fingerprint_sha256, const char* pubkey_fingerprint);
+TLSCertificate* tlscerts_new(const gchar* fingerprint_sha1, int version, const gchar* serialnumber, const gchar* subjectname,
+                             const gchar* issuername, const gchar* notbefore, const gchar* notafter,
+                             const gchar* key_alg, const gchar* signature_alg, const gchar* pem,
+                             const gchar* fingerprint_sha256, const gchar* pubkey_fingerprint);
 
 void tlscerts_set_current(const TLSCertificate* cert);
 
@@ -60,15 +60,15 @@ gboolean tlscerts_exists(const TLSCertificate* cert);
 
 void tlscerts_add(const TLSCertificate* cert);
 
-gboolean tlscerts_revoke(const char* fingerprint);
+gboolean tlscerts_revoke(const gchar* fingerprint);
 
-TLSCertificate* tlscerts_get_trusted(const char* fingerprint);
+TLSCertificate* tlscerts_get_trusted(const gchar* fingerprint);
 
 void tlscerts_free(TLSCertificate* cert);
 
 GList* tlscerts_list(void);
 
-char* tlscerts_complete(const char* prefix, gboolean previous, void* context);
+gchar* tlscerts_complete(const gchar* const prefix, gboolean previous, void* context);
 
 void tlscerts_reset_ac(void);
 

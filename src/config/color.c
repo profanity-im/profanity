@@ -333,9 +333,9 @@ find_closest_col(int h, int s, int l)
 }
 
 static int
-find_col(const char* col_name, int n)
+find_col(const gchar* col_name, int n)
 {
-    char name[32] = { 0 };
+    gchar name[32] = { 0 };
 
     /*
      * make a null terminated version of col_name. we don't want to
@@ -364,7 +364,7 @@ find_col(const char* col_name, int n)
 }
 
 static int
-color_hash(const char* str, color_profile profile)
+color_hash(const gchar* str, color_profile profile)
 {
     GChecksum* cs = NULL;
     guint8 buf[256] = { 0 };
@@ -483,12 +483,12 @@ _color_pair_cache_get(int fg, int bg)
  * check for 'bkgnd' in theme file or use default color as bg
  */
 int
-color_pair_cache_hash_str(const char* str, color_profile profile)
+color_pair_cache_hash_str(const gchar* str, color_profile profile)
 {
     int fg = color_hash(str, profile);
     int bg = -1;
 
-    auto_char char* bkgnd = theme_get_bkgnd();
+    auto_gchar gchar* bkgnd = theme_get_bkgnd();
     if (bkgnd) {
         bg = find_col(bkgnd, strlen(bkgnd));
     }
@@ -503,9 +503,9 @@ color_pair_cache_hash_str(const char* str, color_profile profile)
  * if the pair exists it returns its id
  */
 int
-color_pair_cache_get(const char* pair_name)
+color_pair_cache_get(const gchar* pair_name)
 {
-    const char* sep;
+    const gchar* sep;
     int fg, bg;
 
     sep = strchr(pair_name, '_');

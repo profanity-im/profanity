@@ -46,39 +46,39 @@ void omemo_identity_key(unsigned char** output, size_t* length);
 void omemo_signed_prekey(unsigned char** output, size_t* length);
 void omemo_signed_prekey_signature(unsigned char** output, size_t* length);
 void omemo_prekeys(GList** prekeys, GList** ids, GList** lengths);
-void omemo_set_device_list(const char* const jid, GList* device_list);
+void omemo_set_device_list(const gchar* const jid, GList* device_list);
 GKeyFile* omemo_identity_keyfile(void);
 void omemo_identity_keyfile_save(void);
 GKeyFile* omemo_trust_keyfile(void);
 void omemo_trust_keyfile_save(void);
 GKeyFile* omemo_sessions_keyfile(void);
 void omemo_sessions_keyfile_save(void);
-char* omemo_format_fingerprint(const char* const fingerprint);
-char* omemo_own_fingerprint(gboolean formatted);
-void omemo_trust(const char* const jid, const char* const fingerprint);
-void omemo_untrust(const char* const jid, const char* const fingerprint);
-GList* omemo_known_device_identities(const char* const jid);
-gboolean omemo_is_trusted_identity(const char* const jid, const char* const fingerprint);
-gboolean omemo_is_jid_trusted(const char* const jid);
-GList* omemo_get_jid_untrusted_fingerprints(const char* const jid);
-gboolean omemo_is_device_active(const char* const jid, const char* const fingerprint);
-char* omemo_fingerprint_autocomplete(const char* const search_str, gboolean previous, void* context);
+gchar* omemo_format_fingerprint(const gchar* const fingerprint);
+gchar* omemo_own_fingerprint(gboolean formatted);
+void omemo_trust(const gchar* const jid, const gchar* const fingerprint);
+void omemo_untrust(const gchar* const jid, const gchar* const fingerprint);
+GList* omemo_known_device_identities(const gchar* const jid);
+gboolean omemo_is_trusted_identity(const gchar* const jid, const gchar* const fingerprint);
+gboolean omemo_is_jid_trusted(const gchar* const jid);
+GList* omemo_get_jid_untrusted_fingerprints(const gchar* const jid);
+gboolean omemo_is_device_active(const gchar* const jid, const gchar* const fingerprint);
+gchar* omemo_fingerprint_autocomplete(const gchar* const search_str, gboolean previous, void* context);
 void omemo_fingerprint_autocomplete_reset(void);
-gboolean omemo_automatic_start(const char* const recipient);
+gboolean omemo_automatic_start(const gchar* const recipient);
 
 void omemo_start_sessions(void);
-void omemo_start_session(const char* const barejid);
-void omemo_start_muc_sessions(const char* const roomjid);
-void omemo_start_device_session(const char* const jid, uint32_t device_id, GList* prekeys, uint32_t signed_prekey_id, const unsigned char* const signed_prekey, size_t signed_prekey_len, const unsigned char* const signature, size_t signature_len, const unsigned char* const identity_key, size_t identity_key_len);
+void omemo_start_session(const gchar* const barejid);
+void omemo_start_muc_sessions(const gchar* const roomjid);
+void omemo_start_device_session(const gchar* const jid, uint32_t device_id, GList* prekeys, uint32_t signed_prekey_id, const unsigned char* const signed_prekey, size_t signed_prekey_len, const unsigned char* const signature, size_t signature_len, const unsigned char* const identity_key, size_t identity_key_len);
 
 gboolean omemo_loaded(void);
 
-char* omemo_on_message_send(ProfWin* win, const char* const message, gboolean request_receipt, gboolean muc, const char* const replace_id);
+gchar* omemo_on_message_send(ProfWin* win, const gchar* const message, gboolean request_receipt, gboolean muc, const gchar* const replace_id);
 char* omemo_on_message_recv(const char* const from, uint32_t sid, const unsigned char* const iv, size_t iv_len, GList* keys, const unsigned char* const payload, size_t payload_len, gboolean muc, gboolean* trusted, omemo_error_t* error) __attribute__((nonnull(9, 10)));
 
 char* omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res);
 gcry_error_t omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char* fragment);
 void omemo_free(void* a);
-int omemo_parse_aesgcm_url(const char* aesgcm_url, char** https_url, char** fragment);
+int omemo_parse_aesgcm_url(const gchar* aesgcm_url, char** https_url, char** fragment);
 
-char* omemo_qrcode_str();
+gchar* omemo_qrcode_str();

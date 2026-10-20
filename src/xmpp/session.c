@@ -44,19 +44,19 @@
 // for auto reconnect
 static struct
 {
-    char* name;
-    char* passwd;
+    gchar* name;
+    gchar* passwd;
 } saved_account;
 
 static struct session_details
 {
-    char* name;
-    char* jid;
-    char* passwd;
-    char* altdomain;
+    gchar* name;
+    gchar* jid;
+    gchar* passwd;
+    gchar* altdomain;
     int port;
-    char* tls_policy;
-    char* auth_policy;
+    gchar* tls_policy;
+    gchar* auth_policy;
 } saved_details;
 
 typedef enum {
@@ -69,7 +69,7 @@ typedef enum {
 static GTimer* reconnect_timer;
 static activity_state_t activity_state;
 static resource_presence_t saved_presence;
-static char* saved_status;
+static gchar* saved_status;
 static GHashTable* last_moods = NULL;
 
 static void _session_free_internals(void);
@@ -89,7 +89,7 @@ _session_shutdown(void)
 
     connection_shutdown();
     if (saved_status) {
-        free(saved_status);
+        g_free(saved_status);
     }
 }
 
@@ -113,15 +113,15 @@ session_connect_with_account(const ProfAccount* const account)
     _session_free_internals();
 
     // save account name and password for reconnect
-    saved_account.name = strdup(account->name);
-    saved_account.passwd = strdup(account->password);
+    saved_account.name = g_strdup(account->name);
+    saved_account.passwd = g_strdup(account->password);
 
-    auto_char char* jid = NULL;
+    auto_gchar gchar* jid = NULL;
     if (account->resource) {
         auto_jid Jid* jidp = jid_create_from_bare_and_resource(account->jid, account->resource);
-        jid = strdup(jid_fulljid_or_barejid(jidp));
+        jid = g_strdup(jid_fulljid_or_barejid(jidp));
     } else {
-        jid = strdup(account->jid);
+        jid = g_strdup(account->jid);
     }
 
     jabber_conn_status_t result = connection_connect(
@@ -148,8 +148,8 @@ _session_connect(struct session_details* details)
 }
 
 jabber_conn_status_t
-session_connect_with_details(const char* const jid, const char* const passwd, const char* const altdomain,
-                             const int port, const char* const tls_policy, const char* const auth_policy)
+session_connect_with_details(const gchar* const jid, const gchar* const passwd, const gchar* const altdomain,
+                             const int port, const gchar* const tls_policy, const gchar* const auth_policy)
 {
     assert(jid != NULL);
     assert(passwd != NULL);
@@ -157,10 +157,10 @@ session_connect_with_details(const char* const jid, const char* const passwd, co
     _session_free_internals();
 
     // save details for reconnect, remember name for account creating on success
-    saved_details.name = strdup(jid);
-    saved_details.passwd = strdup(passwd);
+    saved_details.name = g_strdup(jid);
+    saved_details.passwd = g_strdup(passwd);
     if (altdomain) {
-        saved_details.altdomain = strdup(altdomain);
+        saved_details.altdomain = g_strdup(altdomain);
     } else {
         saved_details.altdomain = NULL;
     }
@@ -170,12 +170,12 @@ session_connect_with_details(const char* const jid, const char* const passwd, co
         saved_details.port = 0;
     }
     if (tls_policy) {
-        saved_details.tls_policy = strdup(tls_policy);
+        saved_details.tls_policy = g_strdup(tls_policy);
     } else {
         saved_details.tls_policy = NULL;
     }
     if (auth_policy) {
-        saved_details.auth_policy = strdup(auth_policy);
+        saved_details.auth_policy = g_strdup(auth_policy);
     } else {
         saved_details.auth_policy = NULL;
     }
@@ -186,9 +186,9 @@ session_connect_with_details(const char* const jid, const char* const passwd, co
         auto_gchar gchar* resource = jid_random_resource();
         jid_destroy(jidp);
         jidp = jid_create_from_bare_and_resource(jid, resource);
-        saved_details.jid = strdup(jidp->fulljid);
+        saved_details.jid = g_strdup(jidp->fulljid);
     } else {
-        saved_details.jid = strdup(jid);
+        saved_details.jid = g_strdup(jid);
     }
 
     // connect with fulljid
@@ -258,7 +258,7 @@ session_process_events(void)
     }
 }
 
-const char*
+const gchar*
 session_get_account_name(void)
 {
     return saved_account.name;
@@ -356,8 +356,8 @@ session_login_success(gboolean secured)
         accounts_add(saved_details.name, saved_details.altdomain, saved_details.port, saved_details.tls_policy, saved_details.auth_policy);
         accounts_set_jid(saved_details.name, saved_details.jid);
 
-        saved_account.name = strdup(saved_details.name);
-        saved_account.passwd = strdup(saved_details.passwd);
+        saved_account.name = g_strdup(saved_details.name);
+        saved_account.passwd = g_strdup(saved_details.passwd);
 
         _session_free_saved_details();
         sv_ev_login_account_success(saved_account.name, secured);
@@ -450,7 +450,7 @@ session_check_autoaway(void)
 
     const char* account = session_get_account_name();
     resource_presence_t curr_presence = accounts_get_last_presence(account);
-    auto_char char* curr_status = accounts_get_last_status(account);
+    auto_gchar gchar* curr_status = accounts_get_last_status(account);
 
     unsigned long idle_ms = ui_get_idle_time();
 
@@ -464,10 +464,10 @@ session_check_autoaway(void)
                     // save current presence
                     saved_presence = curr_presence;
                     if (saved_status) {
-                        free(saved_status);
+                        g_free(saved_status);
                     }
                     if (curr_status) {
-                        saved_status = strdup(curr_status);
+                        saved_status = g_strdup(curr_status);
                     } else {
                         saved_status = NULL;
                     }
@@ -615,9 +615,9 @@ session_reconnect_now(void)
 static void
 _session_free_internals(void)
 {
-    FREE_SET_NULL(saved_account.name);
+    GFREE_SET_NULL(saved_account.name);
     prof_wipe_string(saved_account.passwd);
-    FREE_SET_NULL(saved_account.passwd);
+    GFREE_SET_NULL(saved_account.passwd);
     GFREE_SET_NULL(reconnect.altdomain);
     if (last_moods) {
         g_hash_table_destroy(last_moods);
@@ -629,11 +629,11 @@ _session_free_internals(void)
 static void
 _session_free_saved_details(void)
 {
-    FREE_SET_NULL(saved_details.name);
-    FREE_SET_NULL(saved_details.jid);
+    GFREE_SET_NULL(saved_details.name);
+    GFREE_SET_NULL(saved_details.jid);
     prof_wipe_string(saved_details.passwd);
-    FREE_SET_NULL(saved_details.passwd);
-    FREE_SET_NULL(saved_details.altdomain);
-    FREE_SET_NULL(saved_details.tls_policy);
-    FREE_SET_NULL(saved_details.auth_policy);
+    GFREE_SET_NULL(saved_details.passwd);
+    GFREE_SET_NULL(saved_details.altdomain);
+    GFREE_SET_NULL(saved_details.tls_policy);
+    GFREE_SET_NULL(saved_details.auth_policy);
 }

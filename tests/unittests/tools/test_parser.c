@@ -530,8 +530,8 @@ count_tokens__handles__multiple_spaces(void** state)
 void
 get_start__returns__first_of_one(void** state)
 {
-    char* inp = "one";
-    char* result = get_start(inp, 2);
+    const gchar* inp = "one";
+    gchar* result = get_start(inp, 2);
 
     assert_string_equal("one", result);
     g_free(result);
@@ -540,8 +540,8 @@ get_start__returns__first_of_one(void** state)
 void
 get_start__returns__first_of_two(void** state)
 {
-    char* inp = "one two";
-    char* result = get_start(inp, 2);
+    const gchar* inp = "one two";
+    gchar* result = get_start(inp, 2);
 
     assert_string_equal("one ", result);
     g_free(result);
@@ -550,8 +550,8 @@ get_start__returns__first_of_two(void** state)
 void
 get_start__returns__first_two_of_three(void** state)
 {
-    char* inp = "one two three";
-    char* result = get_start(inp, 3);
+    const gchar* inp = "one two three";
+    gchar* result = get_start(inp, 3);
 
     assert_string_equal("one two ", result);
     g_free(result);
@@ -560,8 +560,8 @@ get_start__returns__first_two_of_three(void** state)
 void
 get_start__returns__first_two_of_three_first_quoted(void** state)
 {
-    char* inp = "\"one\" two three";
-    char* result = get_start(inp, 3);
+    const gchar* inp = "\"one\" two three";
+    gchar* result = get_start(inp, 3);
 
     assert_string_equal("\"one\" two ", result);
     g_free(result);
@@ -570,8 +570,8 @@ get_start__returns__first_two_of_three_first_quoted(void** state)
 void
 get_start__returns__first_two_of_three_second_quoted(void** state)
 {
-    char* inp = "one \"two\" three";
-    char* result = get_start(inp, 3);
+    const gchar* inp = "one \"two\" three";
+    gchar* result = get_start(inp, 3);
 
     assert_string_equal("one \"two\" ", result);
     g_free(result);
@@ -580,8 +580,8 @@ get_start__returns__first_two_of_three_second_quoted(void** state)
 void
 get_start__returns__first_two_of_three_first_and_second_quoted(void** state)
 {
-    char* inp = "\"one\" \"two\" three";
-    char* result = get_start(inp, 3);
+    const gchar* inp = "\"one\" \"two\" three";
+    gchar* result = get_start(inp, 3);
 
     assert_string_equal("\"one\" \"two\" ", result);
     g_free(result);
@@ -590,8 +590,8 @@ get_start__returns__first_two_of_three_first_and_second_quoted(void** state)
 void
 get_start__handles__escapes(void** state)
 {
-    char* inp = "one\\ two three";
-    char* result = get_start(inp, 2);
+    const gchar* inp = "one\\ two three";
+    gchar* result = get_start(inp, 2);
 
     assert_string_equal("one\\ two ", result);
     g_free(result);
@@ -600,8 +600,8 @@ get_start__handles__escapes(void** state)
 void
 get_start__handles__multiple_spaces(void** state)
 {
-    char* inp = "one   two";
-    char* result = get_start(inp, 2);
+    const gchar* inp = "one   two";
+    gchar* result = get_start(inp, 2);
 
     assert_string_equal("one   ", result);
     g_free(result);

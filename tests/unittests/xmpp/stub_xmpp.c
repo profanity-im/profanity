@@ -29,9 +29,9 @@ session_set_activity_state_for_presence(resource_presence_t presence)
 }
 
 jabber_conn_status_t
-session_connect_with_details(const char* const jid,
-                             const char* const passwd, const char* const altdomain, const int port, const char* const tls_policy,
-                             const char* const auth_policy)
+session_connect_with_details(const gchar* const jid,
+                             const gchar* const passwd, const gchar* const altdomain, const int port, const gchar* const tls_policy,
+                             const gchar* const auth_policy)
 {
     check_expected(jid);
     check_expected(passwd);
@@ -92,7 +92,7 @@ connection_get_user(void)
     return mock_ptr_type(const char*);
 }
 
-const char*
+const gchar*
 connection_get_domain(void)
 {
     return NULL;
@@ -254,8 +254,8 @@ message_request_voice(const char* const roomjid)
 {
 }
 
-bool
-message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
+gboolean
+message_is_sent_by_us(const ProfMessage* const message, gboolean checkOID)
 {
     return TRUE;
 }
@@ -395,7 +395,7 @@ iq_room_info_request(const char* const room, gboolean display)
 {
 }
 void
-iq_room_affiliation_list(const char* const room, char* affiliation, bool show)
+iq_room_affiliation_list(const char* const room, char* affiliation, gboolean show)
 {
 }
 void

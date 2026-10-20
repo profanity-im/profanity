@@ -165,7 +165,7 @@ cb_handle_smp_event(void* opdata, OtrlSMPEvent smp_event,
         if (chatwin) {
             chatwin_otr_smp_event(chatwin, PROF_OTR_SMP_INIT, NULL);
         }
-        g_hash_table_insert(smp_initiators, strdup(context->username), strdup(context->username));
+        g_hash_table_insert(smp_initiators, g_strdup(context->username), g_strdup(context->username));
         break;
 
     case OTRL_SMPEVENT_ASK_FOR_ANSWER:
@@ -234,13 +234,13 @@ otrlib_init_ops(OtrlMessageAppOps* ops)
 }
 
 ConnContext*
-otrlib_context_find(OtrlUserState user_state, const char* const recipient, char* jid)
+otrlib_context_find(OtrlUserState user_state, const gchar* const recipient, const gchar* jid)
 {
     return otrl_context_find(user_state, recipient, jid, "xmpp", OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
 }
 
 void
-otrlib_end_session(OtrlUserState user_state, const char* const recipient, char* jid, OtrlMessageAppOps* ops)
+otrlib_end_session(OtrlUserState user_state, const gchar* const recipient, const gchar* jid, OtrlMessageAppOps* ops)
 {
     ConnContext* context = otrl_context_find(user_state, recipient, jid, "xmpp",
                                              OTRL_INSTAG_MASTER, 0, NULL, NULL, NULL);
@@ -251,8 +251,8 @@ otrlib_end_session(OtrlUserState user_state, const char* const recipient, char* 
 }
 
 gcry_error_t
-otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps* ops, char* jid, const char* const to,
-                       const char* const message, char** newmessage)
+otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps* ops, const gchar* jid, const gchar* const to,
+                       const gchar* const message, char** newmessage)
 {
     gcry_error_t err;
 
@@ -276,8 +276,8 @@ otrlib_encrypt_message(OtrlUserState user_state, OtrlMessageAppOps* ops, char* j
 }
 
 int
-otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps* ops, char* jid, const char* const from,
-                       const char* const message, char** decrypted, OtrlTLV** tlvs)
+otrlib_decrypt_message(OtrlUserState user_state, OtrlMessageAppOps* ops, const gchar* jid, const gchar* const from,
+                       const gchar* const message, char** decrypted, OtrlTLV** tlvs)
 {
     return otrl_message_receiving(
         user_state,

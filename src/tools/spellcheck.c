@@ -22,7 +22,7 @@
 
 static EnchantBroker* broker = NULL;
 static EnchantDict* dict = NULL;
-static char* current_lang = NULL;
+static gchar* current_lang = NULL;
 
 void
 spellcheck_init(void)
@@ -39,9 +39,8 @@ spellcheck_init(void)
 
     prof_add_shutdown_routine(spellcheck_deinit);
 
-    char* lang = prefs_get_string(PREF_SPELLCHECK_LANG);
+    auto_gchar gchar* lang = prefs_get_string(PREF_SPELLCHECK_LANG);
     spellcheck_set_lang(lang);
-    g_free(lang);
 }
 
 void
@@ -60,7 +59,7 @@ spellcheck_deinit(void)
 }
 
 gboolean
-spellcheck_set_lang(const char* lang)
+spellcheck_set_lang(const gchar* lang)
 {
     if (!broker || !lang) {
         return FALSE;
@@ -87,7 +86,7 @@ spellcheck_set_lang(const char* lang)
     return TRUE;
 }
 
-const char*
+const gchar*
 spellcheck_get_lang(void)
 {
     return current_lang;
@@ -119,7 +118,7 @@ spellcheck_get_available_langs(void)
 }
 
 gboolean
-spellcheck_is_misspelled(const char* word)
+spellcheck_is_misspelled(const gchar* word)
 {
     if (!dict || !word || word[0] == '\0') {
         return FALSE;

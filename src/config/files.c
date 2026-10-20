@@ -21,8 +21,8 @@
 #include "config/files.h"
 #include "config/preferences.h"
 
-static char* _files_get_xdg_config_home(void);
-static char* _files_get_xdg_data_home(void);
+static gchar* _files_get_xdg_config_home(void);
+static gchar* _files_get_xdg_data_home(void);
 
 void
 files_create_directories(void)
@@ -85,7 +85,7 @@ files_get_inputrc_file(void)
 }
 
 gchar*
-files_get_log_file(const char* const log_file)
+files_get_log_file(const gchar* const log_file)
 {
     auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
     GString* logfile;
@@ -116,7 +116,7 @@ files_get_log_file(const char* const log_file)
 }
 
 gchar*
-files_get_config_path(const char* const config_base)
+files_get_config_path(const gchar* const config_base)
 {
     auto_gchar gchar* xdg_config = _files_get_xdg_config_home();
     gchar* result = g_strdup_printf("%s/profanity/%s", xdg_config, config_base);
@@ -132,14 +132,14 @@ files_get_config_path(const char* const config_base)
  * @note Remember to free returned string using `auto_gchar` or `g_free()` when it is no longer needed to prevent memory leaks.
  */
 gchar*
-files_get_data_path(const char* const location)
+files_get_data_path(const gchar* const location)
 {
     auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
     return g_strdup_printf("%s/profanity/%s", xdg_data, location);
 }
 
 gchar*
-files_sanitize_jid(const char* const jid)
+files_sanitize_jid(const gchar* const jid)
 {
     if (jid == NULL) {
         return NULL;
@@ -152,7 +152,7 @@ files_sanitize_jid(const char* const jid)
 }
 
 gchar*
-files_get_download_path(const char* const jid)
+files_get_download_path(const gchar* const jid)
 {
     auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
 
@@ -168,7 +168,7 @@ files_get_download_path(const char* const jid)
 }
 
 gchar*
-files_get_account_data_path(const char* const specific_dir, const char* const jid)
+files_get_account_data_path(const gchar* const specific_dir, const gchar* const jid)
 {
     auto_gchar gchar* data_dir = files_get_data_path(specific_dir);
     auto_gchar gchar* account_dir = files_sanitize_jid(jid);
@@ -177,7 +177,7 @@ files_get_account_data_path(const char* const specific_dir, const char* const ji
 }
 
 gchar*
-files_file_in_account_data_path(const char* const specific_dir, const char* const jid, const char* const file_name)
+files_file_in_account_data_path(const gchar* const specific_dir, const gchar* const jid, const gchar* const file_name)
 {
     gchar* data_path = files_get_account_data_path(specific_dir, jid);
 
@@ -194,14 +194,14 @@ files_file_in_account_data_path(const char* const specific_dir, const char* cons
     return filename;
 }
 
-static char*
+static gchar*
 _files_get_xdg_config_home(void)
 {
     gchar* xdg_config_home_env = getenv("XDG_CONFIG_HOME");
     gchar* xdg_config_home = NULL;
 
     if (xdg_config_home_env) {
-        xdg_config_home = strdup(xdg_config_home_env);
+        xdg_config_home = g_strdup(xdg_config_home_env);
         g_strstrip(xdg_config_home);
     }
 
@@ -210,21 +210,21 @@ _files_get_xdg_config_home(void)
     } else {
         GString* default_path = g_string_new(getenv("HOME"));
         g_string_append(default_path, "/.config");
-        char* result = strdup(default_path->str);
+        gchar* result = g_strdup(default_path->str);
         g_string_free(default_path, TRUE);
 
         return result;
     }
 }
 
-static char*
+static gchar*
 _files_get_xdg_data_home(void)
 {
     gchar* xdg_data_home_env = getenv("XDG_DATA_HOME");
     gchar* xdg_data_home = NULL;
 
     if (xdg_data_home_env) {
-        xdg_data_home = strdup(xdg_data_home_env);
+        xdg_data_home = g_strdup(xdg_data_home_env);
         g_strstrip(xdg_data_home);
     }
 
@@ -233,7 +233,7 @@ _files_get_xdg_data_home(void)
     } else {
         GString* default_path = g_string_new(getenv("HOME"));
         g_string_append(default_path, "/.local/share");
-        gchar* result = strdup(default_path->str);
+        gchar* result = g_strdup(default_path->str);
         g_string_free(default_path, TRUE);
 
         return result;

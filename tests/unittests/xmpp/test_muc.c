@@ -22,7 +22,7 @@ muc_after_test(void** state)
 void
 muc_invites_add__updates__invites_list(void** state)
 {
-    char* room = "room@conf.server";
+    const gchar* room = "room@conf.server";
     muc_invites_add(room, NULL);
 
     gboolean invite_exists = muc_invites_contain(room);
@@ -33,7 +33,7 @@ muc_invites_add__updates__invites_list(void** state)
 void
 muc_invites_remove__updates__invites_list(void** state)
 {
-    char* room = "room@conf.server";
+    const gchar* room = "room@conf.server";
     muc_invites_add(room, NULL);
     muc_invites_remove(room);
 
@@ -67,7 +67,7 @@ muc_invites_count__returns__5_when_five_invites_added(void** state)
 void
 muc_active__is__false_when_not_joined(void** state)
 {
-    char* room = "room@server.org";
+    const gchar* room = "room@server.org";
 
     gboolean room_is_active = muc_active(room);
 
@@ -77,8 +77,8 @@ muc_active__is__false_when_not_joined(void** state)
 void
 muc_active__is__true_when_joined(void** state)
 {
-    char* room = "room@server.org";
-    char* nick = "bob";
+    const gchar* room = "room@server.org";
+    const gchar* nick = "bob";
     muc_join(room, nick, NULL, FALSE);
 
     gboolean room_is_active = muc_active(room);
@@ -99,8 +99,8 @@ muc_roster_add__returns_false_when_room_or_nick_null(void** state)
 void
 muc_roster_add__adds_occupant_to_room_roster(void** state)
 {
-    char* room = "room@server.org";
-    char* nick = "bob";
+    const gchar* room = "room@server.org";
+    const gchar* nick = "bob";
     muc_join(room, nick, NULL, FALSE);
 
     gboolean added = muc_roster_add(room, "alice", NULL, "participant", "member", "chat", "online");

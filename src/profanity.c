@@ -61,15 +61,15 @@
 
 static unsigned int min_runtime = 5;
 
-static void _init(char* log_level, char* config_file, char* log_file, char* theme_name);
+static void _init(const gchar* const log_level, const gchar* const config_file, const gchar* const log_file, const gchar* const theme_name);
 static void _shutdown(void);
-static void _connect_default(const char* const account);
+static void _connect_default(const gchar* const account);
 
 pthread_mutex_t lock;
 static gboolean force_quit = FALSE;
 
 void
-prof_run(gchar* log_level, gchar* account_name, gchar* config_file, gchar* log_file, gchar* theme_name, gchar** commands)
+prof_run(const gchar* const log_level, const gchar* const account_name, const gchar* const config_file, const gchar* const log_file, const gchar* const theme_name, gchar** commands)
 {
     gboolean cont = TRUE;
 
@@ -159,7 +159,7 @@ prof_set_quit(void)
 }
 
 static void
-_connect_default(const char* const account)
+_connect_default(const gchar* const account)
 {
     ProfWin* window = wins_get_current();
     if (account) {
@@ -180,7 +180,7 @@ sigterm_handler(int sig)
 }
 
 static void
-_init(char* log_level, char* config_file, char* log_file, char* theme_name)
+_init(const gchar* const log_level, const gchar* const config_file, const gchar* const log_file, const gchar* const theme_name)
 {
     setlocale(LC_ALL, "");
     // ignore SIGPIPE
@@ -279,7 +279,7 @@ static void
 _call_and_free_shutdown_routine(struct shutdown_routine* r)
 {
     r->routine();
-    free(r);
+    g_free(r);
 }
 
 void

@@ -184,9 +184,9 @@ roster_contact_autocomplete__returns__first_exists(void** state)
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char* search = g_strdup("B");
+    gchar* search = g_strdup("B");
 
-    char* result = roster_contact_autocomplete(search, FALSE, NULL);
+    gchar* result = roster_contact_autocomplete(search, FALSE, NULL);
     assert_string_equal("Bob", result);
     g_free(result);
     g_free(search);
@@ -201,7 +201,7 @@ roster_contact_autocomplete__returns__second_exists(void** state)
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char* result = roster_contact_autocomplete("Dav", FALSE, NULL);
+    gchar* result = roster_contact_autocomplete("Dav", FALSE, NULL);
     assert_string_equal("Dave", result);
     g_free(result);
     roster_destroy();
@@ -215,7 +215,7 @@ roster_contact_autocomplete__returns__third_exists(void** state)
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char* result = roster_contact_autocomplete("Ja", FALSE, NULL);
+    gchar* result = roster_contact_autocomplete("Ja", FALSE, NULL);
     assert_string_equal("James", result);
     g_free(result);
     roster_destroy();
@@ -229,7 +229,7 @@ roster_contact_autocomplete__returns__null_when_no_match(void** state)
     roster_add("Dave", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char* result = roster_contact_autocomplete("Mike", FALSE, NULL);
+    gchar* result = roster_contact_autocomplete("Mike", FALSE, NULL);
     assert_null(result);
     roster_destroy();
 }
@@ -238,7 +238,7 @@ void
 roster_contact_autocomplete__returns__null_on_empty_roster(void** state)
 {
     roster_create();
-    char* result = roster_contact_autocomplete("James", FALSE, NULL);
+    gchar* result = roster_contact_autocomplete("James", FALSE, NULL);
     assert_null(result);
     roster_destroy();
 }
@@ -251,8 +251,8 @@ roster_contact_autocomplete__returns__second_when_two_match(void** state)
     roster_add("Jamie", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char* result1 = roster_contact_autocomplete("Jam", FALSE, NULL);
-    char* result2 = roster_contact_autocomplete(result1, FALSE, NULL);
+    gchar* result1 = roster_contact_autocomplete("Jam", FALSE, NULL);
+    gchar* result2 = roster_contact_autocomplete(result1, FALSE, NULL);
     assert_string_equal("Jamie", result2);
     g_free(result1);
     g_free(result2);
@@ -274,11 +274,11 @@ roster_contact_autocomplete__returns__fifth_when_multiple_match(void** state)
     roster_add("Jamy", NULL, NULL, NULL, FALSE);
     roster_add("Jamz", NULL, NULL, NULL, FALSE);
 
-    char* result1 = roster_contact_autocomplete("Jam", FALSE, NULL);
-    char* result2 = roster_contact_autocomplete(result1, FALSE, NULL);
-    char* result3 = roster_contact_autocomplete(result2, FALSE, NULL);
-    char* result4 = roster_contact_autocomplete(result3, FALSE, NULL);
-    char* result5 = roster_contact_autocomplete(result4, FALSE, NULL);
+    gchar* result1 = roster_contact_autocomplete("Jam", FALSE, NULL);
+    gchar* result2 = roster_contact_autocomplete(result1, FALSE, NULL);
+    gchar* result3 = roster_contact_autocomplete(result2, FALSE, NULL);
+    gchar* result4 = roster_contact_autocomplete(result3, FALSE, NULL);
+    gchar* result5 = roster_contact_autocomplete(result4, FALSE, NULL);
     assert_string_equal("Jamo", result5);
     g_free(result1);
     g_free(result2);
@@ -296,9 +296,9 @@ roster_contact_autocomplete__returns__first_when_two_match_and_reset(void** stat
     roster_add("Jamie", NULL, NULL, NULL, FALSE);
     roster_add("Bob", NULL, NULL, NULL, FALSE);
 
-    char* result1 = roster_contact_autocomplete("Jam", FALSE, NULL);
+    gchar* result1 = roster_contact_autocomplete("Jam", FALSE, NULL);
     roster_reset_search_attempts();
-    char* result2 = roster_contact_autocomplete(result1, FALSE, NULL);
+    gchar* result2 = roster_contact_autocomplete(result1, FALSE, NULL);
     assert_string_equal("James", result2);
     g_free(result1);
     g_free(result2);
@@ -313,7 +313,7 @@ roster_contact_autocomplete__returns__utf8(void** state)
     roster_add("Πλάτων", NULL, NULL, NULL, FALSE);
 
     // Byte-wise (strcmp): Πλάτων (CE A0...) < Σωκράτης (CE A3...)
-    char* result = roster_contact_autocomplete("Π", FALSE, NULL);
+    gchar* result = roster_contact_autocomplete("Π", FALSE, NULL);
     assert_string_equal("Πλάτων", result);
     g_free(result);
 

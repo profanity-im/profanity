@@ -13,15 +13,15 @@
 
 #include <pgp/gpg.h>
 
-char* p_ox_gpg_signcrypt(const char* const sender_barejid, const char* const recipient_barejid, const char* const message);
-char* p_ox_gpg_decrypt(char* base64);
-void p_ox_gpg_readkey(const char* const filename, char** key, char** fp);
-gboolean p_ox_gpg_import(char* base64_public_key);
+gchar* p_ox_gpg_signcrypt(const gchar* const sender_barejid, const gchar* const recipient_barejid, const gchar* const message);
+gchar* p_ox_gpg_decrypt(const gchar* base64);
+void p_ox_gpg_readkey(const gchar* const filename, gchar** key, gchar** fp);
+gboolean p_ox_gpg_import(const gchar* base64_public_key);
 
 GHashTable* ox_gpg_public_keys(void);
 GHashTable* ox_gpg_list_keys(void);
 
-gboolean ox_is_private_key_available(const char* const barejid);
-gboolean ox_is_public_key_available(const char* const barejid);
+gboolean ox_is_private_key_available(const gchar* const barejid);
+gboolean ox_is_public_key_available(const gchar* const barejid);
 
 #endif

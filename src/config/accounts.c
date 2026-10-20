@@ -34,7 +34,7 @@ static Autocomplete all_ac;
 static Autocomplete enabled_ac;
 
 static gchar*
-_sanitize_account_name(const char* const name)
+_sanitize_account_name(const gchar* const name)
 {
     if (!name) {
         return NULL;
@@ -53,7 +53,7 @@ _sanitize_account_name(const char* const name)
 }
 
 static gboolean
-_accounts_has_group(const char* account_name)
+_accounts_has_group(const gchar* account_name)
 {
     if (!account_name || !accounts)
         return FALSE;
@@ -63,7 +63,7 @@ _accounts_has_group(const char* account_name)
 }
 
 static void
-_accounts_save(const char* account_name)
+_accounts_save(const gchar* account_name)
 {
     prof_keyfile_t current;
 
@@ -136,14 +136,14 @@ accounts_load(void)
     }
 }
 
-char*
-accounts_find_enabled(const char* const prefix, gboolean previous, void* context)
+gchar*
+accounts_find_enabled(const gchar* const prefix, gboolean previous, void* context)
 {
     return autocomplete_complete(enabled_ac, prefix, TRUE, previous);
 }
 
-char*
-accounts_find_all(const char* const prefix, gboolean previous, void* context)
+gchar*
+accounts_find_all(const gchar* const prefix, gboolean previous, void* context)
 {
     return autocomplete_complete(all_ac, prefix, TRUE, previous);
 }
@@ -161,10 +161,10 @@ accounts_reset_enabled_search(void)
 }
 
 void
-accounts_add(const char* account_name, const char* altdomain, const int port, const char* const tls_policy, const char* const auth_policy)
+accounts_add(const gchar* account_name, const gchar* altdomain, const int port, const gchar* const tls_policy, const gchar* const auth_policy)
 {
     // set account name and resource
-    const char* barejid = account_name;
+    const gchar* barejid = account_name;
     auto_gchar gchar* resource = jid_random_resource();
     auto_jid Jid* jid = jid_create(account_name);
     if (jid) {
@@ -219,7 +219,7 @@ accounts_add(const char* account_name, const char* altdomain, const int port, co
 }
 
 gboolean
-accounts_remove(const char* account_name)
+accounts_remove(const gchar* account_name)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     gboolean r = g_key_file_remove_group(accounts, sanitized_account_name, NULL);
@@ -258,7 +258,7 @@ _accounts_get_glist(const gchar* sanitized_account_name,
 }
 
 ProfAccount*
-accounts_get_account(const char* const account_name)
+accounts_get_account(const gchar* const account_name)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (!_accounts_has_group(sanitized_account_name)) {
@@ -295,7 +295,7 @@ accounts_get_account(const char* const account_name)
         } else {
             jabber_conn_status_t conn_status = connection_get_status();
             if (conn_status == JABBER_CONNECTED) {
-                const char* conf_jid = connection_jid_for_feature(XMPP_FEATURE_MUC);
+                const gchar* conf_jid = connection_jid_for_feature(XMPP_FEATURE_MUC);
                 if (conf_jid) {
                     muc_service = g_strdup(conf_jid);
                 }
@@ -345,7 +345,7 @@ accounts_get_account(const char* const account_name)
 }
 
 gboolean
-accounts_enable(const char* const account_name)
+accounts_enable(const gchar* const account_name)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -359,7 +359,7 @@ accounts_enable(const char* const account_name)
 }
 
 gboolean
-accounts_disable(const char* const account_name)
+accounts_disable(const gchar* const account_name)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -373,7 +373,7 @@ accounts_disable(const char* const account_name)
 }
 
 gboolean
-accounts_rename(const char* const account_name, const char* const new_name)
+accounts_rename(const gchar* const account_name, const gchar* const new_name)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     auto_gchar gchar* sanitized_new_account_name = _sanitize_account_name(new_name);
@@ -408,13 +408,13 @@ accounts_rename(const char* const account_name, const char* const new_name)
 }
 
 gboolean
-accounts_account_exists(const char* const account_name)
+accounts_account_exists(const gchar* const account_name)
 {
     return _accounts_has_group(account_name);
 }
 
 void
-accounts_set_jid(const char* const account_name, const char* const value)
+accounts_set_jid(const gchar* const account_name, const gchar* const value)
 {
     auto_jid Jid* jid = jid_create(value);
     if (jid) {
@@ -437,7 +437,7 @@ accounts_set_jid(const char* const account_name, const char* const value)
 }
 
 void
-accounts_set_server(const char* const account_name, const char* const value)
+accounts_set_server(const gchar* const account_name, const gchar* const value)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -447,7 +447,7 @@ accounts_set_server(const char* const account_name, const char* const value)
 }
 
 void
-accounts_set_port(const char* const account_name, const int value)
+accounts_set_port(const gchar* const account_name, const int value)
 {
     if (value != 0) {
         auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
@@ -459,7 +459,7 @@ accounts_set_port(const char* const account_name, const int value)
 }
 
 static void
-_accounts_set_string_option(const char* account_name, const char* const option, const char* const value)
+_accounts_set_string_option(const gchar* account_name, const gchar* const option, const gchar* const value)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -469,7 +469,7 @@ _accounts_set_string_option(const char* account_name, const char* const option, 
 }
 
 static void
-_accounts_set_int_option(const char* account_name, const char* const option, int value)
+_accounts_set_int_option(const gchar* account_name, const gchar* const option, int value)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -479,7 +479,7 @@ _accounts_set_int_option(const char* account_name, const char* const option, int
 }
 
 static void
-_accounts_clear_string_option(const char* account_name, const char* const option)
+_accounts_clear_string_option(const gchar* account_name, const gchar* const option)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -489,127 +489,127 @@ _accounts_clear_string_option(const char* account_name, const char* const option
 }
 
 void
-accounts_set_resource(const char* const account_name, const char* const value)
+accounts_set_resource(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "resource", value);
 }
 
 void
-accounts_set_password(const char* const account_name, const char* const value)
+accounts_set_password(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "password", value);
 }
 
 void
-accounts_set_eval_password(const char* const account_name, const char* const value)
+accounts_set_eval_password(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "eval_password", value);
 }
 
 void
-accounts_set_pgp_keyid(const char* const account_name, const char* const value)
+accounts_set_pgp_keyid(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "pgp.keyid", value);
 }
 
 void
-accounts_set_script_start(const char* const account_name, const char* const value)
+accounts_set_script_start(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "script.start", value);
 }
 
 void
-accounts_set_client(const char* const account_name, const char* const value)
+accounts_set_client(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "client.name", value);
 }
 
 void
-accounts_set_theme(const char* const account_name, const char* const value)
+accounts_set_theme(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "theme", value);
 }
 
 void
-accounts_set_max_sessions(const char* const account_name, const int value)
+accounts_set_max_sessions(const gchar* const account_name, const int value)
 {
     _accounts_set_int_option(account_name, "max.sessions", value);
 }
 
 void
-accounts_clear_password(const char* const account_name)
+accounts_clear_password(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "password");
 }
 
 void
-accounts_clear_eval_password(const char* const account_name)
+accounts_clear_eval_password(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "eval_password");
 }
 
 void
-accounts_clear_server(const char* const account_name)
+accounts_clear_server(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "server");
 }
 
 void
-accounts_clear_port(const char* const account_name)
+accounts_clear_port(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "port");
 }
 
 void
-accounts_clear_pgp_keyid(const char* const account_name)
+accounts_clear_pgp_keyid(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "pgp.keyid");
 }
 
 void
-accounts_clear_script_start(const char* const account_name)
+accounts_clear_script_start(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "script.start");
 }
 
 void
-accounts_clear_client(const char* const account_name)
+accounts_clear_client(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "client.name");
 }
 
 void
-accounts_clear_theme(const char* const account_name)
+accounts_clear_theme(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "theme");
 }
 
 void
-accounts_clear_muc(const char* const account_name)
+accounts_clear_muc(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "muc.service");
 }
 
 void
-accounts_clear_resource(const char* const account_name)
+accounts_clear_resource(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "resource");
 }
 
 void
-accounts_clear_otr(const char* const account_name)
+accounts_clear_otr(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "otr.policy");
 }
 
 void
-accounts_clear_max_sessions(const char* const account_name)
+accounts_clear_max_sessions(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "max.sessions");
 }
 
 void
-accounts_add_otr_policy(const char* const account_name, const char* const contact_jid, const char* const policy)
+accounts_add_otr_policy(const gchar* const account_name, const gchar* const contact_jid, const gchar* const policy)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -637,7 +637,7 @@ accounts_add_otr_policy(const char* const account_name, const char* const contac
 }
 
 void
-accounts_add_omemo_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
+accounts_add_omemo_state(const gchar* const account_name, const gchar* const contact_jid, gboolean enabled)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -654,7 +654,7 @@ accounts_add_omemo_state(const char* const account_name, const char* const conta
 }
 
 void
-accounts_add_ox_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
+accounts_add_ox_state(const gchar* const account_name, const gchar* const contact_jid, gboolean enabled)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -669,7 +669,7 @@ accounts_add_ox_state(const char* const account_name, const char* const contact_
 }
 
 void
-accounts_add_pgp_state(const char* const account_name, const char* const contact_jid, gboolean enabled)
+accounts_add_pgp_state(const gchar* const account_name, const gchar* const contact_jid, gboolean enabled)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -686,7 +686,7 @@ accounts_add_pgp_state(const char* const account_name, const char* const contact
 }
 
 void
-accounts_clear_omemo_state(const char* const account_name, const char* const contact_jid)
+accounts_clear_omemo_state(const gchar* const account_name, const gchar* const contact_jid)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -697,73 +697,73 @@ accounts_clear_omemo_state(const char* const account_name, const char* const con
 }
 
 void
-accounts_set_muc_service(const char* const account_name, const char* const value)
+accounts_set_muc_service(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "muc.service", value);
 }
 
 void
-accounts_set_muc_nick(const char* const account_name, const char* const value)
+accounts_set_muc_nick(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "muc.nick", value);
 }
 
 void
-accounts_set_otr_policy(const char* const account_name, const char* const value)
+accounts_set_otr_policy(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "otr.policy", value);
 }
 
 void
-accounts_set_omemo_policy(const char* const account_name, const char* const value)
+accounts_set_omemo_policy(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "omemo.policy", value);
 }
 
 void
-accounts_set_tls_policy(const char* const account_name, const char* const value)
+accounts_set_tls_policy(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "tls.policy", value);
 }
 
 void
-accounts_set_auth_policy(const char* const account_name, const char* const value)
+accounts_set_auth_policy(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "auth.policy", value);
 }
 
 void
-accounts_set_priority_online(const char* const account_name, const gint value)
+accounts_set_priority_online(const gchar* const account_name, const gint value)
 {
     _accounts_set_int_option(account_name, "priority.online", value);
 }
 
 void
-accounts_set_priority_chat(const char* const account_name, const gint value)
+accounts_set_priority_chat(const gchar* const account_name, const gint value)
 {
     _accounts_set_int_option(account_name, "priority.chat", value);
 }
 
 void
-accounts_set_priority_away(const char* const account_name, const gint value)
+accounts_set_priority_away(const gchar* const account_name, const gint value)
 {
     _accounts_set_int_option(account_name, "priority.away", value);
 }
 
 void
-accounts_set_priority_xa(const char* const account_name, const gint value)
+accounts_set_priority_xa(const gchar* const account_name, const gint value)
 {
     _accounts_set_int_option(account_name, "priority.xa", value);
 }
 
 void
-accounts_set_priority_dnd(const char* const account_name, const gint value)
+accounts_set_priority_dnd(const gchar* const account_name, const gint value)
 {
     _accounts_set_int_option(account_name, "priority.dnd", value);
 }
 
 void
-accounts_set_priority_all(const char* const account_name, const gint value)
+accounts_set_priority_all(const gchar* const account_name, const gint value)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -776,7 +776,7 @@ accounts_set_priority_all(const char* const account_name, const gint value)
 }
 
 gint
-accounts_get_priority_for_presence_type(const char* const account_name,
+accounts_get_priority_for_presence_type(const gchar* const account_name,
                                         resource_presence_t presence_type)
 {
     gint result;
@@ -807,19 +807,19 @@ accounts_get_priority_for_presence_type(const char* const account_name,
 }
 
 void
-accounts_set_last_presence(const char* const account_name, const char* const value)
+accounts_set_last_presence(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "presence.last", value);
 }
 
 void
-accounts_set_last_status(const char* const account_name, const char* const value)
+accounts_set_last_status(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "presence.laststatus", value);
 }
 
 void
-accounts_set_last_activity(const char* const account_name)
+accounts_set_last_activity(const gchar* const account_name)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -835,7 +835,7 @@ accounts_set_last_activity(const char* const account_name)
 }
 
 gchar*
-accounts_get_last_activity(const char* const account_name)
+accounts_get_last_activity(const gchar* const account_name)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -846,7 +846,7 @@ accounts_get_last_activity(const char* const account_name)
 }
 
 gchar*
-accounts_get_resource(const char* const account_name)
+accounts_get_resource(const gchar* const account_name)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (!_accounts_has_group(sanitized_account_name)) {
@@ -856,7 +856,7 @@ accounts_get_resource(const char* const account_name)
 }
 
 int
-accounts_get_max_sessions(const char* const account_name)
+accounts_get_max_sessions(const gchar* const account_name)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (!_accounts_has_group(sanitized_account_name)) {
@@ -866,7 +866,7 @@ accounts_get_max_sessions(const char* const account_name)
 }
 
 void
-accounts_set_login_presence(const char* const account_name, const char* const value)
+accounts_set_login_presence(const gchar* const account_name, const gchar* const value)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     if (_accounts_has_group(sanitized_account_name)) {
@@ -876,7 +876,7 @@ accounts_set_login_presence(const char* const account_name, const char* const va
 }
 
 resource_presence_t
-accounts_get_last_presence(const char* const account_name)
+accounts_get_last_presence(const gchar* const account_name)
 {
     resource_presence_t result;
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
@@ -901,15 +901,15 @@ accounts_get_last_presence(const char* const account_name)
     return result;
 }
 
-char*
-accounts_get_last_status(const char* const account_name)
+gchar*
+accounts_get_last_status(const gchar* const account_name)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     return g_key_file_get_string(accounts, sanitized_account_name, "presence.laststatus", NULL);
 }
 
 resource_presence_t
-accounts_get_login_presence(const char* const account_name)
+accounts_get_login_presence(const gchar* const account_name)
 {
     resource_presence_t result;
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
@@ -935,8 +935,8 @@ accounts_get_login_presence(const char* const account_name)
     return result;
 }
 
-char*
-accounts_get_login_status(const char* const account_name)
+gchar*
+accounts_get_login_status(const gchar* const account_name)
 {
     auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
     auto_gchar gchar* setting = g_key_file_get_string(accounts, sanitized_account_name, "presence.login", NULL);

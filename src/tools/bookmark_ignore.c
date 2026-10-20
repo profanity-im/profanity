@@ -38,7 +38,7 @@ _bookmark_save()
 }
 
 void
-bookmark_ignore_on_connect(const char* const barejid)
+bookmark_ignore_on_connect(const gchar* const barejid)
 {
     if (bookmark_ignore_keyfile == NULL) {
         _bookmark_ignore_load();
@@ -68,14 +68,14 @@ bookmark_ignore_list(gsize* len)
 }
 
 void
-bookmark_ignore_add(const char* const barejid)
+bookmark_ignore_add(const gchar* const barejid)
 {
     g_key_file_set_boolean(bookmark_ignore_keyfile, account_jid, barejid, TRUE);
     _bookmark_save();
 }
 
 void
-bookmark_ignore_remove(const char* const barejid)
+bookmark_ignore_remove(const gchar* const barejid)
 {
     g_key_file_remove_key(bookmark_ignore_keyfile, account_jid, barejid, NULL);
     _bookmark_save();

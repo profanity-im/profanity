@@ -45,8 +45,8 @@ static gchar* passphrase_attempt;
 
 static Autocomplete key_ac;
 
-static gchar* _remove_header_footer(gchar* str, const char* const footer);
-static gchar* _add_header_footer(const gchar* const str, const char* const header, const char* const footer);
+static gchar* _remove_header_footer(gchar* str, const gchar* const footer);
+static gchar* _add_header_footer(const gchar* const str, const gchar* const header, const gchar* const footer);
 static gchar* _gpgme_data_to_char(gpgme_data_t data);
 static void _save_pubkeys(void);
 static ProfPGPKey* _gpgme_key_to_ProfPGPKey(gpgme_key_t key);
@@ -475,16 +475,7 @@ p_gpg_sign(const gchar* const str, const gchar* const fp)
         return NULL;
     }
 
-    auto_char char* str_or_empty = NULL;
-    if (str) {
-        str_or_empty = strdup(str);
-    } else {
-        str_or_empty = strdup("");
-    }
-    if (!str_or_empty) {
-        log_error("GPG: strdup failed");
-        return NULL;
-    }
+    auto_gchar gchar* str_or_empty = g_strdup(str ? str : "");
     gpgme_data_t str_data;
     gpgme_data_new_from_mem(&str_data, str_or_empty, strlen(str_or_empty), 1);
 
@@ -584,7 +575,7 @@ p_gpg_encrypt(const gchar* const barejid, const gchar* const message, const gcha
     size_t len;
     char* cipher_str = gpgme_data_release_and_get_mem(cipher, &len);
 
-    char* result = NULL;
+    gchar* result = NULL;
     if (cipher_str) {
         GString* cipher_gstr = g_string_new("");
         g_string_append_len(cipher_gstr, cipher_str, len);
@@ -662,7 +653,7 @@ p_gpg_decrypt(const gchar* const cipher)
 }
 
 void
-p_gpg_free_decrypted(char* decrypted)
+p_gpg_free_decrypted(gchar* decrypted)
 {
     g_free(decrypted);
 }
@@ -755,12 +746,12 @@ gboolean
 p_gpg_is_public_key_format(const gchar* buffer)
 {
     if (buffer == NULL || buffer[0] == '\0') {
-        return false;
+        return FALSE;
     }
 
     const gchar* headerPos = strstr(buffer, PGP_PUBLIC_KEY_HEADER);
     if (headerPos == NULL) {
-        return false;
+        return FALSE;
     }
 
     const gchar* footerPos = strstr(buffer, PGP_PUBLIC_KEY_FOOTER);
@@ -925,7 +916,7 @@ _gpgme_data_to_char(gpgme_data_t data)
 }
 
 static gchar*
-_remove_header_footer(gchar* str, const char* const footer)
+_remove_header_footer(gchar* str, const gchar* const footer)
 {
     int pos = 0;
     int newlines = 0;
@@ -949,7 +940,7 @@ _remove_header_footer(gchar* str, const char* const footer)
 }
 
 static gchar*
-_add_header_footer(const gchar* const str, const char* const header, const char* const footer)
+_add_header_footer(const gchar* const str, const gchar* const header, const gchar* const footer)
 {
     return g_strdup_printf("%s\n\n%s\n%s", header, str, footer);
 }

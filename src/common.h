@@ -106,9 +106,9 @@ typedef struct prof_keyfile_t
 } prof_keyfile_t;
 
 gboolean
-load_data_keyfile(prof_keyfile_t* keyfile, const char* filename);
+load_data_keyfile(prof_keyfile_t* keyfile, const gchar* filename);
 gboolean
-load_config_keyfile(prof_keyfile_t* keyfile, const char* filename);
+load_config_keyfile(prof_keyfile_t* keyfile, const gchar* filename);
 gboolean
 load_custom_keyfile(prof_keyfile_t* keyfile, gchar* filename);
 gboolean
@@ -135,7 +135,7 @@ free_keyfile(prof_keyfile_t* keyfile);
         resource = NULL;         \
     } while (0)
 
-void prof_wipe_string(char* str);
+void prof_wipe_string(gchar* str);
 
 typedef enum {
     CONTACT_OFFLINE,
@@ -154,43 +154,43 @@ typedef enum {
     RESOURCE_XA
 } resource_presence_t;
 
-gboolean string_to_verbosity(const char* cmd, int* verbosity, gchar** err_msg);
+gboolean string_to_verbosity(const gchar* cmd, int* verbosity, gchar** err_msg);
 
-gboolean create_dir(const char* name);
-gboolean copy_file(const char* const src, const char* const target, const gboolean overwrite_existing);
-gboolean strtoi_range(const char* str, int* saveptr, int min, int max, char** err_msg);
-int utf8_display_len(const char* const str);
-gchar* str_xml_sanitize(const char* const str);
-void str_clean_directional_chars(char* str);
-void str_clean_terminal_control_chars(char* str);
-gint str_ascii_casecmp0(const char* s1, const char* s2);
+gboolean create_dir(const gchar* name);
+gboolean copy_file(const gchar* const src, const gchar* const target, const gboolean overwrite_existing);
+gboolean strtoi_range(const gchar* str, int* saveptr, int min, int max, gchar** err_msg);
+int utf8_display_len(const gchar* const str);
+gchar* str_xml_sanitize(const gchar* const str);
+void str_clean_directional_chars(gchar* str);
+void str_clean_terminal_control_chars(gchar* str);
+gint str_ascii_casecmp0(const gchar* s1, const gchar* s2);
 
-gboolean string_matches_one_of(const char* what, const char* is, gboolean is_can_be_null, const char* first, ...) __attribute__((sentinel));
-gboolean valid_tls_policy_option(const char* is);
+gboolean string_matches_one_of(const gchar* what, const gchar* is, gboolean is_can_be_null, const gchar* first, ...) __attribute__((sentinel));
+gboolean valid_tls_policy_option(const gchar* is);
 
-char* release_get_latest(void);
-gboolean release_is_new(const char* const curr_version, const char* const found_version);
+gchar* release_get_latest(void);
+gboolean release_is_new(const gchar* const curr_version, const gchar* const found_version);
 
-char* strip_arg_quotes(const char* const input);
+gchar* strip_arg_quotes(const gchar* const input);
 gboolean is_notify_enabled(void);
 
-GSList* prof_occurrences(const char* const needle, const char* const haystack, int offset, gboolean whole_word,
+GSList* prof_occurrences(const gchar* const needle, const gchar* const haystack, int offset, gboolean whole_word,
                          GSList** result);
-GSList* get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const message, const char* const nick);
+GSList* get_mentions(gboolean whole_word, gboolean case_sensitive, const gchar* const message, const gchar* const nick);
 
-int is_regular_file(const char* path);
-int is_dir(const char* path);
-void get_file_paths_recursive(const char* directory, GSList** contents);
+int is_regular_file(const gchar* path);
+int is_dir(const gchar* path);
+void get_file_paths_recursive(const gchar* directory, GSList** contents);
 
 gchar* get_random_string(int length);
 
 gboolean call_external(gchar** argv);
-gchar** format_call_external_argv(const char* template, const char* url, const char* filename);
+gchar** format_call_external_argv(const gchar* template, const gchar* url, const gchar* filename);
 
-gchar* unique_filename_from_url(const char* url, const char* path);
-gchar* get_expanded_path(const char* path);
+gchar* unique_filename_from_url(const gchar* url, const gchar* path);
+gchar* get_expanded_path(const gchar* path);
 
-char* basename_from_url(const char* url);
+gchar* basename_from_url(const gchar* url);
 
 gchar* prof_date_time_format_iso8601(GDateTime* dt);
 

@@ -24,28 +24,28 @@
 static GHashTable* sessions;
 
 static void
-_chat_session_new(const char* const barejid, const char* const resource, gboolean resource_override,
+_chat_session_new(const gchar* const barejid, const gchar* const resource, gboolean resource_override,
                   gboolean send_states)
 {
     assert(barejid != NULL);
     assert(resource != NULL);
 
     ChatSession* new_session = g_new0(ChatSession, 1);
-    new_session->barejid = strdup(barejid);
-    new_session->resource = strdup(resource);
+    new_session->barejid = g_strdup(barejid);
+    new_session->resource = g_strdup(resource);
     new_session->resource_override = resource_override;
     new_session->send_states = send_states;
 
-    g_hash_table_replace(sessions, strdup(barejid), new_session);
+    g_hash_table_replace(sessions, g_strdup(barejid), new_session);
 }
 
 static void
 _chat_session_free(ChatSession* session)
 {
     if (session) {
-        free(session->resource);
-        free(session->barejid);
-        free(session);
+        g_free(session->resource);
+        g_free(session->barejid);
+        g_free(session);
     }
 }
 
@@ -69,34 +69,34 @@ chat_sessions_clear(void)
 }
 
 void
-chat_session_resource_override(const char* const barejid, const char* const resource)
+chat_session_resource_override(const gchar* const barejid, const gchar* const resource)
 {
     _chat_session_new(barejid, resource, TRUE, TRUE);
 }
 
 ChatSession*
-chat_session_get(const char* const barejid)
+chat_session_get(const gchar* const barejid)
 {
     return sessions ? g_hash_table_lookup(sessions, barejid) : NULL;
 }
 
-char*
-chat_session_get_jid(const char* const barejid)
+gchar*
+chat_session_get_jid(const gchar* const barejid)
 {
     ChatSession* session = chat_session_get(barejid);
-    char* jid = NULL;
+    gchar* jid = NULL;
     if (session) {
         auto_jid Jid* jidp = jid_create_from_bare_and_resource(session->barejid, session->resource);
-        jid = strdup(jidp->fulljid);
+        jid = g_strdup(jidp->fulljid);
     } else {
-        jid = strdup(barejid);
+        jid = g_strdup(barejid);
     }
 
     return jid;
 }
 
-const char*
-chat_session_get_state(const char* const barejid)
+const gchar*
+chat_session_get_state(const gchar* const barejid)
 {
     ChatSession* session = chat_session_get(barejid);
     const char* state = NULL;
@@ -114,7 +114,7 @@ chat_session_get_state(const char* const barejid)
 }
 
 void
-chat_session_recipient_gone(const char* const barejid, const char* const resource)
+chat_session_recipient_gone(const gchar* const barejid, const gchar* const resource)
 {
     assert(barejid != NULL);
     assert(resource != NULL);
@@ -128,25 +128,25 @@ chat_session_recipient_gone(const char* const barejid, const char* const resourc
 }
 
 void
-chat_session_recipient_typing(const char* const barejid, const char* const resource)
+chat_session_recipient_typing(const gchar* const barejid, const gchar* const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
 void
-chat_session_recipient_paused(const char* const barejid, const char* const resource)
+chat_session_recipient_paused(const gchar* const barejid, const gchar* const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
 void
-chat_session_recipient_inactive(const char* const barejid, const char* const resource)
+chat_session_recipient_inactive(const gchar* const barejid, const gchar* const resource)
 {
     chat_session_recipient_active(barejid, resource, TRUE);
 }
 
 void
-chat_session_recipient_active(const char* const barejid, const char* const resource,
+chat_session_recipient_active(const gchar* const barejid, const gchar* const resource,
                               gboolean send_states)
 {
     assert(barejid != NULL);
@@ -169,7 +169,7 @@ chat_session_recipient_active(const char* const barejid, const char* const resou
 }
 
 void
-chat_session_remove(const char* const barejid)
+chat_session_remove(const gchar* const barejid)
 {
     g_hash_table_remove(sessions, barejid);
 }

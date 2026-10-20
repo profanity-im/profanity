@@ -288,7 +288,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     if (new_plain)
         message->plain = new_plain;
 
-    gboolean show_message = true;
+    gboolean show_message = TRUE;
 
     ProfWin* window = (ProfWin*)chatwin;
     int num = wins_get_num(window);
@@ -300,7 +300,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
         if (p_gpg_is_public_key_format(message->plain)) {
             ProfPGPKey* key = p_gpg_import_pubkey(message->plain);
             if (key != NULL) {
-                show_message = false;
+                show_message = FALSE;
                 win_println(window, THEME_DEFAULT, "-", "Received and imported PGP key %s: \"%s\". To assign it to the correspondent using /pgp setkey %s %s", key->fp, key->name, display_name, key->id);
                 p_gpg_free_key(key);
             } else {
@@ -440,18 +440,18 @@ chatwin_contact_online(ProfChatWin* chatwin, Resource* resource, GDateTime* last
 
     const char* show = string_from_resource_presence(resource->presence);
     PContact contact = roster_get_contact(chatwin->barejid);
-    auto_char char* display_str = p_contact_create_display_string(contact, resource->name);
+    auto_gchar gchar* display_str = p_contact_create_display_string(contact, resource->name);
 
     win_show_status_string((ProfWin*)chatwin, display_str, show, resource->status, last_activity, "++", "online");
 }
 
 void
-chatwin_contact_offline(ProfChatWin* chatwin, char* resource, char* status)
+chatwin_contact_offline(ProfChatWin* chatwin, const gchar* const resource, const gchar* const status)
 {
     assert(chatwin != NULL);
 
     PContact contact = roster_get_contact(chatwin->barejid);
-    auto_char char* display_str = p_contact_create_display_string(contact, resource);
+    auto_gchar gchar* display_str = p_contact_create_display_string(contact, resource);
 
     win_show_status_string((ProfWin*)chatwin, display_str, "offline", status, NULL, "--", "offline");
 }
@@ -488,9 +488,9 @@ void
 chatwin_set_enctext(ProfChatWin* chatwin, const char* const enctext)
 {
     if (chatwin->enctext) {
-        free(chatwin->enctext);
+        g_free(chatwin->enctext);
     }
-    chatwin->enctext = strdup(enctext);
+    chatwin->enctext = g_strdup(enctext);
 }
 
 void
@@ -503,9 +503,9 @@ void
 chatwin_set_incoming_char(ProfChatWin* chatwin, const char* const ch)
 {
     if (chatwin->incoming_char) {
-        free(chatwin->incoming_char);
+        g_free(chatwin->incoming_char);
     }
-    chatwin->incoming_char = strdup(ch);
+    chatwin->incoming_char = g_strdup(ch);
 }
 
 void
@@ -518,9 +518,9 @@ void
 chatwin_set_outgoing_char(ProfChatWin* chatwin, const char* const ch)
 {
     if (chatwin->outgoing_char) {
-        free(chatwin->outgoing_char);
+        g_free(chatwin->outgoing_char);
     }
-    chatwin->outgoing_char = strdup(ch);
+    chatwin->outgoing_char = g_strdup(ch);
 }
 
 void
@@ -594,12 +594,12 @@ static void
 _chatwin_set_last_message(ProfChatWin* chatwin, const char* const id, const char* const message)
 {
     if (chatwin->last_message != message) {
-        free(chatwin->last_message);
-        chatwin->last_message = strdup(message);
+        g_free(chatwin->last_message);
+        chatwin->last_message = g_strdup(message);
     }
 
     if (chatwin->last_msg_id != id) {
-        free(chatwin->last_msg_id);
-        chatwin->last_msg_id = strdup(id);
+        g_free(chatwin->last_msg_id);
+        chatwin->last_msg_id = g_strdup(id);
     }
 }

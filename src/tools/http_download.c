@@ -89,7 +89,7 @@ http_file_get(void* userdata)
     HTTPDownload* download = (HTTPDownload*)userdata;
     ssize_t* ret = NULL;
 
-    char* err = NULL;
+    auto_gchar gchar* err = NULL;
 
     CURL* curl;
     CURLcode res;
@@ -98,7 +98,7 @@ http_file_get(void* userdata)
     download->bytes_received = 0;
 
     pthread_mutex_lock(&lock);
-    const char* display_url = download->display_url ? download->display_url : download->url;
+    const gchar* display_url = download->display_url ? download->display_url : download->url;
     if (!download->silent) {
         http_print_transfer(download->window, download->id, THEME_DEFAULT,
                             "Downloading '%s': 0%%", display_url);
@@ -156,11 +156,11 @@ http_file_get(void* userdata)
     }
 
     if ((res = curl_easy_perform(curl)) != CURLE_OK) {
-        err = strdup(curl_easy_strerror(res));
+        err = g_strdup(curl_easy_strerror(res));
     }
 
     if (!err && ftell(outfh) == 0) {
-        err = strdup("Output file is empty.");
+        err = g_strdup("Output file is empty.");
     }
 
     curl_easy_cleanup(curl);
@@ -168,7 +168,7 @@ http_file_get(void* userdata)
 
     if (fclose(outfh) == EOF) {
         if (!err) {
-            err = strdup(g_strerror(errno));
+            err = g_strdup(g_strerror(errno));
         }
     }
 
@@ -186,7 +186,6 @@ http_file_get(void* userdata)
                                        "Downloading '%s' failed: %s",
                                        display_url, err);
         }
-        free(err);
     } else {
         if (!download->cancel) {
             if (!download->silent && !download->silent_done) {
@@ -196,7 +195,7 @@ http_file_get(void* userdata)
                 win_mark_received(download->window, download->id);
             }
             if (download->return_bytes_received) {
-                ret = malloc(sizeof(*ret));
+                ret = g_malloc(sizeof(*ret));
                 if (ret) {
                     *ret = download->bytes_received;
                 }
@@ -221,7 +220,7 @@ http_file_get(void* userdata)
         }
 
         g_strfreev(argv);
-        free(download->cmd_template);
+        g_free(download->cmd_template);
     }
 
 out:
@@ -229,11 +228,11 @@ out:
     download_processes = g_slist_remove(download_processes, download);
     pthread_mutex_unlock(&lock);
 
-    free(download->filename);
-    free(download->url);
-    free(download->display_url);
-    free(download->id);
-    free(download);
+    g_free(download->filename);
+    g_free(download->url);
+    g_free(download->display_url);
+    g_free(download->id);
+    g_free(download);
 
     return ret;
 }

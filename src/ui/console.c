@@ -255,7 +255,7 @@ cons_show_incoming_room_message(const char* const nick, const char* const room, 
         if (mention) {
             win_println(console, THEME_MENTION, "-", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
         } else if (triggers) {
-            auto_char char* triggers_str = _room_triggers_to_string(triggers);
+            auto_gchar gchar* triggers_str = _room_triggers_to_string(triggers);
             win_println(console, THEME_TRIGGER, "-", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
         } else {
             // 'all' or 'first' if its the first message
@@ -361,7 +361,7 @@ void
 cons_check_version(gboolean not_available_msg)
 {
     ProfWin* console = wins_get_console();
-    auto_char char* latest_release = release_get_latest();
+    auto_gchar gchar* latest_release = release_get_latest();
 
     if (!latest_release) {
         return;
@@ -803,8 +803,8 @@ cons_show_qrcode(const char* const text)
 
     ProfWin* console = wins_get_console();
 
-    auto_char char* buf = calloc((width * 4) + 1, 1);
-    auto_char char* pad = calloc((width * 4) + 5, 1);
+    auto_gchar gchar* buf = g_malloc0((width * 4) + 1);
+    auto_gchar gchar* pad = g_malloc0((width * 4) + 5);
 
     if (!buf || !pad) {
         return;
@@ -2447,7 +2447,7 @@ void
 cons_show_contact_online(PContact contact, Resource* resource, GDateTime* last_activity)
 {
     const char* show = string_from_resource_presence(resource->presence);
-    auto_char char* display_str = p_contact_create_display_string(contact, resource->name);
+    auto_gchar gchar* display_str = p_contact_create_display_string(contact, resource->name);
 
     ProfWin* console = wins_get_console();
     win_show_status_string(console, display_str, show, resource->status, last_activity,
@@ -2455,9 +2455,9 @@ cons_show_contact_online(PContact contact, Resource* resource, GDateTime* last_a
 }
 
 void
-cons_show_contact_offline(PContact contact, char* resource, char* status)
+cons_show_contact_offline(PContact contact, const gchar* const resource, const gchar* const status)
 {
-    auto_char char* display_str = p_contact_create_display_string(contact, resource);
+    auto_gchar gchar* display_str = p_contact_create_display_string(contact, resource);
 
     ProfWin* console = wins_get_console();
     win_show_status_string(console, display_str, "offline", status, NULL, "--",

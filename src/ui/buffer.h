@@ -34,25 +34,29 @@ typedef struct prof_buff_entry_t
     theme_item_t theme_item;
     // from as it is displayed
     // might be nick, jid..
-    char* display_from;
-    char* from_jid;
-    char* message;
+    gchar* display_from;
+    gchar* from_jid;
+    gchar* message;
     DeliveryReceipt* receipt;
     // message id, in case we have it
-    char* id;
+    gchar* id;
 } ProfBuffEntry;
 
 typedef struct prof_buff_t* ProfBuff;
 
 ProfBuff buffer_create();
 void buffer_free(ProfBuff buffer);
-void buffer_append(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const barejid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos);
-void buffer_prepend(ProfBuff buffer, const char* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item, const char* const display_from, const char* const barejid, const char* const message, DeliveryReceipt* receipt, const char* const id, int y_start_pos, int y_end_pos);
-void buffer_remove_entry_by_id(ProfBuff buffer, const char* const id);
+void buffer_append(ProfBuff buffer, const gchar* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item,
+                   const gchar* const display_from, const gchar* const barejid, const gchar* const message, DeliveryReceipt* receipt,
+                   const gchar* const id, int y_start_pos, int y_end_pos);
+void buffer_prepend(ProfBuff buffer, const gchar* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item,
+                    const gchar* const display_from, const gchar* const barejid, const gchar* const message, DeliveryReceipt* receipt,
+                    const gchar* const id, int y_start_pos, int y_end_pos);
+void buffer_remove_entry_by_id(ProfBuff buffer, const gchar* const id);
 void buffer_remove_entry(ProfBuff buffer, unsigned int entry);
 unsigned int buffer_size(ProfBuff buffer);
 ProfBuffEntry* buffer_get_entry(ProfBuff buffer, unsigned int entry);
-ProfBuffEntry* buffer_get_entry_by_id(ProfBuff buffer, const char* const id);
-gboolean buffer_mark_received(ProfBuff buffer, const char* const id);
+ProfBuffEntry* buffer_get_entry_by_id(ProfBuff buffer, const gchar* const id);
+gboolean buffer_mark_received(ProfBuff buffer, const gchar* const id);
 
 #endif

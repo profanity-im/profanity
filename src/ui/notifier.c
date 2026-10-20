@@ -55,7 +55,7 @@ _notifier_uninit(void)
 
 #ifdef HAVE_LIBNOTIFY
 static void
-_notify(const char* const message, int timeout, const char* const category)
+_notify(const gchar* const message, int timeout, const gchar* const category)
 {
 #ifdef HAVE_GTK
     if (!tray_gtk_ready()) {
@@ -95,7 +95,7 @@ _notify(const char* const message, int timeout, const char* const category)
 }
 #elif defined(PLATFORM_CYGWIN)
 static void
-_notify(const char* const message, int timeout, const char* const category)
+_notify(const gchar* const message, int timeout, const gchar* const category)
 {
     NOTIFYICONDATA nid;
     memset(&nid, 0, sizeof(nid));
@@ -120,7 +120,7 @@ _notify(const char* const message, int timeout, const char* const category)
 }
 #elif defined(HAVE_OSXNOTIFY)
 static void
-_notify(const char* const message, int timeout, const char* const category)
+_notify(const gchar* const message, int timeout, const gchar* const category)
 {
     auto_gchar gchar* msg = NULL;
     if (message && (message[0] == '<' || message[0] == '[' || message[0] == '(' || message[0] == '{')) {
@@ -153,7 +153,7 @@ _notify(const char* const message, int timeout, const char* const category)
 }
 #else
 static void
-_notify(const char* const message, int timeout, const char* const category)
+_notify(const gchar* const message, int timeout, const gchar* const category)
 {
     log_error_once("Notification backend missing");
 }
@@ -173,14 +173,14 @@ notifier_uninit(void)
 }
 
 void
-notify_typing(const char* const name)
+notify_typing(const gchar* const name)
 {
     auto_gchar gchar* message = g_strdup_printf("%s: typing…", name);
     notify(message, 10000, "Incoming message");
 }
 
 void
-notify_invite(const char* const from, const char* const room, const char* const reason)
+notify_invite(const gchar* const from, const gchar* const room, const gchar* const reason)
 {
     GString* message = g_string_new("Room invite\nfrom: ");
     g_string_append(message, from);
@@ -196,7 +196,7 @@ notify_invite(const char* const from, const char* const room, const char* const 
 }
 
 void
-notify_message(const char* const name, int num, const char* const text)
+notify_message(const gchar* const name, int num, const gchar* const text)
 {
     int ui_index = num;
     if (ui_index == 10) {
@@ -214,7 +214,7 @@ notify_message(const char* const name, int num, const char* const text)
 }
 
 void
-notify_room_message(const char* const nick, const char* const room, int num, const char* const text)
+notify_room_message(const gchar* const nick, const gchar* const room, int num, const gchar* const text)
 {
     int ui_index = num;
     if (ui_index == 10) {
@@ -233,7 +233,7 @@ notify_room_message(const char* const nick, const char* const room, int num, con
 }
 
 void
-notify_subscription(const char* const from)
+notify_subscription(const gchar* const from)
 {
     GString* message = g_string_new("Subscription request: \n");
     g_string_append(message, from);
@@ -293,7 +293,7 @@ notify_remind(void)
 }
 
 void
-notify(const char* const message, int timeout, const char* const category)
+notify(const gchar* const message, int timeout, const gchar* const category)
 {
     log_debug("Attempting notification: %s", message);
     _notify(message, timeout, category);

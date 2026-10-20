@@ -46,7 +46,7 @@
 
 struct curl_data_t
 {
-    char* buffer;
+    gchar* buffer;
     size_t size;
 };
 
@@ -162,14 +162,14 @@ _load_keyfile(prof_keyfile_t* keyfile)
 }
 
 gboolean
-load_data_keyfile(prof_keyfile_t* keyfile, const char* filename)
+load_data_keyfile(prof_keyfile_t* keyfile, const gchar* filename)
 {
     auto_gchar gchar* loc = files_get_data_path(filename);
     return load_custom_keyfile(keyfile, _get_file_or_linked(loc));
 }
 
 gboolean
-load_config_keyfile(prof_keyfile_t* keyfile, const char* filename)
+load_config_keyfile(prof_keyfile_t* keyfile, const gchar* filename)
 {
     auto_gchar gchar* loc = files_get_config_path(filename);
     return load_custom_keyfile(keyfile, _get_file_or_linked(loc));
@@ -215,13 +215,13 @@ free_keyfile(prof_keyfile_t* keyfile)
 }
 
 gboolean
-string_to_verbosity(const char* cmd, int* verbosity, gchar** err_msg)
+string_to_verbosity(const gchar* cmd, int* verbosity, gchar** err_msg)
 {
     return strtoi_range(cmd, verbosity, 0, 3, err_msg);
 }
 
 gboolean
-create_dir(const char* name)
+create_dir(const gchar* name)
 {
     if (g_mkdir_with_parents(name, S_IRWXU) != 0) {
         log_error("Failed to create directory at '%s' with error '%s'", name, strerror(errno));
@@ -231,7 +231,7 @@ create_dir(const char* name)
 }
 
 gboolean
-copy_file(const char* const sourcepath, const char* const targetpath, const gboolean overwrite_existing)
+copy_file(const gchar* const sourcepath, const gchar* const targetpath, const gboolean overwrite_existing)
 {
     GFile* source = g_file_new_for_path(sourcepath);
     GFile* dest = g_file_new_for_path(targetpath);
@@ -243,9 +243,9 @@ copy_file(const char* const sourcepath, const char* const targetpath, const gboo
 }
 
 gboolean
-strtoi_range(const char* str, int* saveptr, int min, int max, gchar** err_msg)
+strtoi_range(const gchar* str, int* saveptr, int min, int max, gchar** err_msg)
 {
-    char* ptr;
+    gchar* ptr;
     int val;
     if (str == NULL) {
         if (err_msg)
@@ -270,11 +270,11 @@ strtoi_range(const char* str, int* saveptr, int min, int max, gchar** err_msg)
 }
 
 gboolean
-string_matches_one_of(const char* what, const char* is, gboolean is_can_be_null, const char* first, ...)
+string_matches_one_of(const gchar* what, const gchar* is, gboolean is_can_be_null, const gchar* first, ...)
 {
     gboolean ret = FALSE;
     va_list ap;
-    const char* cur = first;
+    const gchar* cur = first;
     if (!is)
         return is_can_be_null;
 
@@ -284,12 +284,12 @@ string_matches_one_of(const char* what, const char* is, gboolean is_can_be_null,
             ret = TRUE;
             break;
         }
-        cur = va_arg(ap, const char*);
+        cur = va_arg(ap, const gchar*);
     }
     va_end(ap);
     if (!ret && what) {
         cons_show("Invalid %s: '%s'", what, is);
-        char errmsg[256] = { 0 };
+        gchar errmsg[256] = { 0 };
         size_t sz = 0;
         int s = snprintf(errmsg, sizeof(errmsg) - sz, "%s must be one of:", what);
         if (s < 0 || s + sz >= sizeof(errmsg))
@@ -299,7 +299,7 @@ string_matches_one_of(const char* what, const char* is, gboolean is_can_be_null,
         cur = first;
         va_start(ap, first);
         while (cur != NULL) {
-            const char* next = va_arg(ap, const char*);
+            const gchar* next = va_arg(ap, const gchar*);
             if (next) {
                 s = snprintf(errmsg + sz, sizeof(errmsg) - sz, " '%s',", cur);
             } else {
@@ -324,13 +324,13 @@ string_matches_one_of(const char* what, const char* is, gboolean is_can_be_null,
 }
 
 gboolean
-valid_tls_policy_option(const char* is)
+valid_tls_policy_option(const gchar* is)
 {
     return string_matches_one_of("TLS policy", is, TRUE, "force", "allow", "trust", "disable", "legacy", "direct", NULL);
 }
 
 int
-utf8_display_len(const char* const str)
+utf8_display_len(const gchar* const str)
 {
     if (!str) {
         return 0;
@@ -358,14 +358,14 @@ utf8_display_len(const char* const str)
  * U+0000 to U+001F, except for U+0009 (TAB), U+000A (LF), and U+000D (CR).
  */
 gchar*
-str_xml_sanitize(const char* const str)
+str_xml_sanitize(const gchar* const str)
 {
     if (str == NULL) {
         return NULL;
     }
 
     GString* sanitized = g_string_new_len(NULL, strlen(str));
-    const char* curr = str;
+    const gchar* curr = str;
 
     while (*curr != '\0') {
         gunichar c = g_utf8_get_char(curr);
@@ -381,7 +381,7 @@ str_xml_sanitize(const char* const str)
 typedef gboolean (*CharFilterFunc)(gunichar ch);
 
 static void
-_str_clean_chars(char* str, CharFilterFunc filter_func)
+_str_clean_chars(gchar* str, CharFilterFunc filter_func)
 {
     if (str == NULL || filter_func == NULL) {
         return;
@@ -424,7 +424,7 @@ _is_terminal_control_char(gunichar ch)
  * - Isolates: U+2066 (LRI) through U+2069 (PDI)
  */
 void
-str_clean_directional_chars(char* str)
+str_clean_directional_chars(gchar* str)
 {
     _str_clean_chars(str, _is_directional_char);
 }
@@ -443,13 +443,13 @@ str_clean_directional_chars(char* str)
  * validation.
  */
 void
-str_clean_terminal_control_chars(char* str)
+str_clean_terminal_control_chars(gchar* str)
 {
     _str_clean_chars(str, _is_terminal_control_char);
 }
 
 gint
-str_ascii_casecmp0(const char* s1, const char* s2)
+str_ascii_casecmp0(const gchar* s1, const gchar* s2)
 {
     if (s1 == s2) {
         return 0;
@@ -463,10 +463,10 @@ str_ascii_casecmp0(const char* s1, const char* s2)
     return g_ascii_strcasecmp(s1, s2);
 }
 
-char*
+gchar*
 release_get_latest(void)
 {
-    char* url = "https://profanity-im.github.io/profanity_version.txt";
+    const gchar* url = "https://profanity-im.github.io/profanity_version.txt";
 
     CURL* handle = curl_easy_init();
     struct curl_data_t output;
@@ -490,7 +490,7 @@ release_get_latest(void)
 }
 
 gboolean
-release_is_new(const char* const curr_version, const char* const found_version)
+release_is_new(const gchar* const curr_version, const gchar* const found_version)
 {
     if (!curr_version || !found_version) {
         return FALSE;
@@ -524,7 +524,7 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
 {
     size_t realsize = size * nmemb;
     struct curl_data_t* mem = (struct curl_data_t*)data;
-    mem->buffer = realloc(mem->buffer, mem->size + realsize + 1);
+    mem->buffer = g_realloc(mem->buffer, mem->size + realsize + 1);
 
     if (mem->buffer) {
         memcpy(&(mem->buffer[mem->size]), ptr, realsize);
@@ -558,16 +558,20 @@ _get_file_or_linked(gchar* loc)
     return true_loc;
 }
 
-char*
-strip_arg_quotes(const char* const input)
+gchar*
+strip_arg_quotes(const gchar* const input)
 {
     if (input == NULL) {
         return NULL;
     }
 
+    if (strchr(input, '"') == NULL && strchr(input, '\\') == NULL) {
+        return g_strdup(input);
+    }
+
     // Unescape and strip quotes
     GString* unescaped = g_string_new("");
-    for (const char* p = input; *p; p++) {
+    for (const gchar* p = input; *p; p++) {
         if (*p == '\\' && (*(p + 1) != '\0')) {
             p++;
             g_string_append_c(unescaped, *p);
@@ -608,7 +612,7 @@ is_notify_enabled(void)
 }
 
 GSList*
-prof_occurrences(const char* const needle, const char* const haystack, int offset, gboolean whole_word, GSList** result)
+prof_occurrences(const gchar* const needle, const gchar* const haystack, int offset, gboolean whole_word, GSList** result)
 {
     if (needle == NULL || haystack == NULL || *needle == '\0') {
         return *result;
@@ -657,7 +661,7 @@ prof_occurrences(const char* const needle, const char* const haystack, int offse
 }
 
 int
-is_regular_file(const char* path)
+is_regular_file(const gchar* path)
 {
     struct stat st;
     int ret = stat(path, &st);
@@ -669,7 +673,7 @@ is_regular_file(const char* path)
 }
 
 int
-is_dir(const char* path)
+is_dir(const gchar* path)
 {
     struct stat st;
     int ret = stat(path, &st);
@@ -681,7 +685,7 @@ is_dir(const char* path)
 }
 
 void
-get_file_paths_recursive(const char* path, GSList** contents)
+get_file_paths_recursive(const gchar* path, GSList** contents)
 {
     if (!is_dir(path)) {
         return;
@@ -728,7 +732,7 @@ get_random_string(int length)
 }
 
 GSList*
-get_mentions(gboolean whole_word, gboolean case_sensitive, const char* const message, const char* const nick)
+get_mentions(gboolean whole_word, gboolean case_sensitive, const gchar* const message, const gchar* const nick)
 {
     GSList* mentions = NULL;
 
@@ -781,7 +785,7 @@ call_external(gchar** argv)
  * @note Remember to free the returned argument vector using `auto_gcharv` or `g_strfreev()`.
  */
 gchar**
-format_call_external_argv(const char* template, const char* url, const char* filename)
+format_call_external_argv(const gchar* template, const gchar* url, const gchar* filename)
 {
     gchar** argv = g_strsplit(template, " ", 0);
 
@@ -792,7 +796,7 @@ format_call_external_argv(const char* template, const char* url, const char* fil
             argv[num_args] = g_strdup(url);
         } else if (0 == g_strcmp0(argv[num_args], "%p") && filename != NULL) {
             g_free(argv[num_args]);
-            argv[num_args] = strdup(filename);
+            argv[num_args] = g_strdup(filename);
         }
         num_args++;
     }
@@ -801,7 +805,7 @@ format_call_external_argv(const char* template, const char* url, const char* fil
 }
 
 static gchar*
-_unique_filename(const char* filename)
+_unique_filename(const gchar* filename)
 {
     gchar* unique = g_strdup(filename);
 
@@ -825,7 +829,7 @@ _unique_filename(const char* filename)
 }
 
 static gboolean
-_has_directory_suffix(const char* path)
+_has_directory_suffix(const gchar* path)
 {
     return (g_str_has_suffix(path, ".")
             || g_str_has_suffix(path, "..")
@@ -838,22 +842,22 @@ _has_directory_suffix(const char* path)
  * @param url The URL to extract the basename from.
  * @return The extracted basename or a default name ("index") if the basename has a directory suffix.
  *
- * @note The returned string must be freed by the caller using `auto_free` or `free()`.
+ * @note Remember to free the returned value using `auto_gchar` or `g_free()`.
  */
-char*
-basename_from_url(const char* url)
+gchar*
+basename_from_url(const gchar* url)
 {
-    const char* default_name = "index";
+    const gchar* default_name = "index";
 
     GFile* file = g_file_new_for_commandline_arg(url);
     auto_gchar gchar* basename = g_file_get_basename(file);
     g_object_unref(file);
 
     if (_has_directory_suffix(basename)) {
-        return strdup(default_name);
+        return g_strdup(default_name);
     }
 
-    return strdup(basename);
+    return g_strdup(basename);
 }
 
 /**
@@ -865,7 +869,7 @@ basename_from_url(const char* url)
  * @note Remember to free the returned value using `auto_gchar` or `g_free()`.
  */
 gchar*
-get_expanded_path(const char* path)
+get_expanded_path(const gchar* path)
 {
     if (g_str_has_prefix(path, "file://")) {
         path += strlen("file://");
@@ -887,7 +891,7 @@ get_expanded_path(const char* path)
  * @note Remember to free the returned value using `auto_gchar` or `g_free()`.
  */
 gchar*
-unique_filename_from_url(const char* url, const char* path)
+unique_filename_from_url(const gchar* url, const gchar* path)
 {
     auto_gchar gchar* realpath = NULL;
 
@@ -905,7 +909,7 @@ unique_filename_from_url(const char* url, const char* path)
     if (_has_directory_suffix(realpath) || g_file_test(realpath, G_FILE_TEST_IS_DIR)) {
         // The target should be used as a directory. Assume that the basename
         // should be derived from the URL.
-        auto_char char* basename = basename_from_url(url);
+        auto_gchar gchar* basename = basename_from_url(url);
         filename = g_build_filename(g_file_peek_path(target), basename, NULL);
     } else {
         // Just use the target as filename.
@@ -954,10 +958,10 @@ prof_get_version(void)
 }
 
 void
-prof_wipe_string(char* str)
+prof_wipe_string(gchar* str)
 {
     if (str) {
-        volatile char* p = (volatile char*)str;
+        volatile gchar* p = (volatile gchar*)str;
         while (*p) {
             *p++ = 0;
         }

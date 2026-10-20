@@ -14,8 +14,8 @@ chat_session_get__returns__null_when_no_session(void** state)
 void
 chat_session_recipient_active__updates__new_session(void** state)
 {
-    char* barejid = "myjid@server.org";
-    char* resource = "tablet";
+    const gchar* barejid = "myjid@server.org";
+    const gchar* resource = "tablet";
 
     chat_session_recipient_active(barejid, resource, FALSE);
     ChatSession* session = chat_session_get(barejid);
@@ -27,9 +27,9 @@ chat_session_recipient_active__updates__new_session(void** state)
 void
 chat_session_recipient_active__updates__replace_resource(void** state)
 {
-    char* barejid = "myjid@server.org";
-    char* resource1 = "tablet";
-    char* resource2 = "mobile";
+    const gchar* barejid = "myjid@server.org";
+    const gchar* resource1 = "tablet";
+    const gchar* resource2 = "mobile";
 
     chat_session_recipient_active(barejid, resource1, FALSE);
     chat_session_recipient_active(barejid, resource2, FALSE);
@@ -41,8 +41,8 @@ chat_session_recipient_active__updates__replace_resource(void** state)
 void
 chat_session_remove__updates__session_removed(void** state)
 {
-    char* barejid = "myjid@server.org";
-    char* resource1 = "laptop";
+    const gchar* barejid = "myjid@server.org";
+    const gchar* resource1 = "laptop";
 
     chat_session_recipient_active(barejid, resource1, FALSE);
     chat_session_remove(barejid);

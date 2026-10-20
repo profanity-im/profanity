@@ -17,7 +17,7 @@
 #include "common.h"
 
 static gchar**
-_parse_args_helper(const char* const inp, int min, int max, gboolean* result, gboolean with_freetext)
+_parse_args_helper(const gchar* const inp, int min, int max, gboolean* result, gboolean with_freetext)
 {
     if (inp == NULL) {
         *result = FALSE;
@@ -191,7 +191,7 @@ _parse_args_helper(const char* const inp, int min, int max, gboolean* result, gb
  *
  */
 gchar**
-parse_args(const char* const inp, int min, int max, gboolean* result)
+parse_args(const gchar* const inp, int min, int max, gboolean* result)
 {
     return _parse_args_helper(inp, min, max, result, FALSE);
 }
@@ -223,7 +223,7 @@ parse_args(const char* const inp, int min, int max, gboolean* result)
  *
  */
 gchar**
-parse_args_with_freetext(const char* const inp, int min, int max, gboolean* result)
+parse_args_with_freetext(const gchar* const inp, int min, int max, gboolean* result)
 {
     return _parse_args_helper(inp, min, max, result, TRUE);
 }
@@ -233,7 +233,7 @@ parse_args_with_freetext(const char* const inp, int min, int max, gboolean* resu
  * Used for `/correct` so that we also include quotation marks.
  */
 gchar**
-parse_args_as_one(const char* const inp, int min, int max, gboolean* result)
+parse_args_as_one(const gchar* const inp, int min, int max, gboolean* result)
 {
     gchar** args = g_malloc0(2 * sizeof(*args));
     int length = g_utf8_strlen(inp, -1);
@@ -256,7 +256,7 @@ parse_args_as_one(const char* const inp, int min, int max, gboolean* result)
 }
 
 int
-count_tokens(const char* const string)
+count_tokens(const gchar* const string)
 {
     int length = g_utf8_strlen(string, -1);
     gboolean in_quotes = FALSE;
@@ -299,8 +299,8 @@ count_tokens(const char* const string)
     return num_tokens;
 }
 
-char*
-get_start(const char* const string, int tokens)
+gchar*
+get_start(const gchar* const string, int tokens)
 {
     GString* result = g_string_new("");
     int length = g_utf8_strlen(string, -1);

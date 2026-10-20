@@ -61,7 +61,7 @@ static void _clean_incoming_message(ProfMessage* message);
 static void _sv_ev_incoming_plain(ProfChatWin* chatwin, gboolean new_win, ProfMessage* message, gboolean logit);
 
 void
-sv_ev_login_account_success(char* account_name, gboolean secured)
+sv_ev_login_account_success(const gchar* const account_name, gboolean secured)
 {
     ProfAccount* account = accounts_get_account(account_name);
     if (!account) {
@@ -98,7 +98,7 @@ sv_ev_login_account_success(char* account_name, gboolean secured)
     GList* curr = rooms;
     while (curr) {
         char* password = muc_password(curr->data);
-        const char* const nick = muc_nick(curr->data);
+        const gchar* const nick = muc_nick(curr->data);
         presence_join_room(curr->data, nick, password);
         curr = g_list_next(curr);
     }
@@ -130,7 +130,7 @@ sv_ev_roster_received(void)
         ui_show_roster();
     }
 
-    const char* account_name = session_get_account_name();
+    const gchar* const account_name = session_get_account_name();
 
 #ifdef HAVE_LIBGPGME
     // check pgp key valid if specified
@@ -225,8 +225,8 @@ sv_ev_failed_login(void)
 }
 
 void
-sv_ev_room_invite(jabber_invite_t invite_type, const char* const invitor, const char* const room,
-                  const char* const reason, const char* const password)
+sv_ev_room_invite(jabber_invite_t invite_type, const gchar* const invitor, const gchar* const room,
+                  const gchar* const reason, const gchar* const password)
 {
     if (!muc_active(room) && !muc_invites_contain(room)) {
         cons_show_room_invite(invitor, room, reason);
@@ -235,7 +235,7 @@ sv_ev_room_invite(jabber_invite_t invite_type, const char* const invitor, const 
 }
 
 void
-sv_ev_room_broadcast(const char* const room_jid, const char* const message)
+sv_ev_room_broadcast(const gchar* const room_jid, const gchar* const message)
 {
     if (muc_roster_complete(room_jid)) {
         ProfMucWin* mucwin = wins_get_muc(room_jid);
@@ -248,7 +248,7 @@ sv_ev_room_broadcast(const char* const room_jid, const char* const message)
 }
 
 void
-sv_ev_room_subject(const char* const room, const char* const nick, const char* const subject)
+sv_ev_room_subject(const gchar* const room, const gchar* const nick, const gchar* const subject)
 {
     muc_set_subject(room, subject);
     ProfMucWin* mucwin = wins_get_muc(room);
@@ -327,7 +327,7 @@ sv_ev_room_message(ProfMessage* message)
 
     _clean_incoming_message(message);
 
-    const char* const mynick = muc_nick(mucwin->roomjid);
+    const gchar* const mynick = muc_nick(mucwin->roomjid);
 
     gboolean is_duplicate = FALSE;
 
@@ -359,7 +359,7 @@ sv_ev_room_message(ProfMessage* message)
                   message->from_jid->barejid, message->plain);
         g_slist_free(mentions);
         if (triggers) {
-            g_list_free_full(triggers, free);
+            g_list_free_full(triggers, g_free);
         }
         message->plain = old_plain;
         return;
@@ -369,7 +369,7 @@ sv_ev_room_message(ProfMessage* message)
         // For MAM, do not print to screen immediately. It is loaded and sorted upon query completion.
         g_slist_free(mentions);
         if (triggers) {
-            g_list_free_full(triggers, free);
+            g_list_free_full(triggers, g_free);
         }
         message->plain = old_plain;
         return;
@@ -425,7 +425,7 @@ sv_ev_room_message(ProfMessage* message)
 
     g_slist_free(mentions);
     if (triggers) {
-        g_list_free_full(triggers, free);
+        g_list_free_full(triggers, g_free);
     }
 
     rosterwin_roster();
@@ -498,13 +498,13 @@ sv_ev_outgoing_carbon(ProfMessage* message)
                 return;
             }
             message->enc = PROF_MSG_ENC_NONE;
-            message->plain = strdup(message->body);
+            message->plain = g_strdup(message->body);
             chatwin_outgoing_carbon(chatwin, message);
         }
 #endif
     } else {
         message->enc = PROF_MSG_ENC_NONE;
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
         chatwin_outgoing_carbon(chatwin, message);
     }
 
@@ -544,7 +544,7 @@ _sv_ev_incoming_pgp(ProfChatWin* chatwin, gboolean new_win, ProfMessage* message
             return;
         }
         message->enc = PROF_MSG_ENC_NONE;
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
         _clean_incoming_message(message);
         if (!message->is_mam) {
             chatwin_incoming_msg(chatwin, message, new_win);
@@ -567,7 +567,7 @@ _sv_ev_incoming_ox(ProfChatWin* chatwin, gboolean new_win, ProfMessage* message,
             log_error("Couldn't decrypt OX message and body was empty");
             return;
         }
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
     }
 
     //_clean_incoming_message(message);
@@ -639,7 +639,7 @@ _sv_ev_incoming_plain(ProfChatWin* chatwin, gboolean new_win, ProfMessage* messa
 {
     if (message->body) {
         message->enc = PROF_MSG_ENC_NONE;
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
         if (message->plain == NULL) {
             return;
         }
@@ -760,7 +760,7 @@ sv_ev_incoming_carbon(ProfMessage* message)
 }
 
 void
-sv_ev_message_receipt(const char* const barejid, const char* const id)
+sv_ev_message_receipt(const gchar* const barejid, const gchar* const id)
 {
     ProfChatWin* chatwin = wins_get_chat(barejid);
     if (!chatwin)
@@ -770,7 +770,7 @@ sv_ev_message_receipt(const char* const barejid, const char* const id)
 }
 
 void
-sv_ev_typing(char* barejid, char* resource)
+sv_ev_typing(const gchar* const barejid, const gchar* const resource)
 {
     ui_contact_typing(barejid, resource);
     if (wins_chat_exists(barejid)) {
@@ -779,7 +779,7 @@ sv_ev_typing(char* barejid, char* resource)
 }
 
 void
-sv_ev_paused(char* barejid, char* resource)
+sv_ev_paused(const gchar* const barejid, const gchar* const resource)
 {
     if (wins_chat_exists(barejid)) {
         chat_session_recipient_paused(barejid, resource);
@@ -787,7 +787,7 @@ sv_ev_paused(char* barejid, char* resource)
 }
 
 void
-sv_ev_inactive(char* barejid, char* resource)
+sv_ev_inactive(const gchar* const barejid, const gchar* const resource)
 {
     if (wins_chat_exists(barejid)) {
         chat_session_recipient_inactive(barejid, resource);
@@ -795,7 +795,7 @@ sv_ev_inactive(char* barejid, char* resource)
 }
 
 void
-sv_ev_gone(const char* const barejid, const char* const resource)
+sv_ev_gone(const gchar* const barejid, const gchar* const resource)
 {
     if (barejid && resource) {
         gboolean show_message = TRUE;
@@ -818,7 +818,7 @@ sv_ev_gone(const char* const barejid, const char* const resource)
 }
 
 void
-sv_ev_activity(const char* const barejid, const char* const resource, gboolean send_states)
+sv_ev_activity(const gchar* const barejid, const gchar* const resource, gboolean send_states)
 {
     if (wins_chat_exists(barejid)) {
         chat_session_recipient_active(barejid, resource, send_states);
@@ -859,7 +859,7 @@ sv_ev_subscription(const char* barejid, jabber_subscr_t type)
 }
 
 void
-sv_ev_contact_offline(char* barejid, char* resource, char* status)
+sv_ev_contact_offline(const gchar* const barejid, const gchar* const resource, const gchar* const status)
 {
     gboolean updated = roster_contact_offline(barejid, resource, status);
 
@@ -873,7 +873,7 @@ sv_ev_contact_offline(char* barejid, char* resource, char* status)
 }
 
 void
-sv_ev_contact_online(char* barejid, Resource* resource, GDateTime* last_activity, char* pgpsig)
+sv_ev_contact_online(const gchar* const barejid, Resource* resource, GDateTime* last_activity, const gchar* const pgpsig)
 {
     gboolean updated = roster_update_presence(barejid, resource, last_activity);
 
@@ -894,44 +894,44 @@ sv_ev_contact_online(char* barejid, Resource* resource, GDateTime* last_activity
 }
 
 void
-sv_ev_leave_room(const char* const room)
+sv_ev_leave_room(const gchar* const room)
 {
     muc_leave(room);
     ui_leave_room(room);
 }
 
 void
-sv_ev_room_destroy(const char* const room)
+sv_ev_room_destroy(const gchar* const room)
 {
     muc_leave(room);
     ui_room_destroy(room);
 }
 
 void
-sv_ev_room_destroyed(const char* const room, const char* const new_jid, const char* const password,
-                     const char* const reason)
+sv_ev_room_destroyed(const gchar* const room, const gchar* const new_jid, const gchar* const password,
+                     const gchar* const reason)
 {
     muc_leave(room);
     ui_room_destroyed(room, reason, new_jid, password);
 }
 
 void
-sv_ev_room_kicked(const char* const room, const char* const actor, const char* const reason)
+sv_ev_room_kicked(const gchar* const room, const gchar* const actor, const gchar* const reason)
 {
     muc_leave(room);
     ui_room_kicked(room, actor, reason);
 }
 
 void
-sv_ev_room_banned(const char* const room, const char* const actor, const char* const reason)
+sv_ev_room_banned(const gchar* const room, const gchar* const actor, const gchar* const reason)
 {
     muc_leave(room);
     ui_room_banned(room, actor, reason);
 }
 
 void
-sv_ev_room_occupant_offline(const char* const room, const char* const nick,
-                            const char* const show, const char* const status)
+sv_ev_room_occupant_offline(const gchar* const room, const gchar* const nick,
+                            const gchar* const show, const gchar* const status)
 {
     muc_roster_remove(room, nick);
 
@@ -952,8 +952,8 @@ sv_ev_room_occupant_offline(const char* const room, const char* const nick,
 }
 
 void
-sv_ev_room_occupent_kicked(const char* const room, const char* const nick, const char* const actor,
-                           const char* const reason)
+sv_ev_room_occupent_kicked(const gchar* const room, const gchar* const nick, const gchar* const actor,
+                           const gchar* const reason)
 {
     muc_roster_remove(room, nick);
     ProfMucWin* mucwin = wins_get_muc(room);
@@ -972,8 +972,8 @@ sv_ev_room_occupent_kicked(const char* const room, const char* const nick, const
 }
 
 void
-sv_ev_room_occupent_banned(const char* const room, const char* const nick, const char* const actor,
-                           const char* const reason)
+sv_ev_room_occupent_banned(const gchar* const room, const gchar* const nick, const gchar* const actor,
+                           const gchar* const reason)
 {
     muc_roster_remove(room, nick);
     ProfMucWin* mucwin = wins_get_muc(room);
@@ -995,15 +995,15 @@ sv_ev_room_occupent_banned(const char* const room, const char* const nick, const
 }
 
 void
-sv_ev_roster_update(const char* const barejid, const char* const name,
-                    GSList* groups, const char* const subscription, gboolean pending_out)
+sv_ev_roster_update(const gchar* const barejid, const gchar* const name,
+                    GSList* groups, const gchar* const subscription, gboolean pending_out)
 {
     roster_update(barejid, name, groups, subscription, pending_out);
     rosterwin_roster();
 }
 
 void
-sv_ev_xmpp_stanza(const char* const msg)
+sv_ev_xmpp_stanza(const gchar* const msg)
 {
     ProfXMLWin* xmlwin = wins_get_xmlconsole();
     if (xmlwin) {
@@ -1012,9 +1012,9 @@ sv_ev_xmpp_stanza(const char* const msg)
 }
 
 void
-sv_ev_muc_self_online(const char* const room, const char* const nick, gboolean config_required,
-                      const char* const role, const char* const affiliation, const char* const actor, const char* const reason,
-                      const char* const jid, const char* const show, const char* const status)
+sv_ev_muc_self_online(const gchar* const room, const gchar* const nick, gboolean config_required,
+                      const gchar* const role, const gchar* const affiliation, const gchar* const actor, const gchar* const reason,
+                      const gchar* const jid, const gchar* const show, const gchar* const status)
 {
     muc_roster_add(room, nick, jid, role, affiliation, show, status);
     char* old_role = muc_role_str(room);
@@ -1109,9 +1109,9 @@ sv_ev_muc_self_online(const char* const room, const char* const nick, gboolean c
 }
 
 void
-sv_ev_muc_occupant_online(const char* const room, const char* const nick, const char* const jid,
-                          const char* const role, const char* const affiliation, const char* const actor, const char* const reason,
-                          const char* const show, const char* const status)
+sv_ev_muc_occupant_online(const gchar* const room, const gchar* const nick, const gchar* const jid,
+                          const gchar* const role, const gchar* const affiliation, const gchar* const actor, const gchar* const reason,
+                          const gchar* const show, const gchar* const status)
 {
     Occupant* occupant = muc_roster_item(room, nick);
 
@@ -1201,7 +1201,7 @@ sv_ev_muc_occupant_online(const char* const room, const char* const nick, const 
 }
 
 int
-sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert)
+sv_ev_certfail(const gchar* const errormsg, const TLSCertificate* cert)
 {
     // check profanity trusted certs
     if (tlscerts_exists(cert)) {
@@ -1260,7 +1260,7 @@ sv_ev_certfail(const char* const errormsg, const TLSCertificate* cert)
 }
 
 void
-sv_ev_lastactivity_response(const char* const from, const int seconds, const char* const msg)
+sv_ev_lastactivity_response(const gchar* const from, const int seconds, const gchar* const msg)
 {
     auto_jid Jid* jidp = jid_create(from);
 
@@ -1378,9 +1378,9 @@ _autojoin_timeout_cb(gpointer user_data)
         if (!muc_active(item->barejid)) {
             muc_join(item->barejid, item->nick, item->password, TRUE);
             presence_join_room(item->barejid, item->nick, item->password);
-            iq_room_affiliation_list(item->barejid, "member", false);
-            iq_room_affiliation_list(item->barejid, "admin", false);
-            iq_room_affiliation_list(item->barejid, "owner", false);
+            iq_room_affiliation_list(item->barejid, "member", FALSE);
+            iq_room_affiliation_list(item->barejid, "admin", FALSE);
+            iq_room_affiliation_list(item->barejid, "owner", FALSE);
         }
         _free_autojoin_item(item);
     }

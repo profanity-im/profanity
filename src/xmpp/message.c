@@ -338,7 +338,7 @@ message_handlers_init(void)
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
     _message_handlers_cleanup();
-    pubsub_event_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+    pubsub_event_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
 
 ProfMessage*
@@ -348,7 +348,7 @@ message_init(void)
 
     message->enc = PROF_MSG_ENC_NONE;
     message->omemo_err = OMEMO_ERR_NONE;
-    message->trusted = true;
+    message->trusted = TRUE;
     message->type = PROF_MSG_TYPE_UNINITIALIZED;
 
     return message;
@@ -391,14 +391,14 @@ message_free(ProfMessage* message)
     }
 
     if (message->plain) {
-        free(message->plain);
+        g_free(message->plain);
     }
 
     if (message->timestamp) {
         g_date_time_unref(message->timestamp);
     }
 
-    free(message);
+    g_free(message);
 }
 
 void
@@ -410,23 +410,23 @@ message_handlers_clear(void)
 }
 
 void
-message_pubsub_event_handler_add(const char* const node, ProfMessageCallback func, ProfMessageFreeCallback free_func, void* userdata)
+message_pubsub_event_handler_add(const gchar* const node, ProfMessageCallback func, ProfMessageFreeCallback free_func, void* userdata)
 {
     ProfMessageHandler* handler = g_new(ProfMessageHandler, 1);
     handler->func = func;
     handler->free_func = free_func;
     handler->userdata = userdata;
 
-    g_hash_table_insert(pubsub_event_handlers, strdup(node), handler);
+    g_hash_table_insert(pubsub_event_handlers, g_strdup(node), handler);
 }
 
-char*
+gchar*
 message_send_chat(const char* const barejid, const char* const msg, const char* const oob_url, gboolean request_receipt, const char* const replace_id)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
     const char* state = chat_session_get_state(barejid);
-    auto_char char* jid = chat_session_get_jid(barejid);
+    auto_gchar gchar* jid = chat_session_get_jid(barejid);
     char* id = connection_create_stanza_id();
 
     xmpp_stanza_t* message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
@@ -454,13 +454,13 @@ message_send_chat(const char* const barejid, const char* const msg, const char* 
     return id;
 }
 
-char*
+gchar*
 message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean request_receipt, const char* const replace_id)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
     const char* state = chat_session_get_state(barejid);
-    auto_char char* jid = chat_session_get_jid(barejid);
+    auto_gchar gchar* jid = chat_session_get_jid(barejid);
     char* id = connection_create_stanza_id();
 
     xmpp_stanza_t* message = NULL;
@@ -534,14 +534,14 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
 }
 
 // XEP-0373: OpenPGP for XMPP
-char*
+gchar*
 message_send_chat_ox(const char* const barejid, const char* const msg, gboolean request_receipt, const char* const replace_id)
 {
 #ifdef HAVE_LIBGPGME
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
     const char* state = chat_session_get_state(barejid);
-    auto_char char* jid = chat_session_get_jid(barejid);
+    auto_gchar gchar* jid = chat_session_get_jid(barejid);
     char* id = connection_create_stanza_id();
 
     xmpp_stanza_t* message = NULL;
@@ -595,7 +595,7 @@ message_send_chat_ox(const char* const barejid, const char* const msg, gboolean 
     return NULL;
 }
 
-char*
+gchar*
 message_send_chat_otr(const char* const barejid, const char* const msg, gboolean request_receipt, const char* const replace_id)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
@@ -625,7 +625,7 @@ message_send_chat_otr(const char* const barejid, const char* const msg, gboolean
 }
 
 #ifdef HAVE_OMEMO
-char*
+gchar*
 message_send_chat_omemo(const char* const jid, uint32_t sid, GList* keys,
                         const unsigned char* const iv, size_t iv_len,
                         const unsigned char* const ciphertext, size_t ciphertext_len,
@@ -1061,7 +1061,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* resu
 
                     if (code) {
                         // If configuration change notification send disco info to get updated info of the muc
-                        auto_char char* disqo_info_id = connection_create_stanza_id();
+                        auto_gchar gchar* disqo_info_id = connection_create_stanza_id();
                         xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, disqo_info_id, room_jid, NULL);
                         iq_id_handler_add(disqo_info_id, _room_config_handler, NULL, NULL);
                         iq_send_stanza(iq);
@@ -1156,7 +1156,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* resu
         } else {
             message->enc = PROF_MSG_ENC_OMEMO;
             if (message->plain == NULL) {
-                message->plain = omemo_error_to_string(message->omemo_err);
+                message->plain = g_strdup(omemo_error_to_string(message->omemo_err));
             }
         }
     } else if (message->plain != NULL) {
@@ -1168,7 +1168,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* resu
         log_info("Message received without body for room: %s", from_jid->str);
         goto out;
     } else if (!message->plain) {
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
     }
 
     if (is_mam) {
@@ -1186,7 +1186,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* resu
             message->timestamp = stanza_get_delay_from(stanza, from_jid->domainpart);
         }
 
-        bool is_muc_history = FALSE;
+        gboolean is_muc_history = FALSE;
         if (message->timestamp != NULL) {
             is_muc_history = TRUE;
             g_date_time_unref(message->timestamp);
@@ -1227,7 +1227,7 @@ _message_send_receipt(const char* const fulljid, const char* const message_id)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* message = xmpp_message_new(ctx, NULL, fulljid, id);
 
     xmpp_stanza_t* receipt = xmpp_stanza_new(ctx);
@@ -1333,7 +1333,7 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
     if (message->omemo_err != OMEMO_ERR_NONE) {
         message->enc = PROF_MSG_ENC_OMEMO;
         if (message->plain == NULL) {
-            message->plain = omemo_error_to_string(message->omemo_err);
+            message->plain = g_strdup(omemo_error_to_string(message->omemo_err));
         }
     } else if (message->plain != NULL) {
         message->enc = PROF_MSG_ENC_OMEMO;
@@ -1347,7 +1347,7 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
         log_info("Message received without body from: %s", message->from_jid->str);
         goto out;
     } else if (!message->plain) {
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
     }
 
     if (message->timestamp) {
@@ -1524,7 +1524,7 @@ _handle_chat(xmpp_stanza_t* const stanza, gboolean is_mam, gboolean is_carbon, c
         } else {
             message->enc = PROF_MSG_ENC_OMEMO;
             if (message->plain == NULL) {
-                message->plain = omemo_error_to_string(message->omemo_err);
+                message->plain = g_strdup(omemo_error_to_string(message->omemo_err));
             }
         }
     } else if (message->plain != NULL) {
@@ -1572,11 +1572,12 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
     message->enc = PROF_MSG_ENC_OX;
 
 #ifdef HAVE_LIBGPGME
+    xmpp_ctx_t* ctx = connection_get_ctx();
     xmpp_stanza_t* ox = xmpp_stanza_get_child_by_name_and_ns(stanza, "openpgp", STANZA_NS_OPENPGP_0);
     if (ox) {
         gchar* decrypted = p_ox_gpg_decrypt(xmpp_stanza_get_text(ox));
         if (decrypted) {
-            xmpp_stanza_t* decrypted_stanza = xmpp_stanza_new_from_string(connection_get_ctx(), decrypted);
+            xmpp_stanza_t* decrypted_stanza = xmpp_stanza_new_from_string(ctx, decrypted);
             if (decrypted_stanza) {
                 xmpp_stanza_t* p = xmpp_stanza_get_child_by_name(decrypted_stanza, "payload");
                 if (!p) {
@@ -1588,7 +1589,9 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
                     log_debug("OX Stanza - no body");
                     return;
                 }
-                message->plain = xmpp_stanza_get_text(b);
+                char* b_text = xmpp_stanza_get_text(b);
+                message->plain = g_strdup(b_text);
+                xmpp_free(ctx, b_text);
                 message->encrypted = xmpp_stanza_get_text(ox);
             } else {
                 cons_show("Unable to decrypt OX message (XEP-0373: OpenPGP for XMPP)");
@@ -1598,7 +1601,9 @@ _handle_ox_chat(xmpp_stanza_t* const stanza, ProfMessage* message, gboolean is_m
             // get alternative text from message body
             xmpp_stanza_t* b = xmpp_stanza_get_child_by_name(stanza, "body");
             if (b) {
-                message->plain = xmpp_stanza_get_text(b);
+                char* b_text = xmpp_stanza_get_text(b);
+                message->plain = g_strdup(b_text);
+                xmpp_free(ctx, b_text);
             }
         }
     } else {
@@ -1697,13 +1702,13 @@ _send_message_stanza(xmpp_stanza_t* const stanza)
     xmpp_free(connection_get_ctx(), text);
 }
 
-/* ckeckOID = true: check origin-id
- * checkOID = false: check regular id
+/* checkOID = TRUE: check origin-id
+ * checkOID = FALSE: check regular id
  */
-bool
-message_is_sent_by_us(const ProfMessage* const message, bool checkOID)
+gboolean
+message_is_sent_by_us(const ProfMessage* const message, gboolean checkOID)
 {
-    bool ret = FALSE;
+    gboolean ret = FALSE;
 
     // we check the </origin-id> for this we calculate a hash into it so we can detect
     // whether this client sent it. See connection_create_stanza_id()

@@ -70,8 +70,8 @@ static gboolean is_suspended = FALSE;
 static void _inp_win_update_virtual(void);
 static int _inp_edited(const wint_t ch);
 static void _inp_win_handle_scroll(void);
-static int _inp_offset_to_col(char* str, int offset);
-static void _inp_write(char* line, int offset);
+static int _inp_offset_to_col(const gchar* str, int offset);
+static void _inp_write(const gchar* line, int offset);
 static void _inp_redisplay(void);
 
 static void _inp_rl_addfuncs(void);
@@ -150,23 +150,23 @@ static gboolean
 _inp_slashguard_check(void)
 {
     if (get_password)
-        return false;
+        return FALSE;
     /* ignore empty and quoted messages */
     if (inp_line == NULL || inp_line[0] == '\0' || inp_line[0] == '>')
-        return false;
+        return FALSE;
     if (!prefs_get_boolean(PREF_SLASH_GUARD))
-        return false;
+        return FALSE;
     size_t n = 1;
     while (inp_line[n] != '\0' && n < 4) {
         if (inp_line[n] == '/') {
             cons_show("Your text contains a slash in the first 4 characters");
             free(inp_line);
             inp_line = NULL;
-            return true;
+            return TRUE;
         }
         n++;
     }
-    return false;
+    return FALSE;
 }
 
 char*
@@ -340,7 +340,7 @@ _inp_win_update_virtual(void)
 }
 
 static void
-_inp_write(char* line, int offset)
+_inp_write(const gchar* line, int offset)
 {
     int x;
     int y __attribute__((unused));
@@ -354,7 +354,7 @@ _inp_write(char* line, int offset)
     gboolean do_spell = prefs_get_boolean(PREF_SPELLCHECK_ENABLE) && (line[0] != '/');
 
     for (size_t i = 0; line[i] != '\0'; i++) {
-        char* c = &line[i];
+        const char* c = &line[i];
         char retc[PROF_MB_CUR_MAX] = { 0 };
 
         size_t ch_len = mbrlen(c, MB_CUR_MAX, NULL);
@@ -390,9 +390,8 @@ _inp_write(char* line, int offset)
                     end += next_ch_len;
                 }
 
-                char* word = g_strndup(&line[start], end - start);
+                auto_gchar gchar* word = g_strndup(&line[start], end - start);
                 gboolean misspelled = spellcheck_is_misspelled(word);
-                g_free(word);
 
                 if (misspelled) {
                     wattron(inp_win, theme_attrs(THEME_INPUT_MISSPELLED));
@@ -462,7 +461,7 @@ _inp_edited(const wint_t ch)
 }
 
 static int
-_inp_offset_to_col(char* str, int offset)
+_inp_offset_to_col(const gchar* str, int offset)
 {
     int i = 0;
     int col = 0;
@@ -717,7 +716,7 @@ _inp_rl_tab_com_handler(int count, int key, gboolean previous)
 
     if (strncmp(rl_line_buffer, "/", 1) == 0) {
         ProfWin* window = wins_get_current();
-        auto_char char* result = cmd_ac_complete(window, rl_line_buffer, previous);
+        auto_gchar gchar* result = cmd_ac_complete(window, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -727,7 +726,7 @@ _inp_rl_tab_com_handler(int count, int key, gboolean previous)
 
     if (strncmp(rl_line_buffer, ">", 1) == 0) {
         ProfWin* window = wins_get_current();
-        auto_char char* result = win_quote_autocomplete(window, rl_line_buffer, previous);
+        auto_gchar gchar* result = win_quote_autocomplete(window, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -737,7 +736,7 @@ _inp_rl_tab_com_handler(int count, int key, gboolean previous)
 
     ProfWin* current = wins_get_current();
     if (current->type == WIN_MUC) {
-        auto_char char* result = muc_autocomplete(current, rl_line_buffer, previous);
+        auto_gchar gchar* result = muc_autocomplete(current, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;

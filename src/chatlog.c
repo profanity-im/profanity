@@ -39,12 +39,12 @@ struct dated_chat_log
 };
 
 static gboolean _log_roll_needed(struct dated_chat_log* dated_log);
-static struct dated_chat_log* _create_chatlog(const char* const other, const char* const login);
-static struct dated_chat_log* _create_groupchat_log(const char* const room, const char* const login);
+static struct dated_chat_log* _create_chatlog(const gchar* const other, const gchar* const login);
+static struct dated_chat_log* _create_groupchat_log(const gchar* const room, const gchar* const login);
 static void _free_chat_log(struct dated_chat_log* dated_log);
 static gboolean _key_equals(void* key1, void* key2);
-static void _chat_log_chat(const char* const login, const char* const other, const gchar* const msg,
-                           chat_log_direction_t direction, GDateTime* timestamp, const char* const resourcepart);
+static void _chat_log_chat(const gchar* const login, const gchar* const other, const gchar* const msg,
+                           chat_log_direction_t direction, GDateTime* timestamp, const gchar* const resourcepart);
 static void _groupchat_log_chat(const gchar* const login, const gchar* const room, const gchar* const nick,
                                 const gchar* const msg);
 
@@ -62,9 +62,9 @@ chatlog_init(void)
 
     prof_add_shutdown_routine(_chatlog_close);
 
-    logs = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, free,
+    logs = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
                                  (GDestroyNotify)_free_chat_log);
-    groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, free,
+    groupchat_logs = g_hash_table_new_full(g_str_hash, (GEqualFunc)_key_equals, g_free,
                                            (GDestroyNotify)_free_chat_log);
 }
 
@@ -199,8 +199,8 @@ chat_log_msg_in(ProfMessage* message)
 }
 
 static void
-_chat_log_chat(const char* const login, const char* const other, const char* msg,
-               chat_log_direction_t direction, GDateTime* timestamp, const char* const resourcepart)
+_chat_log_chat(const gchar* const login, const gchar* const other, const char* msg,
+               chat_log_direction_t direction, GDateTime* timestamp, const gchar* const resourcepart)
 {
     auto_gchar gchar* pref_dblog = prefs_get_string(PREF_DBLOG);
     if (g_strcmp0(pref_dblog, "redact") == 0) {
@@ -224,17 +224,17 @@ _chat_log_chat(const char* const login, const char* const other, const char* msg
     // no log for user
     if (dated_log == NULL) {
         dated_log = _create_chatlog(other_name, login);
-        g_hash_table_insert(logs, strdup(other_name), dated_log);
+        g_hash_table_insert(logs, g_strdup(other_name), dated_log);
 
         // log entry exists but file removed
     } else if (!g_file_test(dated_log->filename, G_FILE_TEST_EXISTS)) {
         dated_log = _create_chatlog(other_name, login);
-        g_hash_table_replace(logs, strdup(other_name), dated_log);
+        g_hash_table_replace(logs, g_strdup(other_name), dated_log);
 
         // log file needs rolling
     } else if (_log_roll_needed(dated_log)) {
         dated_log = _create_chatlog(other_name, login);
-        g_hash_table_replace(logs, strdup(other_name), dated_log);
+        g_hash_table_replace(logs, g_strdup(other_name), dated_log);
     }
 
     if (resourcepart) {
@@ -331,12 +331,12 @@ _groupchat_log_chat(const gchar* const login, const gchar* const room, const gch
     // no log for room
     if (dated_log == NULL) {
         dated_log = _create_groupchat_log(room, login);
-        g_hash_table_insert(groupchat_logs, strdup(room), dated_log);
+        g_hash_table_insert(groupchat_logs, g_strdup(room), dated_log);
 
         // log exists but needs rolling
     } else if (_log_roll_needed(dated_log)) {
         dated_log = _create_groupchat_log(room, login);
-        g_hash_table_replace(groupchat_logs, strdup(room), dated_log);
+        g_hash_table_replace(groupchat_logs, g_strdup(room), dated_log);
     }
 
     auto_gchar gchar* date_fmt = prof_date_time_format_iso8601(NULL);
@@ -359,7 +359,7 @@ _groupchat_log_chat(const gchar* const login, const gchar* const room, const gch
 }
 
 static gchar*
-_get_log_filename(const char* const other, const char* const login, GDateTime* dt, gboolean is_room)
+_get_log_filename(const gchar* const other, const gchar* const login, GDateTime* dt, gboolean is_room)
 {
     auto_gchar gchar* chatlogs_dir = files_file_in_account_data_path(DIR_CHATLOGS, login, is_room ? "rooms" : NULL);
     auto_gchar gchar* logfile_name = g_date_time_format(dt, "%Y_%m_%d.log");
@@ -372,7 +372,7 @@ _get_log_filename(const char* const other, const char* const login, GDateTime* d
 }
 
 static struct dated_chat_log*
-_create_chatlog(const char* const other, const char* const login)
+_create_chatlog(const gchar* const other, const gchar* const login)
 {
     GDateTime* now = g_date_time_new_now_local();
 
@@ -384,7 +384,7 @@ _create_chatlog(const char* const other, const char* const login)
 }
 
 static struct dated_chat_log*
-_create_groupchat_log(const char* const room, const char* const login)
+_create_groupchat_log(const gchar* const room, const gchar* const login)
 {
     GDateTime* now = g_date_time_new_now_local();
 

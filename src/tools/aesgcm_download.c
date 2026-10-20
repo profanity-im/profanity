@@ -79,10 +79,10 @@ aesgcm_file_get(void* userdata)
     HTTPDownload* http_dl = g_new0(HTTPDownload, 1);
     http_dl->window = aesgcm_dl->window;
     http_dl->worker = aesgcm_dl->worker;
-    http_dl->id = strdup(aesgcm_dl->id);
-    http_dl->url = strdup(https_url);
-    http_dl->display_url = strdup(aesgcm_dl->url);
-    http_dl->filename = strdup(tmpname);
+    http_dl->id = g_strdup(aesgcm_dl->id);
+    http_dl->url = g_strdup(https_url);
+    http_dl->display_url = g_strdup(aesgcm_dl->url);
+    http_dl->filename = g_strdup(tmpname);
     http_dl->cmd_template = NULL;
     http_dl->silent = FALSE;
     http_dl->silent_done = TRUE;
@@ -94,7 +94,7 @@ aesgcm_file_get(void* userdata)
         return NULL;
     }
     ssize_t bytes_received = *p_bytes_received;
-    free(p_bytes_received);
+    g_free(p_bytes_received);
 
     FILE* tmpfh = fopen(tmpname, "rb");
     if (tmpfh == NULL) {
@@ -146,13 +146,13 @@ aesgcm_file_get(void* userdata)
     }
 
     if (aesgcm_dl->cmd_template != NULL) {
-        free(aesgcm_dl->cmd_template);
+        g_free(aesgcm_dl->cmd_template);
     }
 
-    free(aesgcm_dl->id);
-    free(aesgcm_dl->filename);
-    free(aesgcm_dl->url);
-    free(aesgcm_dl);
+    g_free(aesgcm_dl->id);
+    g_free(aesgcm_dl->filename);
+    g_free(aesgcm_dl->url);
+    g_free(aesgcm_dl);
 
     return NULL;
 }

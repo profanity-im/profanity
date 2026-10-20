@@ -45,7 +45,7 @@ _free_vcard_element(void* velement)
     case VCARD_NICKNAME:
     {
         if (element->nickname) {
-            free(element->nickname);
+            g_free(element->nickname);
         }
         break;
     }
@@ -53,14 +53,14 @@ _free_vcard_element(void* velement)
     {
         if (element->photo.external) {
             if (element->photo.extval) {
-                free(element->photo.extval);
+                g_free(element->photo.extval);
             }
         } else {
             if (element->photo.data) {
                 g_free(element->photo.data);
             }
             if (element->photo.type) {
-                free(element->photo.type);
+                g_free(element->photo.type);
             }
         }
         break;
@@ -73,78 +73,78 @@ _free_vcard_element(void* velement)
     case VCARD_ADDRESS:
     {
         if (element->address.pobox) {
-            free(element->address.pobox);
+            g_free(element->address.pobox);
         }
         if (element->address.extaddr) {
-            free(element->address.extaddr);
+            g_free(element->address.extaddr);
         }
         if (element->address.street) {
-            free(element->address.street);
+            g_free(element->address.street);
         }
         if (element->address.locality) {
-            free(element->address.locality);
+            g_free(element->address.locality);
         }
         if (element->address.region) {
-            free(element->address.region);
+            g_free(element->address.region);
         }
         if (element->address.pcode) {
-            free(element->address.pcode);
+            g_free(element->address.pcode);
         }
         if (element->address.country) {
-            free(element->address.country);
+            g_free(element->address.country);
         }
         break;
     }
     case VCARD_TELEPHONE:
     {
         if (element->telephone.number) {
-            free(element->telephone.number);
+            g_free(element->telephone.number);
         }
         break;
     }
     case VCARD_EMAIL:
     {
         if (element->email.userid) {
-            free(element->email.userid);
+            g_free(element->email.userid);
         }
         break;
     }
     case VCARD_JID:
     {
         if (element->jid) {
-            free(element->jid);
+            g_free(element->jid);
         }
         break;
     }
     case VCARD_TITLE:
     {
         if (element->title) {
-            free(element->title);
+            g_free(element->title);
         }
         break;
     }
     case VCARD_ROLE:
     {
         if (element->role) {
-            free(element->role);
+            g_free(element->role);
         }
         break;
     }
     case VCARD_NOTE:
     {
         if (element->note) {
-            free(element->note);
+            g_free(element->note);
         }
         break;
     }
     case VCARD_URL:
         if (element->url) {
-            free(element->url);
+            g_free(element->url);
         }
         break;
     }
 
-    free(element);
+    g_free(element);
 }
 
 void
@@ -156,24 +156,24 @@ vcard_free_full(vCard* vcard)
 
     // Free the fullname element
     if (vcard->fullname) {
-        free(vcard->fullname);
+        g_free(vcard->fullname);
     }
 
     // Free the name element
     if (vcard->name.family) {
-        free(vcard->name.family);
+        g_free(vcard->name.family);
     }
     if (vcard->name.given) {
-        free(vcard->name.given);
+        g_free(vcard->name.given);
     }
     if (vcard->name.middle) {
-        free(vcard->name.middle);
+        g_free(vcard->name.middle);
     }
     if (vcard->name.prefix) {
-        free(vcard->name.prefix);
+        g_free(vcard->name.prefix);
     }
     if (vcard->name.suffix) {
-        free(vcard->name.suffix);
+        g_free(vcard->name.suffix);
     }
 
     // Clear the elements queue
@@ -202,7 +202,7 @@ vcard_free(vCard* vcard)
     }
 
     g_queue_free(vcard->elements);
-    free(vcard);
+    g_free(vcard);
 }
 
 static void
@@ -272,7 +272,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             if (!element->nickname) {
                 // Invalid element, free and do not push
-                free(element);
+                g_free(element);
                 continue;
             }
 
@@ -295,12 +295,12 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
                 child_pointer2 = xmpp_stanza_get_child_by_name(child_pointer, "BINVAL");
                 if (!child_pointer2) {
                     // No EXTVAL or BINVAL, invalid photo, skipping
-                    free(element);
+                    g_free(element);
                     continue;
                 }
                 char* photo_base64 = xmpp_stanza_get_text(child_pointer2);
                 if (!photo_base64) {
-                    free(element);
+                    g_free(element);
                     continue;
                 }
                 element->photo.data = g_base64_decode(photo_base64, &element->photo.length);
@@ -312,7 +312,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
                     if (element->photo.data) {
                         g_free(element->photo.data);
                     }
-                    free(element);
+                    g_free(element);
                     continue;
                 }
 
@@ -330,7 +330,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             char* bday_text = xmpp_stanza_get_text(child_pointer);
             if (!bday_text) {
-                free(element);
+                g_free(element);
                 continue;
             }
 
@@ -361,7 +361,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             if (!element->birthday) {
                 // Invalid birthday ISO 8601 date, skipping
-                free(element);
+                g_free(element);
                 continue;
             }
             g_queue_push_tail(vcard->elements, element);
@@ -462,7 +462,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
             child_pointer2 = xmpp_stanza_get_child_by_name(child_pointer, "NUMBER");
             if (!child_pointer2) {
                 // No NUMBER, invalid telephone, skipping
-                free(element);
+                g_free(element);
                 continue;
             }
             element->telephone.number = stanza_text_strdup(child_pointer2);
@@ -494,7 +494,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
             child_pointer2 = xmpp_stanza_get_child_by_name(child_pointer, "USERID");
             if (!child_pointer2) {
                 // No USERID, invalid email, skipping
-                free(element);
+                g_free(element);
                 continue;
             }
             element->email.userid = stanza_text_strdup(child_pointer2);
@@ -511,7 +511,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             if (!element->jid) {
                 // Invalid element, free and do not push
-                free(element);
+                g_free(element);
                 continue;
             }
 
@@ -528,7 +528,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             if (!element->title) {
                 // Invalid element, free and do not push
-                free(element);
+                g_free(element);
                 continue;
             }
 
@@ -545,7 +545,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             if (!element->role) {
                 // Invalid element, free and do not push
-                free(element);
+                g_free(element);
                 continue;
             }
 
@@ -562,7 +562,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             if (!element->note) {
                 // Invalid element, free and do not push
-                free(element);
+                g_free(element);
                 continue;
             }
 
@@ -579,7 +579,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
 
             if (!element->note) {
                 // Invalid element, free and do not push
-                free(element);
+                g_free(element);
                 continue;
             }
 
@@ -1212,7 +1212,7 @@ vcard_print(xmpp_ctx_t* ctx, ProfWin* window, char* jid)
 
     data->window = window;
 
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_vcard_request_iq(ctx, jid, id);
 
     iq_id_handler_add(id, _vcard_print_result, (ProfIqFreeCallback)_free_userdata, data);
@@ -1357,7 +1357,7 @@ vcard_photo(xmpp_ctx_t* ctx, char* jid, char* filename, int index, gboolean open
         data->filename = g_strdup(filename);
     }
 
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_vcard_request_iq(ctx, jid, id);
 
     iq_id_handler_add(id, _vcard_photo_result, (ProfIqFreeCallback)_free_userdata, data);
@@ -1392,7 +1392,7 @@ vcard_user_refresh(void)
         return;
     }
 
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_vcard_request_iq(connection_get_ctx(), NULL, id);
 
     iq_id_handler_add(id, _vcard_refresh_result, NULL, NULL);
@@ -1405,7 +1405,7 @@ vcard_user_refresh(void)
 void
 vcard_upload(xmpp_ctx_t* ctx, vCard* vcard)
 {
-    auto_char char* id = connection_create_stanza_id();
+    auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
     xmpp_stanza_set_from(iq, connection_get_fulljid());
 
@@ -1434,10 +1434,10 @@ void
 vcard_user_set_fullname(char* fullname)
 {
     if (vcard_user->fullname) {
-        free(vcard_user->fullname);
+        g_free(vcard_user->fullname);
     }
     if (fullname) {
-        vcard_user->fullname = strdup(fullname);
+        vcard_user->fullname = g_strdup(fullname);
     } else {
         vcard_user->fullname = NULL;
     }
@@ -1449,10 +1449,10 @@ void
 vcard_user_set_name_family(char* family)
 {
     if (vcard_user->name.family) {
-        free(vcard_user->name.family);
+        g_free(vcard_user->name.family);
     }
     if (family) {
-        vcard_user->name.family = strdup(family);
+        vcard_user->name.family = g_strdup(family);
     } else {
         vcard_user->name.family = NULL;
     }
@@ -1464,10 +1464,10 @@ void
 vcard_user_set_name_given(char* given)
 {
     if (vcard_user->name.given) {
-        free(vcard_user->name.given);
+        g_free(vcard_user->name.given);
     }
     if (given) {
-        vcard_user->name.given = strdup(given);
+        vcard_user->name.given = g_strdup(given);
     } else {
         vcard_user->name.given = NULL;
     }
@@ -1479,10 +1479,10 @@ void
 vcard_user_set_name_middle(char* middle)
 {
     if (vcard_user->name.middle) {
-        free(vcard_user->name.middle);
+        g_free(vcard_user->name.middle);
     }
     if (middle) {
-        vcard_user->name.middle = strdup(middle);
+        vcard_user->name.middle = g_strdup(middle);
     } else {
         vcard_user->name.middle = NULL;
     }
@@ -1494,10 +1494,10 @@ void
 vcard_user_set_name_prefix(char* prefix)
 {
     if (vcard_user->name.prefix) {
-        free(vcard_user->name.prefix);
+        g_free(vcard_user->name.prefix);
     }
     if (prefix) {
-        vcard_user->name.prefix = strdup(prefix);
+        vcard_user->name.prefix = g_strdup(prefix);
     } else {
         vcard_user->name.prefix = NULL;
     }
@@ -1509,10 +1509,10 @@ void
 vcard_user_set_name_suffix(char* suffix)
 {
     if (vcard_user->name.suffix) {
-        free(vcard_user->name.suffix);
+        g_free(vcard_user->name.suffix);
     }
     if (suffix) {
-        vcard_user->name.suffix = strdup(suffix);
+        vcard_user->name.suffix = g_strdup(suffix);
     } else {
         vcard_user->name.suffix = NULL;
     }

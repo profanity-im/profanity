@@ -72,10 +72,10 @@ static const char* XML_WIN_TITLE = "XML Console";
 #define CEILING(X) (X - (int)(X) > 0 ? (int)(X + 1) : (int)(X))
 
 static void
-_win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* timestamp, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message_id, const char* const message, ...);
-static void _win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDateTime* time,
-                                int flags, theme_item_t theme_item, const char* const from, const char* const message, DeliveryReceipt* receipt);
-static void _win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pad_indent);
+_win_printf(ProfWin* window, const gchar* show_char, int pad_indent, GDateTime* timestamp, int flags, theme_item_t theme_item, const gchar* const display_from, const gchar* const from_jid, const gchar* const message_id, const gchar* const message, ...);
+static void _win_print_internal(ProfWin* window, const gchar* show_char, int pad_indent, GDateTime* time,
+                                int flags, theme_item_t theme_item, const gchar* const from, const gchar* const message, DeliveryReceipt* receipt);
+static void _win_print_wrapped(WINDOW* win, const gchar* const message, size_t indent, int pad_indent);
 
 int
 win_roster_cols(void)
@@ -142,14 +142,14 @@ win_create_console(void)
 }
 
 ProfWin*
-win_create_chat(const char* const barejid)
+win_create_chat(const gchar* const barejid)
 {
     ProfChatWin* new_win = g_new0(ProfChatWin, 1);
     new_win->window.type = WIN_CHAT;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
 
-    new_win->barejid = strdup(barejid);
+    new_win->barejid = g_strdup(barejid);
     new_win->resource_override = NULL;
     new_win->is_otr = FALSE;
     new_win->otr_is_trusted = FALSE;
@@ -175,7 +175,7 @@ win_create_chat(const char* const barejid)
 }
 
 ProfWin*
-win_create_muc(const char* const roomjid)
+win_create_muc(const gchar* const roomjid)
 {
     ProfMucWin* new_win = g_new0(ProfMucWin, 1);
     int cols = getmaxx(stdscr);
@@ -204,7 +204,7 @@ win_create_muc(const char* const roomjid)
     scrollok(layout->base.win, TRUE);
     new_win->window.layout = (ProfLayout*)layout;
 
-    new_win->roomjid = strdup(roomjid);
+    new_win->roomjid = g_strdup(roomjid);
     new_win->room_name = NULL;
     new_win->unread = 0;
     new_win->unread_mentions = FALSE;
@@ -235,13 +235,13 @@ win_create_muc(const char* const roomjid)
 }
 
 ProfWin*
-win_create_config(const char* const roomjid, DataForm* form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void* userdata)
+win_create_config(const gchar* const roomjid, DataForm* form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void* userdata)
 {
     ProfConfWin* new_win = g_new0(ProfConfWin, 1);
     new_win->window.type = WIN_CONFIG;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
-    new_win->roomjid = strdup(roomjid);
+    new_win->roomjid = g_strdup(roomjid);
     new_win->form = form;
     new_win->submit = submit;
     new_win->cancel = cancel;
@@ -253,13 +253,13 @@ win_create_config(const char* const roomjid, DataForm* form, ProfConfWinCallback
 }
 
 ProfWin*
-win_create_private(const char* const fulljid)
+win_create_private(const gchar* const fulljid)
 {
     ProfPrivateWin* new_win = g_new0(ProfPrivateWin, 1);
     new_win->window.type = WIN_PRIVATE;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
-    new_win->fulljid = strdup(fulljid);
+    new_win->fulljid = g_strdup(fulljid);
     new_win->unread = 0;
     new_win->occupant_offline = FALSE;
     new_win->room_left = FALSE;
@@ -283,15 +283,15 @@ win_create_xmlconsole(void)
 }
 
 ProfWin*
-win_create_plugin(const char* const plugin_name, const char* const tag)
+win_create_plugin(const gchar* const plugin_name, const gchar* const tag)
 {
     ProfPluginWin* new_win = g_new0(ProfPluginWin, 1);
     new_win->window.type = WIN_PLUGIN;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
 
-    new_win->tag = strdup(tag);
-    new_win->plugin_name = strdup(plugin_name);
+    new_win->tag = g_strdup(tag);
+    new_win->plugin_name = g_strdup(plugin_name);
 
     new_win->memcheck = PROFPLUGINWIN_MEMCHECK;
 
@@ -610,7 +610,7 @@ win_free(ProfWin* window)
         buffer_free(window->layout->buffer);
         delwin(window->layout->win);
     }
-    free(window->layout);
+    g_free(window->layout);
 
     if (window->warned_jids) {
         g_hash_table_destroy(window->warned_jids);
@@ -620,56 +620,56 @@ win_free(ProfWin* window)
     case WIN_CHAT:
     {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        free(chatwin->barejid);
-        free(chatwin->resource_override);
-        free(chatwin->enctext);
-        free(chatwin->incoming_char);
-        free(chatwin->outgoing_char);
-        free(chatwin->last_message);
-        free(chatwin->last_msg_id);
+        g_free(chatwin->barejid);
+        g_free(chatwin->resource_override);
+        g_free(chatwin->enctext);
+        g_free(chatwin->incoming_char);
+        g_free(chatwin->outgoing_char);
+        g_free(chatwin->last_message);
+        g_free(chatwin->last_msg_id);
         chat_state_free(chatwin->state);
         break;
     }
     case WIN_MUC:
     {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        free(mucwin->roomjid);
-        free(mucwin->room_name);
-        free(mucwin->enctext);
-        free(mucwin->message_char);
-        free(mucwin->last_message);
-        free(mucwin->last_msg_id);
+        g_free(mucwin->roomjid);
+        g_free(mucwin->room_name);
+        g_free(mucwin->enctext);
+        g_free(mucwin->message_char);
+        g_free(mucwin->last_message);
+        g_free(mucwin->last_msg_id);
         break;
     }
     case WIN_CONFIG:
     {
         ProfConfWin* conf = (ProfConfWin*)window;
-        free(conf->roomjid);
+        g_free(conf->roomjid);
         form_destroy(conf->form);
         break;
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
-        free(privatewin->fulljid);
+        g_free(privatewin->fulljid);
         break;
     }
     case WIN_PLUGIN:
     {
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
-        free(pluginwin->tag);
-        free(pluginwin->plugin_name);
+        g_free(pluginwin->tag);
+        g_free(pluginwin->plugin_name);
         break;
     }
     default:
         break;
     }
 
-    free(window);
+    g_free(window);
 }
 
 gboolean
-win_warn_needed(ProfWin* window, const char* const type, const char* const jid)
+win_warn_needed(ProfWin* window, const gchar* const type, const gchar* const jid)
 {
     if (!window || !type || !jid) {
         return TRUE;
@@ -684,7 +684,7 @@ win_warn_needed(ProfWin* window, const char* const type, const char* const jid)
 }
 
 void
-win_warn_sent(ProfWin* window, const char* const type, const char* const jid)
+win_warn_sent(ProfWin* window, const gchar* const type, const gchar* const jid)
 {
     if (!window || !type || !jid) {
         return;
@@ -1058,7 +1058,7 @@ win_show_contact(ProfWin* window, PContact contact)
 }
 
 void
-win_show_occupant_info(ProfWin* window, const char* const room, Occupant* occupant)
+win_show_occupant_info(ProfWin* window, const gchar* const room, Occupant* occupant)
 {
     const char* presence_str = string_from_resource_presence(occupant->presence);
     const char* occupant_affiliation = muc_occupant_affiliation_str(occupant);
@@ -1415,10 +1415,10 @@ win_show_vcard(ProfWin* window, vCard* vcard)
 }
 
 void
-win_show_status_string(ProfWin* window, const char* const from,
-                       const char* const show, const char* const status,
-                       GDateTime* last_activity, const char* const pre,
-                       const char* const default_show)
+win_show_status_string(ProfWin* window, const gchar* const from,
+                       const gchar* const show, const gchar* const status,
+                       GDateTime* last_activity, const gchar* const pre,
+                       const gchar* const default_show)
 {
     theme_item_t presence_colour;
 
@@ -1457,7 +1457,7 @@ win_show_status_string(ProfWin* window, const char* const from,
  * Returns TRUE if the message was successfully corrected and should not be printed, FALSE otherwise.
  */
 static gboolean
-_win_correct(ProfWin* window, const char* const message, const char* const id, const char* const replace_id, const char* const from_jid)
+_win_correct(ProfWin* window, const gchar* const message, const gchar* const id, const gchar* const replace_id, const gchar* const from_jid)
 {
     if (!replace_id) {
         return FALSE;
@@ -1490,9 +1490,9 @@ _win_correct(ProfWin* window, const char* const message, const char* const id, c
     entry->show_char = prefs_get_correction_char();
 
     if (entry->message) {
-        free(entry->message);
+        g_free(entry->message);
     }
-    entry->message = strdup(message);
+    entry->message = g_strdup(message);
 
     // LMC requires original message ID, hence ID remains the same
 
@@ -1501,7 +1501,7 @@ _win_correct(ProfWin* window, const char* const message, const char* const id, c
 }
 
 void
-win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMessage* message)
+win_print_incoming(ProfWin* window, const gchar* const display_name_from, ProfMessage* message)
 {
     int flags = NO_ME;
 
@@ -1533,13 +1533,13 @@ win_print_incoming(ProfWin* window, const char* const display_name_from, ProfMes
 }
 
 void
-win_print_them(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const show_char, int flags, const char* const them)
+win_print_them(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const gchar* const show_char, int flags, const gchar* const them)
 {
     _win_printf(window, show_char, 0, timestamp, flags | NO_ME | NO_EOL, theme_item, them, NULL, NULL, "");
 }
 
 void
-win_println_incoming_muc_msg(ProfWin* window, const char* show_char, int flags, const ProfMessage* const message)
+win_println_incoming_muc_msg(ProfWin* window, const gchar* show_char, int flags, const ProfMessage* const message)
 {
     if (!prefs_get_boolean(PREF_CORRECTION_ALLOW) || !_win_correct(window, message->plain, message->id, message->replace_id, message->from_jid->fulljid)) {
         _win_printf(window, show_char, 0, message->timestamp, flags | NO_ME, THEME_TEXT_THEM, message->from_jid->resourcepart, message->from_jid->fulljid, message->id, "%s", message->plain);
@@ -1549,7 +1549,7 @@ win_println_incoming_muc_msg(ProfWin* window, const char* show_char, int flags, 
 }
 
 void
-win_print_outgoing_muc_msg(ProfWin* window, const char* show_char, const char* const me, const char* const id, const char* const replace_id, const char* const message)
+win_print_outgoing_muc_msg(ProfWin* window, const gchar* show_char, const gchar* const me, const gchar* const id, const gchar* const replace_id, const gchar* const message)
 {
     GDateTime* timestamp = g_date_time_new_now_local();
 
@@ -1562,7 +1562,7 @@ win_print_outgoing_muc_msg(ProfWin* window, const char* show_char, const char* c
 }
 
 void
-win_print_outgoing(ProfWin* window, const char* show_char, const char* const id, const char* const replace_id, const char* const message)
+win_print_outgoing(ProfWin* window, const gchar* show_char, const gchar* const id, const gchar* const replace_id, const gchar* const message)
 {
     GDateTime* timestamp = g_date_time_new_now_local();
 
@@ -1616,7 +1616,7 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
 }
 
 static void
-win_println_va_internal_with_timestamp(ProfWin* window, theme_item_t theme_item, int pad, int flags, const char* show_char, GDateTime* timestamp, const char* const message, va_list arg)
+win_println_va_internal_with_timestamp(ProfWin* window, theme_item_t theme_item, int pad, int flags, const gchar* show_char, GDateTime* timestamp, const gchar* const message, va_list arg)
 {
     gboolean created_timestamp = FALSE;
     if (!timestamp) {
@@ -1637,13 +1637,13 @@ win_println_va_internal_with_timestamp(ProfWin* window, theme_item_t theme_item,
 }
 
 static void
-win_println_va_internal(ProfWin* window, theme_item_t theme_item, int pad, int flags, const char* show_char, const char* const message, va_list arg)
+win_println_va_internal(ProfWin* window, theme_item_t theme_item, int pad, int flags, const gchar* show_char, const gchar* const message, va_list arg)
 {
     win_println_va_internal_with_timestamp(window, theme_item, pad, flags, show_char, NULL, message, arg);
 }
 
 void
-win_print(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, ...)
+win_print(ProfWin* window, theme_item_t theme_item, const gchar* show_char, const gchar* const message, ...)
 {
     va_list arg;
     va_start(arg, message);
@@ -1652,13 +1652,13 @@ win_print(ProfWin* window, theme_item_t theme_item, const char* show_char, const
 }
 
 void
-win_println_va(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, va_list arg)
+win_println_va(ProfWin* window, theme_item_t theme_item, const gchar* show_char, const gchar* const message, va_list arg)
 {
     win_println_va_internal(window, theme_item, 0, 0, show_char, message, arg);
 }
 
 void
-win_println(ProfWin* window, theme_item_t theme_item, const char* show_char, const char* const message, ...)
+win_println(ProfWin* window, theme_item_t theme_item, const gchar* show_char, const gchar* const message, ...)
 {
     va_list arg;
     va_start(arg, message);
@@ -1667,7 +1667,7 @@ win_println(ProfWin* window, theme_item_t theme_item, const char* show_char, con
 }
 
 void
-win_println_indent(ProfWin* window, int pad, const char* const message, ...)
+win_println_indent(ProfWin* window, int pad, const gchar* const message, ...)
 {
     va_list arg;
     va_start(arg, message);
@@ -1676,7 +1676,7 @@ win_println_indent(ProfWin* window, int pad, const char* const message, ...)
 }
 
 void
-win_append(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_append(ProfWin* window, theme_item_t theme_item, const gchar* const message, ...)
 {
     va_list arg;
     va_start(arg, message);
@@ -1685,7 +1685,7 @@ win_append(ProfWin* window, theme_item_t theme_item, const char* const message, 
 }
 
 void
-win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message, ...)
+win_appendln(ProfWin* window, theme_item_t theme_item, const gchar* const message, ...)
 {
     va_list arg;
     va_start(arg, message);
@@ -1694,7 +1694,7 @@ win_appendln(ProfWin* window, theme_item_t theme_item, const char* const message
 }
 
 void
-win_append_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const message, ...)
+win_append_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const gchar* const message, ...)
 {
     va_list arg;
     va_start(arg, message);
@@ -1703,7 +1703,7 @@ win_append_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timest
 }
 
 void
-win_appendln_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const char* const message, ...)
+win_appendln_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* timestamp, const gchar* const message, ...)
 {
     va_list arg;
     va_start(arg, message);
@@ -1712,13 +1712,13 @@ win_appendln_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* time
 }
 
 void
-win_print_http_transfer(ProfWin* window, const char* const message, char* id)
+win_print_http_transfer(ProfWin* window, const gchar* const message, const gchar* const id)
 {
     win_print_status_with_id(window, message, id, THEME_DEFAULT, 0);
 }
 
 void
-win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const char* const from, const char* const message, const char* id, const char* const replace_id)
+win_print_outgoing_with_receipt(ProfWin* window, const gchar* show_char, const gchar* const from, const gchar* const message, const gchar* const id, const gchar* const replace_id)
 {
     GDateTime* time = g_date_time_new_now_local();
 
@@ -1727,7 +1727,7 @@ win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const ch
 
     const char* myjid = connection_get_fulljid();
     if (_win_correct(window, message, id, replace_id, myjid)) {
-        free(receipt); // TODO: probably we should use this in _win_correct()
+        g_free(receipt); // TODO: probably we should use this in _win_correct()
     } else {
         int y_start_pos = getcury(window->layout->win);
         _win_print_internal(window, show_char, 0, time, 0, THEME_TEXT_ME, from, message, receipt);
@@ -1740,7 +1740,7 @@ win_print_outgoing_with_receipt(ProfWin* window, const char* show_char, const ch
 }
 
 void
-win_mark_received(ProfWin* window, const char* const id)
+win_mark_received(ProfWin* window, const gchar* const id)
 {
     if (window->type == WIN_CONSOLE)
         return;
@@ -1751,28 +1751,28 @@ win_mark_received(ProfWin* window, const char* const id)
 }
 
 void
-win_update_entry_message(ProfWin* window, const char* const id, const char* const message)
+win_update_entry_message(ProfWin* window, const gchar* const id, const gchar* const message)
 {
     if (window->type == WIN_CONSOLE)
         return;
     ProfBuffEntry* entry = buffer_get_entry_by_id(window->layout->buffer, id);
     if (entry) {
-        free(entry->message);
-        entry->message = strdup(message);
+        g_free(entry->message);
+        entry->message = g_strdup(message);
         win_redraw(window);
     }
 }
 
 void
-win_update_entry(ProfWin* window, const char* const id, const char* const message, theme_item_t theme_item, int flags)
+win_update_entry(ProfWin* window, const gchar* const id, const gchar* const message, theme_item_t theme_item, int flags)
 {
     if (window->type == WIN_CONSOLE)
         return;
     ProfBuffEntry* entry = buffer_get_entry_by_id(window->layout->buffer, id);
     if (entry) {
         if (message) {
-            free(entry->message);
-            entry->message = strdup(message);
+            g_free(entry->message);
+            entry->message = g_strdup(message);
         }
         entry->theme_item = theme_item;
         entry->flags |= flags;
@@ -1781,7 +1781,7 @@ win_update_entry(ProfWin* window, const char* const id, const char* const messag
 }
 
 void
-win_print_status_with_id(ProfWin* window, const char* const message, char* id, theme_item_t theme_item, int flags)
+win_print_status_with_id(ProfWin* window, const gchar* const message, const gchar* const id, theme_item_t theme_item, int flags)
 {
     GDateTime* time = g_date_time_new_now_local();
     int y_start_pos = getcury(window->layout->win);
@@ -1791,7 +1791,7 @@ win_print_status_with_id(ProfWin* window, const char* const message, char* id, t
 }
 
 void
-win_remove_entry_message(ProfWin* window, const char* const id)
+win_remove_entry_message(ProfWin* window, const gchar* const id)
 {
     buffer_remove_entry_by_id(window->layout->buffer, id);
     win_redraw(window);
@@ -1804,7 +1804,7 @@ win_newline(ProfWin* window)
 }
 
 static void
-_win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* timestamp, int flags, theme_item_t theme_item, const char* const display_from, const char* const from_jid, const char* const message_id, const char* const message, ...)
+_win_printf(ProfWin* window, const gchar* show_char, int pad_indent, GDateTime* timestamp, int flags, theme_item_t theme_item, const gchar* const display_from, const gchar* const from_jid, const gchar* const message_id, const gchar* const message, ...)
 {
     if (timestamp == NULL) {
         timestamp = g_date_time_new_now_local();
@@ -1828,8 +1828,8 @@ _win_printf(ProfWin* window, const char* show_char, int pad_indent, GDateTime* t
 }
 
 static void
-_win_print_internal(ProfWin* window, const char* show_char, int pad_indent, GDateTime* time,
-                    int flags, theme_item_t theme_item, const char* const from, const char* const message, DeliveryReceipt* receipt)
+_win_print_internal(ProfWin* window, const gchar* show_char, int pad_indent, GDateTime* time,
+                    int flags, theme_item_t theme_item, const gchar* const from, const gchar* const message, DeliveryReceipt* receipt)
 {
     // flags : 1st bit =  0/1 - me/not me. define: NO_ME
     //         2nd bit =  0/1 - date/no date. define: NO_DATE
@@ -1969,7 +1969,7 @@ _win_indent(WINDOW* win, int size)
 }
 
 static void
-_win_print_wrapped(WINDOW* win, const char* const message, size_t indent, int pad_indent)
+_win_print_wrapped(WINDOW* win, const gchar* const message, size_t indent, int pad_indent)
 {
     int starty = getcury(win);
     int wordi = 0;
@@ -2324,7 +2324,7 @@ win_sub_newline_lazy(WINDOW* win)
 }
 
 void
-win_command_list_error(ProfWin* window, const char* const error)
+win_command_list_error(ProfWin* window, const gchar* const error)
 {
     assert(window != NULL);
 
@@ -2332,7 +2332,7 @@ win_command_list_error(ProfWin* window, const char* const error)
 }
 
 void
-win_command_exec_error(ProfWin* window, const char* const command, const char* const error, ...)
+win_command_exec_error(ProfWin* window, const gchar* const command, const gchar* const error, ...)
 {
     assert(window != NULL);
     va_list arg;
@@ -2365,21 +2365,21 @@ win_handle_command_list(ProfWin* window, GSList* cmds)
 }
 
 void
-win_handle_command_exec_status(ProfWin* window, const char* const command, const char* const value)
+win_handle_command_exec_status(ProfWin* window, const gchar* const command, const gchar* const value)
 {
     assert(window != NULL);
     win_println(window, THEME_DEFAULT, "!", "%s %s", command, value);
 }
 
 void
-win_handle_command_exec_result_note(ProfWin* window, const char* const type, const char* const value)
+win_handle_command_exec_result_note(ProfWin* window, const gchar* const type, const gchar* const value)
 {
     assert(window != NULL);
     win_println(window, THEME_DEFAULT, "!", value);
 }
 
 void
-win_insert_last_read_position_marker(ProfWin* window, char* id)
+win_insert_last_read_position_marker(ProfWin* window, const gchar* const id)
 {
     unsigned int size = buffer_size(window->layout->buffer);
 
@@ -2406,8 +2406,8 @@ win_insert_last_read_position_marker(ProfWin* window, char* id)
     g_date_time_unref(time);
 }
 
-char*
-win_quote_autocomplete(ProfWin* window, const char* const input, gboolean previous)
+gchar*
+win_quote_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
 {
     if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
         return NULL;
@@ -2442,7 +2442,7 @@ get_show_char(prof_enc_t encryption_mode)
 }
 
 const gchar*
-get_enc_char(prof_enc_t enc_mode, const char* alt)
+get_enc_char(prof_enc_t enc_mode, const gchar* alt)
 {
     if (alt) {
         return alt;
