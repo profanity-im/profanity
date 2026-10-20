@@ -53,17 +53,17 @@ typedef enum {
 
 typedef struct form_option_t
 {
-    char* label;
-    char* value;
+    gchar* label;
+    gchar* value;
 } FormOption;
 
 typedef struct form_field_t
 {
-    char* label;
-    char* type;
+    gchar* label;
+    gchar* type;
     form_field_type_t type_t;
-    char* var;
-    char* description;
+    gchar* var;
+    gchar* description;
     gboolean required;
     GSList* values;
     GSList* options;
@@ -72,9 +72,9 @@ typedef struct form_field_t
 
 typedef struct data_form_t
 {
-    char* type;
-    char* title;
-    char* instructions;
+    gchar* type;
+    gchar* title;
+    gchar* instructions;
     GSList* fields;
     GHashTable* var_to_tag;
     GHashTable* tag_to_var;
@@ -144,7 +144,7 @@ typedef struct prof_console_win_t
 typedef struct prof_chat_win_t
 {
     ProfWin window;
-    char* barejid;
+    gchar* barejid;
     int unread;
     ChatState* state;
     gboolean is_otr;
@@ -154,23 +154,23 @@ typedef struct prof_chat_win_t
     gboolean is_omemo;
     gboolean omemo_trusted;
     gboolean is_ox; // XEP-0373: OpenPGP for XMPP
-    char* resource_override;
+    gchar* resource_override;
     gboolean history_shown;
     unsigned long memcheck;
-    char* enctext;
-    char* incoming_char;
-    char* outgoing_char;
+    gchar* enctext;
+    gchar* incoming_char;
+    gchar* outgoing_char;
     // For LMC
-    char* last_message;
-    char* last_msg_id;
+    gchar* last_message;
+    gchar* last_msg_id;
     gboolean has_attention;
 } ProfChatWin;
 
 typedef struct prof_muc_win_t
 {
     ProfWin window;
-    char* roomjid;
-    char* room_name;
+    gchar* roomjid;
+    gchar* room_name;
     int unread;
     gboolean unread_mentions;
     gboolean unread_triggers;
@@ -179,12 +179,12 @@ typedef struct prof_muc_win_t
     gboolean is_omemo;
     gboolean omemo_trusted;
     unsigned long memcheck;
-    char* enctext;
-    char* message_char;
+    gchar* enctext;
+    gchar* message_char;
     GDateTime* last_msg_timestamp;
     // For LMC
-    char* last_message;
-    char* last_msg_id;
+    gchar* last_message;
+    gchar* last_msg_id;
     gboolean has_attention;
 } ProfMucWin;
 
@@ -194,7 +194,7 @@ typedef void (*ProfConfWinCallback)(ProfConfWin*);
 struct prof_conf_win_t
 {
     ProfWin window;
-    char* roomjid;
+    gchar* roomjid;
     DataForm* form;
     unsigned long memcheck;
     ProfConfWinCallback submit;
@@ -205,7 +205,7 @@ struct prof_conf_win_t
 typedef struct prof_private_win_t
 {
     ProfWin window;
-    char* fulljid;
+    gchar* fulljid;
     int unread;
     unsigned long memcheck;
     gboolean occupant_offline;
@@ -221,8 +221,8 @@ typedef struct prof_xml_win_t
 typedef struct prof_plugin_win_t
 {
     ProfWin window;
-    char* tag;
-    char* plugin_name;
+    gchar* tag;
+    gchar* plugin_name;
     unsigned long memcheck;
 } ProfPluginWin;
 

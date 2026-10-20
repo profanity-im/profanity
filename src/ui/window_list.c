@@ -86,14 +86,14 @@ wins_get_console(void)
 }
 
 gboolean
-wins_chat_exists(const char* const barejid)
+wins_chat_exists(const gchar* const barejid)
 {
     ProfChatWin* chatwin = wins_get_chat(barejid);
     return (chatwin != NULL);
 }
 
 ProfChatWin*
-wins_get_chat(const char* const barejid)
+wins_get_chat(const gchar* const barejid)
 {
     GList* curr = values;
 
@@ -139,7 +139,7 @@ wins_get_chat_unsubscribed(void)
 }
 
 ProfConfWin*
-wins_get_conf(const char* const roomjid)
+wins_get_conf(const gchar* const roomjid)
 {
     GList* curr = values;
 
@@ -158,7 +158,7 @@ wins_get_conf(const char* const roomjid)
 }
 
 ProfMucWin*
-wins_get_muc(const char* const roomjid)
+wins_get_muc(const gchar* const roomjid)
 {
     GList* curr = values;
 
@@ -177,7 +177,7 @@ wins_get_muc(const char* const roomjid)
 }
 
 ProfPrivateWin*
-wins_get_private(const char* const fulljid)
+wins_get_private(const gchar* const fulljid)
 {
     GList* curr = values;
 
@@ -196,7 +196,7 @@ wins_get_private(const char* const fulljid)
 }
 
 ProfPluginWin*
-wins_get_plugin(const char* const tag)
+wins_get_plugin(const gchar* const tag)
 {
     GList* curr = values;
 
@@ -215,7 +215,7 @@ wins_get_plugin(const char* const tag)
 }
 
 void
-wins_close_plugin(char* tag)
+wins_close_plugin(const gchar* const tag)
 {
     ProfWin* toclose = wins_get_by_string(tag);
     if (toclose == NULL) {
@@ -229,7 +229,7 @@ wins_close_plugin(char* tag)
 }
 
 GList*
-wins_get_private_chats(const char* const roomjid)
+wins_get_private_chats(const gchar* const roomjid)
 {
     GList* result = NULL;
     auto_gchar gchar* prefix = g_strdup_printf("%s/", roomjid);
@@ -250,16 +250,16 @@ wins_get_private_chats(const char* const roomjid)
 }
 
 void
-wins_private_nick_change(const char* const roomjid, const char* const oldnick, const char* const newnick)
+wins_private_nick_change(const gchar* const roomjid, const gchar* const oldnick, const gchar* const newnick)
 {
     auto_jid Jid* oldjid = jid_create_from_bare_and_resource(roomjid, oldnick);
 
     ProfPrivateWin* privwin = wins_get_private(oldjid->fulljid);
     if (privwin) {
-        free(privwin->fulljid);
+        g_free(privwin->fulljid);
 
         auto_jid Jid* newjid = jid_create_from_bare_and_resource(roomjid, newnick);
-        privwin->fulljid = strdup(newjid->fulljid);
+        privwin->fulljid = g_strdup(newjid->fulljid);
         win_println((ProfWin*)privwin, THEME_THEM, "!", "** %s is now known as %s.", oldjid->resourcepart, newjid->resourcepart);
 
         autocomplete_remove(wins_ac, oldjid->fulljid);
@@ -270,7 +270,7 @@ wins_private_nick_change(const char* const roomjid, const char* const oldnick, c
 }
 
 void
-wins_change_nick(const char* const barejid, const char* const oldnick, const char* const newnick)
+wins_change_nick(const gchar* const barejid, const gchar* const oldnick, const gchar* const newnick)
 {
     ProfChatWin* chatwin = wins_get_chat(barejid);
     if (chatwin) {
@@ -284,7 +284,7 @@ wins_change_nick(const char* const barejid, const char* const oldnick, const cha
 }
 
 void
-wins_remove_nick(const char* const barejid, const char* const oldnick)
+wins_remove_nick(const gchar* const barejid, const gchar* const oldnick)
 {
     ProfChatWin* chatwin = wins_get_chat(barejid);
     if (chatwin) {
@@ -358,7 +358,7 @@ wins_get_by_num(int i)
 }
 
 ProfWin*
-wins_get_by_string(const char* str)
+wins_get_by_string(const gchar* const str)
 {
     if (g_strcmp0(str, "console") == 0) {
         ProfWin* conswin = wins_get_console();
@@ -584,7 +584,7 @@ wins_new_xmlconsole(void)
 }
 
 ProfWin*
-wins_new_chat(const char* const barejid)
+wins_new_chat(const gchar* const barejid)
 {
     int result = _wins_get_next_available_num(keys);
     ProfWin* newwin = win_create_chat(barejid);
@@ -607,7 +607,7 @@ wins_new_chat(const char* const barejid)
 }
 
 ProfWin*
-wins_new_muc(const char* const roomjid)
+wins_new_muc(const gchar* const roomjid)
 {
     int result = _wins_get_next_available_num(keys);
     ProfWin* newwin = win_create_muc(roomjid);
@@ -621,7 +621,7 @@ wins_new_muc(const char* const roomjid)
 }
 
 ProfWin*
-wins_new_config(const char* const roomjid, DataForm* form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void* userdata)
+wins_new_config(const gchar* const roomjid, DataForm* form, ProfConfWinCallback submit, ProfConfWinCallback cancel, const void* userdata)
 {
     int result = _wins_get_next_available_num(keys);
     ProfWin* newwin = win_create_config(roomjid, form, submit, cancel, userdata);
@@ -631,7 +631,7 @@ wins_new_config(const char* const roomjid, DataForm* form, ProfConfWinCallback s
 }
 
 ProfWin*
-wins_new_private(const char* const fulljid)
+wins_new_private(const gchar* const fulljid)
 {
     int result = _wins_get_next_available_num(keys);
     ProfWin* newwin = win_create_private(fulljid);
@@ -645,7 +645,7 @@ wins_new_private(const char* const fulljid)
 }
 
 ProfWin*
-wins_new_plugin(const char* const plugin_name, const char* const tag)
+wins_new_plugin(const gchar* const plugin_name, const gchar* const tag)
 {
     int result = _wins_get_next_available_num(keys);
     ProfWin* newwin = win_create_plugin(plugin_name, tag);
@@ -973,7 +973,7 @@ _wins_get_next_available_num(GList* used)
 }
 
 void
-wins_omemo_trust_changed(const char* const jid)
+wins_omemo_trust_changed(const gchar* const jid)
 {
     GList* curr = values;
     while (curr) {
@@ -1118,13 +1118,13 @@ wins_create_summary_attention()
 }
 
 char*
-win_autocomplete(const char* const search_str, gboolean previous, void* context)
+win_autocomplete(const gchar* const search_str, gboolean previous, void* context)
 {
     return autocomplete_complete(wins_ac, search_str, TRUE, previous);
 }
 
 char*
-win_close_autocomplete(const char* const search_str, gboolean previous, void* context)
+win_close_autocomplete(const gchar* const search_str, gboolean previous, void* context)
 {
     return autocomplete_complete(wins_close_ac, search_str, TRUE, previous);
 }
@@ -1251,7 +1251,7 @@ wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message, con
 }
 
 void
-wins_add_quotes_ac(const ProfWin* const win, const char* const message, const gboolean flip)
+wins_add_quotes_ac(const ProfWin* const win, const gchar* const message, const gboolean flip)
 {
     if (flip) {
         autocomplete_add_unsorted(win->quotes_ac, message, FALSE);
@@ -1264,7 +1264,7 @@ wins_add_quotes_ac(const ProfWin* const win, const char* const message, const gb
 }
 
 char*
-wins_get_url(const char* const search_str, gboolean previous, void* context)
+wins_get_url(const gchar* const search_str, gboolean previous, void* context)
 {
     ProfWin* win = (ProfWin*)context;
 
@@ -1272,7 +1272,7 @@ wins_get_url(const char* const search_str, gboolean previous, void* context)
 }
 
 char*
-wins_get_quote(const char* const search_str, gboolean previous, void* context)
+wins_get_quote(const gchar* const search_str, gboolean previous, void* context)
 {
     ProfWin* win = (ProfWin*)context;
 
