@@ -226,7 +226,7 @@ roster_change_name(PContact contact, const gchar* const new_name)
     assert(roster != NULL);
     assert(contact != NULL);
 
-    auto_char char* current_name = NULL;
+    auto_gchar gchar* current_name = NULL;
     const char* barejid = p_contact_barejid(contact);
 
     if (p_contact_name(contact)) {

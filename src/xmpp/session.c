@@ -69,7 +69,7 @@ typedef enum {
 static GTimer* reconnect_timer;
 static activity_state_t activity_state;
 static resource_presence_t saved_presence;
-static char* saved_status;
+static gchar* saved_status;
 static GHashTable* last_moods = NULL;
 
 static void _session_free_internals(void);
@@ -89,7 +89,7 @@ _session_shutdown(void)
 
     connection_shutdown();
     if (saved_status) {
-        free(saved_status);
+        g_free(saved_status);
     }
 }
 
@@ -186,7 +186,7 @@ session_connect_with_details(const gchar* const jid, const gchar* const passwd, 
         auto_gchar gchar* resource = jid_random_resource();
         jid_destroy(jidp);
         jidp = jid_create_from_bare_and_resource(jid, resource);
-        saved_details.jid = strdup(jidp->fulljid);
+        saved_details.jid = g_strdup(jidp->fulljid);
     } else {
         saved_details.jid = g_strdup(jid);
     }
@@ -356,8 +356,8 @@ session_login_success(gboolean secured)
         accounts_add(saved_details.name, saved_details.altdomain, saved_details.port, saved_details.tls_policy, saved_details.auth_policy);
         accounts_set_jid(saved_details.name, saved_details.jid);
 
-        saved_account.name = strdup(saved_details.name);
-        saved_account.passwd = strdup(saved_details.passwd);
+        saved_account.name = g_strdup(saved_details.name);
+        saved_account.passwd = g_strdup(saved_details.passwd);
 
         _session_free_saved_details();
         sv_ev_login_account_success(saved_account.name, secured);
@@ -450,7 +450,7 @@ session_check_autoaway(void)
 
     const char* account = session_get_account_name();
     resource_presence_t curr_presence = accounts_get_last_presence(account);
-    auto_char char* curr_status = accounts_get_last_status(account);
+    auto_gchar gchar* curr_status = accounts_get_last_status(account);
 
     unsigned long idle_ms = ui_get_idle_time();
 
@@ -464,10 +464,10 @@ session_check_autoaway(void)
                     // save current presence
                     saved_presence = curr_presence;
                     if (saved_status) {
-                        free(saved_status);
+                        g_free(saved_status);
                     }
                     if (curr_status) {
-                        saved_status = strdup(curr_status);
+                        saved_status = g_strdup(curr_status);
                     } else {
                         saved_status = NULL;
                     }

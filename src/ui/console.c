@@ -255,7 +255,7 @@ cons_show_incoming_room_message(const char* const nick, const char* const room, 
         if (mention) {
             win_println(console, THEME_MENTION, "-", "<< room mention: %s in %s (win %d)", nick, room, ui_index);
         } else if (triggers) {
-            auto_char char* triggers_str = _room_triggers_to_string(triggers);
+            auto_gchar gchar* triggers_str = _room_triggers_to_string(triggers);
             win_println(console, THEME_TRIGGER, "-", "<< room trigger %s: %s in %s (win %d)", triggers_str, nick, room, ui_index);
         } else {
             // 'all' or 'first' if its the first message
@@ -803,8 +803,8 @@ cons_show_qrcode(const char* const text)
 
     ProfWin* console = wins_get_console();
 
-    auto_char char* buf = calloc((width * 4) + 1, 1);
-    auto_char char* pad = calloc((width * 4) + 5, 1);
+    auto_gchar gchar* buf = g_malloc0((width * 4) + 1);
+    auto_gchar gchar* pad = g_malloc0((width * 4) + 5);
 
     if (!buf || !pad) {
         return;

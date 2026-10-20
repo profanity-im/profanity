@@ -72,7 +72,7 @@ log_database_init(ProfAccount* account)
         return FALSE;
     }
 
-    auto_char char* filename = _get_db_filename(account);
+    auto_gchar gchar* filename = _get_db_filename(account);
     if (!filename) {
         return FALSE;
     }

@@ -83,7 +83,7 @@ avatar_pep_subscribe(void)
 gboolean
 avatar_set(const gchar* path)
 {
-    auto_char char* expanded_path = get_expanded_path(path);
+    auto_gchar gchar* expanded_path = get_expanded_path(path);
 
     auto_gerror GError* err = NULL;
     GdkPixbuf* pixbuf = gdk_pixbuf_new_from_file(expanded_path, &err);

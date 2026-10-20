@@ -159,7 +159,7 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
     GList* prekeys_list = NULL;
     unsigned char* signed_prekey_raw = NULL;
     unsigned char* signed_prekey_signature_raw = NULL;
-    char* from = NULL;
+    auto_gchar gchar* from = NULL;
 
     const char* from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
     log_debug("[OMEMO] omemo_start_device_session_handle_bundle: %s", STR_MAYBE_NULL(from_attr));
@@ -170,9 +170,9 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
     }
 
     if (!from_attr) {
-        from = strdup(connection_get_jid()->barejid);
+        from = g_strdup(connection_get_jid()->barejid);
     } else {
-        from = strdup(from_attr);
+        from = g_strdup(from_attr);
     }
 
     if (g_strcmp0(from, userdata) != 0) {
@@ -310,7 +310,6 @@ omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* cons
     g_free(identity_key_raw);
 
 out:
-    free(from);
     if (signed_prekey_raw) {
         g_free(signed_prekey_raw);
     }

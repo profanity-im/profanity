@@ -31,7 +31,7 @@
 #include "database.h"
 
 static void _stanza_add_unique_id(xmpp_stanza_t* stanza);
-static gchar* _stanza_create_sha1_hash(char* str);
+static gchar* _stanza_create_sha1_hash(const gchar* const str);
 
 #if 0
 xmpp_stanza_t*
@@ -194,7 +194,7 @@ stanza_create_http_upload_request(xmpp_ctx_t* ctx, const gchar* const id,
     xmpp_stanza_set_name(request, STANZA_NAME_REQUEST);
     xmpp_stanza_set_ns(request, STANZA_NS_HTTP_UPLOAD);
 
-    auto_char char* filename_cpy = strdup(upload->filename);
+    auto_gchar gchar* filename_cpy = g_strdup(upload->filename);
     if (!filename_cpy) {
         xmpp_stanza_release(iq);
         xmpp_stanza_release(request);
@@ -1232,7 +1232,7 @@ stanza_get_status(xmpp_stanza_t* stanza, char* def)
     if (status) {
         return stanza_text_strdup(status);
     } else if (def) {
-        return strdup(def);
+        return g_strdup(def);
     } else {
         return NULL;
     }
@@ -1246,7 +1246,7 @@ stanza_get_show(xmpp_stanza_t* stanza, char* def)
     if (show) {
         return stanza_text_strdup(show);
     } else if (def) {
-        return strdup(def);
+        return g_strdup(def);
     } else {
         return NULL;
     }
@@ -1661,9 +1661,9 @@ stanza_parse_caps(xmpp_stanza_t* const stanza)
     const char* ver = xmpp_stanza_get_attribute(caps_st, STANZA_ATTR_VER);
 
     XMPPCaps* caps = g_new0(XMPPCaps, 1);
-    caps->hash = hash ? strdup(hash) : NULL;
-    caps->node = node ? strdup(node) : NULL;
-    caps->ver = ver ? strdup(ver) : NULL;
+    caps->hash = hash ? g_strdup(hash) : NULL;
+    caps->node = node ? g_strdup(node) : NULL;
+    caps->ver = ver ? g_strdup(ver) : NULL;
 
     return caps;
 }
@@ -1671,10 +1671,10 @@ stanza_parse_caps(xmpp_stanza_t* const stanza)
 EntityCapabilities*
 stanza_create_caps_from_query_element(xmpp_stanza_t* query)
 {
-    auto_char char* software = NULL;
-    auto_char char* software_version = NULL;
-    auto_char char* os = NULL;
-    auto_char char* os_version = NULL;
+    auto_gchar gchar* software = NULL;
+    auto_gchar gchar* software_version = NULL;
+    auto_gchar gchar* os = NULL;
+    auto_gchar gchar* os_version = NULL;
 
     xmpp_stanza_t* softwareinfo = xmpp_stanza_get_child_by_ns(query, STANZA_NS_DATA);
     if (softwareinfo) {
@@ -1689,19 +1689,19 @@ stanza_create_caps_from_query_element(xmpp_stanza_t* query)
                 if (formField->values) {
                     if (g_strcmp0(formField->var, "software") == 0) {
                         if (software == NULL) {
-                            software = strdup(formField->values->data);
+                            software = g_strdup(formField->values->data);
                         }
                     } else if (g_strcmp0(formField->var, "software_version") == 0) {
                         if (software_version == NULL) {
-                            software_version = strdup(formField->values->data);
+                            software_version = g_strdup(formField->values->data);
                         }
                     } else if (g_strcmp0(formField->var, "os") == 0) {
                         if (os == NULL) {
-                            os = strdup(formField->values->data);
+                            os = g_strdup(formField->values->data);
                         }
                     } else if (g_strcmp0(formField->var, "os_version") == 0) {
                         if (os_version == NULL) {
-                            os_version = strdup(formField->values->data);
+                            os_version = g_strdup(formField->values->data);
                         }
                     }
                 }
@@ -1717,7 +1717,7 @@ stanza_create_caps_from_query_element(xmpp_stanza_t* query)
     GSList* features = NULL;
     while (child) {
         if (g_strcmp0(xmpp_stanza_get_name(child), "feature") == 0) {
-            features = g_slist_append(features, strdup(xmpp_stanza_get_attribute(child, "var")));
+            features = g_slist_append(features, g_strdup(xmpp_stanza_get_attribute(child, "var")));
         }
         if (g_strcmp0(xmpp_stanza_get_name(child), "identity") == 0) {
             identity_stanzas = g_slist_append(identity_stanzas, child);
@@ -1794,7 +1794,7 @@ stanza_get_error_message(xmpp_stanza_t* stanza)
 
     // return nothing if no error stanza
     if (error_stanza == NULL) {
-        return strdup("unknown");
+        return g_strdup("unknown");
     }
 
     // check for text child
@@ -1836,14 +1836,14 @@ stanza_get_error_message(xmpp_stanza_t* stanza)
         for (size_t i = 0; i < ARRAY_SIZE(defined_conditions); i++) {
             xmpp_stanza_t* cond_stanza = xmpp_stanza_get_child_by_name(error_stanza, defined_conditions[i]);
             if (cond_stanza) {
-                char* result = strdup(xmpp_stanza_get_name(cond_stanza));
+                gchar* result = g_strdup(xmpp_stanza_get_name(cond_stanza));
                 return result;
             }
         }
     }
 
     // if undefined-condition or no condition, return nothing
-    return strdup("unknown");
+    return g_strdup("unknown");
 }
 
 // Note that the `count' must be 2 * number of key/value pairs
@@ -2056,15 +2056,15 @@ stanza_free_caps(XMPPCaps* caps)
     }
 
     if (caps->hash) {
-        free(caps->hash);
+        g_free(caps->hash);
     }
     if (caps->node) {
-        free(caps->node);
+        g_free(caps->node);
     }
     if (caps->ver) {
-        free(caps->ver);
+        g_free(caps->ver);
     }
-    FREE_SET_NULL(caps);
+    GFREE_SET_NULL(caps);
 }
 
 void
@@ -2466,12 +2466,12 @@ _stanza_add_unique_id(xmpp_stanza_t* stanza)
 }
 
 static gchar*
-_stanza_create_sha1_hash(char* str)
+_stanza_create_sha1_hash(const gchar* const str)
 {
     unsigned char* digest = (unsigned char*)malloc(XMPP_SHA1_DIGEST_SIZE);
     assert(digest != NULL);
 
-    xmpp_sha1_digest((unsigned char*)str, strlen(str), digest);
+    xmpp_sha1_digest((const unsigned char*)str, strlen(str), digest);
 
     gchar* b64 = g_base64_encode(digest, XMPP_SHA1_DIGEST_SIZE);
     assert(b64 != NULL);

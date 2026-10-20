@@ -338,7 +338,7 @@ message_handlers_init(void)
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_handler_add(conn, _message_handler, NULL, STANZA_NAME_MESSAGE, NULL, ctx);
     _message_handlers_cleanup();
-    pubsub_event_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, free, free);
+    pubsub_event_handlers = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
 }
 
 ProfMessage*
@@ -417,7 +417,7 @@ message_pubsub_event_handler_add(const gchar* const node, ProfMessageCallback fu
     handler->free_func = free_func;
     handler->userdata = userdata;
 
-    g_hash_table_insert(pubsub_event_handlers, strdup(node), handler);
+    g_hash_table_insert(pubsub_event_handlers, g_strdup(node), handler);
 }
 
 gchar*
@@ -1168,7 +1168,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* resu
         log_info("Message received without body for room: %s", from_jid->str);
         goto out;
     } else if (!message->plain) {
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
     }
 
     if (is_mam) {
@@ -1347,7 +1347,7 @@ _handle_muc_private_message(xmpp_stanza_t* const stanza)
         log_info("Message received without body from: %s", message->from_jid->str);
         goto out;
     } else if (!message->plain) {
-        message->plain = strdup(message->body);
+        message->plain = g_strdup(message->body);
     }
 
     if (message->timestamp) {

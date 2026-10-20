@@ -249,7 +249,7 @@ http_file_put(void* userdata)
     curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
 
     if ((res = curl_easy_perform(curl)) != CURLE_OK) {
-        err = strdup(curl_easy_strerror(res));
+        err = g_strdup(curl_easy_strerror(res));
     } else {
         long http_code = 0;
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);

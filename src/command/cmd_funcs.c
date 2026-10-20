@@ -4913,7 +4913,7 @@ _add_omemo_stream(int* fd, FILE** fh, char** err)
 {
     // Create temporary file for writing ciphertext.
     int tmpfd;
-    auto_char char* tmpname = NULL;
+    auto_gchar gchar* tmpname = NULL;
     if ((tmpfd = g_file_open_tmp("profanity.XXXXXX", &tmpname, NULL)) == -1) {
         *err = "Unable to create temporary file for encrypted transfer.";
         return NULL;
@@ -7396,7 +7396,7 @@ cmd_pgp(ProfWin* window, const gchar* const command, gchar** args)
             ProfPGPKey* key = g_hash_table_lookup(keys, curr->data);
             cons_show("  %s", key->name);
             cons_show("    ID          : %s", key->id);
-            auto_char char* format_fp = p_gpg_format_fp_str(key->fp);
+            auto_gchar gchar* format_fp = p_gpg_format_fp_str(key->fp);
             cons_show("    Fingerprint : %s", format_fp);
             if (key->secret) {
                 cons_show("    Type        : PUBLIC, PRIVATE");
@@ -7692,7 +7692,7 @@ cmd_ox(ProfWin* window, const gchar* const command, gchar** args)
             ProfPGPKey* key = g_hash_table_lookup(keys, curr->data);
             cons_show("  %s", key->name);
             cons_show("    ID          : %s", key->id);
-            auto_char char* format_fp = p_gpg_format_fp_str(key->fp);
+            auto_gchar gchar* format_fp = p_gpg_format_fp_str(key->fp);
             cons_show("    Fingerprint : %s", format_fp);
             if (key->secret) {
                 cons_show("    Type        : PUBLIC, PRIVATE");
@@ -8024,7 +8024,7 @@ cmd_otr_myfp(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    auto_char char* fingerprint = otr_get_my_fingerprint();
+    auto_gchar gchar* fingerprint = otr_get_my_fingerprint();
     win_println(window, THEME_DEFAULT, "!", "Your OTR fingerprint: %s", fingerprint);
     return TRUE;
 #else
@@ -8054,7 +8054,7 @@ cmd_otr_theirfp(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    auto_char char* fingerprint = otr_get_their_fingerprint(chatwin->barejid);
+    auto_gchar gchar* fingerprint = otr_get_their_fingerprint(chatwin->barejid);
     win_println(window, THEME_DEFAULT, "!", "%s's OTR fingerprint: %s", chatwin->barejid, fingerprint);
     return TRUE;
 #else
@@ -8941,7 +8941,7 @@ cmd_omemo_fingerprint(ProfWin* window, const gchar* const command, gchar** args)
     auto_jid Jid* jid = NULL;
     if (!args[1]) {
         if (window->type == WIN_CONSOLE) {
-            auto_char char* fingerprint = omemo_own_fingerprint(TRUE);
+            auto_gchar gchar* fingerprint = omemo_own_fingerprint(TRUE);
             cons_show("Your OMEMO fingerprint: %s", fingerprint);
             jid = jid_create(connection_get_fulljid());
         } else if (window->type == WIN_CHAT) {
@@ -8972,7 +8972,7 @@ cmd_omemo_fingerprint(ProfWin* window, const gchar* const command, gchar** args)
     }
 
     for (GList* fingerprint = fingerprints; fingerprint != NULL; fingerprint = fingerprint->next) {
-        auto_char char* formatted_fingerprint = omemo_format_fingerprint(fingerprint->data);
+        auto_gchar gchar* formatted_fingerprint = omemo_format_fingerprint(fingerprint->data);
         gboolean trusted = omemo_is_trusted_identity(jid->barejid, fingerprint->data);
         gboolean active = omemo_is_device_active(jid->barejid, fingerprint->data);
 
@@ -9180,7 +9180,7 @@ cmd_omemo_qrcode(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    auto_char char* qrstr = omemo_qrcode_str();
+    auto_gchar gchar* qrstr = omemo_qrcode_str();
     cons_show_qrcode(qrstr);
 
     return TRUE;

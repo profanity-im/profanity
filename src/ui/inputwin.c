@@ -716,7 +716,7 @@ _inp_rl_tab_com_handler(int count, int key, gboolean previous)
 
     if (strncmp(rl_line_buffer, "/", 1) == 0) {
         ProfWin* window = wins_get_current();
-        auto_char char* result = cmd_ac_complete(window, rl_line_buffer, previous);
+        auto_gchar gchar* result = cmd_ac_complete(window, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -726,7 +726,7 @@ _inp_rl_tab_com_handler(int count, int key, gboolean previous)
 
     if (strncmp(rl_line_buffer, ">", 1) == 0) {
         ProfWin* window = wins_get_current();
-        auto_char char* result = win_quote_autocomplete(window, rl_line_buffer, previous);
+        auto_gchar gchar* result = win_quote_autocomplete(window, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;
@@ -736,7 +736,7 @@ _inp_rl_tab_com_handler(int count, int key, gboolean previous)
 
     ProfWin* current = wins_get_current();
     if (current->type == WIN_MUC) {
-        auto_char char* result = muc_autocomplete(current, rl_line_buffer, previous);
+        auto_gchar gchar* result = muc_autocomplete(current, rl_line_buffer, previous);
         if (result) {
             rl_replace_line(result, 1);
             rl_point = rl_end;

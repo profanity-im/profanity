@@ -674,7 +674,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
 
     auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
     if ((g_strcmp0(trust_mode, "blind") == 0) && !trusted) {
-        auto_char char* fp = _omemo_fingerprint(identity_key, TRUE);
+        auto_gchar gchar* fp = _omemo_fingerprint(identity_key, TRUE);
         cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
         omemo_trust(jid, fp);
         trusted = TRUE;
@@ -1199,10 +1199,10 @@ omemo_format_fingerprint(const gchar* const fingerprint)
     return output;
 }
 
-static char*
-_omemo_unformat_fingerprint(const char* const fingerprint_formatted)
+static gchar*
+_omemo_unformat_fingerprint(const gchar* const fingerprint_formatted)
 {
-    char* fingerprint = malloc(strlen(fingerprint_formatted) + 1);
+    gchar* fingerprint = g_malloc0(strlen(fingerprint_formatted) + 1);
     if (!fingerprint)
         return NULL;
 
@@ -1408,7 +1408,7 @@ _omemo_fingerprint(ec_public_key* identity, gboolean formatted)
     identity_public_key_len--;
     identity_public_key_data = &identity_public_key_data[1];
 
-    char* fingerprint = malloc(identity_public_key_len * 2 + 1);
+    gchar* fingerprint = g_malloc0(identity_public_key_len * 2 + 1);
     if (!fingerprint) {
         signal_buffer_free(identity_public_key);
         return NULL;
@@ -1559,7 +1559,7 @@ omemo_untrust(const gchar* const jid, const gchar* const fingerprint_formatted)
     }
     g_free(identity);
 
-    auto_char char* fingerprint = _omemo_unformat_fingerprint(fingerprint_formatted);
+    auto_gchar gchar* fingerprint = _omemo_unformat_fingerprint(fingerprint_formatted);
     if (!fingerprint) {
         log_warning("[OMEMO] cannot unformat fingerprint");
         cons_show("Cannot unformat fingerprint");
@@ -2169,7 +2169,7 @@ out:
 gchar*
 omemo_qrcode_str()
 {
-    auto_char char* fingerprint = omemo_own_fingerprint(FALSE);
+    auto_gchar gchar* fingerprint = omemo_own_fingerprint(FALSE);
     uint32_t sid = omemo_device_id();
 
     char* qrstr = g_strdup_printf("xmpp:%s?omemo-sid-%d=%s", connection_get_barejid(), sid, fingerprint);
