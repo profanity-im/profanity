@@ -12,9 +12,9 @@
 
 #include <glib.h>
 
-gboolean conf_string_list_add(GKeyFile* keyfile, const char* const group, const char* const key,
-                              const char* const item);
-gboolean conf_string_list_remove(GKeyFile* keyfile, const char* const group, const char* const key,
-                                 const char* const item);
+gboolean conf_string_list_add(GKeyFile* keyfile, const gchar* const group, const gchar* const key,
+                              const gchar* const item);
+gboolean conf_string_list_remove(GKeyFile* keyfile, const gchar* const group, const gchar* const key,
+                                 const gchar* const item);
 
 #endif
