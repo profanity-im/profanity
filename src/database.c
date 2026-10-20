@@ -41,10 +41,10 @@ static gboolean _check_available_space_for_db_migration(char* path_to_db);
 
 static const int latest_version = 3;
 
-static char*
-_db_strdup(const char* str)
+static gchar*
+_db_strdup(const gchar* str)
 {
-    return str ? strdup(str) : NULL;
+    return str ? g_strdup(str) : NULL;
 }
 
 #define auto_sqlite __attribute__((__cleanup__(auto_free_sqlite)))
@@ -223,7 +223,7 @@ log_database_add_incoming(ProfMessage* message)
 }
 
 static void
-_log_database_add_outgoing(char* type, const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
+_log_database_add_outgoing(char* type, const gchar* const id, const gchar* const barejid, const gchar* const message, const gchar* const replace_id, prof_enc_t enc)
 {
     ProfMessage* msg = message_init();
 
@@ -240,19 +240,19 @@ _log_database_add_outgoing(char* type, const char* const id, const char* const b
 }
 
 void
-log_database_add_outgoing_chat(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
+log_database_add_outgoing_chat(const gchar* const id, const gchar* const barejid, const gchar* const message, const gchar* const replace_id, prof_enc_t enc)
 {
     _log_database_add_outgoing("chat", id, barejid, message, replace_id, enc);
 }
 
 void
-log_database_add_outgoing_muc(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
+log_database_add_outgoing_muc(const gchar* const id, const gchar* const barejid, const gchar* const message, const gchar* const replace_id, prof_enc_t enc)
 {
     _log_database_add_outgoing("muc", id, barejid, message, replace_id, enc);
 }
 
 void
-log_database_add_outgoing_muc_pm(const char* const id, const char* const barejid, const char* const message, const char* const replace_id, prof_enc_t enc)
+log_database_add_outgoing_muc_pm(const gchar* const id, const gchar* const barejid, const gchar* const message, const gchar* const replace_id, prof_enc_t enc)
 {
     _log_database_add_outgoing("mucpm", id, barejid, message, replace_id, enc);
 }
@@ -333,10 +333,10 @@ _db_parse_history_messages(sqlite3_stmt* stmt)
         char* id = (char*)sqlite3_column_text(stmt, 8);
 
         ProfMessage* msg = message_init();
-        msg->id = id ? strdup(id) : NULL;
+        msg->id = id ? g_strdup(id) : NULL;
         msg->from_jid = jid_create_from_bare_and_resource(from_jid, from_resource);
         msg->to_jid = jid_create_from_bare_and_resource(to_jid, to_resource);
-        msg->plain = strdup(message ?: "");
+        msg->plain = g_strdup(message ?: "");
         msg->timestamp = g_date_time_new_from_iso8601(date, NULL);
         msg->type = _get_message_type_type(type);
         msg->enc = _get_message_enc_type(encryption);
@@ -351,7 +351,7 @@ _db_parse_history_messages(sqlite3_stmt* stmt)
 // null the current time is used. from_start gets first few messages if true
 // otherwise the last ones. Flip flips the order of the results
 GSList*
-log_database_get_previous_chat(const gchar* const contact_barejid, const char* start_time, const char* end_time, gboolean from_start, gboolean flip)
+log_database_get_previous_chat(const gchar* const contact_barejid, const gchar* const start_time, const gchar* const end_time, gboolean from_start, gboolean flip)
 {
     sqlite3_stmt* stmt = NULL;
     const Jid* myjid = connection_get_jid();
@@ -396,7 +396,7 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const char* s
 // null the current time is used. from_start gets first few messages if true
 // otherwise the last ones. Flip flips the order of the results
 GSList*
-log_database_get_previous_muc(const gchar* const room_jid, const char* start_time, const char* end_time, gboolean from_start, gboolean flip)
+log_database_get_previous_muc(const gchar* const room_jid, const gchar* const start_time, const gchar* const end_time, gboolean from_start, gboolean flip)
 {
     sqlite3_stmt* stmt = NULL;
     const Jid* myjid = connection_get_jid();
@@ -453,7 +453,7 @@ _db_get_int_result(const char* query)
 }
 
 int
-log_database_get_chat_count(const gchar* const contact_barejid, const char* start_time, const char* end_time)
+log_database_get_chat_count(const gchar* const contact_barejid, const gchar* const start_time, const gchar* const end_time)
 {
     const Jid* myjid = connection_get_jid();
     if (!myjid->str)
@@ -470,7 +470,7 @@ log_database_get_chat_count(const gchar* const contact_barejid, const char* star
 }
 
 int
-log_database_get_muc_count(const gchar* const room_jid, const char* start_time, const char* end_time)
+log_database_get_muc_count(const gchar* const room_jid, const gchar* const start_time, const gchar* const end_time)
 {
     const Jid* myjid = connection_get_jid();
     if (!myjid->str)
@@ -560,9 +560,9 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
         return TRUE;
     } else if (g_strcmp0(pref_dblog, "redact") == 0) {
         if (message->plain) {
-            free(message->plain);
+            g_free(message->plain);
         }
-        message->plain = strdup("[REDACTED]");
+        message->plain = g_strdup("[REDACTED]");
     }
 
     if (!g_chatlog_database) {
@@ -850,7 +850,7 @@ cleanup:
 }
 
 gboolean
-log_database_update_archive_id(const prof_msg_type_t type, const char* const room_or_contact_jid, const char* const stanza_id, const char* const archive_id)
+log_database_update_archive_id(const prof_msg_type_t type, const gchar* const room_or_contact_jid, const gchar* const stanza_id, const gchar* const archive_id)
 {
     if (!g_chatlog_database || !stanza_id || !archive_id || !room_or_contact_jid) {
         return FALSE;
@@ -887,8 +887,8 @@ log_database_update_archive_id(const prof_msg_type_t type, const char* const roo
     return success;
 }
 
-char*
-log_database_get_decrypted_message(const prof_msg_type_t type, const char* const from_jid, const char* const to_jid, const char* const stanza_id, const char* const archive_id)
+gchar*
+log_database_get_decrypted_message(const prof_msg_type_t type, const gchar* const from_jid, const gchar* const to_jid, const gchar* const stanza_id, const gchar* const archive_id)
 {
     if (!g_chatlog_database || !from_jid || !to_jid) {
         return NULL;
@@ -926,7 +926,7 @@ log_database_get_decrypted_message(const prof_msg_type_t type, const char* const
             if (sqlite3_step(stmt) == SQLITE_ROW) {
                 const char* text = (const char*)sqlite3_column_text(stmt, 0);
                 if (text) {
-                    decrypted_text = strdup(text);
+                    decrypted_text = g_strdup(text);
                 }
             }
             sqlite3_finalize(stmt);

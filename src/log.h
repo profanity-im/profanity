@@ -24,17 +24,17 @@ typedef enum {
     PROF_LEVEL_ERROR
 } log_level_t;
 
-void log_init(log_level_t filter, char* log_file);
+void log_init(log_level_t filter, const gchar* const log_file);
 log_level_t log_get_filter(void);
 void log_close(void);
 const gchar* get_log_file_location(void);
-void log_debug(const char* const msg, ...);
-void log_info(const char* const msg, ...);
-void log_warning(const char* const msg, ...);
-void log_error(const char* const msg, ...);
-void log_msg(log_level_t level, const char* const area, const char* const msg);
-int log_level_from_string(char* log_level, log_level_t* level);
-const char* log_string_from_level(log_level_t level);
+void log_debug(const gchar* const msg, ...);
+void log_info(const gchar* const msg, ...);
+void log_warning(const gchar* const msg, ...);
+void log_error(const gchar* const msg, ...);
+void log_msg(log_level_t level, const gchar* const area, const gchar* const msg);
+int log_level_from_string(const gchar* const log_level, log_level_t* level);
+const gchar* log_string_from_level(log_level_t level);
 
 #define _log_Xtype_once(type, ...)                 \
     do {                                           \

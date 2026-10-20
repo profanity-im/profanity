@@ -28,7 +28,7 @@
 
 #define PROF "prof"
 
-static void _log_msg(log_level_t level, const char* const area, const char* const msg);
+static void _log_msg(log_level_t level, const gchar* const area, const gchar* const msg);
 
 static FILE* logp;
 static gchar* mainlogfile = NULL;
@@ -54,7 +54,7 @@ _rotate_log_file(void)
         return;
     auto_gchar gchar* log_file = g_strdup(mainlogfile);
     size_t len = strlen(log_file);
-    auto_gchar gchar* log_file_new = malloc(len + 5);
+    auto_gchar gchar* log_file_new = g_malloc(len + 5);
 
     // the mainlog file should always end in '.log', lets remove this last part
     // so that we can have profanity.001.log later
@@ -107,7 +107,7 @@ _should_log(log_level_t level)
 }
 
 void
-log_debug(const char* const msg, ...)
+log_debug(const gchar* const msg, ...)
 {
     if (!_should_log(PROF_LEVEL_DEBUG))
         return;
@@ -121,7 +121,7 @@ log_debug(const char* const msg, ...)
 }
 
 void
-log_info(const char* const msg, ...)
+log_info(const gchar* const msg, ...)
 {
     if (!_should_log(PROF_LEVEL_INFO))
         return;
@@ -135,7 +135,7 @@ log_info(const char* const msg, ...)
 }
 
 void
-log_warning(const char* const msg, ...)
+log_warning(const gchar* const msg, ...)
 {
     if (!_should_log(PROF_LEVEL_WARN))
         return;
@@ -149,7 +149,7 @@ log_warning(const char* const msg, ...)
 }
 
 void
-log_error(const char* const msg, ...)
+log_error(const gchar* const msg, ...)
 {
     if (!_should_log(PROF_LEVEL_ERROR))
         return;
@@ -163,7 +163,7 @@ log_error(const char* const msg, ...)
 }
 
 void
-log_init(log_level_t filter, char* log_file)
+log_init(log_level_t filter, const gchar* const log_file)
 {
     level_filter = filter;
 
@@ -201,7 +201,7 @@ log_close(void)
 }
 
 static void
-_log_msg(log_level_t level, const char* const area, const char* const msg)
+_log_msg(log_level_t level, const gchar* const area, const gchar* const msg)
 {
     char* level_str = _log_abbreviation_string_from_level(level);
 
@@ -220,7 +220,7 @@ _log_msg(log_level_t level, const char* const area, const char* const msg)
 }
 
 void
-log_msg(log_level_t level, const char* const area, const char* const msg)
+log_msg(log_level_t level, const gchar* const area, const gchar* const msg)
 {
     if (!_should_log(level))
         return;
@@ -228,7 +228,7 @@ log_msg(log_level_t level, const char* const area, const char* const msg)
 }
 
 int
-log_level_from_string(char* log_level, log_level_t* level)
+log_level_from_string(const gchar* const log_level, log_level_t* level)
 {
     int ret = 0;
     assert(log_level != NULL);
@@ -248,7 +248,7 @@ log_level_from_string(char* log_level, log_level_t* level)
     return ret;
 }
 
-const char*
+const gchar*
 log_string_from_level(log_level_t level)
 {
     switch (level) {
