@@ -98,7 +98,7 @@ tlscerts_exists(const TLSCertificate* cert)
         _name_to_tlscert_name_(in, &cert->which, #which); \
     } while (0)
 static void
-_name_to_tlscert_name_(const char* in, tls_cert_name_t* out, const char* name);
+_name_to_tlscert_name_(const gchar* in, tls_cert_name_t* out, const gchar* name);
 
 static TLSCertificate*
 _tlscerts_new(gchar* fingerprint_sha1, int version, gchar* serialnumber, gchar* subjectname,
@@ -238,7 +238,7 @@ _name_to_tlscert_name_(const char* in, tls_cert_name_t* out, const char* name)
 }
 
 static gchar*
-_checked_g_strdup(const char* in)
+_checked_g_strdup(const gchar* in)
 {
     if (in == NULL)
         return NULL;
@@ -246,10 +246,10 @@ _checked_g_strdup(const char* in)
 }
 
 TLSCertificate*
-tlscerts_new(const char* fingerprint_sha1, int version, const char* serialnumber, const char* subjectname,
-             const char* issuername, const char* notbefore, const char* notafter,
-             const char* key_alg, const char* signature_alg, const char* pem,
-             const char* fingerprint_sha256, const char* pubkey_fingerprint)
+tlscerts_new(const gchar* fingerprint_sha1, int version, const gchar* serialnumber, const gchar* subjectname,
+             const gchar* issuername, const gchar* notbefore, const gchar* notafter,
+             const gchar* key_alg, const gchar* signature_alg, const gchar* pem,
+             const gchar* fingerprint_sha256, const gchar* pubkey_fingerprint)
 {
     return _tlscerts_new(_checked_g_strdup(fingerprint_sha1), version, _checked_g_strdup(serialnumber), _checked_g_strdup(subjectname),
                          _checked_g_strdup(issuername), _checked_g_strdup(notbefore), _checked_g_strdup(notafter),
@@ -296,7 +296,7 @@ tlscerts_add(const TLSCertificate* cert)
 }
 
 gboolean
-tlscerts_revoke(const char* fingerprint)
+tlscerts_revoke(const gchar* fingerprint)
 {
     gboolean result = g_key_file_remove_group(tlscerts, fingerprint, NULL);
     if (result) {
@@ -325,8 +325,8 @@ tlscerts_get_trusted(const gchar* fingerprint)
     return _get_TLSCertificate(fingerprint);
 }
 
-char*
-tlscerts_complete(const char* prefix, gboolean previous, void* context)
+gchar*
+tlscerts_complete(const gchar* const prefix, gboolean previous, void* context)
 {
     return autocomplete_complete(certs_ac, prefix, TRUE, previous);
 }
@@ -369,7 +369,7 @@ tlscerts_free(TLSCertificate* cert)
         g_free(cert->fingerprint_sha1);
         g_free(cert->fingerprint_sha256);
 
-        free(cert);
+        g_free(cert);
     }
 }
 

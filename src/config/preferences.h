@@ -314,26 +314,26 @@ void prefs_set_boolean(preference_t pref, gboolean value);
 gchar* prefs_get_string(preference_t pref);
 gchar* prefs_get_string_with_locale(preference_t pref, gchar* locale);
 void prefs_set_string(preference_t pref, const gchar* new_value);
-void prefs_set_string_with_option(preference_t pref, char* option, char* value);
-void prefs_set_string_list_with_option(preference_t pref, char* option, const gchar* const* values);
+void prefs_set_string_with_option(preference_t pref, const gchar* option, const gchar* value);
+void prefs_set_string_list_with_option(preference_t pref, const gchar* option, const gchar* const* values);
 
-char* prefs_get_tls_certpath(void);
+gchar* prefs_get_tls_certpath(void);
 
 gboolean prefs_do_chat_notify(gboolean current_win);
-gboolean prefs_do_room_notify(gboolean current_win, const char* const roomjid, const char* const mynick,
-                              const char* const theirnick, const char* const message, gboolean mention, gboolean trigger_found);
-gboolean prefs_do_room_notify_mention(const char* const roomjid, int unread, gboolean mention, gboolean trigger);
-GList* prefs_message_get_triggers(const char* const message);
+gboolean prefs_do_room_notify(gboolean current_win, const gchar* const roomjid, const gchar* const mynick,
+                              const gchar* const theirnick, const gchar* const message, gboolean mention, gboolean trigger_found);
+gboolean prefs_do_room_notify_mention(const gchar* const roomjid, int unread, gboolean mention, gboolean trigger);
+GList* prefs_message_get_triggers(const gchar* const message);
 
-void prefs_set_room_notify(const char* const roomjid, gboolean value);
-void prefs_set_room_notify_mention(const char* const roomjid, gboolean value);
-void prefs_set_room_notify_trigger(const char* const roomjid, gboolean value);
-gboolean prefs_reset_room_notify(const char* const roomjid);
-gboolean prefs_has_room_notify(const char* const roomjid);
-gboolean prefs_has_room_notify_mention(const char* const roomjid);
-gboolean prefs_has_room_notify_trigger(const char* const roomjid);
-gboolean prefs_get_room_notify(const char* const roomjid);
-gboolean prefs_get_room_notify_mention(const char* const roomjid);
-gboolean prefs_get_room_notify_trigger(const char* const roomjid);
+void prefs_set_room_notify(const gchar* const roomjid, gboolean value);
+void prefs_set_room_notify_mention(const gchar* const roomjid, gboolean value);
+void prefs_set_room_notify_trigger(const gchar* const roomjid, gboolean value);
+gboolean prefs_reset_room_notify(const gchar* const roomjid);
+gboolean prefs_has_room_notify(const gchar* const roomjid);
+gboolean prefs_has_room_notify_mention(const gchar* const roomjid);
+gboolean prefs_has_room_notify_trigger(const gchar* const roomjid);
+gboolean prefs_get_room_notify(const gchar* const roomjid);
+gboolean prefs_get_room_notify_mention(const gchar* const roomjid);
+gboolean prefs_get_room_notify_trigger(const gchar* const roomjid);
 
 #endif

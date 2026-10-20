@@ -41,7 +41,7 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
     if (jid) {
         new_account->jid = jid;
     } else {
-        new_account->jid = strdup(name);
+        new_account->jid = g_strdup(name);
     }
 
     new_account->password = password;
@@ -57,18 +57,18 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
     new_account->port = port;
 
     if (last_presence == NULL || !valid_resource_presence_string(last_presence)) {
-        new_account->last_presence = strdup("online");
+        new_account->last_presence = g_strdup("online");
         g_free(last_presence);
     } else {
         new_account->last_presence = last_presence;
     }
 
     if (login_presence == NULL) {
-        new_account->login_presence = strdup("online");
+        new_account->login_presence = g_strdup("online");
     } else if (strcmp(login_presence, "last") == 0) {
         new_account->login_presence = login_presence;
     } else if (!valid_resource_presence_string(login_presence)) {
-        new_account->login_presence = strdup("online");
+        new_account->login_presence = g_strdup("online");
         g_free(login_presence);
     } else {
         new_account->login_presence = login_presence;
@@ -84,7 +84,7 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
 
     if (muc_nick == NULL) {
         auto_jid Jid* jidp = jid_create(new_account->jid);
-        new_account->muc_nick = strdup(jidp->domainpart);
+        new_account->muc_nick = g_strdup(jidp->domainpart);
     } else {
         new_account->muc_nick = muc_nick;
     }
@@ -178,25 +178,25 @@ account_free(ProfAccount* account)
         return;
     }
 
-    free(account->name);
-    free(account->jid);
+    g_free(account->name);
+    g_free(account->jid);
     prof_wipe_string(account->password);
-    free(account->password);
-    free(account->eval_password);
-    free(account->resource);
-    free(account->server);
-    free(account->last_presence);
-    free(account->login_presence);
-    free(account->muc_service);
-    free(account->muc_nick);
-    free(account->otr_policy);
-    free(account->omemo_policy);
-    free(account->pgp_keyid);
-    free(account->startscript);
-    free(account->client);
-    free(account->theme);
-    free(account->tls_policy);
-    free(account->auth_policy);
+    g_free(account->password);
+    g_free(account->eval_password);
+    g_free(account->resource);
+    g_free(account->server);
+    g_free(account->last_presence);
+    g_free(account->login_presence);
+    g_free(account->muc_service);
+    g_free(account->muc_nick);
+    g_free(account->otr_policy);
+    g_free(account->omemo_policy);
+    g_free(account->pgp_keyid);
+    g_free(account->startscript);
+    g_free(account->client);
+    g_free(account->theme);
+    g_free(account->tls_policy);
+    g_free(account->auth_policy);
     g_list_free_full(account->otr_manual, g_free);
     g_list_free_full(account->otr_opportunistic, g_free);
     g_list_free_full(account->otr_always, g_free);
@@ -204,14 +204,14 @@ account_free(ProfAccount* account)
     g_list_free_full(account->omemo_disabled, g_free);
     g_list_free_full(account->ox_enabled, g_free);
     g_list_free_full(account->pgp_enabled, g_free);
-    free(account);
+    g_free(account);
 }
 
 void
-account_set_server(ProfAccount* account, const char* server)
+account_set_server(ProfAccount* account, const gchar* server)
 {
-    free(account->server);
-    account->server = strdup(server);
+    g_free(account->server);
+    account->server = g_strdup(server);
 }
 
 void
@@ -221,15 +221,15 @@ account_set_port(ProfAccount* account, int port)
 }
 
 void
-account_set_tls_policy(ProfAccount* account, const char* tls_policy)
+account_set_tls_policy(ProfAccount* account, const gchar* tls_policy)
 {
-    free(account->tls_policy);
-    account->tls_policy = strdup(tls_policy);
+    g_free(account->tls_policy);
+    account->tls_policy = g_strdup(tls_policy);
 }
 
 void
-account_set_auth_policy(ProfAccount* account, const char* auth_policy)
+account_set_auth_policy(ProfAccount* account, const gchar* auth_policy)
 {
-    free(account->auth_policy);
-    account->auth_policy = strdup(auth_policy);
+    g_free(account->auth_policy);
+    account->auth_policy = g_strdup(auth_policy);
 }

@@ -420,7 +420,7 @@ prefs_message_get_triggers(const gchar* const message)
     for (gsize i = 0; i < len; i++) {
         auto_gchar gchar* trigger_lower = g_utf8_strdown(triggers[i], -1);
         if (g_strrstr(message_lower, trigger_lower)) {
-            result = g_list_append(result, strdup(triggers[i]));
+            result = g_list_append(result, g_strdup(triggers[i]));
         }
     }
 
@@ -681,7 +681,7 @@ prefs_set_string(preference_t pref, const gchar* new_value)
 }
 
 void
-prefs_set_string_with_option(preference_t pref, gchar* option, gchar* value)
+prefs_set_string_with_option(preference_t pref, const gchar* option, const gchar* value)
 {
     const gchar* group = _get_group(pref);
     const gchar* key = _get_key(pref);
@@ -693,7 +693,7 @@ prefs_set_string_with_option(preference_t pref, gchar* option, gchar* value)
 }
 
 void
-prefs_set_string_list_with_option(preference_t pref, gchar* option, const gchar* const* values)
+prefs_set_string_list_with_option(preference_t pref, const gchar* option, const gchar* const* values)
 {
     const gchar* group = _get_group(pref);
     const gchar* key = _get_key(pref);
@@ -730,19 +730,19 @@ prefs_get_tls_certpath(void)
 
     if (setting == NULL) {
         if (g_file_test("/etc/ssl/certs", G_FILE_TEST_IS_DIR)) {
-            return strdup("/etc/ssl/certs");
+            return g_strdup("/etc/ssl/certs");
         }
         if (g_file_test("/etc/pki/tls/certs", G_FILE_TEST_IS_DIR)) {
-            return strdup("/etc/pki/tls/certs");
+            return g_strdup("/etc/pki/tls/certs");
         }
         if (g_file_test("/etc/ssl", G_FILE_TEST_IS_DIR)) {
-            return strdup("/etc/ssl");
+            return g_strdup("/etc/ssl");
         }
         if (g_file_test("/etc/pki/tls", G_FILE_TEST_IS_DIR)) {
-            return strdup("/etc/pki/tls");
+            return g_strdup("/etc/pki/tls");
         }
         if (g_file_test("/system/etc/security/cacerts", G_FILE_TEST_IS_DIR)) {
-            return strdup("/system/etc/security/cacerts");
+            return g_strdup("/system/etc/security/cacerts");
         }
 
         return NULL;
@@ -1411,7 +1411,7 @@ prefs_get_room_notify_triggers(void)
     auto_gcharv gchar** triggers = g_key_file_get_string_list(prefs, PREF_GROUP_NOTIFICATIONS, "room.trigger.list", &len, NULL);
 
     for (gsize i = 0; i < len; i++) {
-        result = g_list_append(result, strdup(triggers[i]));
+        result = g_list_append(result, g_strdup(triggers[i]));
     }
 
     return result;
@@ -1432,7 +1432,7 @@ prefs_create_profwin_placement(int titlebar, int mainwin, int statusbar, int inp
 void
 prefs_free_win_placement(ProfWinPlacement* placement)
 {
-    free(placement);
+    g_free(placement);
 }
 
 ProfWinPlacement*
