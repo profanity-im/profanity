@@ -133,7 +133,6 @@ omemo_bundle_publish(gboolean first)
     free(identity_key);
     free(signed_prekey);
     free(signed_prekey_signature);
-    free(id);
 }
 
 void
@@ -149,7 +148,6 @@ omemo_bundle_request(const gchar* const jid, uint32_t device_id, ProfIqCallback 
 
     iq_send_stanza(iq);
 
-    free(id);
     xmpp_stanza_release(iq);
 }
 
