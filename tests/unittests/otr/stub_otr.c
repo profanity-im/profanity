@@ -59,13 +59,13 @@ void
 otr_on_connect(ProfAccount* account)
 {
 }
-char*
-otr_on_message_recv(const char* const barejid, const char* const resource, const char* const message, gboolean* was_decrypted)
+gchar*
+otr_on_message_recv(const gchar* const barejid, const gchar* const resource, const gchar* const message, gboolean* was_decrypted)
 {
     return NULL;
 }
 gboolean
-otr_on_message_send(ProfChatWin* chatwin, const char* const message, gboolean request_receipt, const char* const replace_id)
+otr_on_message_send(ProfChatWin* chatwin, const gchar* const message, gboolean request_receipt, const gchar* const replace_id)
 {
     return FALSE;
 }
@@ -82,84 +82,84 @@ otr_key_loaded(void)
     return mock_type(gboolean);
 }
 
-char*
-otr_tag_message(const char* const msg)
+gchar*
+otr_tag_message(const gchar* const msg)
 {
     return NULL;
 }
 
 gboolean
-otr_is_secure(const char* const recipient)
+otr_is_secure(const gchar* const recipient)
 {
     return FALSE;
 }
 
 gboolean
-otr_is_trusted(const char* const recipient)
+otr_is_trusted(const gchar* const recipient)
 {
     return FALSE;
 }
 
 void
-otr_trust(const char* const recipient)
+otr_trust(const gchar* const recipient)
 {
 }
 void
-otr_untrust(const char* const recipient)
+otr_untrust(const gchar* const recipient)
 {
 }
 
 void
-otr_smp_secret(const char* const recipient, const char* secret)
+otr_smp_secret(const gchar* const recipient, const gchar* secret)
 {
 }
 void
-otr_smp_question(const char* const recipient, const char* question, const char* answer)
+otr_smp_question(const gchar* const recipient, const gchar* question, const gchar* answer)
 {
 }
 void
-otr_smp_answer(const char* const recipient, const char* answer)
+otr_smp_answer(const gchar* const recipient, const gchar* answer)
 {
 }
 
 void
-otr_end_session(const char* const recipient)
+otr_end_session(const gchar* const recipient)
 {
 }
 
-char*
+gchar*
 otr_get_my_fingerprint(void)
 {
     return mock_ptr_type(char*);
 }
 
-char*
-otr_get_their_fingerprint(const char* const recipient)
+gchar*
+otr_get_their_fingerprint(const gchar* const recipient)
 {
     check_expected(recipient);
     return mock_ptr_type(char*);
 }
 
-char*
-otr_encrypt_message(const char* const to, const char* const message)
+gchar*
+otr_encrypt_message(const gchar* const to, const gchar* const message)
 {
     return NULL;
 }
 
-char*
-otr_decrypt_message(const char* const from, const char* const message,
+gchar*
+otr_decrypt_message(const gchar* const from, const gchar* const message,
                     gboolean* was_decrypted)
 {
     return NULL;
 }
 
 void
-otr_free_message(char* message)
+otr_free_message(gchar* message)
 {
 }
 
 prof_otrpolicy_t
-otr_get_policy(const char* const recipient)
+otr_get_policy(const gchar* const recipient)
 {
     return PROF_OTRPOLICY_MANUAL;
 }
