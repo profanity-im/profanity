@@ -210,18 +210,15 @@ gboolean
 plugins_install(const char* const plugin_name, const char* const filename, GString* error_message)
 {
     auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
-    GString* target_path = g_string_new(plugins_dir);
-    g_string_append(target_path, "/");
-    g_string_append(target_path, plugin_name);
+    auto_gchar gchar* target_path = g_build_filename(plugins_dir, plugin_name, NULL);
 
-    if (g_file_test(target_path->str, G_FILE_TEST_EXISTS)) {
+    if (g_file_test(target_path, G_FILE_TEST_EXISTS)) {
         log_info("Failed to install plugin: %s, file exists", plugin_name);
         g_string_assign(error_message, "File exists");
         return FALSE;
     }
 
-    gboolean result = copy_file(filename, target_path->str, FALSE);
-    g_string_free(target_path, TRUE);
+    gboolean result = copy_file(filename, target_path, FALSE);
 
     if (result) {
         result = plugins_load(plugin_name, error_message);
