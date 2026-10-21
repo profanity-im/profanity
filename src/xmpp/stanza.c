@@ -189,42 +189,6 @@ stanza_attach_state(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza, const gchar* const s
 }
 
 xmpp_stanza_t*
-stanza_attach_carbons_private(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza)
-{
-    xmpp_stanza_t* private_carbon = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(private_carbon, "private");
-    xmpp_stanza_set_ns(private_carbon, STANZA_NS_CARBONS);
-    xmpp_stanza_add_child(stanza, private_carbon);
-    xmpp_stanza_release(private_carbon);
-
-    return stanza;
-}
-
-xmpp_stanza_t*
-stanza_attach_hints_no_copy(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza)
-{
-    xmpp_stanza_t* no_copy = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(no_copy, "no-copy");
-    xmpp_stanza_set_ns(no_copy, STANZA_NS_HINTS);
-    xmpp_stanza_add_child(stanza, no_copy);
-    xmpp_stanza_release(no_copy);
-
-    return stanza;
-}
-
-xmpp_stanza_t*
-stanza_attach_hints_no_store(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza)
-{
-    xmpp_stanza_t* no_store = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(no_store, "no-store");
-    xmpp_stanza_set_ns(no_store, STANZA_NS_HINTS);
-    xmpp_stanza_add_child(stanza, no_store);
-    xmpp_stanza_release(no_store);
-
-    return stanza;
-}
-
-xmpp_stanza_t*
 stanza_attach_hints_store(xmpp_ctx_t* ctx, xmpp_stanza_t* stanza)
 {
     xmpp_stanza_t* store = xmpp_stanza_new(ctx);
