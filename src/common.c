@@ -664,19 +664,13 @@ prof_occurrences(const gchar* const needle, const gchar* const haystack, int off
 gchar*
 get_random_string(int length)
 {
-    GRand* prng;
-    gchar* rand;
-    gchar alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    gchar* rand = g_malloc0(length + 1);
+    const gchar alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     int endrange = sizeof(alphabet) - 1;
 
-    rand = g_malloc0(length + 1);
-
-    prng = g_rand_new();
-
     for (int i = 0; i < length; i++) {
-        rand[i] = alphabet[g_rand_int_range(prng, 0, endrange)];
+        rand[i] = alphabet[g_random_int_range(0, endrange)];
     }
-    g_rand_free(prng);
 
     return rand;
 }
