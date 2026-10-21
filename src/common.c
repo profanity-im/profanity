@@ -51,7 +51,6 @@ struct curl_data_t
 };
 
 static size_t _data_callback(void* ptr, size_t size, size_t nmemb, void* data);
-static gchar* _get_file_or_linked(gchar* loc);
 
 /**
  * Frees the memory allocated for a gchar* string.
@@ -159,6 +158,19 @@ _load_keyfile(prof_keyfile_t* keyfile)
         log_warning("[Keyfile] no such file: %s", keyfile->filename);
     }
     return FALSE;
+}
+
+static gchar*
+_get_file_or_linked(const gchar* loc)
+{
+    char* resolved = realpath(loc, NULL);
+    if (resolved) {
+        gchar* res = g_strdup(resolved);
+        free(resolved);
+        return res;
+    }
+
+    return g_strdup(loc);
 }
 
 gboolean
@@ -534,29 +546,6 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
     }
 
     return realsize;
-}
-
-static gchar*
-_get_file_or_linked(gchar* loc)
-{
-    auto_gchar gchar* basedir = g_path_get_dirname(loc);
-    gchar* true_loc = g_strdup(loc);
-
-    // check for symlink
-    while (g_file_test(true_loc, G_FILE_TEST_IS_SYMLINK)) {
-        gchar* tmp = g_file_read_link(true_loc, NULL);
-        g_free(true_loc);
-        true_loc = tmp;
-
-        // if relative, add basedir
-        if (!g_str_has_prefix(true_loc, "/") && !g_str_has_prefix(true_loc, "~")) {
-            tmp = g_strdup_printf("%s/%s", basedir, true_loc);
-            g_free(true_loc);
-            true_loc = tmp;
-        }
-    }
-
-    return true_loc;
 }
 
 gchar*
