@@ -661,18 +661,6 @@ prof_occurrences(const gchar* const needle, const gchar* const haystack, int off
 }
 
 int
-is_regular_file(const gchar* path)
-{
-    struct stat st;
-    int ret = stat(path, &st);
-    if (ret != 0) {
-        perror(NULL);
-        return 0;
-    }
-    return S_ISREG(st.st_mode);
-}
-
-int
 is_dir(const gchar* path)
 {
     struct stat st;
@@ -703,7 +691,7 @@ get_file_paths_recursive(const gchar* path, GSList** contents)
 
         if (is_dir(full)) {
             get_file_paths_recursive(full, contents);
-        } else if (is_regular_file(full)) {
+        } else if (g_file_test(full, G_FILE_TEST_IS_REGULAR)) {
             *contents = g_slist_append(*contents, full);
         }
 

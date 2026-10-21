@@ -4960,7 +4960,7 @@ cmd_sendfile(ProfWin* window, const gchar* const command, gchar** args)
         goto out;
     }
 
-    if (!is_regular_file(filename)) {
+    if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR)) {
         cons_show_error("Uploading '%s' failed: Not a file!", filename);
         goto out;
     }
@@ -7047,7 +7047,7 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    if (is_regular_file(path)) {
+    if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
         if (!_is_correct_plugin_extension(args[1])) {
             cons_show("Plugins must have one of the following extensions: \".py\" or \".so\".");
             return TRUE;
@@ -7128,7 +7128,7 @@ cmd_plugins_update(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    if (!is_regular_file(path)) {
+    if (!g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
         cons_show("Argument must be a file.");
         return TRUE;
     }
@@ -7833,7 +7833,7 @@ cmd_ox(ProfWin* window, const gchar* const command, gchar** args)
                 return TRUE;
             }
 
-            if (!is_regular_file(filename)) {
+            if (!g_file_test(filename, G_FILE_TEST_IS_REGULAR)) {
                 cons_show_error("Not a file: %s", filename);
                 return TRUE;
             }

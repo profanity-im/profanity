@@ -42,7 +42,7 @@ plugin_download_install(void* userdata)
 
     http_file_get(plugin_dl);
 
-    if (is_regular_file(path)) {
+    if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
         GString* error_message = g_string_new(NULL);
         auto_gchar gchar* plugin_name = basename_from_url(https_url);
         gboolean result = plugins_install(plugin_name, path, error_message);
