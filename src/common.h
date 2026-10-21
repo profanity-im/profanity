@@ -178,8 +178,6 @@ GSList* prof_occurrences(const gchar* const needle, const gchar* const haystack,
                          GSList** result);
 GSList* get_mentions(gboolean whole_word, gboolean case_sensitive, const gchar* const message, const gchar* const nick);
 
-void get_file_paths_recursive(const gchar* directory, GSList** contents);
-
 gchar* get_random_string(int length);
 
 gboolean call_external(gchar** argv);

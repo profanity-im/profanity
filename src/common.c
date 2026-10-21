@@ -661,33 +661,6 @@ prof_occurrences(const gchar* const needle, const gchar* const haystack, int off
     return *result;
 }
 
-void
-get_file_paths_recursive(const gchar* path, GSList** contents)
-{
-    if (!g_file_test(path, G_FILE_TEST_IS_DIR)) {
-        return;
-    }
-
-    GDir* directory = g_dir_open(path, 0, NULL);
-    const gchar* entry = g_dir_read_name(directory);
-    gchar* full;
-    while (entry) {
-        if (g_str_has_suffix(path, "/")) {
-            full = g_strdup_printf("%s%s", path, entry);
-        } else {
-            full = g_strdup_printf("%s/%s", path, entry);
-        }
-
-        if (g_file_test(full, G_FILE_TEST_IS_DIR)) {
-            get_file_paths_recursive(full, contents);
-        } else if (g_file_test(full, G_FILE_TEST_IS_REGULAR)) {
-            *contents = g_slist_append(*contents, full);
-        }
-
-        entry = g_dir_read_name(directory);
-    }
-}
-
 gchar*
 get_random_string(int length)
 {
