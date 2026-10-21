@@ -81,7 +81,6 @@ gboolean cmd_info(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_intype(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_invite(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_join(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_leave(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_log(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_msg(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_nick(ProfWin* window, const gchar* const command, gchar** args);
@@ -144,7 +143,6 @@ gboolean cmd_command_exec(ProfWin* window, const gchar* const command, gchar** a
 gboolean cmd_change_password(ProfWin* window, const gchar* const command, gchar** args);
 
 gboolean cmd_plugins(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_plugins_sourcepath(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_plugins_update(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_plugins_uninstall(ProfWin* window, const gchar* const command, gchar** args);

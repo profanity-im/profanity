@@ -200,7 +200,6 @@ gint prefs_get_notify_remind(void);
 
 void prefs_set_max_log_size(gint value);
 gint prefs_get_max_log_size(void);
-gint prefs_get_priority(void);
 void prefs_set_reconnect(gint value);
 gint prefs_get_reconnect(void);
 void prefs_set_autoping(gint value);
@@ -279,8 +278,6 @@ void prefs_set_occupants_indent(gint value);
 
 gchar* prefs_get_correction_char(void);
 void prefs_set_correction_char(gchar* ch);
-
-void prefs_add_login(const gchar* jid);
 
 void prefs_set_tray_timer(gint value);
 gint prefs_get_tray_timer(void);

@@ -123,7 +123,6 @@ void theme_init_colours(void);
 gboolean theme_load(const gchar* const theme_name, gboolean load_theme_prefs);
 gboolean theme_exists(const gchar* const theme_name);
 GSList* theme_list(void);
-void theme_close(void);
 int theme_hash_attrs(const gchar* str);
 int theme_attrs(theme_item_t attrs);
 gchar* theme_get_string(const gchar* str);

@@ -96,7 +96,6 @@ void ui_handle_software_version_error(const char* const roomjid, const char* con
 void ui_show_software_version(const char* const jid, const char* const presence, const char* const name,
                               const char* const version, const char* const os);
 void ui_prune_wins(void);
-void ui_auto_away(char* message, gint time, resource_presence_t res_presence);
 void ui_handle_login_account_success(ProfAccount* account, gboolean secured);
 void ui_update_presence(const resource_presence_t resource_presence, const char* const message, const char* const show);
 void ui_invalid_command_usage(const char* const cmd, void (*setting_func)(void));
@@ -315,7 +314,6 @@ void cons_reconnect_setting(void);
 void cons_autoping_setting(void);
 void cons_mucping_setting(void);
 void cons_autoconnect_setting(void);
-void cons_room_cache_setting(void);
 void cons_inpblock_setting(void);
 void cons_statusbar_setting(void);
 void cons_winpos_setting(void);
