@@ -245,26 +245,27 @@ copy_file(const gchar* const sourcepath, const gchar* const targetpath, const gb
 gboolean
 strtoi_range(const gchar* str, int* saveptr, int min, int max, gchar** err_msg)
 {
-    gchar* ptr;
-    int val;
     if (str == NULL) {
-        if (err_msg)
-            *err_msg = g_strdup_printf("'str' input pointer can not be NULL");
-        return FALSE;
-    }
-    errno = 0;
-    val = (int)strtol(str, &ptr, 0);
-    if (errno != 0 || *str == '\0' || *ptr != '\0') {
-        if (err_msg)
-            *err_msg = g_strdup_printf("Could not convert \"%s\" to a number.", str);
-        return FALSE;
-    } else if (val < min || val > max) {
-        if (err_msg)
-            *err_msg = g_strdup_printf("Value %s out of range. Must be in %d..%d.", str, min, max);
+        if (err_msg) {
+            *err_msg = g_strdup("'str' input pointer can not be NULL");
+        }
         return FALSE;
     }
 
-    *saveptr = val;
+    g_autoptr(GError) error = NULL;
+    gint64 val = 0;
+    if (!g_ascii_string_to_signed(str, 10, min, max, &val, &error)) {
+        if (err_msg) {
+            if (g_error_matches(error, G_NUMBER_PARSER_ERROR, G_NUMBER_PARSER_ERROR_OUT_OF_BOUNDS)) {
+                *err_msg = g_strdup_printf("Value %s out of range. Must be in %d..%d.", str, min, max);
+            } else {
+                *err_msg = g_strdup_printf("Could not convert \"%s\" to a number.", str);
+            }
+        }
+        return FALSE;
+    }
+
+    *saveptr = (int)val;
 
     return TRUE;
 }
