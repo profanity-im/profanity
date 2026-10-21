@@ -132,9 +132,9 @@ main(int argc, char** argv)
 #endif
 
 #ifdef HAVE_GTK
-        g_print("GTK icons/clipboard: Enabled\n");
+        g_print("GTK tray: Enabled\n");
 #else
-        g_print("GTK icons/clipboard: Disabled\n");
+        g_print("GTK tray: Disabled\n");
 #endif
 
 #ifdef HAVE_PIXBUF

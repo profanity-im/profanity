@@ -42,10 +42,10 @@ option('omemo-backend',
   description: 'Select OMEMO backend library'
 )
 
-option('icons-and-clipboard',
+option('tray',
   type: 'feature',
   value: 'disabled',
-  description: 'Enable GTK tray icons and clipboard paste support'
+  description: 'Enable GTK tray icon'
 )
 
 option('gdk-pixbuf',

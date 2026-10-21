@@ -2405,15 +2405,6 @@ static const struct cmd_t command_defs[] = {
               "Reload preferences from configuration file.")
     },
 
-    { CMD_PREAMBLE("/paste",
-                   parse_args, 0, 0, NULL)
-      CMD_MAINFUNC(cmd_paste)
-      CMD_SYN(
-              "/paste")
-      CMD_DESC(
-              "Paste clipboard.")
-    },
-
     { CMD_PREAMBLE("/color",
                    parse_args, 1, 2, &cons_color_setting)
       CMD_MAINFUNC(cmd_color)

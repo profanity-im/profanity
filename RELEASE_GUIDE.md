@@ -10,7 +10,7 @@
 * Check copyright dates in all files
 
 * Create clean build folder:
-  `meson setup build_deb --buildtype=debug -Dnotifications=enabled -Dicons-and-clipboard=enabled -Dotr=enabled -Dpgp=enabled -Domemo=enabled -Dc-plugins=enabled -Dpython-plugins=enabled -Domemo-qrcode=enabled -Dgdk-pixbuf=enabled`
+  `meson setup build_deb --buildtype=debug -Dnotifications=enabled -Dtray=enabled -Dotr=enabled -Dpgp=enabled -Domemo=enabled -Dc-plugins=enabled -Dpython-plugins=enabled -Domemo-qrcode=enabled -Dgdk-pixbuf=enabled`
 
 * Build profanity: `meson compile -C build_deb`
 
