@@ -57,56 +57,28 @@ _x_io_handler(Display* display)
  * As now, with 2 icons only, this is pretty useless, but it is not harming ;)
  *
  */
+static GString*
+_get_icon(const gchar* const filename)
+{
+    auto_gchar gchar* rel = g_build_filename(DIR_ICONS, filename, NULL);
+    auto_gchar gchar* user_icon = files_get_config_path(rel);
+    if (g_file_test(user_icon, G_FILE_TEST_EXISTS)) {
+        return g_string_new(user_icon);
+    }
+
+#ifdef ICONS_PATH
+    auto_gchar gchar* system_icon = g_build_filename(ICONS_PATH, filename, NULL);
+    return g_string_new(system_icon);
+#else
+    return NULL;
+#endif
+}
+
 static void
 _get_icons(void)
 {
-    GString* icons_dir = NULL;
-
-#ifdef ICONS_PATH
-
-    icons_dir = g_string_new(ICONS_PATH);
-    icon_filename = g_string_new(icons_dir->str);
-    icon_msg_filename = g_string_new(icons_dir->str);
-    g_string_append(icon_filename, "/proIcon.png");
-    g_string_append(icon_msg_filename, "/proIconMsg.png");
-    g_string_free(icons_dir, TRUE);
-
-#endif /* ICONS_PATH */
-
-    auto_gchar gchar* icons_dir_s = files_get_config_path(DIR_ICONS);
-    icons_dir = g_string_new(icons_dir_s);
-    auto_gerror GError* err = NULL;
-
-    if (!g_file_test(icons_dir->str, G_FILE_TEST_IS_DIR)) {
-        return;
-    }
-
-    GDir* dir = g_dir_open(icons_dir->str, 0, &err);
-    if (dir) {
-        GString* name = g_string_new(g_dir_read_name(dir));
-        while (name->len) {
-            if (g_strcmp0("proIcon.png", name->str) == 0) {
-                if (icon_filename) {
-                    g_string_free(icon_filename, TRUE);
-                }
-                icon_filename = g_string_new(icons_dir->str);
-                g_string_append(icon_filename, "/proIcon.png");
-            } else if (g_strcmp0("proIconMsg.png", name->str) == 0) {
-                if (icon_msg_filename) {
-                    g_string_free(icon_msg_filename, TRUE);
-                }
-                icon_msg_filename = g_string_new(icons_dir->str);
-                g_string_append(icon_msg_filename, "/proIconMsg.png");
-            }
-            g_string_free(name, TRUE);
-            name = g_string_new(g_dir_read_name(dir));
-        }
-        g_string_free(name, TRUE);
-    } else {
-        log_error("Unable to open dir: %s", PROF_GERROR_MESSAGE(err));
-    }
-    g_dir_close(dir);
-    g_string_free(icons_dir, TRUE);
+    icon_filename = _get_icon("proIcon.png");
+    icon_msg_filename = _get_icon("proIconMsg.png");
 }
 
 /*

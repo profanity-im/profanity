@@ -51,7 +51,6 @@ struct curl_data_t
 };
 
 static size_t _data_callback(void* ptr, size_t size, size_t nmemb, void* data);
-static gchar* _get_file_or_linked(gchar* loc);
 
 /**
  * Frees the memory allocated for a gchar* string.
@@ -161,6 +160,19 @@ _load_keyfile(prof_keyfile_t* keyfile)
     return FALSE;
 }
 
+static gchar*
+_get_file_or_linked(const gchar* loc)
+{
+    char* resolved = realpath(loc, NULL);
+    if (resolved) {
+        gchar* res = g_strdup(resolved);
+        free(resolved);
+        return res;
+    }
+
+    return g_strdup(loc);
+}
+
 gboolean
 load_data_keyfile(prof_keyfile_t* keyfile, const gchar* filename)
 {
@@ -245,26 +257,27 @@ copy_file(const gchar* const sourcepath, const gchar* const targetpath, const gb
 gboolean
 strtoi_range(const gchar* str, int* saveptr, int min, int max, gchar** err_msg)
 {
-    gchar* ptr;
-    int val;
     if (str == NULL) {
-        if (err_msg)
-            *err_msg = g_strdup_printf("'str' input pointer can not be NULL");
-        return FALSE;
-    }
-    errno = 0;
-    val = (int)strtol(str, &ptr, 0);
-    if (errno != 0 || *str == '\0' || *ptr != '\0') {
-        if (err_msg)
-            *err_msg = g_strdup_printf("Could not convert \"%s\" to a number.", str);
-        return FALSE;
-    } else if (val < min || val > max) {
-        if (err_msg)
-            *err_msg = g_strdup_printf("Value %s out of range. Must be in %d..%d.", str, min, max);
+        if (err_msg) {
+            *err_msg = g_strdup("'str' input pointer can not be NULL");
+        }
         return FALSE;
     }
 
-    *saveptr = val;
+    g_autoptr(GError) error = NULL;
+    gint64 val = 0;
+    if (!g_ascii_string_to_signed(str, 10, min, max, &val, &error)) {
+        if (err_msg) {
+            if (g_error_matches(error, G_NUMBER_PARSER_ERROR, G_NUMBER_PARSER_ERROR_OUT_OF_BOUNDS)) {
+                *err_msg = g_strdup_printf("Value %s out of range. Must be in %d..%d.", str, min, max);
+            } else {
+                *err_msg = g_strdup_printf("Could not convert \"%s\" to a number.", str);
+            }
+        }
+        return FALSE;
+    }
+
+    *saveptr = (int)val;
 
     return TRUE;
 }
@@ -535,29 +548,6 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
     return realsize;
 }
 
-static gchar*
-_get_file_or_linked(gchar* loc)
-{
-    auto_gchar gchar* basedir = g_path_get_dirname(loc);
-    gchar* true_loc = g_strdup(loc);
-
-    // check for symlink
-    while (g_file_test(true_loc, G_FILE_TEST_IS_SYMLINK)) {
-        gchar* tmp = g_file_read_link(true_loc, NULL);
-        g_free(true_loc);
-        true_loc = tmp;
-
-        // if relative, add basedir
-        if (!g_str_has_prefix(true_loc, "/") && !g_str_has_prefix(true_loc, "~")) {
-            tmp = g_strdup_printf("%s/%s", basedir, true_loc);
-            g_free(true_loc);
-            true_loc = tmp;
-        }
-    }
-
-    return true_loc;
-}
-
 gchar*
 strip_arg_quotes(const gchar* const input)
 {
@@ -660,73 +650,16 @@ prof_occurrences(const gchar* const needle, const gchar* const haystack, int off
     return *result;
 }
 
-int
-is_regular_file(const gchar* path)
-{
-    struct stat st;
-    int ret = stat(path, &st);
-    if (ret != 0) {
-        perror(NULL);
-        return 0;
-    }
-    return S_ISREG(st.st_mode);
-}
-
-int
-is_dir(const gchar* path)
-{
-    struct stat st;
-    int ret = stat(path, &st);
-    if (ret != 0) {
-        perror(NULL);
-        return 0;
-    }
-    return S_ISDIR(st.st_mode);
-}
-
-void
-get_file_paths_recursive(const gchar* path, GSList** contents)
-{
-    if (!is_dir(path)) {
-        return;
-    }
-
-    GDir* directory = g_dir_open(path, 0, NULL);
-    const gchar* entry = g_dir_read_name(directory);
-    gchar* full;
-    while (entry) {
-        if (g_str_has_suffix(path, "/")) {
-            full = g_strdup_printf("%s%s", path, entry);
-        } else {
-            full = g_strdup_printf("%s/%s", path, entry);
-        }
-
-        if (is_dir(full)) {
-            get_file_paths_recursive(full, contents);
-        } else if (is_regular_file(full)) {
-            *contents = g_slist_append(*contents, full);
-        }
-
-        entry = g_dir_read_name(directory);
-    }
-}
-
 gchar*
 get_random_string(int length)
 {
-    GRand* prng;
-    gchar* rand;
-    gchar alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    gchar* rand = g_malloc0(length + 1);
+    const gchar alphabet[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     int endrange = sizeof(alphabet) - 1;
 
-    rand = g_malloc0(length + 1);
-
-    prng = g_rand_new();
-
     for (int i = 0; i < length; i++) {
-        rand[i] = alphabet[g_rand_int_range(prng, 0, endrange)];
+        rand[i] = alphabet[g_random_int_range(0, endrange)];
     }
-    g_rand_free(prng);
 
     return rand;
 }
@@ -871,14 +804,19 @@ basename_from_url(const gchar* url)
 gchar*
 get_expanded_path(const gchar* path)
 {
+    if (path == NULL) {
+        return NULL;
+    }
+
     if (g_str_has_prefix(path, "file://")) {
         path += strlen("file://");
     }
-    if (strlen(path) >= 2 && path[0] == '~' && path[1] == '/') {
-        return g_strdup_printf("%s/%s", getenv("HOME"), path + 2);
-    } else {
-        return g_strdup_printf("%s", path);
+
+    if (g_str_has_prefix(path, "~/")) {
+        return g_build_filename(g_get_home_dir(), path + 2, NULL);
     }
+
+    return g_strdup(path);
 }
 
 /**

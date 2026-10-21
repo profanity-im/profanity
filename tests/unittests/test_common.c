@@ -277,6 +277,13 @@ strtoi_range__returns__false_for_out_of_range(void** state)
     assert_string_equal("Value 11 out of range. Must be in 0..10.", err_msg);
     g_free(err_msg);
     err_msg = NULL;
+
+    // too high, 64-bit overflow
+    result = strtoi_range("4294967296", &value, 0, 10, &err_msg);
+    assert_false(result);
+    assert_string_equal("Value 4294967296 out of range. Must be in 0..10.", err_msg);
+    g_free(err_msg);
+    err_msg = NULL;
 }
 
 void

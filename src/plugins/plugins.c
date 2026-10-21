@@ -147,6 +147,36 @@ plugins_free_install_result(PluginsInstallResult* result)
     }
     g_slist_free_full(result->installed, g_free);
     g_slist_free_full(result->failed, g_free);
+    g_free(result);
+}
+
+static void
+_plugins_install_dir_recursive(const gchar* const path, PluginsInstallResult* result)
+{
+    g_autoptr(GDir) directory = g_dir_open(path, 0, NULL);
+    if (!directory) {
+        return;
+    }
+
+    const gchar* entry = g_dir_read_name(directory);
+    while (entry) {
+        gchar* full = g_build_filename(path, entry, NULL);
+        if (g_file_test(full, G_FILE_TEST_IS_DIR)) {
+            _plugins_install_dir_recursive(full, result);
+        } else if (g_file_test(full, G_FILE_TEST_IS_REGULAR)) {
+            if (g_str_has_suffix(entry, ".py") || g_str_has_suffix(entry, ".so")) {
+                GString* error_message = g_string_new(NULL);
+                if (plugins_install(entry, full, error_message)) {
+                    result->installed = g_slist_append(result->installed, g_strdup(full));
+                } else {
+                    result->failed = g_slist_append(result->failed, g_strdup(full));
+                }
+                g_string_free(error_message, TRUE);
+            }
+        }
+        g_free(full);
+        entry = g_dir_read_name(directory);
+    }
 }
 
 PluginsInstallResult*
@@ -155,26 +185,8 @@ plugins_install_all(const char* const path)
     PluginsInstallResult* result = g_new0(PluginsInstallResult, 1);
     result->installed = NULL;
     result->failed = NULL;
-    GSList* contents = NULL;
-    get_file_paths_recursive(path, &contents);
 
-    GSList* curr = contents;
-    GString* error_message = NULL;
-    while (curr) {
-        error_message = g_string_new(NULL);
-        if (g_str_has_suffix(curr->data, ".py") || g_str_has_suffix(curr->data, ".so")) {
-            gchar* plugin_name = g_path_get_basename(curr->data);
-            if (plugins_install(plugin_name, curr->data, error_message)) {
-                result->installed = g_slist_append(result->installed, g_strdup(curr->data));
-            } else {
-                result->failed = g_slist_append(result->failed, g_strdup(curr->data));
-            }
-        }
-        curr = g_slist_next(curr);
-        g_string_free(error_message, TRUE);
-    }
-
-    g_slist_free_full(contents, g_free);
+    _plugins_install_dir_recursive(path, result);
 
     return result;
 }
@@ -198,18 +210,15 @@ gboolean
 plugins_install(const char* const plugin_name, const char* const filename, GString* error_message)
 {
     auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
-    GString* target_path = g_string_new(plugins_dir);
-    g_string_append(target_path, "/");
-    g_string_append(target_path, plugin_name);
+    auto_gchar gchar* target_path = g_build_filename(plugins_dir, plugin_name, NULL);
 
-    if (g_file_test(target_path->str, G_FILE_TEST_EXISTS)) {
+    if (g_file_test(target_path, G_FILE_TEST_EXISTS)) {
         log_info("Failed to install plugin: %s, file exists", plugin_name);
         g_string_assign(error_message, "File exists");
         return FALSE;
     }
 
-    gboolean result = copy_file(filename, target_path->str, FALSE);
-    g_string_free(target_path, TRUE);
+    gboolean result = copy_file(filename, target_path, FALSE);
 
     if (result) {
         result = plugins_load(plugin_name, error_message);
