@@ -309,10 +309,7 @@ void prefs_save_win_placement(ProfWinPlacement* placement);
 gboolean prefs_get_boolean(preference_t pref);
 void prefs_set_boolean(preference_t pref, gboolean value);
 gchar* prefs_get_string(preference_t pref);
-gchar* prefs_get_string_with_locale(preference_t pref, gchar* locale);
 void prefs_set_string(preference_t pref, const gchar* new_value);
-void prefs_set_string_with_option(preference_t pref, const gchar* option, const gchar* value);
-void prefs_set_string_list_with_option(preference_t pref, const gchar* option, const gchar* const* values);
 
 gchar* prefs_get_tls_certpath(void);
 

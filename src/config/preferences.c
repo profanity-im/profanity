@@ -629,40 +629,6 @@ prefs_get_string(preference_t pref)
 }
 
 /**
- * @brief Retrieves a localized string preference value.
- *
- * @param pref   The preference to retrieve the value for.
- * @param locale The option to consider.
- * @return       Returns the value associated with pref translated in the given locale if available.
- *
- * @note Remember to free the returned string using `auto_gchar` or `g_free()`.
- */
-gchar*
-prefs_get_string_with_locale(preference_t pref, gchar* locale)
-{
-    const gchar* group = _get_group(pref);
-    const gchar* key = _get_key(pref);
-    gchar* def = _get_default_string(pref);
-
-    gchar* result = g_key_file_get_locale_string(prefs, group, key, locale, NULL);
-
-    if (result == NULL) {
-        // check for user set default
-        result = g_key_file_get_locale_string(prefs, group, key, "*", NULL);
-        if (result == NULL) {
-            if (def) {
-                // use hardcoded profanity default
-                return g_strdup(def);
-            } else {
-                return NULL;
-            }
-        }
-    }
-
-    return result;
-}
-
-/**
  * @brief Sets or deletes a string value for the given preference in the preference file.
  *
  * @param pref      The preference to set the value for.
@@ -677,42 +643,6 @@ prefs_set_string(preference_t pref, const gchar* new_value)
         g_key_file_remove_key(prefs, group, key, NULL);
     } else {
         g_key_file_set_string(prefs, group, key, new_value);
-    }
-}
-
-void
-prefs_set_string_with_option(preference_t pref, const gchar* option, const gchar* value)
-{
-    const gchar* group = _get_group(pref);
-    const gchar* key = _get_key(pref);
-    if (value == NULL) {
-        g_key_file_remove_key(prefs, group, key, NULL);
-    } else {
-        g_key_file_set_locale_string(prefs, group, key, option, value);
-    }
-}
-
-void
-prefs_set_string_list_with_option(preference_t pref, const gchar* option, const gchar* const* values)
-{
-    const gchar* group = _get_group(pref);
-    const gchar* key = _get_key(pref);
-    if (values == NULL || *values == NULL) {
-        if (g_strcmp0(option, "*") == 0) {
-            g_key_file_set_string_list(prefs, group, key, NULL, 0);
-        } else {
-            g_key_file_set_locale_string_list(prefs, group, key, option, NULL, 0);
-        }
-    } else {
-        guint num_values = 0;
-        while (values[num_values]) {
-            num_values++;
-        }
-        if (g_strcmp0(option, "*") == 0) {
-            g_key_file_set_string_list(prefs, group, key, values, num_values);
-        } else {
-            g_key_file_set_locale_string_list(prefs, group, key, option, values, num_values);
-        }
     }
 }
 
