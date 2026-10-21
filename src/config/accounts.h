@@ -81,6 +81,5 @@ void accounts_add_otr_policy(const gchar* const account_name, const gchar* const
 void accounts_add_omemo_state(const gchar* const account_name, const gchar* const contact_jid, gboolean enabled);
 void accounts_add_ox_state(const gchar* const account_name, const gchar* const contact_jid, gboolean enabled);
 void accounts_add_pgp_state(const gchar* const account_name, const gchar* const contact_jid, gboolean enabled);
-void accounts_clear_omemo_state(const gchar* const account_name, const gchar* const contact_jid);
 
 #endif
