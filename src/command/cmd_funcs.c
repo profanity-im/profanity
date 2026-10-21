@@ -7063,7 +7063,7 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
         }
         g_string_free(error_message, TRUE);
         return TRUE;
-    } else if (is_dir(path)) {
+    } else if (g_file_test(path, G_FILE_TEST_IS_DIR)) {
         PluginsInstallResult* result = plugins_install_all(path);
         if (result->installed || result->failed) {
             if (result->installed) {

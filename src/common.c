@@ -660,22 +660,10 @@ prof_occurrences(const gchar* const needle, const gchar* const haystack, int off
     return *result;
 }
 
-int
-is_dir(const gchar* path)
-{
-    struct stat st;
-    int ret = stat(path, &st);
-    if (ret != 0) {
-        perror(NULL);
-        return 0;
-    }
-    return S_ISDIR(st.st_mode);
-}
-
 void
 get_file_paths_recursive(const gchar* path, GSList** contents)
 {
-    if (!is_dir(path)) {
+    if (!g_file_test(path, G_FILE_TEST_IS_DIR)) {
         return;
     }
 
@@ -689,7 +677,7 @@ get_file_paths_recursive(const gchar* path, GSList** contents)
             full = g_strdup_printf("%s/%s", path, entry);
         }
 
-        if (is_dir(full)) {
+        if (g_file_test(full, G_FILE_TEST_IS_DIR)) {
             get_file_paths_recursive(full, contents);
         } else if (g_file_test(full, G_FILE_TEST_IS_REGULAR)) {
             *contents = g_slist_append(*contents, full);
