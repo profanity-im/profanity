@@ -12,7 +12,6 @@ RUN dnf install -y \
   glib2-devel \
   glibc-all-langpacks \
   gtk3-devel \
-  libXScrnSaver-devel \
   libcmocka-devel \
   libcurl-devel \
   expat-devel \

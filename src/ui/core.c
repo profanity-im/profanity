@@ -17,10 +17,6 @@
 
 #include <glib.h>
 
-#ifdef HAVE_LIBXSS
-#include <X11/extensions/scrnsaver.h>
-#endif
-
 #ifdef HAVE_NCURSESW_NCURSES_H
 #include <ncursesw/ncurses.h>
 #elif HAVE_NCURSES_H
@@ -56,10 +52,6 @@ static int inp_size;
 static gboolean perform_resize = FALSE;
 static GTimer* ui_idle_time;
 static WINDOW* main_scr;
-
-#ifdef HAVE_LIBXSS
-static Display* display;
-#endif
 
 static void _ui_draw_term_title(void);
 
@@ -98,13 +90,6 @@ ui_init(void)
     wins_init();
     notifier_initialise();
     cons_about();
-#ifdef HAVE_LIBXSS
-    char* x11_display = getenv("DISPLAY");
-    char* wayland_display = getenv("WAYLAND_DISPLAY");
-    if (x11_display && !wayland_display) {
-        display = XOpenDisplay(0);
-    }
-#endif
     ui_idle_time = g_timer_new();
     inp_size = 0;
     ProfWin* window = wins_get_current();
@@ -149,22 +134,6 @@ ui_update(void)
 unsigned long
 ui_get_idle_time(void)
 {
-// if compiled with libxss, get the x sessions idle time
-#ifdef HAVE_LIBXSS
-    if (display) {
-        XScreenSaverInfo* info = XScreenSaverAllocInfo();
-        if (info) {
-            XScreenSaverQueryInfo(display, DefaultRootWindow(display), info);
-            unsigned long result = info->idle;
-            XFree(info);
-            return result;
-        }
-        if (info) {
-            XFree(info);
-        }
-    }
-// if no libxss or xss idle time failed, use profanity idle time
-#endif
     gdouble seconds_elapsed = g_timer_elapsed(ui_idle_time, NULL);
     unsigned long ms_elapsed = seconds_elapsed * 1000.0;
     return ms_elapsed;

@@ -20,7 +20,6 @@ The system libstrophe is used by default; if you instead want to automatically d
 | **Spellcheck** | Support for spelling checks | `-Dspellcheck=enabled` |
 | **Icons/Clipboard** | GTK tray icons & clipboard | `-Dicons-and-clipboard=enabled` |
 | **GDK Pixbuf** | Avatar scaling support | `-Dgdk-pixbuf=enabled` |
-| **XScreenSaver** | Idle time detection | `-Dxscreensaver=enabled` |
 | **Tests** | Build unit tests | `-Dtests=true` |
 | **Sanitizers** | Run-time error detection | `-Db_sanitize=address,undefined` |
 

@@ -69,7 +69,7 @@ EXTRA_ARGS="$*"
 echo -e "${YELLOW}---> Starting build matrix...${NC}"
 
 tests=(
-    "-Dnotifications=enabled -Dicons-and-clipboard=enabled -Dotr=enabled -Dpgp=enabled -Domemo=enabled -Dc-plugins=enabled -Dpython-plugins=enabled -Dxscreensaver=enabled -Domemo-qrcode=enabled -Dgdk-pixbuf=enabled"
+    "-Dnotifications=enabled -Dicons-and-clipboard=enabled -Dotr=enabled -Dpgp=enabled -Domemo=enabled -Dc-plugins=enabled -Dpython-plugins=enabled -Domemo-qrcode=enabled -Dgdk-pixbuf=enabled"
     ""
     "-Dnotifications=disabled"
     "-Dicons-and-clipboard=disabled"
@@ -81,7 +81,6 @@ tests=(
     "-Dpython-plugins=disabled"
     "-Dc-plugins=disabled"
     "-Dc-plugins=disabled -Dpython-plugins=disabled"
-    "-Dxscreensaver=disabled"
     "-Dgdk-pixbuf=disabled"
 )
 

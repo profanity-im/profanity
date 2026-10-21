@@ -22,7 +22,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libomemo-c-dev \
   libssl-dev \
   libtool \
-  libxss-dev \
   make \
   meson \
   ninja-build \
