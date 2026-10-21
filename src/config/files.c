@@ -21,106 +21,63 @@
 #include "config/files.h"
 #include "config/preferences.h"
 
-static gchar* _files_get_xdg_config_home(void);
-static gchar* _files_get_xdg_data_home(void);
-
 void
 files_create_directories(void)
 {
-    auto_gchar gchar* xdg_config = _files_get_xdg_config_home();
-    auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
-
-    GString* themes_dir = g_string_new(xdg_config);
-    g_string_append(themes_dir, "/profanity/themes");
-    GString* icons_dir = g_string_new(xdg_config);
-    g_string_append(icons_dir, "/profanity/icons");
-    GString* chatlogs_dir = g_string_new(xdg_data);
-    g_string_append(chatlogs_dir, "/profanity/chatlogs");
-    GString* logs_dir = g_string_new(xdg_data);
-    g_string_append(logs_dir, "/profanity/logs");
-    GString* plugins_dir = g_string_new(xdg_data);
-    g_string_append(plugins_dir, "/profanity/plugins");
-
-    if (!create_dir(themes_dir->str)) {
-        log_error("Error while creating directory %s", themes_dir->str);
-    }
-    if (!create_dir(icons_dir->str)) {
-        log_error("Error while creating directory %s", icons_dir->str);
-    }
-    if (!create_dir(chatlogs_dir->str)) {
-        log_error("Error while creating directory %s", chatlogs_dir->str);
-    }
-    if (!create_dir(logs_dir->str)) {
-        log_error("Error while creating directory %s", logs_dir->str);
-    }
-    if (!create_dir(plugins_dir->str)) {
-        log_error("Error while creating directory %s", plugins_dir->str);
+    const gchar* const config_dirs[] = { DIR_THEMES, DIR_ICONS, NULL };
+    for (int i = 0; config_dirs[i]; i++) {
+        auto_gchar gchar* dir = files_get_config_path(config_dirs[i]);
+        if (!create_dir(dir)) {
+            log_error("Error while creating directory %s", dir);
+        }
     }
 
-    g_string_free(themes_dir, TRUE);
-    g_string_free(icons_dir, TRUE);
-    g_string_free(chatlogs_dir, TRUE);
-    g_string_free(logs_dir, TRUE);
-    g_string_free(plugins_dir, TRUE);
+    const gchar* const data_dirs[] = { DIR_CHATLOGS, DIR_LOGS, DIR_PLUGINS, NULL };
+    for (int i = 0; data_dirs[i]; i++) {
+        auto_gchar gchar* dir = files_get_data_path(data_dirs[i]);
+        if (!create_dir(dir)) {
+            log_error("Error while creating directory %s", dir);
+        }
+    }
 }
 
 gchar*
 files_get_inputrc_file(void)
 {
-    auto_gchar gchar* xdg_config = _files_get_xdg_config_home();
-    GString* inputrc_file = g_string_new(xdg_config);
+    gchar* inputrc_file = files_get_config_path("inputrc");
 
-    g_string_append(inputrc_file, "/profanity/inputrc");
-
-    if (g_file_test(inputrc_file->str, G_FILE_TEST_IS_REGULAR)) {
-        gchar* result = g_strdup(inputrc_file->str);
-        g_string_free(inputrc_file, TRUE);
-
-        return result;
+    if (g_file_test(inputrc_file, G_FILE_TEST_IS_REGULAR)) {
+        return inputrc_file;
     }
 
-    g_string_free(inputrc_file, TRUE);
-
+    g_free(inputrc_file);
     return NULL;
 }
 
 gchar*
 files_get_log_file(const gchar* const log_file)
 {
-    auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
-    GString* logfile;
-
     if (log_file) {
         auto_gchar gchar* log_path = g_path_get_dirname(log_file);
         if (!create_dir(log_path)) {
             log_error("Error while creating directory %s", log_path);
         }
 
-        logfile = g_string_new(log_file);
-    } else {
-        logfile = g_string_new(xdg_data);
-        g_string_append(logfile, "/profanity/logs/profanity");
-
-        if (!prefs_get_boolean(PREF_LOG_SHARED)) {
-            g_string_append_printf(logfile, "%d", getpid());
-        }
-
-        g_string_append(logfile, ".log");
+        return g_strdup(log_file);
     }
 
-    gchar* result = g_strdup(logfile->str);
+    auto_gchar gchar* base = files_get_data_path(DIR_LOGS "/profanity");
+    if (!prefs_get_boolean(PREF_LOG_SHARED)) {
+        return g_strdup_printf("%s%d.log", base, getpid());
+    }
 
-    g_string_free(logfile, TRUE);
-
-    return result;
+    return g_strdup_printf("%s.log", base);
 }
 
 gchar*
 files_get_config_path(const gchar* const config_base)
 {
-    auto_gchar gchar* xdg_config = _files_get_xdg_config_home();
-    gchar* result = g_strdup_printf("%s/profanity/%s", xdg_config, config_base);
-    return result;
+    return g_build_filename(g_get_user_config_dir(), "profanity", config_base, NULL);
 }
 
 /**
@@ -134,8 +91,7 @@ files_get_config_path(const gchar* const config_base)
 gchar*
 files_get_data_path(const gchar* const location)
 {
-    auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
-    return g_strdup_printf("%s/profanity/%s", xdg_data, location);
+    return g_build_filename(g_get_user_data_dir(), "profanity", location, NULL);
 }
 
 gchar*
@@ -154,16 +110,13 @@ files_sanitize_jid(const gchar* const jid)
 gchar*
 files_get_download_path(const gchar* const jid)
 {
-    auto_gchar gchar* xdg_data = _files_get_xdg_data_home();
-
     if (jid) {
         auto_gchar gchar* account_dir = files_sanitize_jid(jid);
-        GDateTime* now = g_date_time_new_now_local();
+        g_autoptr(GDateTime) now = g_date_time_new_now_local();
         auto_gchar gchar* date = g_date_time_format(now, "%Y_%m_%d");
-        g_date_time_unref(now);
-        return g_strdup_printf("%s/profanity/%s/%s/%s", xdg_data, DIR_DOWNLOADS, account_dir, date);
+        return g_build_filename(g_get_user_data_dir(), "profanity", DIR_DOWNLOADS, account_dir, date, NULL);
     } else {
-        return g_strdup_printf("%s/profanity/%s", xdg_data, DIR_DOWNLOADS);
+        return g_build_filename(g_get_user_data_dir(), "profanity", DIR_DOWNLOADS, NULL);
     }
 }
 
@@ -173,7 +126,7 @@ files_get_account_data_path(const gchar* const specific_dir, const gchar* const 
     auto_gchar gchar* data_dir = files_get_data_path(specific_dir);
     auto_gchar gchar* account_dir = files_sanitize_jid(jid);
 
-    return g_strdup_printf("%s/%s", data_dir, account_dir);
+    return g_build_filename(data_dir, account_dir, NULL);
 }
 
 gchar*
@@ -189,53 +142,7 @@ files_file_in_account_data_path(const gchar* const specific_dir, const gchar* co
     if (!file_name) {
         return data_path;
     }
-    gchar* filename = g_strdup_printf("%s/%s", data_path, file_name);
+    gchar* filename = g_build_filename(data_path, file_name, NULL);
     g_free(data_path);
     return filename;
-}
-
-static gchar*
-_files_get_xdg_config_home(void)
-{
-    gchar* xdg_config_home_env = getenv("XDG_CONFIG_HOME");
-    gchar* xdg_config_home = NULL;
-
-    if (xdg_config_home_env) {
-        xdg_config_home = g_strdup(xdg_config_home_env);
-        g_strstrip(xdg_config_home);
-    }
-
-    if (xdg_config_home && (strcmp(xdg_config_home, "") != 0)) {
-        return xdg_config_home;
-    } else {
-        GString* default_path = g_string_new(getenv("HOME"));
-        g_string_append(default_path, "/.config");
-        gchar* result = g_strdup(default_path->str);
-        g_string_free(default_path, TRUE);
-
-        return result;
-    }
-}
-
-static gchar*
-_files_get_xdg_data_home(void)
-{
-    gchar* xdg_data_home_env = getenv("XDG_DATA_HOME");
-    gchar* xdg_data_home = NULL;
-
-    if (xdg_data_home_env) {
-        xdg_data_home = g_strdup(xdg_data_home_env);
-        g_strstrip(xdg_data_home);
-    }
-
-    if (xdg_data_home && (strcmp(xdg_data_home, "") != 0)) {
-        return xdg_data_home;
-    } else {
-        GString* default_path = g_string_new(getenv("HOME"));
-        g_string_append(default_path, "/.local/share");
-        gchar* result = g_strdup(default_path->str);
-        g_string_free(default_path, TRUE);
-
-        return result;
-    }
 }

@@ -26,6 +26,7 @@
 #define DIR_ICONS     "icons"
 #define DIR_SCRIPTS   "scripts"
 #define DIR_CHATLOGS  "chatlogs"
+#define DIR_LOGS      "logs"
 #define DIR_OTR       "otr"
 #define DIR_PGP       "pgp"
 #define DIR_OMEMO     "omemo"
