@@ -147,6 +147,7 @@ plugins_free_install_result(PluginsInstallResult* result)
     }
     g_slist_free_full(result->installed, g_free);
     g_slist_free_full(result->failed, g_free);
+    g_free(result);
 }
 
 static void
