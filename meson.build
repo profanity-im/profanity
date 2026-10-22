@@ -156,7 +156,6 @@ endif
 have_osxnotify = false
 libnotify_dep = disabler()
 gtk_dep = disabler()
-xscrnsaver_dep = []
 python_dep = disabler()
 dl_dep = disabler()
 gpgme_dep = disabler()
@@ -205,15 +204,6 @@ if get_option('icons-and-clipboard').enabled()
       x11_extra_dep = [x11_dep]
     endif
   endif
-endif
-
-# XScreenSaver
-if get_option('xscreensaver').enabled()
-  xscrnsaver_dep = [
-    dependency('xscrnsaver', required: true),
-    dependency('x11', required: true)
-  ]
-  conf_data.set('HAVE_LIBXSS', 1)
 endif
 
 # Python plugins
@@ -338,10 +328,6 @@ endif
 
 if gtk_dep.found()
   profanity_deps += gtk_dep
-endif
-
-if xscrnsaver_dep.length() > 0
-  profanity_deps += xscrnsaver_dep
 endif
 
 if x11_extra_dep.length() > 0
@@ -787,7 +773,6 @@ summary({
   'OTR': build_otr,
   'PGP': build_pgp,
   'OMEMO': build_omemo,
-  'XScreenSaver': xscrnsaver_dep.length() > 0,
   'GTK': gtk_dep.found(),
   'GDK Pixbuf': gdk_pixbuf_dep.found(),
   'QR Code': qrencode_dep.found(),

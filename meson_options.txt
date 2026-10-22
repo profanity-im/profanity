@@ -42,12 +42,6 @@ option('omemo-backend',
   description: 'Select OMEMO backend library'
 )
 
-option('xscreensaver',
-  type: 'feature',
-  value: 'disabled',
-  description: 'Use libXScrnSaver to determine idle time'
-)
-
 option('icons-and-clipboard',
   type: 'feature',
   value: 'disabled',

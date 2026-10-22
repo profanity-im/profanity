@@ -22,7 +22,6 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   libomemo-c \
   libotr \
   libtool \
-  libxss \
   make \
   openssl \
   pkg-config \
