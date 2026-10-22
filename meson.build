@@ -155,7 +155,6 @@ endif
 # Optional dependencies
 have_osxnotify = false
 libnotify_dep = disabler()
-gtk_dep = disabler()
 python_dep = disabler()
 dl_dep = disabler()
 gpgme_dep = disabler()
@@ -191,19 +190,11 @@ if get_option('notifications').enabled()
   endif
 endif
 
-# GTK (for tray icon)
-x11_extra_dep = []
+# Tray icon (StatusNotifierItem)
+build_tray = false
 if get_option('tray').enabled()
-  gtk_dep = dependency('gtk+-3.0', version: '>= 3.24.0', required: true)
-  conf_data.set('HAVE_GTK', 1)
-
-  x11_dep = dependency('x11', required: false)
-  if x11_dep.found()
-    if cc.has_function('XSetIOErrorExitHandler', dependencies: x11_dep)
-      conf_data.set('HAVE_XEXITHANDLER', 1)
-      x11_extra_dep = [x11_dep]
-    endif
-  endif
+  conf_data.set('HAVE_TRAY', 1)
+  build_tray = true
 endif
 
 # Python plugins
@@ -326,14 +317,6 @@ if libnotify_dep.found()
   profanity_deps += libnotify_dep
 endif
 
-if gtk_dep.found()
-  profanity_deps += gtk_dep
-endif
-
-if x11_extra_dep.length() > 0
-  profanity_deps += x11_extra_dep
-endif
-
 if python_dep.found()
   profanity_deps += python_dep
 endif
@@ -434,6 +417,7 @@ core_sources = files(
   'src/tools/autocomplete.c',
   'src/tools/editor.c',
   'src/tools/spellcheck.c',
+  'src/tools/dbus.c',
   'src/config/files.c',
   'src/config/conflists.c',
   'src/config/accounts.c',
@@ -457,7 +441,7 @@ core_sources = files(
 profanity_sources = core_sources
 
 # Add conditional sources
-if gtk_dep.found()
+if build_tray
   profanity_sources += files('src/ui/tray.c')
 endif
 
@@ -624,6 +608,7 @@ if get_option('tests')
       'src/event/common.c',
       'src/event/server_events.c',
       'src/event/client_events.c',
+      'src/tools/dbus.c',
       'src/ui/tray.c',
       'tests/unittests/xmpp/stub_vcard.c',
       'tests/unittests/xmpp/stub_avatar.c',
@@ -647,6 +632,7 @@ if get_option('tests')
       'tests/unittests/tools/test_autocomplete.c',
       'tests/unittests/xmpp/test_jid.c',
       'tests/unittests/tools/test_parser.c',
+      'tests/unittests/tools/test_dbus.c',
       'tests/unittests/xmpp/test_roster_list.c',
       'tests/unittests/xmpp/test_chat_session.c',
       'tests/unittests/xmpp/test_contact.c',
@@ -771,7 +757,7 @@ summary({
   'OTR': build_otr,
   'PGP': build_pgp,
   'OMEMO': build_omemo,
-  'GTK': gtk_dep.found(),
+  'Tray (StatusNotifierItem)': build_tray,
   'GDK Pixbuf': gdk_pixbuf_dep.found(),
   'QR Code': qrencode_dep.found(),
 }, section: 'Features')

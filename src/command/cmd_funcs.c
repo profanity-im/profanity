@@ -88,7 +88,7 @@
 #include "tools/aesgcm_download.h"
 #endif
 
-#ifdef HAVE_GTK
+#ifdef HAVE_TRAY
 #include "ui/tray.h"
 #endif
 
@@ -6709,9 +6709,9 @@ cmd_flash(ProfWin* window, const gchar* const command, gchar** args)
 gboolean
 cmd_tray(ProfWin* window, const gchar* const command, gchar** args)
 {
-#ifdef HAVE_GTK
-    if (!tray_gtk_ready()) {
-        log_warning("GTK is not ready. Tray functionality is disabled.");
+#ifdef HAVE_TRAY
+    if (!tray_is_ready()) {
+        log_warning("D-Bus is not ready. Tray functionality is disabled.");
         return TRUE;
     }
     if (g_strcmp0(args[0], "timer") == 0) {
@@ -6772,7 +6772,7 @@ cmd_tray(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 #else
-    cons_show("This version of Profanity has not been built with GTK Tray Icon support enabled");
+    cons_show("This version of Profanity has not been built with Tray Icon support enabled");
     return TRUE;
 #endif
 }

@@ -131,10 +131,10 @@ main(int argc, char** argv)
         g_print("Python plugins: Disabled\n");
 #endif
 
-#ifdef HAVE_GTK
-        g_print("GTK tray: Enabled\n");
+#ifdef HAVE_TRAY
+        g_print("Tray (StatusNotifierItem): Enabled\n");
 #else
-        g_print("GTK tray: Disabled\n");
+        g_print("Tray (StatusNotifierItem): Disabled\n");
 #endif
 
 #ifdef HAVE_PIXBUF

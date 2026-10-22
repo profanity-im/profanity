@@ -32,6 +32,7 @@
 #include "command/test_cmd_pgp.h"
 #include "xmpp/test_jid.h"
 #include "tools/test_parser.h"
+#include "tools/test_dbus.h"
 #include "xmpp/test_roster_list.h"
 #include "config/test_preferences.h"
 #include "event/test_server_events.h"
@@ -708,6 +709,9 @@ main(int argc, char* argv[])
         cmocka_unit_test(disco_add_feature__updates__not_duplicate_feature),
         cmocka_unit_test(disco_remove_features__updates__removes_plugin_features),
         cmocka_unit_test(disco_remove_features__updates__not_remove_when_more_than_one_reference),
+
+        cmocka_unit_test(dbus_is_available__returns_boolean),
+        cmocka_unit_test(dbus_get_session_bus__idempotent),
     };
     return cmocka_run_group_tests(all_tests, NULL, NULL);
 }
