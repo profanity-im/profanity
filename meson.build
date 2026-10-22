@@ -191,9 +191,9 @@ if get_option('notifications').enabled()
   endif
 endif
 
-# GTK (for icons and clipboard)
+# GTK (for tray icon)
 x11_extra_dep = []
-if get_option('icons-and-clipboard').enabled()
+if get_option('tray').enabled()
   gtk_dep = dependency('gtk+-3.0', version: '>= 3.24.0', required: true)
   conf_data.set('HAVE_GTK', 1)
 
@@ -432,7 +432,6 @@ core_sources = files(
   'src/tools/plugin_download.c',
   'src/tools/bookmark_ignore.c',
   'src/tools/autocomplete.c',
-  'src/tools/clipboard.c',
   'src/tools/editor.c',
   'src/tools/spellcheck.c',
   'src/config/files.c',
@@ -603,7 +602,6 @@ if get_option('tests')
       'src/command/cmd_ac.c',
       'src/tools/parser.c',
       'src/tools/autocomplete.c',
-      'src/tools/clipboard.c',
       'src/tools/editor.c',
       'src/tools/spellcheck.c',
       'src/tools/bookmark_ignore.c',

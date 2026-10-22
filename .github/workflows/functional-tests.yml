@@ -61,7 +61,7 @@ jobs:
             -Dpgp=enabled \
             -Domemo=enabled \
             -Domemo-qrcode=enabled \
-            -Dicons-and-clipboard=enabled \
+            -Dtray=enabled \
             -Dgdk-pixbuf=enabled \
             -Dspellcheck=enabled \
             -Dtests=true
