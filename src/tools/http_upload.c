@@ -262,12 +262,6 @@ http_file_put(void* userdata)
         if (http_code != 200 && http_code != 201) {
             err = g_strdup_printf("Server returned %lu", http_code);
         }
-
-#if 0
-        printf("HTTP Status: %lu\n", http_code);
-        printf("%s\n", output.buffer);
-        printf("%lu bytes retrieved\n", (long)output.size);
-#endif
     }
 
     curl_easy_cleanup(curl);

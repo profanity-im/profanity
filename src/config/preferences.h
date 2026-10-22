@@ -200,7 +200,6 @@ gint prefs_get_notify_remind(void);
 
 void prefs_set_max_log_size(gint value);
 gint prefs_get_max_log_size(void);
-gint prefs_get_priority(void);
 void prefs_set_reconnect(gint value);
 gint prefs_get_reconnect(void);
 void prefs_set_autoping(gint value);
@@ -280,8 +279,6 @@ void prefs_set_occupants_indent(gint value);
 gchar* prefs_get_correction_char(void);
 void prefs_set_correction_char(gchar* ch);
 
-void prefs_add_login(const gchar* jid);
-
 void prefs_set_tray_timer(gint value);
 gint prefs_get_tray_timer(void);
 
@@ -312,10 +309,7 @@ void prefs_save_win_placement(ProfWinPlacement* placement);
 gboolean prefs_get_boolean(preference_t pref);
 void prefs_set_boolean(preference_t pref, gboolean value);
 gchar* prefs_get_string(preference_t pref);
-gchar* prefs_get_string_with_locale(preference_t pref, gchar* locale);
 void prefs_set_string(preference_t pref, const gchar* new_value);
-void prefs_set_string_with_option(preference_t pref, const gchar* option, const gchar* value);
-void prefs_set_string_list_with_option(preference_t pref, const gchar* option, const gchar* const* values);
 
 gchar* prefs_get_tls_certpath(void);
 

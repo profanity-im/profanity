@@ -20,7 +20,6 @@ typedef enum {
     ROSTER_ORD_PRESENCE
 } roster_ord_t;
 
-void roster_clear(void);
 gboolean roster_update_presence(const gchar* const barejid, Resource* resource, GDateTime* last_activity);
 PContact roster_get_contact(const gchar* const barejid);
 gboolean roster_contact_offline(const gchar* const barejid, const gchar* const resource, const gchar* const status);

@@ -686,17 +686,6 @@ accounts_add_pgp_state(const gchar* const account_name, const gchar* const conta
 }
 
 void
-accounts_clear_omemo_state(const gchar* const account_name, const gchar* const contact_jid)
-{
-    auto_gchar gchar* sanitized_account_name = _sanitize_account_name(account_name);
-    if (_accounts_has_group(sanitized_account_name)) {
-        conf_string_list_remove(accounts, sanitized_account_name, "omemo.enabled", contact_jid);
-        conf_string_list_remove(accounts, sanitized_account_name, "omemo.disabled", contact_jid);
-        _accounts_save(account_name);
-    }
-}
-
-void
 accounts_set_muc_service(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "muc.service", value);
@@ -712,12 +701,6 @@ void
 accounts_set_otr_policy(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "otr.policy", value);
-}
-
-void
-accounts_set_omemo_policy(const gchar* const account_name, const gchar* const value)
-{
-    _accounts_set_string_option(account_name, "omemo.policy", value);
 }
 
 void
