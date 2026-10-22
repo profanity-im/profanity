@@ -47,12 +47,12 @@ static GList* alert_list;
 void
 cons_debug(const char* const msg, ...)
 {
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
-        va_list arg;
-        va_start(arg, msg);
-        win_println_va(wins_get_console(), THEME_DEFAULT, "-", msg, arg);
-        va_end(arg);
-    }
+#ifdef PACKAGE_STATUS_DEVELOPMENT
+    va_list arg;
+    va_start(arg, msg);
+    win_println_va(wins_get_console(), THEME_DEFAULT, "-", msg, arg);
+    va_end(arg);
+#endif
 }
 
 void

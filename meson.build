@@ -43,12 +43,14 @@ if platform == 'osx'
   conf_data.set('PLATFORM_OSX', 1)
 endif
 
-# Get git version if in development
 if is_debug
+  # Get git version if in development
   git = find_program('git', required: false)
   if git.found()
     conf_data.set('HAVE_GIT_VERSION', 1)
   endif
+  # Set variable so we can build conditionally in the source code
+  conf_data.set('PACKAGE_STATUS_DEVELOPMENT', 1)
 endif
 
 # Compiler setup

@@ -40,7 +40,8 @@ main(int argc, char** argv)
     auto_gchar gchar* theme_name = NULL;
     auto_gcharv gchar** commands = NULL;
 
-    if (argc == 2 && g_strcmp0(PACKAGE_STATUS, "development") == 0) {
+#ifdef PACKAGE_STATUS_DEVELOPMENT
+    if (argc == 2) {
         if (g_strcmp0(argv[1], "docgen") == 0) {
             command_docgen();
             return 0;
@@ -49,6 +50,7 @@ main(int argc, char** argv)
             return 0;
         }
     }
+#endif
 
     GOptionEntry entries[] = {
         { "version", 'v', 0, G_OPTION_ARG_NONE, &version, "Show version information", NULL },

@@ -344,12 +344,12 @@ _find_icons(void)
     }
 #endif
 
-    if (g_strcmp0(PACKAGE_STATUS, "development") == 0) {
-        if (g_file_test("../icons/proIcon.png", G_FILE_TEST_EXISTS)) {
-            icon_theme_path = g_canonicalize_filename("../icons", NULL);
-            return;
-        }
+#ifdef PACKAGE_STATUS_DEVELOPMENT
+    if (g_file_test("../icons/proIcon.png", G_FILE_TEST_EXISTS)) {
+        icon_theme_path = g_canonicalize_filename("../icons", NULL);
+        return;
     }
+#endif
 
 #ifdef ICONS_PATH
     icon_theme_path = g_strdup(ICONS_PATH);

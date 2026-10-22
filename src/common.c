@@ -884,15 +884,15 @@ prof_date_time_format_iso8601(GDateTime* dt)
 gchar*
 prof_get_version(void)
 {
-    if (strcmp(PACKAGE_STATUS, "development") == 0) {
+#ifdef PACKAGE_STATUS_DEVELOPMENT
 #ifdef HAVE_GIT_VERSION
-        return g_strdup_printf("%sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
+    return g_strdup_printf("%sdev.%s.%s", PACKAGE_VERSION, PROF_GIT_BRANCH, PROF_GIT_REVISION);
 #else
-        return g_strdup_printf("%sdev", PACKAGE_VERSION);
+    return g_strdup_printf("%sdev", PACKAGE_VERSION);
 #endif
-    } else {
-        return g_strdup_printf("%s", PACKAGE_VERSION);
-    }
+#else
+    return g_strdup_printf("%s", PACKAGE_VERSION);
+#endif
 }
 
 void
