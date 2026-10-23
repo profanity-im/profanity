@@ -221,18 +221,29 @@
       </xmpp:SupportedXep>
     </implements>
 
-   <!-- XEP-0115: Entity Capabilities --> 
-    <implements>
-      <xmpp:SupportedXep>
-        <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0115.html'/>
-        <xmpp:status>complete</xmpp:status>
-        <xmpp:version>1.6.0</xmpp:version>
-        <xmpp:since>0.4.5</xmpp:since>
-        <xmpp:note xml:lang='en'></xmpp:note>
-      </xmpp:SupportedXep>
-    </implements>
+   <!-- XEP-0115: Entity Capabilities -->
+   <implements>
+     <xmpp:SupportedXep>
+       <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0115.html'/>
+       <xmpp:status>complete</xmpp:status>
+       <xmpp:version>1.6.0</xmpp:version>
+       <xmpp:since>0.4.5</xmpp:since>
+       <xmpp:note xml:lang='en'></xmpp:note>
+     </xmpp:SupportedXep>
+   </implements>
 
-   <!-- XEP-0157: Contact Addresses for XMPP Services --> 
+   <!-- XEP-0153: vCard-Based Avatars -->
+   <implements>
+     <xmpp:SupportedXep>
+       <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0153.html'/>
+       <xmpp:status>partial</xmpp:status>
+       <xmpp:version>1.1.1</xmpp:version>
+       <xmpp:since>0.14.0</xmpp:since>
+       <xmpp:note xml:lang='en'>Photo retrieval only, no presence update broadcast.</xmpp:note>
+     </xmpp:SupportedXep>
+   </implements>
+
+   <!-- XEP-0157: Contact Addresses for XMPP Services -->
     <implements>
       <xmpp:SupportedXep>
         <xmpp:xep rdf:resource='https://xmpp.org/extensions/xep-0157.html'/>
