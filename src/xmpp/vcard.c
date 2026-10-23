@@ -1180,9 +1180,9 @@ _vcard_print_result(xmpp_stanza_t* const stanza, void* userdata)
     const char* from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     if (from) {
-        win_println(data->window, THEME_DEFAULT, "!", "vCard for %s", from);
+        win_println(data->window, THEME_DEFAULT, "-", "vCard for %s:", from);
     } else {
-        win_println(data->window, THEME_DEFAULT, "!", "This account's vCard");
+        win_println(data->window, THEME_DEFAULT, "-", "This account's vCard:");
     }
 
     xmpp_stanza_t* vcard_xml = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_VCARD);
