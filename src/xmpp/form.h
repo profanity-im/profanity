@@ -15,6 +15,9 @@
 #include "xmpp/xmpp.h"
 
 DataForm* form_create(xmpp_stanza_t* const stanza);
+DataForm* form_create_empty(const gchar* type, const gchar* title, const gchar* instructions);
+void form_add_field_text(DataForm* form, const gchar* var, const gchar* label, const gchar* value);
+const gchar* form_get_field_value(DataForm* form, const gchar* var);
 xmpp_stanza_t* form_create_submission(DataForm* form);
 gchar* form_get_form_type_field(DataForm* form);
 GSList* form_get_non_form_type_fields_sorted(DataForm* form);

@@ -37,4 +37,8 @@ vcard_element_t* vcard_user_get_element_index(unsigned int index);
 ProfWin* vcard_user_create_win();
 
 void vcard_user_free(void);
+
+DataForm* vcard_create_form(vCard* vcard);
+DataForm* vcard_user_create_form(void);
+void vcard_user_apply_form(DataForm* form);
 #endif

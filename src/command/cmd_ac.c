@@ -1281,11 +1281,8 @@ cmd_ac_init(void)
     autocomplete_add(lastactivity_ac, "get");
 
     autocomplete_add(vcard_ac, "get");
+    autocomplete_add(vcard_ac, "edit");
     autocomplete_add(vcard_ac, "photo");
-    autocomplete_add(vcard_ac, "set");
-    autocomplete_add(vcard_ac, "add");
-    autocomplete_add(vcard_ac, "remove");
-    autocomplete_add(vcard_ac, "save");
 
     autocomplete_add(vcard_photo_ac, "open");
     autocomplete_add(vcard_photo_ac, "save");
