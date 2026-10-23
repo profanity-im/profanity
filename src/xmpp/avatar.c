@@ -20,7 +20,9 @@
 #include <sys/stat.h>
 
 #include "log.h"
+#include "common.h"
 #include "xmpp/connection.h"
+#include "xmpp/jid.h"
 #include "xmpp/iq.h"
 #include "xmpp/message.h"
 #include "xmpp/stanza.h"
@@ -347,4 +349,31 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
     g_string_free(filename, TRUE);
 
     return 1;
+}
+
+gchar*
+avatar_get_path(const gchar* const jid)
+{
+    if (!jid) {
+        return NULL;
+    }
+
+    auto_jid Jid* jidp = jid_create(jid);
+    const gchar* target_jid = (jidp && jidp->barejid) ? jidp->barejid : jid;
+    auto_gchar gchar* sanitized = files_sanitize_jid(target_jid);
+    const gchar* dirs[] = { "avatars", DIR_PHOTOS, NULL };
+    const gchar* extensions[] = { ".png", ".jpeg", ".jpg", ".webp", "", NULL };
+
+    for (int d = 0; dirs[d] != NULL; d++) {
+        auto_gchar gchar* base_path = files_get_data_path(dirs[d]);
+        for (int i = 0; extensions[i] != NULL; i++) {
+            gchar* full_path = g_strdup_printf("%s/%s%s", base_path, sanitized, extensions[i]);
+            if (g_file_test(full_path, G_FILE_TEST_EXISTS)) {
+                return full_path;
+            }
+            g_free(full_path);
+        }
+    }
+
+    return NULL;
 }
