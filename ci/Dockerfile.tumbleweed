@@ -16,7 +16,6 @@ RUN zypper --non-interactive in --no-recommends \
   libgcrypt-devel \
   libgpgme-devel \
   libstrophe-devel \
-  libnotify-devel \
   libotr-devel \
   libsignal-protocol-c-devel \
   libomemo-c-devel \

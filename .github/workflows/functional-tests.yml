@@ -23,7 +23,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             libcmocka-dev libcurl4-openssl-dev libgcrypt20-dev libglib2.0-dev \
             libgpgme-dev libmicrohttpd-dev libncursesw5-dev \
-            libnotify-dev libotr5-dev libreadline-dev libsignal-protocol-c-dev \
+            libotr5-dev libreadline-dev libsignal-protocol-c-dev \
             libomemo-c-dev libssl-dev libtool meson ninja-build \
             pkg-config python3-dev python-dev-is-python3 libsqlite3-dev \
             libgdk-pixbuf-2.0-dev libqrencode-dev libenchant-2-dev \

@@ -3,6 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2026 Michael Vetter <jubalh@iodoru.org>
  *
  * SPDX-License-Identifier: GPL-3.0-or-later WITH OpenSSL-exception
  */
@@ -14,14 +15,16 @@
 
 #include <glib.h>
 
-#ifdef HAVE_LIBNOTIFY
-#include <libnotify/notify.h>
+#ifdef HAVE_NOTIFICATIONS
+#include <gio/gio.h>
+#include "tools/dbus.h"
 #endif
 
 #ifdef PLATFORM_CYGWIN
 #include <windows.h>
 #endif
 
+#include "common.h"
 #include "log.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
@@ -31,59 +34,81 @@
 
 static GTimer* remind_timer;
 
-#ifdef HAVE_LIBNOTIFY
-static NotifyNotification* notification;
-
 static void
 _notifier_uninit(void)
 {
-    if (notify_is_initted()) {
-        g_object_unref(G_OBJECT(notification));
-        notification = NULL;
-        notify_uninit();
+}
+
+#ifdef HAVE_NOTIFICATIONS
+static void
+_on_notify_reply(GObject* source_object, GAsyncResult* res, gpointer user_data)
+{
+    auto_gerror GError* error = NULL;
+    GVariant* result = g_dbus_connection_call_finish(G_DBUS_CONNECTION(source_object), res, &error);
+    if (!result) {
+        log_debug("Failed to send desktop notification: %s", PROF_GERROR_MESSAGE(error));
+        return;
     }
-}
-#else
-static void
-_notifier_uninit(void)
-{
-}
-#endif
 
-#ifdef HAVE_LIBNOTIFY
+    guint32 id = 0;
+    g_variant_get(result, "(u)", &id);
+    log_debug("Desktop notification sent (id: %u)", id);
+    g_variant_unref(result);
+}
+
 static void
 _notify(const gchar* const message, int timeout, const gchar* const category)
 {
-    log_debug("Attempting notification: %s", message);
-    if (notify_is_initted()) {
-        log_debug("Reinitialising libnotify");
-        notify_uninit();
-    } else {
-        log_debug("Initialising libnotify");
+    GDBusConnection* conn = dbus_get_session_bus();
+    if (!conn) {
+        log_debug("D-Bus session bus not available, cannot send notification.");
+        return;
     }
-    notify_init("Profanity");
 
-    if (notify_is_initted()) {
-        if (notification)
-            g_object_unref(G_OBJECT(notification));
-        notification = notify_notification_new("Profanity", message, NULL);
-        notify_notification_set_timeout(notification, timeout);
-        notify_notification_set_category(notification, category);
-        notify_notification_set_urgency(notification, NOTIFY_URGENCY_NORMAL);
-
-        auto_gerror GError* error = NULL;
-        gboolean notify_success = notify_notification_show(notification, &error);
-
-        if (!notify_success) {
-            log_error("Error sending desktop notification:");
-            log_error("  -> Message : %s", message);
-            log_error("  -> Error   : %s", PROF_GERROR_MESSAGE(error));
-        } else {
-            log_debug("Notification sent.");
-        }
+    auto_gchar gchar* summary = NULL;
+    const gchar* body = NULL;
+    const gchar* newline = strchr(message, '\n');
+    if (newline) {
+        summary = g_strndup(message, newline - message);
+        body = newline + 1;
     } else {
-        log_error("Libnotify not initialised.");
+        summary = g_strdup("Profanity");
+        body = message;
     }
+
+    GVariantBuilder hints_builder;
+    g_variant_builder_init(&hints_builder, G_VARIANT_TYPE("a{sv}"));
+    g_variant_builder_add(&hints_builder, "{sv}", "urgency", g_variant_new_byte(1));
+    g_variant_builder_add(&hints_builder, "{sv}", "category", g_variant_new_string(category ? category : "im.received"));
+    g_variant_builder_add(&hints_builder, "{sv}", "desktop-entry", g_variant_new_string("profanity"));
+
+    GVariantBuilder actions_builder;
+    g_variant_builder_init(&actions_builder, G_VARIANT_TYPE("as"));
+
+    GVariant* parameters = g_variant_new(
+        "(susssasa{sv}i)",
+        "Profanity",
+        0,
+        "proIcon",
+        summary,
+        body,
+        &actions_builder,
+        &hints_builder,
+        timeout);
+
+    g_dbus_connection_call(
+        conn,
+        "org.freedesktop.Notifications",
+        "/org/freedesktop/Notifications",
+        "org.freedesktop.Notifications",
+        "Notify",
+        parameters,
+        G_VARIANT_TYPE("(u)"),
+        G_DBUS_CALL_FLAGS_NONE,
+        -1,
+        NULL,
+        _on_notify_reply,
+        NULL);
 }
 #elif defined(PLATFORM_CYGWIN)
 static void

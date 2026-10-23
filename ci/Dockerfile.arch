@@ -16,7 +16,6 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   git \
   gpgme \
   libgcrypt \
-  libnotify \
   libsignal-protocol-c \
   libomemo-c \
   libotr \

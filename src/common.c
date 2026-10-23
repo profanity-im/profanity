@@ -591,7 +591,7 @@ is_notify_enabled(void)
 #ifdef HAVE_OSXNOTIFY
     notify_enabled = TRUE;
 #endif
-#ifdef HAVE_LIBNOTIFY
+#ifdef HAVE_NOTIFICATIONS
     notify_enabled = TRUE;
 #endif
 #ifdef PLATFORM_CYGWIN
