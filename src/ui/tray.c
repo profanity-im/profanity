@@ -105,9 +105,9 @@ static const gchar*
 _get_icon_name(void)
 {
     if (unread_messages > 0) {
-        return "proIconMsg";
+        return "profanity-new-message";
     }
-    return "proIcon";
+    return "profanity-msg-bubble";
 }
 
 static GVariant*
@@ -140,7 +140,7 @@ _sni_get_property(GDBusConnection* connection,
     } else if (g_strcmp0(property_name, "OverlayIconPixmap") == 0) {
         return g_variant_new_array(G_VARIANT_TYPE("(iiay)"), NULL, 0);
     } else if (g_strcmp0(property_name, "AttentionIconName") == 0) {
-        return g_variant_new_string("proIconMsg");
+        return g_variant_new_string("profanity-new-message");
     } else if (g_strcmp0(property_name, "AttentionIconPixmap") == 0) {
         return g_variant_new_array(G_VARIANT_TYPE("(iiay)"), NULL, 0);
     } else if (g_strcmp0(property_name, "AttentionMovieName") == 0) {
@@ -329,7 +329,7 @@ _on_watcher_vanished(GDBusConnection* connection, const gchar* name, gpointer us
 static void
 _find_icons(void)
 {
-    auto_gchar gchar* icon_file = files_get_icon_path("proIcon.png");
+    auto_gchar gchar* icon_file = files_get_icon_path("profanity-msg-bubble.png");
     if (icon_file) {
         icon_theme_path = g_path_get_dirname(icon_file);
         return;
