@@ -1351,7 +1351,10 @@ static const struct cmd_t command_defs[] = {
               "/notify sub on|off")
       CMD_DESC(
               "Configure desktop notifications. "
+              "Incoming message notifications display the contact's avatar if cached on disk "
+              "See '/help avatar' to download avatars on demand with get or automatically with auto. "
               "To configure presence update messages in the console, chat and chat room windows, see '/help presence'.")
+
       CMD_ARGS(
               { "chat on|off", "Notifications for regular chat messages." },
               { "chat current on|off", "Whether to show regular chat message notifications when the window is focused." },
@@ -2463,6 +2466,7 @@ static const struct cmd_t command_defs[] = {
       CMD_DESC(
               "Manage your avatar and contact avatars (XEP-0084). "
               "You can publish your own avatar with set or remove it using unset. "
+              "Contact avatars can be displayed in desktop notifications when available on disk. "
               "Contact avatars are not downloaded automatically by default. "
               "Use get to fetch a contact's avatar on demand, or enable auto to download "
               "and sync avatars automatically.")
