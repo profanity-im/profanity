@@ -177,7 +177,10 @@ static const struct cmd_t command_defs[] = {
               "/tls certpath clear",
               "/tls certpath default")
       CMD_DESC(
-              "Handle TLS certificates. ")
+              "Inspect and manage TLS certificate trust. "
+              "When connecting to a server with a certificate warning, use '/tls cert' to view details, "
+              "'/tls allow' to proceed for this session, '/tls trust' to trust it permanently, "
+              "or '/tls deny' to abort.")
       CMD_ARGS(
               { "allow", "Allow connection to continue with TLS certificate." },
               { "always", "Always allow connections with TLS certificate." },
@@ -710,12 +713,13 @@ static const struct cmd_t command_defs[] = {
               "/form cancel",
               "/form help [<tag>]")
       CMD_DESC(
-              "Form configuration.")
+              "Interact with XMPP data forms (XEP-0004) in configuration windows, such as chat room setup. "
+              "Allows displaying the form, viewing field descriptions, and submitting changes.")
       CMD_ARGS(
-              { "show", "Show the current form." },
-              { "submit", "Submit the current form." },
-              { "cancel", "Cancel changes to the current form." },
-              { "help [<tag>]", "Display help for form, or a specific field." })
+              { "show", "Display the current form and its fields." },
+              { "submit", "Submit completed form to the server." },
+              { "cancel", "Cancel changes and close the form window." },
+              { "help [<tag>]", "Display help for the entire form or a specific field tag." })
     },
 
     { CMD_PREAMBLE("/rooms",
@@ -1149,9 +1153,9 @@ static const struct cmd_t command_defs[] = {
       CMD_SYN(
               "/wrap on|off")
       CMD_DESC(
-              "Word wrapping.")
+              "Enable or disable automatic word wrapping for long messages in chat and console windows.")
       CMD_ARGS(
-              { "on|off", "Enable or disable word wrapping in the main window." })
+              { "on|off", "Enable or disable word wrapping." })
     },
 
     { CMD_PREAMBLE("/time",
@@ -2015,7 +2019,8 @@ static const struct cmd_t command_defs[] = {
               "/autoaway message away|xa <message>|off",
               "/autoaway check on|off")
       CMD_DESC(
-              "Manage autoaway settings for idle time.")
+              "Automatically update your presence or advertise inactivity after a period of no input. "
+              "Use 'mode away' to change your status to away/xa, or 'mode idle' to stay online while letting contacts see how long you have been idle.")
       CMD_ARGS(
               { "mode idle", "Sends idle time, status remains online." },
               { "mode away", "Sends away and xa presence as well as idle time." },
@@ -2571,9 +2576,10 @@ static const struct cmd_t command_defs[] = {
               "/executable vcard_photo set <cmdtemplate>",
               "/executable vcard_photo default")
       CMD_DESC(
-              "Configure executable that should be called upon a certain command.")
+              "Configure external programs used to open files, URLs, or avatars. "
+              "Command templates support '%p' as a placeholder for the file path, and '%u' for URLs.")
       CMD_ARGS(
-              { "avatar set", "Set executable that is run by /avatar open. Use your favorite image viewer." },
+              { "avatar set", "Set executable that is run by /avatar open. Takes a command template replacing %p with the path." },
               { "avatar default", "Restore to default settings." },
               { "urlopen set", "Set executable that is run by /url open. Takes a command template that replaces %u and %p with the URL and path respectively." },
               { "urlopen default", "Restore to default settings." },
@@ -2581,10 +2587,10 @@ static const struct cmd_t command_defs[] = {
               { "urlsave default", "Use the built-in download method for saving." },
               { "editor set", "Set editor to be used with /editor. Needs a terminal editor or a script to run a graphical editor." },
               { "editor default", "Restore to default settings." },
-              { "vcard_photo set", "Set executable that is run by /vcard photo open. Takes a command template that replaces %p with the path" },
+              { "vcard_photo set", "Set executable that is run by /vcard photo open. Takes a command template that replaces %p with the path." },
               { "vcard_photo default", "Restore to default settings." })
       CMD_EXAMPLES(
-              "/executable avatar xdg-open",
+              "/executable avatar set \"feh %p\"",
               "/executable urlopen set \"xdg-open %u\"",
               "/executable urlopen set \"firefox %u\"",
               "/executable urlopen default",
