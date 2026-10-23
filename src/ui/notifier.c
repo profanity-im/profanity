@@ -78,8 +78,8 @@ _notify(const gchar* const message, int timeout, const gchar* const category, co
         body = message;
     }
 
-    auto_gchar gchar* app_icon_path = files_get_icon_path("profanity-msg-bubble.png");
-    const gchar* app_icon = app_icon_path ? app_icon_path : "profanity-msg-bubble";
+    auto_gchar gchar* app_icon_path = files_get_icon_path("profanity.svg");
+    const gchar* app_icon = app_icon_path ? app_icon_path : "profanity";
 
     GVariantBuilder hints_builder;
     g_variant_builder_init(&hints_builder, G_VARIANT_TYPE("a{sv}"));

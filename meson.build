@@ -540,6 +540,11 @@ install_subdir('icons',
   strip_directory: false,
 )
 
+install_data(
+  'icons/profanity.svg',
+  install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'scalable' / 'apps',
+)
+
 # Install man pages
 man_pages = run_command('find', 'docs', '-name', 'profanity*.1', '-type', 'f',
                         check: true).stdout().strip().split('\n')
