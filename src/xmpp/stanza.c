@@ -2332,6 +2332,29 @@ _stanza_create_sha1_hash(const gchar* const str)
 }
 
 xmpp_stanza_t*
+stanza_create_avatar_retrieve_metadata_request(xmpp_ctx_t* ctx, const char* stanza_id, const gchar* const jid)
+{
+    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, stanza_id);
+    xmpp_stanza_set_to(iq, jid);
+
+    xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
+    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
+
+    xmpp_stanza_t* items = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(items, "items");
+    xmpp_stanza_set_attribute(items, STANZA_ATTR_NODE, STANZA_NS_USER_AVATAR_METADATA);
+
+    xmpp_stanza_add_child(pubsub, items);
+    xmpp_stanza_add_child(iq, pubsub);
+
+    xmpp_stanza_release(items);
+    xmpp_stanza_release(pubsub);
+
+    return iq;
+}
+
+xmpp_stanza_t*
 stanza_create_avatar_retrieve_data_request(xmpp_ctx_t* ctx, const char* stanza_id, const gchar* const item_id, const gchar* const jid)
 {
     xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_GET, stanza_id);

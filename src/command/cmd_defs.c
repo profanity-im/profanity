@@ -2461,17 +2461,17 @@ static const struct cmd_t command_defs[] = {
               "/avatar open <barejid>",
               "/avatar auto on|off")
       CMD_DESC(
-              "Upload an avatar for yourself, "
-              "remove your avatar, "
-              "or download a contact's avatar (XEP-0084). "
-              "If nothing happens after using this command, the user either doesn't have an avatar set "
-              "or doesn't use XEP-0084 to publish it.")
+              "Manage your avatar and contact avatars (XEP-0084). "
+              "You can publish your own avatar with set or remove it using unset. "
+              "Contact avatars are not downloaded automatically by default. "
+              "Use get to fetch a contact's avatar on demand, or enable auto to download "
+              "and sync avatars automatically.")
       CMD_ARGS(
               { "set <path>", "Set your avatar to the image file at <path>." },
               { "unset", "Remove your published avatar so others no longer see an avatar for you." },
-              { "get <barejid>", "Download the avatar. barejid is the JID to download avatar from." },
-              { "open <barejid>", "Download avatar and open it with command. See /executable." },
-              { "auto on|off", "Automatically download and sync contact avatars." })
+              { "get <barejid>", "Download the contact's avatar. barejid is the JID to download from." },
+              { "open <barejid>", "Download avatar and open it in your configured image viewer. See /executable." },
+              { "auto on|off", "Automatically download and sync contact avatars in the background." })
       CMD_EXAMPLES(
               "/avatar set ~/images/avatar.png",
               "/avatar unset",

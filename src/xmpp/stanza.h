@@ -391,6 +391,7 @@ gchar* stanza_text_strdup(xmpp_stanza_t* stanza);
 XMPPCaps* stanza_parse_caps(xmpp_stanza_t* const stanza);
 void stanza_free_caps(XMPPCaps* caps);
 
+xmpp_stanza_t* stanza_create_avatar_retrieve_metadata_request(xmpp_ctx_t* ctx, const char* stanza_id, const gchar* const jid);
 xmpp_stanza_t* stanza_create_avatar_retrieve_data_request(xmpp_ctx_t* ctx, const char* stanza_id, const gchar* const item_id, const gchar* const jid);
 xmpp_stanza_t* stanza_create_avatar_data_publish_iq(xmpp_ctx_t* ctx, const gchar* img_data, gsize len);
 xmpp_stanza_t* stanza_create_avatar_metadata_publish_iq(xmpp_ctx_t* ctx, const gchar* img_data, gsize len, int height, int width);

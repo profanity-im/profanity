@@ -47,6 +47,7 @@ const int MAX_PIXEL = 192;             // max pixel width/height for an avatar
 static void _avatar_request_item_by_id(const char* jid, avatar_metadata* data);
 static int _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const userdata);
+static int _avatar_retrieve_metadata_result_handler(xmpp_stanza_t* const stanza, void* const userdata);
 
 static void
 _free_avatar_data(avatar_metadata* data)
@@ -173,18 +174,26 @@ avatar_unset(void)
 gboolean
 avatar_get_by_nick(const gchar* nick, gboolean open)
 {
-    // in case we set the feature, remove it
-    caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
-
-    // save nick in list so we look for this one
-    g_hash_table_insert(looking_for, g_strdup(nick), NULL);
-
-    // add the feature. this will trigger the _avatar_metadata_notfication_handler handler
-    caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
-
-    if (open) {
-        g_hash_table_insert(shall_open, g_strdup(nick), NULL);
+    if (!nick) {
+        return FALSE;
     }
+
+    auto_jid Jid* jidp = jid_create(nick);
+    const gchar* target_jid = (jidp && jidp->barejid) ? jidp->barejid : nick;
+
+    g_hash_table_insert(looking_for, g_strdup(target_jid), NULL);
+    if (open) {
+        g_hash_table_insert(shall_open, g_strdup(target_jid), NULL);
+    }
+
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    auto_gchar gchar* uid = connection_create_stanza_id();
+
+    xmpp_stanza_t* iq = stanza_create_avatar_retrieve_metadata_request(ctx, uid, target_jid);
+    iq_id_handler_add(uid, _avatar_retrieve_metadata_result_handler, g_free, g_strdup(target_jid));
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 
     return TRUE;
 }
@@ -278,6 +287,81 @@ _avatar_request_item_by_id(const char* jid, avatar_metadata* data)
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+}
+
+static int
+_avatar_retrieve_metadata_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    const char* jid = (const char*)userdata;
+    const char* type = xmpp_stanza_get_type(stanza);
+
+    if (g_strcmp0(type, "error") == 0) {
+        cons_show("Contact '%s' has no avatar set or their server does not support XEP-0084.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
+    if (!pubsub) {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(pubsub, "items");
+    if (!items) {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, "item");
+    if (!item) {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    xmpp_stanza_t* metadata = xmpp_stanza_get_child_by_name(item, "metadata");
+    if (!metadata) {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    xmpp_stanza_t* info = xmpp_stanza_get_child_by_name(metadata, "info");
+    if (!info) {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    const char* id = xmpp_stanza_get_id(info);
+    const char* img_type = xmpp_stanza_get_attribute(info, "type");
+
+    if (id && img_type) {
+        log_debug("Avatar ID for %s is: %s", jid, id);
+
+        avatar_metadata* data = g_new0(avatar_metadata, 1);
+        if (data) {
+            data->type = g_strdup(img_type);
+            data->id = g_strdup(id);
+
+            _avatar_request_item_by_id(jid, data);
+        }
+    } else {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+    }
+
+    return 1;
 }
 
 static int
