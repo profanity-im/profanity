@@ -63,6 +63,12 @@ log_level_from_string(const gchar* const log_level, log_level_t* level)
     return mock_type(int);
 }
 
+const gchar*
+log_string_from_level(log_level_t level)
+{
+    return "INFO";
+}
+
 void
 log_stderr_init(log_level_t level)
 {

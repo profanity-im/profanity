@@ -1901,7 +1901,7 @@ static const struct cmd_t command_defs[] = {
     },
 
     { CMD_PREAMBLE("/log",
-                   parse_args, 1, 2, &cons_log_setting)
+                   parse_args, 0, 2, &cons_log_setting)
       CMD_MAINFUNC(cmd_log)
       CMD_SYN(
               "/log where",

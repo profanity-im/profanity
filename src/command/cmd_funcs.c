@@ -6325,6 +6325,18 @@ cmd_inputwin(ProfWin* window, const gchar* const command, gchar** args)
 gboolean
 cmd_log(ProfWin* window, const gchar* const command, gchar** args)
 {
+    if (args[0] == NULL) {
+        cons_show("Log settings:");
+        cons_show("  File    : %s", get_log_file_location());
+        cons_show("  Level   : %s", log_string_from_level(log_get_filter()));
+        cons_show("  Rotate  : %s", prefs_get_boolean(PREF_LOG_ROTATE) ? "ON" : "OFF");
+        if (prefs_get_boolean(PREF_LOG_ROTATE)) {
+            cons_show("  Maxsize : %d bytes", prefs_get_max_log_size());
+        }
+        cons_show("  Shared  : %s", prefs_get_boolean(PREF_LOG_SHARED) ? "ON" : "OFF");
+        return TRUE;
+    }
+
     char* subcmd = args[0];
     char* value = args[1];
 
