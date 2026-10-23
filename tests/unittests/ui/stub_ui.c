@@ -1156,10 +1156,6 @@ void
 cons_slashguard_setting(void)
 {
 }
-void
-cons_mam_setting(void)
-{
-}
 
 void
 cons_silence_setting(void)

@@ -1807,18 +1807,31 @@ static const struct cmd_t command_defs[] = {
     },
 
     { CMD_PREAMBLE("/history",
-                   parse_args, 1, 1, &cons_history_setting)
+                   parse_args, 0, 2, &cons_history_setting)
       CMD_MAINFUNC(cmd_history)
       CMD_TAGS(
               CMD_TAG_UI,
-              CMD_TAG_CHAT)
+              CMD_TAG_CHAT,
+              CMD_TAG_GROUPCHAT)
       CMD_SYN(
-              "/history on|off")
+              "/history",
+              "/history local on|off",
+              "/history mam on|off",
+              "/history mam verify")
       CMD_DESC(
-              "Switch chat history on or off, /logging chat will automatically be enabled when this setting is on. "
-              "When history is enabled, previous messages are shown in chat windows.")
+              "Configure message history. Controls displaying past messages from the local database "
+              "when opening chat windows, and syncing messages from the server using "
+              "Message Archive Management (MAM, XEP-0313). "
+              "Use the PG UP key in a window to load older messages.")
       CMD_ARGS(
-              { "on|off", "Enable or disable showing chat history." })
+              { "local on|off", "Enable or disable showing local database history when opening a window." },
+              { "mam on|off", "Enable or disable syncing server message archives (XEP-0313)." },
+              { "mam verify", "Verify history between oldest and newest messages in current window and fetch missing ones." })
+      CMD_EXAMPLES(
+              "/history",
+              "/history local on",
+              "/history mam on",
+              "/history mam verify")
     },
 
     { CMD_PREAMBLE("/log",
@@ -2542,23 +2555,6 @@ static const struct cmd_t command_defs[] = {
               "/url open https://profanity-im.github.io",
               "/url save https://profanity-im.github.io/guide/latest/userguide.html /home/user/Download/")
     },
-
-    { CMD_PREAMBLE("/mam",
-                    parse_args, 1, 1, &cons_mam_setting)
-       CMD_MAINFUNC(cmd_mam)
-       CMD_TAGS(
-               CMD_TAG_CHAT,
-               CMD_TAG_GROUPCHAT)
-       CMD_SYN(
-               "/mam <on>|<off>",
-               "/mam verify")
-       CMD_DESC(
-               "Enable or disable Message Archive Management (XEP-0313), or verify loaded history. "
-               "Use the PG UP key to load more history.")
-       CMD_ARGS(
-               { "on|off", "Enable or disable MAM" },
-               { "verify", "Verify history between the oldest and newest loaded messages in the current window and fetch any missing ones from the server" })
-     },
 
     { CMD_PREAMBLE("/changepassword",
                    parse_args, 0, 0, NULL)

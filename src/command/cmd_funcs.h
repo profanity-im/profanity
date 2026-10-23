@@ -226,7 +226,6 @@ gboolean cmd_executable_urlopen(ProfWin* window, const gchar* const command, gch
 gboolean cmd_executable_urlsave(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_executable_editor(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_executable_vcard_photo(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_mam(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_editor(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_correct_editor(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_redraw(ProfWin* window, const gchar* const command, gchar** args);

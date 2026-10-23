@@ -112,7 +112,7 @@ static gchar* _strophe_autocomplete(ProfWin* window, const gchar* const input, g
 static gchar* _stamp_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
 static gchar* _adhoc_cmd_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
 static gchar* _vcard_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
-static gchar* _mam_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
+static gchar* _history_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
 
 static gchar* _script_autocomplete_func(const gchar* const prefix, gboolean previous, void* context);
 
@@ -277,7 +277,8 @@ static Autocomplete vcard_name_ac;
 static Autocomplete vcard_set_param_ac;
 static Autocomplete vcard_togglable_param_ac;
 static Autocomplete vcard_address_type_ac;
-static Autocomplete mam_ac;
+static Autocomplete history_ac;
+static Autocomplete history_mam_ac;
 
 static char* last_filepath_input = NULL;
 
@@ -436,7 +437,8 @@ static Autocomplete* all_acs[] = {
     &vcard_set_param_ac,
     &vcard_togglable_param_ac,
     &vcard_address_type_ac,
-    &mam_ac,
+    &history_ac,
+    &history_mam_ac,
 };
 
 static GHashTable* ac_funcs = NULL;
@@ -1348,9 +1350,12 @@ cmd_ac_init(void)
     autocomplete_add(vcard_address_type_ac, "domestic");
     autocomplete_add(vcard_address_type_ac, "international");
 
-    autocomplete_add(mam_ac, "on");
-    autocomplete_add(mam_ac, "off");
-    autocomplete_add(mam_ac, "verify");
+    autocomplete_add(history_ac, "local");
+    autocomplete_add(history_ac, "mam");
+
+    autocomplete_add(history_mam_ac, "on");
+    autocomplete_add(history_mam_ac, "off");
+    autocomplete_add(history_mam_ac, "verify");
 
     if (ac_funcs != NULL)
         g_hash_table_destroy(ac_funcs);
@@ -1383,7 +1388,7 @@ cmd_ac_init(void)
     g_hash_table_insert(ac_funcs, "/lastactivity", _lastactivity_autocomplete);
     g_hash_table_insert(ac_funcs, "/log", _log_autocomplete);
     g_hash_table_insert(ac_funcs, "/logging", _logging_autocomplete);
-    g_hash_table_insert(ac_funcs, "/mam", _mam_autocomplete);
+    g_hash_table_insert(ac_funcs, "/history", _history_autocomplete);
     g_hash_table_insert(ac_funcs, "/privacy", _privacy_autocomplete);
     g_hash_table_insert(ac_funcs, "/mood", _mood_autocomplete);
     g_hash_table_insert(ac_funcs, "/notify", _notify_autocomplete);
@@ -1780,11 +1785,21 @@ _spellcheck_autocomplete(ProfWin* window, const gchar* const input, gboolean pre
 }
 
 static gchar*
-_mam_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
+_history_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
 {
     gchar* result = NULL;
 
-    result = autocomplete_param_with_ac(input, "/mam", mam_ac, TRUE, previous);
+    result = autocomplete_param_with_func(input, "/history local", prefs_autocomplete_boolean_choice, previous, NULL);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/history mam", history_mam_ac, TRUE, previous);
+    if (result) {
+        return result;
+    }
+
+    result = autocomplete_param_with_ac(input, "/history", history_ac, TRUE, previous);
 
     return result;
 }
@@ -1798,7 +1813,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
 
     // autocomplete boolean settings
     gchar* boolean_choices[] = { "/beep", "/states", "/outtype", "/flash", "/splash",
-                                 "/history", "/vercheck", "/privileges", "/wrap",
+                                 "/vercheck", "/privileges", "/wrap",
                                  "/carbons", "/slashguard", "/silence" };
 
     for (size_t i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
