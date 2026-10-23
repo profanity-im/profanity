@@ -44,6 +44,7 @@ gchar* files_get_data_path(const gchar* const location);
 gchar* files_get_download_path(const gchar* const jid);
 gchar* files_get_account_data_path(const gchar* const specific_dir, const gchar* const jid);
 gchar* files_sanitize_jid(const gchar* const jid);
+gchar* files_get_icon_path(const gchar* const filename);
 
 gchar* files_get_log_file(const gchar* const log_file);
 gchar* files_get_inputrc_file(void);

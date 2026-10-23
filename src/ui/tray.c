@@ -82,9 +82,12 @@ static guint own_name_id = 0;
 static gchar* service_name = NULL;
 static gchar* icon_theme_path = NULL;
 static guint timer = 0;
-static gint unread_messages = 0;
+static gboolean tray_alert = FALSE;
+static gint last_unread_count = 0;
 static gboolean tray_enabled = FALSE;
 static gboolean shutting_down = FALSE;
+
+static void _tray_emit_changed(void);
 
 static const gchar*
 _get_status_str(void)
@@ -92,7 +95,7 @@ _get_status_str(void)
     if (!tray_enabled) {
         return "Passive";
     }
-    if (unread_messages > 0) {
+    if (tray_alert) {
         return "NeedsAttention";
     }
     if (prefs_get_boolean(PREF_TRAY_READ)) {
@@ -104,10 +107,10 @@ _get_status_str(void)
 static const gchar*
 _get_icon_name(void)
 {
-    if (unread_messages > 0) {
-        return "proIconMsg";
+    if (tray_alert) {
+        return "profanity-new-message";
     }
-    return "proIcon";
+    return "profanity-msg-bubble";
 }
 
 static GVariant*
@@ -140,7 +143,7 @@ _sni_get_property(GDBusConnection* connection,
     } else if (g_strcmp0(property_name, "OverlayIconPixmap") == 0) {
         return g_variant_new_array(G_VARIANT_TYPE("(iiay)"), NULL, 0);
     } else if (g_strcmp0(property_name, "AttentionIconName") == 0) {
-        return g_variant_new_string("proIconMsg");
+        return g_variant_new_string("profanity-new-message");
     } else if (g_strcmp0(property_name, "AttentionIconPixmap") == 0) {
         return g_variant_new_array(G_VARIANT_TYPE("(iiay)"), NULL, 0);
     } else if (g_strcmp0(property_name, "AttentionMovieName") == 0) {
@@ -156,8 +159,9 @@ _sni_get_property(GDBusConnection* connection,
         g_variant_builder_open(&builder, G_VARIANT_TYPE("a(iiay)"));
         g_variant_builder_close(&builder);
         g_variant_builder_add(&builder, "s", "Profanity");
-        if (unread_messages > 0) {
-            auto_gchar gchar* msg = g_strdup_printf("Unread messages: %d", unread_messages);
+        gint total_unread = wins_get_total_unread();
+        if (total_unread > 0) {
+            auto_gchar gchar* msg = g_strdup_printf("Unread messages: %d", total_unread);
             g_variant_builder_add(&builder, "s", msg);
         } else {
             g_variant_builder_add(&builder, "s", "No unread messages");
@@ -180,7 +184,13 @@ _sni_method_call(GDBusConnection* connection,
                  GDBusMethodInvocation* invocation,
                  gpointer user_data)
 {
-    if (g_strcmp0(method_name, "ContextMenu") == 0 || g_strcmp0(method_name, "Activate") == 0 || g_strcmp0(method_name, "SecondaryActivate") == 0 || g_strcmp0(method_name, "Scroll") == 0) {
+    if (g_strcmp0(method_name, "Activate") == 0) {
+        if (tray_alert) {
+            tray_alert = FALSE;
+            _tray_emit_changed();
+        }
+        g_dbus_method_invocation_return_value(invocation, NULL);
+    } else if (g_strcmp0(method_name, "ContextMenu") == 0 || g_strcmp0(method_name, "SecondaryActivate") == 0 || g_strcmp0(method_name, "Scroll") == 0) {
         g_dbus_method_invocation_return_value(invocation, NULL);
     } else {
         g_dbus_method_invocation_return_error(invocation,
@@ -251,9 +261,27 @@ _tray_change_icon(gpointer data)
         return FALSE;
     }
 
-    gint new_unread = wins_get_total_unread();
-    if (new_unread != unread_messages) {
-        unread_messages = new_unread;
+    gint current_unread = wins_get_total_unread();
+    gboolean state_changed = FALSE;
+
+    if (current_unread > last_unread_count) {
+        if (!tray_alert) {
+            tray_alert = TRUE;
+            state_changed = TRUE;
+        }
+    } else if (current_unread == 0) {
+        if (tray_alert) {
+            tray_alert = FALSE;
+            state_changed = TRUE;
+        }
+    }
+
+    if (current_unread != last_unread_count) {
+        last_unread_count = current_unread;
+        state_changed = TRUE;
+    }
+
+    if (state_changed) {
         _tray_emit_changed();
     }
 
@@ -329,27 +357,11 @@ _on_watcher_vanished(GDBusConnection* connection, const gchar* name, gpointer us
 static void
 _find_icons(void)
 {
-    auto_gchar gchar* user_icons_dir = files_get_config_path(DIR_ICONS);
-    auto_gchar gchar* user_icon_file = g_build_filename(user_icons_dir, "proIcon.png", NULL);
-    if (g_file_test(user_icon_file, G_FILE_TEST_EXISTS)) {
-        icon_theme_path = g_strdup(user_icons_dir);
+    auto_gchar gchar* icon_file = files_get_icon_path("profanity-msg-bubble.png");
+    if (icon_file) {
+        icon_theme_path = g_path_get_dirname(icon_file);
         return;
     }
-
-#ifdef ICONS_PATH
-    auto_gchar gchar* system_icon_file = g_build_filename(ICONS_PATH, "proIcon.png", NULL);
-    if (g_file_test(system_icon_file, G_FILE_TEST_EXISTS)) {
-        icon_theme_path = g_strdup(ICONS_PATH);
-        return;
-    }
-#endif
-
-#ifdef PACKAGE_STATUS_DEVELOPMENT
-    if (g_file_test("../icons/proIcon.png", G_FILE_TEST_EXISTS)) {
-        icon_theme_path = g_canonicalize_filename("../icons", NULL);
-        return;
-    }
-#endif
 
 #ifdef ICONS_PATH
     icon_theme_path = g_strdup(ICONS_PATH);
@@ -495,9 +507,12 @@ tray_enable(void)
     tray_enabled = TRUE;
     shutting_down = FALSE;
 
+    last_unread_count = wins_get_total_unread();
+    tray_alert = (last_unread_count > 0);
+
     _register_with_watcher(session_bus);
 
-    _tray_change_icon(NULL);
+    _tray_emit_changed();
 
     if (timer) {
         g_source_remove(timer);
@@ -514,6 +529,8 @@ void
 tray_disable(void)
 {
     tray_enabled = FALSE;
+    tray_alert = FALSE;
+    last_unread_count = 0;
     if (timer) {
         g_source_remove(timer);
         timer = 0;

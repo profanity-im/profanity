@@ -19,10 +19,16 @@
 #include <errno.h>
 #include <sys/stat.h>
 
+#include <glib/gstdio.h>
+
 #include "log.h"
+#include "common.h"
+#include "xmpp/avatar.h"
 #include "xmpp/connection.h"
+#include "xmpp/jid.h"
 #include "xmpp/iq.h"
 #include "xmpp/message.h"
+#include "xmpp/roster_list.h"
 #include "xmpp/stanza.h"
 #include "ui/ui.h"
 #include "config/files.h"
@@ -41,6 +47,7 @@ const int MAX_PIXEL = 192;             // max pixel width/height for an avatar
 static void _avatar_request_item_by_id(const char* jid, avatar_metadata* data);
 static int _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const userdata);
+static int _avatar_retrieve_metadata_result_handler(xmpp_stanza_t* const stanza, void* const userdata);
 
 static void
 _free_avatar_data(avatar_metadata* data)
@@ -72,11 +79,25 @@ avatar_pep_subscribe(void)
     message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_METADATA, _avatar_metadata_handler, NULL, NULL);
     message_pubsub_event_handler_add(STANZA_NS_USER_AVATAR_DATA, _avatar_metadata_handler, NULL, NULL);
 
-    // caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+    if (prefs_get_boolean(PREF_AVATAR_AUTO)) {
+        caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+    }
 
     _avatar_cleanup();
     looking_for = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     shall_open = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+}
+
+void
+avatar_auto_enable(void)
+{
+    caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+}
+
+void
+avatar_auto_disable(void)
+{
+    caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
 }
 
 #ifdef HAVE_PIXBUF
@@ -132,12 +153,20 @@ avatar_set(const gchar* path)
 #endif
 
 gboolean
-avatar_publishing_disable()
+avatar_unset(void)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_stanza_t* iq = stanza_disable_avatar_publish_iq(ctx);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+
+    const Jid* my_jid = connection_get_jid();
+    if (my_jid && my_jid->barejid) {
+        auto_gchar gchar* path = avatar_get_path(my_jid->barejid);
+        if (path) {
+            g_remove(path);
+        }
+    }
 
     return TRUE;
 }
@@ -145,18 +174,26 @@ avatar_publishing_disable()
 gboolean
 avatar_get_by_nick(const gchar* nick, gboolean open)
 {
-    // in case we set the feature, remove it
-    caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
-
-    // save nick in list so we look for this one
-    g_hash_table_insert(looking_for, g_strdup(nick), NULL);
-
-    // add the feature. this will trigger the _avatar_metadata_notfication_handler handler
-    caps_add_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
-
-    if (open) {
-        g_hash_table_insert(shall_open, g_strdup(nick), NULL);
+    if (!nick) {
+        return FALSE;
     }
+
+    auto_jid Jid* jidp = jid_create(nick);
+    const gchar* target_jid = (jidp && jidp->barejid) ? jidp->barejid : nick;
+
+    g_hash_table_insert(looking_for, g_strdup(target_jid), NULL);
+    if (open) {
+        g_hash_table_insert(shall_open, g_strdup(target_jid), NULL);
+    }
+
+    xmpp_ctx_t* const ctx = connection_get_ctx();
+    auto_gchar gchar* uid = connection_create_stanza_id();
+
+    xmpp_stanza_t* iq = stanza_create_avatar_retrieve_metadata_request(ctx, uid, target_jid);
+    iq_id_handler_add(uid, _avatar_retrieve_metadata_result_handler, g_free, g_strdup(target_jid));
+
+    iq_send_stanza(iq);
+    xmpp_stanza_release(iq);
 
     return TRUE;
 }
@@ -169,7 +206,13 @@ _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
         return 1;
     }
 
-    if (!g_hash_table_contains(looking_for, from)) {
+    auto_jid Jid* from_jid = jid_create(from);
+    const gchar* barejid = (from_jid && from_jid->barejid) ? from_jid->barejid : from;
+
+    gboolean was_explicit = g_hash_table_contains(looking_for, from) || g_hash_table_contains(looking_for, barejid);
+    gboolean auto_sync = prefs_get_boolean(PREF_AVATAR_AUTO) && (roster_get_contact(barejid) != NULL);
+
+    if (!was_explicit && !auto_sync) {
         return 1;
     }
 
@@ -217,8 +260,10 @@ _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
                     }
                 }
             } else {
-                cons_show("We couldn't get the user's avatar, possibly because they haven't set one or have disabled avatar publishing. "
-                          "During this Profanity session, you will receive future changes to this user's avatar.");
+                if (was_explicit) {
+                    cons_show("We couldn't get the user's avatar, possibly because they haven't set one or have disabled avatar publishing. "
+                              "During this Profanity session, you will receive future changes to this user's avatar.");
+                }
             }
         }
     }
@@ -229,7 +274,9 @@ _avatar_metadata_handler(xmpp_stanza_t* const stanza, void* const userdata)
 static void
 _avatar_request_item_by_id(const char* jid, avatar_metadata* data)
 {
-    caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+    if (!prefs_get_boolean(PREF_AVATAR_AUTO)) {
+        caps_remove_feature(XMPP_FEATURE_USER_AVATAR_METADATA_NOTIFY);
+    }
 
     xmpp_ctx_t* const ctx = connection_get_ctx();
 
@@ -243,6 +290,81 @@ _avatar_request_item_by_id(const char* jid, avatar_metadata* data)
 }
 
 static int
+_avatar_retrieve_metadata_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    const char* jid = (const char*)userdata;
+    const char* type = xmpp_stanza_get_type(stanza);
+
+    if (g_strcmp0(type, "error") == 0) {
+        cons_show("Contact '%s' has no avatar set or their server does not support XEP-0084.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
+    if (!pubsub) {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    xmpp_stanza_t* items = xmpp_stanza_get_child_by_name(pubsub, "items");
+    if (!items) {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    xmpp_stanza_t* item = xmpp_stanza_get_child_by_name(items, "item");
+    if (!item) {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    xmpp_stanza_t* metadata = xmpp_stanza_get_child_by_name(item, "metadata");
+    if (!metadata) {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    xmpp_stanza_t* info = xmpp_stanza_get_child_by_name(metadata, "info");
+    if (!info) {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+        return 1;
+    }
+
+    const char* id = xmpp_stanza_get_id(info);
+    const char* img_type = xmpp_stanza_get_attribute(info, "type");
+
+    if (id && img_type) {
+        log_debug("Avatar ID for %s is: %s", jid, id);
+
+        avatar_metadata* data = g_new0(avatar_metadata, 1);
+        if (data) {
+            data->type = g_strdup(img_type);
+            data->id = g_strdup(id);
+
+            _avatar_request_item_by_id(jid, data);
+        }
+    } else {
+        cons_show("Contact '%s' has no avatar set.", jid);
+        g_hash_table_remove(looking_for, jid);
+        g_hash_table_remove(shall_open, jid);
+    }
+
+    return 1;
+}
+
+static int
 _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const userdata)
 {
     const char* from_attr = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
@@ -251,10 +373,19 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
         return 1;
     }
 
-    if (!g_hash_table_contains(looking_for, from_attr)) {
+    auto_jid Jid* from_jid = jid_create(from_attr);
+    const gchar* target_jid = (from_jid && from_jid->barejid) ? from_jid->barejid : from_attr;
+
+    gboolean was_explicit = g_hash_table_contains(looking_for, from_attr) || g_hash_table_contains(looking_for, target_jid);
+    if (!was_explicit && !prefs_get_boolean(PREF_AVATAR_AUTO)) {
         return 1;
     }
-    g_hash_table_remove(looking_for, from_attr);
+    if (g_hash_table_contains(looking_for, from_attr)) {
+        g_hash_table_remove(looking_for, from_attr);
+    }
+    if (g_hash_table_contains(looking_for, target_jid)) {
+        g_hash_table_remove(looking_for, target_jid);
+    }
 
     xmpp_stanza_t* pubsub = xmpp_stanza_get_child_by_ns(stanza, STANZA_NS_PUBSUB);
     if (!pubsub) {
@@ -300,10 +431,8 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
         }
     }
 
-    GString* from = g_string_new(from_attr);
-    g_string_replace(from, "@", "_at_", 0);
-    g_string_append(filename, from->str);
-    g_string_free(from, TRUE);
+    auto_gchar gchar* from_clean = files_sanitize_jid(target_jid);
+    g_string_append(filename, from_clean);
 
     avatar_metadata* data = (avatar_metadata*)userdata;
 
@@ -322,13 +451,18 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
     auto_gerror GError* err = NULL;
     if (g_file_set_contents(filename->str, de, size, &err) == FALSE) {
         log_error("Unable to save picture: %s", err->message);
-        cons_show("Unable to save picture %s", err->message);
+        if (was_explicit) {
+            cons_show("Unable to save picture %s", err->message);
+        }
     } else {
-        cons_show("Avatar saved as %s", filename->str);
+        log_debug("Avatar saved as %s", filename->str);
+        if (was_explicit) {
+            cons_show("Avatar saved as %s", filename->str);
+        }
     }
 
     // if we shall open it
-    if (g_hash_table_contains(shall_open, from_attr)) {
+    if (g_hash_table_contains(shall_open, from_attr) || g_hash_table_contains(shall_open, target_jid)) {
         auto_gchar gchar* cmdtemplate = prefs_get_string(PREF_AVATAR_CMD);
 
         if (cmdtemplate == NULL) {
@@ -342,9 +476,37 @@ _avatar_request_item_result_handler(xmpp_stanza_t* const stanza, void* const use
         }
 
         g_hash_table_remove(shall_open, from_attr);
+        g_hash_table_remove(shall_open, target_jid);
     }
 
     g_string_free(filename, TRUE);
 
     return 1;
+}
+
+gchar*
+avatar_get_path(const gchar* const jid)
+{
+    if (!jid) {
+        return NULL;
+    }
+
+    auto_jid Jid* jidp = jid_create(jid);
+    const gchar* target_jid = (jidp && jidp->barejid) ? jidp->barejid : jid;
+    auto_gchar gchar* sanitized = files_sanitize_jid(target_jid);
+    const gchar* dirs[] = { "avatars", DIR_PHOTOS, NULL };
+    const gchar* extensions[] = { ".png", ".jpeg", ".jpg", ".webp", "", NULL };
+
+    for (int d = 0; dirs[d] != NULL; d++) {
+        auto_gchar gchar* base_path = files_get_data_path(dirs[d]);
+        for (int i = 0; extensions[i] != NULL; i++) {
+            gchar* full_path = g_strdup_printf("%s/%s%s", base_path, sanitized, extensions[i]);
+            if (g_file_test(full_path, G_FILE_TEST_EXISTS)) {
+                return full_path;
+            }
+            g_free(full_path);
+        }
+    }
+
+    return NULL;
 }

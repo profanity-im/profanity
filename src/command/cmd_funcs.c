@@ -9304,17 +9304,35 @@ gboolean
 cmd_avatar(ProfWin* window, const gchar* const command, gchar** args)
 {
     if (args[1] == NULL) {
-        if (g_strcmp0(args[0], "disable") == 0) {
-            if (avatar_publishing_disable()) {
-                cons_show("Avatar publishing disabled. To enable avatar publishing, use '/avatar set <path>'.");
+        if (g_strcmp0(args[0], "unset") == 0) {
+            if (avatar_unset()) {
+                cons_show("Avatar removed. To set an avatar, use '/avatar set <path>'.");
             } else {
-                cons_show("Failed to disable avatar publishing.");
+                cons_show("Failed to remove avatar.");
+            }
+        } else if (g_strcmp0(args[0], "auto") == 0) {
+            if (prefs_get_boolean(PREF_AVATAR_AUTO)) {
+                cons_show("Automatic avatar downloading: ON");
+            } else {
+                cons_show("Automatic avatar downloading: OFF");
             }
         } else {
             cons_bad_cmd_usage(command);
         }
     } else {
-        if (g_strcmp0(args[0], "set") == 0) {
+        if (g_strcmp0(args[0], "auto") == 0) {
+            if (g_strcmp0(args[1], "on") == 0) {
+                prefs_set_boolean(PREF_AVATAR_AUTO, TRUE);
+                avatar_auto_enable();
+                cons_show("Automatic avatar downloading enabled.");
+            } else if (g_strcmp0(args[1], "off") == 0) {
+                prefs_set_boolean(PREF_AVATAR_AUTO, FALSE);
+                avatar_auto_disable();
+                cons_show("Automatic avatar downloading disabled.");
+            } else {
+                cons_bad_cmd_usage(command);
+            }
+        } else if (g_strcmp0(args[0], "set") == 0) {
 #ifdef HAVE_PIXBUF
             if (avatar_set(args[1])) {
                 cons_show("Avatar updated successfully");

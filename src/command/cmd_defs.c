@@ -1351,7 +1351,10 @@ static const struct cmd_t command_defs[] = {
               "/notify sub on|off")
       CMD_DESC(
               "Configure desktop notifications. "
+              "Incoming message notifications display the contact's avatar if cached on disk "
+              "See '/help avatar' to download avatars on demand with get or automatically with auto. "
               "To configure presence update messages in the console, chat and chat room windows, see '/help presence'.")
+
       CMD_ARGS(
               { "chat on|off", "Notifications for regular chat messages." },
               { "chat current on|off", "Whether to show regular chat message notifications when the window is focused." },
@@ -1416,7 +1419,9 @@ static const struct cmd_t command_defs[] = {
               "/tray read on|off",
               "/tray timer <seconds>")
       CMD_DESC(
-              "Display an icon in the tray that will indicate new messages.")
+              "Display an icon in the system tray to indicate new messages. "
+              "Clicking the icon acknowledges current messages and resets the alert until new messages arrive. "
+              "Unread indicators in chat windows remain untouched so you can still see where to reply.")
       CMD_ARGS(
               { "on|off", "Show tray icon." },
               { "read on|off", "Show tray icon when no unread messages." },
@@ -2454,25 +2459,29 @@ static const struct cmd_t command_defs[] = {
               CMD_TAG_CHAT)
       CMD_SYN(
               "/avatar set <path>",
-              "/avatar disable",
+              "/avatar unset",
               "/avatar get <barejid>",
-              "/avatar open <barejid>")
+              "/avatar open <barejid>",
+              "/avatar auto on|off")
       CMD_DESC(
-              "Upload an avatar for yourself, "
-              "disable your avatar, "
-              "or download a contact's avatar (XEP-0084). "
-              "If nothing happens after using this command, the user either doesn't have an avatar set "
-              "or doesn't use XEP-0084 to publish it.")
+              "Manage your avatar and contact avatars (XEP-0084). "
+              "You can publish your own avatar with set or remove it using unset. "
+              "Contact avatars can be displayed in desktop notifications when available on disk. "
+              "Contact avatars are not downloaded automatically by default. "
+              "Use get to fetch a contact's avatar on demand, or enable auto to download "
+              "and sync avatars automatically.")
       CMD_ARGS(
-              { "set <path>", "Set avatar to the image at <path>." },
-              { "disable", "Disable avatar publishing; your avatar will not display to others." },
-              { "get <barejid>", "Download the avatar. barejid is the JID to download avatar from." },
-              { "open <barejid>", "Download avatar and open it with command. See /executable." })
+              { "set <path>", "Set your avatar to the image file at <path>." },
+              { "unset", "Remove your published avatar so others no longer see an avatar for you." },
+              { "get <barejid>", "Download the contact's avatar. barejid is the JID to download from." },
+              { "open <barejid>", "Download avatar and open it in your configured image viewer. See /executable." },
+              { "auto on|off", "Automatically download and sync contact avatars in the background." })
       CMD_EXAMPLES(
               "/avatar set ~/images/avatar.png",
-              "/avatar disable",
+              "/avatar unset",
               "/avatar get thor@valhalla.edda",
-              "/avatar open freyja@vanaheimr.edda") },
+              "/avatar open freyja@vanaheimr.edda",
+              "/avatar auto on") },
 
     { CMD_PREAMBLE("/correction",
                    parse_args, 1, 2, &cons_correction_setting)

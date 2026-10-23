@@ -1148,9 +1148,10 @@ cmd_ac_init(void)
     autocomplete_add(correction_ac, "char");
 
     autocomplete_add(avatar_ac, "set");
-    autocomplete_add(avatar_ac, "disable");
+    autocomplete_add(avatar_ac, "unset");
     autocomplete_add(avatar_ac, "get");
     autocomplete_add(avatar_ac, "open");
+    autocomplete_add(avatar_ac, "auto");
 
     autocomplete_add(url_ac, "open");
     autocomplete_add(url_ac, "save");
@@ -4048,6 +4049,11 @@ static gchar*
 _avatar_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
 {
     gchar* result = NULL;
+
+    result = autocomplete_param_with_func(input, "/avatar auto", prefs_autocomplete_boolean_choice, previous, NULL);
+    if (result) {
+        return result;
+    }
 
     result = autocomplete_param_with_ac(input, "/avatar", avatar_ac, TRUE, previous);
     if (result) {

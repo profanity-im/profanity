@@ -13,10 +13,13 @@
 #include <glib.h>
 
 void avatar_pep_subscribe(void);
+void avatar_auto_enable(void);
+void avatar_auto_disable(void);
 gboolean avatar_get_by_nick(const gchar* nick, gboolean open);
+gchar* avatar_get_path(const gchar* const jid);
 #ifdef HAVE_PIXBUF
 gboolean avatar_set(const gchar* path);
 #endif
+gboolean avatar_unset(void);
 
 #endif
-gboolean avatar_publishing_disable();

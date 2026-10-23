@@ -1424,11 +1424,11 @@ notifier_uninit(void)
 }
 
 void
-notify_typing(const gchar* const handle)
+notify_typing(const gchar* const handle, const gchar* const barejid)
 {
 }
 void
-notify_message(const gchar* const name, int win, const gchar* const text)
+notify_message(const gchar* const name, const gchar* const barejid, int win, const gchar* const text)
 {
 }
 void
