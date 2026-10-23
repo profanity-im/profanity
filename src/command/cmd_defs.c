@@ -2572,9 +2572,10 @@ static const struct cmd_t command_defs[] = {
               "/executable vcard_photo set <cmdtemplate>",
               "/executable vcard_photo default")
       CMD_DESC(
-              "Configure executable that should be called upon a certain command.")
+              "Configure external programs used to open files, URLs, or avatars. "
+              "Command templates support '%p' as a placeholder for the file path, and '%u' for URLs.")
       CMD_ARGS(
-              { "avatar set", "Set executable that is run by /avatar open. Use your favorite image viewer." },
+              { "avatar set", "Set executable that is run by /avatar open. Takes a command template replacing %p with the path." },
               { "avatar default", "Restore to default settings." },
               { "urlopen set", "Set executable that is run by /url open. Takes a command template that replaces %u and %p with the URL and path respectively." },
               { "urlopen default", "Restore to default settings." },
@@ -2582,10 +2583,10 @@ static const struct cmd_t command_defs[] = {
               { "urlsave default", "Use the built-in download method for saving." },
               { "editor set", "Set editor to be used with /editor. Needs a terminal editor or a script to run a graphical editor." },
               { "editor default", "Restore to default settings." },
-              { "vcard_photo set", "Set executable that is run by /vcard photo open. Takes a command template that replaces %p with the path" },
+              { "vcard_photo set", "Set executable that is run by /vcard photo open. Takes a command template that replaces %p with the path." },
               { "vcard_photo default", "Restore to default settings." })
       CMD_EXAMPLES(
-              "/executable avatar xdg-open",
+              "/executable avatar set \"feh %p\"",
               "/executable urlopen set \"xdg-open %u\"",
               "/executable urlopen set \"firefox %u\"",
               "/executable urlopen default",
