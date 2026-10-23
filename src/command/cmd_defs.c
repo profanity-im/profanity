@@ -1416,7 +1416,9 @@ static const struct cmd_t command_defs[] = {
               "/tray read on|off",
               "/tray timer <seconds>")
       CMD_DESC(
-              "Display an icon in the tray that will indicate new messages.")
+              "Display an icon in the system tray to indicate new messages. "
+              "Clicking the icon acknowledges current messages and resets the alert until new messages arrive. "
+              "Unread indicators in chat windows remain untouched so you can still see where to reply.")
       CMD_ARGS(
               { "on|off", "Show tray icon." },
               { "read on|off", "Show tray icon when no unread messages." },

@@ -82,9 +82,12 @@ static guint own_name_id = 0;
 static gchar* service_name = NULL;
 static gchar* icon_theme_path = NULL;
 static guint timer = 0;
-static gint unread_messages = 0;
+static gboolean tray_alert = FALSE;
+static gint last_unread_count = 0;
 static gboolean tray_enabled = FALSE;
 static gboolean shutting_down = FALSE;
+
+static void _tray_emit_changed(void);
 
 static const gchar*
 _get_status_str(void)
@@ -92,7 +95,7 @@ _get_status_str(void)
     if (!tray_enabled) {
         return "Passive";
     }
-    if (unread_messages > 0) {
+    if (tray_alert) {
         return "NeedsAttention";
     }
     if (prefs_get_boolean(PREF_TRAY_READ)) {
@@ -104,7 +107,7 @@ _get_status_str(void)
 static const gchar*
 _get_icon_name(void)
 {
-    if (unread_messages > 0) {
+    if (tray_alert) {
         return "profanity-new-message";
     }
     return "profanity-msg-bubble";
@@ -156,8 +159,9 @@ _sni_get_property(GDBusConnection* connection,
         g_variant_builder_open(&builder, G_VARIANT_TYPE("a(iiay)"));
         g_variant_builder_close(&builder);
         g_variant_builder_add(&builder, "s", "Profanity");
-        if (unread_messages > 0) {
-            auto_gchar gchar* msg = g_strdup_printf("Unread messages: %d", unread_messages);
+        gint total_unread = wins_get_total_unread();
+        if (total_unread > 0) {
+            auto_gchar gchar* msg = g_strdup_printf("Unread messages: %d", total_unread);
             g_variant_builder_add(&builder, "s", msg);
         } else {
             g_variant_builder_add(&builder, "s", "No unread messages");
@@ -180,7 +184,13 @@ _sni_method_call(GDBusConnection* connection,
                  GDBusMethodInvocation* invocation,
                  gpointer user_data)
 {
-    if (g_strcmp0(method_name, "ContextMenu") == 0 || g_strcmp0(method_name, "Activate") == 0 || g_strcmp0(method_name, "SecondaryActivate") == 0 || g_strcmp0(method_name, "Scroll") == 0) {
+    if (g_strcmp0(method_name, "Activate") == 0) {
+        if (tray_alert) {
+            tray_alert = FALSE;
+            _tray_emit_changed();
+        }
+        g_dbus_method_invocation_return_value(invocation, NULL);
+    } else if (g_strcmp0(method_name, "ContextMenu") == 0 || g_strcmp0(method_name, "SecondaryActivate") == 0 || g_strcmp0(method_name, "Scroll") == 0) {
         g_dbus_method_invocation_return_value(invocation, NULL);
     } else {
         g_dbus_method_invocation_return_error(invocation,
@@ -251,9 +261,27 @@ _tray_change_icon(gpointer data)
         return FALSE;
     }
 
-    gint new_unread = wins_get_total_unread();
-    if (new_unread != unread_messages) {
-        unread_messages = new_unread;
+    gint current_unread = wins_get_total_unread();
+    gboolean state_changed = FALSE;
+
+    if (current_unread > last_unread_count) {
+        if (!tray_alert) {
+            tray_alert = TRUE;
+            state_changed = TRUE;
+        }
+    } else if (current_unread == 0) {
+        if (tray_alert) {
+            tray_alert = FALSE;
+            state_changed = TRUE;
+        }
+    }
+
+    if (current_unread != last_unread_count) {
+        last_unread_count = current_unread;
+        state_changed = TRUE;
+    }
+
+    if (state_changed) {
         _tray_emit_changed();
     }
 
@@ -479,9 +507,12 @@ tray_enable(void)
     tray_enabled = TRUE;
     shutting_down = FALSE;
 
+    last_unread_count = wins_get_total_unread();
+    tray_alert = (last_unread_count > 0);
+
     _register_with_watcher(session_bus);
 
-    _tray_change_icon(NULL);
+    _tray_emit_changed();
 
     if (timer) {
         g_source_remove(timer);
@@ -498,6 +529,8 @@ void
 tray_disable(void)
 {
     tray_enabled = FALSE;
+    tray_alert = FALSE;
+    last_unread_count = 0;
     if (timer) {
         g_source_remove(timer);
         timer = 0;
