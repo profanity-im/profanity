@@ -371,7 +371,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     }
 
     if (notify) {
-        notify_message(display_name, num, message->plain);
+        notify_message(display_name, message->from_jid->barejid, num, message->plain);
     }
 
     plugins_post_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);

@@ -69,7 +69,7 @@ privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
     }
 
     if (notify) {
-        notify_message(jidp->resourcepart, num, message->plain);
+        notify_message(jidp->resourcepart, jidp->barejid, num, message->plain);
     }
 }
 

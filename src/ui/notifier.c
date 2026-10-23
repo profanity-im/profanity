@@ -10,14 +10,14 @@
 #include "config.h"
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <glib.h>
 
 #ifdef HAVE_NOTIFICATIONS
-#include <gio/gio.h>
 #include "tools/dbus.h"
+#include <gio/gio.h>
 #endif
 
 #ifdef PLATFORM_CYGWIN
@@ -25,12 +25,14 @@
 #endif
 
 #include "common.h"
-#include "log.h"
+#include "config/files.h"
 #include "config/preferences.h"
+#include "log.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
-#include "xmpp/xmpp.h"
+#include "xmpp/avatar.h"
 #include "xmpp/muc.h"
+#include "xmpp/xmpp.h"
 
 static GTimer* remind_timer;
 
@@ -57,7 +59,7 @@ _on_notify_reply(GObject* source_object, GAsyncResult* res, gpointer user_data)
 }
 
 static void
-_notify(const gchar* const message, int timeout, const gchar* const category)
+_notify(const gchar* const message, int timeout, const gchar* const category, const gchar* const avatar_path)
 {
     GDBusConnection* conn = dbus_get_session_bus();
     if (!conn) {
@@ -76,11 +78,19 @@ _notify(const gchar* const message, int timeout, const gchar* const category)
         body = message;
     }
 
+    auto_gchar gchar* app_icon_path = files_get_icon_path("proIcon.png");
+    const gchar* app_icon = app_icon_path ? app_icon_path : "proIcon";
+
     GVariantBuilder hints_builder;
     g_variant_builder_init(&hints_builder, G_VARIANT_TYPE("a{sv}"));
     g_variant_builder_add(&hints_builder, "{sv}", "urgency", g_variant_new_byte(1));
     g_variant_builder_add(&hints_builder, "{sv}", "category", g_variant_new_string(category ? category : "im.received"));
     g_variant_builder_add(&hints_builder, "{sv}", "desktop-entry", g_variant_new_string("profanity"));
+
+    if (avatar_path && g_file_test(avatar_path, G_FILE_TEST_EXISTS)) {
+        g_variant_builder_add(&hints_builder, "{sv}", "image-path", g_variant_new_string(avatar_path));
+        g_variant_builder_add(&hints_builder, "{sv}", "image_path", g_variant_new_string(avatar_path));
+    }
 
     GVariantBuilder actions_builder;
     g_variant_builder_init(&actions_builder, G_VARIANT_TYPE("as"));
@@ -89,7 +99,7 @@ _notify(const gchar* const message, int timeout, const gchar* const category)
         "(susssasa{sv}i)",
         "Profanity",
         0,
-        "proIcon",
+        app_icon,
         summary,
         body,
         &actions_builder,
@@ -112,7 +122,7 @@ _notify(const gchar* const message, int timeout, const gchar* const category)
 }
 #elif defined(PLATFORM_CYGWIN)
 static void
-_notify(const gchar* const message, int timeout, const gchar* const category)
+_notify(const gchar* const message, int timeout, const gchar* const category, const gchar* const avatar_path)
 {
     NOTIFYICONDATA nid;
     memset(&nid, 0, sizeof(nid));
@@ -137,7 +147,7 @@ _notify(const gchar* const message, int timeout, const gchar* const category)
 }
 #elif defined(HAVE_OSXNOTIFY)
 static void
-_notify(const gchar* const message, int timeout, const gchar* const category)
+_notify(const gchar* const message, int timeout, const gchar* const category, const gchar* const avatar_path)
 {
     auto_gchar gchar* msg = NULL;
     if (message && (message[0] == '<' || message[0] == '[' || message[0] == '(' || message[0] == '{')) {
@@ -161,6 +171,11 @@ _notify(const gchar* const message, int timeout, const gchar* const category)
         g_string_append(notify_command, app_id);
     }
 
+    if (avatar_path && g_file_test(avatar_path, G_FILE_TEST_EXISTS)) {
+        auto_gchar gchar* quoted_avatar = g_shell_quote(avatar_path);
+        g_string_append_printf(notify_command, " -contentImage %s", quoted_avatar);
+    }
+
     int res = system(notify_command->str);
     if (res == -1) {
         log_error("Could not send desktop notification.");
@@ -170,7 +185,7 @@ _notify(const gchar* const message, int timeout, const gchar* const category)
 }
 #else
 static void
-_notify(const gchar* const message, int timeout, const gchar* const category)
+_notify(const gchar* const message, int timeout, const gchar* const category, const gchar* const avatar_path)
 {
     log_error_once("Notification backend missing");
 }
@@ -190,10 +205,12 @@ notifier_uninit(void)
 }
 
 void
-notify_typing(const gchar* const name)
+notify_typing(const gchar* const name, const gchar* const barejid)
 {
     auto_gchar gchar* message = g_strdup_printf("%s: typing…", name);
-    notify(message, 10000, "Incoming message");
+    auto_gchar gchar* avatar_path = avatar_get_path(barejid);
+    log_debug("Attempting notification: %s", message);
+    _notify(message, 10000, "Incoming message", avatar_path);
 }
 
 void
@@ -207,13 +224,15 @@ notify_invite(const gchar* const from, const gchar* const room, const gchar* con
         g_string_append_printf(message, "\n\"%s\"", reason);
     }
 
-    notify(message->str, 10000, "Incoming message");
+    auto_gchar gchar* avatar_path = avatar_get_path(from);
+    log_debug("Attempting notification: %s", message->str);
+    _notify(message->str, 10000, "Incoming message", avatar_path);
 
     g_string_free(message, TRUE);
 }
 
 void
-notify_message(const gchar* const name, int num, const gchar* const text)
+notify_message(const gchar* const name, const gchar* const barejid, int num, const gchar* const text)
 {
     int ui_index = num;
     if (ui_index == 10) {
@@ -226,7 +245,9 @@ notify_message(const gchar* const name, int num, const gchar* const text)
         g_string_append_printf(message, "\n%s", text);
     }
 
-    notify(message->str, 10000, "incoming message");
+    auto_gchar gchar* avatar_path = avatar_get_path(barejid);
+    log_debug("Attempting notification: %s", message->str);
+    _notify(message->str, 10000, "incoming message", avatar_path);
     g_string_free(message, TRUE);
 }
 
@@ -244,7 +265,9 @@ notify_room_message(const gchar* const nick, const gchar* const room, int num, c
         g_string_append_printf(message, "\n%s", text);
     }
 
-    notify(message->str, 10000, "incoming message");
+    auto_gchar gchar* avatar_path = avatar_get_path(room);
+    log_debug("Attempting notification: %s", message->str);
+    _notify(message->str, 10000, "incoming message", avatar_path);
 
     g_string_free(message, TRUE);
 }
@@ -254,7 +277,9 @@ notify_subscription(const gchar* const from)
 {
     GString* message = g_string_new("Subscription request: \n");
     g_string_append(message, from);
-    notify(message->str, 10000, "Incoming message");
+    auto_gchar gchar* avatar_path = avatar_get_path(from);
+    log_debug("Attempting notification: %s", message->str);
+    _notify(message->str, 10000, "Incoming message", avatar_path);
     g_string_free(message, TRUE);
 }
 
@@ -300,7 +325,8 @@ notify_remind(void)
         }
 
         if ((donotify && unread > 0) || (open > 0) || (subs > 0)) {
-            notify(text->str, 5000, "Incoming message");
+            log_debug("Attempting notification: %s", text->str);
+            _notify(text->str, 5000, "Incoming message", NULL);
         }
 
         g_string_free(text, TRUE);
@@ -313,5 +339,5 @@ void
 notify(const gchar* const message, int timeout, const gchar* const category)
 {
     log_debug("Attempting notification: %s", message);
-    _notify(message, timeout, category);
+    _notify(message, timeout, category, NULL);
 }
