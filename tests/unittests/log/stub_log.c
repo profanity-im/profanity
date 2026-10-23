@@ -22,6 +22,11 @@ log_get_filter(void)
 }
 
 void
+log_set_filter(log_level_t filter)
+{
+}
+
+void
 log_close(void)
 {
 }
@@ -56,6 +61,12 @@ int
 log_level_from_string(const gchar* const log_level, log_level_t* level)
 {
     return mock_type(int);
+}
+
+const gchar*
+log_string_from_level(log_level_t level)
+{
+    return "INFO";
 }
 
 void

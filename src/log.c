@@ -192,6 +192,12 @@ log_get_filter(void)
 }
 
 void
+log_set_filter(log_level_t filter)
+{
+    level_filter = filter;
+}
+
+void
 log_close(void)
 {
     GFREE_SET_NULL(mainlogfile);

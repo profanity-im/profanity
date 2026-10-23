@@ -1901,7 +1901,7 @@ static const struct cmd_t command_defs[] = {
     },
 
     { CMD_PREAMBLE("/log",
-                   parse_args, 1, 2, &cons_log_setting)
+                   parse_args, 0, 2, &cons_log_setting)
       CMD_MAINFUNC(cmd_log)
       CMD_SYN(
               "/log where",
@@ -1910,13 +1910,13 @@ static const struct cmd_t command_defs[] = {
               "/log shared on|off",
               "/log level INFO|DEBUG|WARN|ERROR")
       CMD_DESC(
-              "Manage profanity log settings.")
+              "Manage application diagnostic and error logs.")
       CMD_ARGS(
               { "where", "Show the current log file location." },
               { "rotate on|off", "Rotate log, default on. Does not take effect if you specified a filename yourself when starting Profanity." },
               { "maxsize <bytes>", "With rotate enabled, specifies the max log size, defaults to 10485760 (10MB)." },
               { "shared on|off", "Share logs between all instances, default: on. When off, the process id will be included in the log filename. Does not take effect if you specified a filename yourself when starting Profanity." },
-              {"level INFO|DEBUG|WARN|ERROR", "Set the log level. Default is INFO. Only works with default log file, not with user provided log file during startup via -f." })
+              { "level INFO|DEBUG|WARN|ERROR", "Set the log level, default is INFO." })
     },
 
     { CMD_PREAMBLE("/carbons",
