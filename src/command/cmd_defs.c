@@ -2019,7 +2019,8 @@ static const struct cmd_t command_defs[] = {
               "/autoaway message away|xa <message>|off",
               "/autoaway check on|off")
       CMD_DESC(
-              "Manage autoaway settings for idle time.")
+              "Automatically update your presence or advertise inactivity after a period of no input. "
+              "Use 'mode away' to change your status to away/xa, or 'mode idle' to stay online while letting contacts see how long you have been idle.")
       CMD_ARGS(
               { "mode idle", "Sends idle time, status remains online." },
               { "mode away", "Sends away and xa presence as well as idle time." },
