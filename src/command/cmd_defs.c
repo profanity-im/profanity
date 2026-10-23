@@ -1153,9 +1153,9 @@ static const struct cmd_t command_defs[] = {
       CMD_SYN(
               "/wrap on|off")
       CMD_DESC(
-              "Word wrapping.")
+              "Enable or disable automatic word wrapping for long messages in chat and console windows.")
       CMD_ARGS(
-              { "on|off", "Enable or disable word wrapping in the main window." })
+              { "on|off", "Enable or disable word wrapping." })
     },
 
     { CMD_PREAMBLE("/time",
