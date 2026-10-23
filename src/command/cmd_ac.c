@@ -906,6 +906,7 @@ cmd_ac_init(void)
     autocomplete_add(form_ac, "cancel");
     autocomplete_add(form_ac, "show");
     autocomplete_add(form_ac, "help");
+    autocomplete_add(form_ac, "clear");
 
     autocomplete_add(form_field_multi_ac, "add");
     autocomplete_add(form_field_multi_ac, "remove");
@@ -1280,11 +1281,8 @@ cmd_ac_init(void)
     autocomplete_add(lastactivity_ac, "get");
 
     autocomplete_add(vcard_ac, "get");
+    autocomplete_add(vcard_ac, "edit");
     autocomplete_add(vcard_ac, "photo");
-    autocomplete_add(vcard_ac, "set");
-    autocomplete_add(vcard_ac, "add");
-    autocomplete_add(vcard_ac, "remove");
-    autocomplete_add(vcard_ac, "save");
 
     autocomplete_add(vcard_photo_ac, "open");
     autocomplete_add(vcard_photo_ac, "save");
@@ -2947,6 +2945,11 @@ _form_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
     DataForm* form = confwin->form;
     if (form) {
         found = autocomplete_param_with_ac(input, "/form help", form->tag_ac, TRUE, previous);
+        if (found) {
+            return found;
+        }
+
+        found = autocomplete_param_with_ac(input, "/form clear", form->tag_ac, TRUE, previous);
         if (found) {
             return found;
         }

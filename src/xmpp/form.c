@@ -674,3 +674,57 @@ form_reset_autocompleters(DataForm* form)
         curr_field = g_slist_next(curr_field);
     }
 }
+
+DataForm*
+form_create_empty(const gchar* type, const gchar* title, const gchar* instructions)
+{
+    DataForm* form = g_new0(DataForm, 1);
+    form->type = g_strdup(type ? type : "form");
+    form->title = g_strdup(title);
+    form->instructions = g_strdup(instructions);
+    form->var_to_tag = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    form->tag_to_var = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
+    form->tag_ac = autocomplete_new();
+    form->modified = FALSE;
+    return form;
+}
+
+void
+form_add_field_text(DataForm* form, const gchar* var, const gchar* label, const gchar* value)
+{
+    FormField* field = g_new0(FormField, 1);
+    field->var = g_strdup(var);
+    field->label = g_strdup(label);
+    field->type = g_strdup("text-single");
+    field->type_t = FIELD_TEXT_SINGLE;
+    field->value_ac = autocomplete_new();
+    if (value && *value) {
+        field->values = g_slist_append(NULL, g_strdup(value));
+    }
+    form->fields = g_slist_append(form->fields, field);
+
+    int tag_num = g_slist_length(form->fields);
+    gchar* tag = g_strdup_printf("field%d", tag_num);
+    g_hash_table_insert(form->var_to_tag, g_strdup(var), g_strdup(tag));
+    g_hash_table_insert(form->tag_to_var, g_strdup(tag), g_strdup(var));
+    autocomplete_add(form->tag_ac, tag);
+    g_free(tag);
+}
+
+const gchar*
+form_get_field_value(DataForm* form, const gchar* var)
+{
+    if (!form || !var) {
+        return NULL;
+    }
+    for (GSList* curr = form->fields; curr; curr = g_slist_next(curr)) {
+        FormField* field = curr->data;
+        if (g_strcmp0(field->var, var) == 0) {
+            if (field->values && field->values->data) {
+                return (const gchar*)field->values->data;
+            }
+            return NULL;
+        }
+    }
+    return NULL;
+}

@@ -21,6 +21,7 @@
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/connection.h"
+#include "xmpp/form.h"
 #include "xmpp/iq.h"
 #include "xmpp/stanza.h"
 
@@ -1179,9 +1180,9 @@ _vcard_print_result(xmpp_stanza_t* const stanza, void* userdata)
     const char* from = xmpp_stanza_get_attribute(stanza, STANZA_ATTR_FROM);
 
     if (from) {
-        win_println(data->window, THEME_DEFAULT, "!", "vCard for %s", from);
+        win_println(data->window, THEME_DEFAULT, "-", "vCard for %s:", from);
     } else {
-        win_println(data->window, THEME_DEFAULT, "!", "This account's vCard");
+        win_println(data->window, THEME_DEFAULT, "-", "This account's vCard:");
     }
 
     xmpp_stanza_t* vcard_xml = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_VCARD);
@@ -1559,4 +1560,180 @@ vcard_user_free(void)
         vcard_free(vcard_user);
     }
     vcard_user = NULL;
+}
+
+DataForm*
+vcard_create_form(vCard* vcard)
+{
+    DataForm* form = form_create_empty("form", "Your vCard Profile", "Use '/field<N> <value>' to set a field, '/form clear field<N>' to remove it, and '/form submit' to save.");
+
+    const gchar* fn = vcard ? vcard->fullname : NULL;
+    const gchar* family = vcard ? vcard->name.family : NULL;
+    const gchar* given = vcard ? vcard->name.given : NULL;
+    const gchar* nickname = NULL;
+    const gchar* email = NULL;
+    const gchar* url = NULL;
+    const gchar* title = NULL;
+    const gchar* role = NULL;
+    const gchar* note = NULL;
+    auto_gchar gchar* bday_str = NULL;
+
+    if (vcard && vcard->elements) {
+        for (GList* curr = vcard->elements->head; curr; curr = curr->next) {
+            vcard_element_t* elem = curr->data;
+            switch (elem->type) {
+            case VCARD_NICKNAME:
+                if (!nickname) {
+                    nickname = elem->nickname;
+                }
+                break;
+            case VCARD_EMAIL:
+                if (!email) {
+                    email = elem->email.userid;
+                }
+                break;
+            case VCARD_URL:
+                if (!url) {
+                    url = elem->url;
+                }
+                break;
+            case VCARD_TITLE:
+                if (!title) {
+                    title = elem->title;
+                }
+                break;
+            case VCARD_ROLE:
+                if (!role) {
+                    role = elem->role;
+                }
+                break;
+            case VCARD_NOTE:
+                if (!note) {
+                    note = elem->note;
+                }
+                break;
+            case VCARD_BIRTHDAY:
+                if (!bday_str && elem->birthday) {
+                    bday_str = g_date_time_format(elem->birthday, "%Y-%m-%d");
+                }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+
+    form_add_field_text(form, "fn", "Full Name", fn);
+    form_add_field_text(form, "family", "Family Name", family);
+    form_add_field_text(form, "given", "Given Name", given);
+    form_add_field_text(form, "nickname", "Nickname", nickname);
+    form_add_field_text(form, "email", "Email Address", email);
+    form_add_field_text(form, "url", "Website / URL", url);
+    form_add_field_text(form, "title", "Title / Role", title ? title : role);
+    form_add_field_text(form, "bday", "Birthday (YYYY-MM-DD)", bday_str);
+    form_add_field_text(form, "note", "About / Note", note);
+
+    return form;
+}
+
+DataForm*
+vcard_user_create_form(void)
+{
+    if (!vcard_user) {
+        vcard_user = vcard_new();
+    }
+    return vcard_create_form(vcard_user);
+}
+
+void
+vcard_user_apply_form(DataForm* form)
+{
+    if (!form) {
+        return;
+    }
+
+    if (!vcard_user) {
+        vcard_user = vcard_new();
+    }
+
+    const gchar* fn = form_get_field_value(form, "fn");
+    vcard_user_set_fullname((fn && *fn) ? (char*)fn : NULL);
+
+    const gchar* family = form_get_field_value(form, "family");
+    vcard_user_set_name_family((family && *family) ? (char*)family : NULL);
+
+    const gchar* given = form_get_field_value(form, "given");
+    vcard_user_set_name_given((given && *given) ? (char*)given : NULL);
+
+    if (vcard_user->elements) {
+        GQueue* new_q = g_queue_new();
+        while (!g_queue_is_empty(vcard_user->elements)) {
+            vcard_element_t* elem = g_queue_pop_head(vcard_user->elements);
+            if (elem->type == VCARD_PHOTO) {
+                g_queue_push_tail(new_q, elem);
+            } else {
+                _free_vcard_element(elem);
+            }
+        }
+        g_queue_free(vcard_user->elements);
+        vcard_user->elements = new_q;
+    } else {
+        vcard_user->elements = g_queue_new();
+    }
+
+    const gchar* nickname = form_get_field_value(form, "nickname");
+    if (nickname && *nickname) {
+        vcard_element_t* el = g_new0(vcard_element_t, 1);
+        el->type = VCARD_NICKNAME;
+        el->nickname = g_strdup(nickname);
+        g_queue_push_tail(vcard_user->elements, el);
+    }
+
+    const gchar* email = form_get_field_value(form, "email");
+    if (email && *email) {
+        vcard_element_t* el = g_new0(vcard_element_t, 1);
+        el->type = VCARD_EMAIL;
+        el->email.userid = g_strdup(email);
+        el->email.options = VCARD_EMAIL_INTERNET;
+        g_queue_push_tail(vcard_user->elements, el);
+    }
+
+    const gchar* url = form_get_field_value(form, "url");
+    if (url && *url) {
+        vcard_element_t* el = g_new0(vcard_element_t, 1);
+        el->type = VCARD_URL;
+        el->url = g_strdup(url);
+        g_queue_push_tail(vcard_user->elements, el);
+    }
+
+    const gchar* title = form_get_field_value(form, "title");
+    if (title && *title) {
+        vcard_element_t* el = g_new0(vcard_element_t, 1);
+        el->type = VCARD_TITLE;
+        el->title = g_strdup(title);
+        g_queue_push_tail(vcard_user->elements, el);
+    }
+
+    const gchar* note = form_get_field_value(form, "note");
+    if (note && *note) {
+        vcard_element_t* el = g_new0(vcard_element_t, 1);
+        el->type = VCARD_NOTE;
+        el->note = g_strdup(note);
+        g_queue_push_tail(vcard_user->elements, el);
+    }
+
+    const gchar* bday = form_get_field_value(form, "bday");
+    if (bday && *bday) {
+        GTimeZone* utc = g_time_zone_new_utc();
+        GDateTime* dt = g_date_time_new_from_iso8601(bday, utc);
+        g_time_zone_unref(utc);
+        if (dt) {
+            vcard_element_t* el = g_new0(vcard_element_t, 1);
+            el->type = VCARD_BIRTHDAY;
+            el->birthday = dt;
+            g_queue_push_tail(vcard_user->elements, el);
+        }
+    }
+
+    vcard_user_save();
 }

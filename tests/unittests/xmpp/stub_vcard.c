@@ -77,3 +77,20 @@ void
 vcard_user_free(void)
 {
 }
+
+DataForm*
+vcard_create_form(vCard* vcard)
+{
+    return NULL;
+}
+
+DataForm*
+vcard_user_create_form(void)
+{
+    return NULL;
+}
+
+void
+vcard_user_apply_form(DataForm* form)
+{
+}

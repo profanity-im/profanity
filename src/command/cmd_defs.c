@@ -709,14 +709,16 @@ static const struct cmd_t command_defs[] = {
               CMD_TAG_GROUPCHAT)
       CMD_SYN(
               "/form show",
+              "/form clear <field>",
               "/form submit",
               "/form cancel",
               "/form help [<tag>]")
       CMD_DESC(
-              "Interact with XMPP data forms (XEP-0004) in configuration windows, such as chat room setup. "
-              "Allows displaying the form, viewing field descriptions, and submitting changes.")
+              "Interact with XMPP data forms (XEP-0004) in configuration windows, such as chat room setup or vCard editing. "
+              "Allows displaying the form, viewing field descriptions, clearing fields, and submitting changes.")
       CMD_ARGS(
               { "show", "Display the current form and its fields." },
+              { "clear <field>", "Clear the value of the specified field." },
               { "submit", "Submit completed form to the server." },
               { "cancel", "Cancel changes and close the form window." },
               { "help [<tag>]", "Display help for the entire form or a specific field tag." })
@@ -1499,118 +1501,37 @@ static const struct cmd_t command_defs[] = {
     { CMD_PREAMBLE("/vcard",
                    parse_args, 0, 7, NULL)
       CMD_SUBFUNCS(
-              {"add", cmd_vcard_add},
-              {"remove", cmd_vcard_remove},
+              {"edit", cmd_vcard_edit},
               {"get", cmd_vcard_get},
-              {"set", cmd_vcard_set},
-              {"photo", cmd_vcard_photo},
-              {"refresh", cmd_vcard_refresh},
-              {"save", cmd_vcard_save})
+              {"photo", cmd_vcard_photo})
       CMD_MAINFUNC(cmd_vcard)
       CMD_TAGS(
               CMD_TAG_CHAT,
               CMD_TAG_GROUPCHAT)
       CMD_SYN(
+              "/vcard",
               "/vcard get [<nick|contact>]",
+              "/vcard edit",
               "/vcard photo open <nick|contact> [<index>]",
               "/vcard photo save <nick|contact> [output <filepath>] [index <index>]",
-              "/vcard set fullname <fullname>",
-              "/vcard set name family <family>",
-              "/vcard set name given <given>",
-              "/vcard set name middle <middle>",
-              "/vcard set name prefix <prefix>",
-              "/vcard set name suffix <suffix>",
-              "/vcard set <index> [<value>]",
-              "/vcard set <index> pobox <value>",
-              "/vcard set <index> extaddr <value>",
-              "/vcard set <index> street <value>",
-              "/vcard set <index> locality <value>",
-              "/vcard set <index> region <value>",
-              "/vcard set <index> pocode <value>",
-              "/vcard set <index> country <value>",
-              "/vcard set <index> type domestic|international",
-              "/vcard set <index> home on|off",
-              "/vcard set <index> work on|off",
-              "/vcard set <index> voice on|off",
-              "/vcard set <index> fax on|off",
-              "/vcard set <index> pager on|off",
-              "/vcard set <index> msg on|off",
-              "/vcard set <index> cell on|off",
-              "/vcard set <index> video on|off",
-              "/vcard set <index> bbs on|off",
-              "/vcard set <index> modem on|off",
-              "/vcard set <index> isdn on|off",
-              "/vcard set <index> pcs on|off",
-              "/vcard set <index> preferred on|off",
-              "/vcard set <index> parcel on|off",
-              "/vcard set <index> postal on|off",
-              "/vcard set <index> internet on|off",
-              "/vcard set <index> x400 on|off",
-              "/vcard add nickname <nickname>",
-              "/vcard add birthday <date>",
-              "/vcard add address",
-              "/vcard add tel <number>",
-              "/vcard add email <userid>",
-              "/vcard add jid <jid>",
-              "/vcard add title <title>",
-              "/vcard add role <role>",
-              "/vcard add note <note>",
-              "/vcard add url <url>",
-              "/vcard remove <index>",
-              "/vcard refresh",
-              "/vcard save")
+              "/vcard photo open-self [<index>]",
+              "/vcard photo save-self [output <filepath>] [index <index>]")
       CMD_DESC(
-              "Read your vCard or a user's vCard, get a user's avatar via their vCard, or modify your vCard. If no arguments are given, your vCard will be displayed in a new window, or an existing vCard window.")
+              "View or edit your vCard profile (XEP-0054). "
+              "If no arguments are given, your vCard is displayed. ")
       CMD_ARGS(
-              { "get [<nick|contact>]", "Get your vCard, if a nickname/contact is provided, get that user's vCard" },
-              { "photo open <nick|contact> [<index>]", "Download a user's photo from their vCard to a file, and open it. If index is not specified, download the first photo (usually avatar) from their vCard" },
-              { "photo save <nick|contact>", "Download a user's photo from their vCard to a file. If index is not specified, download the first photo (usually avatar) from their vCard. If output is not specified, download the photo to profanity's photos directory." },
-              { "photo open-self [<index>]", "Download a photo from your vCard to a file, and open it. If index is not specified, download the first photo (usually avatar) from your vCard" },
-              { "photo save-self", "Download a photo from your vCard to a file. If index is not specified, download the first photo (usually avatar) from your vCard. If output is not specified, download the photo to profanity's photos directory. Same arguments as `photo open`" },
-              { "set fullname <fullname>", "Set your vCard's fullname to the specified value" },
-              { "set name family <family>", "Set your vCard's family name to the specified value" },
-              { "set name given <given>", "Set your vCard's given name to the specified value" },
-              { "set name middle <middle>", "Set your vCard's middle name to the specified value" },
-              { "set name prefix <prefix>", "Set your vCard's prefix name to the specified value" },
-              { "set name suffix <suffix>", "Set your vCard's suffix name to the specified value" },
-              { "set <index> [<value>]", "Set the main field in a element in your vCard to the specified value, or if no value was specified, modify the field in an editor, This only works in elements that have one field." },
-              { "set <index> pobox <value>", "Set the P.O. box in an address element in your vCard to the specified value." },
-              { "set <index> extaddr <value>", "Set the extended address in an address element in your vCard to the specified value." },
-              { "set <index> street <value>", "Set the street in an address element in your vCard to the specified value." },
-              { "set <index> locality <value>", "Set the locality in an address element in your vCard to the specified value." },
-              { "set <index> region <value>", "Set the region in an address element in your vCard to the specified value." },
-              { "set <index> pocode <value>", "Set the P.O. code in an address element in your vCard to the specified value." },
-              { "set <index> type domestic|international", "Set the type in an address element in your vCard to either domestic or international." },
-              { "set <index> home on|off", "Set the home option in an element in your vCard. (address, telephone, e-mail only)" },
-              { "set <index> work on|off", "Set the work option in an element in your vCard. (address, telephone, e-mail only)" },
-              { "set <index> voice on|off", "Set the voice option in a telephone element in your vCard." },
-              { "set <index> fax on|off", "Set the fax option in a telephone element in your vCard." },
-              { "set <index> pager on|off", "Set the pager option in a telephone element in your vCard." },
-              { "set <index> msg on|off", "Set the message option in a telephone element in your vCard." },
-              { "set <index> cell on|off", "Set the cellphone option in a telephone element in your vCard." },
-              { "set <index> video on|off", "Set the video option in a telephone element in your vCard." },
-              { "set <index> bbs on|off", "Set the BBS option in a telephone element in your vCard." },
-              { "set <index> modem on|off", "Set the modem option in a telephone element in your vCard." },
-              { "set <index> isdn on|off", "Set the ISDN option in a telephone element in your vCard." },
-              { "set <index> pcs on|off", "Set the PCS option in a telephone element in your vCard." },
-              { "set <index> preferred on|off", "Set the preferred option in an element in your vCard. (address, telephone, e-mail only)" },
-              { "set <index> parcel on|off", "Set the parcel option in an address element in your vCard." },
-              { "set <index> postal on|off", "Set the postal option in an address element in your vCard." },
-              { "set <index> internet on|off", "Set the internet option in an e-mail address in your vCard." },
-              { "set <index> x400 on|off", "Set the X400 option in an e-mail address in your vCard." },
-              { "add nickname <nickname>", "Add a nickname to your vCard" },
-              { "add birthday <date>", "Add a birthday date to your vCard" },
-              { "add address", "Add an address to your vCard" },
-              { "add tel <number>", "Add a telephone number to your vCard" },
-              { "add email <userid>", "Add an e-mail address to your vCard" },
-              { "add jid <jid>", "Add a Jabber ID to your vCard" },
-              { "add title <title>", "Add a title to your vCard" },
-              { "add role <role>", "Add a role to your vCard" },
-              { "add note <note>", "Add a note to your vCard" },
-              { "add url <url>", "Add a URL to your vCard" },
-              { "remove <index>", "Remove a element in your vCard by index" },
-              { "refresh", "Refreshes the local copy of the current account's vCard (undoes all your unpublished modifications)" },
-              { "save", "Save changes to the server" })
+              { "get [<nick|contact>]", "View your vCard, or a contact's vCard if provided." },
+              { "edit", "Edit your vCard profile in an interactive form window." },
+              { "photo open <nick|contact> [<index>]", "Download a user's photo from their vCard to a file, and open it." },
+              { "photo save <nick|contact>", "Download a user's photo from their vCard to a file." },
+              { "photo open-self [<index>]", "Download a photo from your vCard to a file, and open it." },
+              { "photo save-self", "Download a photo from your vCard to a file." })
+      CMD_EXAMPLES(
+              "/vcard",
+              "/vcard get",
+              "/vcard get friend@server.org",
+              "/vcard edit",
+              "/vcard photo open friend@server.org")
     },
 
     { CMD_PREAMBLE("/vercheck",

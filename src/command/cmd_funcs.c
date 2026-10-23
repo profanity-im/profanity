@@ -3999,13 +3999,26 @@ cmd_form(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    if (!string_matches_one_of(NULL, args[0], FALSE, "submit", "cancel", "show", "help", NULL)) {
+    if (!string_matches_one_of(NULL, args[0], FALSE, "submit", "cancel", "show", "help", "clear", NULL)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
 
     ProfConfWin* confwin = (ProfConfWin*)window;
     assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+
+    if (g_strcmp0(args[0], "clear") == 0) {
+        gchar* tag = args[1];
+        if (!tag || !form_tag_exists(confwin->form, tag)) {
+            win_println(window, THEME_DEFAULT, "-", "Invalid field tag. Usage: /form clear <field>");
+            return TRUE;
+        }
+
+        form_set_value(confwin->form, tag, "");
+        win_println(window, THEME_DEFAULT, "-", "Field cleared…");
+        confwin_show_form_field(confwin, confwin->form, tag);
+        return TRUE;
+    }
 
     if (g_strcmp0(args[0], "show") == 0) {
         confwin_show_form(confwin);
@@ -9985,6 +9998,40 @@ cmd_strophe(ProfWin* window, const gchar* const command, gchar** args)
     return TRUE;
 }
 
+static void
+_vcard_form_submit(ProfConfWin* confwin)
+{
+    vcard_user_apply_form(confwin->form);
+    cons_show("vCard updated successfully.");
+}
+
+static void
+_vcard_form_cancel(ProfConfWin* confwin)
+{
+    cons_show("vCard editing cancelled.");
+}
+
+gboolean
+cmd_vcard_edit(ProfWin* window, const gchar* const command, gchar** args)
+{
+    if (connection_get_status() != JABBER_CONNECTED) {
+        cons_show("You are not currently connected.");
+        return TRUE;
+    }
+
+    ProfConfWin* existing = wins_get_conf("vcard");
+    if (existing) {
+        ui_focus_win((ProfWin*)existing);
+        return TRUE;
+    }
+
+    DataForm* form = vcard_user_create_form();
+    ProfWin* confwin = wins_new_config("vcard", form, _vcard_form_submit, _vcard_form_cancel, NULL);
+    confwin_handle_configuration((ProfConfWin*)confwin, form);
+
+    return TRUE;
+}
+
 gboolean
 cmd_vcard(ProfWin* window, const gchar* const command, gchar** args)
 {
@@ -9993,16 +10040,7 @@ cmd_vcard(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    ProfVcardWin* vcardwin = wins_get_vcard();
-
-    if (vcardwin) {
-        ui_focus_win((ProfWin*)vcardwin);
-    } else {
-        vcardwin = (ProfVcardWin*)vcard_user_create_win();
-        ui_focus_win((ProfWin*)vcardwin);
-    }
-    vcardwin_update();
-    return TRUE;
+    return cmd_vcard_get(window, command, args);
 }
 
 gboolean
