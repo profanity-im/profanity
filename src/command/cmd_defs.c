@@ -177,7 +177,10 @@ static const struct cmd_t command_defs[] = {
               "/tls certpath clear",
               "/tls certpath default")
       CMD_DESC(
-              "Handle TLS certificates. ")
+              "Inspect and manage TLS certificate trust. "
+              "When connecting to a server with a certificate warning, use '/tls cert' to view details, "
+              "'/tls allow' to proceed for this session, '/tls trust' to trust it permanently, "
+              "or '/tls deny' to abort.")
       CMD_ARGS(
               { "allow", "Allow connection to continue with TLS certificate." },
               { "always", "Always allow connections with TLS certificate." },
