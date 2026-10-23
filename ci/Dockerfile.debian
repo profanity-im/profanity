@@ -16,7 +16,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   libgpgme11-dev \
   libmicrohttpd-dev \
   libncursesw5-dev \
-  libnotify-dev \
   libotr5-dev \
   libreadline-dev \
   libomemo-c-dev \

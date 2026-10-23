@@ -155,8 +155,6 @@ if not readline_dep.found()
 endif
 
 # Optional dependencies
-have_osxnotify = false
-libnotify_dep = disabler()
 python_dep = disabler()
 dl_dep = disabler()
 gpgme_dep = disabler()
@@ -179,16 +177,17 @@ build_otr = false
 build_omemo = false
 
 # Notifications
+build_notifications = false
 if get_option('notifications').enabled()
   if platform == 'osx'
     terminal_notifier = find_program('terminal-notifier', required: true)
-    have_osxnotify = true
     conf_data.set('HAVE_OSXNOTIFY', 1)
-  elif platform in ['nix', 'freebsd']
-    libnotify_dep = dependency('libnotify', required: true)
-    conf_data.set('HAVE_LIBNOTIFY', 1)
+    build_notifications = true
+  elif platform == 'cygwin'
+    build_notifications = true
   else
-    error('Notifications not supported on this platform')
+    conf_data.set('HAVE_NOTIFICATIONS', 1)
+    build_notifications = true
   endif
 endif
 
@@ -315,10 +314,6 @@ profanity_deps = [
 ]
 
 # Add optional dependencies only if found
-if libnotify_dep.found()
-  profanity_deps += libnotify_dep
-endif
-
 if python_dep.found()
   profanity_deps += python_dep
 endif
@@ -753,7 +748,7 @@ summary({
 }, section: 'Directories')
 
 summary({
-  'Notifications': libnotify_dep.found() or have_osxnotify,
+  'Notifications': build_notifications,
   'Python plugins': build_python_api,
   'C plugins': build_c_api,
   'OTR': build_otr,
