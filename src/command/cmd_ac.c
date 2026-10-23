@@ -906,6 +906,7 @@ cmd_ac_init(void)
     autocomplete_add(form_ac, "cancel");
     autocomplete_add(form_ac, "show");
     autocomplete_add(form_ac, "help");
+    autocomplete_add(form_ac, "clear");
 
     autocomplete_add(form_field_multi_ac, "add");
     autocomplete_add(form_field_multi_ac, "remove");
@@ -2947,6 +2948,11 @@ _form_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
     DataForm* form = confwin->form;
     if (form) {
         found = autocomplete_param_with_ac(input, "/form help", form->tag_ac, TRUE, previous);
+        if (found) {
+            return found;
+        }
+
+        found = autocomplete_param_with_ac(input, "/form clear", form->tag_ac, TRUE, previous);
         if (found) {
             return found;
         }

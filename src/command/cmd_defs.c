@@ -709,6 +709,7 @@ static const struct cmd_t command_defs[] = {
               CMD_TAG_GROUPCHAT)
       CMD_SYN(
               "/form show",
+              "/form clear <field>",
               "/form submit",
               "/form cancel",
               "/form help [<tag>]")
@@ -717,6 +718,7 @@ static const struct cmd_t command_defs[] = {
               "Allows displaying the form, viewing field descriptions, and submitting changes.")
       CMD_ARGS(
               { "show", "Display the current form and its fields." },
+              { "clear <field>", "Clear the value of the specified field." },
               { "submit", "Submit completed form to the server." },
               { "cancel", "Cancel changes and close the form window." },
               { "help [<tag>]", "Display help for the entire form or a specific field tag." })

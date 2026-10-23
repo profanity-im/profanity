@@ -3999,13 +3999,26 @@ cmd_form(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    if (!string_matches_one_of(NULL, args[0], FALSE, "submit", "cancel", "show", "help", NULL)) {
+    if (!string_matches_one_of(NULL, args[0], FALSE, "submit", "cancel", "show", "help", "clear", NULL)) {
         cons_bad_cmd_usage(command);
         return TRUE;
     }
 
     ProfConfWin* confwin = (ProfConfWin*)window;
     assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
+
+    if (g_strcmp0(args[0], "clear") == 0) {
+        gchar* tag = args[1];
+        if (!tag || !form_tag_exists(confwin->form, tag)) {
+            win_println(window, THEME_DEFAULT, "-", "Invalid field tag. Usage: /form clear <field>");
+            return TRUE;
+        }
+
+        form_set_value(confwin->form, tag, "");
+        win_println(window, THEME_DEFAULT, "-", "Field cleared…");
+        confwin_show_form_field(confwin, confwin->form, tag);
+        return TRUE;
+    }
 
     if (g_strcmp0(args[0], "show") == 0) {
         confwin_show_form(confwin);
