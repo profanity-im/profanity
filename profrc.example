@@ -601,6 +601,15 @@ lang=en_US
 
 
 # ==============================================================================
+# [avatar] - Avatar Settings
+# ==============================================================================
+[avatar]
+# Automatically download and sync PEP avatars for roster contacts.
+# Possible values: true, false (Default: false)
+auto=false
+
+
+# ==============================================================================
 # [executables] - Executables
 # ==============================================================================
 [executables]

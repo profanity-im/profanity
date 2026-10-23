@@ -2458,7 +2458,8 @@ static const struct cmd_t command_defs[] = {
               "/avatar set <path>",
               "/avatar disable",
               "/avatar get <barejid>",
-              "/avatar open <barejid>")
+              "/avatar open <barejid>",
+              "/avatar auto on|off")
       CMD_DESC(
               "Upload an avatar for yourself, "
               "disable your avatar, "
@@ -2469,12 +2470,14 @@ static const struct cmd_t command_defs[] = {
               { "set <path>", "Set avatar to the image at <path>." },
               { "disable", "Disable avatar publishing; your avatar will not display to others." },
               { "get <barejid>", "Download the avatar. barejid is the JID to download avatar from." },
-              { "open <barejid>", "Download avatar and open it with command. See /executable." })
+              { "open <barejid>", "Download avatar and open it with command. See /executable." },
+              { "auto on|off", "Automatically download and sync contact avatars." })
       CMD_EXAMPLES(
               "/avatar set ~/images/avatar.png",
               "/avatar disable",
               "/avatar get thor@valhalla.edda",
-              "/avatar open freyja@vanaheimr.edda") },
+              "/avatar open freyja@vanaheimr.edda",
+              "/avatar auto on") },
 
     { CMD_PREAMBLE("/correction",
                    parse_args, 1, 2, &cons_correction_setting)

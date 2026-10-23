@@ -42,6 +42,7 @@
 #define PREF_GROUP_PLUGINS       "plugins"
 #define PREF_GROUP_EXECUTABLES   "executables"
 #define PREF_GROUP_SPELLCHECK    "spellcheck"
+#define PREF_GROUP_AVATAR        "avatar"
 
 #define INPBLOCK_DEFAULT 1000
 
@@ -1844,6 +1845,8 @@ _get_group(preference_t pref)
     case PREF_URL_SAVE_CMD:
     case PREF_VCARD_PHOTO_CMD:
         return PREF_GROUP_EXECUTABLES;
+    case PREF_AVATAR_AUTO:
+        return PREF_GROUP_AVATAR;
     case PREF_AUTOAWAY_CHECK:
     case PREF_AUTOAWAY_MODE:
     case PREF_AUTOAWAY_MESSAGE:
@@ -2144,6 +2147,8 @@ _get_key(preference_t pref)
         return "correction.allow";
     case PREF_AVATAR_CMD:
         return "avatar.cmd";
+    case PREF_AVATAR_AUTO:
+        return "auto";
     case PREF_SLASH_GUARD:
         return "slashguard";
     case PREF_MAM:

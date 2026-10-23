@@ -3,6 +3,8 @@
 #include <stdlib.h>
 
 void avatar_pep_subscribe(void) {};
+void avatar_auto_enable(void) {};
+void avatar_auto_disable(void) {};
 
 gboolean
 avatar_get_by_nick(const char* nick, gboolean open)
