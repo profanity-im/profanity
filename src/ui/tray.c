@@ -329,27 +329,11 @@ _on_watcher_vanished(GDBusConnection* connection, const gchar* name, gpointer us
 static void
 _find_icons(void)
 {
-    auto_gchar gchar* user_icons_dir = files_get_config_path(DIR_ICONS);
-    auto_gchar gchar* user_icon_file = g_build_filename(user_icons_dir, "proIcon.png", NULL);
-    if (g_file_test(user_icon_file, G_FILE_TEST_EXISTS)) {
-        icon_theme_path = g_strdup(user_icons_dir);
+    auto_gchar gchar* icon_file = files_get_icon_path("proIcon.png");
+    if (icon_file) {
+        icon_theme_path = g_path_get_dirname(icon_file);
         return;
     }
-
-#ifdef ICONS_PATH
-    auto_gchar gchar* system_icon_file = g_build_filename(ICONS_PATH, "proIcon.png", NULL);
-    if (g_file_test(system_icon_file, G_FILE_TEST_EXISTS)) {
-        icon_theme_path = g_strdup(ICONS_PATH);
-        return;
-    }
-#endif
-
-#ifdef PACKAGE_STATUS_DEVELOPMENT
-    if (g_file_test("../icons/proIcon.png", G_FILE_TEST_EXISTS)) {
-        icon_theme_path = g_canonicalize_filename("../icons", NULL);
-        return;
-    }
-#endif
 
 #ifdef ICONS_PATH
     icon_theme_path = g_strdup(ICONS_PATH);

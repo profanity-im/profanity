@@ -51,6 +51,7 @@ if is_debug
   endif
   # Set variable so we can build conditionally in the source code
   conf_data.set('PACKAGE_STATUS_DEVELOPMENT', 1)
+  conf_data.set_quoted('DEV_ICONS_PATH', meson.project_source_root() / 'icons')
 endif
 
 # Compiler setup

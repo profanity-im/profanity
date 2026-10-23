@@ -146,3 +146,35 @@ files_file_in_account_data_path(const gchar* const specific_dir, const gchar* co
     g_free(data_path);
     return filename;
 }
+
+gchar*
+files_get_icon_path(const gchar* const filename)
+{
+    if (!filename) {
+        return NULL;
+    }
+
+    auto_gchar gchar* user_icons_dir = files_get_config_path(DIR_ICONS);
+    auto_gchar gchar* user_icon_file = g_build_filename(user_icons_dir, filename, NULL);
+    if (g_file_test(user_icon_file, G_FILE_TEST_EXISTS)) {
+        return g_steal_pointer(&user_icon_file);
+    }
+
+#ifdef PACKAGE_STATUS_DEVELOPMENT
+#ifdef DEV_ICONS_PATH
+    auto_gchar gchar* dev_icon_file = g_build_filename(DEV_ICONS_PATH, filename, NULL);
+    if (g_file_test(dev_icon_file, G_FILE_TEST_EXISTS)) {
+        return g_steal_pointer(&dev_icon_file);
+    }
+#endif
+#else
+#ifdef ICONS_PATH
+    auto_gchar gchar* system_icon_file = g_build_filename(ICONS_PATH, filename, NULL);
+    if (g_file_test(system_icon_file, G_FILE_TEST_EXISTS)) {
+        return g_steal_pointer(&system_icon_file);
+    }
+#endif
+#endif
+
+    return NULL;
+}
