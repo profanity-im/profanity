@@ -15,7 +15,6 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   gcc \
   git \
   gpgme \
-  gtk2 \
   libgcrypt \
   libnotify \
   libsignal-protocol-c \

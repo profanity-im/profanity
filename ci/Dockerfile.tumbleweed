@@ -10,7 +10,6 @@ RUN zypper --non-interactive in --no-recommends \
   git \
   glib2-devel \
   glibc-locale \
-  gtk2-devel \
   libcmocka-devel \
   libcurl-devel \
   libexpat-devel \

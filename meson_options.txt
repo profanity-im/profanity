@@ -45,7 +45,7 @@ option('omemo-backend',
 option('tray',
   type: 'feature',
   value: 'disabled',
-  description: 'Enable GTK tray icon'
+  description: 'Enable Tray (StatusNotifierItem)'
 )
 
 option('gdk-pixbuf',

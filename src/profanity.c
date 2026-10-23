@@ -10,7 +10,7 @@
 #include "config.h"
 #include <unistd.h>
 
-#ifdef HAVE_GTK
+#ifdef HAVE_TRAY
 #include "ui/tray.h"
 #endif
 
@@ -141,7 +141,7 @@ prof_run(const gchar* const log_level, const gchar* const account_name, const gc
         ui_update();
         while (g_main_context_iteration(NULL, FALSE))
             ;
-#ifdef HAVE_GTK
+#ifdef HAVE_TRAY
         tray_update();
 #endif
     }
@@ -240,7 +240,7 @@ _init(const gchar* const log_level, const gchar* const config_file, const gchar*
     spellcheck_init();
     atexit(_shutdown);
     plugins_init();
-#ifdef HAVE_GTK
+#ifdef HAVE_TRAY
     tray_init();
 #endif
     inp_nonblocking(TRUE);
