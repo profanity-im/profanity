@@ -710,12 +710,13 @@ static const struct cmd_t command_defs[] = {
               "/form cancel",
               "/form help [<tag>]")
       CMD_DESC(
-              "Form configuration.")
+              "Interact with XMPP data forms (XEP-0004) in configuration windows, such as chat room setup. "
+              "Allows displaying the form, viewing field descriptions, and submitting changes.")
       CMD_ARGS(
-              { "show", "Show the current form." },
-              { "submit", "Submit the current form." },
-              { "cancel", "Cancel changes to the current form." },
-              { "help [<tag>]", "Display help for form, or a specific field." })
+              { "show", "Display the current form and its fields." },
+              { "submit", "Submit completed form to the server." },
+              { "cancel", "Cancel changes and close the form window." },
+              { "help [<tag>]", "Display help for the entire form or a specific field tag." })
     },
 
     { CMD_PREAMBLE("/rooms",
