@@ -13,7 +13,9 @@
 #include <strophe.h>
 #include <sys/stat.h>
 
+#include "common.h"
 #include "xmpp/vcard.h"
+#include "xmpp/jid.h"
 #include "config/files.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
@@ -1293,11 +1295,10 @@ _vcard_photo_result(xmpp_stanza_t* const stanza, void* userdata)
             }
         }
         if (from) {
-            GString* from_clean = g_string_new(from);
-            g_string_replace(from_clean, "@", "_at_", 0);
-            g_string_replace(from_clean, "/", "_slash_", 0);
-            g_string_append(filename, from_clean->str);
-            g_string_free(from_clean, TRUE);
+            auto_jid Jid* from_jid = jid_create(from);
+            const gchar* target_jid = (from_jid && from_jid->barejid) ? from_jid->barejid : from;
+            auto_gchar gchar* from_clean = files_sanitize_jid(target_jid);
+            g_string_append(filename, from_clean);
         }
     } else {
         filename = g_string_new(data->filename);
