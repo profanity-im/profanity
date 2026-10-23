@@ -22,6 +22,11 @@ log_get_filter(void)
 }
 
 void
+log_set_filter(log_level_t filter)
+{
+}
+
+void
 log_close(void)
 {
 }

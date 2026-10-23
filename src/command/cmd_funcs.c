@@ -6365,8 +6365,7 @@ cmd_log(ProfWin* window, const gchar* const command, gchar** args)
     if (strcmp(subcmd, "level") == 0) {
         log_level_t prof_log_level;
         if (log_level_from_string(value, &prof_log_level) == 0) {
-            log_close();
-            log_init(prof_log_level, NULL);
+            log_set_filter(prof_log_level);
 
             cons_show("Log level changed to: %s.", value);
             return TRUE;

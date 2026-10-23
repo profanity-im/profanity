@@ -1916,7 +1916,7 @@ static const struct cmd_t command_defs[] = {
               { "rotate on|off", "Rotate log, default on. Does not take effect if you specified a filename yourself when starting Profanity." },
               { "maxsize <bytes>", "With rotate enabled, specifies the max log size, defaults to 10485760 (10MB)." },
               { "shared on|off", "Share logs between all instances, default: on. When off, the process id will be included in the log filename. Does not take effect if you specified a filename yourself when starting Profanity." },
-              {"level INFO|DEBUG|WARN|ERROR", "Set the log level. Default is INFO. Only works with default log file, not with user provided log file during startup via -f." })
+              { "level INFO|DEBUG|WARN|ERROR", "Set the log level, default is INFO." })
     },
 
     { CMD_PREAMBLE("/carbons",
