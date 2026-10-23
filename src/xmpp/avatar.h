@@ -20,6 +20,6 @@ gchar* avatar_get_path(const gchar* const jid);
 #ifdef HAVE_PIXBUF
 gboolean avatar_set(const gchar* path);
 #endif
-gboolean avatar_publishing_disable(void);
+gboolean avatar_unset(void);
 
 #endif

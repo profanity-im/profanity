@@ -19,8 +19,11 @@
 #include <errno.h>
 #include <sys/stat.h>
 
+#include <glib/gstdio.h>
+
 #include "log.h"
 #include "common.h"
+#include "xmpp/avatar.h"
 #include "xmpp/connection.h"
 #include "xmpp/jid.h"
 #include "xmpp/iq.h"
@@ -149,12 +152,20 @@ avatar_set(const gchar* path)
 #endif
 
 gboolean
-avatar_publishing_disable()
+avatar_unset(void)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
     xmpp_stanza_t* iq = stanza_disable_avatar_publish_iq(ctx);
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
+
+    const Jid* my_jid = connection_get_jid();
+    if (my_jid && my_jid->barejid) {
+        auto_gchar gchar* path = avatar_get_path(my_jid->barejid);
+        if (path) {
+            g_remove(path);
+        }
+    }
 
     return TRUE;
 }

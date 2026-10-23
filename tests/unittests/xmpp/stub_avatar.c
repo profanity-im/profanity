@@ -25,7 +25,7 @@ avatar_set(const char* path)
 }
 
 gboolean
-avatar_publishing_disable()
+avatar_unset(void)
 {
     return TRUE;
 }

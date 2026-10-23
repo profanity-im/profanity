@@ -1148,7 +1148,7 @@ cmd_ac_init(void)
     autocomplete_add(correction_ac, "char");
 
     autocomplete_add(avatar_ac, "set");
-    autocomplete_add(avatar_ac, "disable");
+    autocomplete_add(avatar_ac, "unset");
     autocomplete_add(avatar_ac, "get");
     autocomplete_add(avatar_ac, "open");
     autocomplete_add(avatar_ac, "auto");

@@ -9304,11 +9304,11 @@ gboolean
 cmd_avatar(ProfWin* window, const gchar* const command, gchar** args)
 {
     if (args[1] == NULL) {
-        if (g_strcmp0(args[0], "disable") == 0) {
-            if (avatar_publishing_disable()) {
-                cons_show("Avatar publishing disabled. To enable avatar publishing, use '/avatar set <path>'.");
+        if (g_strcmp0(args[0], "unset") == 0) {
+            if (avatar_unset()) {
+                cons_show("Avatar removed. To set an avatar, use '/avatar set <path>'.");
             } else {
-                cons_show("Failed to disable avatar publishing.");
+                cons_show("Failed to remove avatar.");
             }
         } else if (g_strcmp0(args[0], "auto") == 0) {
             if (prefs_get_boolean(PREF_AVATAR_AUTO)) {
