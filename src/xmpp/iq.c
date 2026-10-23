@@ -2661,15 +2661,6 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
         cons_show_disco_items(items, from);
     } else if (g_strcmp0(id, "discoitemsreq_onconnect") == 0) {
         connection_set_disco_items(items);
-
-        while (late_delivery_windows) {
-            LateDeliveryUserdata* del_data = late_delivery_windows->data;
-            _iq_mam_request((ProfWin*)del_data->win, del_data->startdate, del_data->enddate, del_data->lastid);
-            g_free(del_data->lastid);
-            g_free(del_data);
-            late_delivery_windows = g_slist_delete_link(late_delivery_windows,
-                                                        late_delivery_windows);
-        }
     }
 
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);
@@ -2679,6 +2670,15 @@ void
 iq_feature_retrieval_complete_handler(void)
 {
     received_disco_items = TRUE;
+
+    while (late_delivery_windows) {
+        LateDeliveryUserdata* del_data = late_delivery_windows->data;
+        _iq_mam_request((ProfWin*)del_data->win, del_data->startdate, del_data->enddate, del_data->lastid);
+        g_free(del_data->lastid);
+        g_free(del_data);
+        late_delivery_windows = g_slist_delete_link(late_delivery_windows,
+                                                    late_delivery_windows);
+    }
 }
 
 void
@@ -2736,7 +2736,7 @@ _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
     }
 
     // Remove the "Loading messages…" message
-    buffer_remove_entry(window->layout->buffer, 0);
+    win_remove_loading_history(window);
 
     xmpp_stanza_t* fin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
     gboolean is_complete = FALSE;
@@ -2927,6 +2927,7 @@ _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate, const ch
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
         cons_show_error("Server doesn't support MAM (%s).", XMPP_FEATURE_MAM2);
+        win_remove_loading_history(win);
         if (startdate)
             g_date_time_unref(startdate);
         if (enddate)
@@ -3034,6 +3035,10 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         auto_char char* error_message = stanza_get_error_message(stanza);
         cons_show_error("Server error: %s", error_message);
         log_debug("MAM Error: %s", error_message);
+        MamRsmUserdata* data = (MamRsmUserdata*)userdata;
+        if (data && data->win && wins_get_num((ProfWin*)data->win) != -1) {
+            win_remove_loading_history((ProfWin*)data->win);
+        }
     } else if (g_strcmp0(type, "result") == 0) {
         xmpp_stanza_t* fin = xmpp_stanza_get_child_by_name_and_ns(stanza, STANZA_NAME_FIN, STANZA_NS_MAM2);
         if (fin) {
@@ -3045,7 +3050,7 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
                 return 0;
             }
 
-            buffer_remove_entry(window->layout->buffer, 0);
+            win_remove_loading_history(window);
 
             auto_gchar gchar* start_str = NULL;
             if (data->start_datestr) {
