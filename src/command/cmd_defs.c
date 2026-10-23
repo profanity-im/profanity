@@ -1910,7 +1910,7 @@ static const struct cmd_t command_defs[] = {
               "/log shared on|off",
               "/log level INFO|DEBUG|WARN|ERROR")
       CMD_DESC(
-              "Manage profanity log settings.")
+              "Manage application diagnostic and error logs.")
       CMD_ARGS(
               { "where", "Show the current log file location." },
               { "rotate on|off", "Rotate log, default on. Does not take effect if you specified a filename yourself when starting Profanity." },
