@@ -6962,17 +6962,89 @@ gboolean
 cmd_history(ProfWin* window, const gchar* const command, gchar** args)
 {
     if (args[0] == NULL) {
-        cons_bad_cmd_usage(command);
+        cons_show("History settings:");
+        cons_show("  Local history (/history local) : %s", prefs_get_boolean(PREF_HISTORY) ? "ON" : "OFF");
+        cons_show("  Server MAM    (/history mam)   : %s", prefs_get_boolean(PREF_MAM) ? "ON" : "OFF");
         return TRUE;
     }
 
-    _cmd_set_boolean_preference(args[0], "Chat history", PREF_HISTORY);
-
-    // if set to on, set chlog (/logging chat on)
-    if (strcmp(args[0], "on") == 0) {
-        prefs_set_boolean(PREF_CHLOG, TRUE);
+    if (g_strcmp0(args[0], "local") == 0) {
+        if (args[1] == NULL) {
+            cons_show("Local history (/history local): %s", prefs_get_boolean(PREF_HISTORY) ? "ON" : "OFF");
+            return TRUE;
+        }
+        _cmd_set_boolean_preference(args[1], "Local chat history", PREF_HISTORY);
+        if (g_strcmp0(args[1], "on") == 0) {
+            prefs_set_boolean(PREF_CHLOG, TRUE);
+        }
+        return TRUE;
     }
 
+    if (g_strcmp0(args[0], "mam") == 0) {
+        if (args[1] == NULL) {
+            cons_show("Server MAM (/history mam): %s", prefs_get_boolean(PREF_MAM) ? "ON" : "OFF");
+            return TRUE;
+        }
+        if (g_strcmp0(args[1], "verify") == 0) {
+            if (connection_get_status() != JABBER_CONNECTED) {
+                cons_show("You are not currently connected.");
+                return TRUE;
+            }
+            if (window->type != WIN_CHAT && window->type != WIN_MUC) {
+                cons_show("MAM verification can only be performed in chat or groupchat windows.");
+                return TRUE;
+            }
+            if (!prefs_get_boolean(PREF_MAM)) {
+                cons_show("Message Archive Management (MAM) is currently disabled.");
+                return TRUE;
+            }
+            if (!connection_supports(XMPP_FEATURE_MAM2)) {
+                cons_show("Your server does not support Message Archive Management (MAM2).");
+                return TRUE;
+            }
+
+            unsigned int buf_size = buffer_size(window->layout->buffer);
+            if (buf_size == 0) {
+                cons_show("No loaded history in this window to verify.");
+                return TRUE;
+            }
+
+            ProfBuffEntry* first_msg = NULL;
+            ProfBuffEntry* last_msg = NULL;
+
+            for (unsigned int i = 0; i < buf_size; i++) {
+                ProfBuffEntry* entry = buffer_get_entry(window->layout->buffer, i);
+                if (entry && entry->message && entry->message[0] != '-') {
+                    if (!first_msg) {
+                        first_msg = entry;
+                    }
+                    last_msg = entry;
+                }
+            }
+
+            if (!first_msg || !last_msg) {
+                cons_show("No messages found in the active scrollback buffer.");
+                return TRUE;
+            }
+
+            GDateTime* utc_start = g_date_time_to_timezone(first_msg->time, g_time_zone_new_utc());
+            GDateTime* utc_end = g_date_time_to_timezone(last_msg->time, g_time_zone_new_utc());
+            auto_gchar gchar* start_str = g_date_time_format(utc_start, "%FT%T.%f%:z");
+            auto_gchar gchar* end_str = g_date_time_format(utc_end, "%FT%T.%f%:z");
+            g_date_time_unref(utc_start);
+            g_date_time_unref(utc_end);
+
+            cons_show("Verifying history from %s to %s...", start_str, end_str);
+            iq_mam_verify_request(window, start_str, end_str);
+
+            return TRUE;
+        }
+
+        _cmd_set_boolean_preference(args[1], "Message Archive Management", PREF_MAM);
+        return TRUE;
+    }
+
+    cons_bad_cmd_usage(command);
     return TRUE;
 }
 
@@ -9742,69 +9814,6 @@ gboolean
 cmd_executable_vcard_photo(ProfWin* window, const gchar* const command, gchar** args)
 {
     return _cmd_executable_template(PREF_VCARD_PHOTO_CMD, command, args);
-}
-
-gboolean
-cmd_mam(ProfWin* window, const gchar* const command, gchar** args)
-{
-    if (g_strcmp0(args[0], "verify") == 0) {
-        if (connection_get_status() != JABBER_CONNECTED) {
-            cons_show("You are not currently connected.");
-            return TRUE;
-        }
-        if (window->type != WIN_CHAT && window->type != WIN_MUC) {
-            cons_show("MAM verification can only be performed in chat or groupchat windows.");
-            return TRUE;
-        }
-        if (!prefs_get_boolean(PREF_MAM)) {
-            cons_show("Message Archive Management (MAM) is currently disabled.");
-            return TRUE;
-        }
-        if (!connection_supports(XMPP_FEATURE_MAM2)) {
-            cons_show("Your server does not support Message Archive Management (MAM2).");
-            return TRUE;
-        }
-
-        unsigned int buf_size = buffer_size(window->layout->buffer);
-        if (buf_size == 0) {
-            cons_show("No loaded history in this window to verify.");
-            return TRUE;
-        }
-
-        ProfBuffEntry* first_msg = NULL;
-        ProfBuffEntry* last_msg = NULL;
-
-        for (unsigned int i = 0; i < buf_size; i++) {
-            ProfBuffEntry* entry = buffer_get_entry(window->layout->buffer, i);
-            if (entry && entry->message && entry->message[0] != '-') {
-                if (!first_msg) {
-                    first_msg = entry;
-                }
-                last_msg = entry;
-            }
-        }
-
-        if (!first_msg || !last_msg) {
-            cons_show("No messages found in the active scrollback buffer.");
-            return TRUE;
-        }
-
-        GDateTime* utc_start = g_date_time_to_timezone(first_msg->time, g_time_zone_new_utc());
-        GDateTime* utc_end = g_date_time_to_timezone(last_msg->time, g_time_zone_new_utc());
-        auto_gchar gchar* start_str = g_date_time_format(utc_start, "%FT%T.%f%:z");
-        auto_gchar gchar* end_str = g_date_time_format(utc_end, "%FT%T.%f%:z");
-        g_date_time_unref(utc_start);
-        g_date_time_unref(utc_end);
-
-        cons_show("Verifying history from %s to %s...", start_str, end_str);
-        iq_mam_verify_request(window, start_str, end_str);
-
-        return TRUE;
-    }
-
-    _cmd_set_boolean_preference(args[0], "Message Archive Management", PREF_MAM);
-
-    return TRUE;
 }
 
 gboolean

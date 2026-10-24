@@ -687,13 +687,7 @@ sv_ev_incoming_message(ProfMessage* message)
 
     if (!chatwin) {
         chatwin = chatwin_new(looking_for_jid);
-        ProfWin* window = (ProfWin*)chatwin;
         new_win = TRUE;
-
-        if (prefs_get_boolean(PREF_MAM)) {
-            win_print_loading_history(window);
-            iq_mam_request((ProfWin*)chatwin, g_date_time_ref(message->timestamp)); // copy timestamp
-        }
 
 #ifdef HAVE_OMEMO
         if (!message->is_mam) {

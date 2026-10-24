@@ -2178,6 +2178,28 @@ win_print_loading_history(ProfWin* window)
 }
 
 void
+win_remove_loading_history(ProfWin* window)
+{
+    if (!window || !window->layout || !window->layout->buffer) {
+        return;
+    }
+
+    gboolean changed = FALSE;
+    unsigned int size = buffer_size(window->layout->buffer);
+    for (int i = (int)size - 1; i >= 0; i--) {
+        ProfBuffEntry* entry = buffer_get_entry(window->layout->buffer, i);
+        if (entry && entry->theme_item == THEME_ROOMINFO && g_strcmp0(entry->message, LOADING_MESSAGE) == 0) {
+            buffer_remove_entry(window->layout->buffer, i);
+            changed = TRUE;
+        }
+    }
+
+    if (changed) {
+        win_redraw(window);
+    }
+}
+
+void
 win_print_end_of_archive(ProfWin* window)
 {
     GDateTime* timestamp;

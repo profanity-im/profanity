@@ -1777,10 +1777,9 @@ cons_gone_setting(void)
 void
 cons_history_setting(void)
 {
-    if (prefs_get_boolean(PREF_HISTORY))
-        cons_show("Chat history (/history)       : ON");
-    else
-        cons_show("Chat history (/history)       : OFF");
+    cons_show("Chat history (/history local: %s, /history mam: %s)",
+              prefs_get_boolean(PREF_HISTORY) ? "ON" : "OFF",
+              prefs_get_boolean(PREF_MAM) ? "ON" : "OFF");
 }
 
 void
@@ -1818,7 +1817,6 @@ cons_show_chat_prefs(void)
     cons_history_setting();
     cons_carbons_setting();
     cons_receipts_setting();
-    cons_mam_setting();
     cons_silence_setting();
 
     cons_alert(NULL);
@@ -2141,16 +2139,6 @@ cons_slashguard_setting(void)
         cons_show("Slashguard (/slashguard)       : ON");
     } else {
         cons_show("Slashguard (/slashguard)       : OFF");
-    }
-}
-
-void
-cons_mam_setting(void)
-{
-    if (prefs_get_boolean(PREF_MAM)) {
-        cons_show("Message Archive Management (XEP-0313) (/mam)    : ON");
-    } else {
-        cons_show("Message Archive Management (XEP-0313) (/mam)    : OFF");
     }
 }
 
