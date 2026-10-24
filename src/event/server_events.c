@@ -23,7 +23,6 @@
 #include "config/tlscerts.h"
 #include "config/account.h"
 #include "config/cafile.h"
-#include "config/scripts.h"
 #include "common.h"
 #include "event/client_events.h"
 #include "event/server_events.h"
@@ -113,10 +112,6 @@ sv_ev_login_account_success(const gchar* const account_name, gboolean secured)
     }
 
     ev_inc_connection_counter();
-
-    if (account->startscript) {
-        scripts_exec(account->startscript);
-    }
 
     account_free(account);
 }

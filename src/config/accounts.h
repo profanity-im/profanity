@@ -60,7 +60,6 @@ void accounts_set_priority_all(const gchar* const account_name, const gint value
 gint accounts_get_priority_for_presence_type(const gchar* const account_name,
                                              resource_presence_t presence_type);
 void accounts_set_pgp_keyid(const gchar* const account_name, const gchar* const value);
-void accounts_set_script_start(const gchar* const account_name, const gchar* const value);
 void accounts_set_client(const gchar* const account_name, const gchar* const value);
 void accounts_set_theme(const gchar* const account_name, const gchar* const value);
 void accounts_set_max_sessions(const gchar* const account_name, const int value);
@@ -71,7 +70,6 @@ void accounts_clear_server(const gchar* const account_name);
 void accounts_clear_port(const gchar* const account_name);
 void accounts_clear_otr(const gchar* const account_name);
 void accounts_clear_pgp_keyid(const gchar* const account_name);
-void accounts_clear_script_start(const gchar* const account_name);
 void accounts_clear_client(const gchar* const account_name);
 void accounts_clear_theme(const gchar* const account_name);
 void accounts_clear_muc(const gchar* const account_name);

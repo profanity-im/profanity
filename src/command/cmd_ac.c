@@ -19,7 +19,6 @@
 
 #include "common.h"
 #include "config/preferences.h"
-#include "config/scripts.h"
 #include "command/cmd_ac.h"
 #include "command/cmd_funcs.h"
 #include "tools/parser.h"
@@ -81,7 +80,6 @@ static gchar* _help_autocomplete(ProfWin* window, const gchar* const input, gboo
 static gchar* _wins_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
 static gchar* _tls_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
 static gchar* _titlebar_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
-static gchar* _script_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
 static gchar* _subject_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
 static gchar* _console_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
 static gchar* _win_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
@@ -113,8 +111,6 @@ static gchar* _stamp_autocomplete(ProfWin* window, const gchar* const input, gbo
 static gchar* _adhoc_cmd_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
 static gchar* _vcard_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
 static gchar* _history_autocomplete(ProfWin* window, const gchar* const input, gboolean previous);
-
-static gchar* _script_autocomplete_func(const gchar* const prefix, gboolean previous, void* context);
 
 static gchar* _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean previous);
 
@@ -222,8 +218,6 @@ static Autocomplete titlebar_room_ac;
 static Autocomplete titlebar_room_title_ac;
 static Autocomplete titlebar_show_ac;
 static Autocomplete tls_certpath_ac;
-static Autocomplete script_ac;
-static Autocomplete script_show_ac;
 static Autocomplete console_ac;
 static Autocomplete console_msg_ac;
 static Autocomplete autoping_ac;
@@ -386,7 +380,6 @@ static Autocomplete* all_acs[] = {
     &titlebar_room_title_ac,
     &titlebar_show_ac,
     &tls_certpath_ac,
-    &script_ac,
     &console_ac,
     &console_msg_ac,
     &autoping_ac,
@@ -608,7 +601,6 @@ cmd_ac_init(void)
     autocomplete_add(account_set_ac, "nick");
     autocomplete_add(account_set_ac, "otr");
     autocomplete_add(account_set_ac, "pgpkeyid");
-    autocomplete_add(account_set_ac, "startscript");
     autocomplete_add(account_set_ac, "clientid");
     autocomplete_add(account_set_ac, "tls");
     autocomplete_add(account_set_ac, "auth");
@@ -621,7 +613,6 @@ cmd_ac_init(void)
     autocomplete_add(account_clear_ac, "port");
     autocomplete_add(account_clear_ac, "otr");
     autocomplete_add(account_clear_ac, "pgpkeyid");
-    autocomplete_add(account_clear_ac, "startscript");
     autocomplete_add(account_clear_ac, "clientid");
     autocomplete_add(account_clear_ac, "theme");
     autocomplete_add(account_clear_ac, "muc");
@@ -1026,12 +1017,6 @@ cmd_ac_init(void)
     autocomplete_add(tls_certpath_ac, "clear");
     autocomplete_add(tls_certpath_ac, "default");
 
-    autocomplete_add(script_ac, "run");
-    autocomplete_add(script_ac, "list");
-    autocomplete_add(script_ac, "show");
-
-    script_show_ac = NULL;
-
     autocomplete_add(console_ac, "chat");
     autocomplete_add(console_ac, "muc");
     autocomplete_add(console_ac, "private");
@@ -1409,9 +1394,8 @@ cmd_ac_init(void)
     g_hash_table_insert(ac_funcs, "/reconnect", _reconnect_autocomplete);
     g_hash_table_insert(ac_funcs, "/resource", _resource_autocomplete);
     g_hash_table_insert(ac_funcs, "/role", _role_autocomplete);
-    g_hash_table_insert(ac_funcs, "/rooms", _rooms_autocomplete);
     g_hash_table_insert(ac_funcs, "/roster", _roster_autocomplete);
-    g_hash_table_insert(ac_funcs, "/script", _script_autocomplete);
+    g_hash_table_insert(ac_funcs, "/rooms", _rooms_autocomplete);
     g_hash_table_insert(ac_funcs, "/sendfile", _sendfile_autocomplete);
     g_hash_table_insert(ac_funcs, "/software", _software_autocomplete);
     g_hash_table_insert(ac_funcs, "/status", _status_autocomplete);
@@ -1627,10 +1611,6 @@ cmd_ac_reset(ProfWin* window)
         autocomplete_free(plugins_reload_ac);
         plugins_reload_ac = NULL;
     }
-    if (script_show_ac) {
-        autocomplete_free(script_show_ac);
-        script_show_ac = NULL;
-    }
 
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
@@ -1666,7 +1646,6 @@ cmd_ac_uninit(void)
     autocomplete_free(plugins_load_ac);
     autocomplete_free(plugins_unload_ac);
     autocomplete_free(plugins_reload_ac);
-    autocomplete_free(script_show_ac);
     g_free(last_filepath_input);
     last_filepath_input = NULL;
     g_hash_table_destroy(ac_funcs);
@@ -2827,49 +2806,6 @@ _theme_autocomplete(ProfWin* window, const gchar* const input, gboolean previous
 }
 
 static gchar*
-_script_autocomplete_func(const gchar* const prefix, gboolean previous, void* context)
-{
-    if (script_show_ac == NULL) {
-        script_show_ac = autocomplete_new();
-        GSList* scripts = scripts_list();
-        GSList* curr = scripts;
-        while (curr) {
-            autocomplete_add(script_show_ac, curr->data);
-            curr = g_slist_next(curr);
-        }
-        g_slist_free_full(scripts, g_free);
-    }
-
-    return autocomplete_complete(script_show_ac, prefix, FALSE, previous);
-}
-
-static gchar*
-_script_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
-{
-    gchar* result = NULL;
-    if (strncmp(input, "/script show ", 13) == 0) {
-        result = autocomplete_param_with_func(input, "/script show", _script_autocomplete_func, previous, NULL);
-        if (result) {
-            return result;
-        }
-    }
-
-    if (strncmp(input, "/script run ", 12) == 0) {
-        result = autocomplete_param_with_func(input, "/script run", _script_autocomplete_func, previous, NULL);
-        if (result) {
-            return result;
-        }
-    }
-
-    result = autocomplete_param_with_ac(input, "/script", script_ac, TRUE, previous);
-    if (result) {
-        return result;
-    }
-
-    return NULL;
-}
-
-static gchar*
 _resource_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
 {
     char* found = NULL;
@@ -3713,16 +3649,6 @@ _account_autocomplete(ProfWin* window, const gchar* const input, gboolean previo
             GString* beginning = g_string_new("/account");
             g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
             found = autocomplete_param_with_ac(input, beginning->str, auth_property_ac, TRUE, previous);
-            g_string_free(beginning, TRUE);
-            if (found) {
-                return found;
-            }
-        }
-        if ((num_args == 3 && space_at_end && (g_strcmp0(args[2], "startscript") == 0))
-            || (num_args == 4 && (g_strcmp0(args[2], "startscript") == 0) && !space_at_end)) {
-            GString* beginning = g_string_new("/account");
-            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            found = autocomplete_param_with_func(input, beginning->str, _script_autocomplete_func, previous, NULL);
             g_string_free(beginning, TRUE);
             if (found) {
                 return found;

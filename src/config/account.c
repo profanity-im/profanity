@@ -31,7 +31,7 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
             gchar* otr_policy, GList* otr_manual, GList* otr_opportunistic, GList* otr_always,
             gchar* omemo_policy, GList* omemo_enabled, GList* omemo_disabled,
             GList* ox_enabled, GList* pgp_enabled, gchar* pgp_keyid,
-            gchar* startscript, gchar* theme, gchar* tls_policy, gchar* auth_policy,
+            gchar* theme, gchar* tls_policy, gchar* auth_policy,
             gchar* client, int max_sessions)
 {
     ProfAccount* new_account = g_new0(ProfAccount, 1);
@@ -103,8 +103,6 @@ account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_password, gboo
 
     new_account->pgp_enabled = pgp_enabled;
     new_account->pgp_keyid = pgp_keyid;
-
-    new_account->startscript = startscript;
 
     new_account->client = client;
 
@@ -192,7 +190,6 @@ account_free(ProfAccount* account)
     g_free(account->otr_policy);
     g_free(account->omemo_policy);
     g_free(account->pgp_keyid);
-    g_free(account->startscript);
     g_free(account->client);
     g_free(account->theme);
     g_free(account->tls_policy);

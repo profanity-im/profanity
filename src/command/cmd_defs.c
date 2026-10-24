@@ -32,7 +32,6 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "config/tlscerts.h"
-#include "config/scripts.h"
 #include "plugins/plugins.h"
 #include "tools/autocomplete.h"
 #include "tools/parser.h"
@@ -2207,26 +2206,6 @@ static const struct cmd_t command_defs[] = {
               "/xmlconsole")
       CMD_DESC(
               "Open the XML console to view incoming and outgoing XMPP traffic.")
-    },
-
-    { CMD_PREAMBLE("/script",
-                   parse_args, 1, 2, NULL)
-      CMD_MAINFUNC(cmd_script)
-      CMD_SYN(
-              "/script run <script>",
-              "/script list",
-              "/script show <script>")
-      CMD_DESC(
-              "Run command scripts. "
-              "Scripts are stored in $XDG_DATA_HOME/profanity/scripts/ which is usually $HOME/.local/share/profanity/scripts/.")
-      CMD_ARGS(
-              { "script run <script>", "Execute a script." },
-              { "script list", "List all scripts TODO." },
-              { "script show <script>", "Show the commands in script TODO." })
-      CMD_EXAMPLES(
-              "/script list",
-              "/script run myscript",
-              "/script show somescript")
     },
 
     { CMD_PREAMBLE("/export",

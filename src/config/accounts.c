@@ -318,8 +318,6 @@ accounts_get_account(const gchar* const account_name)
 
         gchar* pgp_keyid = g_key_file_get_string(accounts, sanitized_account_name, "pgp.keyid", NULL);
 
-        gchar* startscript = g_key_file_get_string(accounts, sanitized_account_name, "script.start", NULL);
-
         gchar* client = g_key_file_get_string(accounts, sanitized_account_name, "client.name", NULL);
 
         gchar* theme = g_key_file_get_string(accounts, sanitized_account_name, "theme", NULL);
@@ -340,7 +338,7 @@ accounts_get_account(const gchar* const account_name)
                            priority_dnd, muc_service, muc_nick, otr_policy, otr_manual,
                            otr_opportunistic, otr_always, omemo_policy, omemo_enabled,
                            omemo_disabled, ox_enabled, pgp_enabled, pgp_keyid,
-                           startscript, theme, tls_policy, auth_policy, client, max_sessions);
+                           theme, tls_policy, auth_policy, client, max_sessions);
     }
 }
 
@@ -513,12 +511,6 @@ accounts_set_pgp_keyid(const gchar* const account_name, const gchar* const value
 }
 
 void
-accounts_set_script_start(const gchar* const account_name, const gchar* const value)
-{
-    _accounts_set_string_option(account_name, "script.start", value);
-}
-
-void
 accounts_set_client(const gchar* const account_name, const gchar* const value)
 {
     _accounts_set_string_option(account_name, "client.name", value);
@@ -564,12 +556,6 @@ void
 accounts_clear_pgp_keyid(const gchar* const account_name)
 {
     _accounts_clear_string_option(account_name, "pgp.keyid");
-}
-
-void
-accounts_clear_script_start(const gchar* const account_name)
-{
-    _accounts_clear_string_option(account_name, "script.start");
 }
 
 void

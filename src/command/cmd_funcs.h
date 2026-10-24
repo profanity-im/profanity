@@ -134,7 +134,6 @@ gboolean cmd_titlebar_show_hide(ProfWin* window, const gchar* const command, gch
 gboolean cmd_mainwin(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_statusbar(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_inputwin(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_script(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_export(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_charset(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_console(ProfWin* window, const gchar* const command, gchar** args);
