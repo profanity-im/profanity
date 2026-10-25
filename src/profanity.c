@@ -32,7 +32,6 @@
 #include "config/theme.h"
 #include "tools/spellcheck.h"
 #include "config/tlscerts.h"
-#include "config/scripts.h"
 #include "command/cmd_defs.h"
 #include "plugins/plugins.h"
 #include "event/client_events.h"
@@ -227,7 +226,6 @@ _init(const gchar* const log_level, const gchar* const config_file, const gchar*
     log_info("Initialising contact list");
     muc_init();
     tlscerts_init();
-    scripts_init();
 #ifdef HAVE_LIBOTR
     otr_init();
 #endif

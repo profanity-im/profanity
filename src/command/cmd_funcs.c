@@ -45,7 +45,6 @@
 #include "config/preferences.h"
 #include "config/theme.h"
 #include "config/tlscerts.h"
-#include "config/scripts.h"
 #include "event/client_events.h"
 #include "tools/http_upload.h"
 #include "tools/http_download.h"
@@ -778,14 +777,6 @@ _account_set_pgpkeyid(char* account_name, char* pgpkeyid)
 }
 
 gboolean
-_account_set_startscript(char* account_name, char* script)
-{
-    accounts_set_script_start(account_name, script);
-    cons_show("Updated start script for account %s: %s", account_name, script);
-    return TRUE;
-}
-
-gboolean
 _account_set_client(char* account_name, char* new_client)
 {
     accounts_set_client(account_name, new_client);
@@ -951,8 +942,6 @@ cmd_account_set(ProfWin* window, const gchar* const command, gchar** args)
         return _account_set_status(account_name, value);
     if (strcmp(property, "pgpkeyid") == 0)
         return _account_set_pgpkeyid(account_name, value);
-    if (strcmp(property, "startscript") == 0)
-        return _account_set_startscript(account_name, value);
     if (strcmp(property, "clientid") == 0)
         return _account_set_client(account_name, value);
     if (strcmp(property, "theme") == 0)
@@ -1008,9 +997,6 @@ cmd_account_clear(ProfWin* window, const gchar* const command, gchar** args)
     } else if (strcmp(property, "pgpkeyid") == 0) {
         accounts_clear_pgp_keyid(account_name);
         cons_show("Removed PGP key ID for account %s", account_name);
-    } else if (strcmp(property, "startscript") == 0) {
-        accounts_clear_script_start(account_name);
-        cons_show("Removed start script for account %s", account_name);
     } else if (strcmp(property, "clientid") == 0) {
         accounts_clear_client(account_name);
         cons_show("Reset client name for account %s", account_name);
@@ -1053,29 +1039,6 @@ cmd_account(ProfWin* window, const gchar* const command, gchar** args)
         account_free(account);
     } else {
         log_error("Could not get accounts");
-    }
-
-    return TRUE;
-}
-
-gboolean
-cmd_script(ProfWin* window, const gchar* const command, gchar** args)
-{
-    if ((g_strcmp0(args[0], "run") == 0) && args[1]) {
-        gboolean res = scripts_exec(args[1]);
-        if (!res) {
-            cons_show("Could not find script %s", args[1]);
-        }
-    } else if (g_strcmp0(args[0], "list") == 0) {
-        GSList* scripts = scripts_list();
-        cons_show_scripts(scripts);
-        g_slist_free_full(scripts, g_free);
-    } else if ((g_strcmp0(args[0], "show") == 0) && args[1]) {
-        GSList* commands = scripts_read(args[1]);
-        cons_show_script(args[1], commands);
-        g_slist_free_full(commands, g_free);
-    } else {
-        cons_bad_cmd_usage(command);
     }
 
     return TRUE;

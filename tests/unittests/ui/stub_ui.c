@@ -884,14 +884,6 @@ void
 cons_show_themes(GSList* themes)
 {
 }
-void
-cons_show_scripts(GSList* scripts)
-{
-}
-void
-cons_show_script(const char* const script, GSList* commands)
-{
-}
 
 void
 cons_show_aliases(GList* aliases)

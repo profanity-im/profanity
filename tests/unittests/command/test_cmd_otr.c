@@ -190,7 +190,7 @@ cmd_otr_gen__tests__generates_key_for_connected_account(void** state)
     gchar* args[] = { "gen", NULL };
     gchar* account_name = g_strdup("myaccount");
     ProfAccount* account = account_new(account_name, g_strdup("me@jabber.org"), NULL, NULL,
-                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+                                       TRUE, NULL, 0, NULL, NULL, NULL, 0, 0, 0, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
 
     will_return(connection_get_status, JABBER_CONNECTED);
     will_return(session_get_account_name, account_name);

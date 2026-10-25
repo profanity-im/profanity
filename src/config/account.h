@@ -41,7 +41,6 @@ typedef struct prof_account_t
     GList* ox_enabled;
     GList* pgp_enabled;
     gchar* pgp_keyid;
-    gchar* startscript;
     gchar* theme;
     gchar* tls_policy;
     gchar* auth_policy;
@@ -56,7 +55,7 @@ ProfAccount* account_new(gchar* name, gchar* jid, gchar* password, gchar* eval_p
                          gchar* otr_policy, GList* otr_manual, GList* otr_opportunistic, GList* otr_always,
                          gchar* omemo_policy, GList* omemo_enabled, GList* omemo_disabled,
                          GList* ox_enabled, GList* pgp_enabled, gchar* pgp_keyid,
-                         gchar* startscript, gchar* theme, gchar* tls_policy, gchar* auth_policy,
+                         gchar* theme, gchar* tls_policy, gchar* auth_policy,
                          gchar* client, int max_sessions);
 gchar* account_create_connect_jid(ProfAccount* account);
 gboolean account_eval_password(ProfAccount* account);
