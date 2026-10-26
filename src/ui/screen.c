@@ -18,6 +18,7 @@
 #endif
 
 #include "config/preferences.h"
+#include "ui/screen.h"
 
 int
 _screen_line_row(int win_pos, int mainwin_pos)

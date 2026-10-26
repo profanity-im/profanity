@@ -17,6 +17,7 @@
 #include "config/preferences.h"
 
 #include "log.h"
+#include "tools/bookmark_ignore.h"
 
 #include "xmpp/xmpp.h"
 

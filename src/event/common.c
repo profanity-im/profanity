@@ -19,6 +19,7 @@
 #include "database.h"
 #include "tools/bookmark_ignore.h"
 #include "event/server_events.h"
+#include "event/common.h"
 
 #ifdef HAVE_LIBGPGME
 #include "pgp/gpg.h"

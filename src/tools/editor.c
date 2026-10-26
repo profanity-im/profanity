@@ -21,6 +21,7 @@
 #include "log.h"
 #include "common.h"
 #include "xmpp/xmpp.h"
+#include "tools/editor.h"
 #include "ui/ui.h"
 
 typedef struct EditorContext

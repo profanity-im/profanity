@@ -15,6 +15,7 @@
 #include <glib.h>
 
 #include "common.h"
+#include "tools/parser.h"
 
 static gchar**
 _parse_args_helper(const gchar* const inp, int min, int max, gboolean* result, gboolean with_freetext)

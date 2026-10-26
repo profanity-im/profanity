@@ -18,6 +18,7 @@
 #include "database.h"
 #include "config/preferences.h"
 #include "event/common.h"
+#include "event/client_events.h"
 #include "plugins/plugins.h"
 #include "ui/window_list.h"
 #include "xmpp/chat_session.h"

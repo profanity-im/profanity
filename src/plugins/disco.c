@@ -13,6 +13,7 @@
 #include <stdlib.h>
 
 #include <glib.h>
+#include "plugins/disco.h"
 
 // features to reference count map
 static GHashTable* features = NULL;

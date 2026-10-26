@@ -17,6 +17,7 @@
 #include "common.h"
 #include "config/theme.h"
 #include "config/files.h"
+#include "plugins/themes.h"
 
 static prof_keyfile_t themes_prof_keyfile;
 static GKeyFile* themes;

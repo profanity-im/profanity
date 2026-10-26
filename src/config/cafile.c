@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "config/files.h"
+#include "config/cafile.h"
 #include "log.h"
 #include "xmpp/xmpp.h"
 

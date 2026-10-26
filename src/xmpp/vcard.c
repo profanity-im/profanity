@@ -24,6 +24,7 @@
 #include "xmpp/form.h"
 #include "xmpp/iq.h"
 #include "xmpp/stanza.h"
+#include "xmpp/vcard_funcs.h"
 
 // Connected account's vCard
 vCard* vcard_user = NULL;

@@ -18,6 +18,7 @@
 #include "xmpp/stanza.h"
 #include "xmpp/iq.h"
 #include "pgp/ox.h"
+#include "xmpp/ox.h"
 
 #ifdef HAVE_LIBGPGME
 

@@ -17,6 +17,7 @@
 #include "xmpp/iq.h"
 #include "xmpp/message.h"
 #include "xmpp/stanza.h"
+#include "xmpp/omemo.h"
 
 #include "omemo/omemo.h"
 

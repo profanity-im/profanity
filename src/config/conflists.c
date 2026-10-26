@@ -10,6 +10,7 @@
 #include "config.h"
 #include "common.h"
 #include "log.h"
+#include "config/conflists.h"
 
 #include <string.h>
 #include <glib.h>
