@@ -51,8 +51,7 @@ bookmark_ignore_on_disconnect(void)
 {
     free_keyfile(&bookmark_ignore_prof_keyfile);
     bookmark_ignore_keyfile = NULL;
-    g_free(account_jid);
-    account_jid = NULL;
+    g_clear_pointer(&account_jid, g_free);
 }
 
 gboolean

@@ -219,11 +219,8 @@ void
 free_keyfile(prof_keyfile_t* keyfile)
 {
     log_debug("[Keyfile]: free %s", STR_MAYBE_NULL(keyfile->filename));
-    if (keyfile->keyfile)
-        g_key_file_free(keyfile->keyfile);
-    keyfile->keyfile = NULL;
-    g_free(keyfile->filename);
-    keyfile->filename = NULL;
+    g_clear_pointer(&keyfile->keyfile, g_key_file_free);
+    g_clear_pointer(&keyfile->filename, g_free);
 }
 
 gboolean
