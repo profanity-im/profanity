@@ -59,7 +59,6 @@ cc = meson.get_compiler('c')
 
 # Common compiler flags
 add_project_arguments([
-  '-Wno-deprecated-declarations',
   '-Wno-unused-parameter',
 ], language: 'c')
 
