@@ -1522,22 +1522,10 @@ cmd_ac_reset(ProfWin* window)
     for (n = G_N_ELEMENTS(all_acs); n > 0; --n) {
         autocomplete_reset(*(all_acs[n - 1]));
     }
-    if (theme_load_ac) {
-        autocomplete_free(theme_load_ac);
-        theme_load_ac = NULL;
-    }
-    if (plugins_load_ac) {
-        autocomplete_free(plugins_load_ac);
-        plugins_load_ac = NULL;
-    }
-    if (plugins_unload_ac) {
-        autocomplete_free(plugins_unload_ac);
-        plugins_unload_ac = NULL;
-    }
-    if (plugins_reload_ac) {
-        autocomplete_free(plugins_reload_ac);
-        plugins_reload_ac = NULL;
-    }
+    g_clear_pointer(&theme_load_ac, autocomplete_free);
+    g_clear_pointer(&plugins_load_ac, autocomplete_free);
+    g_clear_pointer(&plugins_unload_ac, autocomplete_free);
+    g_clear_pointer(&plugins_reload_ac, autocomplete_free);
 
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
@@ -1569,14 +1557,12 @@ cmd_ac_uninit(void)
     for (n = G_N_ELEMENTS(all_acs); n > 0; --n) {
         autocomplete_free(*(all_acs[n - 1]));
     }
-    autocomplete_free(theme_load_ac);
-    autocomplete_free(plugins_load_ac);
-    autocomplete_free(plugins_unload_ac);
-    autocomplete_free(plugins_reload_ac);
-    g_free(last_filepath_input);
-    last_filepath_input = NULL;
-    g_hash_table_destroy(ac_funcs);
-    ac_funcs = NULL;
+    g_clear_pointer(&theme_load_ac, autocomplete_free);
+    g_clear_pointer(&plugins_load_ac, autocomplete_free);
+    g_clear_pointer(&plugins_unload_ac, autocomplete_free);
+    g_clear_pointer(&plugins_reload_ac, autocomplete_free);
+    g_clear_pointer(&last_filepath_input, g_free);
+    g_clear_pointer(&ac_funcs, g_hash_table_destroy);
 }
 
 static void

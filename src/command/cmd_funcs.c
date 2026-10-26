@@ -387,8 +387,7 @@ cmd_connect(ProfWin* window, const gchar* const command, gchar** args)
             ui_resize();
             if (res) {
                 conn_status = cl_ev_connect_account(account);
-                free(account->password);
-                account->password = NULL;
+                g_clear_pointer(&account->password, free);
             } else {
                 cons_show("Error evaluating password, see logs for details.");
                 account_free(account);
@@ -400,8 +399,7 @@ cmd_connect(ProfWin* window, const gchar* const command, gchar** args)
         } else {
             account->password = ui_ask_password(FALSE);
             conn_status = cl_ev_connect_account(account);
-            free(account->password);
-            account->password = NULL;
+            g_clear_pointer(&account->password, free);
         }
 
         jid = account_create_connect_jid(account);
@@ -3518,8 +3516,7 @@ _xmpp_uri_parse_join(const gchar* uri, gchar** out_room, gchar** out_password)
     auto_gcharv gchar** parts = g_strsplit(query_str, ";", -1);
 
     if (parts[0] == NULL || g_strcmp0(parts[0], "join") != 0) {
-        g_free(*out_room);
-        *out_room = NULL;
+        g_clear_pointer(out_room, g_free);
         return FALSE;
     }
 

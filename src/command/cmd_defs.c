@@ -2787,10 +2787,8 @@ static void
 _cmd_uninit(void)
 {
     cmd_ac_uninit();
-    g_hash_table_destroy(commands);
-    commands = NULL;
-    g_hash_table_destroy(search_index);
-    search_index = NULL;
+    g_clear_pointer(&commands, g_hash_table_destroy);
+    g_clear_pointer(&search_index, g_hash_table_destroy);
 }
 
 /*
