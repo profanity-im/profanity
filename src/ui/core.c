@@ -975,19 +975,6 @@ ui_win_unread(int index)
     }
 }
 
-gboolean
-ui_win_has_attention(int index)
-{
-    gboolean ret = FALSE;
-
-    ProfWin* window = wins_get_by_num(index);
-    if (window) {
-        ret = win_has_attention(window);
-    }
-
-    return ret;
-}
-
 char*
 ui_ask_password(gboolean confirm)
 {

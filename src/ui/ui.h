@@ -53,7 +53,6 @@ int ui_close_all_wins(void);
 int ui_close_read_wins(void);
 void ui_close_win(int index);
 int ui_win_unread(int index);
-gboolean ui_win_has_attention(int index);
 gboolean win_has_attention(ProfWin* window);
 gboolean win_toggle_attention(ProfWin* window);
 char* ui_ask_password(gboolean confirm);

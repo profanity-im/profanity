@@ -222,12 +222,6 @@ ui_win_unread(int index)
 }
 
 gboolean
-ui_win_has_attention(int index)
-{
-    return FALSE;
-}
-
-gboolean
 win_has_attention(ProfWin* window)
 {
     return FALSE;
