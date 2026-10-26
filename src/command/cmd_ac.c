@@ -265,12 +265,6 @@ static Autocomplete adhoc_cmd_ac;
 static Autocomplete lastactivity_ac;
 static Autocomplete vcard_ac;
 static Autocomplete vcard_photo_ac;
-static Autocomplete vcard_element_ac;
-static Autocomplete vcard_set_ac;
-static Autocomplete vcard_name_ac;
-static Autocomplete vcard_set_param_ac;
-static Autocomplete vcard_togglable_param_ac;
-static Autocomplete vcard_address_type_ac;
 static Autocomplete history_ac;
 static Autocomplete history_mam_ac;
 
@@ -424,12 +418,6 @@ static Autocomplete* all_acs[] = {
     &lastactivity_ac,
     &vcard_ac,
     &vcard_photo_ac,
-    &vcard_element_ac,
-    &vcard_set_ac,
-    &vcard_name_ac,
-    &vcard_set_param_ac,
-    &vcard_togglable_param_ac,
-    &vcard_address_type_ac,
     &history_ac,
     &history_mam_ac,
 };
@@ -1273,67 +1261,6 @@ cmd_ac_init(void)
 
     autocomplete_add(vcard_photo_ac, "open");
     autocomplete_add(vcard_photo_ac, "save");
-
-    autocomplete_add(vcard_element_ac, "nickname");
-    autocomplete_add(vcard_element_ac, "birthday");
-    autocomplete_add(vcard_element_ac, "address");
-    autocomplete_add(vcard_element_ac, "tel");
-    autocomplete_add(vcard_element_ac, "email");
-    autocomplete_add(vcard_element_ac, "jid");
-    autocomplete_add(vcard_element_ac, "title");
-    autocomplete_add(vcard_element_ac, "role");
-    autocomplete_add(vcard_element_ac, "note");
-    autocomplete_add(vcard_element_ac, "url");
-
-    autocomplete_add(vcard_set_ac, "fullname");
-    autocomplete_add(vcard_set_ac, "name");
-
-    autocomplete_add(vcard_name_ac, "family");
-    autocomplete_add(vcard_name_ac, "given");
-    autocomplete_add(vcard_name_ac, "middle");
-    autocomplete_add(vcard_name_ac, "prefix");
-    autocomplete_add(vcard_name_ac, "suffix");
-
-    autocomplete_add(vcard_set_param_ac, "pobox");
-    autocomplete_add(vcard_set_param_ac, "extaddr");
-    autocomplete_add(vcard_set_param_ac, "street");
-    autocomplete_add(vcard_set_param_ac, "locality");
-    autocomplete_add(vcard_set_param_ac, "region");
-    autocomplete_add(vcard_set_param_ac, "pocode");
-    autocomplete_add(vcard_set_param_ac, "country");
-    autocomplete_add(vcard_set_param_ac, "type");
-    autocomplete_add(vcard_set_param_ac, "home");
-    autocomplete_add(vcard_set_param_ac, "work");
-    autocomplete_add(vcard_set_param_ac, "voice");
-    autocomplete_add(vcard_set_param_ac, "fax");
-    autocomplete_add(vcard_set_param_ac, "pager");
-    autocomplete_add(vcard_set_param_ac, "msg");
-    autocomplete_add(vcard_set_param_ac, "cell");
-    autocomplete_add(vcard_set_param_ac, "video");
-    autocomplete_add(vcard_set_param_ac, "bbs");
-    autocomplete_add(vcard_set_param_ac, "modem");
-    autocomplete_add(vcard_set_param_ac, "isdn");
-    autocomplete_add(vcard_set_param_ac, "pcs");
-    autocomplete_add(vcard_set_param_ac, "preferred");
-    autocomplete_add(vcard_set_param_ac, "x400");
-
-    autocomplete_add(vcard_togglable_param_ac, "home");
-    autocomplete_add(vcard_togglable_param_ac, "work");
-    autocomplete_add(vcard_togglable_param_ac, "voice");
-    autocomplete_add(vcard_togglable_param_ac, "fax");
-    autocomplete_add(vcard_togglable_param_ac, "pager");
-    autocomplete_add(vcard_togglable_param_ac, "msg");
-    autocomplete_add(vcard_togglable_param_ac, "cell");
-    autocomplete_add(vcard_togglable_param_ac, "video");
-    autocomplete_add(vcard_togglable_param_ac, "bbs");
-    autocomplete_add(vcard_togglable_param_ac, "modem");
-    autocomplete_add(vcard_togglable_param_ac, "isdn");
-    autocomplete_add(vcard_togglable_param_ac, "pcs");
-    autocomplete_add(vcard_togglable_param_ac, "preferred");
-    autocomplete_add(vcard_togglable_param_ac, "x400");
-
-    autocomplete_add(vcard_address_type_ac, "domestic");
-    autocomplete_add(vcard_address_type_ac, "international");
 
     autocomplete_add(history_ac, "local");
     autocomplete_add(history_ac, "mam");
@@ -4251,68 +4178,6 @@ static gchar*
 _vcard_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
 {
     gchar* result = NULL;
-
-    gboolean parse_result = FALSE;
-    auto_gcharv gchar** args = parse_args(input, 0, 7, &parse_result);
-
-    if (parse_result && (g_strcmp0(args[0], "set") == 0)) {
-        gboolean space_at_end = g_str_has_suffix(input, " ");
-        int num_args = g_strv_length(args);
-        gboolean is_num = TRUE;
-
-        if (num_args >= 2) {
-            for (size_t i = 0; i < strlen(args[1]); i++) {
-                if (!isdigit((int)args[1][i])) {
-                    is_num = FALSE;
-                    break;
-                }
-            }
-        }
-
-        if ((num_args == 2 && space_at_end && is_num) || (num_args == 3 && !space_at_end && is_num)) {
-            GString* beginning = g_string_new("/vcard");
-            g_string_append_printf(beginning, " %s %s", args[0], args[1]);
-            result = autocomplete_param_with_ac(input, beginning->str, vcard_set_param_ac, TRUE, previous);
-            g_string_free(beginning, TRUE);
-            if (result) {
-                return result;
-            }
-        } else if ((num_args == 3 && space_at_end && is_num && (g_strcmp0(args[2], "type") == 0)) || (num_args == 4 && !space_at_end && is_num && (g_strcmp0(args[2], "type") == 0))) {
-            GString* beginning = g_string_new("/vcard");
-            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            result = autocomplete_param_with_ac(input, beginning->str, vcard_address_type_ac, TRUE, previous);
-            g_string_free(beginning, TRUE);
-            if (result) {
-                return result;
-            }
-        } else if ((num_args == 3 && space_at_end && is_num && autocomplete_contains(vcard_togglable_param_ac, args[2])) || (num_args == 4 && !space_at_end && is_num && autocomplete_contains(vcard_togglable_param_ac, args[2]))) {
-            GString* beginning = g_string_new("/vcard");
-            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            result = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice, previous, NULL);
-            g_string_free(beginning, TRUE);
-            if (result) {
-                return result;
-            }
-        } else {
-            result = autocomplete_param_with_ac(input, "/vcard set name", vcard_name_ac, TRUE, previous);
-
-            if (result) {
-                return result;
-            }
-
-            result = autocomplete_param_with_ac(input, "/vcard set", vcard_set_ac, TRUE, previous);
-
-            if (result) {
-                return result;
-            }
-        }
-    }
-
-    result = autocomplete_param_with_ac(input, "/vcard add", vcard_element_ac, TRUE, previous);
-
-    if (result) {
-        return result;
-    }
 
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;

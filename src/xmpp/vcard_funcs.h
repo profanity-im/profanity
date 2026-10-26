@@ -27,14 +27,6 @@ void vcard_user_save(void);
 void vcard_user_set_fullname(char* fullname);
 void vcard_user_set_name_family(char* family);
 void vcard_user_set_name_given(char* given);
-void vcard_user_set_name_middle(char* middle);
-void vcard_user_set_name_prefix(char* prefix);
-void vcard_user_set_name_suffix(char* suffix);
-
-void vcard_user_add_element(vcard_element_t* element);
-void vcard_user_remove_element(unsigned int index);
-vcard_element_t* vcard_user_get_element_index(unsigned int index);
-ProfWin* vcard_user_create_win();
 
 void vcard_user_free(void);
 

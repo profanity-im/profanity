@@ -235,12 +235,7 @@ gboolean cmd_strophe(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_stamp(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_vcard(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_vcard_edit(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_vcard_add(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_vcard_remove(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_vcard_get(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_vcard_photo(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_vcard_refresh(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_vcard_set(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_vcard_save(ProfWin* window, const gchar* const command, gchar** args);
 
 #endif
