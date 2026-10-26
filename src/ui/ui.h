@@ -242,7 +242,6 @@ void cons_show_pgp_prefs(void);
 void cons_show_omemo_prefs(void);
 void cons_show_ox_prefs(void);
 void cons_show_account(ProfAccount* account);
-void cons_debug(const char* const msg, ...);
 void cons_show_error(const char* const cmd, ...);
 void cons_show_contacts(GSList* list);
 void cons_show_roster(GSList* list);

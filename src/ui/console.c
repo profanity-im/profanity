@@ -45,17 +45,6 @@ static void _show_roster_contacts(GSList* list, gboolean show_groups);
 static GList* alert_list;
 
 void
-cons_debug(const char* const msg, ...)
-{
-#ifdef PACKAGE_STATUS_DEVELOPMENT
-    va_list arg;
-    va_start(arg, msg);
-    win_println_va(wins_get_console(), THEME_DEFAULT, "-", msg, arg);
-    va_end(arg);
-#endif
-}
-
-void
 cons_show(const char* const msg, ...)
 {
     va_list arg;

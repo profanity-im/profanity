@@ -808,10 +808,6 @@ cons_show_account(ProfAccount* account)
 }
 
 void
-cons_debug(const char* const msg, ...)
-{
-}
-void
 cons_show_time(void)
 {
 }
