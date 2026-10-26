@@ -13,7 +13,7 @@
 #include "ui/win_types.h"
 #include "xmpp/vcard.h"
 
-vCard* vcard_new();
+vCard* vcard_new(void);
 void vcard_free(vCard* vcard);
 void vcard_free_full(vCard* vcard);
 

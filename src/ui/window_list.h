@@ -65,7 +65,7 @@ void wins_reestablished_connection(void);
 void wins_omemo_trust_changed(const gchar* const jid);
 gboolean wins_tidy(void);
 GSList* wins_create_summary(gboolean unread);
-GSList* wins_create_summary_attention();
+GSList* wins_create_summary_attention(void);
 void wins_destroy(void);
 GList* wins_get_nums(void);
 void wins_swap(int source_win, int target_win);

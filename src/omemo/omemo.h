@@ -81,4 +81,4 @@ gcry_error_t omemo_decrypt_file(FILE* in, FILE* out, off_t file_size, const char
 void omemo_free(void* a);
 int omemo_parse_aesgcm_url(const gchar* aesgcm_url, char** https_url, char** fragment);
 
-gchar* omemo_qrcode_str();
+gchar* omemo_qrcode_str(void);

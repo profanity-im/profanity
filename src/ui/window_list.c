@@ -1084,7 +1084,7 @@ wins_create_summary(gboolean unread)
 }
 
 GSList*
-wins_create_summary_attention()
+wins_create_summary_attention(void)
 {
     GSList* result = NULL;
 

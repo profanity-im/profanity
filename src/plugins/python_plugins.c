@@ -32,13 +32,13 @@ static char* _handle_string_or_none_result(ProfPlugin* plugin, PyObject* result,
 static gboolean _handle_boolean_result(ProfPlugin* plugin, PyObject* result, char* hook);
 
 void
-allow_python_threads()
+allow_python_threads(void)
 {
     thread_state = PyEval_SaveThread();
 }
 
 void
-disable_python_threads()
+disable_python_threads(void)
 {
     PyEval_RestoreThread(thread_state);
 }

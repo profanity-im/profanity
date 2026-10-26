@@ -44,7 +44,7 @@ typedef struct prof_buff_entry_t
 
 typedef struct prof_buff_t* ProfBuff;
 
-ProfBuff buffer_create();
+ProfBuff buffer_create(void);
 void buffer_free(ProfBuff buffer);
 void buffer_append(ProfBuff buffer, const gchar* show_char, int pad_indent, GDateTime* time, int flags, theme_item_t theme_item,
                    const gchar* const display_from, const gchar* const barejid, const gchar* const message, DeliveryReceipt* receipt,
