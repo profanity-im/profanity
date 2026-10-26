@@ -78,7 +78,7 @@ _p_gpg_passphrase_cb(void* hook, const char* uid_hint, const char* passphrase_in
         if (passphrase_attempt) {
             g_free(passphrase_attempt);
         }
-        passphrase_attempt = g_string_free(pass_term, FALSE);
+        passphrase_attempt = g_string_free_and_steal(pass_term);
 
         gpgme_io_write(fd, passphrase_attempt, strlen(passphrase_attempt));
     }
@@ -682,7 +682,7 @@ p_gpg_format_fp_str(gchar* fp)
         }
     }
 
-    return g_string_free(format, FALSE);
+    return g_string_free_and_steal(format);
 }
 
 /**

@@ -385,7 +385,7 @@ str_xml_sanitize(const gchar* const str)
         curr = g_utf8_next_char(curr);
     }
 
-    return g_string_free(sanitized, FALSE);
+    return g_string_free_and_steal(sanitized);
 }
 
 typedef gboolean (*CharFilterFunc)(gunichar ch);
@@ -577,7 +577,7 @@ strip_arg_quotes(const gchar* const input)
         }
     }
 
-    return g_string_free(unescaped, FALSE);
+    return g_string_free_and_steal(unescaped);
 }
 
 gboolean

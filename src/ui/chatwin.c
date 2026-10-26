@@ -481,7 +481,7 @@ chatwin_get_string(ProfChatWin* chatwin)
         g_string_append_printf(res, ", %d unread", chatwin->unread);
     }
 
-    return g_string_free(res, FALSE);
+    return g_string_free_and_steal(res);
 }
 
 void

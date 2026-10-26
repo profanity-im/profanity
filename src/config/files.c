@@ -104,7 +104,7 @@ files_sanitize_jid(const gchar* const jid)
     GString* s = g_string_new(jid);
     g_string_replace(s, "@", "_at_", 0);
 
-    return g_string_free(s, FALSE);
+    return g_string_free_and_steal(s);
 }
 
 gchar*

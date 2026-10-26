@@ -2726,7 +2726,7 @@ _cmd_index(const Command* cmd)
         index = g_string_append(index, " ");
     }
 
-    return g_string_free(index, FALSE);
+    return g_string_free_and_steal(index);
 }
 
 GList*

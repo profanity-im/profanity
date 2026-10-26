@@ -101,7 +101,7 @@ _parse_args_helper(const gchar* const inp, int min, int max, gboolean* result, g
         } else {
             if (in_quotes) {
                 if (curr_uni == '"') {
-                    tokens = g_slist_append(tokens, g_string_free(current_token, FALSE));
+                    tokens = g_slist_append(tokens, g_string_free_and_steal(current_token));
                     current_token = g_string_new("");
                     in_token = FALSE;
                     in_quotes = FALSE;
@@ -112,7 +112,7 @@ _parse_args_helper(const gchar* const inp, int min, int max, gboolean* result, g
                 if (with_freetext && in_freetext) {
                     g_string_append_unichar(current_token, curr_uni);
                 } else if (curr_uni == ' ') {
-                    tokens = g_slist_append(tokens, g_string_free(current_token, FALSE));
+                    tokens = g_slist_append(tokens, g_string_free_and_steal(current_token));
                     current_token = g_string_new("");
                     in_token = FALSE;
                 } else {
@@ -123,7 +123,7 @@ _parse_args_helper(const gchar* const inp, int min, int max, gboolean* result, g
     }
 
     if (in_token) {
-        tokens = g_slist_append(tokens, g_string_free(current_token, FALSE));
+        tokens = g_slist_append(tokens, g_string_free_and_steal(current_token));
     } else {
         g_string_free(current_token, TRUE);
     }
@@ -355,7 +355,7 @@ get_start(const gchar* const string, int tokens)
         }
     }
 
-    return g_string_free(result, FALSE);
+    return g_string_free_and_steal(result);
 }
 
 GHashTable*

@@ -33,7 +33,7 @@ vcardwin_get_string(ProfVcardWin* vcardwin)
         g_string_append(string, " (modified)");
     }
 
-    return g_string_free(string, FALSE);
+    return g_string_free_and_steal(string);
 }
 
 void

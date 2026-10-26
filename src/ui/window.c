@@ -420,7 +420,7 @@ win_get_title(ProfWin* window)
 {
     GString* title = g_string_new("");
     win_title_append(window, title);
-    return g_string_free(title, FALSE);
+    return g_string_free_and_steal(title);
 }
 
 const gchar*
@@ -542,7 +542,7 @@ win_to_string(ProfWin* window)
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
         GString* gstring = g_string_new("");
         g_string_append_printf(gstring, "Plugin: %s", pluginwin->tag);
-        return g_string_free(gstring, FALSE);
+        return g_string_free_and_steal(gstring);
     }
     case WIN_VCARD:
     {

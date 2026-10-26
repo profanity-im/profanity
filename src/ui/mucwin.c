@@ -965,7 +965,7 @@ mucwin_generate_title(const gchar* const muc_jid, const preference_t pref)
 {
     GString* title = g_string_new("");
     mucwin_title_append(muc_jid, pref, title);
-    return g_string_free(title, FALSE);
+    return g_string_free_and_steal(title);
 }
 
 gboolean

@@ -217,7 +217,7 @@ _room_triggers_to_string(GList* triggers)
         }
     }
 
-    return g_string_free(triggers_str, FALSE);
+    return g_string_free_and_steal(triggers_str);
 }
 
 void

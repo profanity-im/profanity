@@ -235,7 +235,7 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
             }
             g_string_append_c(unescaped, *p);
         }
-        ac->search_str = g_string_free(unescaped, FALSE);
+        ac->search_str = g_string_free_and_steal(unescaped);
 
         found = _search(ac, ac->items, quote, NEXT);
 
@@ -406,7 +406,7 @@ _search(Autocomplete ac, GList* curr, gboolean quote, search_direction direction
                     g_string_append_c(escaped, *p);
                 }
                 g_string_append_c(escaped, '"');
-                return g_string_free(escaped, FALSE);
+                return g_string_free_and_steal(escaped);
                 // otherwise just return the string
             } else {
                 return g_strdup(curr->data);

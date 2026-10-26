@@ -249,5 +249,5 @@ privwin_get_string(ProfPrivateWin* privwin)
         g_string_append_printf(res, ", %d unread", privwin->unread);
     }
 
-    return g_string_free(res, FALSE);
+    return g_string_free_and_steal(res);
 }

@@ -794,7 +794,7 @@ muc_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
     if (strlen(chat_room->autocomplete_prefix) == 0) {
         g_string_append(replace_with, ": ");
     }
-    return g_string_free(replace_with, FALSE);
+    return g_string_free_and_steal(replace_with);
 }
 
 void
