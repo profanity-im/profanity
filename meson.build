@@ -72,6 +72,8 @@ if is_debug
     '-Wstrict-prototypes',
     '-Wmissing-prototypes',
     '-Wnull-dereference',
+    '-Wundef',
+    '-Winit-self',
     '-fstack-protector-strong',
     '-D_FORTIFY_SOURCE=2',
     '-Og',
@@ -82,6 +84,9 @@ if is_debug
   endif
   if cc.has_argument('-Wduplicated-branches')
     add_project_arguments('-Wduplicated-branches', language: 'c')
+  endif
+  if cc.has_argument('-Wlogical-op')
+    add_project_arguments('-Wlogical-op', language: 'c')
   endif
   if cc.get_id() == 'gcc'
      analyzer_args += '-fanalyzer'
