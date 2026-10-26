@@ -364,11 +364,11 @@ _get_log_filename(const gchar* const other, const gchar* const login, GDateTime*
     auto_gchar gchar* chatlogs_dir = files_file_in_account_data_path(DIR_CHATLOGS, login, is_room ? "rooms" : NULL);
     auto_gchar gchar* logfile_name = g_date_time_format(dt, "%Y_%m_%d.log");
     auto_gchar gchar* other_ = files_sanitize_jid(other);
-    auto_gchar gchar* logs_path = g_strdup_printf("%s/%s", chatlogs_dir, other_);
+    auto_gchar gchar* logs_path = g_build_filename(chatlogs_dir, other_, NULL);
 
     create_dir(logs_path);
 
-    return g_strdup_printf("%s/%s", logs_path, logfile_name);
+    return g_build_filename(logs_path, logfile_name, NULL);
 }
 
 static struct dated_chat_log*

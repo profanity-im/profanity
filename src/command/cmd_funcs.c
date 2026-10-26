@@ -7062,9 +7062,9 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
         path = get_expanded_path(args[1]);
     } else {
         if (g_str_has_suffix(args[1], ".py")) {
-            path = g_strdup_printf("%s/%s", GLOBAL_PYTHON_PLUGINS_PATH, args[1]);
+            path = g_build_filename(GLOBAL_PYTHON_PLUGINS_PATH, args[1], NULL);
         } else if (g_str_has_suffix(args[1], ".so")) {
-            path = g_strdup_printf("%s/%s", GLOBAL_C_PLUGINS_PATH, args[1]);
+            path = g_build_filename(GLOBAL_C_PLUGINS_PATH, args[1], NULL);
         } else {
             cons_show("Plugins must have one of the following extensions: \".py\" or \".so\".");
             return TRUE;

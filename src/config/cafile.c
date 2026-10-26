@@ -27,7 +27,7 @@ _cafile_name(void)
     if (!create_dir(certs_dir)) {
         return NULL;
     }
-    return g_strdup_printf("%s/CAfile.pem", certs_dir);
+    return g_build_filename(certs_dir, "CAfile.pem", NULL);
 }
 
 void
