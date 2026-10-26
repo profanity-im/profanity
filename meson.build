@@ -93,7 +93,7 @@ if platform == 'osx'
 endif
 
 # Required dependencies
-glib_dep = dependency('glib-2.0', version: '>= 2.68.0')
+glib_dep = dependency('glib-2.0', version: '>= 2.80.0')
 gio_dep = dependency('gio-2.0')
 curl_dep = dependency('libcurl', version: '>= 7.62.0')
 sqlite_dep = dependency('sqlite3', version: '>= 3.35.0')
