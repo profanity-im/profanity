@@ -45,8 +45,6 @@ void win_print_outgoing_muc_msg(ProfWin* window, const gchar* show_char, const g
 void win_print_history(ProfWin* window, const ProfMessage* const message);
 void win_print_old_history(ProfWin* window, const ProfMessage* const message);
 
-void win_print_http_transfer(ProfWin* window, const gchar* const message, const gchar* const id);
-
 void win_newline(ProfWin* window);
 void win_redraw(ProfWin* window);
 void win_print_loading_history(ProfWin* window);

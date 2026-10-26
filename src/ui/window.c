@@ -1736,12 +1736,6 @@ win_appendln_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* time
 }
 
 void
-win_print_http_transfer(ProfWin* window, const gchar* const message, const gchar* const id)
-{
-    win_print_status_with_id(window, message, id, THEME_DEFAULT, 0);
-}
-
-void
 win_print_outgoing_with_receipt(ProfWin* window, const gchar* show_char, const gchar* const from, const gchar* const message, const gchar* const id, const gchar* const replace_id)
 {
     GDateTime* time = g_date_time_new_now_local();

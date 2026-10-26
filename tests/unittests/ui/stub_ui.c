@@ -501,7 +501,6 @@ mucwin_unset_message_char(ProfMucWin* mucwin)
 
 void win_update_entry_message(ProfWin* window, const gchar* const id, const gchar* const message) {};
 void win_mark_received(ProfWin* window, const char* const id) {};
-void win_print_http_transfer(ProfWin* window, const gchar* const message, const gchar* const id) {};
 void win_print_loading_history(ProfWin* window) {};
 void win_remove_loading_history(ProfWin* window) {};
 
