@@ -1051,7 +1051,7 @@ ui_contact_offline(const gchar* const barejid, const gchar* const resource, cons
 
     ProfChatWin* chatwin = wins_get_chat(barejid);
     if (chatwin && chatwin->resource_override && (g_strcmp0(resource, chatwin->resource_override) == 0)) {
-        FREE_SET_NULL(chatwin->resource_override);
+        g_clear_pointer(&chatwin->resource_override, g_free);
     }
 }
 

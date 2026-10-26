@@ -615,25 +615,22 @@ session_reconnect_now(void)
 static void
 _session_free_internals(void)
 {
-    GFREE_SET_NULL(saved_account.name);
+    g_clear_pointer(&saved_account.name, g_free);
     prof_wipe_string(saved_account.passwd);
-    GFREE_SET_NULL(saved_account.passwd);
-    GFREE_SET_NULL(reconnect.altdomain);
-    if (last_moods) {
-        g_hash_table_destroy(last_moods);
-        last_moods = NULL;
-    }
+    g_clear_pointer(&saved_account.passwd, g_free);
+    g_clear_pointer(&reconnect.altdomain, g_free);
+    g_clear_pointer(&last_moods, g_hash_table_destroy);
     _session_free_saved_details();
 }
 
 static void
 _session_free_saved_details(void)
 {
-    GFREE_SET_NULL(saved_details.name);
-    GFREE_SET_NULL(saved_details.jid);
+    g_clear_pointer(&saved_details.name, g_free);
+    g_clear_pointer(&saved_details.jid, g_free);
     prof_wipe_string(saved_details.passwd);
-    GFREE_SET_NULL(saved_details.passwd);
-    GFREE_SET_NULL(saved_details.altdomain);
-    GFREE_SET_NULL(saved_details.tls_policy);
-    GFREE_SET_NULL(saved_details.auth_policy);
+    g_clear_pointer(&saved_details.passwd, g_free);
+    g_clear_pointer(&saved_details.altdomain, g_free);
+    g_clear_pointer(&saved_details.tls_policy, g_free);
+    g_clear_pointer(&saved_details.auth_policy, g_free);
 }

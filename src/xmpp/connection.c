@@ -573,8 +573,8 @@ connection_disconnect(void)
 void
 connection_set_disconnected(void)
 {
-    GFREE_SET_NULL(conn.presence_message);
-    GFREE_SET_NULL(conn.domain);
+    g_clear_pointer(&conn.presence_message, g_free);
+    g_clear_pointer(&conn.domain, g_free);
     conn.conn_status = JABBER_DISCONNECTED;
 }
 
@@ -884,7 +884,7 @@ connection_get_presence_msg(void)
 void
 connection_set_presence_msg(const gchar* const message)
 {
-    GFREE_SET_NULL(conn.presence_message);
+    g_clear_pointer(&conn.presence_message, g_free);
     if (message) {
         conn.presence_message = g_strdup(message);
     }

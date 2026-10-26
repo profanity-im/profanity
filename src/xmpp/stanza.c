@@ -1915,7 +1915,7 @@ stanza_free_caps(XMPPCaps* caps)
     if (caps->ver) {
         g_free(caps->ver);
     }
-    GFREE_SET_NULL(caps);
+    g_free(caps);
 }
 
 void
@@ -1937,7 +1937,7 @@ stanza_free_presence(XMPPPresence* presence)
     if (presence->status) {
         free(presence->status);
     }
-    FREE_SET_NULL(presence);
+    g_free(presence);
 }
 
 XMPPPresence*

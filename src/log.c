@@ -200,7 +200,7 @@ log_set_filter(log_level_t filter)
 void
 log_close(void)
 {
-    GFREE_SET_NULL(mainlogfile);
+    g_clear_pointer(&mainlogfile, g_free);
     if (logp) {
         fclose(logp);
     }

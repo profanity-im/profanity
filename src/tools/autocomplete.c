@@ -56,7 +56,7 @@ void
 autocomplete_reset(Autocomplete ac)
 {
     ac->last_found = NULL;
-    GFREE_SET_NULL(ac->search_str);
+    g_clear_pointer(&ac->search_str, g_free);
 }
 
 void
@@ -225,9 +225,7 @@ autocomplete_complete(Autocomplete ac, const gchar* search_str, gboolean quote, 
 
     // first search attempt
     if (!ac->last_found) {
-        if (ac->search_str) {
-            GFREE_SET_NULL(ac->search_str);
-        }
+        g_clear_pointer(&ac->search_str, g_free);
 
         // unescape search string
         GString* unescaped = g_string_new("");

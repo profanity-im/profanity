@@ -105,7 +105,7 @@ status_bar_close(void)
         if (statusbar->tabs) {
             g_hash_table_destroy(statusbar->tabs);
         }
-        GFREE_SET_NULL(statusbar);
+        g_clear_pointer(&statusbar, g_free);
     }
     if (tz) {
         g_time_zone_unref(tz);
@@ -207,7 +207,7 @@ status_bar_set_prompt(const gchar* const prompt)
 void
 status_bar_clear_prompt(void)
 {
-    GFREE_SET_NULL(statusbar->prompt);
+    g_clear_pointer(&statusbar->prompt, g_free);
 
     status_bar_draw();
 }
@@ -224,7 +224,7 @@ status_bar_set_fulljid(const gchar* const fulljid)
 void
 status_bar_clear_fulljid(void)
 {
-    GFREE_SET_NULL(statusbar->fulljid);
+    g_clear_pointer(&statusbar->fulljid, g_free);
 
     status_bar_draw();
 }
@@ -444,7 +444,7 @@ _status_bar_draw_time(guint pos)
         return pos;
     }
 
-    GFREE_SET_NULL(statusbar->time);
+    g_clear_pointer(&statusbar->time, g_free);
 
     GDateTime* datetime = g_date_time_new_now(tz);
     statusbar->time = g_date_time_format(datetime, time_pref);

@@ -496,7 +496,7 @@ chatwin_set_enctext(ProfChatWin* chatwin, const char* const enctext)
 void
 chatwin_unset_enctext(ProfChatWin* chatwin)
 {
-    FREE_SET_NULL(chatwin->enctext);
+    g_clear_pointer(&chatwin->enctext, g_free);
 }
 
 void
@@ -511,7 +511,7 @@ chatwin_set_incoming_char(ProfChatWin* chatwin, const char* const ch)
 void
 chatwin_unset_incoming_char(ProfChatWin* chatwin)
 {
-    FREE_SET_NULL(chatwin->incoming_char);
+    g_clear_pointer(&chatwin->incoming_char, g_free);
 }
 
 void
@@ -526,7 +526,7 @@ chatwin_set_outgoing_char(ProfChatWin* chatwin, const char* const ch)
 void
 chatwin_unset_outgoing_char(ProfChatWin* chatwin)
 {
-    FREE_SET_NULL(chatwin->outgoing_char);
+    g_clear_pointer(&chatwin->outgoing_char, g_free);
 }
 
 static void

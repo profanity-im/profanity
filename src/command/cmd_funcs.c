@@ -3115,7 +3115,7 @@ cmd_resource(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
 
     } else if (g_strcmp0(cmd, "off") == 0) {
-        FREE_SET_NULL(chatwin->resource_override);
+        g_clear_pointer(&chatwin->resource_override, g_free);
         chat_state_free(chatwin->state);
         chatwin->state = chat_state_new();
         chat_session_remove(chatwin->barejid);

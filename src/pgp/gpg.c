@@ -102,12 +102,12 @@ _p_gpg_close(void)
 
     if (passphrase) {
         prof_wipe_string(passphrase);
-        GFREE_SET_NULL(passphrase);
+        g_clear_pointer(&passphrase, g_free);
     }
 
     if (passphrase_attempt) {
         prof_wipe_string(passphrase_attempt);
-        GFREE_SET_NULL(passphrase_attempt);
+        g_clear_pointer(&passphrase_attempt, g_free);
     }
 }
 

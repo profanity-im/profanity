@@ -412,11 +412,8 @@ static void
 _free_chat_log(struct dated_chat_log* dated_log)
 {
     if (dated_log) {
-        GFREE_SET_NULL(dated_log->filename);
-        if (dated_log->date) {
-            g_date_time_unref(dated_log->date);
-            dated_log->date = NULL;
-        }
+        g_clear_pointer(&dated_log->filename, g_free);
+        g_clear_pointer(&dated_log->date, g_date_time_unref);
         g_free(dated_log);
     }
 }
