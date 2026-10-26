@@ -435,7 +435,7 @@ void
 cmd_ac_init(void)
 {
     size_t n;
-    for (n = 0; n < ARRAY_SIZE(all_acs); ++n) {
+    for (n = 0; n < G_N_ELEMENTS(all_acs); ++n) {
         *(all_acs[n]) = autocomplete_new();
     }
 
@@ -1519,7 +1519,7 @@ cmd_ac_reset(ProfWin* window)
     omemo_fingerprint_autocomplete_reset();
 #endif
     size_t n;
-    for (n = ARRAY_SIZE(all_acs); n > 0; --n) {
+    for (n = G_N_ELEMENTS(all_acs); n > 0; --n) {
         autocomplete_reset(*(all_acs[n - 1]));
     }
     if (theme_load_ac) {
@@ -1566,7 +1566,7 @@ void
 cmd_ac_uninit(void)
 {
     size_t n;
-    for (n = ARRAY_SIZE(all_acs); n > 0; --n) {
+    for (n = G_N_ELEMENTS(all_acs); n > 0; --n) {
         autocomplete_free(*(all_acs[n - 1]));
     }
     autocomplete_free(theme_load_ac);
@@ -1722,7 +1722,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
                                  "/vercheck", "/privileges", "/wrap",
                                  "/carbons", "/slashguard", "/silence" };
 
-    for (size_t i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice, previous, NULL);
         if (result) {
             return result;
@@ -1742,7 +1742,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
         if (nick_ac) {
             gchar* nick_choices[] = { "/msg", "/info", "/caps" };
 
-            for (size_t i = 0; i < ARRAY_SIZE(nick_choices); i++) {
+            for (size_t i = 0; i < G_N_ELEMENTS(nick_choices); i++) {
                 result = autocomplete_param_with_ac(input, nick_choices[i], nick_ac, TRUE, previous);
                 if (result) {
                     return result;
@@ -1753,7 +1753,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
         // otherwise autocomplete using roster
     } else if (conn_status == JABBER_CONNECTED) {
         gchar* contact_choices[] = { "/msg", "/info" };
-        for (size_t i = 0; i < ARRAY_SIZE(contact_choices); i++) {
+        for (size_t i = 0; i < G_N_ELEMENTS(contact_choices); i++) {
             result = autocomplete_param_with_func(input, contact_choices[i], roster_contact_autocomplete, previous, NULL);
             if (result) {
                 return result;
@@ -1765,7 +1765,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
         }
 
         gchar* resource_choices[] = { "/caps", "/ping" };
-        for (size_t i = 0; i < ARRAY_SIZE(resource_choices); i++) {
+        for (size_t i = 0; i < G_N_ELEMENTS(resource_choices); i++) {
             result = autocomplete_param_with_func(input, resource_choices[i], roster_fulljid_autocomplete, previous, NULL);
             if (result) {
                 return result;
@@ -1774,7 +1774,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
     }
 
     gchar* invite_choices[] = { "/join" };
-    for (size_t i = 0; i < ARRAY_SIZE(invite_choices); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(invite_choices); i++) {
         result = autocomplete_param_with_func(input, invite_choices[i], muc_invites_find, previous, NULL);
         if (result) {
             return result;
@@ -1795,7 +1795,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
         { "/inputwin", winpos_ac },
     };
 
-    for (size_t i = 0; i < ARRAY_SIZE(ac_cmds); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(ac_cmds); i++) {
         result = autocomplete_param_with_ac(input, ac_cmds[i].cmd, ac_cmds[i].completer, TRUE, previous);
         if (result) {
             return result;
@@ -1885,7 +1885,7 @@ _who_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
                                         "/who chat", "/who away", "/who xa", "/who dnd", "/who available",
                                         "/who unavailable" };
 
-            for (size_t i = 0; i < ARRAY_SIZE(group_commands); i++) {
+            for (size_t i = 0; i < G_N_ELEMENTS(group_commands); i++) {
                 result = autocomplete_param_with_func(input, group_commands[i], roster_group_autocomplete, previous, NULL);
                 if (result) {
                     return result;
@@ -2207,7 +2207,7 @@ _notify_autocomplete(ProfWin* window, const gchar* const input, gboolean previou
 
     gchar* boolean_choices1[] = { "/notify room current", "/notify chat current", "/notify typing current",
                                   "/notify room text", "/notify chat text", "/notify room offline" };
-    for (size_t i = 0; i < ARRAY_SIZE(boolean_choices1); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(boolean_choices1); i++) {
         result = autocomplete_param_with_func(input, boolean_choices1[i], prefs_autocomplete_boolean_choice, previous, NULL);
         if (result) {
             return result;
@@ -2240,7 +2240,7 @@ _notify_autocomplete(ProfWin* window, const gchar* const input, gboolean previou
     }
 
     gchar* boolean_choices2[] = { "/notify invite", "/notify sub", "/notify mention", "/notify trigger" };
-    for (size_t i = 0; i < ARRAY_SIZE(boolean_choices2); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(boolean_choices2); i++) {
         result = autocomplete_param_with_func(input, boolean_choices2[i], prefs_autocomplete_boolean_choice, previous, NULL);
         if (result) {
             return result;
@@ -3635,7 +3635,7 @@ _account_autocomplete(ProfWin* window, const gchar* const input, gboolean previo
                                 "/account disable", "/account rename", "/account clear", "/account remove",
                                 "/account default set" };
 
-    for (size_t i = 0; i < ARRAY_SIZE(account_choice); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(account_choice); i++) {
         found = autocomplete_param_with_func(input, account_choice[i], accounts_find_all, previous, NULL);
         if (found) {
             return found;

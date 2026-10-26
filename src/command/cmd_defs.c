@@ -2809,7 +2809,7 @@ cmd_init(void)
 
     // load command defs into hash table
     commands = g_hash_table_new(g_str_hash, g_str_equal);
-    for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
+    for (unsigned int i = 0; i < G_N_ELEMENTS(command_defs); i++) {
         const Command* pcmd = command_defs + i;
 
         // add to hash
@@ -2896,7 +2896,7 @@ command_docgen(void)
 {
     GList* cmds = NULL;
 
-    for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
+    for (unsigned int i = 0; i < G_N_ELEMENTS(command_defs); i++) {
         const Command* pcmd = command_defs + i;
         cmds = g_list_insert_sorted(cmds, (gpointer)pcmd, (GCompareFunc)_cmp_command);
     }
@@ -2983,7 +2983,7 @@ command_mangen(void)
 {
     GList* cmds = NULL;
 
-    for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
+    for (unsigned int i = 0; i < G_N_ELEMENTS(command_defs); i++) {
         const Command* pcmd = command_defs + i;
         cmds = g_list_insert_sorted(cmds, (gpointer)pcmd, (GCompareFunc)_cmp_command);
     }

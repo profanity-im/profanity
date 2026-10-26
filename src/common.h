@@ -19,8 +19,6 @@
 #define notify_notification_new(summary, body, icon) notify_notification_new(summary, body, icon, NULL)
 #endif
 
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
-
 #define PROF_STRINGIFY_(n) #n
 #define PROF_STRINGIFY(n)  PROF_STRINGIFY_(n)
 

@@ -1684,7 +1684,7 @@ stanza_get_error_message(xmpp_stanza_t* stanza)
             STANZA_NAME_UNEXPECTED_REQUEST
         };
 
-        for (size_t i = 0; i < ARRAY_SIZE(defined_conditions); i++) {
+        for (size_t i = 0; i < G_N_ELEMENTS(defined_conditions); i++) {
             xmpp_stanza_t* cond_stanza = xmpp_stanza_get_child_by_name(error_stanza, defined_conditions[i]);
             if (cond_stanza) {
                 gchar* result = g_strdup(xmpp_stanza_get_name(cond_stanza));

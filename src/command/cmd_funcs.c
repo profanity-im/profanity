@@ -5298,7 +5298,7 @@ cmd_presence(ProfWin* window, const gchar* const command, gchar** args)
         { .pref = PREF_STATUSES_MUC, .name = "room", .description = "chat room windows" },
     };
     size_t n = 0;
-    for (; n < ARRAY_SIZE(presence_prefs); ++n) {
+    for (; n < G_N_ELEMENTS(presence_prefs); ++n) {
         const struct presence_preferences* pp = &presence_prefs[n];
         if (g_strcmp0(args[0], pp->name) != 0)
             continue;
@@ -5317,7 +5317,7 @@ cmd_presence(ProfWin* window, const gchar* const command, gchar** args)
         prefs_set_string(pp->pref, args[1]);
         break;
     }
-    if (n == ARRAY_SIZE(presence_prefs)) {
+    if (n == G_N_ELEMENTS(presence_prefs)) {
         cons_bad_cmd_usage(command);
     }
     return TRUE;
@@ -5354,7 +5354,7 @@ cmd_time(ProfWin* window, const gchar* const command, gchar** args)
     gboolean redraw = FALSE;
     gboolean set_all = g_strcmp0(args[0], "all") == 0;
     size_t n = 0;
-    for (; n < ARRAY_SIZE(time_prefs); ++n) {
+    for (; n < G_N_ELEMENTS(time_prefs); ++n) {
         if (!set_all && g_strcmp0(args[0], time_prefs[n].name) != 0)
             continue;
         const struct time_preferences* tp = &time_prefs[n];
@@ -5373,7 +5373,7 @@ cmd_time(ProfWin* window, const gchar* const command, gchar** args)
                 { .name = "iso8601", .format = "%Y-%m-%dT%H:%M:%S" },
             };
             const gchar* set_arg = args[2];
-            for (size_t m = 0; m < ARRAY_SIZE(format_strings); ++m) {
+            for (size_t m = 0; m < G_N_ELEMENTS(format_strings); ++m) {
                 if (g_strcmp0(args[2], format_strings[m].name) == 0) {
                     set_arg = format_strings[m].format;
                     break;
@@ -5398,7 +5398,7 @@ cmd_time(ProfWin* window, const gchar* const command, gchar** args)
             break;
         }
     }
-    if (!set_all && n == ARRAY_SIZE(time_prefs)) {
+    if (!set_all && n == G_N_ELEMENTS(time_prefs)) {
         cons_bad_cmd_usage(command);
     }
     if (redraw)
