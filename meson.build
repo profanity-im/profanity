@@ -75,6 +75,9 @@ if is_debug
     '-Og',
     '-Wpointer-arith'
   ], language: 'c')
+  if cc.has_argument('-Wduplicated-cond')
+    add_project_arguments('-Wduplicated-cond', language: 'c')
+  endif
   if cc.get_id() == 'gcc'
      analyzer_args += '-fanalyzer'
   endif
