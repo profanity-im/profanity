@@ -50,7 +50,7 @@ void api_win_create(
     const char* const plugin_name,
     const char* tag,
     void* callback,
-    void (*callback_func)(PluginWindowCallback* window_callback, char* tag, char* line),
+    void (*callback_func)(PluginWindowCallback* window_callback, const char* tag, const char* const line),
     void (*destroy)(void* callback));
 int api_win_focus(const char* tag);
 int api_win_show(const char* tag, const char* line);

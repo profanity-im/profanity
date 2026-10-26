@@ -1475,7 +1475,7 @@ python_timed_callback(PluginTimedFunction* timed_function)
 }
 
 void
-python_window_callback(PluginWindowCallback* window_callback, char* tag, char* line)
+python_window_callback(PluginWindowCallback* window_callback, const char* tag, const char* const line)
 {
     disable_python_threads();
     PyObject* p_args = NULL;

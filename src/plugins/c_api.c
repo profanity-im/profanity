@@ -427,11 +427,11 @@ c_timed_callback(PluginTimedFunction* timed_function)
 }
 
 void
-c_window_callback(PluginWindowCallback* window_callback, char* tag, char* line)
+c_window_callback(PluginWindowCallback* window_callback, const char* tag, const char* const line)
 {
     WindowWrapper* wrapper = window_callback->callback;
     void (*f)(char* tag, char* line) = wrapper->func;
-    f(tag, line);
+    f((char*)tag, (char*)line);
 }
 
 void
