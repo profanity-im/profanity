@@ -69,6 +69,7 @@ if is_debug
     '-Wunused',
     '-Wall',
     '-Wextra',
+    '-Wstrict-prototypes',
     '-fstack-protector-strong',
     '-D_FORTIFY_SOURCE=2',
     '-Og',
