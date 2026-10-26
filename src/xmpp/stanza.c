@@ -2056,30 +2056,6 @@ stanza_create_omemo_devicelist_request(xmpp_ctx_t* ctx, const gchar* const id,
 }
 
 xmpp_stanza_t*
-stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t* ctx, const gchar* const jid)
-{
-    auto_gchar gchar* id = connection_create_stanza_id();
-    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
-
-    xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
-    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
-
-    xmpp_stanza_t* subscribe = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(subscribe, STANZA_NAME_SUBSCRIBE);
-    xmpp_stanza_set_attribute(subscribe, STANZA_ATTR_NODE, STANZA_NS_OMEMO_DEVICELIST);
-    xmpp_stanza_set_attribute(subscribe, "jid", jid);
-
-    xmpp_stanza_add_child(pubsub, subscribe);
-    xmpp_stanza_add_child(iq, pubsub);
-
-    xmpp_stanza_release(subscribe);
-    xmpp_stanza_release(pubsub);
-
-    return iq;
-}
-
-xmpp_stanza_t*
 stanza_create_omemo_devicelist_publish(xmpp_ctx_t* ctx, GList* const ids)
 {
     auto_gchar gchar* id = connection_create_stanza_id();
