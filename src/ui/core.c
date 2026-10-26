@@ -48,7 +48,6 @@
 #include "otr/otr.h"
 #endif
 
-static int inp_size;
 static gboolean perform_resize = FALSE;
 static GTimer* ui_idle_time;
 static WINDOW* main_scr;
@@ -91,7 +90,6 @@ ui_init(void)
     notifier_initialise();
     cons_about();
     ui_idle_time = g_timer_new();
-    inp_size = 0;
     ProfWin* window = wins_get_current();
     win_update_virtual(window);
 }
