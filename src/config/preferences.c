@@ -1705,7 +1705,7 @@ prefs_get_aliases(void)
     }
 }
 
-void
+static void
 _free_alias(ProfAlias* alias)
 {
     g_clear_pointer(&alias->name, g_free);

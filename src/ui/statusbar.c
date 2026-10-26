@@ -165,7 +165,7 @@ status_bar_inactive(const int win)
     status_bar_draw();
 }
 
-void
+static void
 _create_tab(const int win, win_type_t wintype, const gchar* const identifier, gboolean highlight)
 {
     int true_win = win == 0 ? 10 : win;

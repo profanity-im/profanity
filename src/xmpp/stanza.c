@@ -955,7 +955,7 @@ stanza_create_caps_sha1_from_query(xmpp_stanza_t* const query)
     return result;
 }
 
-xmpp_stanza_t*
+static xmpp_stanza_t*
 stanza_get_child_by_name_and_from(xmpp_stanza_t* const stanza, const gchar* const name, const gchar* const from)
 {
     xmpp_stanza_t* child;

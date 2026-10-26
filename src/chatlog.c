@@ -48,7 +48,7 @@ static void _chat_log_chat(const gchar* const login, const gchar* const other, c
 static void _groupchat_log_chat(const gchar* const login, const gchar* const room, const gchar* const nick,
                                 const gchar* const msg);
 
-void
+static void
 _chatlog_close(void)
 {
     g_hash_table_destroy(logs);

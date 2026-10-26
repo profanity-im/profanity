@@ -593,7 +593,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
     return TRUE;
 }
 
-xmpp_stanza_t*
+static xmpp_stanza_t*
 vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
 {
     if (!vcard || !ctx) {
@@ -1405,7 +1405,7 @@ vcard_user_refresh(void)
 }
 
 // Upload a vCard and set it as the currently connected account's vCard
-void
+static void
 vcard_upload(xmpp_ctx_t* ctx, vCard* vcard)
 {
     auto_gchar gchar* id = connection_create_stanza_id();

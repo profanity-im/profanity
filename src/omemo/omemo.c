@@ -637,7 +637,7 @@ omemo_sessions_keyfile_save(void)
     save_keyfile(&omemo_ctx.sessions);
 }
 
-void
+static void
 omemo_known_devices_keyfile_save(void)
 {
     save_keyfile(&omemo_ctx.knowndevices);
@@ -2058,7 +2058,7 @@ omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res)
     return fragment;
 }
 
-void
+static void
 _bytes_from_hex(const char* hex, size_t hex_size,
                 unsigned char* bytes, size_t bytes_size)
 {

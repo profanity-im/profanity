@@ -228,7 +228,7 @@ _highest_presence(Resource* first, Resource* second)
     }
 }
 
-Resource*
+static Resource*
 _get_most_available_resource(PContact contact)
 {
     // find resource with highest priority, if more than one,

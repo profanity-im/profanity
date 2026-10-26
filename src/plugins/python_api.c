@@ -1565,7 +1565,7 @@ static struct PyModuleDef profModule = {
 };
 #endif
 
-PyMODINIT_FUNC
+static PyMODINIT_FUNC
 python_api_init(void)
 {
 #ifdef PY_IS_PYTHON3

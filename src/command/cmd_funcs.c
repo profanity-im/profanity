@@ -597,7 +597,7 @@ cmd_account_default(ProfWin* window, const gchar* const command, gchar** args)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_jid(char* account_name, char* jid)
 {
     auto_jid Jid* jidp = jid_create(jid);
@@ -616,7 +616,7 @@ _account_set_jid(char* account_name, char* jid)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_server(char* account_name, char* server)
 {
     accounts_set_server(account_name, server);
@@ -625,7 +625,7 @@ _account_set_server(char* account_name, char* server)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_port(char* account_name, char* port)
 {
     int porti;
@@ -642,7 +642,7 @@ _account_set_port(char* account_name, char* port)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_resource(char* account_name, char* resource)
 {
     accounts_set_resource(account_name, resource);
@@ -655,7 +655,7 @@ _account_set_resource(char* account_name, char* resource)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_password(char* account_name, char* password)
 {
     ProfAccount* account = accounts_get_account(account_name);
@@ -670,7 +670,7 @@ _account_set_password(char* account_name, char* password)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_eval_password(char* account_name, char* eval_password)
 {
     ProfAccount* account = accounts_get_account(account_name);
@@ -685,7 +685,7 @@ _account_set_eval_password(char* account_name, char* eval_password)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_muc(char* account_name, char* muc)
 {
     accounts_set_muc_service(account_name, muc);
@@ -694,7 +694,7 @@ _account_set_muc(char* account_name, char* muc)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_nick(char* account_name, char* nick)
 {
     accounts_set_muc_nick(account_name, nick);
@@ -703,7 +703,7 @@ _account_set_nick(char* account_name, char* nick)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_otr(char* account_name, char* policy)
 {
     if (string_matches_one_of("OTR policy", policy, FALSE, "manual", "opportunistic", "always", NULL)) {
@@ -714,7 +714,7 @@ _account_set_otr(char* account_name, char* policy)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_status(char* account_name, char* status)
 {
     if (!valid_resource_presence_string(status) && (strcmp(status, "last") != 0)) {
@@ -727,7 +727,7 @@ _account_set_status(char* account_name, char* status)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_pgpkeyid(char* account_name, char* pgpkeyid)
 {
 #ifdef HAVE_LIBGPGME
@@ -745,7 +745,7 @@ _account_set_pgpkeyid(char* account_name, char* pgpkeyid)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_client(char* account_name, char* new_client)
 {
     accounts_set_client(account_name, new_client);
@@ -753,7 +753,7 @@ _account_set_client(char* account_name, char* new_client)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_theme(char* account_name, char* theme)
 {
     if (!theme_exists(theme)) {
@@ -787,7 +787,7 @@ _account_set_theme(char* account_name, char* theme)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_tls(char* account_name, char* policy)
 {
     if (valid_tls_policy_option(policy)) {
@@ -798,7 +798,7 @@ _account_set_tls(char* account_name, char* policy)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_auth(char* account_name, char* policy)
 {
     if (string_matches_one_of("Auth policy", policy, FALSE, "default", "legacy", NULL)) {
@@ -809,7 +809,7 @@ _account_set_auth(char* account_name, char* policy)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_max_sessions(char* account_name, char* max_sessions_raw)
 {
     int max_sessions;
@@ -830,7 +830,7 @@ _account_set_max_sessions(char* account_name, char* max_sessions_raw)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_presence_priority(char* account_name, char* presence, char* priority)
 {
     int intval;
@@ -4851,7 +4851,7 @@ cmd_disco(ProfWin* window, const gchar* const command, gchar** args)
 
 // TODO: Move this into its own tools such as HTTPUpload or AESGCMDownload.
 #ifdef HAVE_OMEMO
-char*
+static char*
 _add_omemo_stream(int* fd, FILE** fh, char** err)
 {
     // Create temporary file for writing ciphertext.
@@ -9412,7 +9412,7 @@ cmd_correction(ProfWin* window, const gchar* const command, gchar** args)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _can_correct(ProfWin* window)
 {
     jabber_conn_status_t conn_status = connection_get_status();
@@ -9482,7 +9482,7 @@ cmd_slashguard(ProfWin* window, const gchar* const command, gchar** args)
     return TRUE;
 }
 
-gchar*
+static gchar*
 _prepare_filename(ProfWin* window, gchar* url, gchar* path)
 {
     char* jid = NULL;
@@ -9532,7 +9532,7 @@ _prepare_filename(ProfWin* window, gchar* url, gchar* path)
 }
 
 #ifdef HAVE_OMEMO
-void
+static void
 _url_aesgcm_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* path)
 {
     auto_gchar gchar* filename = _prepare_filename(window, url, path);
@@ -9690,7 +9690,7 @@ cmd_url_save(ProfWin* window, const gchar* const command, gchar** args)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _cmd_executable_template(const preference_t setting, const char* command, gchar** args)
 {
     guint num_args = g_strv_length(args);

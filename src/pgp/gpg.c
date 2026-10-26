@@ -52,7 +52,7 @@ static void _save_pubkeys(void);
 static ProfPGPKey* _gpgme_key_to_ProfPGPKey(gpgme_key_t key);
 static const gchar* _gpgme_key_get_email(gpgme_key_t key);
 
-void
+static void
 _p_gpg_free_pubkeyid(ProfPGPPubKeyId* pubkeyid)
 {
     if (pubkeyid) {

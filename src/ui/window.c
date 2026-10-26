@@ -2103,7 +2103,7 @@ _win_print_wrapped(WINDOW* win, const gchar* const message, size_t indent, int p
     }
 }
 
-void
+static void
 win_print_trackbar(ProfWin* window)
 {
     _win_ensure_pad_capacity(window, window->layout->win, getcury(window->layout->win));

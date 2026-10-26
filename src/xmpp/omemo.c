@@ -57,7 +57,7 @@ omemo_devicelist_publish(GList* device_list)
     xmpp_stanza_release(iq);
 }
 
-void
+static void
 omemo_devicelist_configure(void)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();

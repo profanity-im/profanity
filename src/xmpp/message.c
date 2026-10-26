@@ -281,7 +281,7 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
     return 1;
 }
 
-void
+static void
 message_muc_submit_voice_approve(ProfConfWin* confwin)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();

@@ -398,7 +398,7 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
     }
 }
 
-gint
+static gint
 _cmp_trigger_weight(gconstpointer a, gconstpointer b)
 {
     int alen = strlen((char*)a);

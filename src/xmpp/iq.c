@@ -847,7 +847,7 @@ iq_command_exec(const char* const target, const char* const command)
     xmpp_stanza_release(iq);
 }
 
-void
+static void
 iq_submit_command_config(ProfConfWin* confwin)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
@@ -864,7 +864,7 @@ iq_submit_command_config(ProfConfWin* confwin)
     g_free(data);
 }
 
-void
+static void
 iq_cancel_command_config(ProfConfWin* confwin)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
@@ -3189,7 +3189,7 @@ _muc_register_nick_response_handler(xmpp_stanza_t* const stanza, void* const use
     return 0;
 }
 
-void
+static void
 iq_submit_muc_register_nick_form(ProfConfWin* confwin)
 {
     auto_gchar gchar* id = connection_create_stanza_id();

@@ -204,7 +204,7 @@ cons_show_typing(const char* const barejid)
     cons_alert(NULL);
 }
 
-char*
+static char*
 _room_triggers_to_string(GList* triggers)
 {
     GString* triggers_str = g_string_new("");
@@ -1294,7 +1294,7 @@ cons_occupants_setting(void)
     }
 }
 
-void
+static void
 cons_rooms_cache_setting(void)
 {
     if (prefs_get_boolean(PREF_ROOM_LIST_CACHE)) {

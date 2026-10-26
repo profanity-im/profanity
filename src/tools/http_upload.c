@@ -111,7 +111,7 @@ _data_callback(void* ptr, size_t size, size_t nmemb, void* data)
     return realsize;
 }
 
-int
+static int
 format_alt_url(char* original_url, char* new_scheme, char* new_fragment, char** new_url)
 {
     int ret = 0;
