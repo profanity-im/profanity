@@ -1270,11 +1270,3 @@ wins_get_url(const gchar* const search_str, gboolean previous, void* context)
 
     return autocomplete_complete(win->urls_ac, search_str, FALSE, previous);
 }
-
-char*
-wins_get_quote(const gchar* const search_str, gboolean previous, void* context)
-{
-    ProfWin* win = (ProfWin*)context;
-
-    return autocomplete_complete(win->quotes_ac, search_str, FALSE, previous);
-}
