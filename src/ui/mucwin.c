@@ -907,10 +907,7 @@ mucwin_set_enctext(ProfMucWin* mucwin, const char* const enctext)
 void
 mucwin_unset_enctext(ProfMucWin* mucwin)
 {
-    if (mucwin->enctext) {
-        g_free(mucwin->enctext);
-        mucwin->enctext = NULL;
-    }
+    g_clear_pointer(&mucwin->enctext, g_free);
 }
 
 void
@@ -925,10 +922,7 @@ mucwin_set_message_char(ProfMucWin* mucwin, const char* const ch)
 void
 mucwin_unset_message_char(ProfMucWin* mucwin)
 {
-    if (mucwin->message_char) {
-        g_free(mucwin->message_char);
-        mucwin->message_char = NULL;
-    }
+    g_clear_pointer(&mucwin->message_char, g_free);
 }
 
 static void

@@ -160,8 +160,7 @@ _inp_slashguard_check(void)
     while (inp_line[n] != '\0' && n < 4) {
         if (inp_line[n] == '/') {
             cons_show("Your text contains a slash in the first 4 characters");
-            free(inp_line);
-            inp_line = NULL;
+            g_clear_pointer(&inp_line, free);
             return TRUE;
         }
         n++;
