@@ -198,8 +198,7 @@ status_bar_new(const int win, win_type_t wintype, const gchar* const identifier)
 void
 status_bar_set_prompt(const gchar* const prompt)
 {
-    g_free(statusbar->prompt);
-    statusbar->prompt = g_strdup(prompt);
+    g_set_str(&statusbar->prompt, prompt);
 
     status_bar_draw();
 }
@@ -215,8 +214,7 @@ status_bar_clear_prompt(void)
 void
 status_bar_set_fulljid(const gchar* const fulljid)
 {
-    g_free(statusbar->fulljid);
-    statusbar->fulljid = g_strdup(fulljid);
+    g_set_str(&statusbar->fulljid, fulljid);
 
     status_bar_draw();
 }

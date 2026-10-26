@@ -898,10 +898,7 @@ mucwin_get_string(ProfMucWin* mucwin)
 void
 mucwin_set_enctext(ProfMucWin* mucwin, const char* const enctext)
 {
-    if (mucwin->enctext) {
-        g_free(mucwin->enctext);
-    }
-    mucwin->enctext = g_strdup(enctext);
+    g_set_str(&mucwin->enctext, enctext);
 }
 
 void
@@ -913,10 +910,7 @@ mucwin_unset_enctext(ProfMucWin* mucwin)
 void
 mucwin_set_message_char(ProfMucWin* mucwin, const char* const ch)
 {
-    if (mucwin->message_char) {
-        g_free(mucwin->message_char);
-    }
-    mucwin->message_char = g_strdup(ch);
+    g_set_str(&mucwin->message_char, ch);
 }
 
 void
@@ -928,15 +922,8 @@ mucwin_unset_message_char(ProfMucWin* mucwin)
 static void
 _mucwin_set_last_message(ProfMucWin* mucwin, const char* const id, const char* const message)
 {
-    if (mucwin->last_message != message) {
-        g_free(mucwin->last_message);
-        mucwin->last_message = g_strdup(message);
-    }
-
-    if (mucwin->last_msg_id != id) {
-        g_free(mucwin->last_msg_id);
-        mucwin->last_msg_id = g_strdup(id);
-    }
+    g_set_str(&mucwin->last_message, message);
+    g_set_str(&mucwin->last_msg_id, id);
 }
 
 void

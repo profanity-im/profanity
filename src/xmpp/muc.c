@@ -448,8 +448,7 @@ muc_nick_change_complete(const gchar* const room, const gchar* const nick)
     if (chat_room) {
         g_hash_table_remove(chat_room->roster, chat_room->nick);
         autocomplete_remove(chat_room->nick_ac, chat_room->nick);
-        g_free(chat_room->nick);
-        chat_room->nick = g_strdup(nick);
+        g_set_str(&chat_room->nick, nick);
         chat_room->pending_nick_change = FALSE;
         g_hash_table_remove(chat_room->nick_changes, nick);
     }

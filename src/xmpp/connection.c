@@ -872,10 +872,7 @@ connection_get_presence_msg(void)
 void
 connection_set_presence_msg(const gchar* const message)
 {
-    g_clear_pointer(&conn.presence_message, g_free);
-    if (message) {
-        conn.presence_message = g_strdup(message);
-    }
+    g_set_str(&conn.presence_message, message);
 }
 
 void

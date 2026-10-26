@@ -78,10 +78,9 @@ p_contact_new(const gchar* const barejid, const gchar* const name,
 void
 p_contact_set_name(const PContact contact, const gchar* const name)
 {
-    g_clear_pointer(&contact->name, g_free);
     g_clear_pointer(&contact->name_collate_key, g_free);
-    if (name) {
-        contact->name = g_strdup(name);
+    g_set_str(&contact->name, name);
+    if (contact->name) {
         contact->name_collate_key = g_utf8_collate_key(contact->name, -1);
     }
 }
@@ -383,10 +382,7 @@ p_contact_set_presence(const PContact contact, Resource* resource)
 void
 p_contact_set_subscription(const PContact contact, const gchar* const subscription)
 {
-    g_clear_pointer(&contact->subscription, g_free);
-    if (subscription) {
-        contact->subscription = g_strdup(subscription);
-    }
+    g_set_str(&contact->subscription, subscription);
 }
 
 void

@@ -130,16 +130,13 @@ bookmark_update(const char* jid, const char* nick, const char* password, const c
     }
 
     if (nick) {
-        g_free(bookmark->nick);
-        bookmark->nick = g_strdup(nick);
+        g_set_str(&bookmark->nick, nick);
     }
     if (password) {
-        g_free(bookmark->password);
-        bookmark->password = g_strdup(password);
+        g_set_str(&bookmark->password, password);
     }
     if (name) {
-        g_free(bookmark->name);
-        bookmark->name = g_strdup(name);
+        g_set_str(&bookmark->name, name);
     }
     if (autojoin_str) {
         if (g_strcmp0(autojoin_str, "on") == 0) {

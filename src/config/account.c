@@ -207,8 +207,7 @@ account_free(ProfAccount* account)
 void
 account_set_server(ProfAccount* account, const gchar* server)
 {
-    g_free(account->server);
-    account->server = g_strdup(server);
+    g_set_str(&account->server, server);
 }
 
 void
@@ -220,13 +219,11 @@ account_set_port(ProfAccount* account, int port)
 void
 account_set_tls_policy(ProfAccount* account, const gchar* tls_policy)
 {
-    g_free(account->tls_policy);
-    account->tls_policy = g_strdup(tls_policy);
+    g_set_str(&account->tls_policy, tls_policy);
 }
 
 void
 account_set_auth_policy(ProfAccount* account, const gchar* auth_policy)
 {
-    g_free(account->auth_policy);
-    account->auth_policy = g_strdup(auth_policy);
+    g_set_str(&account->auth_policy, auth_policy);
 }
