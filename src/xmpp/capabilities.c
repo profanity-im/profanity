@@ -49,12 +49,10 @@ _caps_close(void)
     caps_reset_ver();
     free_keyfile(&caps_prof_keyfile);
     cache = NULL;
-    g_hash_table_destroy(jid_to_ver);
-    g_hash_table_destroy(jid_to_caps);
-    g_free(cache_loc);
-    cache_loc = NULL;
-    g_hash_table_destroy(prof_features);
-    prof_features = NULL;
+    g_clear_pointer(&jid_to_ver, g_hash_table_destroy);
+    g_clear_pointer(&jid_to_caps, g_hash_table_destroy);
+    g_clear_pointer(&cache_loc, g_free);
+    g_clear_pointer(&prof_features, g_hash_table_destroy);
 }
 
 void
@@ -324,10 +322,7 @@ caps_get_my_sha1(xmpp_ctx_t* const ctx)
 void
 caps_reset_ver(void)
 {
-    if (my_sha1) {
-        g_free(my_sha1);
-        my_sha1 = NULL;
-    }
+    g_clear_pointer(&my_sha1, g_free);
 }
 
 static EntityCapabilities*

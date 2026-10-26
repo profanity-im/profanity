@@ -52,9 +52,7 @@ _chat_session_free(ChatSession* session)
 void
 chat_sessions_init(void)
 {
-    if (sessions) {
-        g_hash_table_destroy(sessions);
-    }
+    g_clear_pointer(&sessions, g_hash_table_destroy);
 
     sessions = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_chat_session_free);
 }
@@ -62,10 +60,7 @@ chat_sessions_init(void)
 void
 chat_sessions_clear(void)
 {
-    if (sessions) {
-        g_hash_table_destroy(sessions);
-        sessions = NULL;
-    }
+    g_clear_pointer(&sessions, g_hash_table_destroy);
 }
 
 void

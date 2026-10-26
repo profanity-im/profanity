@@ -398,10 +398,7 @@ p_contact_set_pending_out(const PContact contact, gboolean pending_out)
 void
 p_contact_set_last_activity(const PContact contact, GDateTime* last_activity)
 {
-    if (contact->last_activity) {
-        g_date_time_unref(contact->last_activity);
-        contact->last_activity = NULL;
-    }
+    g_clear_pointer(&contact->last_activity, g_date_time_unref);
 
     if (last_activity) {
         contact->last_activity = g_date_time_ref(last_activity);

@@ -74,8 +74,7 @@ _plugins_shutdown(void)
     autocompleters_destroy();
     callbacks_close();
     disco_close();
-    g_hash_table_destroy(plugins);
-    plugins = NULL;
+    g_clear_pointer(&plugins, g_hash_table_destroy);
 }
 
 void

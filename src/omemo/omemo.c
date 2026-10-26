@@ -106,10 +106,7 @@ static struct omemo_static_data
 static void
 _omemo_close(void)
 {
-    if (omemo_static_data.fingerprint_ac) {
-        g_hash_table_destroy(omemo_static_data.fingerprint_ac);
-        omemo_static_data.fingerprint_ac = NULL;
-    }
+    g_clear_pointer(&omemo_static_data.fingerprint_ac, g_hash_table_destroy);
     pthread_mutex_destroy(&omemo_static_data.lock);
 }
 

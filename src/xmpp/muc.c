@@ -71,14 +71,10 @@ static void _occupant_free(Occupant* occupant);
 static void
 _muc_close(void)
 {
-    g_hash_table_destroy(invite_passwords);
-    invite_passwords = NULL;
-    g_hash_table_destroy(rooms);
-    rooms = NULL;
-    autocomplete_free(confservers_ac);
-    confservers_ac = NULL;
-    autocomplete_free(invite_ac);
-    invite_ac = NULL;
+    g_clear_pointer(&invite_passwords, g_hash_table_destroy);
+    g_clear_pointer(&rooms, g_hash_table_destroy);
+    g_clear_pointer(&confservers_ac, autocomplete_free);
+    g_clear_pointer(&invite_ac, autocomplete_free);
 }
 
 void
@@ -843,10 +839,7 @@ muc_autocomplete_reset(const gchar* const room)
             autocomplete_reset(chat_room->nick_ac);
         }
 
-        if (chat_room->autocomplete_prefix) {
-            g_free(chat_room->autocomplete_prefix);
-            chat_room->autocomplete_prefix = NULL;
-        }
+        g_clear_pointer(&chat_room->autocomplete_prefix, g_free);
     }
 }
 

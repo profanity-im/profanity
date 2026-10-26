@@ -1185,8 +1185,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* resu
         gboolean is_muc_history = FALSE;
         if (message->timestamp != NULL) {
             is_muc_history = TRUE;
-            g_date_time_unref(message->timestamp);
-            message->timestamp = NULL;
+            g_clear_pointer(&message->timestamp, g_date_time_unref);
         }
 
         // we want to display the oldest delay

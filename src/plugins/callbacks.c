@@ -154,12 +154,9 @@ callbacks_remove(const char* const plugin_name)
 void
 callbacks_close(void)
 {
-    g_hash_table_destroy(p_window_callbacks);
-    p_window_callbacks = NULL;
-    g_hash_table_destroy(p_timed_functions);
-    p_timed_functions = NULL;
-    g_hash_table_destroy(p_commands);
-    p_commands = NULL;
+    g_clear_pointer(&p_window_callbacks, g_hash_table_destroy);
+    g_clear_pointer(&p_timed_functions, g_hash_table_destroy);
+    g_clear_pointer(&p_commands, g_hash_table_destroy);
 }
 
 void
