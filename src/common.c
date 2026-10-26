@@ -116,8 +116,11 @@ auto_close_gfd(gint* fd)
     if (fd == NULL)
         return;
 
-    if (close(*fd) == EOF)
-        log_error(g_strerror(errno));
+    GError* error = NULL;
+    if (!g_clear_fd(fd, &error)) {
+        log_error("Failed closing fd: %s", error->message);
+        g_error_free(error);
+    }
 }
 
 /**

@@ -4964,7 +4964,7 @@ cmd_sendfile(ProfWin* window, const gchar* const command, gchar** args)
     FILE* fh = fdopen(fd, "rb");
     if (!fh) {
         cons_show_error("Unable to open file descriptor for '%s'.", filename);
-        close(fd);
+        g_clear_fd(&fd, NULL);
         goto out;
     }
 
