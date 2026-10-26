@@ -599,28 +599,6 @@ cons_show_sent_subs(void)
 }
 
 void
-cons_show_room_list(GSList* rooms, const char* const conference_node)
-{
-    ProfWin* console = wins_get_console();
-    if (rooms && (g_slist_length(rooms) > 0)) {
-        cons_show("Chat rooms at %s:", conference_node);
-        while (rooms) {
-            DiscoItem* room = rooms->data;
-            win_print(console, THEME_DEFAULT, "-", "  %s", room->jid);
-            if (room->name) {
-                win_append(console, THEME_DEFAULT, ", (%s)", room->name);
-            }
-            win_newline(console);
-            rooms = g_slist_next(rooms);
-        }
-    } else {
-        cons_show("No chat rooms at %s", conference_node);
-    }
-
-    cons_alert(NULL);
-}
-
-void
 cons_show_bookmarks(const GList* list)
 {
     ProfWin* console = wins_get_console();
