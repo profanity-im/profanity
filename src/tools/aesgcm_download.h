@@ -35,7 +35,6 @@ typedef struct aesgcm_download_t
 
 void* aesgcm_file_get(void* userdata);
 
-void aesgcm_download_cancel_processes(ProfWin* window);
 void aesgcm_download_add_download(AESGCMDownload* download);
 
 #endif

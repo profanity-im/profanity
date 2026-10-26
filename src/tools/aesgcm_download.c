@@ -158,12 +158,6 @@ aesgcm_file_get(void* userdata)
 }
 
 void
-aesgcm_download_cancel_processes(ProfWin* window)
-{
-    http_download_cancel_processes(window);
-}
-
-void
 aesgcm_download_add_download(AESGCMDownload* aesgcm_dl)
 {
     http_download_add_download(aesgcm_dl->http_dl);
