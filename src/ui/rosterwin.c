@@ -954,9 +954,7 @@ _rosterwin_unsubscribed_header(ProfLayoutSplit* layout, GList* wins)
     auto_gchar gchar* countpref = prefs_get_string(PREF_ROSTER_COUNT);
     if (g_strcmp0(countpref, "items") == 0) {
         int itemcount = g_list_length(wins);
-        if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
-            g_string_append_printf(header, " (%d)", itemcount);
-        } else {
+        if (itemcount > 0 || prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
             g_string_append_printf(header, " (%d)", itemcount);
         }
     } else if (g_strcmp0(countpref, "unread") == 0) {
@@ -999,9 +997,7 @@ _rosterwin_contacts_header(ProfLayoutSplit* layout, const char* const title, GSL
     auto_gchar gchar* countpref = prefs_get_string(PREF_ROSTER_COUNT);
     if (g_strcmp0(countpref, "items") == 0) {
         int itemcount = g_slist_length(contacts);
-        if (itemcount == 0 && prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
-            g_string_append_printf(header, " (%d)", itemcount);
-        } else {
+        if (itemcount > 0 || prefs_get_boolean(PREF_ROSTER_COUNT_ZERO)) {
             g_string_append_printf(header, " (%d)", itemcount);
         }
     } else if (g_strcmp0(countpref, "unread") == 0) {
