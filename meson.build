@@ -70,6 +70,7 @@ if is_debug
     '-Wall',
     '-Wextra',
     '-Wstrict-prototypes',
+    '-Wmissing-prototypes',
     '-Wnull-dereference',
     '-fstack-protector-strong',
     '-D_FORTIFY_SOURCE=2',
