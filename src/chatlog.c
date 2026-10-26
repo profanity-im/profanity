@@ -178,7 +178,7 @@ chat_log_omemo_msg_in(ProfMessage* message)
             if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
             } else {
-                _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
             }
         }
     }
