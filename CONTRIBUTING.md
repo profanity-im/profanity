@@ -11,7 +11,6 @@ The system libstrophe is used by default; if you instead want to automatically d
 | :--- | :--- | :--- |
 | **Notifications** | Desktop notifications support | `-Dnotifications=enabled` |
 | **Python Plugins** | Support for Python plugins | `-Dpython-plugins=enabled` |
-| **C Plugins** | Support for C plugins | `-Dc-plugins=enabled` |
 | **OTR** | Off-the-Record encryption | `-Dotr=enabled` |
 | **PGP** | PGP encryption support | `-Dpgp=enabled` |
 | **OMEMO** | OMEMO encryption support | `-Domemo=enabled` |

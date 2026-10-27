@@ -13,8 +13,7 @@
 #include "command/cmd_defs.h"
 
 typedef enum {
-    LANG_PYTHON,
-    LANG_C
+    LANG_PYTHON
 } lang_t;
 
 typedef struct prof_plugins_install_t

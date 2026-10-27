@@ -220,23 +220,9 @@ if get_option('python-plugins').enabled()
   else
     conf_data.set('PY_IS_PYTHON3', 1)
   endif
-  
+
   build_python_api = true
   conf_data.set('HAVE_PYTHON', 1)
-endif
-
-# C plugins
-if get_option('c-plugins').enabled()
-  if platform == 'cygwin'
-    error('C plugins are not supported on Cygwin')
-  endif
-  
-  if platform not in ['openbsd', 'freebsd', 'netbsd']
-    dl_dep = cc.find_library('dl', required: true)
-  endif
-  
-  build_c_api = true
-  conf_data.set('HAVE_C', 1)
 endif
 
 # PGP support
@@ -294,12 +280,10 @@ endif
 
 icons_path = get_option('datadir') / meson.project_name() / 'icons'
 global_python_plugins_path = get_option('datadir') / meson.project_name() / 'plugins'
-global_c_plugins_path = get_option('libdir') / meson.project_name() / 'plugins'
 
 conf_data.set_quoted('THEMES_PATH', get_option('prefix') / themes_path)
 conf_data.set_quoted('ICONS_PATH', get_option('prefix') / icons_path)
 conf_data.set_quoted('GLOBAL_PYTHON_PLUGINS_PATH', get_option('prefix') / global_python_plugins_path)
-conf_data.set_quoted('GLOBAL_C_PLUGINS_PATH', get_option('prefix') / global_c_plugins_path)
 
 # Check for required functions
 foreach func : ['atexit', 'memset', 'strdup', 'strstr']
@@ -462,13 +446,6 @@ if build_python_api
   )
 endif
 
-if build_c_api
-  profanity_sources += files(
-    'src/plugins/c_plugins.c',
-    'src/plugins/c_api.c',
-  )
-endif
-
 if build_pgp
   profanity_sources += files(
     'src/pgp/gpg.c',
@@ -522,24 +499,10 @@ profanity_exe = executable(
   include_directories: inc,
   install: true,
   export_dynamic: true,
-)
-
-# Build libprofanity shared library for C plugins
-if build_c_api
-  libprofanity = shared_library(
-    'profanity',
-    'src/plugins/profapi.c',
-    dependencies: profanity_deps,
-    include_directories: inc,
-    install: true,
-    version: '0.0.0',
   )
-  
-  install_headers('src/plugins/profapi.h')
-endif
 
-# Install themes if enabled
-if get_option('install_themes')
+  # Install themes if enabled
+  if get_option('install_themes')
   install_subdir('themes',
     install_dir: get_option('datadir') / meson.project_name(),
     strip_directory: false,
@@ -678,14 +641,7 @@ if get_option('tests')
         'src/plugins/python_api.c',
       )
     endif
-    
-    if build_c_api
-      unittest_sources += files(
-        'src/plugins/c_plugins.c',
-        'src/plugins/c_api.c',
-      )
-    endif
-    
+
     if build_pgp
       unittest_sources += files(
         'tests/unittests/pgp/stub_gpg.c',
@@ -761,13 +717,11 @@ summary({
   'Themes path': themes_path,
   'Icons path': icons_path,
   'Global Python plugins path': global_python_plugins_path,
-  'Global C plugins path': global_c_plugins_path,
 }, section: 'Directories')
 
 summary({
   'Notifications': build_notifications,
   'Python plugins': build_python_api,
-  'C plugins': build_c_api,
   'OTR': build_otr,
   'PGP': build_pgp,
   'OMEMO': build_omemo,

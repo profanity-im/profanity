@@ -2133,7 +2133,7 @@ static const struct cmd_t command_defs[] = {
               "/plugins reload [<plugin>]",
               "/plugins python_version")
       CMD_DESC(
-              "Manage plugins. Passing no arguments lists installed plugins and global plugins which are available for local installation. Global directory for Python plugins is " GLOBAL_PYTHON_PLUGINS_PATH " and for C Plugins is " GLOBAL_C_PLUGINS_PATH ".")
+              "Manage plugins. Passing no arguments lists installed plugins and global plugins which are available for local installation. Global directory for Python plugins is " GLOBAL_PYTHON_PLUGINS_PATH ".")
       CMD_ARGS(
               { "install [<path or URL>]", "Install a plugin, or all plugins found in a directory (recursive), or download and install plugin (plugin name is based on basename). And loads it/them." },
               { "update [<path or URL>]", "Uninstall and then install the plugin. Plugin name to update is basename." },

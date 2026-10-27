@@ -10,7 +10,7 @@
 * Check copyright dates in all files
 
 * Create clean build folder:
-  `meson setup build_deb --buildtype=debug -Dnotifications=enabled -Dtray=enabled -Dotr=enabled -Dpgp=enabled -Domemo=enabled -Dc-plugins=enabled -Dpython-plugins=enabled -Domemo-qrcode=enabled -Dgdk-pixbuf=enabled`
+  `meson setup build_deb --buildtype=debug -Dnotifications=enabled -Dtray=enabled -Dotr=enabled -Dpgp=enabled -Domemo=enabled -Dpython-plugins=enabled -Domemo-qrcode=enabled -Dgdk-pixbuf=enabled`
 
 * Build profanity: `meson compile -C build_deb`
 
@@ -20,8 +20,7 @@
 * Generate manpages (the mangen argument only works when package status is development)
     `./build_deb/profanity mangen`
 
-* Determine if libprofanitys version needs to be [increased](https://github.com/profanity-im/profanity/issues/973)
-* Update plugin API docs (./apidocs/c and ./apidocs/python) need to run the `gen.sh` and commit the results to the website git repo
+* Update plugin API docs (./apidocs/python) need to run the `gen.sh` and commit the results to the website git repo
 * Update CHANGELOG (Use scripts/changelog-helper.py)
 * Update profrc.example
 * Update profanity.doap (new XEPs and latest version). Look for `DEV` which marks what is done on the development branch.

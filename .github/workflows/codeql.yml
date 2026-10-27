@@ -46,7 +46,6 @@ jobs:
           meson setup build_codeql \
             -Dnotifications=enabled \
             -Dpython-plugins=enabled \
-            -Dc-plugins=enabled \
             -Dotr=enabled \
             -Dpgp=enabled \
             -Domemo=enabled \

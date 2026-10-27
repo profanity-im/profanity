@@ -56,7 +56,6 @@ jobs:
             -Db_sanitize=none \
             -Dnotifications=enabled \
             -Dpython-plugins=enabled \
-            -Dc-plugins=enabled \
             -Dotr=enabled \
             -Dpgp=enabled \
             -Domemo=enabled \

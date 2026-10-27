@@ -120,12 +120,6 @@ main(int argc, char** argv)
         g_print("OMEMO support: Disabled\n");
 #endif
 
-#ifdef HAVE_C
-        g_print("C plugins: Enabled\n");
-#else
-        g_print("C plugins: Disabled\n");
-#endif
-
 #ifdef HAVE_PYTHON
         auto_gchar gchar* python_version = python_get_version_number();
         g_print("Python plugins: Enabled (%s)\n", python_version);

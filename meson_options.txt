@@ -11,12 +11,6 @@ option('python-plugins',
   description: 'Enable Python plugins'
 )
 
-option('c-plugins',
-  type: 'feature',
-  value: 'disabled',
-  description: 'Enable C plugins'
-)
-
 option('otr',
   type: 'feature',
   value: 'disabled',
