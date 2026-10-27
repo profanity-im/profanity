@@ -813,68 +813,58 @@ _lua_prof_encryption_reset(lua_State* L)
 }
 
 static int
-_lua_prof_settings_boolean_get(lua_State* L)
+_lua_prof_settings_get(lua_State* L)
 {
     const char* group = luaL_checkstring(L, 1);
     const char* key = luaL_checkstring(L, 2);
-    gboolean def = lua_toboolean(L, 3);
-    lua_pushboolean(L, plugin_settings_boolean_get(group, key, def));
-    return 1;
-}
 
-static int
-_lua_prof_settings_boolean_set(lua_State* L)
-{
-    const char* group = luaL_checkstring(L, 1);
-    const char* key = luaL_checkstring(L, 2);
-    gboolean val = lua_toboolean(L, 3);
-    plugin_settings_boolean_set(group, key, val);
-    return 0;
-}
-
-static int
-_lua_prof_settings_string_get(lua_State* L)
-{
-    const char* group = luaL_checkstring(L, 1);
-    const char* key = luaL_checkstring(L, 2);
-    const char* def = luaL_optstring(L, 3, NULL);
-    char* val = plugin_settings_string_get(group, key, def);
-    if (val) {
-        lua_pushstring(L, val);
-        free(val);
-    } else {
-        lua_pushnil(L);
+    // If arg 3 is missing or a string, default to string
+    if (lua_isnoneornil(L, 3) || lua_type(L, 3) == LUA_TSTRING) {
+        const char* def = luaL_optstring(L, 3, NULL);
+        char* val = plugin_settings_string_get(group, key, def);
+        if (val) {
+            lua_pushstring(L, val);
+            free(val);
+        } else {
+            lua_pushnil(L);
+        }
+        return 1;
     }
-    return 1;
-}
 
-static int
-_lua_prof_settings_string_set(lua_State* L)
-{
-    const char* group = luaL_checkstring(L, 1);
-    const char* key = luaL_checkstring(L, 2);
-    const char* val = luaL_checkstring(L, 3);
-    plugin_settings_string_set(group, key, val);
+    // If arg 3 is boolean, we get a boolean
+    if (lua_isboolean(L, 3)) {
+        gboolean def = lua_toboolean(L, 3);
+        lua_pushboolean(L, plugin_settings_boolean_get(group, key, def));
+        return 1;
+    }
+
+    // If arg 3 is number, we get an int
+    if (lua_isnumber(L, 3)) {
+        int def = lua_tointeger(L, 3);
+        lua_pushinteger(L, plugin_settings_int_get(group, key, def));
+        return 1;
+    }
+
+    luaL_error(L, "prof.settings.get: arg 3 must be string, boolean, or number default value");
     return 0;
 }
 
 static int
-_lua_prof_settings_int_get(lua_State* L)
+_lua_prof_settings_set(lua_State* L)
 {
     const char* group = luaL_checkstring(L, 1);
     const char* key = luaL_checkstring(L, 2);
-    int def = luaL_optinteger(L, 3, 0);
-    lua_pushinteger(L, plugin_settings_int_get(group, key, def));
-    return 1;
-}
 
-static int
-_lua_prof_settings_int_set(lua_State* L)
-{
-    const char* group = luaL_checkstring(L, 1);
-    const char* key = luaL_checkstring(L, 2);
-    int val = luaL_checkinteger(L, 3);
-    plugin_settings_int_set(group, key, val);
+    if (lua_isboolean(L, 3)) {
+        gboolean val = lua_toboolean(L, 3);
+        plugin_settings_boolean_set(group, key, val);
+    } else if (lua_isnumber(L, 3)) {
+        int val = lua_tointeger(L, 3);
+        plugin_settings_int_set(group, key, val);
+    } else {
+        const char* val = luaL_checkstring(L, 3);
+        plugin_settings_string_set(group, key, val);
+    }
     return 0;
 }
 
@@ -1038,11 +1028,80 @@ _lua_prof_filepath_completer_add(lua_State* L)
     return 0;
 }
 
+static const struct luaL_Reg log_lib[] = {
+    { "debug", _lua_prof_log_debug },
+    { "info", _lua_prof_log_info },
+    { "warning", _lua_prof_log_warning },
+    { "error", _lua_prof_log_error },
+    { NULL, NULL }
+};
+
+static const struct luaL_Reg chat_lib[] = {
+    { "show", _lua_prof_chat_show },
+    { "show_themed", _lua_prof_chat_show_themed },
+    { "set_titlebar_enctext", _lua_prof_chat_set_titlebar_enctext },
+    { "unset_titlebar_enctext", _lua_prof_chat_unset_titlebar_enctext },
+    { "set_incoming_char", _lua_prof_chat_set_incoming_char },
+    { "unset_incoming_char", _lua_prof_chat_unset_incoming_char },
+    { "set_outgoing_char", _lua_prof_chat_set_outgoing_char },
+    { "unset_outgoing_char", _lua_prof_chat_unset_outgoing_char },
+    { NULL, NULL }
+};
+
+static const struct luaL_Reg muc_lib[] = {
+    { "show", _lua_prof_room_show },
+    { "show_themed", _lua_prof_room_show_themed },
+    { "join", _lua_prof_room_join },
+    { "leave", _lua_prof_room_leave },
+    { "set_titlebar_enctext", _lua_prof_room_set_titlebar_enctext },
+    { "unset_titlebar_enctext", _lua_prof_room_unset_titlebar_enctext },
+    { "set_message_char", _lua_prof_room_set_message_char },
+    { "unset_message_char", _lua_prof_room_unset_message_char },
+    { NULL, NULL }
+};
+
+static const struct luaL_Reg win_lib[] = {
+    { "exists", _lua_prof_win_exists },
+    { "create", _lua_prof_win_create },
+    { "close", _lua_prof_win_close },
+    { "focus", _lua_prof_win_focus },
+    { "show", _lua_prof_win_show },
+    { "show_themed", _lua_prof_win_show_themed },
+    { NULL, NULL }
+};
+
+static const struct luaL_Reg cons_lib[] = {
+    { "alert", _lua_prof_cons_alert },
+    { "show", _lua_prof_cons_show },
+    { "show_themed", _lua_prof_cons_show_themed },
+    { "bad_cmd_usage", _lua_prof_cons_bad_cmd_usage },
+    { NULL, NULL }
+};
+
+static const struct luaL_Reg disco_lib[] = {
+    { "add_feature", _lua_prof_disco_add_feature },
+    { NULL, NULL }
+};
+
+static const struct luaL_Reg settings_lib[] = {
+    { "get", _lua_prof_settings_get },
+    { "set", _lua_prof_settings_set },
+    { "list_get", _lua_prof_settings_string_list_get },
+    { "list_add", _lua_prof_settings_string_list_add },
+    { "list_remove", _lua_prof_settings_string_list_remove },
+    { "list_clear", _lua_prof_settings_string_list_clear },
+    { NULL, NULL }
+};
+
+static const struct luaL_Reg completer_lib[] = {
+    { "add", _lua_prof_completer_add },
+    { "remove", _lua_prof_completer_remove },
+    { "clear", _lua_prof_completer_clear },
+    { "filepath_add", _lua_prof_filepath_completer_add },
+    { NULL, NULL }
+};
+
 static const struct luaL_Reg prof_lib[] = {
-    { "cons_alert", _lua_prof_cons_alert },
-    { "cons_show", _lua_prof_cons_show },
-    { "cons_show_themed", _lua_prof_cons_show_themed },
-    { "cons_bad_cmd_usage", _lua_prof_cons_bad_cmd_usage },
     { "notify", _lua_prof_notify },
     { "is_connected", _lua_prof_is_connected },
     { "get_account_name", _lua_prof_get_account_name },
@@ -1058,52 +1117,11 @@ static const struct luaL_Reg prof_lib[] = {
     { "get_roster", _lua_prof_get_roster },
     { "get_current_occupants", _lua_prof_get_current_occupants },
     { "get_room_nick", _lua_prof_get_room_nick },
-    { "log_debug", _lua_prof_log_debug },
-    { "log_info", _lua_prof_log_info },
-    { "log_warning", _lua_prof_log_warning },
-    { "log_error", _lua_prof_log_error },
-    { "win_exists", _lua_prof_win_exists },
-    { "win_create", _lua_prof_win_create },
-    { "win_close", _lua_prof_win_close },
-    { "win_focus", _lua_prof_win_focus },
     { "get_open_windows", _lua_prof_get_open_windows },
-    { "win_show", _lua_prof_win_show },
-    { "win_show_themed", _lua_prof_win_show_themed },
-    { "chat_show", _lua_prof_chat_show },
-    { "chat_show_themed", _lua_prof_chat_show_themed },
-    { "room_show", _lua_prof_room_show },
-    { "room_show_themed", _lua_prof_room_show_themed },
-    { "room_join", _lua_prof_room_join },
-    { "room_leave", _lua_prof_room_leave },
-    { "chat_set_titlebar_enctext", _lua_prof_chat_set_titlebar_enctext },
-    { "chat_unset_titlebar_enctext", _lua_prof_chat_unset_titlebar_enctext },
-    { "chat_set_incoming_char", _lua_prof_chat_set_incoming_char },
-    { "chat_unset_incoming_char", _lua_prof_chat_unset_incoming_char },
-    { "chat_set_outgoing_char", _lua_prof_chat_set_outgoing_char },
-    { "chat_unset_outgoing_char", _lua_prof_chat_unset_outgoing_char },
-    { "room_set_titlebar_enctext", _lua_prof_room_set_titlebar_enctext },
-    { "room_unset_titlebar_enctext", _lua_prof_room_unset_titlebar_enctext },
-    { "room_set_message_char", _lua_prof_room_set_message_char },
-    { "room_unset_message_char", _lua_prof_room_unset_message_char },
     { "incoming_message", _lua_prof_incoming_message },
-    { "disco_add_feature", _lua_prof_disco_add_feature },
     { "encryption_reset", _lua_prof_encryption_reset },
-    { "settings_boolean_get", _lua_prof_settings_boolean_get },
-    { "settings_boolean_set", _lua_prof_settings_boolean_set },
-    { "settings_string_get", _lua_prof_settings_string_get },
-    { "settings_string_set", _lua_prof_settings_string_set },
-    { "settings_int_get", _lua_prof_settings_int_get },
-    { "settings_int_set", _lua_prof_settings_int_set },
-    { "settings_string_list_get", _lua_prof_settings_string_list_get },
-    { "settings_string_list_add", _lua_prof_settings_string_list_add },
-    { "settings_string_list_remove", _lua_prof_settings_string_list_remove },
-    { "settings_string_list_clear", _lua_prof_settings_string_list_clear },
     { "register_command", _lua_prof_register_command },
     { "register_timed", _lua_prof_register_timed },
-    { "completer_add", _lua_prof_completer_add },
-    { "completer_remove", _lua_prof_completer_remove },
-    { "completer_clear", _lua_prof_completer_clear },
-    { "filepath_completer_add", _lua_prof_filepath_completer_add },
     { NULL, NULL }
 };
 
@@ -1114,6 +1132,31 @@ api_init_lua(const char* const plugin_name, lua_State* L)
     lua_setfield(L, LUA_REGISTRYINDEX, "prof_plugin_name");
 
     luaL_newlib(L, prof_lib);
+
+    luaL_newlib(L, log_lib);
+    lua_setfield(L, -2, "log");
+
+    luaL_newlib(L, chat_lib);
+    lua_setfield(L, -2, "chat");
+
+    luaL_newlib(L, muc_lib);
+    lua_setfield(L, -2, "muc");
+
+    luaL_newlib(L, win_lib);
+    lua_setfield(L, -2, "win");
+
+    luaL_newlib(L, cons_lib);
+    lua_setfield(L, -2, "cons");
+
+    luaL_newlib(L, disco_lib);
+    lua_setfield(L, -2, "disco");
+
+    luaL_newlib(L, settings_lib);
+    lua_setfield(L, -2, "settings");
+
+    luaL_newlib(L, completer_lib);
+    lua_setfield(L, -2, "completer");
+
     lua_setglobal(L, "prof");
 }
 
