@@ -53,7 +53,9 @@ _lua_call_void_0arg(ProfPlugin* plugin, const char* hook)
     lua_State* L = plugin->L;
     lua_getglobal(L, hook);
     if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
-        log_error("Plugin %s error in %s: %s", plugin->name, hook, lua_tostring(L, -1));
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
         lua_pop(L, 1);
     }
 }
@@ -65,7 +67,9 @@ _lua_call_void_1str(ProfPlugin* plugin, const char* hook, const char* s1)
     lua_getglobal(L, hook);
     lua_pushstring(L, s1 ? s1 : "");
     if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
-        log_error("Plugin %s error in %s: %s", plugin->name, hook, lua_tostring(L, -1));
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
         lua_pop(L, 1);
     }
 }
@@ -78,7 +82,9 @@ _lua_call_void_2str(ProfPlugin* plugin, const char* hook, const char* s1, const 
     lua_pushstring(L, s1 ? s1 : "");
     lua_pushstring(L, s2 ? s2 : "");
     if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
-        log_error("Plugin %s error in %s: %s", plugin->name, hook, lua_tostring(L, -1));
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
         lua_pop(L, 1);
     }
 }
@@ -96,7 +102,9 @@ _lua_call_void_3str(ProfPlugin* plugin, const char* hook, const char* s1, const 
     }
     lua_pushstring(L, s3 ? s3 : "");
     if (lua_pcall(L, 3, 0, 0) != LUA_OK) {
-        log_error("Plugin %s error in %s: %s", plugin->name, hook, lua_tostring(L, -1));
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
         lua_pop(L, 1);
     }
 }
@@ -119,7 +127,9 @@ _lua_call_void_4str(ProfPlugin* plugin, const char* hook, const char* s1, const 
         lua_pushnil(L);
     }
     if (lua_pcall(L, 4, 0, 0) != LUA_OK) {
-        log_error("Plugin %s error in %s: %s", plugin->name, hook, lua_tostring(L, -1));
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
         lua_pop(L, 1);
     }
 }
@@ -148,7 +158,9 @@ _lua_call_void_presence(ProfPlugin* plugin, const char* barejid, const char* res
     }
     lua_pushinteger(L, priority);
     if (lua_pcall(L, 5, 0, 0) != LUA_OK) {
-        log_error("Plugin %s error in prof_on_contact_presence: %s", plugin->name, lua_tostring(L, -1));
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in prof_on_contact_presence: %s", plugin->name, err);
+        cons_show("Plugin %s error in prof_on_contact_presence: %s", plugin->name, err);
         lua_pop(L, 1);
     }
 }
@@ -161,7 +173,9 @@ _lua_call_filter_2str(ProfPlugin* plugin, const char* hook, const char* s1, cons
     lua_pushstring(L, s1 ? s1 : "");
     lua_pushstring(L, s2 ? s2 : "");
     if (lua_pcall(L, 2, 1, 0) != LUA_OK) {
-        log_error("Plugin %s error in %s: %s", plugin->name, hook, lua_tostring(L, -1));
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
         lua_pop(L, 1);
         return NULL;
     }
@@ -186,7 +200,9 @@ _lua_call_filter_3str(ProfPlugin* plugin, const char* hook, const char* s1, cons
     }
     lua_pushstring(L, s3 ? s3 : "");
     if (lua_pcall(L, 3, 1, 0) != LUA_OK) {
-        log_error("Plugin %s error in %s: %s", plugin->name, hook, lua_tostring(L, -1));
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
         lua_pop(L, 1);
         return NULL;
     }
@@ -205,7 +221,9 @@ _lua_call_bool_1str(ProfPlugin* plugin, const char* hook, const char* s1)
     lua_getglobal(L, hook);
     lua_pushstring(L, s1 ? s1 : "");
     if (lua_pcall(L, 1, 1, 0) != LUA_OK) {
-        log_error("Plugin %s error in %s: %s", plugin->name, hook, lua_tostring(L, -1));
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
         lua_pop(L, 1);
         return TRUE;
     }
@@ -271,6 +289,7 @@ _lua_plugin_create(const char* const filename)
     if (luaL_dofile(L, full_path) != LUA_OK) {
         const char* err = lua_tostring(L, -1);
         log_error("Error loading Lua plugin %s: %s", filename, err ? err : "unknown error");
+        cons_show("Error loading Lua plugin %s: %s", filename, err ? err : "unknown error");
         lua_close(L);
         return NULL;
     }
@@ -323,7 +342,9 @@ _plugin_call_init(ProfPlugin* plugin, const char* version, const char* status,
     lua_pushstring(L, account_name ? account_name : "");
     lua_pushstring(L, fulljid ? fulljid : "");
     if (lua_pcall(L, 4, 0, 0) != LUA_OK) {
-        log_error("Plugin %s error in prof_init: %s", plugin->name, lua_tostring(L, -1));
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in prof_init: %s", plugin->name, err);
+        cons_show("Plugin %s error in prof_init: %s", plugin->name, err);
         lua_pop(L, 1);
     }
 }
