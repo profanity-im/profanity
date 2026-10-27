@@ -2513,6 +2513,7 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* con
         auto_char char* error_message = stanza_get_error_message(stanza);
         if (from) {
             log_error("Service discovery failed for %s: %s", from, error_message);
+            connection_features_received(from);
         } else {
             log_error("Service discovery failed: %s", error_message);
         }
