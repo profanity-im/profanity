@@ -27,8 +27,7 @@ RUN dnf install -y \
   meson \
   ninja-build \
   ncurses-devel \
-  python3 \
-  python3-devel \
+  lua-devel \
   readline-devel \
   openssl-devel \
   sqlite-devel \
