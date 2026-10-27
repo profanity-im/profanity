@@ -494,6 +494,7 @@ wins_close_by_num(int i)
             case WIN_CHAT:
             {
                 ProfChatWin* chatwin = (ProfChatWin*)window;
+                plugins_on_win_close(chatwin->barejid, "chat");
                 autocomplete_remove(wins_ac, chatwin->barejid);
                 autocomplete_remove(wins_close_ac, chatwin->barejid);
 
@@ -515,6 +516,7 @@ wins_close_by_num(int i)
             case WIN_MUC:
             {
                 ProfMucWin* mucwin = (ProfMucWin*)window;
+                plugins_on_win_close(mucwin->roomjid, "muc");
                 autocomplete_remove(wins_ac, mucwin->roomjid);
                 autocomplete_remove(wins_close_ac, mucwin->roomjid);
 
@@ -528,6 +530,7 @@ wins_close_by_num(int i)
             case WIN_PRIVATE:
             {
                 ProfPrivateWin* privwin = (ProfPrivateWin*)window;
+                plugins_on_win_close(privwin->fulljid, "private");
                 autocomplete_remove(wins_ac, privwin->fulljid);
                 autocomplete_remove(wins_close_ac, privwin->fulljid);
                 autocomplete_free(window->urls_ac);
@@ -536,6 +539,7 @@ wins_close_by_num(int i)
             }
             case WIN_XML:
             {
+                plugins_on_win_close("xmlconsole", "xmlconsole");
                 autocomplete_remove(wins_ac, "xmlconsole");
                 autocomplete_remove(wins_close_ac, "xmlconsole");
                 break;
@@ -543,12 +547,23 @@ wins_close_by_num(int i)
             case WIN_PLUGIN:
             {
                 ProfPluginWin* pluginwin = (ProfPluginWin*)window;
+                plugins_on_win_close(pluginwin->tag, "plugin");
                 plugins_close_win(pluginwin->plugin_name, pluginwin->tag);
                 autocomplete_remove(wins_ac, pluginwin->tag);
                 autocomplete_remove(wins_close_ac, pluginwin->tag);
                 break;
             }
             case WIN_CONFIG:
+            {
+                ProfConfWin* confwin = (ProfConfWin*)window;
+                plugins_on_win_close(confwin->roomjid ? confwin->roomjid : "config", "config");
+                break;
+            }
+            case WIN_VCARD:
+            {
+                plugins_on_win_close("vcard", "vcard");
+                break;
+            }
             default:
                 break;
             }
@@ -580,6 +595,7 @@ wins_new_xmlconsole(void)
     _wins_htable_insert(windows, GINT_TO_POINTER(result), newwin);
     autocomplete_add(wins_ac, "xmlconsole");
     autocomplete_add(wins_close_ac, "xmlconsole");
+    plugins_on_win_open("xmlconsole", "xmlconsole");
     return newwin;
 }
 
@@ -603,6 +619,7 @@ wins_new_chat(const gchar* const barejid)
     newwin->urls_ac = autocomplete_new();
     newwin->quotes_ac = autocomplete_new();
 
+    plugins_on_win_open(barejid, "chat");
     return newwin;
 }
 
@@ -617,6 +634,7 @@ wins_new_muc(const gchar* const roomjid)
     newwin->urls_ac = autocomplete_new();
     newwin->quotes_ac = autocomplete_new();
 
+    plugins_on_win_open(roomjid, "muc");
     return newwin;
 }
 
@@ -627,6 +645,7 @@ wins_new_config(const gchar* const roomjid, DataForm* form, ProfConfWinCallback 
     ProfWin* newwin = win_create_config(roomjid, form, submit, cancel, userdata);
     _wins_htable_insert(windows, GINT_TO_POINTER(result), newwin);
 
+    plugins_on_win_open(roomjid ? roomjid : "config", "config");
     return newwin;
 }
 
@@ -641,6 +660,7 @@ wins_new_private(const gchar* const fulljid)
     newwin->urls_ac = autocomplete_new();
     newwin->quotes_ac = autocomplete_new();
 
+    plugins_on_win_open(fulljid, "private");
     return newwin;
 }
 
@@ -652,6 +672,7 @@ wins_new_plugin(const gchar* const plugin_name, const gchar* const tag)
     _wins_htable_insert(windows, GINT_TO_POINTER(result), newwin);
     autocomplete_add(wins_ac, tag);
     autocomplete_add(wins_close_ac, tag);
+    plugins_on_win_open(tag, "plugin");
     return newwin;
 }
 
@@ -662,6 +683,7 @@ wins_new_vcard(vCard* vcard)
     ProfWin* newwin = win_create_vcard(vcard);
     _wins_htable_insert(windows, GINT_TO_POINTER(result), newwin);
 
+    plugins_on_win_open("vcard", "vcard");
     return newwin;
 }
 

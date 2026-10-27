@@ -5,6 +5,7 @@
 
 #include "plugins/callbacks.h"
 #include "plugins/plugins.h"
+#include "test_callbacks.h"
 
 void
 plugins_get_command_names__returns__no_commands(void** state)
@@ -54,4 +55,14 @@ plugins_get_command_names__returns__commands_when_added(void** state)
     assert_true(foundCommand1 && foundCommand2 && foundCommand3);
 
     g_list_free(names);
+}
+
+void
+plugins_get_lua_version__returns_version_string(void** state)
+{
+    const char* ver = plugins_get_lua_version();
+    assert_non_null(ver);
+#ifdef HAVE_PLUGINS
+    assert_string_not_equal(ver, "none");
+#endif
 }

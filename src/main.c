@@ -21,6 +21,10 @@
 #include "pgp/gpg.h"
 #endif
 
+#ifdef HAVE_PLUGINS
+#include "plugins/plugins.h"
+#endif
+
 #include "profanity.h"
 #include "common.h"
 #include "command/cmd_defs.h"
@@ -114,6 +118,12 @@ main(int argc, char** argv)
         g_print("OMEMO support: Enabled\n");
 #else
         g_print("OMEMO support: Disabled\n");
+#endif
+
+#ifdef HAVE_PLUGINS
+        g_print("Plugins: Enabled (%s)\n", plugins_get_lua_version());
+#else
+        g_print("Plugins: Disabled\n");
 #endif
 
 #ifdef HAVE_TRAY

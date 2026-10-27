@@ -761,6 +761,7 @@ sv_ev_message_receipt(const gchar* const barejid, const gchar* const id)
 void
 sv_ev_typing(const gchar* const barejid, const gchar* const resource)
 {
+    plugins_on_chat_state(barejid, "composing");
     ui_contact_typing(barejid, resource);
     if (wins_chat_exists(barejid)) {
         chat_session_recipient_typing(barejid, resource);
@@ -770,6 +771,7 @@ sv_ev_typing(const gchar* const barejid, const gchar* const resource)
 void
 sv_ev_paused(const gchar* const barejid, const gchar* const resource)
 {
+    plugins_on_chat_state(barejid, "paused");
     if (wins_chat_exists(barejid)) {
         chat_session_recipient_paused(barejid, resource);
     }
@@ -778,6 +780,7 @@ sv_ev_paused(const gchar* const barejid, const gchar* const resource)
 void
 sv_ev_inactive(const gchar* const barejid, const gchar* const resource)
 {
+    plugins_on_chat_state(barejid, "inactive");
     if (wins_chat_exists(barejid)) {
         chat_session_recipient_inactive(barejid, resource);
     }
@@ -786,6 +789,7 @@ sv_ev_inactive(const gchar* const barejid, const gchar* const resource)
 void
 sv_ev_gone(const gchar* const barejid, const gchar* const resource)
 {
+    plugins_on_chat_state(barejid, "gone");
     if (barejid && resource) {
         gboolean show_message = TRUE;
 
@@ -809,6 +813,9 @@ sv_ev_gone(const gchar* const barejid, const gchar* const resource)
 void
 sv_ev_activity(const gchar* const barejid, const gchar* const resource, gboolean send_states)
 {
+    if (send_states) {
+        plugins_on_chat_state(barejid, "active");
+    }
     if (wins_chat_exists(barejid)) {
         chat_session_recipient_active(barejid, resource, send_states);
     }
@@ -923,6 +930,7 @@ sv_ev_room_occupant_offline(const gchar* const room, const gchar* const nick,
                             const gchar* const show, const gchar* const status)
 {
     muc_roster_remove(room, nick);
+    plugins_on_room_occupant_leave(room, nick, status);
 
     auto_gchar gchar* muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
     ProfMucWin* mucwin = wins_get_muc(room);
@@ -1138,6 +1146,7 @@ sv_ev_muc_occupant_online(const gchar* const room, const gchar* const nick, cons
 
     // joined room
     if (!occupant) {
+        plugins_on_room_occupant_join(room, nick);
         auto_gchar gchar* muc_status_pref = prefs_get_string(PREF_STATUSES_MUC);
         ProfMucWin* mucwin = wins_get_muc(room);
         if (mucwin && g_strcmp0(muc_status_pref, "none") != 0) {

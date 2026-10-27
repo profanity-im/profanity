@@ -5,6 +5,18 @@ option('notifications',
   description: 'Enable desktop notifications'
 )
 
+option('plugins',
+  type: 'feature',
+  value: 'auto',
+  description: 'Enable Lua plugin support'
+)
+
+option('lua-version',
+  type: 'string',
+  value: '',
+  description: 'Specify exact Lua pkg-config package (e.g. lua5.4, lua-5.4, lua, luajit). If empty, auto-detect.'
+)
+
 option('otr',
   type: 'feature',
   value: 'disabled',

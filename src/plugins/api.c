@@ -2,24 +2,28 @@
  * api.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2026 Michael Vetter <jubalh@iodoru.org>
  *
  * SPDX-License-Identifier: GPL-3.0-or-later WITH OpenSSL-exception
  */
 
 #include "config.h"
 
+#ifdef HAVE_PLUGINS
+
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
 
 #include <glib.h>
+#include <lua.h>
+#include <lualib.h>
+#include <lauxlib.h>
 
 #include "profanity.h"
 #include "log.h"
 #include "common.h"
 #include "config/theme.h"
-#include "command/cmd_defs.h"
+#include "command/cmd_funcs.h"
 #include "event/server_events.h"
 #include "event/client_events.h"
 #include "plugins/callbacks.h"
@@ -31,12 +35,24 @@
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/roster_list.h"
+#include "xmpp/contact.h"
+#include "xmpp/session.h"
+#include "xmpp/connection.h"
+#include "xmpp/capabilities.h"
+#include "xmpp/message.h"
+#include "xmpp/jid.h"
+#include "xmpp/xmpp.h"
+#include "xmpp/muc.h"
 
-void
-api_cons_alert(void)
+#ifdef HAVE_LIBOTR
+#include "otr/otr.h"
+#endif
+
+typedef struct lua_callback_t
 {
-    cons_alert(NULL);
-}
+    lua_State* L;
+    int ref;
+} LuaCallback;
 
 static const gchar*
 _normalize_crlf(const gchar* const message, gchar** to_free)
@@ -51,852 +67,1147 @@ _normalize_crlf(const gchar* const message, gchar** to_free)
     return *to_free;
 }
 
-int
-api_cons_show(const char* const message)
+static void
+_lua_command_exec(PluginCommand* command, gchar** args)
 {
-    if (message == NULL) {
-        log_warning("%s", "prof_cons_show failed, message is NULL");
-        return 0;
+    LuaCallback* cb = (LuaCallback*)command->callback;
+    if (!cb || !cb->L || cb->ref == LUA_NOREF) {
+        return;
     }
 
+    lua_rawgeti(cb->L, LUA_REGISTRYINDEX, cb->ref);
+    int num_args = 0;
+    if (args) {
+        for (int i = 0; args[i]; i++) {
+            lua_pushstring(cb->L, args[i]);
+            num_args++;
+        }
+    }
+
+    if (lua_pcall(cb->L, num_args, 0, 0) != LUA_OK) {
+        const char* err = lua_tostring(cb->L, -1);
+        log_error("Lua error in command /%s: %s", command->command_name, err ? err : "unknown error");
+        cons_show("Plugin error in command /%s: %s", command->command_name, err ? err : "unknown error");
+        lua_pop(cb->L, 1);
+    }
+}
+
+static void
+_lua_timed_exec(PluginTimedFunction* timed_function)
+{
+    LuaCallback* cb = (LuaCallback*)timed_function->callback;
+    if (!cb || !cb->L || cb->ref == LUA_NOREF) {
+        return;
+    }
+
+    lua_rawgeti(cb->L, LUA_REGISTRYINDEX, cb->ref);
+    if (lua_pcall(cb->L, 0, 0, 0) != LUA_OK) {
+        const char* err = lua_tostring(cb->L, -1);
+        log_error("Lua error in timed callback: %s", err ? err : "unknown error");
+        lua_pop(cb->L, 1);
+    }
+}
+
+static void
+_lua_win_exec(PluginWindowCallback* window_callback, const char* tag, const char* const line)
+{
+    LuaCallback* cb = (LuaCallback*)window_callback->callback;
+    if (!cb || !cb->L || cb->ref == LUA_NOREF) {
+        return;
+    }
+
+    lua_rawgeti(cb->L, LUA_REGISTRYINDEX, cb->ref);
+    lua_pushstring(cb->L, tag ? tag : "");
+    lua_pushstring(cb->L, line ? line : "");
+    if (lua_pcall(cb->L, 2, 0, 0) != LUA_OK) {
+        const char* err = lua_tostring(cb->L, -1);
+        log_error("Lua error in window %s callback: %s", tag ? tag : "", err ? err : "unknown error");
+        lua_pop(cb->L, 1);
+    }
+}
+
+static void
+_lua_callback_destroy(void* callback)
+{
+    LuaCallback* cb = (LuaCallback*)callback;
+    if (!cb) {
+        return;
+    }
+    if (cb->L && cb->ref != LUA_NOREF && cb->ref != LUA_REFNIL) {
+        luaL_unref(cb->L, LUA_REGISTRYINDEX, cb->ref);
+    }
+    g_free(cb);
+}
+
+static const char*
+_lua_get_plugin_name(lua_State* L)
+{
+    lua_getfield(L, LUA_REGISTRYINDEX, "prof_plugin_name");
+    const char* name = lua_tostring(L, -1);
+    lua_pop(L, 1);
+    return name;
+}
+
+static int
+_lua_prof_cons_alert(lua_State* L)
+{
+    cons_alert(NULL);
+    return 0;
+}
+
+static int
+_lua_prof_cons_show(lua_State* L)
+{
+    const char* message = luaL_checkstring(L, 1);
     auto_gchar gchar* to_free = NULL;
     const gchar* parsed = _normalize_crlf(message, &to_free);
     cons_show("%s", parsed);
-
-    return 1;
+    return 0;
 }
 
-int
-api_cons_show_themed(const char* const group, const char* const key, const char* const def, const char* const message)
+static int
+_lua_prof_cons_show_themed(lua_State* L)
 {
-    if (message == NULL) {
-        log_warning("%s", "prof_cons_show_themed failed, message is NULL");
-        return 0;
-    }
+    const char* group = luaL_checkstring(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    const char* def = luaL_checkstring(L, 3);
+    const char* message = luaL_checkstring(L, 4);
 
     auto_gchar gchar* to_free = NULL;
     const gchar* parsed = _normalize_crlf(message, &to_free);
     theme_item_t themeitem = plugin_themes_get(group, key, def);
     ProfWin* console = wins_get_console();
     win_println(console, themeitem, "-", "%s", parsed);
-
-    return 1;
+    return 0;
 }
 
-int
-api_cons_bad_cmd_usage(const char* const cmd)
+static int
+_lua_prof_cons_bad_cmd_usage(lua_State* L)
 {
-    if (cmd == NULL) {
-        log_warning("%s", "prof_cons_bad_cmd_usage failed, cmd is NULL");
+    const char* cmd = luaL_checkstring(L, 1);
+    cons_bad_cmd_usage(cmd);
+    return 0;
+}
+
+static int
+_lua_prof_notify(lua_State* L)
+{
+    const char* message = luaL_checkstring(L, 1);
+    int timeout_ms = luaL_optinteger(L, 2, 5000);
+    const char* category = luaL_optstring(L, 3, "message");
+    notify(message, timeout_ms, category);
+    return 0;
+}
+
+static int
+_lua_prof_send_line(lua_State* L)
+{
+    const char* line = luaL_checkstring(L, 1);
+    ProfWin* current = wins_get_current();
+    if (!current) {
         return 0;
     }
-
-    cons_bad_cmd_usage(cmd);
-
-    return 1;
-}
-
-void
-api_register_command(const char* const plugin_name, const char* command_name, int min_args, int max_args,
-                     char** synopsis, const char* description, char* arguments[][2], char** examples,
-                     void* callback, void (*callback_exec)(PluginCommand* command, gchar** args), void (*callback_destroy)(void* callback))
-{
-    PluginCommand* command = g_new0(PluginCommand, 1);
-    command->command_name = g_strdup(command_name);
-    command->min_args = min_args;
-    command->max_args = max_args;
-    command->callback = callback;
-    command->callback_exec = callback_exec;
-    command->callback_destroy = callback_destroy;
-
-    CommandHelp* help = g_new0(CommandHelp, 1);
-
-    int i;
-    for (i = 0; synopsis[i] != NULL; i++) {
-        help->synopsis[i] = g_strdup(synopsis[i]);
-    }
-
-    help->desc = g_strdup(description);
-    for (i = 0; arguments[i][0] != NULL; i++) {
-        help->args[i][0] = g_strdup(arguments[i][0]);
-        help->args[i][1] = g_strdup(arguments[i][1]);
-    }
-
-    for (i = 0; examples[i] != NULL; i++) {
-        help->examples[i] = g_strdup(examples[i]);
-    }
-
-    command->help = help;
-
-    callbacks_add_command(plugin_name, command);
-}
-
-void
-api_register_timed(const char* const plugin_name, void* callback, int interval_seconds,
-                   void (*callback_exec)(PluginTimedFunction* timed_function), void (*callback_destroy)(void* callback))
-{
-    PluginTimedFunction* timed_function = g_new0(PluginTimedFunction, 1);
-    timed_function->callback = callback;
-    timed_function->callback_exec = callback_exec;
-    timed_function->callback_destroy = callback_destroy;
-    timed_function->interval_seconds = interval_seconds;
-    timed_function->timer = g_timer_new();
-
-    callbacks_add_timed(plugin_name, timed_function);
-}
-
-void
-api_completer_add(const char* const plugin_name, const char* key, char** items)
-{
-    autocompleters_add(plugin_name, key, items);
-}
-
-void
-api_completer_remove(const char* const plugin_name, const char* key, char** items)
-{
-    autocompleters_remove(plugin_name, key, items);
-}
-
-void
-api_completer_clear(const char* const plugin_name, const char* key)
-{
-    autocompleters_clear(plugin_name, key);
-}
-
-void
-api_filepath_completer_add(const char* const plugin_name, const char* prefix)
-{
-    autocompleters_filepath_add(plugin_name, prefix);
-}
-
-void
-api_notify(const char* message, const char* category, int timeout_ms)
-{
-    notify(message, timeout_ms, category);
-}
-
-void
-api_send_line(char* line)
-{
-    ProfWin* current = wins_get_current();
-    cmd_process_input(current, line);
-}
-
-char*
-api_get_current_recipient(void)
-{
-    ProfWin* current = wins_get_current();
     if (current->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)current;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
-        return chatwin->barejid;
+        cl_ev_send_msg(chatwin, line, NULL);
+    } else if (current->type == WIN_MUC) {
+        ProfMucWin* mucwin = (ProfMucWin*)current;
+        cl_ev_send_muc_msg(mucwin, line, NULL);
     } else {
-        return NULL;
+        cmd_process_input(current, (char*)line);
     }
+    return 0;
 }
 
-char*
-api_get_current_muc(void)
+static int
+_lua_prof_send_stanza(lua_State* L)
+{
+    const char* stanza = luaL_checkstring(L, 1);
+    connection_send_stanza(stanza);
+    return 0;
+}
+
+static int
+_lua_prof_is_connected(lua_State* L)
+{
+    lua_pushboolean(L, connection_get_status() == JABBER_CONNECTED);
+    return 1;
+}
+
+static int
+_lua_prof_get_account_name(lua_State* L)
+{
+    const char* name = session_get_account_name();
+    if (name) {
+        lua_pushstring(L, name);
+    } else {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+static int
+_lua_prof_get_my_jid(lua_State* L)
+{
+    const char* jid = connection_get_fulljid();
+    if (jid) {
+        lua_pushstring(L, jid);
+    } else {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+static int
+_lua_prof_get_current_recipient(lua_State* L)
 {
     ProfWin* current = wins_get_current();
-    if (current->type == WIN_MUC) {
-        ProfMucWin* mucwin = (ProfMucWin*)current;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        return mucwin->roomjid;
+    if (current && current->type == WIN_CHAT) {
+        ProfChatWin* chatwin = (ProfChatWin*)current;
+        lua_pushstring(L, chatwin->barejid);
     } else {
-        return NULL;
+        lua_pushnil(L);
     }
+    return 1;
 }
 
-char*
-api_get_current_nick(void)
+static int
+_lua_prof_get_current_muc(lua_State* L)
 {
     ProfWin* current = wins_get_current();
-    if (current->type == WIN_MUC) {
+    if (current && current->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)current;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        const char* const nick = muc_nick(mucwin->roomjid);
-        return nick ? g_strdup(nick) : NULL;
+        lua_pushstring(L, mucwin->roomjid);
     } else {
-        return NULL;
+        lua_pushnil(L);
     }
+    return 1;
 }
 
-char*
-api_get_name_from_roster(const char* barejid)
-{
-    return g_strdup(roster_get_display_name(barejid));
-}
-
-char*
-api_get_barejid_from_roster(const char* name)
-{
-    return roster_barejid_from_name(name);
-}
-
-gchar**
-api_get_current_occupants(void)
+static int
+_lua_prof_current_win_is_console(lua_State* L)
 {
     ProfWin* current = wins_get_current();
-    if (current->type == WIN_MUC) {
+    lua_pushboolean(L, current && current->type == WIN_CONSOLE);
+    return 1;
+}
+
+static int
+_lua_prof_get_current_nick(lua_State* L)
+{
+    ProfWin* current = wins_get_current();
+    if (current && current->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)current;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
-        GList* occupants_list = muc_roster(mucwin->roomjid);
-        gchar** result = g_new0(gchar*, g_list_length(occupants_list) + 1);
-        if (result == NULL) {
-            g_list_free(occupants_list);
-            return NULL;
+        const char* nick = muc_nick(mucwin->roomjid);
+        if (nick) {
+            lua_pushstring(L, nick);
+            return 1;
         }
+    }
+    lua_pushnil(L);
+    return 1;
+}
 
+static int
+_lua_prof_get_name_from_roster(lua_State* L)
+{
+    const char* barejid = luaL_checkstring(L, 1);
+    const char* name = roster_get_display_name(barejid);
+    if (name) {
+        lua_pushstring(L, name);
+    } else {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+static int
+_lua_prof_get_barejid_from_roster(lua_State* L)
+{
+    const char* name = luaL_checkstring(L, 1);
+    char* barejid = roster_barejid_from_name(name);
+    if (barejid) {
+        lua_pushstring(L, barejid);
+        free(barejid);
+    } else {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+static int
+_lua_prof_get_roster(lua_State* L)
+{
+    GSList* contacts = roster_get_contacts(ROSTER_ORD_NAME);
+    lua_newtable(L);
+
+    int idx = 1;
+    GSList* curr = contacts;
+    while (curr) {
+        PContact contact = curr->data;
+        if (contact) {
+            lua_newtable(L);
+
+            const char* barejid = p_contact_barejid(contact);
+            lua_pushstring(L, barejid ? barejid : "");
+            lua_setfield(L, -2, "barejid");
+
+            const char* name = p_contact_name(contact);
+            if (name) {
+                lua_pushstring(L, name);
+            } else {
+                lua_pushnil(L);
+            }
+            lua_setfield(L, -2, "name");
+
+            const char* sub = p_contact_subscription(contact);
+            if (sub) {
+                lua_pushstring(L, sub);
+            } else {
+                lua_pushnil(L);
+            }
+            lua_setfield(L, -2, "subscription");
+
+            const char* presence = p_contact_presence(contact);
+            if (presence) {
+                lua_pushstring(L, presence);
+            } else {
+                lua_pushnil(L);
+            }
+            lua_setfield(L, -2, "presence");
+
+            const char* status = p_contact_status(contact);
+            if (status) {
+                lua_pushstring(L, status);
+            } else {
+                lua_pushnil(L);
+            }
+            lua_setfield(L, -2, "status");
+
+            GSList* groups = p_contact_groups(contact);
+            lua_newtable(L);
+            int g_idx = 1;
+            while (groups) {
+                lua_pushstring(L, (const char*)groups->data);
+                lua_rawseti(L, -2, g_idx++);
+                groups = g_slist_next(groups);
+            }
+            lua_setfield(L, -2, "groups");
+
+            lua_rawseti(L, -2, idx++);
+        }
+        curr = g_slist_next(curr);
+    }
+    g_slist_free(contacts);
+
+    return 1;
+}
+
+static int
+_lua_prof_get_current_occupants(lua_State* L)
+{
+    ProfWin* current = wins_get_current();
+    lua_newtable(L);
+    if (current && current->type == WIN_MUC) {
+        ProfMucWin* mucwin = (ProfMucWin*)current;
+        GList* occupants_list = muc_roster(mucwin->roomjid);
         GList* curr = occupants_list;
-        int i = 0;
+        int idx = 1;
         while (curr) {
             Occupant* occupant = curr->data;
-            result[i++] = g_strdup(occupant->nick);
+            if (occupant && occupant->nick) {
+                lua_pushstring(L, occupant->nick);
+                lua_rawseti(L, -2, idx++);
+            }
             curr = g_list_next(curr);
         }
-        result[i] = NULL;
-
         g_list_free(occupants_list);
-
-        return result;
-    } else {
-        return NULL;
     }
+    return 1;
 }
 
-int
-api_current_win_is_console(void)
+static int
+_lua_prof_get_room_nick(lua_State* L)
 {
-    ProfWin* current = wins_get_current();
-    if (current && current->type == WIN_CONSOLE) {
-        return 1;
+    const char* barejid = luaL_checkstring(L, 1);
+    const char* nick = muc_nick(barejid);
+    if (nick) {
+        lua_pushstring(L, nick);
     } else {
-        return 0;
+        lua_pushnil(L);
     }
+    return 1;
 }
 
-char*
-api_get_room_nick(const char* barejid)
+static int
+_lua_prof_log_debug(lua_State* L)
 {
-    const char* const nick = muc_nick(barejid);
-
-    return nick ? g_strdup(nick) : NULL;
-}
-
-void
-api_log_debug(const char* message)
-{
+    const char* message = luaL_checkstring(L, 1);
     log_debug("%s", message);
+    return 0;
 }
 
-void
-api_log_info(const char* message)
+static int
+_lua_prof_log_info(lua_State* L)
 {
+    const char* message = luaL_checkstring(L, 1);
     log_info("%s", message);
+    return 0;
 }
 
-void
-api_log_warning(const char* message)
+static int
+_lua_prof_log_warning(lua_State* L)
 {
+    const char* message = luaL_checkstring(L, 1);
     log_warning("%s", message);
+    return 0;
 }
 
-void
-api_log_error(const char* message)
+static int
+_lua_prof_log_error(lua_State* L)
 {
+    const char* message = luaL_checkstring(L, 1);
     log_error("%s", message);
+    return 0;
 }
 
-int
-api_win_exists(const char* tag)
+static int
+_lua_prof_win_exists(lua_State* L)
 {
-    return (wins_get_plugin(tag) != NULL);
+    const char* tag = luaL_checkstring(L, 1);
+    lua_pushboolean(L, wins_get_plugin(tag) != NULL);
+    return 1;
 }
 
-void
-api_win_create(
-    const char* const plugin_name,
-    const char* tag,
-    void* callback,
-    void (*callback_exec)(PluginWindowCallback* window_callback, const char* tag, const char* const line),
-    void (*callback_destroy)(void* callback))
+static int
+_lua_prof_win_create(lua_State* L)
 {
-    if (callbacks_win_exists(plugin_name, tag)) {
-        if (callback_destroy) {
-            callback_destroy(callback);
+    const char* tag = luaL_checkstring(L, 1);
+    luaL_checktype(L, 2, LUA_TFUNCTION);
+
+    const char* plugin_name = _lua_get_plugin_name(L);
+    lua_pushvalue(L, 2);
+    int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    LuaCallback* cb = g_new0(LuaCallback, 1);
+    cb->L = L;
+    cb->ref = ref;
+
+    ProfWin* newwin = wins_new_plugin(plugin_name, tag);
+    if (newwin) {
+        PluginWindowCallback* window_callback = g_new0(PluginWindowCallback, 1);
+        window_callback->callback = cb;
+        window_callback->callback_exec = _lua_win_exec;
+        window_callback->callback_destroy = _lua_callback_destroy;
+        callbacks_add_window_handler(plugin_name, tag, window_callback);
+    } else {
+        _lua_callback_destroy(cb);
+    }
+    return 0;
+}
+
+static int
+_lua_prof_win_close(lua_State* L)
+{
+    const char* tag = luaL_checkstring(L, 1);
+    wins_close_plugin(tag);
+    return 0;
+}
+
+static const char*
+_win_type_str(win_type_t type)
+{
+    switch (type) {
+    case WIN_CONSOLE:
+        return "console";
+    case WIN_CHAT:
+        return "chat";
+    case WIN_MUC:
+        return "muc";
+    case WIN_PRIVATE:
+        return "private";
+    case WIN_XML:
+        return "xmlconsole";
+    case WIN_PLUGIN:
+        return "plugin";
+    case WIN_CONFIG:
+        return "config";
+    case WIN_VCARD:
+        return "vcard";
+    default:
+        return "unknown";
+    }
+}
+
+static int
+_lua_prof_get_open_windows(lua_State* L)
+{
+    GList* nums = wins_get_nums();
+    lua_newtable(L);
+
+    int idx = 1;
+    GList* curr = nums;
+    while (curr) {
+        int num = GPOINTER_TO_INT(curr->data);
+        ProfWin* window = wins_get_by_num(num);
+        if (window) {
+            lua_newtable(L);
+
+            lua_pushinteger(L, num);
+            lua_setfield(L, -2, "num");
+
+            lua_pushstring(L, _win_type_str(window->type));
+            lua_setfield(L, -2, "type");
+
+            auto_gchar gchar* title = win_to_string(window);
+            lua_pushstring(L, title ? title : "");
+            lua_setfield(L, -2, "title");
+
+            lua_pushinteger(L, win_unread(window));
+            lua_setfield(L, -2, "unread");
+
+            lua_pushboolean(L, wins_is_current(window));
+            lua_setfield(L, -2, "is_current");
+
+            lua_rawseti(L, -2, idx++);
         }
-        return;
+        curr = g_list_next(curr);
     }
-
-    PluginWindowCallback* window = g_new0(PluginWindowCallback, 1);
-    window->callback = callback;
-    window->callback_exec = callback_exec;
-    window->callback_destroy = callback_destroy;
-
-    callbacks_add_window_handler(plugin_name, tag, window);
-
-    wins_new_plugin(plugin_name, tag);
-
-    // set status bar active
-    ProfPluginWin* pluginwin = wins_get_plugin(tag);
-    int num = wins_get_num((ProfWin*)pluginwin);
-    status_bar_active(num, WIN_PLUGIN, pluginwin->tag);
-}
-
-int
-api_win_focus(const char* tag)
-{
-    if (tag == NULL) {
-        log_warning("%s", "prof_win_focus failed, tag is NULL");
-        return 0;
-    }
-
-    ProfPluginWin* pluginwin = wins_get_plugin(tag);
-    if (pluginwin == NULL) {
-        log_warning("prof_win_focus failed, no window with tag: %s", tag);
-        return 0;
-    }
-
-    ui_focus_win((ProfWin*)pluginwin);
+    g_list_free(nums);
 
     return 1;
 }
 
-int
-api_win_show(const char* tag, const char* line)
+static int
+_lua_prof_win_focus(lua_State* L)
 {
-    if (tag == NULL) {
-        log_warning("%s", "prof_win_show failed, tag is NULL");
-        return 0;
+    const char* tag = luaL_checkstring(L, 1);
+    ProfWin* window = (ProfWin*)wins_get_plugin(tag);
+    if (window) {
+        ui_focus_win(window);
+        lua_pushboolean(L, TRUE);
+    } else {
+        lua_pushboolean(L, FALSE);
     }
-    if (line == NULL) {
-        log_warning("%s", "prof_win_show failed, line is NULL");
-        return 0;
-    }
-
-    ProfPluginWin* pluginwin = wins_get_plugin(tag);
-    if (pluginwin == NULL) {
-        log_warning("prof_win_show failed, no window with tag: %s", tag);
-        return 0;
-    }
-
-    ProfWin* window = (ProfWin*)pluginwin;
-    win_println(window, THEME_DEFAULT, "!", "%s", line);
-
     return 1;
 }
 
-int
-api_win_show_themed(const char* tag, const char* const group, const char* const key, const char* const def, const char* line)
+static int
+_lua_prof_win_show(lua_State* L)
 {
-    if (tag == NULL) {
-        log_warning("%s", "prof_win_show_themed failed, tag is NULL");
-        return 0;
+    const char* tag = luaL_checkstring(L, 1);
+    const char* line = luaL_checkstring(L, 2);
+    ProfPluginWin* pluginwin = wins_get_plugin(tag);
+    if (pluginwin) {
+        auto_gchar gchar* to_free = NULL;
+        const gchar* parsed = _normalize_crlf(line, &to_free);
+        win_println((ProfWin*)pluginwin, THEME_DEFAULT, "-", "%s", parsed);
     }
-    if (line == NULL) {
-        log_warning("%s", "prof_win_show_themed failed, line is NULL");
-        return 0;
-    }
+    return 0;
+}
+
+static int
+_lua_prof_win_show_themed(lua_State* L)
+{
+    const char* tag = luaL_checkstring(L, 1);
+    const char* group = luaL_checkstring(L, 2);
+    const char* key = luaL_checkstring(L, 3);
+    const char* def = luaL_checkstring(L, 4);
+    const char* line = luaL_checkstring(L, 5);
 
     ProfPluginWin* pluginwin = wins_get_plugin(tag);
-    if (pluginwin == NULL) {
-        log_warning("prof_win_show_themed failed, no window with tag: %s", tag);
-        return 0;
+    if (pluginwin) {
+        auto_gchar gchar* to_free = NULL;
+        const gchar* parsed = _normalize_crlf(line, &to_free);
+        theme_item_t themeitem = plugin_themes_get(group, key, def);
+        win_println((ProfWin*)pluginwin, themeitem, "-", "%s", parsed);
     }
-
-    theme_item_t themeitem = plugin_themes_get(group, key, def);
-    ProfWin* window = (ProfWin*)pluginwin;
-    win_println(window, themeitem, "!", "%s", line);
-
-    return 1;
+    return 0;
 }
 
-int
-api_send_stanza(const char* const stanza)
+static int
+_lua_prof_chat_show(lua_State* L)
 {
-    return connection_send_stanza(stanza);
+    const char* barejid = luaL_checkstring(L, 1);
+    const char* message = luaL_checkstring(L, 2);
+
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        auto_gchar gchar* to_free = NULL;
+        const gchar* parsed = _normalize_crlf(message, &to_free);
+        win_println((ProfWin*)chatwin, THEME_DEFAULT, "-", "%s", parsed);
+    }
+    return 0;
 }
 
-gboolean
-api_settings_boolean_get(const char* const group, const char* const key, gboolean def)
+static int
+_lua_prof_chat_show_themed(lua_State* L)
 {
-    return plugin_settings_boolean_get(group, key, def);
+    const char* barejid = luaL_checkstring(L, 1);
+    const char* group = luaL_checkstring(L, 2);
+    const char* key = luaL_checkstring(L, 3);
+    const char* def = luaL_checkstring(L, 4);
+    const char* ch = luaL_optstring(L, 5, "-");
+    const char* message = luaL_checkstring(L, 6);
+
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        auto_gchar gchar* to_free = NULL;
+        const gchar* parsed = _normalize_crlf(message, &to_free);
+        theme_item_t themeitem = plugin_themes_get(group, key, def);
+        win_println((ProfWin*)chatwin, themeitem, ch, "%s", parsed);
+    }
+    return 0;
 }
 
-void
-api_settings_boolean_set(const char* const group, const char* const key, gboolean value)
+static int
+_lua_prof_room_show(lua_State* L)
 {
-    plugin_settings_boolean_set(group, key, value);
+    const char* roomjid = luaL_checkstring(L, 1);
+    const char* message = luaL_checkstring(L, 2);
+
+    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    if (mucwin) {
+        auto_gchar gchar* to_free = NULL;
+        const gchar* parsed = _normalize_crlf(message, &to_free);
+        win_println((ProfWin*)mucwin, THEME_DEFAULT, "-", "%s", parsed);
+    }
+    return 0;
 }
 
-char*
-api_settings_string_get(const char* const group, const char* const key, const char* const def)
+static int
+_lua_prof_room_show_themed(lua_State* L)
 {
-    return plugin_settings_string_get(group, key, def);
+    const char* roomjid = luaL_checkstring(L, 1);
+    const char* group = luaL_checkstring(L, 2);
+    const char* key = luaL_checkstring(L, 3);
+    const char* def = luaL_checkstring(L, 4);
+    const char* ch = luaL_optstring(L, 5, "-");
+    const char* message = luaL_checkstring(L, 6);
+
+    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    if (mucwin) {
+        auto_gchar gchar* to_free = NULL;
+        const gchar* parsed = _normalize_crlf(message, &to_free);
+        theme_item_t themeitem = plugin_themes_get(group, key, def);
+        win_println((ProfWin*)mucwin, themeitem, ch, "%s", parsed);
+    }
+    return 0;
 }
 
-void
-api_settings_string_set(const char* const group, const char* const key, const char* const value)
+static int
+_lua_prof_room_join(lua_State* L)
 {
-    plugin_settings_string_set(group, key, value);
+    const char* roomjid = luaL_checkstring(L, 1);
+    const char* nick = luaL_optstring(L, 2, NULL);
+    const char* password = luaL_optstring(L, 3, NULL);
+
+    GString* cmd = g_string_new("/join ");
+    g_string_append(cmd, roomjid);
+    if (nick) {
+        g_string_append_printf(cmd, " %s", nick);
+    }
+    if (password) {
+        g_string_append_printf(cmd, " %s", password);
+    }
+    ProfWin* current = wins_get_current();
+    if (current) {
+        cmd_process_input(current, cmd->str);
+    }
+    g_string_free(cmd, TRUE);
+    return 0;
 }
 
-char**
-api_settings_string_list_get(const char* const group, const char* const key)
+static int
+_lua_prof_room_leave(lua_State* L)
 {
-    return plugin_settings_string_list_get(group, key);
+    const char* roomjid = luaL_checkstring(L, 1);
+    if (muc_active(roomjid)) {
+        presence_leave_chat_room(roomjid);
+        muc_leave(roomjid);
+        ui_leave_room(roomjid);
+    }
+    return 0;
 }
 
-void
-api_settings_string_list_add(const char* const group, const char* const key, const char* const value)
+static int
+_lua_prof_chat_set_titlebar_enctext(lua_State* L)
 {
-    plugin_settings_string_list_add(group, key, value);
+    const char* barejid = luaL_checkstring(L, 1);
+    const char* enctext = luaL_checkstring(L, 2);
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        chatwin_set_enctext(chatwin, enctext);
+    }
+    return 0;
 }
 
-int
-api_settings_string_list_remove(const char* const group, const char* const key, const char* const value)
+static int
+_lua_prof_chat_unset_titlebar_enctext(lua_State* L)
 {
-    return plugin_settings_string_list_remove(group, key, value);
+    const char* barejid = luaL_checkstring(L, 1);
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        chatwin_unset_enctext(chatwin);
+    }
+    return 0;
 }
 
-int
-api_settings_string_list_clear(const char* const group, const char* const key)
+static int
+_lua_prof_chat_set_incoming_char(lua_State* L)
 {
-    return plugin_settings_string_list_clear(group, key);
+    const char* barejid = luaL_checkstring(L, 1);
+    const char* ch = luaL_checkstring(L, 2);
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (chatwin && strlen(ch) == 1) {
+        chatwin_set_incoming_char(chatwin, ch);
+    }
+    return 0;
 }
 
-int
-api_settings_int_get(const char* const group, const char* const key, int def)
+static int
+_lua_prof_chat_unset_incoming_char(lua_State* L)
 {
-    return plugin_settings_int_get(group, key, def);
+    const char* barejid = luaL_checkstring(L, 1);
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        chatwin_unset_incoming_char(chatwin);
+    }
+    return 0;
 }
 
-void
-api_settings_int_set(const char* const group, const char* const key, int value)
+static int
+_lua_prof_chat_set_outgoing_char(lua_State* L)
 {
-    plugin_settings_int_set(group, key, value);
+    const char* barejid = luaL_checkstring(L, 1);
+    const char* ch = luaL_checkstring(L, 2);
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (chatwin && strlen(ch) == 1) {
+        chatwin_set_outgoing_char(chatwin, ch);
+    }
+    return 0;
 }
 
-void
-api_incoming_message(const char* const barejid, const char* const resource, const char* const plain)
+static int
+_lua_prof_chat_unset_outgoing_char(lua_State* L)
 {
+    const char* barejid = luaL_checkstring(L, 1);
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        chatwin_unset_outgoing_char(chatwin);
+    }
+    return 0;
+}
+
+static int
+_lua_prof_room_set_titlebar_enctext(lua_State* L)
+{
+    const char* roomjid = luaL_checkstring(L, 1);
+    const char* enctext = luaL_checkstring(L, 2);
+    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    if (mucwin) {
+        mucwin_set_enctext(mucwin, enctext);
+    }
+    return 0;
+}
+
+static int
+_lua_prof_room_unset_titlebar_enctext(lua_State* L)
+{
+    const char* roomjid = luaL_checkstring(L, 1);
+    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    if (mucwin) {
+        mucwin_unset_enctext(mucwin);
+    }
+    return 0;
+}
+
+static int
+_lua_prof_room_set_message_char(lua_State* L)
+{
+    const char* roomjid = luaL_checkstring(L, 1);
+    const char* ch = luaL_checkstring(L, 2);
+    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    if (mucwin && strlen(ch) == 1) {
+        mucwin_set_message_char(mucwin, ch);
+    }
+    return 0;
+}
+
+static int
+_lua_prof_room_unset_message_char(lua_State* L)
+{
+    const char* roomjid = luaL_checkstring(L, 1);
+    ProfMucWin* mucwin = wins_get_muc(roomjid);
+    if (mucwin) {
+        mucwin_unset_message_char(mucwin);
+    }
+    return 0;
+}
+
+static int
+_lua_prof_incoming_message(lua_State* L)
+{
+    const char* barejid = luaL_checkstring(L, 1);
+    const char* resource = luaL_optstring(L, 2, NULL);
+    const char* plain = luaL_checkstring(L, 3);
+
     ProfMessage* message = message_init();
     message->from_jid = jid_create_from_bare_and_resource(barejid, resource);
     message->plain = g_strdup(plain);
 
     sv_ev_incoming_message(message);
-
-    // TODO handle all states
     sv_ev_activity((char*)barejid, (char*)resource, FALSE);
 
     message_free(message);
+    return 0;
 }
 
-void
-api_disco_add_feature(char* plugin_name, char* feature)
+static int
+_lua_prof_disco_add_feature(lua_State* L)
 {
-    if (feature == NULL) {
-        log_warning("%s", "api_disco_add_feature failed, feature is NULL");
-        return;
-    }
-
-    disco_add_feature(plugin_name, feature);
-
+    const char* feature = luaL_checkstring(L, 1);
+    const char* plugin_name = _lua_get_plugin_name(L);
+    disco_add_feature((char*)plugin_name, (char*)feature);
     caps_reset_ver();
-
-    // resend presence to update server's disco info data for this client
-    if (connection_get_status() == JABBER_CONNECTED) {
-        resource_presence_t last_presence = accounts_get_last_presence(session_get_account_name());
-        cl_ev_presence_send(last_presence, 0);
-    }
+    return 0;
 }
+
+static int
+_lua_prof_encryption_reset(lua_State* L)
+{
+    const char* barejid = luaL_checkstring(L, 1);
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+#ifdef HAVE_LIBGPGME
+        if (chatwin->pgp_send) {
+            chatwin->pgp_send = FALSE;
+            win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "PGP encryption disabled.");
+        }
+#endif
+#ifdef HAVE_LIBOTR
+        if (chatwin->is_otr) {
+            chatwin_otr_unsecured(chatwin, TRUE);
+            otr_end_session(chatwin->barejid);
+        }
+#endif
+    }
+    return 0;
+}
+
+static int
+_lua_prof_settings_boolean_get(lua_State* L)
+{
+    const char* group = luaL_checkstring(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    gboolean def = lua_toboolean(L, 3);
+    lua_pushboolean(L, plugin_settings_boolean_get(group, key, def));
+    return 1;
+}
+
+static int
+_lua_prof_settings_boolean_set(lua_State* L)
+{
+    const char* group = luaL_checkstring(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    gboolean val = lua_toboolean(L, 3);
+    plugin_settings_boolean_set(group, key, val);
+    return 0;
+}
+
+static int
+_lua_prof_settings_string_get(lua_State* L)
+{
+    const char* group = luaL_checkstring(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    const char* def = luaL_optstring(L, 3, NULL);
+    char* val = plugin_settings_string_get(group, key, def);
+    if (val) {
+        lua_pushstring(L, val);
+        free(val);
+    } else {
+        lua_pushnil(L);
+    }
+    return 1;
+}
+
+static int
+_lua_prof_settings_string_set(lua_State* L)
+{
+    const char* group = luaL_checkstring(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    const char* val = luaL_checkstring(L, 3);
+    plugin_settings_string_set(group, key, val);
+    return 0;
+}
+
+static int
+_lua_prof_settings_int_get(lua_State* L)
+{
+    const char* group = luaL_checkstring(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    int def = luaL_optinteger(L, 3, 0);
+    lua_pushinteger(L, plugin_settings_int_get(group, key, def));
+    return 1;
+}
+
+static int
+_lua_prof_settings_int_set(lua_State* L)
+{
+    const char* group = luaL_checkstring(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    int val = luaL_checkinteger(L, 3);
+    plugin_settings_int_set(group, key, val);
+    return 0;
+}
+
+static int
+_lua_prof_settings_string_list_get(lua_State* L)
+{
+    const char* group = luaL_checkstring(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    char** list = plugin_settings_string_list_get(group, key);
+    lua_newtable(L);
+    if (list) {
+        for (int i = 0; list[i]; i++) {
+            lua_pushstring(L, list[i]);
+            lua_rawseti(L, -2, i + 1);
+        }
+        g_strfreev(list);
+    }
+    return 1;
+}
+
+static int
+_lua_prof_settings_string_list_add(lua_State* L)
+{
+    const char* group = luaL_checkstring(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    const char* val = luaL_checkstring(L, 3);
+    plugin_settings_string_list_add(group, key, val);
+    return 0;
+}
+
+static int
+_lua_prof_settings_string_list_remove(lua_State* L)
+{
+    const char* group = luaL_checkstring(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    const char* val = luaL_checkstring(L, 3);
+    lua_pushboolean(L, plugin_settings_string_list_remove(group, key, val));
+    return 1;
+}
+
+static int
+_lua_prof_settings_string_list_clear(lua_State* L)
+{
+    const char* group = luaL_checkstring(L, 1);
+    const char* key = luaL_checkstring(L, 2);
+    lua_pushboolean(L, plugin_settings_string_list_clear(group, key));
+    return 1;
+}
+
+static int
+_lua_prof_register_command(lua_State* L)
+{
+    const char* command_name = luaL_checkstring(L, 1);
+    int min_args = luaL_checkinteger(L, 2);
+    int max_args = luaL_checkinteger(L, 3);
+    luaL_checktype(L, 4, LUA_TFUNCTION);
+    const char* synopsis = luaL_optstring(L, 5, NULL);
+    const char* description = luaL_optstring(L, 6, NULL);
+
+    const char* plugin_name = _lua_get_plugin_name(L);
+
+    lua_pushvalue(L, 4);
+    int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    LuaCallback* cb = g_new0(LuaCallback, 1);
+    cb->L = L;
+    cb->ref = ref;
+
+    PluginCommand* command = g_new0(PluginCommand, 1);
+    command->command_name = g_strdup(command_name);
+    command->min_args = min_args;
+    command->max_args = max_args;
+    command->callback = cb;
+    command->callback_exec = _lua_command_exec;
+    command->callback_destroy = _lua_callback_destroy;
+
+    CommandHelp* help = g_new0(CommandHelp, 1);
+    if (synopsis) {
+        help->synopsis[0] = g_strdup(synopsis);
+    }
+    if (description) {
+        help->desc = g_strdup(description);
+    }
+    command->help = help;
+
+    callbacks_add_command(plugin_name, command);
+    return 0;
+}
+
+static int
+_lua_prof_register_timed(lua_State* L)
+{
+    luaL_checktype(L, 1, LUA_TFUNCTION);
+    int interval_seconds = luaL_checkinteger(L, 2);
+
+    const char* plugin_name = _lua_get_plugin_name(L);
+
+    lua_pushvalue(L, 1);
+    int ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+    LuaCallback* cb = g_new0(LuaCallback, 1);
+    cb->L = L;
+    cb->ref = ref;
+
+    PluginTimedFunction* timed_function = g_new0(PluginTimedFunction, 1);
+    timed_function->interval_seconds = interval_seconds;
+    timed_function->timer = g_timer_new();
+    timed_function->callback = cb;
+    timed_function->callback_exec = _lua_timed_exec;
+    timed_function->callback_destroy = _lua_callback_destroy;
+
+    callbacks_add_timed(plugin_name, timed_function);
+    return 0;
+}
+
+static int
+_lua_prof_completer_add(lua_State* L)
+{
+    const char* key = luaL_checkstring(L, 1);
+    luaL_checktype(L, 2, LUA_TTABLE);
+
+    const char* plugin_name = _lua_get_plugin_name(L);
+    int len = luaL_len(L, 2);
+    char** items = g_new0(char*, len + 1);
+    for (int i = 1; i <= len; i++) {
+        lua_rawgeti(L, 2, i);
+        items[i - 1] = g_strdup(luaL_checkstring(L, -1));
+        lua_pop(L, 1);
+    }
+
+    autocompleters_add(plugin_name, key, items);
+    g_strfreev(items);
+    return 0;
+}
+
+static int
+_lua_prof_completer_remove(lua_State* L)
+{
+    const char* key = luaL_checkstring(L, 1);
+    luaL_checktype(L, 2, LUA_TTABLE);
+
+    const char* plugin_name = _lua_get_plugin_name(L);
+    int len = luaL_len(L, 2);
+    char** items = g_new0(char*, len + 1);
+    for (int i = 1; i <= len; i++) {
+        lua_rawgeti(L, 2, i);
+        items[i - 1] = g_strdup(luaL_checkstring(L, -1));
+        lua_pop(L, 1);
+    }
+
+    autocompleters_remove(plugin_name, key, items);
+    g_strfreev(items);
+    return 0;
+}
+
+static int
+_lua_prof_completer_clear(lua_State* L)
+{
+    const char* key = luaL_checkstring(L, 1);
+    const char* plugin_name = _lua_get_plugin_name(L);
+    autocompleters_clear(plugin_name, key);
+    return 0;
+}
+
+static int
+_lua_prof_filepath_completer_add(lua_State* L)
+{
+    const char* prefix = luaL_checkstring(L, 1);
+    const char* plugin_name = _lua_get_plugin_name(L);
+    autocompleters_filepath_add(plugin_name, prefix);
+    return 0;
+}
+
+static const struct luaL_Reg prof_lib[] = {
+    { "cons_alert", _lua_prof_cons_alert },
+    { "cons_show", _lua_prof_cons_show },
+    { "cons_show_themed", _lua_prof_cons_show_themed },
+    { "cons_bad_cmd_usage", _lua_prof_cons_bad_cmd_usage },
+    { "notify", _lua_prof_notify },
+    { "is_connected", _lua_prof_is_connected },
+    { "get_account_name", _lua_prof_get_account_name },
+    { "get_my_jid", _lua_prof_get_my_jid },
+    { "send_line", _lua_prof_send_line },
+    { "send_stanza", _lua_prof_send_stanza },
+    { "get_current_recipient", _lua_prof_get_current_recipient },
+    { "get_current_muc", _lua_prof_get_current_muc },
+    { "current_win_is_console", _lua_prof_current_win_is_console },
+    { "get_current_nick", _lua_prof_get_current_nick },
+    { "get_name_from_roster", _lua_prof_get_name_from_roster },
+    { "get_barejid_from_roster", _lua_prof_get_barejid_from_roster },
+    { "get_roster", _lua_prof_get_roster },
+    { "get_current_occupants", _lua_prof_get_current_occupants },
+    { "get_room_nick", _lua_prof_get_room_nick },
+    { "log_debug", _lua_prof_log_debug },
+    { "log_info", _lua_prof_log_info },
+    { "log_warning", _lua_prof_log_warning },
+    { "log_error", _lua_prof_log_error },
+    { "win_exists", _lua_prof_win_exists },
+    { "win_create", _lua_prof_win_create },
+    { "win_close", _lua_prof_win_close },
+    { "win_focus", _lua_prof_win_focus },
+    { "get_open_windows", _lua_prof_get_open_windows },
+    { "win_show", _lua_prof_win_show },
+    { "win_show_themed", _lua_prof_win_show_themed },
+    { "chat_show", _lua_prof_chat_show },
+    { "chat_show_themed", _lua_prof_chat_show_themed },
+    { "room_show", _lua_prof_room_show },
+    { "room_show_themed", _lua_prof_room_show_themed },
+    { "room_join", _lua_prof_room_join },
+    { "room_leave", _lua_prof_room_leave },
+    { "chat_set_titlebar_enctext", _lua_prof_chat_set_titlebar_enctext },
+    { "chat_unset_titlebar_enctext", _lua_prof_chat_unset_titlebar_enctext },
+    { "chat_set_incoming_char", _lua_prof_chat_set_incoming_char },
+    { "chat_unset_incoming_char", _lua_prof_chat_unset_incoming_char },
+    { "chat_set_outgoing_char", _lua_prof_chat_set_outgoing_char },
+    { "chat_unset_outgoing_char", _lua_prof_chat_unset_outgoing_char },
+    { "room_set_titlebar_enctext", _lua_prof_room_set_titlebar_enctext },
+    { "room_unset_titlebar_enctext", _lua_prof_room_unset_titlebar_enctext },
+    { "room_set_message_char", _lua_prof_room_set_message_char },
+    { "room_unset_message_char", _lua_prof_room_unset_message_char },
+    { "incoming_message", _lua_prof_incoming_message },
+    { "disco_add_feature", _lua_prof_disco_add_feature },
+    { "encryption_reset", _lua_prof_encryption_reset },
+    { "settings_boolean_get", _lua_prof_settings_boolean_get },
+    { "settings_boolean_set", _lua_prof_settings_boolean_set },
+    { "settings_string_get", _lua_prof_settings_string_get },
+    { "settings_string_set", _lua_prof_settings_string_set },
+    { "settings_int_get", _lua_prof_settings_int_get },
+    { "settings_int_set", _lua_prof_settings_int_set },
+    { "settings_string_list_get", _lua_prof_settings_string_list_get },
+    { "settings_string_list_add", _lua_prof_settings_string_list_add },
+    { "settings_string_list_remove", _lua_prof_settings_string_list_remove },
+    { "settings_string_list_clear", _lua_prof_settings_string_list_clear },
+    { "register_command", _lua_prof_register_command },
+    { "register_timed", _lua_prof_register_timed },
+    { "completer_add", _lua_prof_completer_add },
+    { "completer_remove", _lua_prof_completer_remove },
+    { "completer_clear", _lua_prof_completer_clear },
+    { "filepath_completer_add", _lua_prof_filepath_completer_add },
+    { NULL, NULL }
+};
 
 void
-api_encryption_reset(const char* const barejid)
+api_init_lua(const char* const plugin_name, lua_State* L)
 {
-    if (barejid == NULL) {
-        log_warning("%s", "api_encryption_reset failed, barejid is NULL");
-        return;
-    }
+    lua_pushstring(L, plugin_name);
+    lua_setfield(L, LUA_REGISTRYINDEX, "prof_plugin_name");
 
-    ProfChatWin* chatwin = wins_get_chat(barejid);
-    if (chatwin == NULL) {
-        log_warning("%s", "api_encryption_reset failed, could not find chat window for %s", barejid);
-        return;
-    }
+    luaL_newlib(L, prof_lib);
+    lua_setglobal(L, "prof");
+}
 
-#ifdef HAVE_LIBGPGME
-    if (chatwin->pgp_send) {
-        chatwin->pgp_send = FALSE;
-        win_println((ProfWin*)chatwin, THEME_DEFAULT, "!", "PGP encryption disabled.");
-    }
 #endif
-
-#ifdef HAVE_LIBOTR
-    if (chatwin->is_otr) {
-        chatwin_otr_unsecured(chatwin, TRUE);
-        otr_end_session(chatwin->barejid);
-    }
-#endif
-}
-
-int
-api_chat_set_titlebar_enctext(const char* const barejid, const char* const enctext)
-{
-    if (enctext == NULL) {
-        log_warning("%s", "api_chat_set_titlebar_enctext failed, enctext is NULL");
-        return 0;
-    }
-
-    if (barejid == NULL) {
-        log_warning("%s", "api_chat_set_titlebar_enctext failed, barejid is NULL");
-        return 0;
-    }
-
-    ProfChatWin* chatwin = wins_get_chat(barejid);
-    if (chatwin == NULL) {
-        log_warning("%s", "api_chat_set_titlebar_enctext failed, could not find chat window for %s", barejid);
-        return 0;
-    }
-
-    chatwin_set_enctext(chatwin, enctext);
-
-    return 1;
-}
-
-int
-api_chat_unset_titlebar_enctext(const char* const barejid)
-{
-    if (barejid == NULL) {
-        log_warning("%s", "api_chat_unset_titlebar_enctext failed, barejid is NULL");
-        return 0;
-    }
-
-    ProfChatWin* chatwin = wins_get_chat(barejid);
-    if (chatwin == NULL) {
-        log_warning("%s", "api_chat_unset_titlebar_enctext failed, could not find chat window for %s", barejid);
-        return 0;
-    }
-
-    chatwin_unset_enctext(chatwin);
-
-    return 1;
-}
-
-int
-api_chat_set_incoming_char(const char* const barejid, const char* const ch)
-{
-    if (ch == NULL) {
-        log_warning("%s", "api_chat_set_incoming_char failed, ch is NULL");
-        return 0;
-    }
-
-    if (strlen(ch) != 1) {
-        log_warning("%s", "api_chat_set_incoming_char failed, ch must be a string of length 1");
-        return 0;
-    }
-
-    if (barejid == NULL) {
-        log_warning("%s", "api_chat_set_incoming_char failed, barejid is NULL");
-        return 0;
-    }
-
-    ProfChatWin* chatwin = wins_get_chat(barejid);
-    if (chatwin == NULL) {
-        log_warning("%s", "api_chat_set_incoming_char failed, could not find chat window for %s", barejid);
-        return 0;
-    }
-
-    chatwin_set_incoming_char(chatwin, ch);
-
-    return 1;
-}
-
-int
-api_chat_unset_incoming_char(const char* const barejid)
-{
-    if (barejid == NULL) {
-        log_warning("%s", "api_chat_unset_incoming_char failed, barejid is NULL");
-        return 0;
-    }
-
-    ProfChatWin* chatwin = wins_get_chat(barejid);
-    if (chatwin == NULL) {
-        log_warning("%s", "api_chat_unset_incoming_char failed, could not find chat window for %s", barejid);
-        return 0;
-    }
-
-    chatwin_unset_incoming_char(chatwin);
-
-    return 1;
-}
-
-int
-api_chat_set_outgoing_char(const char* const barejid, const char* const ch)
-{
-    if (ch == NULL) {
-        log_warning("%s", "api_chat_set_outgoing_char failed, ch is NULL");
-        return 0;
-    }
-
-    if (strlen(ch) != 1) {
-        log_warning("%s", "api_chat_set_outgoing_char failed, ch must be a string of length 1");
-        return 0;
-    }
-
-    if (barejid == NULL) {
-        log_warning("%s", "api_chat_set_outgoing_char failed, barejid is NULL");
-        return 0;
-    }
-
-    ProfChatWin* chatwin = wins_get_chat(barejid);
-    if (chatwin == NULL) {
-        log_warning("%s", "api_chat_set_outgoing_char failed, could not find chat window for %s", barejid);
-        return 0;
-    }
-
-    chatwin_set_outgoing_char(chatwin, ch);
-
-    return 1;
-}
-
-int
-api_chat_unset_outgoing_char(const char* const barejid)
-{
-    if (barejid == NULL) {
-        log_warning("%s", "api_chat_unset_outgoing_char failed, barejid is NULL");
-        return 0;
-    }
-
-    ProfChatWin* chatwin = wins_get_chat(barejid);
-    if (chatwin == NULL) {
-        log_warning("%s", "api_chat_unset_outgoing_char failed, could not find chat window for %s", barejid);
-        return 0;
-    }
-
-    chatwin_unset_outgoing_char(chatwin);
-
-    return 1;
-}
-
-int
-api_room_set_titlebar_enctext(const char* const roomjid, const char* const enctext)
-{
-    if (enctext == NULL) {
-        log_warning("%s", "api_room_set_titlebar_enctext failed, enctext is NULL");
-        return 0;
-    }
-
-    if (roomjid == NULL) {
-        log_warning("%s", "api_room_set_titlebar_enctext failed, roomjid is NULL");
-        return 0;
-    }
-
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
-    if (mucwin == NULL) {
-        log_warning("%s", "api_room_set_titlebar_enctext failed, could not find room window for %s", roomjid);
-        return 0;
-    }
-
-    mucwin_set_enctext(mucwin, enctext);
-
-    return 1;
-}
-
-int
-api_room_unset_titlebar_enctext(const char* const roomjid)
-{
-    if (roomjid == NULL) {
-        log_warning("%s", "api_room_unset_titlebar_enctext failed, roomjid is NULL");
-        return 0;
-    }
-
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
-    if (mucwin == NULL) {
-        log_warning("%s", "api_room_unset_titlebar_enctext failed, could not find room window for %s", roomjid);
-        return 0;
-    }
-
-    mucwin_unset_enctext(mucwin);
-
-    return 1;
-}
-
-int
-api_room_set_message_char(const char* const roomjid, const char* const ch)
-{
-    if (ch == NULL) {
-        log_warning("%s", "api_room_set_message_char failed, ch is NULL");
-        return 0;
-    }
-
-    if (strlen(ch) != 1) {
-        log_warning("%s", "api_room_set_message_char failed, ch must be a string of length 1");
-        return 0;
-    }
-
-    if (roomjid == NULL) {
-        log_warning("%s", "api_room_set_message_char failed, roomjid is NULL");
-        return 0;
-    }
-
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
-    if (mucwin == NULL) {
-        log_warning("%s", "api_room_set_message_char failed, could not find room window for %s", roomjid);
-        return 0;
-    }
-
-    mucwin_set_message_char(mucwin, ch);
-
-    return 1;
-}
-
-int
-api_room_unset_message_char(const char* const roomjid)
-{
-    if (roomjid == NULL) {
-        log_warning("%s", "api_room_unset_message_char failed, roomjid is NULL");
-        return 0;
-    }
-
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
-    if (mucwin == NULL) {
-        log_warning("%s", "api_room_unset_message_char failed, could not find room window for %s", roomjid);
-        return 0;
-    }
-
-    mucwin_unset_message_char(mucwin);
-
-    return 1;
-}
-
-int
-api_chat_show(const char* const barejid, const char* message)
-{
-    if (message == NULL) {
-        log_warning("%s", "api_chat_show failed, message is NULL");
-        return 0;
-    }
-
-    if (barejid == NULL) {
-        log_warning("%s", "api_chat_show failed, barejid is NULL");
-        return 0;
-    }
-
-    ProfChatWin* chatwin = wins_get_chat(barejid);
-    if (chatwin == NULL) {
-        log_warning("%s", "api_chat_show failed, could not find chat window for %s", barejid);
-        return 0;
-    }
-
-    auto_gchar gchar* to_free = NULL;
-    const gchar* parsed = _normalize_crlf(message, &to_free);
-    win_println((ProfWin*)chatwin, THEME_TEXT, "-", "%s", parsed);
-
-    return 1;
-}
-
-int
-api_chat_show_themed(const char* const barejid, const char* const group, const char* const key, const char* const def,
-                     const char* const ch, const char* const message)
-{
-    if (message == NULL) {
-        log_warning("%s", "api_chat_show_themed failed, message is NULL");
-        return 0;
-    }
-
-    if (barejid == NULL) {
-        log_warning("%s", "api_chat_show_themed failed, barejid is NULL");
-        return 0;
-    }
-
-    char* show_ch = "-";
-    if (ch) {
-        if (g_utf8_strlen(ch, 4) != 1) {
-            log_warning("%s", "api_chat_show_themed failed, ch must be a string of length 1");
-            return 0;
-        } else {
-            show_ch = (char*)ch;
-        }
-    }
-
-    ProfChatWin* chatwin = wins_get_chat(barejid);
-    if (chatwin == NULL) {
-        log_warning("%s", "api_chat_show_themed failed, could not find chat window for %s", barejid);
-        return 0;
-    }
-
-    auto_gchar gchar* to_free = NULL;
-    const gchar* parsed = _normalize_crlf(message, &to_free);
-    theme_item_t themeitem = plugin_themes_get(group, key, def);
-
-    win_println((ProfWin*)chatwin, themeitem, show_ch, "%s", parsed);
-
-    return 1;
-}
-
-int
-api_room_show(const char* const roomjid, const char* message)
-{
-    if (message == NULL) {
-        log_warning("%s", "api_room_show failed, message is NULL");
-        return 0;
-    }
-
-    if (roomjid == NULL) {
-        log_warning("%s", "api_room_show failed, roomjid is NULL");
-        return 0;
-    }
-
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
-    if (mucwin == NULL) {
-        log_warning("%s", "api_room_show failed, could not find room window for %s", roomjid);
-        return 0;
-    }
-
-    auto_gchar gchar* to_free = NULL;
-    const gchar* parsed = _normalize_crlf(message, &to_free);
-    win_println((ProfWin*)mucwin, THEME_TEXT, "-", "%s", parsed);
-
-    return 1;
-}
-
-int
-api_room_show_themed(const char* const roomjid, const char* const group, const char* const key, const char* const def,
-                     const char* const ch, const char* const message)
-{
-    if (message == NULL) {
-        log_warning("%s", "api_room_show_themed failed, message is NULL");
-        return 0;
-    }
-
-    if (roomjid == NULL) {
-        log_warning("%s", "api_room_show_themed failed, roomjid is NULL");
-        return 0;
-    }
-
-    char* show_ch = "-";
-    if (ch) {
-        if (g_utf8_strlen(ch, 4) != 1) {
-            log_warning("%s", "api_room_show_themed failed, ch must be a string of length 1");
-            return 0;
-        } else {
-            show_ch = (char*)ch;
-        }
-    }
-
-    ProfMucWin* mucwin = wins_get_muc(roomjid);
-    if (mucwin == NULL) {
-        log_warning("%s", "api_room_show_themed failed, could not find room window for %s", roomjid);
-        return 0;
-    }
-
-    auto_gchar gchar* to_free = NULL;
-    const gchar* parsed = _normalize_crlf(message, &to_free);
-    theme_item_t themeitem = plugin_themes_get(group, key, def);
-
-    win_println((ProfWin*)mucwin, themeitem, show_ch, "%s", parsed);
-
-    return 1;
-}

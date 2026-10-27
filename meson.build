@@ -169,6 +169,7 @@ if not readline_dep.found()
 endif
 
 # Optional dependencies
+lua_dep = disabler()
 gpgme_dep = disabler()
 libotr_dep = disabler()
 gdk_pixbuf_dep = disabler()
@@ -182,6 +183,7 @@ stabber_dep = cc.find_library('stabber', required: false)
 util_dep = cc.find_library('util', required: false)
 
 # Build flags
+build_plugins = false
 build_pgp = false
 build_otr = false
 build_omemo = false
@@ -206,6 +208,31 @@ build_tray = false
 if get_option('tray').enabled()
   conf_data.set('HAVE_TRAY', 1)
   build_tray = true
+endif
+
+# Plugins (Lua)
+lua_opt = get_option('plugins')
+lua_ver = get_option('lua-version')
+
+if not lua_opt.disabled()
+  if lua_ver != ''
+    lua_dep = dependency(lua_ver, required: lua_opt.enabled())
+  else
+    foreach name : ['lua5.4', 'lua-5.4', 'lua54', 'lua', 'lua5.3', 'lua-5.3', 'lua53', 'luajit']
+      lua_dep = dependency(name, required: false)
+      if lua_dep.found()
+        break
+      endif
+    endforeach
+    if not lua_dep.found() and lua_opt.enabled()
+      error('Lua dependency not found, but -Dplugins=enabled was specified')
+    endif
+  endif
+
+  if lua_dep.found()
+    build_plugins = true
+    conf_data.set('HAVE_PLUGINS', 1)
+  endif
 endif
 
 # PGP support
@@ -293,6 +320,10 @@ profanity_deps = [
 ]
 
 # Add optional dependencies only if found
+if lua_dep.found()
+  profanity_deps += lua_dep
+endif
+
 if gpgme_dep.found()
   profanity_deps += gpgme_dep
 endif
@@ -396,18 +427,23 @@ core_sources = files(
   'src/config/color.c',
   'src/config/cafile.c',
   'src/plugins/plugins.c',
-  'src/plugins/api.c',
-  'src/plugins/callbacks.c',
-  'src/plugins/autocompleters.c',
-  'src/plugins/themes.c',
-  'src/plugins/settings.c',
-  'src/plugins/disco.c',
 )
 
 # Build the final source list
 profanity_sources = core_sources
 
 # Add conditional sources
+if build_plugins
+  profanity_sources += files(
+    'src/plugins/api.c',
+    'src/plugins/callbacks.c',
+    'src/plugins/autocompleters.c',
+    'src/plugins/themes.c',
+    'src/plugins/settings.c',
+    'src/plugins/disco.c',
+  )
+endif
+
 if build_tray
   profanity_sources += files('src/ui/tray.c')
 endif
@@ -541,12 +577,6 @@ if get_option('tests')
       'src/config/color.c',
       'src/config/conflists.c',
       'src/plugins/plugins.c',
-      'src/plugins/api.c',
-      'src/plugins/callbacks.c',
-      'src/plugins/autocompleters.c',
-      'src/plugins/themes.c',
-      'src/plugins/settings.c',
-      'src/plugins/disco.c',
       'src/ui/window_list.c',
       'src/event/common.c',
       'src/event/server_events.c',
@@ -596,12 +626,23 @@ if get_option('tests')
       'tests/unittests/command/test_cmd_ac.c',
       'tests/unittests/command/test_cmd_disconnect.c',
       'tests/unittests/command/test_cmd_mucping.c',
-      'tests/unittests/plugins/test_callbacks.c',
-      'tests/unittests/plugins/test_plugins_disco.c',
       'tests/unittests/unittests.c',
       )
 
-      if build_pgp
+    if build_plugins
+      unittest_sources += files(
+        'src/plugins/api.c',
+        'src/plugins/callbacks.c',
+        'src/plugins/autocompleters.c',
+        'src/plugins/themes.c',
+        'src/plugins/settings.c',
+        'src/plugins/disco.c',
+        'tests/unittests/plugins/test_callbacks.c',
+        'tests/unittests/plugins/test_plugins_disco.c',
+      )
+    endif
+
+    if build_pgp
       unittest_sources += files(
         'tests/unittests/pgp/stub_gpg.c',
         'tests/unittests/pgp/stub_ox.c',
@@ -679,6 +720,7 @@ summary({
 
 summary({
   'Notifications': build_notifications,
+  'Plugins (Lua)': build_plugins ? 'Enabled (' + lua_dep.name() + ' ' + lua_dep.version() + ')' : 'Disabled',
   'OTR': build_otr,
   'PGP': build_pgp,
   'OMEMO': build_omemo,
