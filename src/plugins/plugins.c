@@ -52,10 +52,6 @@ _lua_call_void_0arg(ProfPlugin* plugin, const char* hook)
 {
     lua_State* L = plugin->L;
     lua_getglobal(L, hook);
-    if (!lua_isfunction(L, -1)) {
-        lua_pop(L, 1);
-        return;
-    }
     if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
         log_error("Plugin %s error in %s: %s", plugin->name, hook, lua_tostring(L, -1));
         lua_pop(L, 1);
@@ -67,10 +63,6 @@ _lua_call_void_1str(ProfPlugin* plugin, const char* hook, const char* s1)
 {
     lua_State* L = plugin->L;
     lua_getglobal(L, hook);
-    if (!lua_isfunction(L, -1)) {
-        lua_pop(L, 1);
-        return;
-    }
     lua_pushstring(L, s1 ? s1 : "");
     if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
         log_error("Plugin %s error in %s: %s", plugin->name, hook, lua_tostring(L, -1));
@@ -83,10 +75,6 @@ _lua_call_void_2str(ProfPlugin* plugin, const char* hook, const char* s1, const 
 {
     lua_State* L = plugin->L;
     lua_getglobal(L, hook);
-    if (!lua_isfunction(L, -1)) {
-        lua_pop(L, 1);
-        return;
-    }
     lua_pushstring(L, s1 ? s1 : "");
     lua_pushstring(L, s2 ? s2 : "");
     if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
@@ -100,10 +88,6 @@ _lua_call_void_3str(ProfPlugin* plugin, const char* hook, const char* s1, const 
 {
     lua_State* L = plugin->L;
     lua_getglobal(L, hook);
-    if (!lua_isfunction(L, -1)) {
-        lua_pop(L, 1);
-        return;
-    }
     lua_pushstring(L, s1 ? s1 : "");
     if (s2) {
         lua_pushstring(L, s2);
@@ -122,10 +106,6 @@ _lua_call_void_4str(ProfPlugin* plugin, const char* hook, const char* s1, const 
 {
     lua_State* L = plugin->L;
     lua_getglobal(L, hook);
-    if (!lua_isfunction(L, -1)) {
-        lua_pop(L, 1);
-        return;
-    }
     lua_pushstring(L, s1 ? s1 : "");
     if (s2) {
         lua_pushstring(L, s2);
@@ -150,10 +130,6 @@ _lua_call_void_presence(ProfPlugin* plugin, const char* barejid, const char* res
 {
     lua_State* L = plugin->L;
     lua_getglobal(L, "prof_on_contact_presence");
-    if (!lua_isfunction(L, -1)) {
-        lua_pop(L, 1);
-        return;
-    }
     lua_pushstring(L, barejid ? barejid : "");
     if (resource) {
         lua_pushstring(L, resource);
@@ -182,10 +158,6 @@ _lua_call_filter_2str(ProfPlugin* plugin, const char* hook, const char* s1, cons
 {
     lua_State* L = plugin->L;
     lua_getglobal(L, hook);
-    if (!lua_isfunction(L, -1)) {
-        lua_pop(L, 1);
-        return NULL;
-    }
     lua_pushstring(L, s1 ? s1 : "");
     lua_pushstring(L, s2 ? s2 : "");
     if (lua_pcall(L, 2, 1, 0) != LUA_OK) {
@@ -206,10 +178,6 @@ _lua_call_filter_3str(ProfPlugin* plugin, const char* hook, const char* s1, cons
 {
     lua_State* L = plugin->L;
     lua_getglobal(L, hook);
-    if (!lua_isfunction(L, -1)) {
-        lua_pop(L, 1);
-        return NULL;
-    }
     lua_pushstring(L, s1 ? s1 : "");
     if (s2) {
         lua_pushstring(L, s2);
@@ -235,10 +203,6 @@ _lua_call_bool_1str(ProfPlugin* plugin, const char* hook, const char* s1)
 {
     lua_State* L = plugin->L;
     lua_getglobal(L, hook);
-    if (!lua_isfunction(L, -1)) {
-        lua_pop(L, 1);
-        return TRUE;
-    }
     lua_pushstring(L, s1 ? s1 : "");
     if (lua_pcall(L, 1, 1, 0) != LUA_OK) {
         log_error("Plugin %s error in %s: %s", plugin->name, hook, lua_tostring(L, -1));
@@ -296,6 +260,32 @@ _lua_plugin_create(const char* const filename)
     ProfPlugin* plugin = g_new0(ProfPlugin, 1);
     plugin->name = g_strdup(filename);
     plugin->L = L;
+    plugin->hook_mask = 0;
+
+    static const char* const hooks[] = {
+        "prof_init", "prof_on_start", "prof_on_shutdown", "prof_on_unload", "prof_on_connect", "prof_on_disconnect",
+        "prof_pre_chat_message_display", "prof_post_chat_message_display", "prof_pre_chat_message_send", "prof_post_chat_message_send",
+        "prof_pre_room_message_display", "prof_post_room_message_display", "prof_pre_room_message_send", "prof_post_room_message_send",
+        "prof_on_room_history_message",
+        "prof_pre_priv_message_display", "prof_post_priv_message_display", "prof_pre_priv_message_send", "prof_post_priv_message_send",
+        "prof_on_message_stanza_send", "prof_on_message_stanza_receive",
+        "prof_on_presence_stanza_send", "prof_on_presence_stanza_receive",
+        "prof_on_iq_stanza_send", "prof_on_iq_stanza_receive",
+        "prof_on_contact_offline", "prof_on_contact_presence",
+        "prof_on_chat_win_focus", "prof_on_room_win_focus",
+        "prof_on_room_occupant_join", "prof_on_room_occupant_leave",
+        "prof_on_chat_state", "prof_on_message_correction", "prof_on_win_open", "prof_on_win_close"
+    };
+
+    G_STATIC_ASSERT(G_N_ELEMENTS(hooks) <= 64);
+
+    for (size_t i = 0; i < G_N_ELEMENTS(hooks); i++) {
+        lua_getglobal(L, hooks[i]);
+        if (lua_isfunction(L, -1)) {
+            plugin->hook_mask |= (1ULL << i);
+        }
+        lua_pop(L, 1);
+    }
 
     return plugin;
 }
@@ -332,7 +322,8 @@ _plugins_shutdown(void)
         ProfPlugin* plugin = curr->data;
 #ifdef HAVE_PLUGINS
         if (plugin->L) {
-            _lua_call_void_0arg(plugin, "prof_on_shutdown");
+            if (plugin->hook_mask & HOOK_ON_SHUTDOWN)
+                _lua_call_void_0arg(plugin, "prof_on_shutdown");
         }
         _plugin_destroy(plugin);
 #endif
@@ -388,7 +379,9 @@ plugins_init(void)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _plugin_call_init(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
+        if (plugin->hook_mask & HOOK_INIT) {
+            _plugin_call_init(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
+        }
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -515,10 +508,12 @@ plugins_load(const char* const name, GString* error_message)
     if (plugin) {
         g_hash_table_insert(plugins, g_strdup(name), plugin);
 #ifdef HAVE_PLUGINS
-        if (connection_get_status() == JABBER_CONNECTED) {
-            _plugin_call_init(plugin, PACKAGE_VERSION, PACKAGE_STATUS, session_get_account_name(), connection_get_fulljid());
-        } else {
-            _plugin_call_init(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
+        if (plugin->hook_mask & HOOK_INIT) {
+            if (connection_get_status() == JABBER_CONNECTED) {
+                _plugin_call_init(plugin, PACKAGE_VERSION, PACKAGE_STATUS, session_get_account_name(), connection_get_fulljid());
+            } else {
+                _plugin_call_init(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
+            }
         }
 #endif
         log_info("Loaded plugin: %s", name);
@@ -582,7 +577,8 @@ plugins_unload(const char* const name)
     if (plugin) {
 #ifdef HAVE_PLUGINS
         if (plugin->L) {
-            _lua_call_void_0arg(plugin, "prof_on_unload");
+            if (plugin->hook_mask & HOOK_ON_UNLOAD)
+                _lua_call_void_0arg(plugin, "prof_on_unload");
         }
 #endif
         callbacks_remove(name);
@@ -704,7 +700,8 @@ plugins_on_start(void)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_0arg(plugin, "prof_on_start");
+        if (plugin->hook_mask & HOOK_ON_START)
+            _lua_call_void_0arg(plugin, "prof_on_start");
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -731,7 +728,8 @@ plugins_on_connect(const char* const account_name, const char* const fulljid)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_2str(plugin, "prof_on_connect", account_name, fulljid);
+        if (plugin->hook_mask & HOOK_ON_CONNECT)
+            _lua_call_void_2str(plugin, "prof_on_connect", account_name, fulljid);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -746,7 +744,8 @@ plugins_on_disconnect(const char* const account_name, const char* const fulljid)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_2str(plugin, "prof_on_disconnect", account_name, fulljid);
+        if (plugin->hook_mask & HOOK_ON_DISCONNECT)
+            _lua_call_void_2str(plugin, "prof_on_disconnect", account_name, fulljid);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -762,10 +761,13 @@ plugins_pre_chat_message_display(const char* const barejid, const char* const re
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        char* new_msg = _lua_call_filter_3str(plugin, "prof_pre_chat_message_display", barejid, resource, result ? result : message);
-        if (new_msg) {
-            g_free(result);
-            result = new_msg;
+
+        if (plugin->hook_mask & HOOK_PRE_CHAT_MESSAGE_DISPLAY) {
+            char* new_msg = _lua_call_filter_3str(plugin, "prof_pre_chat_message_display", barejid, resource, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -784,7 +786,8 @@ plugins_post_chat_message_display(const char* const barejid, const char* const r
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_3str(plugin, "prof_post_chat_message_display", barejid, resource, message);
+        if (plugin->hook_mask & HOOK_POST_CHAT_MESSAGE_DISPLAY)
+            _lua_call_void_3str(plugin, "prof_post_chat_message_display", barejid, resource, message);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -800,10 +803,13 @@ plugins_pre_chat_message_send(const char* const barejid, const char* message)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_chat_message_send", barejid, result ? result : message);
-        if (new_msg) {
-            g_free(result);
-            result = new_msg;
+
+        if (plugin->hook_mask & HOOK_PRE_CHAT_MESSAGE_SEND) {
+            char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_chat_message_send", barejid, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -822,7 +828,8 @@ plugins_post_chat_message_send(const char* const barejid, const char* message)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_2str(plugin, "prof_post_chat_message_send", barejid, message);
+        if (plugin->hook_mask & HOOK_POST_CHAT_MESSAGE_SEND)
+            _lua_call_void_2str(plugin, "prof_post_chat_message_send", barejid, message);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -838,10 +845,13 @@ plugins_pre_room_message_display(const char* const barejid, const char* const ni
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        char* new_msg = _lua_call_filter_3str(plugin, "prof_pre_room_message_display", barejid, nick, result ? result : message);
-        if (new_msg) {
-            g_free(result);
-            result = new_msg;
+
+        if (plugin->hook_mask & HOOK_PRE_ROOM_MESSAGE_DISPLAY) {
+            char* new_msg = _lua_call_filter_3str(plugin, "prof_pre_room_message_display", barejid, nick, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -860,7 +870,8 @@ plugins_post_room_message_display(const char* const barejid, const char* const n
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_3str(plugin, "prof_post_room_message_display", barejid, nick, message);
+        if (plugin->hook_mask & HOOK_POST_ROOM_MESSAGE_DISPLAY)
+            _lua_call_void_3str(plugin, "prof_post_room_message_display", barejid, nick, message);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -876,10 +887,13 @@ plugins_pre_room_message_send(const char* const barejid, const char* message)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_room_message_send", barejid, result ? result : message);
-        if (new_msg) {
-            g_free(result);
-            result = new_msg;
+
+        if (plugin->hook_mask & HOOK_PRE_ROOM_MESSAGE_SEND) {
+            char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_room_message_send", barejid, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -898,7 +912,8 @@ plugins_post_room_message_send(const char* const barejid, const char* message)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_2str(plugin, "prof_post_room_message_send", barejid, message);
+        if (plugin->hook_mask & HOOK_POST_ROOM_MESSAGE_SEND)
+            _lua_call_void_2str(plugin, "prof_post_room_message_send", barejid, message);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -918,7 +933,8 @@ plugins_on_room_history_message(const char* const barejid, const char* const nic
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_4str(plugin, "prof_on_room_history_message", barejid, nick, message, time_str);
+        if (plugin->hook_mask & HOOK_ON_ROOM_HISTORY_MESSAGE)
+            _lua_call_void_4str(plugin, "prof_on_room_history_message", barejid, nick, message, time_str);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -934,10 +950,13 @@ plugins_pre_priv_message_display(const char* const fulljid, const char* message)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_priv_message_display", fulljid, result ? result : message);
-        if (new_msg) {
-            g_free(result);
-            result = new_msg;
+
+        if (plugin->hook_mask & HOOK_PRE_PRIV_MESSAGE_DISPLAY) {
+            char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_priv_message_display", fulljid, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -956,7 +975,8 @@ plugins_post_priv_message_display(const char* const fulljid, const char* message
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_2str(plugin, "prof_post_priv_message_display", fulljid, message);
+        if (plugin->hook_mask & HOOK_POST_PRIV_MESSAGE_DISPLAY)
+            _lua_call_void_2str(plugin, "prof_post_priv_message_display", fulljid, message);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -972,10 +992,13 @@ plugins_pre_priv_message_send(const char* const fulljid, const char* const messa
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_priv_message_send", fulljid, result ? result : message);
-        if (new_msg) {
-            g_free(result);
-            result = new_msg;
+
+        if (plugin->hook_mask & HOOK_PRE_PRIV_MESSAGE_SEND) {
+            char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_priv_message_send", fulljid, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -994,7 +1017,8 @@ plugins_post_priv_message_send(const char* const fulljid, const char* const mess
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_2str(plugin, "prof_post_priv_message_send", fulljid, message);
+        if (plugin->hook_mask & HOOK_POST_PRIV_MESSAGE_SEND)
+            _lua_call_void_2str(plugin, "prof_post_priv_message_send", fulljid, message);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -1010,10 +1034,13 @@ plugins_on_message_stanza_send(const char* const text)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        char* new_stanza = _lua_call_filter_2str(plugin, "prof_on_message_stanza_send", result ? result : text, "");
-        if (new_stanza) {
-            g_free(result);
-            result = new_stanza;
+
+        if (plugin->hook_mask & HOOK_ON_MESSAGE_STANZA_SEND) {
+            char* new_stanza = _lua_call_filter_2str(plugin, "prof_on_message_stanza_send", result ? result : text, "");
+            if (new_stanza) {
+                g_free(result);
+                result = new_stanza;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -1033,8 +1060,10 @@ plugins_on_message_stanza_receive(const char* const text)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        if (!_lua_call_bool_1str(plugin, "prof_on_message_stanza_receive", text)) {
-            result = FALSE;
+        if (plugin->hook_mask & HOOK_ON_MESSAGE_STANZA_RECEIVE) {
+            if (!_lua_call_bool_1str(plugin, "prof_on_message_stanza_receive", text)) {
+                result = FALSE;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -1054,10 +1083,13 @@ plugins_on_presence_stanza_send(const char* const text)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        char* new_stanza = _lua_call_filter_2str(plugin, "prof_on_presence_stanza_send", result ? result : text, "");
-        if (new_stanza) {
-            g_free(result);
-            result = new_stanza;
+
+        if (plugin->hook_mask & HOOK_ON_PRESENCE_STANZA_SEND) {
+            char* new_stanza = _lua_call_filter_2str(plugin, "prof_on_presence_stanza_send", result ? result : text, "");
+            if (new_stanza) {
+                g_free(result);
+                result = new_stanza;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -1077,8 +1109,10 @@ plugins_on_presence_stanza_receive(const char* const text)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        if (!_lua_call_bool_1str(plugin, "prof_on_presence_stanza_receive", text)) {
-            result = FALSE;
+        if (plugin->hook_mask & HOOK_ON_PRESENCE_STANZA_RECEIVE) {
+            if (!_lua_call_bool_1str(plugin, "prof_on_presence_stanza_receive", text)) {
+                result = FALSE;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -1098,10 +1132,13 @@ plugins_on_iq_stanza_send(const char* const text)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        char* new_stanza = _lua_call_filter_2str(plugin, "prof_on_iq_stanza_send", result ? result : text, "");
-        if (new_stanza) {
-            g_free(result);
-            result = new_stanza;
+
+        if (plugin->hook_mask & HOOK_ON_IQ_STANZA_SEND) {
+            char* new_stanza = _lua_call_filter_2str(plugin, "prof_on_iq_stanza_send", result ? result : text, "");
+            if (new_stanza) {
+                g_free(result);
+                result = new_stanza;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -1121,8 +1158,10 @@ plugins_on_iq_stanza_receive(const char* const text)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        if (!_lua_call_bool_1str(plugin, "prof_on_iq_stanza_receive", text)) {
-            result = FALSE;
+        if (plugin->hook_mask & HOOK_ON_IQ_STANZA_RECEIVE) {
+            if (!_lua_call_bool_1str(plugin, "prof_on_iq_stanza_receive", text)) {
+                result = FALSE;
+            }
         }
         curr = g_list_next(curr);
     }
@@ -1141,7 +1180,8 @@ plugins_on_contact_offline(const char* const barejid, const char* const resource
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_3str(plugin, "prof_on_contact_offline", barejid, resource, status);
+        if (plugin->hook_mask & HOOK_ON_CONTACT_OFFLINE)
+            _lua_call_void_3str(plugin, "prof_on_contact_offline", barejid, resource, status);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -1157,7 +1197,8 @@ plugins_on_contact_presence(const char* const barejid, const char* const resourc
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_presence(plugin, barejid, resource, presence, status, priority);
+        if (plugin->hook_mask & HOOK_ON_CONTACT_PRESENCE)
+            _lua_call_void_presence(plugin, barejid, resource, presence, status, priority);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -1172,7 +1213,8 @@ plugins_on_chat_win_focus(const char* const barejid)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_1str(plugin, "prof_on_chat_win_focus", barejid);
+        if (plugin->hook_mask & HOOK_ON_CHAT_WIN_FOCUS)
+            _lua_call_void_1str(plugin, "prof_on_chat_win_focus", barejid);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -1187,7 +1229,8 @@ plugins_on_room_win_focus(const char* const barejid)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_1str(plugin, "prof_on_room_win_focus", barejid);
+        if (plugin->hook_mask & HOOK_ON_ROOM_WIN_FOCUS)
+            _lua_call_void_1str(plugin, "prof_on_room_win_focus", barejid);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -1202,7 +1245,8 @@ plugins_on_room_occupant_join(const char* const roomjid, const char* const nick)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_2str(plugin, "prof_on_room_occupant_join", roomjid, nick);
+        if (plugin->hook_mask & HOOK_ON_ROOM_OCCUPANT_JOIN)
+            _lua_call_void_2str(plugin, "prof_on_room_occupant_join", roomjid, nick);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -1217,7 +1261,8 @@ plugins_on_room_occupant_leave(const char* const roomjid, const char* const nick
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_3str(plugin, "prof_on_room_occupant_leave", roomjid, nick, reason);
+        if (plugin->hook_mask & HOOK_ON_ROOM_OCCUPANT_LEAVE)
+            _lua_call_void_3str(plugin, "prof_on_room_occupant_leave", roomjid, nick, reason);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -1232,7 +1277,8 @@ plugins_on_chat_state(const char* const barejid, const char* const state)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_2str(plugin, "prof_on_chat_state", barejid, state);
+        if (plugin->hook_mask & HOOK_ON_CHAT_STATE)
+            _lua_call_void_2str(plugin, "prof_on_chat_state", barejid, state);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -1247,7 +1293,8 @@ plugins_on_message_correction(const char* const barejid, const char* const id, c
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_3str(plugin, "prof_on_message_correction", barejid, id, new_message);
+        if (plugin->hook_mask & HOOK_ON_MESSAGE_CORRECTION)
+            _lua_call_void_3str(plugin, "prof_on_message_correction", barejid, id, new_message);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -1262,7 +1309,8 @@ plugins_on_win_open(const char* const title, const char* const type)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_2str(plugin, "prof_on_win_open", title, type);
+        if (plugin->hook_mask & HOOK_ON_WIN_OPEN)
+            _lua_call_void_2str(plugin, "prof_on_win_open", title, type);
         curr = g_list_next(curr);
     }
     g_list_free(values);
@@ -1277,7 +1325,8 @@ plugins_on_win_close(const char* const title, const char* const type)
     GList* curr = values;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        _lua_call_void_2str(plugin, "prof_on_win_close", title, type);
+        if (plugin->hook_mask & HOOK_ON_WIN_CLOSE)
+            _lua_call_void_2str(plugin, "prof_on_win_close", title, type);
         curr = g_list_next(curr);
     }
     g_list_free(values);
