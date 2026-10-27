@@ -250,6 +250,24 @@ _lua_plugin_create(const char* const filename)
     luaL_openlibs(L);
     api_init_lua(filename, L);
 
+    lua_getglobal(L, "package");
+    if (lua_istable(L, -1)) {
+        lua_getfield(L, -1, "path");
+        const char* current_path = lua_tostring(L, -1);
+        auto_gchar gchar* new_path = g_strdup_printf("%s;%s/?.lua;%s/?/init.lua", current_path, plugins_dir, plugins_dir);
+        lua_pushstring(L, new_path);
+        lua_setfield(L, -3, "path");
+        lua_pop(L, 1);
+
+        lua_getfield(L, -1, "cpath");
+        const char* current_cpath = lua_tostring(L, -1);
+        auto_gchar gchar* new_cpath = g_strdup_printf("%s;%s/?.so", current_cpath, plugins_dir);
+        lua_pushstring(L, new_cpath);
+        lua_setfield(L, -3, "cpath");
+        lua_pop(L, 1);
+    }
+    lua_pop(L, 1);
+
     if (luaL_dofile(L, full_path) != LUA_OK) {
         const char* err = lua_tostring(L, -1);
         log_error("Error loading Lua plugin %s: %s", filename, err ? err : "unknown error");
