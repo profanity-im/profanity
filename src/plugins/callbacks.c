@@ -35,9 +35,11 @@ static GHashTable* p_window_callbacks = NULL;
 static void
 _free_window_callback(PluginWindowCallback* window_callback)
 {
-    if (window_callback->callback_destroy) {
-        window_callback->callback_destroy(window_callback->callback);
+#ifdef HAVE_PLUGINS
+    if (window_callback->L && window_callback->lua_ref > 0) {
+        luaL_unref(window_callback->L, LUA_REGISTRYINDEX, window_callback->lua_ref);
     }
+#endif
     g_free(window_callback);
 }
 
@@ -80,13 +82,22 @@ _free_command_help(CommandHelp* help)
 static void
 _free_command(PluginCommand* command)
 {
-    if (command->callback_destroy) {
-        command->callback_destroy(command->callback);
+#ifdef HAVE_PLUGINS
+    if (command->L && command->lua_ref > 0) {
+        luaL_unref(command->L, LUA_REGISTRYINDEX, command->lua_ref);
     }
+#endif
     g_free(command->command_name);
 
-    if (command->help)
-        _free_command_help(command->help);
+    if (command->help) {
+        if (command->help->synopsis[0]) {
+            g_free((char*)command->help->synopsis[0]);
+        }
+        if (command->help->desc) {
+            g_free((char*)command->help->desc);
+        }
+        g_free(command->help);
+    }
 
     g_free(command);
 }
@@ -100,14 +111,12 @@ _free_command_hash(GHashTable* command_hash)
 static void
 _free_timed_function(PluginTimedFunction* timed_function)
 {
-    if (!timed_function)
-        return;
-    if (timed_function->callback_destroy) {
-        timed_function->callback_destroy(timed_function->callback);
+#ifdef HAVE_PLUGINS
+    if (timed_function->L && timed_function->lua_ref > 0) {
+        luaL_unref(timed_function->L, LUA_REGISTRYINDEX, timed_function->lua_ref);
     }
-
+#endif
     g_timer_destroy(timed_function->timer);
-
     g_free(timed_function);
 }
 
@@ -271,7 +280,24 @@ plugins_run_command(const char* const input)
             if (result == FALSE) {
                 ui_invalid_command_usage(command->command_name, NULL);
             } else {
-                command->callback_exec(command, args);
+                #ifdef HAVE_PLUGINS
+                if (command->L && command->lua_ref > 0) {
+                    lua_rawgeti(command->L, LUA_REGISTRYINDEX, command->lua_ref);
+                    int num_args = 0;
+                    if (args) {
+                        for (int i = 0; args[i]; i++) {
+                            lua_pushstring(command->L, args[i]);
+                            num_args++;
+                        }
+                    }
+                    if (lua_pcall(command->L, num_args, 0, 0) != LUA_OK) {
+                        const char* err = lua_tostring(command->L, -1);
+                        log_error("Lua error in command /%s: %s", command->command_name, err);
+                        cons_show("Plugin error in command /%s: %s", command->command_name, err);
+                        lua_pop(command->L, 1);
+                    }
+                }
+#endif
             }
             g_list_free(command_hashes);
             return TRUE;
@@ -321,7 +347,17 @@ plugins_run_timed(void)
             gdouble elapsed = g_timer_elapsed(timed_function->timer, NULL);
 
             if (timed_function->interval_seconds > 0 && elapsed >= timed_function->interval_seconds) {
-                timed_function->callback_exec(timed_function);
+                #ifdef HAVE_PLUGINS
+                if (timed_function->L && timed_function->lua_ref > 0) {
+                    lua_rawgeti(timed_function->L, LUA_REGISTRYINDEX, timed_function->lua_ref);
+                    if (lua_pcall(timed_function->L, 0, 0, 0) != LUA_OK) {
+                        const char* err = lua_tostring(timed_function->L, -1);
+                        log_error("Lua error in timed callback: %s", err);
+                        cons_show("Plugin error in timed callback: %s", err);
+                        lua_pop(timed_function->L, 1);
+                    }
+                }
+#endif
                 g_timer_start(timed_function->timer);
             }
 

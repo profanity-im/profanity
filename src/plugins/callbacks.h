@@ -15,31 +15,38 @@
 
 #include "command/cmd_defs.h"
 
+#ifdef HAVE_PLUGINS
+#include <lua.h>
+#endif
+
 typedef struct p_command
 {
     char* command_name;
     int min_args;
     int max_args;
     CommandHelp* help;
-    void* callback;
-    void (*callback_exec)(struct p_command* command, gchar** args);
-    void (*callback_destroy)(void* callback);
+#ifdef HAVE_PLUGINS
+    lua_State* L;
+    int lua_ref;
+#endif
 } PluginCommand;
 
 typedef struct p_timed_function
 {
-    void* callback;
-    void (*callback_exec)(struct p_timed_function* timed_function);
-    void (*callback_destroy)(void* callback);
     int interval_seconds;
     GTimer* timer;
+#ifdef HAVE_PLUGINS
+    lua_State* L;
+    int lua_ref;
+#endif
 } PluginTimedFunction;
 
 typedef struct p_window_input_callback
 {
-    void* callback;
-    void (*callback_exec)(struct p_window_input_callback* window_callback, const char* tag, const char* const line);
-    void (*callback_destroy)(void* callback);
+#ifdef HAVE_PLUGINS
+    lua_State* L;
+    int lua_ref;
+#endif
 } PluginWindowCallback;
 
 void callbacks_init(void);

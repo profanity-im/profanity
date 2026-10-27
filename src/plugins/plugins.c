@@ -721,7 +721,19 @@ plugins_win_process_line(char* win, const char* const line)
 {
     PluginWindowCallback* window = callbacks_get_window_handler(win);
     if (window) {
-        window->callback_exec(window, win, line);
+#ifdef HAVE_PLUGINS
+        if (window->L && window->lua_ref > 0) {
+            lua_rawgeti(window->L, LUA_REGISTRYINDEX, window->lua_ref);
+            lua_pushstring(window->L, win ? win : "");
+            lua_pushstring(window->L, line ? line : "");
+            if (lua_pcall(window->L, 2, 0, 0) != LUA_OK) {
+                const char* err = lua_tostring(window->L, -1);
+                log_error("Lua error in window %s callback: %s", win, err);
+                cons_show("Lua error in window %s callback: %s", win, err);
+                lua_pop(window->L, 1);
+            }
+        }
+#endif
     }
 }
 

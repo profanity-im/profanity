@@ -48,12 +48,6 @@
 #include "otr/otr.h"
 #endif
 
-typedef struct lua_callback_t
-{
-    lua_State* L;
-    int ref;
-} LuaCallback;
-
 static const gchar*
 _normalize_crlf(const gchar* const message, gchar** to_free)
 {
@@ -65,78 +59,6 @@ _normalize_crlf(const gchar* const message, gchar** to_free)
     auto_gcharv gchar** parts = g_strsplit(message, "\r\n", -1);
     *to_free = g_strjoinv("\n", parts);
     return *to_free;
-}
-
-static void
-_lua_command_exec(PluginCommand* command, gchar** args)
-{
-    LuaCallback* cb = (LuaCallback*)command->callback;
-    if (!cb || !cb->L || cb->ref == LUA_NOREF) {
-        return;
-    }
-
-    lua_rawgeti(cb->L, LUA_REGISTRYINDEX, cb->ref);
-    int num_args = 0;
-    if (args) {
-        for (int i = 0; args[i]; i++) {
-            lua_pushstring(cb->L, args[i]);
-            num_args++;
-        }
-    }
-
-    if (lua_pcall(cb->L, num_args, 0, 0) != LUA_OK) {
-        const char* err = lua_tostring(cb->L, -1);
-        log_error("Lua error in command /%s: %s", command->command_name, err ? err : "unknown error");
-        cons_show("Plugin error in command /%s: %s", command->command_name, err ? err : "unknown error");
-        lua_pop(cb->L, 1);
-    }
-}
-
-static void
-_lua_timed_exec(PluginTimedFunction* timed_function)
-{
-    LuaCallback* cb = (LuaCallback*)timed_function->callback;
-    if (!cb || !cb->L || cb->ref == LUA_NOREF) {
-        return;
-    }
-
-    lua_rawgeti(cb->L, LUA_REGISTRYINDEX, cb->ref);
-    if (lua_pcall(cb->L, 0, 0, 0) != LUA_OK) {
-        const char* err = lua_tostring(cb->L, -1);
-        log_error("Lua error in timed callback: %s", err ? err : "unknown error");
-        lua_pop(cb->L, 1);
-    }
-}
-
-static void
-_lua_win_exec(PluginWindowCallback* window_callback, const char* tag, const char* const line)
-{
-    LuaCallback* cb = (LuaCallback*)window_callback->callback;
-    if (!cb || !cb->L || cb->ref == LUA_NOREF) {
-        return;
-    }
-
-    lua_rawgeti(cb->L, LUA_REGISTRYINDEX, cb->ref);
-    lua_pushstring(cb->L, tag ? tag : "");
-    lua_pushstring(cb->L, line ? line : "");
-    if (lua_pcall(cb->L, 2, 0, 0) != LUA_OK) {
-        const char* err = lua_tostring(cb->L, -1);
-        log_error("Lua error in window %s callback: %s", tag ? tag : "", err ? err : "unknown error");
-        lua_pop(cb->L, 1);
-    }
-}
-
-static void
-_lua_callback_destroy(void* callback)
-{
-    LuaCallback* cb = (LuaCallback*)callback;
-    if (!cb) {
-        return;
-    }
-    if (cb->L && cb->ref != LUA_NOREF && cb->ref != LUA_REFNIL) {
-        luaL_unref(cb->L, LUA_REGISTRYINDEX, cb->ref);
-    }
-    g_free(cb);
 }
 
 static const char*
@@ -489,19 +411,14 @@ _lua_prof_win_create(lua_State* L)
     lua_pushvalue(L, 2);
     int ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    LuaCallback* cb = g_new0(LuaCallback, 1);
-    cb->L = L;
-    cb->ref = ref;
-
     ProfWin* newwin = wins_new_plugin(plugin_name, tag);
     if (newwin) {
         PluginWindowCallback* window_callback = g_new0(PluginWindowCallback, 1);
-        window_callback->callback = cb;
-        window_callback->callback_exec = _lua_win_exec;
-        window_callback->callback_destroy = _lua_callback_destroy;
+        window_callback->L = L;
+        window_callback->lua_ref = ref;
         callbacks_add_window_handler(plugin_name, tag, window_callback);
     } else {
-        _lua_callback_destroy(cb);
+        luaL_unref(L, LUA_REGISTRYINDEX, ref);
     }
     return 0;
 }
@@ -1022,17 +939,12 @@ _lua_prof_register_command(lua_State* L)
     lua_pushvalue(L, 4);
     int ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    LuaCallback* cb = g_new0(LuaCallback, 1);
-    cb->L = L;
-    cb->ref = ref;
-
     PluginCommand* command = g_new0(PluginCommand, 1);
     command->command_name = g_strdup(command_name);
     command->min_args = min_args;
     command->max_args = max_args;
-    command->callback = cb;
-    command->callback_exec = _lua_command_exec;
-    command->callback_destroy = _lua_callback_destroy;
+    command->L = L;
+    command->lua_ref = ref;
 
     CommandHelp* help = g_new0(CommandHelp, 1);
     if (synopsis) {
@@ -1058,16 +970,11 @@ _lua_prof_register_timed(lua_State* L)
     lua_pushvalue(L, 1);
     int ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-    LuaCallback* cb = g_new0(LuaCallback, 1);
-    cb->L = L;
-    cb->ref = ref;
-
     PluginTimedFunction* timed_function = g_new0(PluginTimedFunction, 1);
     timed_function->interval_seconds = interval_seconds;
     timed_function->timer = g_timer_new();
-    timed_function->callback = cb;
-    timed_function->callback_exec = _lua_timed_exec;
-    timed_function->callback_destroy = _lua_callback_destroy;
+    timed_function->L = L;
+    timed_function->lua_ref = ref;
 
     callbacks_add_timed(plugin_name, timed_function);
     return 0;
