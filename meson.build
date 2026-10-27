@@ -169,8 +169,6 @@ if not readline_dep.found()
 endif
 
 # Optional dependencies
-python_dep = disabler()
-dl_dep = disabler()
 gpgme_dep = disabler()
 libotr_dep = disabler()
 gdk_pixbuf_dep = disabler()
@@ -184,8 +182,6 @@ stabber_dep = cc.find_library('stabber', required: false)
 util_dep = cc.find_library('util', required: false)
 
 # Build flags
-build_python_api = false
-build_c_api = false
 build_pgp = false
 build_otr = false
 build_omemo = false
@@ -210,19 +206,6 @@ build_tray = false
 if get_option('tray').enabled()
   conf_data.set('HAVE_TRAY', 1)
   build_tray = true
-endif
-
-# Python plugins
-if get_option('python-plugins').enabled()
-  python_dep = dependency('python3-embed', required: false)
-  if not python_dep.found()
-    python_dep = dependency('python-embed', required: true)
-  else
-    conf_data.set('PY_IS_PYTHON3', 1)
-  endif
-
-  build_python_api = true
-  conf_data.set('HAVE_PYTHON', 1)
 endif
 
 # PGP support
@@ -279,11 +262,9 @@ if themes_path == ''
 endif
 
 icons_path = get_option('datadir') / meson.project_name() / 'icons'
-global_python_plugins_path = get_option('datadir') / meson.project_name() / 'plugins'
 
 conf_data.set_quoted('THEMES_PATH', get_option('prefix') / themes_path)
 conf_data.set_quoted('ICONS_PATH', get_option('prefix') / icons_path)
-conf_data.set_quoted('GLOBAL_PYTHON_PLUGINS_PATH', get_option('prefix') / global_python_plugins_path)
 
 # Check for required functions
 foreach func : ['atexit', 'memset', 'strdup', 'strstr']
@@ -312,14 +293,6 @@ profanity_deps = [
 ]
 
 # Add optional dependencies only if found
-if python_dep.found()
-  profanity_deps += python_dep
-endif
-
-if dl_dep.found()
-  profanity_deps += dl_dep
-endif
-
 if gpgme_dep.found()
   profanity_deps += gpgme_dep
 endif
@@ -437,13 +410,6 @@ profanity_sources = core_sources
 # Add conditional sources
 if build_tray
   profanity_sources += files('src/ui/tray.c')
-endif
-
-if build_python_api
-  profanity_sources += files(
-    'src/plugins/python_plugins.c',
-    'src/plugins/python_api.c',
-  )
 endif
 
 if build_pgp
@@ -633,16 +599,9 @@ if get_option('tests')
       'tests/unittests/plugins/test_callbacks.c',
       'tests/unittests/plugins/test_plugins_disco.c',
       'tests/unittests/unittests.c',
-    )
-    
-    if build_python_api
-      unittest_sources += files(
-        'src/plugins/python_plugins.c',
-        'src/plugins/python_api.c',
       )
-    endif
 
-    if build_pgp
+      if build_pgp
       unittest_sources += files(
         'tests/unittests/pgp/stub_gpg.c',
         'tests/unittests/pgp/stub_ox.c',
@@ -716,12 +675,10 @@ summary({
   'Install themes': get_option('install_themes'),
   'Themes path': themes_path,
   'Icons path': icons_path,
-  'Global Python plugins path': global_python_plugins_path,
 }, section: 'Directories')
 
 summary({
   'Notifications': build_notifications,
-  'Python plugins': build_python_api,
   'OTR': build_otr,
   'PGP': build_pgp,
   'OMEMO': build_omemo,

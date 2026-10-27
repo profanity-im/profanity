@@ -1026,7 +1026,6 @@ cmd_ac_init(void)
     autocomplete_add(plugins_ac, "load");
     autocomplete_add(plugins_ac, "unload");
     autocomplete_add(plugins_ac, "reload");
-    autocomplete_add(plugins_ac, "python_version");
 
     autocomplete_add(blocked_ac, "add");
     autocomplete_add(blocked_ac, "remove");

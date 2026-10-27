@@ -27,11 +27,6 @@
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
-#ifdef HAVE_PYTHON
-#include "plugins/python_plugins.h"
-#include "plugins/python_api.h"
-#endif
-
 static GHashTable* plugins;
 
 static void
@@ -42,18 +37,9 @@ _plugins_shutdown(void)
 
     while (curr) {
         next = g_list_next(curr);
-#ifdef HAVE_PYTHON
-        if (curr && ((ProfPlugin*)curr->data)->lang == LANG_PYTHON) {
-            python_plugin_destroy(curr->data);
-            curr = NULL;
-        }
-#endif
         curr = next;
     }
     g_list_free(values);
-#ifdef HAVE_PYTHON
-    python_shutdown();
-#endif
 
     plugin_settings_close();
     plugin_themes_close();
@@ -73,10 +59,6 @@ plugins_init(void)
     plugin_themes_init();
     plugin_settings_init();
 
-#ifdef HAVE_PYTHON
-    python_env_init();
-#endif
-
     // load plugins
     auto_gcharv gchar** plugins_pref = prefs_get_plugins();
     if (!plugins_pref) {
@@ -85,15 +67,6 @@ plugins_init(void)
     for (guint i = 0; i < g_strv_length(plugins_pref); i++) {
         gboolean loaded = FALSE;
         gchar* filename = plugins_pref[i];
-#ifdef HAVE_PYTHON
-        if (g_str_has_suffix(filename, ".py")) {
-            ProfPlugin* plugin = python_plugin_create(filename);
-            if (plugin) {
-                g_hash_table_insert(plugins, g_strdup(filename), plugin);
-                loaded = TRUE;
-            }
-        }
-#endif
         if (loaded) {
             log_info("Loaded plugin: %s", filename);
         } else {
@@ -141,7 +114,7 @@ _plugins_install_dir_recursive(const gchar* const path, PluginsInstallResult* re
         if (g_file_test(full, G_FILE_TEST_IS_DIR)) {
             _plugins_install_dir_recursive(full, result);
         } else if (g_file_test(full, G_FILE_TEST_IS_REGULAR)) {
-            if (g_str_has_suffix(entry, ".py")) {
+            if (g_str_has_suffix(entry, ".lua")) {
                 GString* error_message = g_string_new(NULL);
                 if (plugins_install(entry, full, error_message)) {
                     result->installed = g_slist_append(result->installed, g_strdup(full));
@@ -226,19 +199,7 @@ plugins_load_all(void)
 gboolean
 plugins_load(const char* const name, GString* error_message)
 {
-    ProfPlugin* plugin = g_hash_table_lookup(plugins, name);
-    if (plugin) {
-        log_info("Failed to load plugin: %s, plugin already loaded", name);
-        return FALSE;
-    }
-
-    if (g_str_has_suffix(name, ".py")) {
-#ifdef HAVE_PYTHON
-        plugin = python_plugin_create(name);
-#else
-        g_string_assign(error_message, "Python plugins support is disabled.");
-#endif
-    }
+    ProfPlugin* plugin = NULL;
     if (plugin) {
         g_hash_table_insert(plugins, g_strdup(name), plugin);
         if (connection_get_status() == JABBER_CONNECTED) {
@@ -287,11 +248,6 @@ plugins_unload(const char* const name)
     ProfPlugin* plugin = g_hash_table_lookup(plugins, name);
     if (plugin) {
         plugin->on_unload_func(plugin);
-#ifdef HAVE_PYTHON
-        if (plugin->lang == LANG_PYTHON) {
-            python_plugin_destroy(plugin);
-        }
-#endif
         prefs_remove_plugin(name);
         g_hash_table_remove(plugins, name);
 
@@ -355,7 +311,7 @@ _plugins_unloaded_list_dir(const gchar* const dir, GSList** result)
     const gchar* plugin = g_dir_read_name(plugins_dir);
     while (plugin) {
         ProfPlugin* found = g_hash_table_lookup(plugins, plugin);
-        if (g_str_has_suffix(plugin, ".py") && !found) {
+        if (g_str_has_suffix(plugin, ".lua") && !found) {
             *result = g_slist_append(*result, g_strdup(plugin));
         }
         plugin = g_dir_read_name(plugins_dir);

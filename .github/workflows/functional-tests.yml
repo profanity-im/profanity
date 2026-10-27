@@ -55,7 +55,6 @@ jobs:
             --buildtype=debugoptimized \
             -Db_sanitize=none \
             -Dnotifications=enabled \
-            -Dpython-plugins=enabled \
             -Dotr=enabled \
             -Dpgp=enabled \
             -Domemo=enabled \

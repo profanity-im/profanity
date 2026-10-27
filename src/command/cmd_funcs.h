@@ -148,7 +148,6 @@ gboolean cmd_plugins_uninstall(ProfWin* window, const gchar* const command, gcha
 gboolean cmd_plugins_load(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_plugins_unload(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_plugins_reload(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_plugins_python_version(ProfWin* window, const gchar* const command, gchar** args);
 
 gboolean cmd_blocked(ProfWin* window, const gchar* const command, gchar** args);
 

@@ -91,10 +91,6 @@
 #include "ui/tray.h"
 #endif
 
-#ifdef HAVE_PYTHON
-#include "plugins/python_plugins.h"
-#endif
-
 static void _update_presence(const resource_presence_t presence,
                              const char* const show, gchar** args);
 static gboolean _cmd_set_boolean_preference(gchar* arg, const char* const display,
@@ -7026,7 +7022,7 @@ cmd_receipts(ProfWin* window, const gchar* const command, gchar** args)
 static gboolean
 _is_correct_plugin_extension(gchar* plugin)
 {
-    return g_str_has_suffix(plugin, ".py");
+    return g_str_has_suffix(plugin, ".lua");
 }
 
 static gboolean
@@ -7048,23 +7044,14 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
     auto_gchar gchar* scheme = g_uri_parse_scheme(args[1]);
     if (_http_based_uri_scheme(scheme)) {
         if (!_is_correct_plugin_extension(args[1])) {
-            cons_show("Please, use url ending with correct file name. Plugins must have the \".py\" extension.");
+            cons_show("Please, use url ending with correct file name. Plugins must have the \".lua\" extension.");
             return TRUE;
         }
         _download_install_plugin(window, args[1], NULL);
         return TRUE;
     }
 
-    if (strchr(args[1], '/')) {
-        path = get_expanded_path(args[1]);
-    } else {
-        if (g_str_has_suffix(args[1], ".py")) {
-            path = g_build_filename(GLOBAL_PYTHON_PLUGINS_PATH, args[1], NULL);
-        } else {
-            cons_show("Plugins must have the \".py\" extension.");
-            return TRUE;
-        }
-    }
+    path = get_expanded_path(args[1]);
 
     if (access(path, R_OK) != 0) {
         cons_show("Cannot access: %s", path);
@@ -7073,7 +7060,7 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
 
     if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
         if (!_is_correct_plugin_extension(args[1])) {
-            cons_show("Plugins must have the \".py\" extension.");
+            cons_show("Plugins must have the \".lua\" extension.");
             return TRUE;
         }
 
@@ -7132,7 +7119,7 @@ cmd_plugins_update(ProfWin* window, const gchar* const command, gchar** args)
     if (_http_based_uri_scheme(scheme)) {
         auto_gchar gchar* plugin_name = basename_from_url(args[1]);
         if (!_is_correct_plugin_extension(plugin_name)) {
-            cons_show("Please, use url ending with correct file name. Plugins must have the \".py\" extension.");
+            cons_show("Please, use url ending with correct file name. Plugins must have the \".lua\" extension.");
             return TRUE;
         }
 
@@ -7157,8 +7144,8 @@ cmd_plugins_update(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    if (!g_str_has_suffix(path, ".py")) {
-        cons_show("Plugins must have the '.py' extension.");
+    if (!g_str_has_suffix(path, ".lua")) {
+        cons_show("Plugins must have the '.lua' extension.");
         return TRUE;
     }
 
@@ -7273,39 +7260,8 @@ cmd_plugins_reload(ProfWin* window, const gchar* const command, gchar** args)
 }
 
 gboolean
-cmd_plugins_python_version(ProfWin* window, const gchar* const command, gchar** args)
-{
-#ifdef HAVE_PYTHON
-    const char* version = python_get_version_string();
-    cons_show("Python version:");
-    cons_show("%s", version);
-#else
-    cons_show("This build does not support python plugins.");
-#endif
-    return TRUE;
-}
-
-gboolean
 cmd_plugins(ProfWin* window, const gchar* const command, gchar** args)
 {
-    GDir* global_pyp_dir = NULL;
-
-    if (access(GLOBAL_PYTHON_PLUGINS_PATH, R_OK) == 0) {
-        global_pyp_dir = g_dir_open(GLOBAL_PYTHON_PLUGINS_PATH, 0, NULL);
-        if (global_pyp_dir == NULL) {
-            log_warning("Error when trying to open global plugins path: %s", GLOBAL_PYTHON_PLUGINS_PATH);
-            return TRUE;
-        }
-    }
-    if (global_pyp_dir) {
-        const gchar* filename;
-        cons_show("The following Python plugins are available globally and can be installed:");
-        while ((filename = g_dir_read_name(global_pyp_dir))) {
-            if (g_str_has_suffix(filename, ".py"))
-                cons_show("  %s", filename);
-        }
-    }
-
     GList* plugins = plugins_loaded_list();
     GSList* unloaded_plugins = plugins_unloaded_list();
 

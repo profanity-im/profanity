@@ -5,12 +5,6 @@ option('notifications',
   description: 'Enable desktop notifications'
 )
 
-option('python-plugins',
-  type: 'feature',
-  value: 'disabled',
-  description: 'Enable Python plugins'
-)
-
 option('otr',
   type: 'feature',
   value: 'disabled',
@@ -61,12 +55,6 @@ option('spellcheck',
 )
 
 # Other:
-option('python_framework',
-  type: 'string',
-  value: '',
-  description: 'Set base directory for Python Framework (macOS only)'
-)
-
 option('tests',
   type: 'boolean',
   value: false,

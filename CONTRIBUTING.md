@@ -10,7 +10,8 @@ The system libstrophe is used by default; if you instead want to automatically d
 | Feature | Description | Meson option |
 | :--- | :--- | :--- |
 | **Notifications** | Desktop notifications support | `-Dnotifications=enabled` |
-| **Python Plugins** | Support for Python plugins | `-Dpython-plugins=enabled` |
+| **Plugins** | Lua plugin support | `-Dplugins=enabled` |
+| **Lua Version** | Explicit Lua pkg-config package | `-Dlua-version=lua5.4` |
 | **OTR** | Off-the-Record encryption | `-Dotr=enabled` |
 | **PGP** | PGP encryption support | `-Dpgp=enabled` |
 | **OMEMO** | OMEMO encryption support | `-Domemo=enabled` |
@@ -271,11 +272,11 @@ To see the complete list check `proftest.h`.
 4. Add the new source file to `functionaltest_sources` in `meson.build`.
 
 ### Valgrind
-We provide a suppressions file `prof.supp`. It is a combination of the suppressions for shipped with glib2, python and custom rules.
+We provide a suppressions file `prof.supp`. It is a combination of the suppressions shipped with glib2 and custom rules.
 
 `G_DEBUG=gc-friendly G_SLICE=always-malloc valgrind --tool=memcheck --track-origins=yes --leak-check=full --leak-resolution=high --num-callers=30 --show-leak-kinds=definite --log-file=profval --suppressions=prof.supp ./build_run/profanity`
 
-There's also the option to create a "personalized" suppression file with the up-to-date glib2 and python suppressions.
+There's also the option to create a "personalized" suppression file with the up-to-date glib2 suppressions.
 
 ### Clang Static Analyzer
 Running the clang static code analyzer helps improving the quality too.

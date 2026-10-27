@@ -2120,8 +2120,7 @@ static const struct cmd_t command_defs[] = {
               { "update", cmd_plugins_update },
               { "load", cmd_plugins_load },
               { "unload", cmd_plugins_unload },
-              { "reload", cmd_plugins_reload },
-              { "python_version", cmd_plugins_python_version })
+              { "reload", cmd_plugins_reload })
       CMD_MAINFUNC(cmd_plugins)
       CMD_SYN(
               "/plugins",
@@ -2130,27 +2129,25 @@ static const struct cmd_t command_defs[] = {
               "/plugins uninstall [<plugin>]",
               "/plugins unload [<plugin>]",
               "/plugins load [<plugin>]",
-              "/plugins reload [<plugin>]",
-              "/plugins python_version")
+              "/plugins reload [<plugin>]")
       CMD_DESC(
-              "Manage plugins. Passing no arguments lists installed plugins and global plugins which are available for local installation. Global directory for Python plugins is " GLOBAL_PYTHON_PLUGINS_PATH ".")
+              "Manage plugins. Passing no arguments lists installed plugins.")
       CMD_ARGS(
               { "install [<path or URL>]", "Install a plugin, or all plugins found in a directory (recursive), or download and install plugin (plugin name is based on basename). And loads it/them." },
               { "update [<path or URL>]", "Uninstall and then install the plugin. Plugin name to update is basename." },
               { "uninstall [<plugin>]", "Uninstall a plugin." },
               { "load [<plugin>]", "Load a plugin that already exists in the plugin directory, passing no argument loads all found plugins. It will be loaded upon next start too unless unloaded." },
               { "unload [<plugin>]", "Unload a loaded plugin, passing no argument will unload all plugins." },
-              { "reload [<plugin>]", "Reload a plugin, passing no argument will reload all plugins." },
-              { "python_version", "Show the Python interpreter version." })
+              { "reload [<plugin>]", "Reload a plugin, passing no argument will reload all plugins." })
       CMD_EXAMPLES(
-              "/plugins install /home/steveharris/Downloads/metal.py",
-              "/plugins install https://raw.githubusercontent.com/profanity-im/profanity-plugins/master/stable/sounds.py",
-              "/plugins update /home/steveharris/Downloads/metal.py",
-              "/plugins update https://raw.githubusercontent.com/profanity-im/profanity-plugins/master/stable/sounds.py",
-              "/plugins uninstall browser.py",
-              "/plugins load browser.py",
-              "/plugins unload say.py",
-              "/plugins reload wikipedia.py")
+              "/plugins install /home/steveharris/Downloads/metal.lua",
+              "/plugins install https://raw.githubusercontent.com/profanity-im/profanity-plugins/master/stable/sounds.lua",
+              "/plugins update /home/steveharris/Downloads/metal.lua",
+              "/plugins update https://raw.githubusercontent.com/profanity-im/profanity-plugins/master/stable/sounds.lua",
+              "/plugins uninstall browser.lua",
+              "/plugins load browser.lua",
+              "/plugins unload say.lua",
+              "/plugins reload wikipedia.lua")
     },
 
     { CMD_PREAMBLE("/prefs",
