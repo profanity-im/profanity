@@ -71,14 +71,10 @@ static void _occupant_free(Occupant* occupant);
 static void
 _muc_close(void)
 {
-    g_hash_table_destroy(invite_passwords);
-    invite_passwords = NULL;
-    g_hash_table_destroy(rooms);
-    rooms = NULL;
-    autocomplete_free(confservers_ac);
-    confservers_ac = NULL;
-    autocomplete_free(invite_ac);
-    invite_ac = NULL;
+    g_clear_pointer(&invite_passwords, g_hash_table_destroy);
+    g_clear_pointer(&rooms, g_hash_table_destroy);
+    g_clear_pointer(&confservers_ac, autocomplete_free);
+    g_clear_pointer(&invite_ac, autocomplete_free);
 }
 
 void
@@ -452,8 +448,7 @@ muc_nick_change_complete(const gchar* const room, const gchar* const nick)
     if (chat_room) {
         g_hash_table_remove(chat_room->roster, chat_room->nick);
         autocomplete_remove(chat_room->nick_ac, chat_room->nick);
-        g_free(chat_room->nick);
-        chat_room->nick = g_strdup(nick);
+        g_set_str(&chat_room->nick, nick);
         chat_room->pending_nick_change = FALSE;
         g_hash_table_remove(chat_room->nick_changes, nick);
     }
@@ -799,7 +794,7 @@ muc_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
     if (strlen(chat_room->autocomplete_prefix) == 0) {
         g_string_append(replace_with, ": ");
     }
-    return g_string_free(replace_with, FALSE);
+    return g_string_free_and_steal(replace_with);
 }
 
 void
@@ -843,10 +838,7 @@ muc_autocomplete_reset(const gchar* const room)
             autocomplete_reset(chat_room->nick_ac);
         }
 
-        if (chat_room->autocomplete_prefix) {
-            g_free(chat_room->autocomplete_prefix);
-            chat_room->autocomplete_prefix = NULL;
-        }
+        g_clear_pointer(&chat_room->autocomplete_prefix, g_free);
     }
 }
 

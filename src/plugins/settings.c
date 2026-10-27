@@ -19,6 +19,7 @@
 #include "config/theme.h"
 #include "config/files.h"
 #include "config/conflists.h"
+#include "plugins/settings.h"
 
 static prof_keyfile_t settings_prof_keyfile;
 static GKeyFile* settings;

@@ -24,6 +24,7 @@
 #include "xmpp/form.h"
 #include "xmpp/iq.h"
 #include "xmpp/stanza.h"
+#include "xmpp/vcard_funcs.h"
 
 // Connected account's vCard
 vCard* vcard_user = NULL;
@@ -592,7 +593,7 @@ vcard_parse(xmpp_stanza_t* vcard_xml, vCard* vcard)
     return TRUE;
 }
 
-xmpp_stanza_t*
+static xmpp_stanza_t*
 vcard_to_xml(xmpp_ctx_t* const ctx, vCard* vcard)
 {
     if (!vcard || !ctx) {
@@ -1404,7 +1405,7 @@ vcard_user_refresh(void)
 }
 
 // Upload a vCard and set it as the currently connected account's vCard
-void
+static void
 vcard_upload(xmpp_ctx_t* ctx, vCard* vcard)
 {
     auto_gchar gchar* id = connection_create_stanza_id();
@@ -1475,81 +1476,6 @@ vcard_user_set_name_given(char* given)
     }
 
     vcard_user->modified = TRUE;
-}
-
-void
-vcard_user_set_name_middle(char* middle)
-{
-    if (vcard_user->name.middle) {
-        g_free(vcard_user->name.middle);
-    }
-    if (middle) {
-        vcard_user->name.middle = g_strdup(middle);
-    } else {
-        vcard_user->name.middle = NULL;
-    }
-
-    vcard_user->modified = TRUE;
-}
-
-void
-vcard_user_set_name_prefix(char* prefix)
-{
-    if (vcard_user->name.prefix) {
-        g_free(vcard_user->name.prefix);
-    }
-    if (prefix) {
-        vcard_user->name.prefix = g_strdup(prefix);
-    } else {
-        vcard_user->name.prefix = NULL;
-    }
-
-    vcard_user->modified = TRUE;
-}
-
-void
-vcard_user_set_name_suffix(char* suffix)
-{
-    if (vcard_user->name.suffix) {
-        g_free(vcard_user->name.suffix);
-    }
-    if (suffix) {
-        vcard_user->name.suffix = g_strdup(suffix);
-    } else {
-        vcard_user->name.suffix = NULL;
-    }
-
-    vcard_user->modified = TRUE;
-}
-
-void
-vcard_user_add_element(vcard_element_t* element)
-{
-    g_queue_push_tail(vcard_user->elements, element);
-    vcard_user->modified = TRUE;
-}
-
-void
-vcard_user_remove_element(unsigned int index)
-{
-    void* pointer = g_queue_pop_nth(vcard_user->elements, index);
-
-    if (pointer) {
-        _free_vcard_element(pointer);
-        vcard_user->modified = TRUE;
-    }
-}
-
-vcard_element_t*
-vcard_user_get_element_index(unsigned int index)
-{
-    return g_queue_peek_nth(vcard_user->elements, index);
-}
-
-ProfWin*
-vcard_user_create_win(void)
-{
-    return wins_new_vcard(vcard_user);
 }
 
 void

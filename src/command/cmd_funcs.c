@@ -107,35 +107,6 @@ static gboolean _cmd_execute_alias(ProfWin* window, const char* const inp, gbool
 static gboolean
 _download_install_plugin(ProfWin* window, gchar* url, gchar* path);
 
-static void
-_vcard_editor_finished_cb(gchar* message, void* user_data)
-{
-    if (message) {
-        char** field = user_data;
-        if (*field) {
-            g_free(*field);
-        }
-        *field = g_strdup(message);
-        cons_show("Field updated. Remember to call /me save to apply changes.");
-    }
-}
-
-static gboolean
-_update_vcard_field(char** field, char* value)
-{
-    if (!value) {
-        if (launch_editor(*field, _vcard_editor_finished_cb, field)) {
-            return TRUE;
-        }
-    } else {
-        if (*field) {
-            g_free(*field);
-        }
-        *field = g_strdup(value);
-    }
-    return FALSE;
-}
-
 /**
  * @brief Processes a line of input and determines if profanity should continue.
  *
@@ -416,8 +387,7 @@ cmd_connect(ProfWin* window, const gchar* const command, gchar** args)
             ui_resize();
             if (res) {
                 conn_status = cl_ev_connect_account(account);
-                free(account->password);
-                account->password = NULL;
+                g_clear_pointer(&account->password, free);
             } else {
                 cons_show("Error evaluating password, see logs for details.");
                 account_free(account);
@@ -429,8 +399,7 @@ cmd_connect(ProfWin* window, const gchar* const command, gchar** args)
         } else {
             account->password = ui_ask_password(FALSE);
             conn_status = cl_ev_connect_account(account);
-            free(account->password);
-            account->password = NULL;
+            g_clear_pointer(&account->password, free);
         }
 
         jid = account_create_connect_jid(account);
@@ -628,7 +597,7 @@ cmd_account_default(ProfWin* window, const gchar* const command, gchar** args)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_jid(char* account_name, char* jid)
 {
     auto_jid Jid* jidp = jid_create(jid);
@@ -647,7 +616,7 @@ _account_set_jid(char* account_name, char* jid)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_server(char* account_name, char* server)
 {
     accounts_set_server(account_name, server);
@@ -656,7 +625,7 @@ _account_set_server(char* account_name, char* server)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_port(char* account_name, char* port)
 {
     int porti;
@@ -673,7 +642,7 @@ _account_set_port(char* account_name, char* port)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_resource(char* account_name, char* resource)
 {
     accounts_set_resource(account_name, resource);
@@ -686,7 +655,7 @@ _account_set_resource(char* account_name, char* resource)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_password(char* account_name, char* password)
 {
     ProfAccount* account = accounts_get_account(account_name);
@@ -701,7 +670,7 @@ _account_set_password(char* account_name, char* password)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_eval_password(char* account_name, char* eval_password)
 {
     ProfAccount* account = accounts_get_account(account_name);
@@ -716,7 +685,7 @@ _account_set_eval_password(char* account_name, char* eval_password)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_muc(char* account_name, char* muc)
 {
     accounts_set_muc_service(account_name, muc);
@@ -725,7 +694,7 @@ _account_set_muc(char* account_name, char* muc)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_nick(char* account_name, char* nick)
 {
     accounts_set_muc_nick(account_name, nick);
@@ -734,7 +703,7 @@ _account_set_nick(char* account_name, char* nick)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_otr(char* account_name, char* policy)
 {
     if (string_matches_one_of("OTR policy", policy, FALSE, "manual", "opportunistic", "always", NULL)) {
@@ -745,7 +714,7 @@ _account_set_otr(char* account_name, char* policy)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_status(char* account_name, char* status)
 {
     if (!valid_resource_presence_string(status) && (strcmp(status, "last") != 0)) {
@@ -758,7 +727,7 @@ _account_set_status(char* account_name, char* status)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_pgpkeyid(char* account_name, char* pgpkeyid)
 {
 #ifdef HAVE_LIBGPGME
@@ -776,7 +745,7 @@ _account_set_pgpkeyid(char* account_name, char* pgpkeyid)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_client(char* account_name, char* new_client)
 {
     accounts_set_client(account_name, new_client);
@@ -784,7 +753,7 @@ _account_set_client(char* account_name, char* new_client)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_theme(char* account_name, char* theme)
 {
     if (!theme_exists(theme)) {
@@ -818,7 +787,7 @@ _account_set_theme(char* account_name, char* theme)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_tls(char* account_name, char* policy)
 {
     if (valid_tls_policy_option(policy)) {
@@ -829,7 +798,7 @@ _account_set_tls(char* account_name, char* policy)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_auth(char* account_name, char* policy)
 {
     if (string_matches_one_of("Auth policy", policy, FALSE, "default", "legacy", NULL)) {
@@ -840,7 +809,7 @@ _account_set_auth(char* account_name, char* policy)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_max_sessions(char* account_name, char* max_sessions_raw)
 {
     int max_sessions;
@@ -861,7 +830,7 @@ _account_set_max_sessions(char* account_name, char* max_sessions_raw)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _account_set_presence_priority(char* account_name, char* presence, char* priority)
 {
     int intval;
@@ -3144,7 +3113,7 @@ cmd_resource(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
 
     } else if (g_strcmp0(cmd, "off") == 0) {
-        FREE_SET_NULL(chatwin->resource_override);
+        g_clear_pointer(&chatwin->resource_override, g_free);
         chat_state_free(chatwin->state);
         chatwin->state = chat_state_new();
         chat_session_remove(chatwin->barejid);
@@ -3547,8 +3516,7 @@ _xmpp_uri_parse_join(const gchar* uri, gchar** out_room, gchar** out_password)
     auto_gcharv gchar** parts = g_strsplit(query_str, ";", -1);
 
     if (parts[0] == NULL || g_strcmp0(parts[0], "join") != 0) {
-        g_free(*out_room);
-        *out_room = NULL;
+        g_clear_pointer(out_room, g_free);
         return FALSE;
     }
 
@@ -4883,7 +4851,7 @@ cmd_disco(ProfWin* window, const gchar* const command, gchar** args)
 
 // TODO: Move this into its own tools such as HTTPUpload or AESGCMDownload.
 #ifdef HAVE_OMEMO
-char*
+static char*
 _add_omemo_stream(int* fd, FILE** fh, char** err)
 {
     // Create temporary file for writing ciphertext.
@@ -4996,7 +4964,7 @@ cmd_sendfile(ProfWin* window, const gchar* const command, gchar** args)
     FILE* fh = fdopen(fd, "rb");
     if (!fh) {
         cons_show_error("Unable to open file descriptor for '%s'.", filename);
-        close(fd);
+        g_clear_fd(&fd, NULL);
         goto out;
     }
 
@@ -5327,7 +5295,7 @@ cmd_presence(ProfWin* window, const gchar* const command, gchar** args)
         { .pref = PREF_STATUSES_MUC, .name = "room", .description = "chat room windows" },
     };
     size_t n = 0;
-    for (; n < ARRAY_SIZE(presence_prefs); ++n) {
+    for (; n < G_N_ELEMENTS(presence_prefs); ++n) {
         const struct presence_preferences* pp = &presence_prefs[n];
         if (g_strcmp0(args[0], pp->name) != 0)
             continue;
@@ -5346,7 +5314,7 @@ cmd_presence(ProfWin* window, const gchar* const command, gchar** args)
         prefs_set_string(pp->pref, args[1]);
         break;
     }
-    if (n == ARRAY_SIZE(presence_prefs)) {
+    if (n == G_N_ELEMENTS(presence_prefs)) {
         cons_bad_cmd_usage(command);
     }
     return TRUE;
@@ -5383,7 +5351,7 @@ cmd_time(ProfWin* window, const gchar* const command, gchar** args)
     gboolean redraw = FALSE;
     gboolean set_all = g_strcmp0(args[0], "all") == 0;
     size_t n = 0;
-    for (; n < ARRAY_SIZE(time_prefs); ++n) {
+    for (; n < G_N_ELEMENTS(time_prefs); ++n) {
         if (!set_all && g_strcmp0(args[0], time_prefs[n].name) != 0)
             continue;
         const struct time_preferences* tp = &time_prefs[n];
@@ -5402,7 +5370,7 @@ cmd_time(ProfWin* window, const gchar* const command, gchar** args)
                 { .name = "iso8601", .format = "%Y-%m-%dT%H:%M:%S" },
             };
             const gchar* set_arg = args[2];
-            for (size_t m = 0; m < ARRAY_SIZE(format_strings); ++m) {
+            for (size_t m = 0; m < G_N_ELEMENTS(format_strings); ++m) {
                 if (g_strcmp0(args[2], format_strings[m].name) == 0) {
                     set_arg = format_strings[m].format;
                     break;
@@ -5427,7 +5395,7 @@ cmd_time(ProfWin* window, const gchar* const command, gchar** args)
             break;
         }
     }
-    if (!set_all && n == ARRAY_SIZE(time_prefs)) {
+    if (!set_all && n == G_N_ELEMENTS(time_prefs)) {
         cons_bad_cmd_usage(command);
     }
     if (redraw)
@@ -7091,9 +7059,9 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
         path = get_expanded_path(args[1]);
     } else {
         if (g_str_has_suffix(args[1], ".py")) {
-            path = g_strdup_printf("%s/%s", GLOBAL_PYTHON_PLUGINS_PATH, args[1]);
+            path = g_build_filename(GLOBAL_PYTHON_PLUGINS_PATH, args[1], NULL);
         } else if (g_str_has_suffix(args[1], ".so")) {
-            path = g_strdup_printf("%s/%s", GLOBAL_C_PLUGINS_PATH, args[1]);
+            path = g_build_filename(GLOBAL_C_PLUGINS_PATH, args[1], NULL);
         } else {
             cons_show("Plugins must have one of the following extensions: \".py\" or \".so\".");
             return TRUE;
@@ -9444,7 +9412,7 @@ cmd_correction(ProfWin* window, const gchar* const command, gchar** args)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _can_correct(ProfWin* window)
 {
     jabber_conn_status_t conn_status = connection_get_status();
@@ -9514,7 +9482,7 @@ cmd_slashguard(ProfWin* window, const gchar* const command, gchar** args)
     return TRUE;
 }
 
-gchar*
+static gchar*
 _prepare_filename(ProfWin* window, gchar* url, gchar* path)
 {
     char* jid = NULL;
@@ -9564,7 +9532,7 @@ _prepare_filename(ProfWin* window, gchar* url, gchar* path)
 }
 
 #ifdef HAVE_OMEMO
-void
+static void
 _url_aesgcm_method(ProfWin* window, const char* cmd_template, gchar* url, gchar* path)
 {
     auto_gchar gchar* filename = _prepare_filename(window, url, path);
@@ -9722,7 +9690,7 @@ cmd_url_save(ProfWin* window, const gchar* const command, gchar** args)
     return TRUE;
 }
 
-gboolean
+static gboolean
 _cmd_executable_template(const preference_t setting, const char* command, gchar** args)
 {
     guint num_args = g_strv_length(args);
@@ -10016,104 +9984,6 @@ cmd_vcard(ProfWin* window, const gchar* const command, gchar** args)
 }
 
 gboolean
-cmd_vcard_add(ProfWin* window, const gchar* const command, gchar** args)
-{
-    if (connection_get_status() != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
-    vcard_element_t* element = g_new0(vcard_element_t, 1);
-    if (!element) {
-        cons_show_error("Memory allocation failed.");
-        return TRUE;
-    }
-
-    struct tm tm;
-    gchar* type = args[1];
-    gchar* value = args[2];
-
-    if (g_strcmp0(type, "nickname") == 0) {
-        element->type = VCARD_NICKNAME;
-
-        element->nickname = g_strdup(value);
-    } else if (g_strcmp0(type, "birthday") == 0) {
-        element->type = VCARD_BIRTHDAY;
-
-        memset(&tm, 0, sizeof(struct tm));
-        if (!strptime(value, "%Y-%m-%d", &tm)) {
-            cons_show_error("Error parsing ISO8601 date.");
-            g_free(element);
-            return TRUE;
-        }
-        element->birthday = g_date_time_new_local(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, 0, 0, 0);
-    } else if (g_strcmp0(type, "tel") == 0) {
-        element->type = VCARD_TELEPHONE;
-        if (value) {
-            element->telephone.number = g_strdup(value);
-        }
-    } else if (g_strcmp0(type, "address") == 0) {
-        element->type = VCARD_ADDRESS;
-    } else if (g_strcmp0(type, "email") == 0) {
-        element->type = VCARD_EMAIL;
-        if (value) {
-            element->email.userid = g_strdup(value);
-        }
-    } else if (g_strcmp0(type, "jid") == 0) {
-        element->type = VCARD_JID;
-        if (value) {
-            element->jid = g_strdup(value);
-        }
-    } else if (g_strcmp0(type, "title") == 0) {
-        element->type = VCARD_TITLE;
-        if (value) {
-            element->title = g_strdup(value);
-        }
-    } else if (g_strcmp0(type, "role") == 0) {
-        element->type = VCARD_ROLE;
-        if (value) {
-            element->role = g_strdup(value);
-        }
-    } else if (g_strcmp0(type, "note") == 0) {
-        element->type = VCARD_NOTE;
-        if (value) {
-            element->note = g_strdup(value);
-        }
-    } else if (g_strcmp0(type, "url") == 0) {
-        element->type = VCARD_URL;
-        if (value) {
-            element->url = g_strdup(value);
-        }
-    } else {
-        cons_bad_cmd_usage(command);
-        g_free(element);
-        return TRUE;
-    }
-
-    vcard_user_add_element(element);
-    vcardwin_update();
-    return TRUE;
-}
-
-gboolean
-cmd_vcard_remove(ProfWin* window, const gchar* const command, gchar** args)
-{
-    if (connection_get_status() != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
-    if (args[1]) {
-        vcard_user_remove_element(atoi(args[1]));
-        cons_show("Removed element at index %d", atoi(args[1]));
-        vcardwin_update();
-    } else {
-        cons_bad_cmd_usage(command);
-    }
-    return TRUE;
-}
-
-gboolean
 cmd_vcard_get(ProfWin* window, const gchar* const command, gchar** args)
 {
     char* user = args[1];
@@ -10295,443 +10165,5 @@ cmd_vcard_photo(ProfWin* window, const gchar* const command, gchar** args)
         cons_bad_cmd_usage(command);
     }
 
-    return TRUE;
-}
-
-gboolean
-cmd_vcard_refresh(ProfWin* window, const gchar* const command, gchar** args)
-{
-    if (connection_get_status() != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
-    vcard_user_refresh();
-    vcardwin_update();
-    return TRUE;
-}
-
-gboolean
-cmd_vcard_set(ProfWin* window, const gchar* const command, gchar** args)
-{
-    char* key = args[1];
-    char* value = args[2];
-
-    if (connection_get_status() != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
-    if (!key) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
-    gboolean is_num = TRUE;
-    for (size_t i = 0; i < strlen(key); i++) {
-        if (!isdigit((int)key[i])) {
-            is_num = FALSE;
-            break;
-        }
-    }
-
-    if (g_strcmp0(key, "fullname") == 0 && value) {
-        vcard_user_set_fullname(value);
-        cons_show("User vCard's full name has been set");
-    } else if (g_strcmp0(key, "name") == 0 && value) {
-        char* value2 = args[3];
-
-        if (!value2) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-
-        if (g_strcmp0(value, "family") == 0) {
-            vcard_user_set_name_family(value2);
-            cons_show("User vCard's family name has been set");
-        } else if (g_strcmp0(value, "given") == 0) {
-            vcard_user_set_name_given(value2);
-            cons_show("User vCard's given name has been set");
-        } else if (g_strcmp0(value, "middle") == 0) {
-            vcard_user_set_name_middle(value2);
-            cons_show("User vCard's middle name has been set");
-        } else if (g_strcmp0(value, "prefix") == 0) {
-            vcard_user_set_name_prefix(value2);
-            cons_show("User vCard's prefix name has been set");
-        } else if (g_strcmp0(value, "suffix") == 0) {
-            vcard_user_set_name_suffix(value2);
-            cons_show("User vCard's suffix name has been set");
-        }
-    } else if (is_num) {
-        char* value2 = args[3];
-        struct tm tm;
-
-        vcard_element_t* element = vcard_user_get_element_index(atoi(key));
-
-        if (!element) {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-
-        if (!value2 || !value) {
-            // Set the main field of element at index <key> to <value>, or from an editor
-
-            switch (element->type) {
-            case VCARD_NICKNAME:
-                if (_update_vcard_field(&element->nickname, value)) {
-                    return TRUE;
-                }
-                break;
-            case VCARD_BIRTHDAY:
-                memset(&tm, 0, sizeof(struct tm));
-                if (!strptime(value, "%Y-%m-%d", &tm)) {
-                    cons_show_error("Error parsing ISO8601 date.");
-                    return TRUE;
-                }
-
-                if (element->birthday) {
-                    g_date_time_unref(element->birthday);
-                }
-                element->birthday = g_date_time_new_local(tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, 0, 0, 0);
-                break;
-            case VCARD_TELEPHONE:
-                if (_update_vcard_field(&element->telephone.number, value)) {
-                    return TRUE;
-                }
-                break;
-            case VCARD_EMAIL:
-                if (_update_vcard_field(&element->email.userid, value)) {
-                    return TRUE;
-                }
-                break;
-            case VCARD_JID:
-                if (_update_vcard_field(&element->jid, value)) {
-                    return TRUE;
-                }
-                break;
-            case VCARD_TITLE:
-                if (_update_vcard_field(&element->title, value)) {
-                    return TRUE;
-                }
-                break;
-            case VCARD_ROLE:
-                if (_update_vcard_field(&element->role, value)) {
-                    return TRUE;
-                }
-                break;
-            case VCARD_NOTE:
-                if (_update_vcard_field(&element->note, value)) {
-                    return TRUE;
-                }
-                break;
-            case VCARD_URL:
-                if (_update_vcard_field(&element->url, value)) {
-                    return TRUE;
-                }
-                break;
-            default:
-                cons_show_error("Element unsupported");
-            }
-        } else if (value) {
-            if (g_strcmp0(value, "pobox") == 0 && element->type == VCARD_ADDRESS) {
-                if (_update_vcard_field(&element->address.pobox, value2)) {
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "extaddr") == 0 && element->type == VCARD_ADDRESS) {
-                if (_update_vcard_field(&element->address.extaddr, value2)) {
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "street") == 0 && element->type == VCARD_ADDRESS) {
-                if (_update_vcard_field(&element->address.street, value2)) {
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "locality") == 0 && element->type == VCARD_ADDRESS) {
-                if (_update_vcard_field(&element->address.locality, value2)) {
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "region") == 0 && element->type == VCARD_ADDRESS) {
-                if (_update_vcard_field(&element->address.region, value2)) {
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "pocode") == 0 && element->type == VCARD_ADDRESS) {
-                if (_update_vcard_field(&element->address.pcode, value2)) {
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "country") == 0 && element->type == VCARD_ADDRESS) {
-                if (_update_vcard_field(&element->address.country, value2)) {
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "type") == 0 && element->type == VCARD_ADDRESS) {
-                if (g_strcmp0(value2, "domestic") == 0) {
-                    element->address.options &= ~VCARD_INTL;
-                    element->address.options |= VCARD_DOM;
-                } else if (g_strcmp0(value2, "international") == 0) {
-                    element->address.options &= ~VCARD_DOM;
-                    element->address.options |= VCARD_INTL;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "home") == 0) {
-                switch (element->type) {
-                case VCARD_ADDRESS:
-                    if (g_strcmp0(value2, "on") == 0) {
-                        element->address.options |= VCARD_HOME;
-                    } else if (g_strcmp0(value2, "off") == 0) {
-                        element->address.options &= ~VCARD_HOME;
-                    } else {
-                        cons_bad_cmd_usage(command);
-                        return TRUE;
-                    }
-                    break;
-                case VCARD_TELEPHONE:
-                    if (g_strcmp0(value2, "on") == 0) {
-                        element->telephone.options |= VCARD_HOME;
-                    } else if (g_strcmp0(value2, "off") == 0) {
-                        element->telephone.options &= ~VCARD_HOME;
-                    } else {
-                        cons_bad_cmd_usage(command);
-                        return TRUE;
-                    }
-                    break;
-                case VCARD_EMAIL:
-                    if (g_strcmp0(value2, "on") == 0) {
-                        element->email.options |= VCARD_HOME;
-                    } else if (g_strcmp0(value2, "off") == 0) {
-                        element->email.options &= ~VCARD_HOME;
-                    } else {
-                        cons_bad_cmd_usage(command);
-                        return TRUE;
-                    }
-                    break;
-                default:
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "work") == 0) {
-                switch (element->type) {
-                case VCARD_ADDRESS:
-                    if (g_strcmp0(value2, "on") == 0) {
-                        element->address.options |= VCARD_WORK;
-                    } else if (g_strcmp0(value2, "off") == 0) {
-                        element->address.options &= ~VCARD_WORK;
-                    } else {
-                        cons_bad_cmd_usage(command);
-                        return TRUE;
-                    }
-                    break;
-                case VCARD_TELEPHONE:
-                    if (g_strcmp0(value2, "on") == 0) {
-                        element->telephone.options |= VCARD_WORK;
-                    } else if (g_strcmp0(value2, "off") == 0) {
-                        element->telephone.options &= ~VCARD_WORK;
-                    } else {
-                        cons_bad_cmd_usage(command);
-                        return TRUE;
-                    }
-                    break;
-                case VCARD_EMAIL:
-                    if (g_strcmp0(value2, "on") == 0) {
-                        element->email.options |= VCARD_WORK;
-                    } else if (g_strcmp0(value2, "off") == 0) {
-                        element->email.options &= ~VCARD_WORK;
-                    } else {
-                        cons_bad_cmd_usage(command);
-                        return TRUE;
-                    }
-                    break;
-                default:
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "voice") == 0 && element->type == VCARD_TELEPHONE) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->telephone.options |= VCARD_TEL_VOICE;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->telephone.options &= ~VCARD_TEL_VOICE;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "fax") == 0 && element->type == VCARD_TELEPHONE) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->telephone.options |= VCARD_TEL_FAX;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->telephone.options &= ~VCARD_TEL_FAX;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "pager") == 0 && element->type == VCARD_TELEPHONE) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->telephone.options |= VCARD_TEL_PAGER;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->telephone.options &= ~VCARD_TEL_PAGER;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "msg") == 0 && element->type == VCARD_TELEPHONE) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->telephone.options |= VCARD_TEL_MSG;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->telephone.options &= ~VCARD_TEL_MSG;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "cell") == 0 && element->type == VCARD_TELEPHONE) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->telephone.options |= VCARD_TEL_CELL;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->telephone.options &= ~VCARD_TEL_CELL;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "video") == 0 && element->type == VCARD_TELEPHONE) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->telephone.options |= VCARD_TEL_VIDEO;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->telephone.options &= ~VCARD_TEL_VIDEO;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "bbs") == 0 && element->type == VCARD_TELEPHONE) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->telephone.options |= VCARD_TEL_BBS;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->telephone.options &= ~VCARD_TEL_BBS;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "modem") == 0 && element->type == VCARD_TELEPHONE) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->telephone.options |= VCARD_TEL_MODEM;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->telephone.options &= ~VCARD_TEL_MODEM;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "isdn") == 0 && element->type == VCARD_TELEPHONE) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->telephone.options |= VCARD_TEL_ISDN;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->telephone.options &= ~VCARD_TEL_ISDN;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "pcs") == 0 && element->type == VCARD_TELEPHONE) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->telephone.options |= VCARD_TEL_PCS;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->telephone.options &= ~VCARD_TEL_PCS;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "preferred") == 0) {
-                switch (element->type) {
-                case VCARD_ADDRESS:
-                    if (g_strcmp0(value2, "on") == 0) {
-                        element->address.options |= VCARD_PREF;
-                    } else if (g_strcmp0(value2, "off") == 0) {
-                        element->address.options &= ~VCARD_PREF;
-                    } else {
-                        cons_bad_cmd_usage(command);
-                        return TRUE;
-                    }
-                    break;
-                case VCARD_TELEPHONE:
-                    if (g_strcmp0(value2, "on") == 0) {
-                        element->telephone.options |= VCARD_PREF;
-                    } else if (g_strcmp0(value2, "off") == 0) {
-                        element->telephone.options &= ~VCARD_PREF;
-                    } else {
-                        cons_bad_cmd_usage(command);
-                        return TRUE;
-                    }
-                    break;
-                case VCARD_EMAIL:
-                    if (g_strcmp0(value2, "on") == 0) {
-                        element->email.options |= VCARD_PREF;
-                    } else if (g_strcmp0(value2, "off") == 0) {
-                        element->email.options &= ~VCARD_PREF;
-                    } else {
-                        cons_bad_cmd_usage(command);
-                        return TRUE;
-                    }
-                    break;
-                default:
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "parcel") == 0 && element->type == VCARD_ADDRESS) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->address.options |= VCARD_PARCEL;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->address.options &= ~VCARD_PARCEL;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "postal") == 0 && element->type == VCARD_ADDRESS) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->address.options |= VCARD_POSTAL;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->address.options &= ~VCARD_POSTAL;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "internet") == 0 && element->type == VCARD_EMAIL) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->email.options |= VCARD_EMAIL_INTERNET;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->email.options &= ~VCARD_EMAIL_INTERNET;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else if (g_strcmp0(value, "x400") == 0 && element->type == VCARD_EMAIL) {
-                if (g_strcmp0(value2, "on") == 0) {
-                    element->email.options |= VCARD_EMAIL_X400;
-                } else if (g_strcmp0(value2, "off") == 0) {
-                    element->email.options &= ~VCARD_EMAIL_X400;
-                } else {
-                    cons_bad_cmd_usage(command);
-                    return TRUE;
-                }
-            } else {
-                cons_bad_cmd_usage(command);
-                return TRUE;
-            }
-        } else {
-            cons_bad_cmd_usage(command);
-            return TRUE;
-        }
-    } else {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
-    vcardwin_update();
-    return TRUE;
-}
-
-gboolean
-cmd_vcard_save(ProfWin* window, const gchar* const command, gchar** args)
-{
-    if (connection_get_status() != JABBER_CONNECTED) {
-        cons_show("You are not currently connected.");
-        return TRUE;
-    }
-
-    vcard_user_save();
-    cons_show("User vCard uploaded");
     return TRUE;
 }

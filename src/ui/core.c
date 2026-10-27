@@ -48,7 +48,6 @@
 #include "otr/otr.h"
 #endif
 
-static int inp_size;
 static gboolean perform_resize = FALSE;
 static GTimer* ui_idle_time;
 static WINDOW* main_scr;
@@ -91,7 +90,6 @@ ui_init(void)
     notifier_initialise();
     cons_about();
     ui_idle_time = g_timer_new();
-    inp_size = 0;
     ProfWin* window = wins_get_current();
     win_update_virtual(window);
 }
@@ -975,19 +973,6 @@ ui_win_unread(int index)
     }
 }
 
-gboolean
-ui_win_has_attention(int index)
-{
-    gboolean ret = FALSE;
-
-    ProfWin* window = wins_get_by_num(index);
-    if (window) {
-        ret = win_has_attention(window);
-    }
-
-    return ret;
-}
-
 char*
 ui_ask_password(gboolean confirm)
 {
@@ -1066,7 +1051,7 @@ ui_contact_offline(const gchar* const barejid, const gchar* const resource, cons
 
     ProfChatWin* chatwin = wins_get_chat(barejid);
     if (chatwin && chatwin->resource_override && (g_strcmp0(resource, chatwin->resource_override) == 0)) {
-        FREE_SET_NULL(chatwin->resource_override);
+        g_clear_pointer(&chatwin->resource_override, g_free);
     }
 }
 

@@ -59,7 +59,6 @@ cc = meson.get_compiler('c')
 
 # Common compiler flags
 add_project_arguments([
-  '-Wno-deprecated-declarations',
   '-Wno-unused-parameter',
 ], language: 'c')
 
@@ -70,11 +69,25 @@ if is_debug
     '-Wunused',
     '-Wall',
     '-Wextra',
+    '-Wstrict-prototypes',
+    '-Wmissing-prototypes',
+    '-Wnull-dereference',
+    '-Wundef',
+    '-Winit-self',
     '-fstack-protector-strong',
     '-D_FORTIFY_SOURCE=2',
     '-Og',
     '-Wpointer-arith'
   ], language: 'c')
+  if cc.has_argument('-Wduplicated-cond')
+    add_project_arguments('-Wduplicated-cond', language: 'c')
+  endif
+  if cc.has_argument('-Wduplicated-branches')
+    add_project_arguments('-Wduplicated-branches', language: 'c')
+  endif
+  if cc.has_argument('-Wlogical-op')
+    add_project_arguments('-Wlogical-op', language: 'c')
+  endif
   if cc.get_id() == 'gcc'
      analyzer_args += '-fanalyzer'
   endif
@@ -93,7 +106,7 @@ if platform == 'osx'
 endif
 
 # Required dependencies
-glib_dep = dependency('glib-2.0', version: '>= 2.68.0')
+glib_dep = dependency('glib-2.0', version: '>= 2.80.0')
 gio_dep = dependency('gio-2.0')
 curl_dep = dependency('libcurl', version: '>= 7.62.0')
 sqlite_dep = dependency('sqlite3', version: '>= 3.35.0')

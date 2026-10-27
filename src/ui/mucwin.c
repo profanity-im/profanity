@@ -398,7 +398,7 @@ _mucwin_print_mention(ProfWin* window, const char* const message, const char* co
     }
 }
 
-gint
+static gint
 _cmp_trigger_weight(gconstpointer a, gconstpointer b)
 {
     int alen = strlen((char*)a);
@@ -898,51 +898,32 @@ mucwin_get_string(ProfMucWin* mucwin)
 void
 mucwin_set_enctext(ProfMucWin* mucwin, const char* const enctext)
 {
-    if (mucwin->enctext) {
-        g_free(mucwin->enctext);
-    }
-    mucwin->enctext = g_strdup(enctext);
+    g_set_str(&mucwin->enctext, enctext);
 }
 
 void
 mucwin_unset_enctext(ProfMucWin* mucwin)
 {
-    if (mucwin->enctext) {
-        g_free(mucwin->enctext);
-        mucwin->enctext = NULL;
-    }
+    g_clear_pointer(&mucwin->enctext, g_free);
 }
 
 void
 mucwin_set_message_char(ProfMucWin* mucwin, const char* const ch)
 {
-    if (mucwin->message_char) {
-        g_free(mucwin->message_char);
-    }
-    mucwin->message_char = g_strdup(ch);
+    g_set_str(&mucwin->message_char, ch);
 }
 
 void
 mucwin_unset_message_char(ProfMucWin* mucwin)
 {
-    if (mucwin->message_char) {
-        g_free(mucwin->message_char);
-        mucwin->message_char = NULL;
-    }
+    g_clear_pointer(&mucwin->message_char, g_free);
 }
 
 static void
 _mucwin_set_last_message(ProfMucWin* mucwin, const char* const id, const char* const message)
 {
-    if (mucwin->last_message != message) {
-        g_free(mucwin->last_message);
-        mucwin->last_message = g_strdup(message);
-    }
-
-    if (mucwin->last_msg_id != id) {
-        g_free(mucwin->last_msg_id);
-        mucwin->last_msg_id = g_strdup(id);
-    }
+    g_set_str(&mucwin->last_message, message);
+    g_set_str(&mucwin->last_msg_id, id);
 }
 
 void
@@ -984,7 +965,7 @@ mucwin_generate_title(const gchar* const muc_jid, const preference_t pref)
 {
     GString* title = g_string_new("");
     mucwin_title_append(muc_jid, pref, title);
-    return g_string_free(title, FALSE);
+    return g_string_free_and_steal(title);
 }
 
 gboolean

@@ -52,7 +52,7 @@ static void _save_pubkeys(void);
 static ProfPGPKey* _gpgme_key_to_ProfPGPKey(gpgme_key_t key);
 static const gchar* _gpgme_key_get_email(gpgme_key_t key);
 
-void
+static void
 _p_gpg_free_pubkeyid(ProfPGPPubKeyId* pubkeyid)
 {
     if (pubkeyid) {
@@ -78,7 +78,7 @@ _p_gpg_passphrase_cb(void* hook, const char* uid_hint, const char* passphrase_in
         if (passphrase_attempt) {
             g_free(passphrase_attempt);
         }
-        passphrase_attempt = g_string_free(pass_term, FALSE);
+        passphrase_attempt = g_string_free_and_steal(pass_term);
 
         gpgme_io_write(fd, passphrase_attempt, strlen(passphrase_attempt));
     }
@@ -89,25 +89,21 @@ _p_gpg_passphrase_cb(void* hook, const char* uid_hint, const char* passphrase_in
 static void
 _p_gpg_close(void)
 {
-    if (pubkeys) {
-        g_hash_table_destroy(pubkeys);
-        pubkeys = NULL;
-    }
+    g_clear_pointer(&pubkeys, g_hash_table_destroy);
 
     free_keyfile(&pubkeys_prof_keyfile);
     pubkeyfile = NULL;
 
-    autocomplete_free(key_ac);
-    key_ac = NULL;
+    g_clear_pointer(&key_ac, autocomplete_free);
 
     if (passphrase) {
         prof_wipe_string(passphrase);
-        GFREE_SET_NULL(passphrase);
+        g_clear_pointer(&passphrase, g_free);
     }
 
     if (passphrase_attempt) {
         prof_wipe_string(passphrase_attempt);
-        GFREE_SET_NULL(passphrase_attempt);
+        g_clear_pointer(&passphrase_attempt, g_free);
     }
 }
 
@@ -686,7 +682,7 @@ p_gpg_format_fp_str(gchar* fp)
         }
     }
 
-    return g_string_free(format, FALSE);
+    return g_string_free_and_steal(format);
 }
 
 /**

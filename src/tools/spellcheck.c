@@ -54,8 +54,7 @@ spellcheck_deinit(void)
         enchant_broker_free(broker);
         broker = NULL;
     }
-    g_free(current_lang);
-    current_lang = NULL;
+    g_clear_pointer(&current_lang, g_free);
 }
 
 gboolean
@@ -80,8 +79,7 @@ spellcheck_set_lang(const gchar* lang)
     }
 
     dict = new_dict;
-    g_free(current_lang);
-    current_lang = g_strdup(lang);
+    g_set_str(&current_lang, lang);
 
     return TRUE;
 }

@@ -281,7 +281,7 @@ _message_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* con
     return 1;
 }
 
-void
+static void
 message_muc_submit_voice_approve(ProfConfWin* confwin)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
@@ -457,63 +457,50 @@ message_send_chat(const char* const barejid, const char* const msg, const char* 
 gchar*
 message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean request_receipt, const char* const replace_id)
 {
-    xmpp_ctx_t* const ctx = connection_get_ctx();
-
-    const char* state = chat_session_get_state(barejid);
-    auto_gchar gchar* jid = chat_session_get_jid(barejid);
-    char* id = connection_create_stanza_id();
-
-    xmpp_stanza_t* message = NULL;
 #ifdef HAVE_LIBGPGME
+    xmpp_ctx_t* const ctx = connection_get_ctx();
     ProfAccount* account = accounts_get_account(session_get_account_name());
-    if (account->pgp_keyid) {
-        auto_jid Jid* jidp = jid_create(jid);
-        auto_gchar gchar* encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
-        if (encrypted) {
-            message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
-            xmpp_message_set_body(message, "This message is encrypted (XEP-0027).");
-            xmpp_stanza_t* x = xmpp_stanza_new(ctx);
-            xmpp_stanza_set_name(x, STANZA_NAME_X);
-            xmpp_stanza_set_ns(x, STANZA_NS_ENCRYPTED);
-            xmpp_stanza_t* enc_st = xmpp_stanza_new(ctx);
-            xmpp_stanza_set_text(enc_st, encrypted);
-            xmpp_stanza_add_child(x, enc_st);
-            xmpp_stanza_release(enc_st);
-            xmpp_stanza_add_child(message, x);
-            xmpp_stanza_release(x);
-        } else {
-            ProfChatWin* chatwin = wins_get_chat(barejid);
-            if (chatwin) {
-                win_println((ProfWin*)chatwin, THEME_ERROR, "!", "PGP encryption failed. Message not sent.");
-            } else {
-                cons_show_error("PGP encryption failed. Message not sent.");
-            }
-            g_free(id);
-            account_free(account);
-            return NULL;
-        }
-    } else {
+
+    if (!account->pgp_keyid) {
         ProfChatWin* chatwin = wins_get_chat(barejid);
         if (chatwin) {
             win_println((ProfWin*)chatwin, THEME_ERROR, "!", "PGP key ID not set for account. Message not sent.");
         } else {
             cons_show_error("PGP key ID not set for account. Message not sent.");
         }
-        g_free(id);
         account_free(account);
         return NULL;
     }
+
+    auto_gchar gchar* jid = chat_session_get_jid(barejid);
+    auto_jid Jid* jidp = jid_create(jid);
+    auto_gchar gchar* encrypted = p_gpg_encrypt(jidp->barejid, msg, account->pgp_keyid);
     account_free(account);
-#else
-    ProfChatWin* chatwin = wins_get_chat(barejid);
-    if (chatwin) {
-        win_println((ProfWin*)chatwin, THEME_ERROR, "!", "PGP support is not included in this build. Message not sent.");
-    } else {
-        cons_show_error("PGP support is not included in this build. Message not sent.");
+
+    if (!encrypted) {
+        ProfChatWin* chatwin = wins_get_chat(barejid);
+        if (chatwin) {
+            win_println((ProfWin*)chatwin, THEME_ERROR, "!", "PGP encryption failed. Message not sent.");
+        } else {
+            cons_show_error("PGP encryption failed. Message not sent.");
+        }
+        return NULL;
     }
-    g_free(id);
-    return NULL;
-#endif
+
+    const char* state = chat_session_get_state(barejid);
+    char* id = connection_create_stanza_id();
+
+    xmpp_stanza_t* message = xmpp_message_new(ctx, STANZA_TYPE_CHAT, jid, id);
+    xmpp_message_set_body(message, "This message is encrypted (XEP-0027).");
+    xmpp_stanza_t* x = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_name(x, STANZA_NAME_X);
+    xmpp_stanza_set_ns(x, STANZA_NS_ENCRYPTED);
+    xmpp_stanza_t* enc_st = xmpp_stanza_new(ctx);
+    xmpp_stanza_set_text(enc_st, encrypted);
+    xmpp_stanza_add_child(x, enc_st);
+    xmpp_stanza_release(enc_st);
+    xmpp_stanza_add_child(message, x);
+    xmpp_stanza_release(x);
 
     if (state) {
         stanza_attach_state(ctx, message, state);
@@ -531,6 +518,15 @@ message_send_chat_pgp(const char* const barejid, const char* const msg, gboolean
     xmpp_stanza_release(message);
 
     return id;
+#else
+    ProfChatWin* chatwin = wins_get_chat(barejid);
+    if (chatwin) {
+        win_println((ProfWin*)chatwin, THEME_ERROR, "!", "PGP support is not included in this build. Message not sent.");
+    } else {
+        cons_show_error("PGP support is not included in this build. Message not sent.");
+    }
+    return NULL;
+#endif
 }
 
 // XEP-0373: OpenPGP for XMPP
@@ -1189,8 +1185,7 @@ _handle_groupchat(xmpp_stanza_t* const stanza, gboolean is_mam, const char* resu
         gboolean is_muc_history = FALSE;
         if (message->timestamp != NULL) {
             is_muc_history = TRUE;
-            g_date_time_unref(message->timestamp);
-            message->timestamp = NULL;
+            g_clear_pointer(&message->timestamp, g_date_time_unref);
         }
 
         // we want to display the oldest delay

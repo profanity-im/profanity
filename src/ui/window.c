@@ -420,7 +420,7 @@ win_get_title(ProfWin* window)
 {
     GString* title = g_string_new("");
     win_title_append(window, title);
-    return g_string_free(title, FALSE);
+    return g_string_free_and_steal(title);
 }
 
 const gchar*
@@ -542,7 +542,7 @@ win_to_string(ProfWin* window)
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
         GString* gstring = g_string_new("");
         g_string_append_printf(gstring, "Plugin: %s", pluginwin->tag);
-        return g_string_free(gstring, FALSE);
+        return g_string_free_and_steal(gstring);
     }
     case WIN_VCARD:
     {
@@ -1736,12 +1736,6 @@ win_appendln_highlight(ProfWin* window, theme_item_t theme_item, GDateTime* time
 }
 
 void
-win_print_http_transfer(ProfWin* window, const gchar* const message, const gchar* const id)
-{
-    win_print_status_with_id(window, message, id, THEME_DEFAULT, 0);
-}
-
-void
 win_print_outgoing_with_receipt(ProfWin* window, const gchar* show_char, const gchar* const from, const gchar* const message, const gchar* const id, const gchar* const replace_id)
 {
     GDateTime* time = g_date_time_new_now_local();
@@ -2109,7 +2103,7 @@ _win_print_wrapped(WINDOW* win, const gchar* const message, size_t indent, int p
     }
 }
 
-void
+static void
 win_print_trackbar(ProfWin* window)
 {
     _win_ensure_pad_capacity(window, window->layout->win, getcury(window->layout->win));

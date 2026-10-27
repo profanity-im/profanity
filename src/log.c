@@ -200,7 +200,7 @@ log_set_filter(log_level_t filter)
 void
 log_close(void)
 {
-    GFREE_SET_NULL(mainlogfile);
+    g_clear_pointer(&mainlogfile, g_free);
     if (logp) {
         fclose(logp);
     }
@@ -327,8 +327,8 @@ _log_stderr_close(void)
     stderr_inited = 0;
     free(stderr_buf);
     g_string_free(stderr_msg, TRUE);
-    close(stderr_pipe[0]);
-    close(stderr_pipe[1]);
+    g_clear_fd(&stderr_pipe[0], NULL);
+    g_clear_fd(&stderr_pipe[1], NULL);
 }
 
 void
@@ -356,7 +356,7 @@ log_stderr_init(log_level_t level)
     int dup_fd = dup2(stderr_pipe[1], STDERR_FILENO);
     if (dup_fd < 0)
         goto err_free;
-    close(dup_fd);
+    g_clear_fd(&dup_fd, NULL);
 
     stderr_level = level;
     stderr_inited = 1;
@@ -369,8 +369,8 @@ err_free:
         g_string_free(stderr_msg, TRUE);
     free(stderr_buf);
 err_close:
-    close(stderr_pipe[0]);
-    close(stderr_pipe[1]);
+    g_clear_fd(&stderr_pipe[0], NULL);
+    g_clear_fd(&stderr_pipe[1], NULL);
 err:
     stderr_inited = 0;
     log_error("Unable to init stderr log handler: %s", strerror(errno));

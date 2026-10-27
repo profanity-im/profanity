@@ -30,36 +30,24 @@
 #include "config/preferences.h"
 #include "config/color.h"
 
-static GString* theme_loc;
+static gchar* theme_loc;
 static GKeyFile* theme;
 static GHashTable* bold_items;
 static GHashTable* defaults;
 
 static void _load_preferences(void);
 static void _theme_list_dir(const gchar* const dir, GSList** result);
-static GString* _theme_find(const gchar* const theme_name);
+static gchar* _theme_find(const gchar* const theme_name);
 static gboolean _theme_load_file(const gchar* const theme_name);
 
 static void
 _theme_close(void)
 {
     color_pair_cache_free();
-    if (theme) {
-        g_key_file_free(theme);
-        theme = NULL;
-    }
-    if (theme_loc) {
-        g_string_free(theme_loc, TRUE);
-        theme_loc = NULL;
-    }
-    if (bold_items) {
-        g_hash_table_destroy(bold_items);
-        bold_items = NULL;
-    }
-    if (defaults) {
-        g_hash_table_destroy(defaults);
-        defaults = NULL;
-    }
+    g_clear_pointer(&theme, g_key_file_free);
+    g_clear_pointer(&theme_loc, g_free);
+    g_clear_pointer(&bold_items, g_hash_table_destroy);
+    g_clear_pointer(&defaults, g_hash_table_destroy);
 }
 
 void
@@ -171,13 +159,8 @@ theme_exists(const gchar* const theme_name)
         return TRUE;
     }
 
-    GString* new_theme_file = _theme_find(theme_name);
-    if (new_theme_file == NULL) {
-        return FALSE;
-    }
-
-    g_string_free(new_theme_file, TRUE);
-    return TRUE;
+    auto_gchar gchar* new_theme_file = _theme_find(theme_name);
+    return (new_theme_file != NULL);
 }
 
 gboolean
@@ -210,22 +193,20 @@ _theme_load_file(const gchar* const theme_name)
 
         // load theme from file
     } else {
-        GString* new_theme_file = _theme_find(theme_name);
+        gchar* new_theme_file = _theme_find(theme_name);
         if (new_theme_file == NULL) {
             log_info("Theme does not exist \"%s\"", theme_name);
             return FALSE;
         }
 
-        if (theme_loc) {
-            g_string_free(theme_loc, TRUE);
-        }
+        g_clear_pointer(&theme_loc, g_free);
         theme_loc = new_theme_file;
         log_info("Loading theme \"%s\"", theme_name);
         if (theme) {
             g_key_file_free(theme);
         }
         theme = g_key_file_new();
-        g_key_file_load_from_file(theme, theme_loc->str, G_KEY_FILE_KEEP_COMMENTS,
+        g_key_file_load_from_file(theme, theme_loc, G_KEY_FILE_KEEP_COMMENTS,
                                   NULL);
     }
 
@@ -496,35 +477,29 @@ _theme_list_dir(const gchar* const dir, GSList** result)
     }
 }
 
-static GString*
+static gchar*
 _theme_find(const gchar* const theme_name)
 {
-    GString* path = NULL;
     auto_gchar gchar* themes_dir = files_get_config_path(DIR_THEMES);
+    g_auto(GPathBuf) pbuf = G_PATH_BUF_INIT;
 
     if (themes_dir) {
-        path = g_string_new(themes_dir);
-        g_string_append(path, "/");
-        g_string_append(path, theme_name);
-        if (!g_file_test(path->str, G_FILE_TEST_EXISTS)) {
-            g_string_free(path, TRUE);
-            path = NULL;
+        g_path_buf_init_from_path(&pbuf, themes_dir);
+        g_path_buf_push(&pbuf, theme_name);
+        if (g_file_test(g_path_buf_to_path(&pbuf), G_FILE_TEST_EXISTS)) {
+            return g_path_buf_clear_to_path(&pbuf);
         }
     }
 
 #ifdef THEMES_PATH
-    if (path == NULL) {
-        path = g_string_new(THEMES_PATH);
-        g_string_append(path, "/");
-        g_string_append(path, theme_name);
-        if (!g_file_test(path->str, G_FILE_TEST_EXISTS)) {
-            g_string_free(path, TRUE);
-            path = NULL;
-        }
+    g_path_buf_init_from_path(&pbuf, THEMES_PATH);
+    g_path_buf_push(&pbuf, theme_name);
+    if (g_file_test(g_path_buf_to_path(&pbuf), G_FILE_TEST_EXISTS)) {
+        return g_path_buf_clear_to_path(&pbuf);
     }
 #endif /* THEMES_PATH */
 
-    return path;
+    return NULL;
 }
 
 theme_item_t

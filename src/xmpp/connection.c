@@ -141,14 +141,8 @@ void
 connection_shutdown(void)
 {
     connection_clear_data();
-    if (conn.requested_features) {
-        g_hash_table_destroy(conn.requested_features);
-        conn.requested_features = NULL;
-    }
-    if (conn.available_resources) {
-        g_hash_table_destroy(conn.available_resources);
-        conn.available_resources = NULL;
-    }
+    g_clear_pointer(&conn.requested_features, g_hash_table_destroy);
+    g_clear_pointer(&conn.available_resources, g_hash_table_destroy);
     if (conn.sm_state) {
         xmpp_free_sm_state(conn.sm_state);
         conn.sm_state = NULL;
@@ -563,28 +557,22 @@ connection_disconnect(void)
         }
     }
 
-    g_free(prof_identifier);
-    prof_identifier = NULL;
-
-    jid_destroy(conn.jid);
-    conn.jid = NULL;
+    g_clear_pointer(&prof_identifier, g_free);
+    g_clear_pointer(&conn.jid, jid_destroy);
 }
 
 void
 connection_set_disconnected(void)
 {
-    GFREE_SET_NULL(conn.presence_message);
-    GFREE_SET_NULL(conn.domain);
+    g_clear_pointer(&conn.presence_message, g_free);
+    g_clear_pointer(&conn.domain, g_free);
     conn.conn_status = JABBER_DISCONNECTED;
 }
 
 void
 connection_clear_data(void)
 {
-    if (conn.features_by_jid) {
-        g_hash_table_destroy(conn.features_by_jid);
-        conn.features_by_jid = NULL;
-    }
+    g_clear_pointer(&conn.features_by_jid, g_hash_table_destroy);
 
     if (conn.available_resources) {
         g_hash_table_remove_all(conn.available_resources);
@@ -884,10 +872,7 @@ connection_get_presence_msg(void)
 void
 connection_set_presence_msg(const gchar* const message)
 {
-    GFREE_SET_NULL(conn.presence_message);
-    if (message) {
-        conn.presence_message = g_strdup(message);
-    }
+    g_set_str(&conn.presence_message, message);
 }
 
 void
@@ -1023,8 +1008,7 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
                 xmpp_send_raw(conn.xmpp_conn, conn.queued_messages[n], strlen(conn.queued_messages[n]));
                 free(conn.queued_messages[n]);
             }
-            free(conn.queued_messages);
-            conn.queued_messages = NULL;
+            g_clear_pointer(&conn.queued_messages, free);
         }
 
         break;

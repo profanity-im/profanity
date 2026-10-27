@@ -21,6 +21,7 @@
 #include "log.h"
 #include "common.h"
 #include "xmpp/xmpp.h"
+#include "tools/editor.h"
 #include "ui/ui.h"
 
 typedef struct EditorContext
@@ -79,7 +80,7 @@ launch_editor(const gchar* initial_content, void (*callback)(gchar* content, voi
             cons_show_error("Could not create editor directory.");
             return TRUE;
         }
-        filename = g_strdup_printf("%s/compose.md", data_dir);
+        filename = g_build_filename(data_dir, "compose.md", NULL);
     }
     if (!filename) {
         log_error("[Editor] something went wrong while creating compose file");

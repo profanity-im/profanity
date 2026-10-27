@@ -74,8 +74,7 @@ _plugins_shutdown(void)
     autocompleters_destroy();
     callbacks_close();
     disco_close();
-    g_hash_table_destroy(plugins);
-    plugins = NULL;
+    g_clear_pointer(&plugins, g_hash_table_destroy);
 }
 
 void
@@ -158,9 +157,13 @@ _plugins_install_dir_recursive(const gchar* const path, PluginsInstallResult* re
         return;
     }
 
+    g_auto(GPathBuf) pbuf = G_PATH_BUF_INIT;
+    g_path_buf_init_from_path(&pbuf, path);
+
     const gchar* entry = g_dir_read_name(directory);
     while (entry) {
-        gchar* full = g_build_filename(path, entry, NULL);
+        g_path_buf_push(&pbuf, entry);
+        const gchar* full = g_path_buf_to_path(&pbuf);
         if (g_file_test(full, G_FILE_TEST_IS_DIR)) {
             _plugins_install_dir_recursive(full, result);
         } else if (g_file_test(full, G_FILE_TEST_IS_REGULAR)) {
@@ -174,7 +177,7 @@ _plugins_install_dir_recursive(const gchar* const path, PluginsInstallResult* re
                 g_string_free(error_message, TRUE);
             }
         }
-        g_free(full);
+        g_path_buf_pop(&pbuf);
         entry = g_dir_read_name(directory);
     }
 }

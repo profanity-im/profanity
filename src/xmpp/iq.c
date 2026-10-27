@@ -847,7 +847,7 @@ iq_command_exec(const char* const target, const char* const command)
     xmpp_stanza_release(iq);
 }
 
-void
+static void
 iq_submit_command_config(ProfConfWin* confwin)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
@@ -864,7 +864,7 @@ iq_submit_command_config(ProfConfWin* confwin)
     g_free(data);
 }
 
-void
+static void
 iq_cancel_command_config(ProfConfWin* confwin)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
@@ -1121,12 +1121,9 @@ _room_list_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
     GPatternSpec* glob = NULL;
     if (filter != NULL) {
-        gchar* filter_lower = g_utf8_strdown(filter, -1);
-        GString* glob_str = g_string_new("*");
-        g_string_append(glob_str, filter_lower);
-        g_string_append(glob_str, "*");
-        glob = g_pattern_spec_new(glob_str->str);
-        g_string_free(glob_str, TRUE);
+        auto_gchar gchar* filter_lower = g_utf8_strdown(filter, -1);
+        auto_gchar gchar* glob_str = g_strdup_printf("*%s*", filter_lower);
+        glob = g_pattern_spec_new(glob_str);
     }
 
     gboolean matched = FALSE;
@@ -1146,7 +1143,7 @@ _room_list_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             if (item_name) {
                 item_name_lower = g_utf8_strdown(item_name, -1);
             }
-            if ((item_jid_lower) && ((glob == NULL) || ((g_pattern_match(glob, strlen(item_jid_lower), item_jid_lower, NULL)) || (item_name_lower && g_pattern_match(glob, strlen(item_name_lower), item_name_lower, NULL))))) {
+            if ((item_jid_lower) && ((glob == NULL) || (g_pattern_spec_match_string(glob, item_jid_lower) || (item_name_lower && g_pattern_spec_match_string(glob, item_name_lower))))) {
 
                 if (glob) {
                     matched = TRUE;
@@ -3193,7 +3190,7 @@ _muc_register_nick_response_handler(xmpp_stanza_t* const stanza, void* const use
     return 0;
 }
 
-void
+static void
 iq_submit_muc_register_nick_form(ProfConfWin* confwin)
 {
     auto_gchar gchar* id = connection_create_stanza_id();

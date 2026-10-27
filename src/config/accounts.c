@@ -324,8 +324,7 @@ accounts_get_account(const gchar* const account_name)
 
         gchar* tls_policy = g_key_file_get_string(accounts, sanitized_account_name, "tls.policy", NULL);
         if (tls_policy && !valid_tls_policy_option(tls_policy)) {
-            g_free(tls_policy);
-            tls_policy = NULL;
+            g_clear_pointer(&tls_policy, g_free);
         }
 
         gchar* auth_policy = g_key_file_get_string(accounts, sanitized_account_name, "auth.policy", NULL);

@@ -106,10 +106,7 @@ static struct omemo_static_data
 static void
 _omemo_close(void)
 {
-    if (omemo_static_data.fingerprint_ac) {
-        g_hash_table_destroy(omemo_static_data.fingerprint_ac);
-        omemo_static_data.fingerprint_ac = NULL;
-    }
+    g_clear_pointer(&omemo_static_data.fingerprint_ac, g_hash_table_destroy);
     pthread_mutex_destroy(&omemo_static_data.lock);
 }
 
@@ -143,15 +140,15 @@ _omemo_finalize_identity_load(ProfAccount* account)
         return FALSE;
     }
 
-    if (load_custom_keyfile(&omemo_ctx.trust, g_strdup_printf("%s/%s", omemo_dir, "trust.txt"))) {
+    if (load_custom_keyfile(&omemo_ctx.trust, g_build_filename(omemo_dir, "trust.txt", NULL))) {
         _load_trust();
     }
 
-    if (load_custom_keyfile(&omemo_ctx.sessions, g_strdup_printf("%s/%s", omemo_dir, "sessions.txt"))) {
+    if (load_custom_keyfile(&omemo_ctx.sessions, g_build_filename(omemo_dir, "sessions.txt", NULL))) {
         _load_sessions();
     }
 
-    if (load_custom_keyfile(&omemo_ctx.knowndevices, g_strdup_printf("%s/%s", omemo_dir, "known_devices.txt"))) {
+    if (load_custom_keyfile(&omemo_ctx.knowndevices, g_build_filename(omemo_dir, "known_devices.txt", NULL))) {
         _load_known_devices();
     }
 
@@ -256,7 +253,7 @@ omemo_on_connect(ProfAccount* account)
         return;
     }
 
-    if (load_custom_keyfile(&omemo_ctx.identity, g_strdup_printf("%s/%s", omemo_dir, "identity.txt"))) {
+    if (load_custom_keyfile(&omemo_ctx.identity, g_build_filename(omemo_dir, "identity.txt", NULL))) {
         if (!_load_identity())
             return;
     }
@@ -640,7 +637,7 @@ omemo_sessions_keyfile_save(void)
     save_keyfile(&omemo_ctx.sessions);
 }
 
-void
+static void
 omemo_known_devices_keyfile_save(void)
 {
     save_keyfile(&omemo_ctx.knowndevices);
@@ -2061,7 +2058,7 @@ omemo_encrypt_file(FILE* in, FILE* out, off_t file_size, int* gcry_res)
     return fragment;
 }
 
-void
+static void
 _bytes_from_hex(const char* hex, size_t hex_size,
                 unsigned char* bytes, size_t bytes_size)
 {

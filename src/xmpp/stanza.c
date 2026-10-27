@@ -955,7 +955,7 @@ stanza_create_caps_sha1_from_query(xmpp_stanza_t* const query)
     return result;
 }
 
-xmpp_stanza_t*
+static xmpp_stanza_t*
 stanza_get_child_by_name_and_from(xmpp_stanza_t* const stanza, const gchar* const name, const gchar* const from)
 {
     xmpp_stanza_t* child;
@@ -1684,7 +1684,7 @@ stanza_get_error_message(xmpp_stanza_t* stanza)
             STANZA_NAME_UNEXPECTED_REQUEST
         };
 
-        for (size_t i = 0; i < ARRAY_SIZE(defined_conditions); i++) {
+        for (size_t i = 0; i < G_N_ELEMENTS(defined_conditions); i++) {
             xmpp_stanza_t* cond_stanza = xmpp_stanza_get_child_by_name(error_stanza, defined_conditions[i]);
             if (cond_stanza) {
                 gchar* result = g_strdup(xmpp_stanza_get_name(cond_stanza));
@@ -1915,7 +1915,7 @@ stanza_free_caps(XMPPCaps* caps)
     if (caps->ver) {
         g_free(caps->ver);
     }
-    GFREE_SET_NULL(caps);
+    g_free(caps);
 }
 
 void
@@ -1937,7 +1937,7 @@ stanza_free_presence(XMPPPresence* presence)
     if (presence->status) {
         free(presence->status);
     }
-    FREE_SET_NULL(presence);
+    g_free(presence);
 }
 
 XMPPPresence*
@@ -2050,30 +2050,6 @@ stanza_create_omemo_devicelist_request(xmpp_ctx_t* ctx, const gchar* const id,
     xmpp_stanza_add_child(iq, pubsub);
 
     xmpp_stanza_release(items);
-    xmpp_stanza_release(pubsub);
-
-    return iq;
-}
-
-xmpp_stanza_t*
-stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t* ctx, const gchar* const jid)
-{
-    auto_gchar gchar* id = connection_create_stanza_id();
-    xmpp_stanza_t* iq = xmpp_iq_new(ctx, STANZA_TYPE_SET, id);
-
-    xmpp_stanza_t* pubsub = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(pubsub, STANZA_NAME_PUBSUB);
-    xmpp_stanza_set_ns(pubsub, STANZA_NS_PUBSUB);
-
-    xmpp_stanza_t* subscribe = xmpp_stanza_new(ctx);
-    xmpp_stanza_set_name(subscribe, STANZA_NAME_SUBSCRIBE);
-    xmpp_stanza_set_attribute(subscribe, STANZA_ATTR_NODE, STANZA_NS_OMEMO_DEVICELIST);
-    xmpp_stanza_set_attribute(subscribe, "jid", jid);
-
-    xmpp_stanza_add_child(pubsub, subscribe);
-    xmpp_stanza_add_child(iq, pubsub);
-
-    xmpp_stanza_release(subscribe);
     xmpp_stanza_release(pubsub);
 
     return iq;

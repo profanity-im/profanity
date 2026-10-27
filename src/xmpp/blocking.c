@@ -23,6 +23,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/stanza.h"
 #include "xmpp/iq.h"
+#include "xmpp/blocking.h"
 
 static int _blocklist_result_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _block_add_result_handler(xmpp_stanza_t* const stanza, void* const userdata);

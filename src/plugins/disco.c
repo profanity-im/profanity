@@ -13,6 +13,7 @@
 #include <stdlib.h>
 
 #include <glib.h>
+#include "plugins/disco.h"
 
 // features to reference count map
 static GHashTable* features = NULL;
@@ -114,13 +115,6 @@ disco_get_features(void)
 void
 disco_close(void)
 {
-    if (features) {
-        g_hash_table_destroy(features);
-        features = NULL;
-    }
-
-    if (plugin_to_features) {
-        g_hash_table_destroy(plugin_to_features);
-        plugin_to_features = NULL;
-    }
+    g_clear_pointer(&features, g_hash_table_destroy);
+    g_clear_pointer(&plugin_to_features, g_hash_table_destroy);
 }

@@ -20,6 +20,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/stanza.h"
 #include "xmpp/connection.h"
+#include "xmpp/form.h"
 
 static gboolean
 _is_valid_form_element(xmpp_stanza_t* stanza)

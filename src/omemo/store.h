@@ -232,26 +232,3 @@ int save_identity(const signal_protocol_address* address, uint8_t* key_data, siz
  * @return 1 if trusted, 0 if untrusted, negative on failure
  */
 int is_trusted_identity(const signal_protocol_address* address, uint8_t* key_data, size_t key_len, void* user_data);
-
-/**
- * Store a serialized sender key record for a given
- * (groupId + senderId + deviceId) tuple.
- *
- * @param sender_key_name the (groupId + senderId + deviceId) tuple
- * @param record pointer to a buffer containing the serialized record
- * @param record_len length of the serialized record
- * @return 0 on success, negative on failure
- */
-int store_sender_key(const signal_protocol_sender_key_name* sender_key_name, uint8_t* record, size_t record_len, uint8_t* user_record, size_t user_record_len, void* user_data);
-
-/**
- * Returns a copy of the sender key record corresponding to the
- * (groupId + senderId + deviceId) tuple.
- *
- * @param record pointer to a newly allocated buffer containing the record,
- *     if found. Unset if no record was found.
- *     The Signal Protocol library is responsible for freeing this buffer.
- * @param sender_key_name the (groupId + senderId + deviceId) tuple
- * @return 1 if the record was loaded, 0 if the record was not found, negative on failure
- */
-int load_sender_key(signal_buffer** record, signal_buffer** user_record, const signal_protocol_sender_key_name* sender_key_name, void* user_data);

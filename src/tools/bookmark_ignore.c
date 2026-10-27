@@ -17,6 +17,7 @@
 #include "config/preferences.h"
 
 #include "log.h"
+#include "tools/bookmark_ignore.h"
 
 #include "xmpp/xmpp.h"
 
@@ -25,14 +26,14 @@ static GKeyFile* bookmark_ignore_keyfile = NULL;
 static gchar* account_jid = NULL;
 
 static void
-_bookmark_ignore_load()
+_bookmark_ignore_load(void)
 {
     load_data_keyfile(&bookmark_ignore_prof_keyfile, FILE_BOOKMARK_AUTOJOIN_IGNORE);
     bookmark_ignore_keyfile = bookmark_ignore_prof_keyfile.keyfile;
 }
 
 static void
-_bookmark_save()
+_bookmark_save(void)
 {
     save_keyfile(&bookmark_ignore_prof_keyfile);
 }
@@ -51,8 +52,7 @@ bookmark_ignore_on_disconnect(void)
 {
     free_keyfile(&bookmark_ignore_prof_keyfile);
     bookmark_ignore_keyfile = NULL;
-    g_free(account_jid);
-    account_jid = NULL;
+    g_clear_pointer(&account_jid, g_free);
 }
 
 gboolean

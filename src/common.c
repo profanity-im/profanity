@@ -116,8 +116,11 @@ auto_close_gfd(gint* fd)
     if (fd == NULL)
         return;
 
-    if (close(*fd) == EOF)
-        log_error(g_strerror(errno));
+    GError* error = NULL;
+    if (!g_clear_fd(fd, &error)) {
+        log_error("Failed closing fd: %s", error->message);
+        g_error_free(error);
+    }
 }
 
 /**
@@ -219,11 +222,8 @@ void
 free_keyfile(prof_keyfile_t* keyfile)
 {
     log_debug("[Keyfile]: free %s", STR_MAYBE_NULL(keyfile->filename));
-    if (keyfile->keyfile)
-        g_key_file_free(keyfile->keyfile);
-    keyfile->keyfile = NULL;
-    g_free(keyfile->filename);
-    keyfile->filename = NULL;
+    g_clear_pointer(&keyfile->keyfile, g_key_file_free);
+    g_clear_pointer(&keyfile->filename, g_free);
 }
 
 gboolean
@@ -388,7 +388,7 @@ str_xml_sanitize(const gchar* const str)
         curr = g_utf8_next_char(curr);
     }
 
-    return g_string_free(sanitized, FALSE);
+    return g_string_free_and_steal(sanitized);
 }
 
 typedef gboolean (*CharFilterFunc)(gunichar ch);
@@ -580,7 +580,7 @@ strip_arg_quotes(const gchar* const input)
         }
     }
 
-    return g_string_free(unescaped, FALSE);
+    return g_string_free_and_steal(unescaped);
 }
 
 gboolean

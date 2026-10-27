@@ -38,7 +38,8 @@
 static void _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid);
 static void _chatwin_set_last_message(ProfChatWin* chatwin, const char* const id, const char* const message);
 
-gboolean
+#ifdef HAVE_LIBGPGME
+static gboolean
 _pgp_automatic_start(const char* const recipient)
 {
     gboolean result = FALSE;
@@ -52,7 +53,7 @@ _pgp_automatic_start(const char* const recipient)
     return result;
 }
 
-gboolean
+static gboolean
 _ox_automatic_start(const char* const recipient)
 {
     gboolean result = FALSE;
@@ -65,6 +66,7 @@ _ox_automatic_start(const char* const recipient)
     account_free(account);
     return result;
 }
+#endif
 
 ProfChatWin*
 chatwin_new(const char* const barejid)
@@ -94,10 +96,12 @@ chatwin_new(const char* const barejid)
     // We start a new OMEMO session if this contact has been configured accordingly.
     // However, if OTR is *also* configured, ask the user to choose between OMEMO and OTR.
 
+    gboolean is_pgp_secure = FALSE;
     gboolean is_ox_secure = FALSE;
     gboolean is_otr_secure = FALSE;
     gboolean is_omemo_secure = FALSE;
 #ifdef HAVE_LIBGPGME
+    is_pgp_secure = _pgp_automatic_start(barejid);
     is_ox_secure = _ox_automatic_start(barejid);
 #endif
 
@@ -109,7 +113,7 @@ chatwin_new(const char* const barejid)
     is_otr_secure = otr_is_secure(barejid);
 #endif
 
-    if (is_omemo_secure + is_otr_secure + _pgp_automatic_start(barejid) + is_ox_secure > 1) {
+    if (is_omemo_secure + is_otr_secure + is_pgp_secure + is_ox_secure > 1) {
         win_println(window, THEME_DEFAULT, "!", "This chat could be either OMEMO, PGP, OX or OTR encrypted, but not more than one. "
                                                 "Use '/omemo start', '/pgp start', '/ox start' or '/otr start' to select the encryption method.");
     } else if (is_omemo_secure) {
@@ -118,7 +122,7 @@ chatwin_new(const char* const barejid)
         omemo_start_session(barejid);
         chatwin->is_omemo = TRUE;
 #endif
-    } else if (_pgp_automatic_start(barejid)) {
+    } else if (is_pgp_secure) {
         // Start the PGP session
         chatwin->pgp_send = TRUE;
     } else if (is_ox_secure) {
@@ -481,52 +485,43 @@ chatwin_get_string(ProfChatWin* chatwin)
         g_string_append_printf(res, ", %d unread", chatwin->unread);
     }
 
-    return g_string_free(res, FALSE);
+    return g_string_free_and_steal(res);
 }
 
 void
 chatwin_set_enctext(ProfChatWin* chatwin, const char* const enctext)
 {
-    if (chatwin->enctext) {
-        g_free(chatwin->enctext);
-    }
-    chatwin->enctext = g_strdup(enctext);
+    g_set_str(&chatwin->enctext, enctext);
 }
 
 void
 chatwin_unset_enctext(ProfChatWin* chatwin)
 {
-    FREE_SET_NULL(chatwin->enctext);
+    g_clear_pointer(&chatwin->enctext, g_free);
 }
 
 void
 chatwin_set_incoming_char(ProfChatWin* chatwin, const char* const ch)
 {
-    if (chatwin->incoming_char) {
-        g_free(chatwin->incoming_char);
-    }
-    chatwin->incoming_char = g_strdup(ch);
+    g_set_str(&chatwin->incoming_char, ch);
 }
 
 void
 chatwin_unset_incoming_char(ProfChatWin* chatwin)
 {
-    FREE_SET_NULL(chatwin->incoming_char);
+    g_clear_pointer(&chatwin->incoming_char, g_free);
 }
 
 void
 chatwin_set_outgoing_char(ProfChatWin* chatwin, const char* const ch)
 {
-    if (chatwin->outgoing_char) {
-        g_free(chatwin->outgoing_char);
-    }
-    chatwin->outgoing_char = g_strdup(ch);
+    g_set_str(&chatwin->outgoing_char, ch);
 }
 
 void
 chatwin_unset_outgoing_char(ProfChatWin* chatwin)
 {
-    FREE_SET_NULL(chatwin->outgoing_char);
+    g_clear_pointer(&chatwin->outgoing_char, g_free);
 }
 
 static void
@@ -593,13 +588,6 @@ chatwin_db_history(ProfChatWin* chatwin, const char* start_time, const char* end
 static void
 _chatwin_set_last_message(ProfChatWin* chatwin, const char* const id, const char* const message)
 {
-    if (chatwin->last_message != message) {
-        g_free(chatwin->last_message);
-        chatwin->last_message = g_strdup(message);
-    }
-
-    if (chatwin->last_msg_id != id) {
-        g_free(chatwin->last_msg_id);
-        chatwin->last_msg_id = g_strdup(id);
-    }
+    g_set_str(&chatwin->last_message, message);
+    g_set_str(&chatwin->last_msg_id, id);
 }

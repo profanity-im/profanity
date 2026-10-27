@@ -18,6 +18,7 @@
 #include "xmpp/stanza.h"
 #include "xmpp/iq.h"
 #include "pgp/ox.h"
+#include "xmpp/ox.h"
 
 #ifdef HAVE_LIBGPGME
 
@@ -38,7 +39,7 @@ static int _ox_public_key_result(xmpp_stanza_t* const stanza, void* const userda
  * YYYY-MM-DDThh:mm:ssZ
  */
 
-static char* _gettimestamp();
+static char* _gettimestamp(void);
 
 /*!
  *
@@ -454,8 +455,8 @@ _ox_public_key_result(xmpp_stanza_t* const stanza, void* const userdata)
 }
 
 // Date and Time (XEP-0082)
-char*
-_gettimestamp()
+static char*
+_gettimestamp(void)
 {
     GDateTime* dt = g_date_time_new_now_local();
     gchar* datestr = g_date_time_format(dt, "%FT%TZ");

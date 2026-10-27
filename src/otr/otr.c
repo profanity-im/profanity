@@ -134,10 +134,7 @@ static void
 _otr_shutdown(void)
 {
     g_hash_table_destroy(smp_initiators);
-    if (jid) {
-        g_free(jid);
-        jid = NULL;
-    }
+    g_clear_pointer(&jid, g_free);
     if (user_state) {
         otrl_userstate_free(user_state);
         user_state = NULL;

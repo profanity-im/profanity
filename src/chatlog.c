@@ -48,7 +48,7 @@ static void _chat_log_chat(const gchar* const login, const gchar* const other, c
 static void _groupchat_log_chat(const gchar* const login, const gchar* const room, const gchar* const nick,
                                 const gchar* const msg);
 
-void
+static void
 _chatlog_close(void)
 {
     g_hash_table_destroy(logs);
@@ -178,7 +178,7 @@ chat_log_omemo_msg_in(ProfMessage* message)
             if (message->type == PROF_MSG_TYPE_MUCPM) {
                 _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
             } else {
-                _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, message->from_jid->resourcepart);
+                _chat_log_chat(mybarejid, message->from_jid->barejid, "[redacted]", PROF_IN_LOG, message->timestamp, NULL);
             }
         }
     }
@@ -364,11 +364,11 @@ _get_log_filename(const gchar* const other, const gchar* const login, GDateTime*
     auto_gchar gchar* chatlogs_dir = files_file_in_account_data_path(DIR_CHATLOGS, login, is_room ? "rooms" : NULL);
     auto_gchar gchar* logfile_name = g_date_time_format(dt, "%Y_%m_%d.log");
     auto_gchar gchar* other_ = files_sanitize_jid(other);
-    auto_gchar gchar* logs_path = g_strdup_printf("%s/%s", chatlogs_dir, other_);
+    auto_gchar gchar* logs_path = g_build_filename(chatlogs_dir, other_, NULL);
 
     create_dir(logs_path);
 
-    return g_strdup_printf("%s/%s", logs_path, logfile_name);
+    return g_build_filename(logs_path, logfile_name, NULL);
 }
 
 static struct dated_chat_log*
@@ -412,11 +412,8 @@ static void
 _free_chat_log(struct dated_chat_log* dated_log)
 {
     if (dated_log) {
-        GFREE_SET_NULL(dated_log->filename);
-        if (dated_log->date) {
-            g_date_time_unref(dated_log->date);
-            dated_log->date = NULL;
-        }
+        g_clear_pointer(&dated_log->filename, g_free);
+        g_clear_pointer(&dated_log->date, g_date_time_unref);
         g_free(dated_log);
     }
 }

@@ -15,6 +15,7 @@
 #include <glib.h>
 
 void prof_run(const gchar* const log_level, const gchar* const account_name, const gchar* const config_file, const gchar* const log_file, const gchar* const theme_name, gchar** commands);
+void prof_shutdown(void);
 gboolean prof_set_quit(void);
 
 extern pthread_mutex_t lock;

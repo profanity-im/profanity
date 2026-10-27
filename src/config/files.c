@@ -104,7 +104,7 @@ files_sanitize_jid(const gchar* const jid)
     GString* s = g_string_new(jid);
     g_string_replace(s, "@", "_at_", 0);
 
-    return g_string_free(s, FALSE);
+    return g_string_free_and_steal(s);
 }
 
 gchar*
@@ -132,19 +132,24 @@ files_get_account_data_path(const gchar* const specific_dir, const gchar* const 
 gchar*
 files_file_in_account_data_path(const gchar* const specific_dir, const gchar* const jid, const gchar* const file_name)
 {
-    gchar* data_path = files_get_account_data_path(specific_dir, jid);
+    g_auto(GPathBuf) pbuf = G_PATH_BUF_INIT;
+    auto_gchar gchar* data_dir = files_get_data_path(specific_dir);
+    auto_gchar gchar* account_dir = files_sanitize_jid(jid);
 
-    if (!create_dir(data_path)) {
-        g_free(data_path);
+    g_path_buf_init_from_path(&pbuf, data_dir);
+    if (account_dir) {
+        g_path_buf_push(&pbuf, account_dir);
+    }
+
+    if (!create_dir(g_path_buf_to_path(&pbuf))) {
         return NULL;
     }
 
-    if (!file_name) {
-        return data_path;
+    if (file_name) {
+        g_path_buf_push(&pbuf, file_name);
     }
-    gchar* filename = g_build_filename(data_path, file_name, NULL);
-    g_free(data_path);
-    return filename;
+
+    return g_path_buf_clear_to_path(&pbuf);
 }
 
 gchar*

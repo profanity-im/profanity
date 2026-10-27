@@ -238,16 +238,16 @@ _prefs_load(void)
         autocomplete_add(room_trigger_ac, triggers[i]);
     }
 
-    GFREE_SET_NULL(pref_otr_char);
+    g_clear_pointer(&pref_otr_char, g_free);
     pref_otr_char = g_key_file_get_string(prefs, PREF_GROUP_OTR, "otr.char", NULL);
 
-    GFREE_SET_NULL(pref_pgp_char);
+    g_clear_pointer(&pref_pgp_char, g_free);
     pref_pgp_char = g_key_file_get_string(prefs, PREF_GROUP_PGP, "pgp.char", NULL);
 
-    GFREE_SET_NULL(pref_ox_char);
+    g_clear_pointer(&pref_ox_char, g_free);
     pref_ox_char = g_key_file_get_string(prefs, PREF_GROUP_OX, "ox.char", NULL);
 
-    GFREE_SET_NULL(pref_omemo_char);
+    g_clear_pointer(&pref_omemo_char, g_free);
     pref_omemo_char = g_key_file_get_string(prefs, PREF_GROUP_OMEMO, "omemo.char", NULL);
 }
 
@@ -255,10 +255,10 @@ _prefs_load(void)
 static void
 _prefs_close(void)
 {
-    GFREE_SET_NULL(pref_otr_char);
-    GFREE_SET_NULL(pref_pgp_char);
-    GFREE_SET_NULL(pref_ox_char);
-    GFREE_SET_NULL(pref_omemo_char);
+    g_clear_pointer(&pref_otr_char, g_free);
+    g_clear_pointer(&pref_pgp_char, g_free);
+    g_clear_pointer(&pref_ox_char, g_free);
+    g_clear_pointer(&pref_omemo_char, g_free);
 
     autocomplete_free(boolean_choice_ac);
     autocomplete_free(room_trigger_ac);
@@ -1039,7 +1039,7 @@ _prefs_set_encryption_char(gchar** cached_var, const gchar* const ch, const gcha
 {
     if (g_utf8_strlen(ch, 4) == 1) {
         g_key_file_set_string(prefs, pref_group, key, ch);
-        GFREE_SET_NULL(*cached_var);
+        g_clear_pointer(cached_var, g_free);
         *cached_var = g_strdup(ch);
         return TRUE;
     } else {
@@ -1705,12 +1705,12 @@ prefs_get_aliases(void)
     }
 }
 
-void
+static void
 _free_alias(ProfAlias* alias)
 {
-    GFREE_SET_NULL(alias->name);
-    GFREE_SET_NULL(alias->value);
-    GFREE_SET_NULL(alias);
+    g_clear_pointer(&alias->name, g_free);
+    g_clear_pointer(&alias->value, g_free);
+    g_free(alias);
 }
 
 void

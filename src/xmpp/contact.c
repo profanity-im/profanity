@@ -78,10 +78,9 @@ p_contact_new(const gchar* const barejid, const gchar* const name,
 void
 p_contact_set_name(const PContact contact, const gchar* const name)
 {
-    GFREE_SET_NULL(contact->name);
-    GFREE_SET_NULL(contact->name_collate_key);
-    if (name) {
-        contact->name = g_strdup(name);
+    g_clear_pointer(&contact->name_collate_key, g_free);
+    g_set_str(&contact->name, name);
+    if (contact->name) {
         contact->name_collate_key = g_utf8_collate_key(contact->name, -1);
     }
 }
@@ -229,7 +228,7 @@ _highest_presence(Resource* first, Resource* second)
     }
 }
 
-Resource*
+static Resource*
 _get_most_available_resource(PContact contact)
 {
     // find resource with highest priority, if more than one,
@@ -383,10 +382,7 @@ p_contact_set_presence(const PContact contact, Resource* resource)
 void
 p_contact_set_subscription(const PContact contact, const gchar* const subscription)
 {
-    GFREE_SET_NULL(contact->subscription);
-    if (subscription) {
-        contact->subscription = g_strdup(subscription);
-    }
+    g_set_str(&contact->subscription, subscription);
 }
 
 void
@@ -398,10 +394,7 @@ p_contact_set_pending_out(const PContact contact, gboolean pending_out)
 void
 p_contact_set_last_activity(const PContact contact, GDateTime* last_activity)
 {
-    if (contact->last_activity) {
-        g_date_time_unref(contact->last_activity);
-        contact->last_activity = NULL;
-    }
+    g_clear_pointer(&contact->last_activity, g_date_time_unref);
 
     if (last_activity) {
         contact->last_activity = g_date_time_ref(last_activity);

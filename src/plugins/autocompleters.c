@@ -15,6 +15,7 @@
 
 #include "tools/autocomplete.h"
 #include "command/cmd_ac.h"
+#include "plugins/autocompleters.h"
 
 static GHashTable* plugin_to_acs;
 static GHashTable* plugin_to_filepath_acs;

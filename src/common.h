@@ -19,8 +19,6 @@
 #define notify_notification_new(summary, body, icon) notify_notification_new(summary, body, icon, NULL)
 #endif
 
-#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
-
 #define PROF_STRINGIFY_(n) #n
 #define PROF_STRINGIFY(n)  PROF_STRINGIFY_(n)
 
@@ -122,18 +120,6 @@ free_keyfile(prof_keyfile_t* keyfile);
 // assume malloc stores at most 8 bytes for size of allocated memory
 // and page size is at least 4KB
 #define READ_BUF_SIZE 4088
-
-#define FREE_SET_NULL(resource) \
-    do {                        \
-        free(resource);         \
-        resource = NULL;        \
-    } while (0)
-
-#define GFREE_SET_NULL(resource) \
-    do {                         \
-        g_free(resource);        \
-        resource = NULL;         \
-    } while (0)
 
 void prof_wipe_string(gchar* str);
 

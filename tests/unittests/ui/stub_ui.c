@@ -222,12 +222,6 @@ ui_win_unread(int index)
 }
 
 gboolean
-ui_win_has_attention(int index)
-{
-    return FALSE;
-}
-
-gboolean
 win_has_attention(ProfWin* window)
 {
     return FALSE;
@@ -501,7 +495,6 @@ mucwin_unset_message_char(ProfMucWin* mucwin)
 
 void win_update_entry_message(ProfWin* window, const gchar* const id, const gchar* const message) {};
 void win_mark_received(ProfWin* window, const char* const id) {};
-void win_print_http_transfer(ProfWin* window, const gchar* const message, const gchar* const id) {};
 void win_print_loading_history(ProfWin* window) {};
 void win_remove_loading_history(ProfWin* window) {};
 
@@ -815,10 +808,6 @@ cons_show_account(ProfAccount* account)
 }
 
 void
-cons_debug(const char* const msg, ...)
-{
-}
-void
 cons_show_time(void)
 {
 }
@@ -906,11 +895,6 @@ void
 cons_show_account_list(gchar** accounts)
 {
     check_expected(accounts);
-}
-
-void
-cons_show_room_list(GSList* room, const char* const conference_node)
-{
 }
 
 void

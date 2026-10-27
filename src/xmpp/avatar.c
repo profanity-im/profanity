@@ -495,16 +495,24 @@ avatar_get_path(const gchar* const jid)
     const gchar* target_jid = (jidp && jidp->barejid) ? jidp->barejid : jid;
     auto_gchar gchar* sanitized = files_sanitize_jid(target_jid);
     const gchar* dirs[] = { "avatars", DIR_PHOTOS, NULL };
-    const gchar* extensions[] = { ".png", ".jpeg", ".jpg", ".webp", "", NULL };
+    const gchar* extensions[] = { "png", "jpeg", "jpg", "webp", NULL };
+
+    g_auto(GPathBuf) pbuf = G_PATH_BUF_INIT;
 
     for (int d = 0; dirs[d] != NULL; d++) {
         auto_gchar gchar* base_path = files_get_data_path(dirs[d]);
+        g_path_buf_init_from_path(&pbuf, base_path);
+        g_path_buf_push(&pbuf, sanitized);
+
+        if (g_file_test(g_path_buf_to_path(&pbuf), G_FILE_TEST_EXISTS)) {
+            return g_path_buf_clear_to_path(&pbuf);
+        }
+
         for (int i = 0; extensions[i] != NULL; i++) {
-            gchar* full_path = g_strdup_printf("%s/%s%s", base_path, sanitized, extensions[i]);
-            if (g_file_test(full_path, G_FILE_TEST_EXISTS)) {
-                return full_path;
+            g_path_buf_set_extension(&pbuf, extensions[i]);
+            if (g_file_test(g_path_buf_to_path(&pbuf), G_FILE_TEST_EXISTS)) {
+                return g_path_buf_clear_to_path(&pbuf);
             }
-            g_free(full_path);
         }
     }
 

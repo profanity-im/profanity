@@ -2726,7 +2726,7 @@ _cmd_index(const Command* cmd)
         index = g_string_append(index, " ");
     }
 
-    return g_string_free(index, FALSE);
+    return g_string_free_and_steal(index);
 }
 
 GList*
@@ -2787,10 +2787,8 @@ static void
 _cmd_uninit(void)
 {
     cmd_ac_uninit();
-    g_hash_table_destroy(commands);
-    commands = NULL;
-    g_hash_table_destroy(search_index);
-    search_index = NULL;
+    g_clear_pointer(&commands, g_hash_table_destroy);
+    g_clear_pointer(&search_index, g_hash_table_destroy);
 }
 
 /*
@@ -2809,7 +2807,7 @@ cmd_init(void)
 
     // load command defs into hash table
     commands = g_hash_table_new(g_str_hash, g_str_equal);
-    for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
+    for (unsigned int i = 0; i < G_N_ELEMENTS(command_defs); i++) {
         const Command* pcmd = command_defs + i;
 
         // add to hash
@@ -2896,7 +2894,7 @@ command_docgen(void)
 {
     GList* cmds = NULL;
 
-    for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
+    for (unsigned int i = 0; i < G_N_ELEMENTS(command_defs); i++) {
         const Command* pcmd = command_defs + i;
         cmds = g_list_insert_sorted(cmds, (gpointer)pcmd, (GCompareFunc)_cmp_command);
     }
@@ -2983,7 +2981,7 @@ command_mangen(void)
 {
     GList* cmds = NULL;
 
-    for (unsigned int i = 0; i < ARRAY_SIZE(command_defs); i++) {
+    for (unsigned int i = 0; i < G_N_ELEMENTS(command_defs); i++) {
         const Command* pcmd = command_defs + i;
         cmds = g_list_insert_sorted(cmds, (gpointer)pcmd, (GCompareFunc)_cmp_command);
     }

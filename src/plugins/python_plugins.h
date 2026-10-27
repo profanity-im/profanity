@@ -15,8 +15,8 @@
 ProfPlugin* python_plugin_create(const char* const filename);
 void python_plugin_destroy(ProfPlugin* plugin);
 void python_check_error(void);
-void allow_python_threads();
-void disable_python_threads();
+void allow_python_threads(void);
+void disable_python_threads(void);
 
 const char* python_get_version_string(void);
 gchar* python_get_version_number(void);

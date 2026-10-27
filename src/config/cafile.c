@@ -17,6 +17,7 @@
 
 #include "common.h"
 #include "config/files.h"
+#include "config/cafile.h"
 #include "log.h"
 #include "xmpp/xmpp.h"
 
@@ -27,7 +28,7 @@ _cafile_name(void)
     if (!create_dir(certs_dir)) {
         return NULL;
     }
-    return g_strdup_printf("%s/CAfile.pem", certs_dir);
+    return g_build_filename(certs_dir, "CAfile.pem", NULL);
 }
 
 void
@@ -74,7 +75,7 @@ cafile_get_name(void)
          * of servers you're trying to connect to are in your OS trust-store
          */
         log_debug("[CAfile] file %s not created yet", cafile);
-        GFREE_SET_NULL(cafile);
+        g_clear_pointer(&cafile, g_free);
     }
     return cafile;
 }

@@ -1084,7 +1084,7 @@ wins_create_summary(gboolean unread)
 }
 
 GSList*
-wins_create_summary_attention()
+wins_create_summary_attention(void)
 {
     GSList* result = NULL;
 
@@ -1144,17 +1144,11 @@ win_close_reset_search_attempts(void)
 void
 wins_destroy(void)
 {
-    if (values)
-        g_list_free(values);
-    if (keys)
-        g_list_free(keys);
-    values = keys = NULL;
-    g_hash_table_destroy(windows);
-    windows = NULL;
-    autocomplete_free(wins_ac);
-    wins_ac = NULL;
-    autocomplete_free(wins_close_ac);
-    wins_close_ac = NULL;
+    g_clear_pointer(&values, g_list_free);
+    g_clear_pointer(&keys, g_list_free);
+    g_clear_pointer(&windows, g_hash_table_destroy);
+    g_clear_pointer(&wins_ac, autocomplete_free);
+    g_clear_pointer(&wins_close_ac, autocomplete_free);
 }
 
 ProfWin*
@@ -1269,12 +1263,4 @@ wins_get_url(const gchar* const search_str, gboolean previous, void* context)
     ProfWin* win = (ProfWin*)context;
 
     return autocomplete_complete(win->urls_ac, search_str, FALSE, previous);
-}
-
-char*
-wins_get_quote(const gchar* const search_str, gboolean previous, void* context)
-{
-    ProfWin* win = (ProfWin*)context;
-
-    return autocomplete_complete(win->quotes_ac, search_str, FALSE, previous);
 }

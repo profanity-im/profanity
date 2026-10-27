@@ -408,19 +408,3 @@ is_trusted_identity(const signal_protocol_address* address, uint8_t* key_data,
         return ret;
     }
 }
-
-int
-store_sender_key(const signal_protocol_sender_key_name* sender_key_name,
-                 uint8_t* record, size_t record_len, uint8_t* user_record,
-                 size_t user_record_len, void* user_data)
-{
-    return SG_SUCCESS;
-}
-
-int
-load_sender_key(signal_buffer** record, signal_buffer** user_record,
-                const signal_protocol_sender_key_name* sender_key_name,
-                void* user_data)
-{
-    return SG_SUCCESS;
-}

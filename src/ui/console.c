@@ -45,17 +45,6 @@ static void _show_roster_contacts(GSList* list, gboolean show_groups);
 static GList* alert_list;
 
 void
-cons_debug(const char* const msg, ...)
-{
-#ifdef PACKAGE_STATUS_DEVELOPMENT
-    va_list arg;
-    va_start(arg, msg);
-    win_println_va(wins_get_console(), THEME_DEFAULT, "-", msg, arg);
-    va_end(arg);
-#endif
-}
-
-void
 cons_show(const char* const msg, ...)
 {
     va_list arg;
@@ -215,7 +204,7 @@ cons_show_typing(const char* const barejid)
     cons_alert(NULL);
 }
 
-char*
+static char*
 _room_triggers_to_string(GList* triggers)
 {
     GString* triggers_str = g_string_new("");
@@ -228,7 +217,7 @@ _room_triggers_to_string(GList* triggers)
         }
     }
 
-    return g_string_free(triggers_str, FALSE);
+    return g_string_free_and_steal(triggers_str);
 }
 
 void
@@ -595,28 +584,6 @@ cons_show_sent_subs(void)
     } else {
         cons_show("No pending requests sent.");
     }
-    cons_alert(NULL);
-}
-
-void
-cons_show_room_list(GSList* rooms, const char* const conference_node)
-{
-    ProfWin* console = wins_get_console();
-    if (rooms && (g_slist_length(rooms) > 0)) {
-        cons_show("Chat rooms at %s:", conference_node);
-        while (rooms) {
-            DiscoItem* room = rooms->data;
-            win_print(console, THEME_DEFAULT, "-", "  %s", room->jid);
-            if (room->name) {
-                win_append(console, THEME_DEFAULT, ", (%s)", room->name);
-            }
-            win_newline(console);
-            rooms = g_slist_next(rooms);
-        }
-    } else {
-        cons_show("No chat rooms at %s", conference_node);
-    }
-
     cons_alert(NULL);
 }
 
@@ -1327,7 +1294,7 @@ cons_occupants_setting(void)
     }
 }
 
-void
+static void
 cons_rooms_cache_setting(void)
 {
     if (prefs_get_boolean(PREF_ROOM_LIST_CACHE)) {

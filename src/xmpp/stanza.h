@@ -339,7 +339,6 @@ void stanza_attach_publish_options_va(xmpp_ctx_t* const ctx, xmpp_stanza_t* cons
 void stanza_attach_publish_options(xmpp_ctx_t* const ctx, xmpp_stanza_t* const iq, const gchar* const option, const gchar* const value);
 
 xmpp_stanza_t* stanza_create_omemo_devicelist_request(xmpp_ctx_t* ctx, const gchar* const id, const gchar* const jid);
-xmpp_stanza_t* stanza_create_omemo_devicelist_subscribe(xmpp_ctx_t* ctx, const gchar* const jid);
 xmpp_stanza_t* stanza_create_omemo_devicelist_publish(xmpp_ctx_t* ctx, GList* const ids);
 xmpp_stanza_t* stanza_create_omemo_bundle_publish(xmpp_ctx_t* ctx, const gchar* const id, uint32_t device_id, const unsigned char* const identity_key, size_t identity_key_length, const unsigned char* const signed_prekey, size_t signed_prekey_length, const unsigned char* const signed_prekey_signature, size_t signed_prekey_signature_length, GList* const prekeys, GList* const prekeys_id, GList* const prekeys_length);
 xmpp_stanza_t* stanza_create_omemo_bundle_request(xmpp_ctx_t* ctx, const gchar* const id, const gchar* const jid, uint32_t device_id);

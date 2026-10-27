@@ -65,7 +65,7 @@ void wins_reestablished_connection(void);
 void wins_omemo_trust_changed(const gchar* const jid);
 gboolean wins_tidy(void);
 GSList* wins_create_summary(gboolean unread);
-GSList* wins_create_summary_attention();
+GSList* wins_create_summary_attention(void);
 void wins_destroy(void);
 GList* wins_get_nums(void);
 void wins_swap(int source_win, int target_win);
@@ -80,6 +80,5 @@ void win_close_reset_search_attempts(void);
 void wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message, const gboolean flip);
 char* wins_get_url(const gchar* const search_str, gboolean previous, void* context);
 void wins_add_quotes_ac(const ProfWin* const win, const gchar* const message, const gboolean flip);
-char* wins_get_quote(const gchar* const search_str, gboolean previous, void* context);
 
 #endif

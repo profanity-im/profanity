@@ -27,6 +27,7 @@
 #include "plugins/themes.h"
 #include "plugins/settings.h"
 #include "plugins/disco.h"
+#include "plugins/api.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/roster_list.h"

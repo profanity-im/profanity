@@ -34,6 +34,7 @@
 #include "xmpp/iq.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/muc.h"
+#include "xmpp/presence.h"
 
 static Autocomplete sub_requests_ac;
 

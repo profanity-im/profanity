@@ -10,6 +10,8 @@
 #ifndef BOOKMARK_IGNORE_H
 #define BOOKMARK_IGNORE_H
 
+typedef struct bookmark_t Bookmark;
+
 void bookmark_ignore_on_connect(const gchar* const barejid);
 void bookmark_ignore_on_disconnect(void);
 gboolean bookmark_ignored(Bookmark* bookmark);

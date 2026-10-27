@@ -265,12 +265,6 @@ static Autocomplete adhoc_cmd_ac;
 static Autocomplete lastactivity_ac;
 static Autocomplete vcard_ac;
 static Autocomplete vcard_photo_ac;
-static Autocomplete vcard_element_ac;
-static Autocomplete vcard_set_ac;
-static Autocomplete vcard_name_ac;
-static Autocomplete vcard_set_param_ac;
-static Autocomplete vcard_togglable_param_ac;
-static Autocomplete vcard_address_type_ac;
 static Autocomplete history_ac;
 static Autocomplete history_mam_ac;
 
@@ -424,12 +418,6 @@ static Autocomplete* all_acs[] = {
     &lastactivity_ac,
     &vcard_ac,
     &vcard_photo_ac,
-    &vcard_element_ac,
-    &vcard_set_ac,
-    &vcard_name_ac,
-    &vcard_set_param_ac,
-    &vcard_togglable_param_ac,
-    &vcard_address_type_ac,
     &history_ac,
     &history_mam_ac,
 };
@@ -447,7 +435,7 @@ void
 cmd_ac_init(void)
 {
     size_t n;
-    for (n = 0; n < ARRAY_SIZE(all_acs); ++n) {
+    for (n = 0; n < G_N_ELEMENTS(all_acs); ++n) {
         *(all_acs[n]) = autocomplete_new();
     }
 
@@ -1274,67 +1262,6 @@ cmd_ac_init(void)
     autocomplete_add(vcard_photo_ac, "open");
     autocomplete_add(vcard_photo_ac, "save");
 
-    autocomplete_add(vcard_element_ac, "nickname");
-    autocomplete_add(vcard_element_ac, "birthday");
-    autocomplete_add(vcard_element_ac, "address");
-    autocomplete_add(vcard_element_ac, "tel");
-    autocomplete_add(vcard_element_ac, "email");
-    autocomplete_add(vcard_element_ac, "jid");
-    autocomplete_add(vcard_element_ac, "title");
-    autocomplete_add(vcard_element_ac, "role");
-    autocomplete_add(vcard_element_ac, "note");
-    autocomplete_add(vcard_element_ac, "url");
-
-    autocomplete_add(vcard_set_ac, "fullname");
-    autocomplete_add(vcard_set_ac, "name");
-
-    autocomplete_add(vcard_name_ac, "family");
-    autocomplete_add(vcard_name_ac, "given");
-    autocomplete_add(vcard_name_ac, "middle");
-    autocomplete_add(vcard_name_ac, "prefix");
-    autocomplete_add(vcard_name_ac, "suffix");
-
-    autocomplete_add(vcard_set_param_ac, "pobox");
-    autocomplete_add(vcard_set_param_ac, "extaddr");
-    autocomplete_add(vcard_set_param_ac, "street");
-    autocomplete_add(vcard_set_param_ac, "locality");
-    autocomplete_add(vcard_set_param_ac, "region");
-    autocomplete_add(vcard_set_param_ac, "pocode");
-    autocomplete_add(vcard_set_param_ac, "country");
-    autocomplete_add(vcard_set_param_ac, "type");
-    autocomplete_add(vcard_set_param_ac, "home");
-    autocomplete_add(vcard_set_param_ac, "work");
-    autocomplete_add(vcard_set_param_ac, "voice");
-    autocomplete_add(vcard_set_param_ac, "fax");
-    autocomplete_add(vcard_set_param_ac, "pager");
-    autocomplete_add(vcard_set_param_ac, "msg");
-    autocomplete_add(vcard_set_param_ac, "cell");
-    autocomplete_add(vcard_set_param_ac, "video");
-    autocomplete_add(vcard_set_param_ac, "bbs");
-    autocomplete_add(vcard_set_param_ac, "modem");
-    autocomplete_add(vcard_set_param_ac, "isdn");
-    autocomplete_add(vcard_set_param_ac, "pcs");
-    autocomplete_add(vcard_set_param_ac, "preferred");
-    autocomplete_add(vcard_set_param_ac, "x400");
-
-    autocomplete_add(vcard_togglable_param_ac, "home");
-    autocomplete_add(vcard_togglable_param_ac, "work");
-    autocomplete_add(vcard_togglable_param_ac, "voice");
-    autocomplete_add(vcard_togglable_param_ac, "fax");
-    autocomplete_add(vcard_togglable_param_ac, "pager");
-    autocomplete_add(vcard_togglable_param_ac, "msg");
-    autocomplete_add(vcard_togglable_param_ac, "cell");
-    autocomplete_add(vcard_togglable_param_ac, "video");
-    autocomplete_add(vcard_togglable_param_ac, "bbs");
-    autocomplete_add(vcard_togglable_param_ac, "modem");
-    autocomplete_add(vcard_togglable_param_ac, "isdn");
-    autocomplete_add(vcard_togglable_param_ac, "pcs");
-    autocomplete_add(vcard_togglable_param_ac, "preferred");
-    autocomplete_add(vcard_togglable_param_ac, "x400");
-
-    autocomplete_add(vcard_address_type_ac, "domestic");
-    autocomplete_add(vcard_address_type_ac, "international");
-
     autocomplete_add(history_ac, "local");
     autocomplete_add(history_ac, "mam");
 
@@ -1592,25 +1519,13 @@ cmd_ac_reset(ProfWin* window)
     omemo_fingerprint_autocomplete_reset();
 #endif
     size_t n;
-    for (n = ARRAY_SIZE(all_acs); n > 0; --n) {
+    for (n = G_N_ELEMENTS(all_acs); n > 0; --n) {
         autocomplete_reset(*(all_acs[n - 1]));
     }
-    if (theme_load_ac) {
-        autocomplete_free(theme_load_ac);
-        theme_load_ac = NULL;
-    }
-    if (plugins_load_ac) {
-        autocomplete_free(plugins_load_ac);
-        plugins_load_ac = NULL;
-    }
-    if (plugins_unload_ac) {
-        autocomplete_free(plugins_unload_ac);
-        plugins_unload_ac = NULL;
-    }
-    if (plugins_reload_ac) {
-        autocomplete_free(plugins_reload_ac);
-        plugins_reload_ac = NULL;
-    }
+    g_clear_pointer(&theme_load_ac, autocomplete_free);
+    g_clear_pointer(&plugins_load_ac, autocomplete_free);
+    g_clear_pointer(&plugins_unload_ac, autocomplete_free);
+    g_clear_pointer(&plugins_reload_ac, autocomplete_free);
 
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
@@ -1639,17 +1554,15 @@ void
 cmd_ac_uninit(void)
 {
     size_t n;
-    for (n = ARRAY_SIZE(all_acs); n > 0; --n) {
+    for (n = G_N_ELEMENTS(all_acs); n > 0; --n) {
         autocomplete_free(*(all_acs[n - 1]));
     }
-    autocomplete_free(theme_load_ac);
-    autocomplete_free(plugins_load_ac);
-    autocomplete_free(plugins_unload_ac);
-    autocomplete_free(plugins_reload_ac);
-    g_free(last_filepath_input);
-    last_filepath_input = NULL;
-    g_hash_table_destroy(ac_funcs);
-    ac_funcs = NULL;
+    g_clear_pointer(&theme_load_ac, autocomplete_free);
+    g_clear_pointer(&plugins_load_ac, autocomplete_free);
+    g_clear_pointer(&plugins_unload_ac, autocomplete_free);
+    g_clear_pointer(&plugins_reload_ac, autocomplete_free);
+    g_clear_pointer(&last_filepath_input, g_free);
+    g_clear_pointer(&ac_funcs, g_hash_table_destroy);
 }
 
 static void
@@ -1795,7 +1708,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
                                  "/vercheck", "/privileges", "/wrap",
                                  "/carbons", "/slashguard", "/silence" };
 
-    for (size_t i = 0; i < ARRAY_SIZE(boolean_choices); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(boolean_choices); i++) {
         result = autocomplete_param_with_func(input, boolean_choices[i], prefs_autocomplete_boolean_choice, previous, NULL);
         if (result) {
             return result;
@@ -1815,7 +1728,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
         if (nick_ac) {
             gchar* nick_choices[] = { "/msg", "/info", "/caps" };
 
-            for (size_t i = 0; i < ARRAY_SIZE(nick_choices); i++) {
+            for (size_t i = 0; i < G_N_ELEMENTS(nick_choices); i++) {
                 result = autocomplete_param_with_ac(input, nick_choices[i], nick_ac, TRUE, previous);
                 if (result) {
                     return result;
@@ -1826,7 +1739,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
         // otherwise autocomplete using roster
     } else if (conn_status == JABBER_CONNECTED) {
         gchar* contact_choices[] = { "/msg", "/info" };
-        for (size_t i = 0; i < ARRAY_SIZE(contact_choices); i++) {
+        for (size_t i = 0; i < G_N_ELEMENTS(contact_choices); i++) {
             result = autocomplete_param_with_func(input, contact_choices[i], roster_contact_autocomplete, previous, NULL);
             if (result) {
                 return result;
@@ -1838,7 +1751,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
         }
 
         gchar* resource_choices[] = { "/caps", "/ping" };
-        for (size_t i = 0; i < ARRAY_SIZE(resource_choices); i++) {
+        for (size_t i = 0; i < G_N_ELEMENTS(resource_choices); i++) {
             result = autocomplete_param_with_func(input, resource_choices[i], roster_fulljid_autocomplete, previous, NULL);
             if (result) {
                 return result;
@@ -1847,7 +1760,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
     }
 
     gchar* invite_choices[] = { "/join" };
-    for (size_t i = 0; i < ARRAY_SIZE(invite_choices); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(invite_choices); i++) {
         result = autocomplete_param_with_func(input, invite_choices[i], muc_invites_find, previous, NULL);
         if (result) {
             return result;
@@ -1868,7 +1781,7 @@ _cmd_ac_complete_params(ProfWin* window, const gchar* const input, gboolean prev
         { "/inputwin", winpos_ac },
     };
 
-    for (size_t i = 0; i < ARRAY_SIZE(ac_cmds); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(ac_cmds); i++) {
         result = autocomplete_param_with_ac(input, ac_cmds[i].cmd, ac_cmds[i].completer, TRUE, previous);
         if (result) {
             return result;
@@ -1958,7 +1871,7 @@ _who_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
                                         "/who chat", "/who away", "/who xa", "/who dnd", "/who available",
                                         "/who unavailable" };
 
-            for (size_t i = 0; i < ARRAY_SIZE(group_commands); i++) {
+            for (size_t i = 0; i < G_N_ELEMENTS(group_commands); i++) {
                 result = autocomplete_param_with_func(input, group_commands[i], roster_group_autocomplete, previous, NULL);
                 if (result) {
                     return result;
@@ -2280,7 +2193,7 @@ _notify_autocomplete(ProfWin* window, const gchar* const input, gboolean previou
 
     gchar* boolean_choices1[] = { "/notify room current", "/notify chat current", "/notify typing current",
                                   "/notify room text", "/notify chat text", "/notify room offline" };
-    for (size_t i = 0; i < ARRAY_SIZE(boolean_choices1); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(boolean_choices1); i++) {
         result = autocomplete_param_with_func(input, boolean_choices1[i], prefs_autocomplete_boolean_choice, previous, NULL);
         if (result) {
             return result;
@@ -2313,7 +2226,7 @@ _notify_autocomplete(ProfWin* window, const gchar* const input, gboolean previou
     }
 
     gchar* boolean_choices2[] = { "/notify invite", "/notify sub", "/notify mention", "/notify trigger" };
-    for (size_t i = 0; i < ARRAY_SIZE(boolean_choices2); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(boolean_choices2); i++) {
         result = autocomplete_param_with_func(input, boolean_choices2[i], prefs_autocomplete_boolean_choice, previous, NULL);
         if (result) {
             return result;
@@ -3708,7 +3621,7 @@ _account_autocomplete(ProfWin* window, const gchar* const input, gboolean previo
                                 "/account disable", "/account rename", "/account clear", "/account remove",
                                 "/account default set" };
 
-    for (size_t i = 0; i < ARRAY_SIZE(account_choice); i++) {
+    for (size_t i = 0; i < G_N_ELEMENTS(account_choice); i++) {
         found = autocomplete_param_with_func(input, account_choice[i], accounts_find_all, previous, NULL);
         if (found) {
             return found;
@@ -4251,68 +4164,6 @@ static gchar*
 _vcard_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
 {
     gchar* result = NULL;
-
-    gboolean parse_result = FALSE;
-    auto_gcharv gchar** args = parse_args(input, 0, 7, &parse_result);
-
-    if (parse_result && (g_strcmp0(args[0], "set") == 0)) {
-        gboolean space_at_end = g_str_has_suffix(input, " ");
-        int num_args = g_strv_length(args);
-        gboolean is_num = TRUE;
-
-        if (num_args >= 2) {
-            for (size_t i = 0; i < strlen(args[1]); i++) {
-                if (!isdigit((int)args[1][i])) {
-                    is_num = FALSE;
-                    break;
-                }
-            }
-        }
-
-        if ((num_args == 2 && space_at_end && is_num) || (num_args == 3 && !space_at_end && is_num)) {
-            GString* beginning = g_string_new("/vcard");
-            g_string_append_printf(beginning, " %s %s", args[0], args[1]);
-            result = autocomplete_param_with_ac(input, beginning->str, vcard_set_param_ac, TRUE, previous);
-            g_string_free(beginning, TRUE);
-            if (result) {
-                return result;
-            }
-        } else if ((num_args == 3 && space_at_end && is_num && (g_strcmp0(args[2], "type") == 0)) || (num_args == 4 && !space_at_end && is_num && (g_strcmp0(args[2], "type") == 0))) {
-            GString* beginning = g_string_new("/vcard");
-            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            result = autocomplete_param_with_ac(input, beginning->str, vcard_address_type_ac, TRUE, previous);
-            g_string_free(beginning, TRUE);
-            if (result) {
-                return result;
-            }
-        } else if ((num_args == 3 && space_at_end && is_num && autocomplete_contains(vcard_togglable_param_ac, args[2])) || (num_args == 4 && !space_at_end && is_num && autocomplete_contains(vcard_togglable_param_ac, args[2]))) {
-            GString* beginning = g_string_new("/vcard");
-            g_string_append_printf(beginning, " %s %s %s", args[0], args[1], args[2]);
-            result = autocomplete_param_with_func(input, beginning->str, prefs_autocomplete_boolean_choice, previous, NULL);
-            g_string_free(beginning, TRUE);
-            if (result) {
-                return result;
-            }
-        } else {
-            result = autocomplete_param_with_ac(input, "/vcard set name", vcard_name_ac, TRUE, previous);
-
-            if (result) {
-                return result;
-            }
-
-            result = autocomplete_param_with_ac(input, "/vcard set", vcard_set_ac, TRUE, previous);
-
-            if (result) {
-                return result;
-            }
-        }
-    }
-
-    result = autocomplete_param_with_ac(input, "/vcard add", vcard_element_ac, TRUE, previous);
-
-    if (result) {
-        return result;
-    }
 
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;

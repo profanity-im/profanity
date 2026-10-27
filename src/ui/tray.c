@@ -391,20 +391,9 @@ _tray_shutdown(void)
         registration_id = 0;
     }
 
-    if (introspection_data) {
-        g_dbus_node_info_unref(introspection_data);
-        introspection_data = NULL;
-    }
-
-    if (service_name) {
-        g_free(service_name);
-        service_name = NULL;
-    }
-
-    if (icon_theme_path) {
-        g_free(icon_theme_path);
-        icon_theme_path = NULL;
-    }
+    g_clear_pointer(&introspection_data, g_dbus_node_info_unref);
+    g_clear_pointer(&service_name, g_free);
+    g_clear_pointer(&icon_theme_path, g_free);
 }
 
 void

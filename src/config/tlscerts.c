@@ -36,8 +36,7 @@ _tlscerts_close(void)
     free_keyfile(&tlscerts_prof_keyfile);
     tlscerts = NULL;
 
-    g_free(current_fp);
-    current_fp = NULL;
+    g_clear_pointer(&current_fp, g_free);
 
     autocomplete_free(certs_ac);
 }
@@ -81,10 +80,7 @@ tlscerts_current_fingerprint_equals(const TLSCertificate* cert)
 void
 tlscerts_clear_current(void)
 {
-    if (current_fp) {
-        g_free(current_fp);
-        current_fp = NULL;
-    }
+    g_clear_pointer(&current_fp, g_free);
 }
 
 gboolean
