@@ -404,3 +404,39 @@ plugins_periodic_timer(void** state)
     prof_input("/plugins unload timer_test.lua");
     assert_true(prof_output_exact("Unloaded plugin: timer_test.lua"));
 }
+
+void
+plugins_error_handling_crash_immunity(void** state)
+{
+    const char* plugin_dir = "./tests/functionaltests/files/xdg_data_home/profanity/plugins";
+    g_mkdir_with_parents(plugin_dir, 0700);
+
+    const char* script = "function prof_init(version, status, account, fulljid)\n"
+                         "    prof.register_command('/buggycmd', 0, 0, cmd_buggy, '/buggycmd', 'Buggy command')\n"
+                         "    prof.register_command('/goodcmd', 0, 0, cmd_good, '/goodcmd', 'Good command')\n"
+                         "end\n"
+                         "function cmd_buggy()\n"
+                         "    error('intentional plugin crash!')\n"
+                         "end\n"
+                         "function cmd_good()\n"
+                         "    prof.cons.show('goodcmd executed successfully')\n"
+                         "end\n";
+
+    char* script_path = g_build_filename(plugin_dir, "error_test.lua", NULL);
+    g_file_set_contents(script_path, script, -1, NULL);
+    g_free(script_path);
+
+    prof_input("/plugins load error_test.lua");
+    assert_true(prof_output_exact("Loaded plugin: error_test.lua"));
+
+    // Execute buggy command; must be safely caught by lua_pcall and logged to console
+    prof_input("/buggycmd");
+    assert_true(prof_output_regex("Plugin error in command .*intentional plugin crash!"));
+
+    // Verify VM and client remain healthy by running subsequent command
+    prof_input("/goodcmd");
+    assert_true(prof_output_exact("goodcmd executed successfully"));
+
+    prof_input("/plugins unload error_test.lua");
+    assert_true(prof_output_exact("Unloaded plugin: error_test.lua"));
+}

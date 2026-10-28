@@ -18,5 +18,6 @@ void plugins_window_lifecycle_and_input(void** state);
 void plugins_settings_persistence(void** state);
 void plugins_autocompletion(void** state);
 void plugins_periodic_timer(void** state);
+void plugins_error_handling_crash_immunity(void** state);
 
 #endif
