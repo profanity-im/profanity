@@ -128,6 +128,8 @@ main(int argc, char* argv[])
 
 #ifdef HAVE_PLUGINS
         PROF_FUNC_TEST(plugins_load_and_run_command),
+        PROF_FUNC_TEST(plugins_priority_ordering),
+        PROF_FUNC_TEST(plugins_priority_alphabetical_tie_break),
 #endif
     };
 
