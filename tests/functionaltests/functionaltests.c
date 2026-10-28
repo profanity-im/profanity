@@ -130,6 +130,7 @@ main(int argc, char* argv[])
         PROF_FUNC_TEST(plugins_load_and_run_command),
         PROF_FUNC_TEST(plugins_priority_ordering),
         PROF_FUNC_TEST(plugins_priority_alphabetical_tie_break),
+        PROF_FUNC_TEST(plugins_message_filter_chain),
 #endif
     };
 

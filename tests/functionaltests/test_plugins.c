@@ -127,3 +127,57 @@ plugins_priority_alphabetical_tie_break(void** state)
     prof_input("/plugins unload plugin_beta.lua");
     assert_true(prof_output_exact("Unloaded plugin: plugin_beta.lua"));
 }
+
+void
+plugins_message_filter_chain(void** state)
+{
+    const char* plugin_dir = "./tests/functionaltests/files/xdg_data_home/profanity/plugins";
+    g_mkdir_with_parents(plugin_dir, 0700);
+
+    // Plugin 1: EARLY priority, transforms "apple" to "banana"
+    const char* script_early = "prof_priority = prof.PRIORITY_EARLY\n"
+                               "function prof_pre_chat_message_send(barejid, msg)\n"
+                               "    local modified, count = string.gsub(msg, 'apple', 'banana')\n"
+                               "    return modified\n"
+                               "end\n";
+
+    // Plugin 2: NORMAL priority, transforms "banana" to "cherry"
+    const char* script_normal = "prof_priority = prof.PRIORITY_NORMAL\n"
+                                "function prof_pre_chat_message_send(barejid, msg)\n"
+                                "    local modified, count = string.gsub(msg, 'banana', 'cherry')\n"
+                                "    return modified\n"
+                                "end\n";
+
+    char* path_early = g_build_filename(plugin_dir, "filter_early.lua", NULL);
+    char* path_normal = g_build_filename(plugin_dir, "filter_normal.lua", NULL);
+    g_file_set_contents(path_early, script_early, -1, NULL);
+    g_file_set_contents(path_normal, script_normal, -1, NULL);
+    g_free(path_early);
+    g_free(path_normal);
+
+    prof_input("/plugins load filter_early.lua");
+    assert_true(prof_output_exact("Loaded plugin: filter_early.lua"));
+
+    prof_input("/plugins load filter_normal.lua");
+    assert_true(prof_output_exact("Loaded plugin: filter_normal.lua"));
+
+    prof_connect();
+
+    prof_input("/msg buddy@localhost");
+    prof_input("I like apple");
+
+    assert_true(stbbr_received(
+        "<message id='*' to='buddy@localhost' type='chat'>"
+        "<body>I like cherry</body>"
+        "</message>"));
+
+    assert_true(prof_output_exact("me: I like cherry"));
+
+    prof_input("/win 1");
+
+    prof_input("/plugins unload filter_early.lua");
+    assert_true(prof_output_exact("Unloaded plugin: filter_early.lua"));
+
+    prof_input("/plugins unload filter_normal.lua");
+    assert_true(prof_output_exact("Unloaded plugin: filter_normal.lua"));
+}
