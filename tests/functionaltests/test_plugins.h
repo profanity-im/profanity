@@ -16,5 +16,6 @@ void plugins_stanza_interception_and_drop(void** state);
 void plugins_disco_add_feature_advertised(void** state);
 void plugins_window_lifecycle_and_input(void** state);
 void plugins_settings_persistence(void** state);
+void plugins_autocompletion(void** state);
 
 #endif

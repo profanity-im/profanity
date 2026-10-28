@@ -345,3 +345,32 @@ plugins_settings_persistence(void** state)
     prof_input("/plugins unload settings_test.lua");
     assert_true(prof_output_exact("Unloaded plugin: settings_test.lua"));
 }
+
+void
+plugins_autocompletion(void** state)
+{
+    const char* plugin_dir = "./tests/functionaltests/files/xdg_data_home/profanity/plugins";
+    g_mkdir_with_parents(plugin_dir, 0700);
+
+    const char* script = "function prof_init(version, status, account, fulljid)\n"
+                         "    prof.register_command('/actest', 0, 1, cmd_ac, '/actest [arg]', 'Autocomplete test')\n"
+                         "    prof.completer.add('/actest', { 'banana', 'blueberry' })\n"
+                         "end\n"
+                         "function cmd_ac(arg)\n"
+                         "    prof.cons.show('actest: ' .. (arg or 'none'))\n"
+                         "end\n";
+
+    char* script_path = g_build_filename(plugin_dir, "ac_test.lua", NULL);
+    g_file_set_contents(script_path, script, -1, NULL);
+    g_free(script_path);
+
+    prof_input("/plugins load ac_test.lua");
+    assert_true(prof_output_exact("Loaded plugin: ac_test.lua"));
+
+    // Type partial subcommand and send TAB, then Enter
+    prof_send_raw("/actest ban\t\n");
+    assert_true(prof_output_exact("actest: banana"));
+
+    prof_input("/plugins unload ac_test.lua");
+    assert_true(prof_output_exact("Unloaded plugin: ac_test.lua"));
+}

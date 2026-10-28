@@ -135,6 +135,7 @@ main(int argc, char* argv[])
         PROF_FUNC_TEST(plugins_disco_add_feature_advertised),
         PROF_FUNC_TEST(plugins_window_lifecycle_and_input),
         PROF_FUNC_TEST(plugins_settings_persistence),
+        PROF_FUNC_TEST(plugins_autocompletion),
 #endif
     };
 
