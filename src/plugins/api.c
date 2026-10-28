@@ -32,6 +32,7 @@
 #include "plugins/settings.h"
 #include "plugins/disco.h"
 #include "plugins/api.h"
+#include "plugins/plugins.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
 #include "xmpp/roster_list.h"
@@ -1132,6 +1133,15 @@ api_init_lua(const char* const plugin_name, lua_State* L)
     lua_setfield(L, LUA_REGISTRYINDEX, "prof_plugin_name");
 
     luaL_newlib(L, prof_lib);
+
+    lua_pushinteger(L, PROF_PLUGIN_PRIORITY_EARLY);
+    lua_setfield(L, -2, "PRIORITY_EARLY");
+
+    lua_pushinteger(L, PROF_PLUGIN_PRIORITY_NORMAL);
+    lua_setfield(L, -2, "PRIORITY_NORMAL");
+
+    lua_pushinteger(L, PROF_PLUGIN_PRIORITY_LATE);
+    lua_setfield(L, -2, "PRIORITY_LATE");
 
     luaL_newlib(L, log_lib);
     lua_setfield(L, -2, "log");

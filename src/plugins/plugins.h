@@ -19,6 +19,14 @@
 #include <lauxlib.h>
 #endif
 
+#define PROF_PLUGIN_PRIORITY_EARLY  1
+#define PROF_PLUGIN_PRIORITY_NORMAL 100
+#define PROF_PLUGIN_PRIORITY_LATE   200
+
+#define PROF_PLUGIN_PRIORITY_EARLY  1
+#define PROF_PLUGIN_PRIORITY_NORMAL 100
+#define PROF_PLUGIN_PRIORITY_LATE   200
+
 typedef struct prof_plugins_install_t
 {
     GSList* installed;
@@ -69,6 +77,7 @@ typedef struct prof_plugin_t
 #ifdef HAVE_PLUGINS
     lua_State* L;
     uint64_t hook_mask;
+    int priority;
 #endif
 } ProfPlugin;
 

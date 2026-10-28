@@ -31,6 +31,18 @@
 #include "xmpp/xmpp.h"
 
 static GHashTable* plugins = NULL;
+static GList* plugins_ordered = NULL;
+
+static gint
+_plugin_compare(gconstpointer a, gconstpointer b)
+{
+    const ProfPlugin* p1 = a;
+    const ProfPlugin* p2 = b;
+    if (p1->priority != p2->priority) {
+        return p1->priority - p2->priority;
+    }
+    return g_strcmp0(p1->name, p2->name);
+}
 
 const char*
 plugins_get_lua_version(void)
@@ -315,7 +327,6 @@ _lua_plugin_create(const char* const filename)
     };
 
     G_STATIC_ASSERT(G_N_ELEMENTS(hooks) <= 64);
-
     for (size_t i = 0; i < G_N_ELEMENTS(hooks); i++) {
         lua_getglobal(L, hooks[i]);
         if (lua_isfunction(L, -1)) {
@@ -323,6 +334,14 @@ _lua_plugin_create(const char* const filename)
         }
         lua_pop(L, 1);
     }
+
+    lua_getglobal(L, "prof_priority");
+    if (lua_isnumber(L, -1)) {
+        plugin->priority = lua_tointeger(L, -1);
+    } else {
+        plugin->priority = PROF_PLUGIN_PRIORITY_NORMAL;
+    }
+    lua_pop(L, 1);
 
     return plugin;
 }
@@ -353,11 +372,9 @@ _plugin_call_init(ProfPlugin* plugin, const char* version, const char* status,
 static void
 _plugins_shutdown(void)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList *curr = values, *next;
+    GList* curr = plugins_ordered;
 
     while (curr) {
-        next = g_list_next(curr);
         ProfPlugin* plugin = curr->data;
 #ifdef HAVE_PLUGINS
         if (plugin->L) {
@@ -366,16 +383,17 @@ _plugins_shutdown(void)
         }
         _plugin_destroy(plugin);
 #endif
-        curr = next;
+        curr = g_list_next(curr);
     }
-    g_list_free(values);
 
     plugin_settings_close();
     plugin_themes_close();
     autocompleters_destroy();
+
     callbacks_close();
     disco_close();
     g_clear_pointer(&plugins, g_hash_table_destroy);
+    g_clear_pointer(&plugins_ordered, g_list_free);
 }
 
 void
@@ -401,6 +419,7 @@ plugins_init(void)
             ProfPlugin* plugin = _lua_plugin_create(filename);
             if (plugin) {
                 g_hash_table_insert(plugins, g_strdup(filename), plugin);
+                plugins_ordered = g_list_insert_sorted(plugins_ordered, plugin, _plugin_compare);
                 loaded = TRUE;
             }
         }
@@ -414,8 +433,7 @@ plugins_init(void)
 
     // initialise plugins
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_INIT) {
@@ -423,7 +441,6 @@ plugins_init(void)
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -545,7 +562,9 @@ plugins_load(const char* const name, GString* error_message)
 #endif
 
     if (plugin) {
+
         g_hash_table_insert(plugins, g_strdup(name), plugin);
+        plugins_ordered = g_list_insert_sorted(plugins_ordered, plugin, _plugin_compare);
 #ifdef HAVE_PLUGINS
         if (plugin->hook_mask & HOOK_INIT) {
             if (connection_get_status() == JABBER_CONNECTED) {
@@ -622,10 +641,12 @@ plugins_unload(const char* const name)
 #endif
         callbacks_remove(name);
         prefs_remove_plugin(name);
+
+        plugins_ordered = g_list_remove(plugins_ordered, plugin);
+        g_hash_table_remove(plugins, name);
 #ifdef HAVE_PLUGINS
         _plugin_destroy(plugin);
 #endif
-        g_hash_table_remove(plugins, name);
 
         caps_reset_ver();
         if (connection_get_status() == JABBER_CONNECTED) {
@@ -747,15 +768,13 @@ void
 plugins_on_start(void)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_START)
             _lua_call_void_0arg(plugin, "prof_on_start");
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -775,15 +794,13 @@ void
 plugins_on_connect(const char* const account_name, const char* const fulljid)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_CONNECT)
             _lua_call_void_2str(plugin, "prof_on_connect", account_name, fulljid);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -791,15 +808,13 @@ void
 plugins_on_disconnect(const char* const account_name, const char* const fulljid)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_DISCONNECT)
             _lua_call_void_2str(plugin, "prof_on_disconnect", account_name, fulljid);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -808,8 +823,7 @@ plugins_pre_chat_message_display(const char* const barejid, const char* const re
 {
 #ifdef HAVE_PLUGINS
     char* result = NULL;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
 
@@ -822,7 +836,6 @@ plugins_pre_chat_message_display(const char* const barejid, const char* const re
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return NULL;
@@ -833,15 +846,13 @@ void
 plugins_post_chat_message_display(const char* const barejid, const char* const resource, const char* message)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_POST_CHAT_MESSAGE_DISPLAY)
             _lua_call_void_3str(plugin, "prof_post_chat_message_display", barejid, resource, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -850,8 +861,7 @@ plugins_pre_chat_message_send(const char* const barejid, const char* message)
 {
 #ifdef HAVE_PLUGINS
     char* result = NULL;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
 
@@ -864,7 +874,6 @@ plugins_pre_chat_message_send(const char* const barejid, const char* message)
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return NULL;
@@ -875,15 +884,13 @@ void
 plugins_post_chat_message_send(const char* const barejid, const char* message)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_POST_CHAT_MESSAGE_SEND)
             _lua_call_void_2str(plugin, "prof_post_chat_message_send", barejid, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -892,8 +899,7 @@ plugins_pre_room_message_display(const char* const barejid, const char* const ni
 {
 #ifdef HAVE_PLUGINS
     char* result = NULL;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
 
@@ -906,7 +912,6 @@ plugins_pre_room_message_display(const char* const barejid, const char* const ni
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return NULL;
@@ -917,15 +922,13 @@ void
 plugins_post_room_message_display(const char* const barejid, const char* const nick, const char* message)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_POST_ROOM_MESSAGE_DISPLAY)
             _lua_call_void_3str(plugin, "prof_post_room_message_display", barejid, nick, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -934,8 +937,7 @@ plugins_pre_room_message_send(const char* const barejid, const char* message)
 {
 #ifdef HAVE_PLUGINS
     char* result = NULL;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
 
@@ -948,7 +950,6 @@ plugins_pre_room_message_send(const char* const barejid, const char* message)
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return NULL;
@@ -959,15 +960,13 @@ void
 plugins_post_room_message_send(const char* const barejid, const char* message)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_POST_ROOM_MESSAGE_SEND)
             _lua_call_void_2str(plugin, "prof_post_room_message_send", barejid, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -980,15 +979,13 @@ plugins_on_room_history_message(const char* const barejid, const char* const nic
     if (timestamp) {
         time_str = g_date_time_format_iso8601(timestamp);
     }
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_ROOM_HISTORY_MESSAGE)
             _lua_call_void_4str(plugin, "prof_on_room_history_message", barejid, nick, message, time_str);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -997,8 +994,7 @@ plugins_pre_priv_message_display(const char* const fulljid, const char* message)
 {
 #ifdef HAVE_PLUGINS
     char* result = NULL;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
 
@@ -1011,7 +1007,6 @@ plugins_pre_priv_message_display(const char* const fulljid, const char* message)
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return NULL;
@@ -1022,15 +1017,13 @@ void
 plugins_post_priv_message_display(const char* const fulljid, const char* message)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_POST_PRIV_MESSAGE_DISPLAY)
             _lua_call_void_2str(plugin, "prof_post_priv_message_display", fulljid, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -1039,8 +1032,7 @@ plugins_pre_priv_message_send(const char* const fulljid, const char* const messa
 {
 #ifdef HAVE_PLUGINS
     char* result = NULL;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
 
@@ -1053,7 +1045,6 @@ plugins_pre_priv_message_send(const char* const fulljid, const char* const messa
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return NULL;
@@ -1064,15 +1055,13 @@ void
 plugins_post_priv_message_send(const char* const fulljid, const char* const message)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_POST_PRIV_MESSAGE_SEND)
             _lua_call_void_2str(plugin, "prof_post_priv_message_send", fulljid, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -1081,8 +1070,7 @@ plugins_on_message_stanza_send(const char* const text)
 {
 #ifdef HAVE_PLUGINS
     char* result = NULL;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
 
@@ -1095,7 +1083,6 @@ plugins_on_message_stanza_send(const char* const text)
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return NULL;
@@ -1107,8 +1094,7 @@ plugins_on_message_stanza_receive(const char* const text)
 {
 #ifdef HAVE_PLUGINS
     gboolean result = TRUE;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_MESSAGE_STANZA_RECEIVE) {
@@ -1118,7 +1104,6 @@ plugins_on_message_stanza_receive(const char* const text)
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return TRUE;
@@ -1130,8 +1115,7 @@ plugins_on_presence_stanza_send(const char* const text)
 {
 #ifdef HAVE_PLUGINS
     char* result = NULL;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
 
@@ -1144,7 +1128,6 @@ plugins_on_presence_stanza_send(const char* const text)
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return NULL;
@@ -1156,8 +1139,7 @@ plugins_on_presence_stanza_receive(const char* const text)
 {
 #ifdef HAVE_PLUGINS
     gboolean result = TRUE;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_PRESENCE_STANZA_RECEIVE) {
@@ -1167,7 +1149,6 @@ plugins_on_presence_stanza_receive(const char* const text)
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return TRUE;
@@ -1179,8 +1160,7 @@ plugins_on_iq_stanza_send(const char* const text)
 {
 #ifdef HAVE_PLUGINS
     char* result = NULL;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
 
@@ -1193,7 +1173,6 @@ plugins_on_iq_stanza_send(const char* const text)
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return NULL;
@@ -1205,8 +1184,7 @@ plugins_on_iq_stanza_receive(const char* const text)
 {
 #ifdef HAVE_PLUGINS
     gboolean result = TRUE;
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_IQ_STANZA_RECEIVE) {
@@ -1216,7 +1194,6 @@ plugins_on_iq_stanza_receive(const char* const text)
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
     return result;
 #else
     return TRUE;
@@ -1227,15 +1204,13 @@ void
 plugins_on_contact_offline(const char* const barejid, const char* const resource, const char* const status)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_CONTACT_OFFLINE)
             _lua_call_void_3str(plugin, "prof_on_contact_offline", barejid, resource, status);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -1244,15 +1219,13 @@ plugins_on_contact_presence(const char* const barejid, const char* const resourc
                             const char* const status, const int priority)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_CONTACT_PRESENCE)
             _lua_call_void_presence(plugin, barejid, resource, presence, status, priority);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -1260,15 +1233,13 @@ void
 plugins_on_chat_win_focus(const char* const barejid)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_CHAT_WIN_FOCUS)
             _lua_call_void_1str(plugin, "prof_on_chat_win_focus", barejid);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -1276,15 +1247,13 @@ void
 plugins_on_room_win_focus(const char* const barejid)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_ROOM_WIN_FOCUS)
             _lua_call_void_1str(plugin, "prof_on_room_win_focus", barejid);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -1292,15 +1261,13 @@ void
 plugins_on_room_occupant_join(const char* const roomjid, const char* const nick)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_ROOM_OCCUPANT_JOIN)
             _lua_call_void_2str(plugin, "prof_on_room_occupant_join", roomjid, nick);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -1308,15 +1275,13 @@ void
 plugins_on_room_occupant_leave(const char* const roomjid, const char* const nick, const char* const reason)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_ROOM_OCCUPANT_LEAVE)
             _lua_call_void_3str(plugin, "prof_on_room_occupant_leave", roomjid, nick, reason);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -1324,15 +1289,13 @@ void
 plugins_on_chat_state(const char* const barejid, const char* const state)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_CHAT_STATE)
             _lua_call_void_2str(plugin, "prof_on_chat_state", barejid, state);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -1340,15 +1303,13 @@ void
 plugins_on_message_correction(const char* const barejid, const char* const id, const char* const new_message)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_MESSAGE_CORRECTION)
             _lua_call_void_3str(plugin, "prof_on_message_correction", barejid, id, new_message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -1356,15 +1317,13 @@ void
 plugins_on_win_open(const char* const title, const char* const type)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_WIN_OPEN)
             _lua_call_void_2str(plugin, "prof_on_win_open", title, type);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
@@ -1372,15 +1331,13 @@ void
 plugins_on_win_close(const char* const title, const char* const type)
 {
 #ifdef HAVE_PLUGINS
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
         if (plugin->hook_mask & HOOK_ON_WIN_CLOSE)
             _lua_call_void_2str(plugin, "prof_on_win_close", title, type);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
 #endif
 }
 
