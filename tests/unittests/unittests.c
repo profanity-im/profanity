@@ -704,6 +704,9 @@ main(int argc, char* argv[])
         cmocka_unit_test_setup_teardown(plugins_get_command_names__returns__commands_when_added,
                                         load_preferences,
                                         close_preferences),
+        cmocka_unit_test_setup_teardown(plugins_commands__lookup_and_removal,
+                                        load_preferences,
+                                        close_preferences),
         cmocka_unit_test(plugins_get_lua_version__returns_version_string),
 
         cmocka_unit_test(disco_get_features__returns__empty_list_when_none),

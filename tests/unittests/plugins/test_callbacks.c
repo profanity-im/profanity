@@ -58,6 +58,40 @@ plugins_get_command_names__returns__commands_when_added(void** state)
 }
 
 void
+plugins_commands__lookup_and_removal(void** state)
+{
+    plugins_init();
+
+    PluginCommand* command1 = g_new0(PluginCommand, 1);
+    command1->command_name = g_strdup("/cmd1");
+    CommandHelp* help1 = g_new0(CommandHelp, 1);
+    help1->synopsis[0] = g_strdup("/cmd1 synopsis");
+    command1->help = help1;
+    callbacks_add_command("plugin1", command1);
+
+    PluginCommand* command2 = g_new0(PluginCommand, 1);
+    command2->command_name = g_strdup("/cmd2");
+    callbacks_add_command("plugin2", command2);
+
+    CommandHelp* help = plugins_get_help("/cmd1");
+    assert_non_null(help);
+    assert_string_equal(help->synopsis[0], "/cmd1 synopsis");
+
+    assert_null(plugins_get_help("/nonexistent"));
+
+    callbacks_remove("plugin1");
+
+    assert_null(plugins_get_help("/cmd1"));
+
+    GList* remaining = plugins_get_command_names();
+    assert_int_equal(g_list_length(remaining), 1);
+    assert_string_equal(remaining->data, "/cmd2");
+    g_list_free(remaining);
+
+    callbacks_close();
+}
+
+void
 plugins_get_lua_version__returns_version_string(void** state)
 {
     const char* ver = plugins_get_lua_version();
