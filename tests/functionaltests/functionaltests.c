@@ -132,6 +132,7 @@ main(int argc, char* argv[])
         PROF_FUNC_TEST(plugins_priority_alphabetical_tie_break),
         PROF_FUNC_TEST(plugins_message_filter_chain),
         PROF_FUNC_TEST(plugins_stanza_interception_and_drop),
+        PROF_FUNC_TEST(plugins_disco_add_feature_advertised),
 #endif
     };
 

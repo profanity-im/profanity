@@ -224,3 +224,39 @@ plugins_stanza_interception_and_drop(void** state)
     prof_input("/plugins unload stanza_drop.lua");
     assert_true(prof_output_exact("Unloaded plugin: stanza_drop.lua"));
 }
+
+void
+plugins_disco_add_feature_advertised(void** state)
+{
+    const char* plugin_dir = "./tests/functionaltests/files/xdg_data_home/profanity/plugins";
+    g_mkdir_with_parents(plugin_dir, 0700);
+
+    const char* script = "function prof_init(version, status, account, fulljid)\n"
+                         "    prof.disco.add_feature('urn:xmpp:test-feature-x')\n"
+                         "end\n";
+
+    char* script_path = g_build_filename(plugin_dir, "disco_test.lua", NULL);
+    g_file_set_contents(script_path, script, -1, NULL);
+    g_free(script_path);
+
+    prof_input("/plugins load disco_test.lua");
+    assert_true(prof_output_exact("Loaded plugin: disco_test.lua"));
+
+    prof_connect();
+
+    // Query Profanity for its disco#info features
+    stbbr_send(
+        "<iq id='disco1' to='stabber@localhost/profanity' from='buddy1@localhost/mobile' type='get'>"
+        "<query xmlns='http://jabber.org/protocol/disco#info'/>"
+        "</iq>");
+
+    assert_true(stbbr_received(
+        "<iq id='disco1' to='buddy1@localhost/mobile' type='result'>"
+        "<query xmlns='http://jabber.org/protocol/disco#info'>"
+        "<feature var='urn:xmpp:test-feature-x'/>"
+        "</query>"
+        "</iq>"));
+
+    prof_input("/plugins unload disco_test.lua");
+    assert_true(prof_output_exact("Unloaded plugin: disco_test.lua"));
+}
