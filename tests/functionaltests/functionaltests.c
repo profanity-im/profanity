@@ -136,6 +136,7 @@ main(int argc, char* argv[])
         PROF_FUNC_TEST(plugins_window_lifecycle_and_input),
         PROF_FUNC_TEST(plugins_settings_persistence),
         PROF_FUNC_TEST(plugins_autocompletion),
+        PROF_FUNC_TEST(plugins_periodic_timer),
 #endif
     };
 

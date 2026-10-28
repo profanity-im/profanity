@@ -374,3 +374,33 @@ plugins_autocompletion(void** state)
     prof_input("/plugins unload ac_test.lua");
     assert_true(prof_output_exact("Unloaded plugin: ac_test.lua"));
 }
+
+void
+plugins_periodic_timer(void** state)
+{
+    const char* plugin_dir = "./tests/functionaltests/files/xdg_data_home/profanity/plugins";
+    g_mkdir_with_parents(plugin_dir, 0700);
+
+    const char* script = "local tick = 0\n"
+                         "function prof_init(version, status, account, fulljid)\n"
+                         "    prof.register_timed(on_timer, 1)\n"
+                         "end\n"
+                         "function on_timer()\n"
+                         "    tick = tick + 1\n"
+                         "    prof.cons.show('TIMER_TICK_' .. tostring(tick))\n"
+                         "end\n";
+
+    char* script_path = g_build_filename(plugin_dir, "timer_test.lua", NULL);
+    g_file_set_contents(script_path, script, -1, NULL);
+    g_free(script_path);
+
+    prof_input("/plugins load timer_test.lua");
+    assert_true(prof_output_exact("Loaded plugin: timer_test.lua"));
+
+    // Wait for the 1-second timer to fire and render in the console
+    assert_true(prof_output_exact("TIMER_TICK_1"));
+
+    // Unload the plugin and verify timer is safely unregistered without crashing
+    prof_input("/plugins unload timer_test.lua");
+    assert_true(prof_output_exact("Unloaded plugin: timer_test.lua"));
+}
