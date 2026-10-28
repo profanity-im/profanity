@@ -181,3 +181,46 @@ plugins_message_filter_chain(void** state)
     prof_input("/plugins unload filter_normal.lua");
     assert_true(prof_output_exact("Unloaded plugin: filter_normal.lua"));
 }
+
+void
+plugins_stanza_interception_and_drop(void** state)
+{
+    const char* plugin_dir = "./tests/functionaltests/files/xdg_data_home/profanity/plugins";
+    g_mkdir_with_parents(plugin_dir, 0700);
+
+    const char* script = "function prof_on_message_stanza_receive(stanza)\n"
+                         "    if string.find(stanza, 'SPAM_BLOCK_ME') then\n"
+                         "        prof.cons.show('Dropped spam stanza')\n"
+                         "        return false\n"
+                         "    end\n"
+                         "    return true\n"
+                         "end\n";
+
+    char* script_path = g_build_filename(plugin_dir, "stanza_drop.lua", NULL);
+    g_file_set_contents(script_path, script, -1, NULL);
+    g_free(script_path);
+
+    prof_input("/plugins load stanza_drop.lua");
+    assert_true(prof_output_exact("Loaded plugin: stanza_drop.lua"));
+
+    prof_connect();
+
+    // 1. Send stanza matching the spam condition; plugin drops it
+    stbbr_send(
+        "<message id='spam1' to='stabber@localhost' from='spammer@localhost/bot' type='chat'>"
+        "<body>SPAM_BLOCK_ME</body>"
+        "</message>");
+
+    assert_true(prof_output_exact("Dropped spam stanza"));
+
+    // 2. Send normal stanza; plugin allows it, normal chat notification appears
+    stbbr_send(
+        "<message id='legit1' to='stabber@localhost' from='friend@localhost/home' type='chat'>"
+        "<body>Legit message</body>"
+        "</message>");
+
+    assert_true(prof_output_regex("<< chat message: friend@localhost/home"));
+
+    prof_input("/plugins unload stanza_drop.lua");
+    assert_true(prof_output_exact("Unloaded plugin: stanza_drop.lua"));
+}
