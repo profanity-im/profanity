@@ -267,18 +267,17 @@ plugins_window_lifecycle_and_input(void** state)
     const char* plugin_dir = "./tests/functionaltests/files/xdg_data_home/profanity/plugins";
     g_mkdir_with_parents(plugin_dir, 0700);
 
-    const char* script =
-        "function prof_init(version, status, account, fulljid)\n"
-        "    prof.register_command('/testcustomwin', 0, 0, cmd_open, '/testcustomwin', 'Open custom window')\n"
-        "end\n"
-        "function cmd_open()\n"
-        "    prof.win.create('customtag', on_win_input)\n"
-        "    prof.win.show('customtag', 'CUSTOM_WIN_STARTED')\n"
-        "    prof.win.focus('customtag')\n"
-        "end\n"
-        "function on_win_input(tag, line)\n"
-        "    prof.win.show(tag, 'ECHO: ' .. line)\n"
-        "end\n";
+    const char* script = "function prof_init(version, status, account, fulljid)\n"
+                         "    prof.register_command('/testcustomwin', 0, 0, cmd_open, '/testcustomwin', 'Open custom window')\n"
+                         "end\n"
+                         "function cmd_open()\n"
+                         "    prof.win.create('customtag', on_win_input)\n"
+                         "    prof.win.show('customtag', 'CUSTOM_WIN_STARTED')\n"
+                         "    prof.win.focus('customtag')\n"
+                         "end\n"
+                         "function on_win_input(tag, line)\n"
+                         "    prof.win.show(tag, 'ECHO: ' .. line)\n"
+                         "end\n";
 
     char* script_path = g_build_filename(plugin_dir, "custom_win.lua", NULL);
     g_file_set_contents(script_path, script, -1, NULL);
@@ -296,4 +295,53 @@ plugins_window_lifecycle_and_input(void** state)
     prof_input("/win close");
     prof_input("/plugins unload custom_win.lua");
     assert_true(prof_output_exact("Unloaded plugin: custom_win.lua"));
+}
+
+void
+plugins_settings_persistence(void** state)
+{
+    const char* plugin_dir = "./tests/functionaltests/files/xdg_data_home/profanity/plugins";
+    g_mkdir_with_parents(plugin_dir, 0700);
+
+    const char* script = "function prof_init(version, status, account, fulljid)\n"
+                         "    prof.register_command('/setval', 1, 1, cmd_set, '/setval <val>', 'Set setting')\n"
+                         "    prof.register_command('/getval', 0, 0, cmd_get, '/getval', 'Get setting')\n"
+                         "end\n"
+                         "function cmd_set(val)\n"
+                         "    prof.settings.set('testgroup', 'mykey', val)\n"
+                         "    prof.cons.show('Saved: ' .. val)\n"
+                         "end\n"
+                         "function cmd_get()\n"
+                         "    local val = prof.settings.get('testgroup', 'mykey', 'missing')\n"
+                         "    prof.cons.show('Loaded: ' .. val)\n"
+                         "end\n";
+
+    char* script_path = g_build_filename(plugin_dir, "settings_test.lua", NULL);
+    g_file_set_contents(script_path, script, -1, NULL);
+    g_free(script_path);
+
+    prof_input("/plugins load settings_test.lua");
+    assert_true(prof_output_exact("Loaded plugin: settings_test.lua"));
+
+    // 1. Save setting
+    prof_input("/setval persistent_data_42");
+    assert_true(prof_output_exact("Saved: persistent_data_42"));
+
+    // 2. Read setting in same session
+    prof_input("/getval");
+    assert_true(prof_output_exact("Loaded: persistent_data_42"));
+
+    // 3. Unload plugin
+    prof_input("/plugins unload settings_test.lua");
+    assert_true(prof_output_exact("Unloaded plugin: settings_test.lua"));
+
+    // 4. Reload plugin and verify setting was persisted
+    prof_input("/plugins load settings_test.lua");
+    assert_true(prof_output_exact("Loaded plugin: settings_test.lua"));
+
+    prof_input("/getval");
+    assert_true(prof_output_exact("Loaded: persistent_data_42"));
+
+    prof_input("/plugins unload settings_test.lua");
+    assert_true(prof_output_exact("Unloaded plugin: settings_test.lua"));
 }

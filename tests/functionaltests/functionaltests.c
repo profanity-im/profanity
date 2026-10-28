@@ -134,6 +134,7 @@ main(int argc, char* argv[])
         PROF_FUNC_TEST(plugins_stanza_interception_and_drop),
         PROF_FUNC_TEST(plugins_disco_add_feature_advertised),
         PROF_FUNC_TEST(plugins_window_lifecycle_and_input),
+        PROF_FUNC_TEST(plugins_settings_persistence),
 #endif
     };
 
