@@ -138,6 +138,7 @@ main(int argc, char* argv[])
         PROF_FUNC_TEST(plugins_autocompletion),
         PROF_FUNC_TEST(plugins_periodic_timer),
         PROF_FUNC_TEST(plugins_error_handling_crash_immunity),
+        PROF_FUNC_TEST(plugins_startup_autoloading),
 #endif
     };
 

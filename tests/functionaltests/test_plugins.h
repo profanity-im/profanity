@@ -19,5 +19,6 @@ void plugins_settings_persistence(void** state);
 void plugins_autocompletion(void** state);
 void plugins_periodic_timer(void** state);
 void plugins_error_handling_crash_immunity(void** state);
+void plugins_startup_autoloading(void** state);
 
 #endif

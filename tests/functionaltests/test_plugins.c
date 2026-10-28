@@ -9,6 +9,7 @@
 #include <glib/gstdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 #include "prof_cmocka.h"
@@ -439,4 +440,48 @@ plugins_error_handling_crash_immunity(void** state)
 
     prof_input("/plugins unload error_test.lua");
     assert_true(prof_output_exact("Unloaded plugin: error_test.lua"));
+}
+
+void
+plugins_startup_autoloading(void** state)
+{
+    const char* plugin_dir = "./tests/functionaltests/files/xdg_data_home/profanity/plugins";
+    g_mkdir_with_parents(plugin_dir, 0700);
+
+    const char* script = "function prof_init(version, status, account, fulljid)\n"
+                         "    prof.cons.show('STARTUP_PLUGIN_INITIALIZED')\n"
+                         "    prof.register_command('/startupcmd', 0, 0, cmd_startup, '/startupcmd', 'Startup command')\n"
+                         "end\n"
+                         "function cmd_startup()\n"
+                         "    prof.cons.show('startupcmd executed!')\n"
+                         "end\n";
+
+    char* script_path = g_build_filename(plugin_dir, "startup_test.lua", NULL);
+    g_file_set_contents(script_path, script, -1, NULL);
+    g_free(script_path);
+
+    // 1. Load the plugin so Profanity automatically saves it into profrc preferences
+    prof_input("/plugins load startup_test.lua");
+    assert_true(prof_output_exact("Loaded plugin: startup_test.lua"));
+
+    // 2. Quit Profanity
+    prof_input("/quit");
+    waitpid(prof_pid, NULL, 0);
+
+    // 3. Restart Profanity with existing config and data dirs intact
+    prof_start();
+    usleep(1000 * 500);
+    prof_expect_timeout = 30;
+    assert_true(prof_output_regex("Profanity"));
+    prof_input("/inpblock timeout 5");
+
+    // 4. Assert that the plugin was automatically loaded and initialized on startup
+    assert_true(prof_output_exact("STARTUP_PLUGIN_INITIALIZED"));
+
+    // 5. Assert that its registered command is immediately callable
+    prof_input("/startupcmd");
+    assert_true(prof_output_exact("startupcmd executed!"));
+
+    prof_input("/plugins unload startup_test.lua");
+    assert_true(prof_output_exact("Unloaded plugin: startup_test.lua"));
 }
