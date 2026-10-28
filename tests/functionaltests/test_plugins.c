@@ -260,3 +260,40 @@ plugins_disco_add_feature_advertised(void** state)
     prof_input("/plugins unload disco_test.lua");
     assert_true(prof_output_exact("Unloaded plugin: disco_test.lua"));
 }
+
+void
+plugins_window_lifecycle_and_input(void** state)
+{
+    const char* plugin_dir = "./tests/functionaltests/files/xdg_data_home/profanity/plugins";
+    g_mkdir_with_parents(plugin_dir, 0700);
+
+    const char* script =
+        "function prof_init(version, status, account, fulljid)\n"
+        "    prof.register_command('/testcustomwin', 0, 0, cmd_open, '/testcustomwin', 'Open custom window')\n"
+        "end\n"
+        "function cmd_open()\n"
+        "    prof.win.create('customtag', on_win_input)\n"
+        "    prof.win.show('customtag', 'CUSTOM_WIN_STARTED')\n"
+        "    prof.win.focus('customtag')\n"
+        "end\n"
+        "function on_win_input(tag, line)\n"
+        "    prof.win.show(tag, 'ECHO: ' .. line)\n"
+        "end\n";
+
+    char* script_path = g_build_filename(plugin_dir, "custom_win.lua", NULL);
+    g_file_set_contents(script_path, script, -1, NULL);
+    g_free(script_path);
+
+    prof_input("/plugins load custom_win.lua");
+    assert_true(prof_output_exact("Loaded plugin: custom_win.lua"));
+
+    prof_input("/testcustomwin");
+    assert_true(prof_output_exact("CUSTOM_WIN_STARTED"));
+
+    prof_input("ping from test");
+    assert_true(prof_output_exact("ECHO: ping from test"));
+
+    prof_input("/win close");
+    prof_input("/plugins unload custom_win.lua");
+    assert_true(prof_output_exact("Unloaded plugin: custom_win.lua"));
+}
