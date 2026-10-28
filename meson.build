@@ -688,6 +688,10 @@ if get_option('tests')
         'tests/functionaltests/functionaltests.c',
       )
 
+      if build_plugins
+        functionaltest_sources += files('tests/functionaltests/test_plugins.c')
+      endif
+
       functionaltests = executable(
         'functionaltests',
         functionaltest_sources,
