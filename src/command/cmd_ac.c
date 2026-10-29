@@ -225,7 +225,6 @@ static Autocomplete mucping_ac;
 static Autocomplete plugins_ac;
 static Autocomplete plugins_load_ac;
 static Autocomplete plugins_unload_ac;
-static Autocomplete plugins_reload_ac;
 static Autocomplete filepath_ac;
 static Autocomplete blocked_ac;
 static Autocomplete tray_ac;
@@ -720,7 +719,6 @@ cmd_ac_init(void)
     theme_load_ac = NULL;
     plugins_load_ac = NULL;
     plugins_unload_ac = NULL;
-    plugins_reload_ac = NULL;
 
     autocomplete_add(who_roster_ac, "chat");
     autocomplete_add(who_roster_ac, "online");
@@ -1021,11 +1019,9 @@ cmd_ac_init(void)
     autocomplete_add(mucping_ac, "timeout");
 
     autocomplete_add(plugins_ac, "install");
-    autocomplete_add(plugins_ac, "update");
     autocomplete_add(plugins_ac, "uninstall");
     autocomplete_add(plugins_ac, "load");
     autocomplete_add(plugins_ac, "unload");
-    autocomplete_add(plugins_ac, "reload");
 
     autocomplete_add(blocked_ac, "add");
     autocomplete_add(blocked_ac, "remove");
@@ -1524,7 +1520,6 @@ cmd_ac_reset(ProfWin* window)
     g_clear_pointer(&theme_load_ac, autocomplete_free);
     g_clear_pointer(&plugins_load_ac, autocomplete_free);
     g_clear_pointer(&plugins_unload_ac, autocomplete_free);
-    g_clear_pointer(&plugins_reload_ac, autocomplete_free);
 
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
@@ -1559,7 +1554,6 @@ cmd_ac_uninit(void)
     g_clear_pointer(&theme_load_ac, autocomplete_free);
     g_clear_pointer(&plugins_load_ac, autocomplete_free);
     g_clear_pointer(&plugins_unload_ac, autocomplete_free);
-    g_clear_pointer(&plugins_reload_ac, autocomplete_free);
     g_clear_pointer(&last_filepath_input, g_free);
     g_clear_pointer(&ac_funcs, g_hash_table_destroy);
 }
@@ -2599,10 +2593,6 @@ _plugins_autocomplete(ProfWin* window, const gchar* const input, gboolean previo
         return cmd_ac_complete_filepath(input, "/plugins install", previous);
     }
 
-    if (strncmp(input, "/plugins update ", 16) == 0) {
-        return cmd_ac_complete_filepath(input, "/plugins update", previous);
-    }
-
     if (strncmp(input, "/plugins load ", 14) == 0) {
         if (plugins_load_ac == NULL) {
             plugins_load_ac = autocomplete_new();
@@ -2615,23 +2605,6 @@ _plugins_autocomplete(ProfWin* window, const gchar* const input, gboolean previo
             g_slist_free_full(plugins, g_free);
         }
         result = autocomplete_param_with_ac(input, "/plugins load", plugins_load_ac, TRUE, previous);
-        if (result) {
-            return result;
-        }
-    }
-
-    if (strncmp(input, "/plugins reload ", 16) == 0) {
-        if (plugins_reload_ac == NULL) {
-            plugins_reload_ac = autocomplete_new();
-            GList* plugins = plugins_loaded_list();
-            GList* curr = plugins;
-            while (curr) {
-                autocomplete_add(plugins_reload_ac, curr->data);
-                curr = g_list_next(curr);
-            }
-            g_list_free(plugins);
-        }
-        result = autocomplete_param_with_ac(input, "/plugins reload", plugins_reload_ac, TRUE, previous);
         if (result) {
             return result;
         }

@@ -7108,65 +7108,6 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
 }
 
 gboolean
-cmd_plugins_update(ProfWin* window, const gchar* const command, gchar** args)
-{
-    if (args[1] == NULL) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
-    auto_gchar gchar* scheme = g_uri_parse_scheme(args[1]);
-    if (_http_based_uri_scheme(scheme)) {
-        auto_gchar gchar* plugin_name = basename_from_url(args[1]);
-        if (!_is_correct_plugin_extension(plugin_name)) {
-            cons_show("Please, use url ending with correct file name. Plugins must have the \".lua\" extension.");
-            return TRUE;
-        }
-
-        if (!plugins_uninstall(plugin_name)) {
-            cons_show("Failed to uninstall plugin: %s.", plugin_name);
-            return TRUE;
-        }
-
-        _download_install_plugin(window, args[1], NULL);
-        return TRUE;
-    }
-
-    auto_gchar gchar* path = get_expanded_path(args[1]);
-
-    if (access(path, R_OK) != 0) {
-        cons_show("File not found: %s", path);
-        return TRUE;
-    }
-
-    if (!g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
-        cons_show("Argument must be a file.");
-        return TRUE;
-    }
-
-    if (!g_str_has_suffix(path, ".lua")) {
-        cons_show("Plugins must have the '.lua' extension.");
-        return TRUE;
-    }
-
-    auto_gchar gchar* plugin_name = g_path_get_basename(path);
-    if (!plugins_uninstall(plugin_name)) {
-        cons_show("Failed to uninstall plugin: %s.", plugin_name);
-        return TRUE;
-    }
-
-    GString* error_message = g_string_new(NULL);
-    if (plugins_install(plugin_name, path, error_message)) {
-        cons_show("Plugin installed: %s", plugin_name);
-    } else {
-        cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
-    }
-
-    g_string_free(error_message, TRUE);
-    return TRUE;
-}
-
-gboolean
 cmd_plugins_uninstall(ProfWin* window, const gchar* const command, gchar** args)
 {
     if (args[1] == NULL) {
@@ -7234,27 +7175,6 @@ cmd_plugins_unload(ProfWin* window, const gchar* const command, gchar** args)
     } else {
         cons_show("Failed to unload plugin: %s", args[1]);
     }
-
-    return TRUE;
-}
-
-gboolean
-cmd_plugins_reload(ProfWin* window, const gchar* const command, gchar** args)
-{
-    if (args[1] == NULL) {
-        plugins_reload_all();
-        cons_show("Reloaded all plugins");
-        return TRUE;
-    }
-
-    GString* error_message = g_string_new(NULL);
-    gboolean res = plugins_reload(args[1], error_message);
-    if (res) {
-        cons_show("Reloaded plugin: %s", args[1]);
-    } else {
-        cons_show("Failed to reload plugin: %s, %s.", args[1], error_message->str);
-    }
-    g_string_free(error_message, TRUE);
 
     return TRUE;
 }

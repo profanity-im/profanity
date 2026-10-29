@@ -658,38 +658,6 @@ plugins_unload(const char* const name)
     return FALSE;
 }
 
-gboolean
-plugins_reload(const char* const name, GString* error_message)
-{
-    if (plugins_unload(name)) {
-        return plugins_load(name, error_message);
-    }
-    return FALSE;
-}
-
-void
-plugins_reload_all(void)
-{
-    GList* plugin_names = g_hash_table_get_keys(plugins);
-    GList* plugin_names_dup = NULL;
-    GList* curr = plugin_names;
-    while (curr) {
-        plugin_names_dup = g_list_append(plugin_names_dup, g_strdup(curr->data));
-        curr = g_list_next(curr);
-    }
-    g_list_free(plugin_names);
-
-    curr = plugin_names_dup;
-    while (curr) {
-        GString* error_message = g_string_new(NULL);
-        plugins_reload(curr->data, error_message);
-        g_string_free(error_message, TRUE);
-        curr = g_list_next(curr);
-    }
-
-    g_list_free_full(plugin_names_dup, g_free);
-}
-
 static void
 _plugins_unloaded_list_dir(const gchar* const dir, GSList** result)
 {
@@ -1440,20 +1408,6 @@ gboolean
 plugins_unload_all(void)
 {
     return TRUE;
-}
-
-gboolean
-plugins_reload(const char* const name, GString* error_message)
-{
-    if (error_message) {
-        g_string_assign(error_message, "Plugin support is disabled.");
-    }
-    return FALSE;
-}
-
-void
-plugins_reload_all(void)
-{
 }
 
 void
