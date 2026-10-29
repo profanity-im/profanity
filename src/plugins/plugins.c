@@ -261,14 +261,41 @@ _plugin_destroy(ProfPlugin* plugin)
     g_free(plugin);
 }
 
+gchar*
+plugins_find_plugin_path(const char* const filename)
+{
+    if (!filename) {
+        return NULL;
+    }
+
+    auto_gchar gchar* local_dir = files_get_data_path(DIR_PLUGINS);
+    gchar* local_path = g_build_filename(local_dir, filename, NULL);
+    if (g_file_test(local_path, G_FILE_TEST_IS_REGULAR)) {
+        return local_path;
+    }
+    g_free(local_path);
+
+    const gchar* const* system_dirs = g_get_system_data_dirs();
+    if (system_dirs) {
+        for (int i = 0; system_dirs[i]; i++) {
+            auto_gchar gchar* sys_dir = g_build_filename(system_dirs[i], "profanity", DIR_PLUGINS, NULL);
+            gchar* sys_path = g_build_filename(sys_dir, filename, NULL);
+            if (g_file_test(sys_path, G_FILE_TEST_IS_REGULAR)) {
+                return sys_path;
+            }
+            g_free(sys_path);
+        }
+    }
+
+    return NULL;
+}
+
 static ProfPlugin*
 _lua_plugin_create(const char* const filename)
 {
-    auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
-    auto_gchar gchar* full_path = g_build_filename(plugins_dir, filename, NULL);
-
-    if (!g_file_test(full_path, G_FILE_TEST_IS_REGULAR)) {
-        log_error("Plugin file not found: %s", full_path);
+    auto_gchar gchar* full_path = plugins_find_plugin_path(filename);
+    if (!full_path || !g_file_test(full_path, G_FILE_TEST_IS_REGULAR)) {
+        log_error("Plugin file not found: %s", filename);
         return NULL;
     }
 
@@ -282,19 +309,37 @@ _lua_plugin_create(const char* const filename)
 
     lua_getglobal(L, "package");
     if (lua_istable(L, -1)) {
+        auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
+        GString* new_path = g_string_new(NULL);
+        GString* new_cpath = g_string_new(NULL);
+
         lua_getfield(L, -1, "path");
         const char* current_path = lua_tostring(L, -1);
-        auto_gchar gchar* new_path = g_strdup_printf("%s;%s/?.lua;%s/?/init.lua", current_path, plugins_dir, plugins_dir);
-        lua_pushstring(L, new_path);
-        lua_setfield(L, -3, "path");
+        g_string_append_printf(new_path, "%s;%s/?.lua;%s/?/init.lua", current_path, plugins_dir, plugins_dir);
         lua_pop(L, 1);
 
         lua_getfield(L, -1, "cpath");
         const char* current_cpath = lua_tostring(L, -1);
-        auto_gchar gchar* new_cpath = g_strdup_printf("%s;%s/?.so", current_cpath, plugins_dir);
-        lua_pushstring(L, new_cpath);
-        lua_setfield(L, -3, "cpath");
+        g_string_append_printf(new_cpath, "%s;%s/?.so", current_cpath, plugins_dir);
         lua_pop(L, 1);
+
+        const gchar* const* system_dirs = g_get_system_data_dirs();
+        if (system_dirs) {
+            for (int i = 0; system_dirs[i]; i++) {
+                auto_gchar gchar* sys_dir = g_build_filename(system_dirs[i], "profanity", DIR_PLUGINS, NULL);
+                g_string_append_printf(new_path, ";%s/?.lua;%s/?/init.lua", sys_dir, sys_dir);
+                g_string_append_printf(new_cpath, ";%s/?.so", sys_dir);
+            }
+        }
+
+        lua_pushstring(L, new_path->str);
+        lua_setfield(L, -2, "path");
+
+        lua_pushstring(L, new_cpath->str);
+        lua_setfield(L, -2, "cpath");
+
+        g_string_free(new_path, TRUE);
+        g_string_free(new_cpath, TRUE);
     }
     lua_pop(L, 1);
 
@@ -669,9 +714,31 @@ _plugins_unloaded_list_dir(const gchar* const dir, GSList** result)
     while (plugin) {
         ProfPlugin* found = g_hash_table_lookup(plugins, plugin);
         if (g_str_has_suffix(plugin, ".lua") && !found) {
-            *result = g_slist_append(*result, g_strdup(plugin));
+            if (!g_slist_find_custom(*result, plugin, (GCompareFunc)g_strcmp0)) {
+                *result = g_slist_append(*result, g_strdup(plugin));
+            }
         }
         plugin = g_dir_read_name(plugins_dir);
+    }
+    g_dir_close(plugins_dir);
+}
+
+static void
+_plugins_installed_list_dir(const gchar* const dir, GSList** result)
+{
+    GDir* plugins_dir = g_dir_open(dir, 0, NULL);
+    if (!plugins_dir) {
+        return;
+    }
+
+    const gchar* filename = g_dir_read_name(plugins_dir);
+    while (filename) {
+        if (g_str_has_suffix(filename, ".lua")) {
+            if (!g_slist_find_custom(*result, filename, (GCompareFunc)g_strcmp0)) {
+                *result = g_slist_append(*result, g_strdup(filename));
+            }
+        }
+        filename = g_dir_read_name(plugins_dir);
     }
     g_dir_close(plugins_dir);
 }
@@ -681,19 +748,15 @@ plugins_installed_list(void)
 {
     GSList* result = NULL;
     auto_gchar gchar* local_dir = files_get_data_path(DIR_PLUGINS);
-    GDir* plugins_dir = g_dir_open(local_dir, 0, NULL);
-    if (!plugins_dir) {
-        return NULL;
-    }
+    _plugins_installed_list_dir(local_dir, &result);
 
-    const gchar* filename = g_dir_read_name(plugins_dir);
-    while (filename) {
-        if (g_str_has_suffix(filename, ".lua")) {
-            result = g_slist_append(result, g_strdup(filename));
+    const gchar* const* system_dirs = g_get_system_data_dirs();
+    if (system_dirs) {
+        for (int i = 0; system_dirs[i]; i++) {
+            auto_gchar gchar* sys_dir = g_build_filename(system_dirs[i], "profanity", DIR_PLUGINS, NULL);
+            _plugins_installed_list_dir(sys_dir, &result);
         }
-        filename = g_dir_read_name(plugins_dir);
     }
-    g_dir_close(plugins_dir);
 
     return result;
 }
@@ -704,6 +767,14 @@ plugins_unloaded_list(void)
     GSList* result = NULL;
     auto_gchar gchar* local_dir = files_get_data_path(DIR_PLUGINS);
     _plugins_unloaded_list_dir(local_dir, &result);
+
+    const gchar* const* system_dirs = g_get_system_data_dirs();
+    if (system_dirs) {
+        for (int i = 0; system_dirs[i]; i++) {
+            auto_gchar gchar* sys_dir = g_build_filename(system_dirs[i], "profanity", DIR_PLUGINS, NULL);
+            _plugins_unloaded_list_dir(sys_dir, &result);
+        }
+    }
 
     return result;
 }
@@ -1360,6 +1431,12 @@ plugins_get_lua_version(void)
 void
 plugins_init(void)
 {
+}
+
+gchar*
+plugins_find_plugin_path(const char* const filename)
+{
+    return NULL;
 }
 
 GSList*

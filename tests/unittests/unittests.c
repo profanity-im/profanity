@@ -708,6 +708,7 @@ main(int argc, char* argv[])
                                         load_preferences,
                                         close_preferences),
         cmocka_unit_test(plugins_get_lua_version__returns_version_string),
+        cmocka_unit_test(plugins_find_plugin_path__tests),
 
         cmocka_unit_test(disco_get_features__returns__empty_list_when_none),
         cmocka_unit_test(disco_add_feature__updates__added_feature),

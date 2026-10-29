@@ -5,5 +5,6 @@ void plugins_get_command_names__returns__no_commands(void** state);
 void plugins_get_command_names__returns__commands_when_added(void** state);
 void plugins_commands__lookup_and_removal(void** state);
 void plugins_get_lua_version__returns_version_string(void** state);
+void plugins_find_plugin_path__tests(void** state);
 
 #endif

@@ -7115,11 +7115,22 @@ cmd_plugins_uninstall(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    gboolean res = plugins_uninstall(args[1]);
+    const gchar* name = args[1];
+    auto_gchar gchar* local_dir = files_get_data_path(DIR_PLUGINS);
+    auto_gchar gchar* local_path = g_build_filename(local_dir, name, NULL);
+    if (!g_file_test(local_path, G_FILE_TEST_IS_REGULAR)) {
+        auto_gchar gchar* sys_path = plugins_find_plugin_path(name);
+        if (sys_path) {
+            cons_show("Cannot uninstall system plugin: %s", name);
+            return TRUE;
+        }
+    }
+
+    gboolean res = plugins_uninstall(name);
     if (res) {
-        cons_show("Uninstalled plugin: %s", args[1]);
+        cons_show("Uninstalled plugin: %s", name);
     } else {
-        cons_show("Failed to uninstall plugin: %s", args[1]);
+        cons_show("Failed to uninstall plugin: %s", name);
     }
 
     return TRUE;
@@ -7188,9 +7199,8 @@ cmd_plugins_enable(ProfWin* window, const gchar* const command, gchar** args)
     }
 
     const gchar* name = args[1];
-    auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
-    auto_gchar gchar* full_path = g_build_filename(plugins_dir, name, NULL);
-    if (!g_file_test(full_path, G_FILE_TEST_IS_REGULAR)) {
+    auto_gchar gchar* full_path = plugins_find_plugin_path(name);
+    if (!full_path) {
         cons_show("Plugin not found: %s", name);
         return TRUE;
     }
@@ -7202,11 +7212,11 @@ cmd_plugins_enable(ProfWin* window, const gchar* const command, gchar** args)
         if (plugins_load(name, error_message)) {
             cons_show("Plugin enabled and loaded: %s", name);
         } else {
-            cons_show("Plugin %s failed to load: %s", name, error_message->str);
+            cons_show("Plugin enabled for startup: %s (failed to load: %s)", name, error_message->str);
         }
         g_string_free(error_message, TRUE);
     } else {
-        cons_show("Plugin enabled: %s", name);
+        cons_show("Plugin enabled (will auto-load on start): %s", name);
     }
 
     return TRUE;
@@ -7222,9 +7232,8 @@ cmd_plugins_disable(ProfWin* window, const gchar* const command, gchar** args)
 
     const gchar* name = args[1];
     if (!prefs_plugin_is_enabled(name) && !plugins_is_loaded(name)) {
-        auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
-        auto_gchar gchar* full_path = g_build_filename(plugins_dir, name, NULL);
-        if (!g_file_test(full_path, G_FILE_TEST_IS_REGULAR)) {
+        auto_gchar gchar* full_path = plugins_find_plugin_path(name);
+        if (!full_path) {
             cons_show("Plugin not found: %s", name);
             return TRUE;
         }

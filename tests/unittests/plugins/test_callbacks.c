@@ -100,3 +100,10 @@ plugins_get_lua_version__returns_version_string(void** state)
     assert_string_not_equal(ver, "none");
 #endif
 }
+
+void
+plugins_find_plugin_path__tests(void** state)
+{
+    assert_null(plugins_find_plugin_path(NULL));
+    assert_null(plugins_find_plugin_path("definitely_nonexistent_plugin_9999.lua"));
+}

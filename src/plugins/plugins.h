@@ -83,6 +83,7 @@ typedef struct prof_plugin_t
 
 const char* plugins_get_lua_version(void);
 void plugins_init(void);
+gchar* plugins_find_plugin_path(const char* const filename);
 GSList* plugins_installed_list(void);
 GSList* plugins_unloaded_list(void);
 GList* plugins_loaded_list(void);
