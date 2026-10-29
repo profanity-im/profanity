@@ -456,13 +456,24 @@ plugins_startup_autoloading(void** state)
                          "    prof.cons.show('startupcmd executed!')\n"
                          "end\n";
 
+    const char* session_script = "function prof_init(version, status, account, fulljid)\n"
+                                 "    prof.cons.show('SESSION_PLUGIN_INITIALIZED')\n"
+                                 "end\n";
+
     char* script_path = g_build_filename(plugin_dir, "startup_test.lua", NULL);
     g_file_set_contents(script_path, script, -1, NULL);
     g_free(script_path);
 
-    // 1. Load the plugin so Profanity automatically saves it into profrc preferences
-    prof_input("/plugins load startup_test.lua");
-    assert_true(prof_output_exact("Loaded plugin: startup_test.lua"));
+    char* session_path = g_build_filename(plugin_dir, "session_test.lua", NULL);
+    g_file_set_contents(session_path, session_script, -1, NULL);
+    g_free(session_path);
+
+    // 1. Load session_test.lua (session only) and enable startup_test.lua (persistent)
+    prof_input("/plugins load session_test.lua");
+    assert_true(prof_output_exact("Loaded plugin: session_test.lua"));
+
+    prof_input("/plugins enable startup_test.lua");
+    assert_true(prof_output_exact("Plugin enabled and loaded: startup_test.lua"));
 
     // 2. Quit Profanity
     prof_input("/quit");
@@ -475,13 +486,14 @@ plugins_startup_autoloading(void** state)
     assert_true(prof_output_regex("Profanity"));
     prof_input("/inpblock timeout 5");
 
-    // 4. Assert that the plugin was automatically loaded and initialized on startup
+    // 4. Assert that the enabled plugin was automatically loaded on startup
     assert_true(prof_output_exact("STARTUP_PLUGIN_INITIALIZED"));
 
     // 5. Assert that its registered command is immediately callable
     prof_input("/startupcmd");
     assert_true(prof_output_exact("startupcmd executed!"));
 
-    prof_input("/plugins unload startup_test.lua");
-    assert_true(prof_output_exact("Unloaded plugin: startup_test.lua"));
+    // 6. Disable the plugin
+    prof_input("/plugins disable startup_test.lua");
+    assert_true(prof_output_exact("Plugin disabled and unloaded: startup_test.lua"));
 }

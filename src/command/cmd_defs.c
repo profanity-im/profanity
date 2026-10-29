@@ -2118,27 +2118,35 @@ static const struct cmd_t command_defs[] = {
               { "install", cmd_plugins_install },
               { "uninstall", cmd_plugins_uninstall },
               { "load", cmd_plugins_load },
-              { "unload", cmd_plugins_unload })
+              { "unload", cmd_plugins_unload },
+              { "enable", cmd_plugins_enable },
+              { "disable", cmd_plugins_disable })
       CMD_MAINFUNC(cmd_plugins)
       CMD_SYN(
               "/plugins",
               "/plugins install [<path or URL>]",
               "/plugins uninstall [<plugin>]",
+              "/plugins load [<plugin>]",
               "/plugins unload [<plugin>]",
-              "/plugins load [<plugin>]")
+              "/plugins enable <plugin>",
+              "/plugins disable <plugin>")
       CMD_DESC(
               "Manage plugins. Passing no arguments lists installed plugins.")
       CMD_ARGS(
               { "install [<path or URL>]", "Install a plugin, or all plugins found in a directory (recursive), or download and install plugin (plugin name is based on basename)." },
               { "uninstall [<plugin>]", "Uninstall a plugin." },
-              { "load [<plugin>]", "Load a plugin that already exists in the plugin directory, passing no argument loads all found plugins. It will be loaded upon next start too unless unloaded." },
-              { "unload [<plugin>]", "Unload a loaded plugin, passing no argument will unload all plugins." })
+              { "load [<plugin>]", "Load a plugin that already exists in the plugin directory for the current session, passing no argument loads all found plugins." },
+              { "unload [<plugin>]", "Unload a loaded plugin from the current session, passing no argument will unload all plugins." },
+              { "enable <plugin>", "Enable a plugin to auto-load on start and load it immediately." },
+              { "disable <plugin>", "Disable a plugin from auto-loading on start and unload it." })
       CMD_EXAMPLES(
               "/plugins install /home/steveharris/Downloads/metal.lua",
               "/plugins install https://raw.githubusercontent.com/profanity-im/profanity-plugins/master/stable/sounds.lua",
               "/plugins uninstall browser.lua",
               "/plugins load browser.lua",
-              "/plugins unload say.lua")
+              "/plugins unload say.lua",
+              "/plugins enable browser.lua",
+              "/plugins disable say.lua")
     },
 
     { CMD_PREAMBLE("/prefs",

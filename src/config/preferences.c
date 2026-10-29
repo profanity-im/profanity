@@ -928,6 +928,27 @@ prefs_remove_plugin(const gchar* const name)
     _save_prefs();
 }
 
+gboolean
+prefs_plugin_is_enabled(const gchar* const name)
+{
+    if (name == NULL) {
+        return FALSE;
+    }
+
+    auto_gcharv gchar** plugins = prefs_get_plugins();
+    if (!plugins) {
+        return FALSE;
+    }
+
+    for (guint i = 0; i < g_strv_length(plugins); i++) {
+        if (g_strcmp0(plugins[i], name) == 0) {
+            return TRUE;
+        }
+    }
+
+    return FALSE;
+}
+
 void
 prefs_set_occupants_size(gint value)
 {

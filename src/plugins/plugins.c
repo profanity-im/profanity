@@ -506,6 +506,7 @@ gboolean
 plugins_uninstall(const char* const plugin_name)
 {
     plugins_unload(plugin_name);
+    prefs_remove_plugin(plugin_name);
     auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
     auto_gchar gchar* full_path = g_build_filename(plugins_dir, plugin_name, NULL);
     GFile* file = g_file_new_for_path(full_path);
@@ -575,7 +576,6 @@ plugins_load(const char* const name, GString* error_message)
         }
 #endif
         log_info("Loaded plugin: %s", name);
-        prefs_add_plugin(name);
         return TRUE;
     } else {
         log_info("Failed to load plugin: %s", name);
@@ -640,7 +640,6 @@ plugins_unload(const char* const name)
         }
 #endif
         callbacks_remove(name);
-        prefs_remove_plugin(name);
 
         plugins_ordered = g_list_remove(plugins_ordered, plugin);
         g_hash_table_remove(plugins, name);
@@ -678,6 +677,28 @@ _plugins_unloaded_list_dir(const gchar* const dir, GSList** result)
 }
 
 GSList*
+plugins_installed_list(void)
+{
+    GSList* result = NULL;
+    auto_gchar gchar* local_dir = files_get_data_path(DIR_PLUGINS);
+    GDir* plugins_dir = g_dir_open(local_dir, 0, NULL);
+    if (!plugins_dir) {
+        return NULL;
+    }
+
+    const gchar* filename = g_dir_read_name(plugins_dir);
+    while (filename) {
+        if (g_str_has_suffix(filename, ".lua")) {
+            result = g_slist_append(result, g_strdup(filename));
+        }
+        filename = g_dir_read_name(plugins_dir);
+    }
+    g_dir_close(plugins_dir);
+
+    return result;
+}
+
+GSList*
 plugins_unloaded_list(void)
 {
     GSList* result = NULL;
@@ -691,6 +712,16 @@ GList*
 plugins_loaded_list(void)
 {
     return g_hash_table_get_keys(plugins);
+}
+
+gboolean
+plugins_is_loaded(const char* const name)
+{
+    if (!name || !plugins) {
+        return FALSE;
+    }
+
+    return g_hash_table_contains(plugins, name);
 }
 
 char*
@@ -1332,6 +1363,12 @@ plugins_init(void)
 }
 
 GSList*
+plugins_installed_list(void)
+{
+    return NULL;
+}
+
+GSList*
 plugins_unloaded_list(void)
 {
     return NULL;
@@ -1341,6 +1378,12 @@ GList*
 plugins_loaded_list(void)
 {
     return NULL;
+}
+
+gboolean
+plugins_is_loaded(const char* const name)
+{
+    return FALSE;
 }
 
 char*

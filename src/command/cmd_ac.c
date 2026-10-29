@@ -225,6 +225,8 @@ static Autocomplete mucping_ac;
 static Autocomplete plugins_ac;
 static Autocomplete plugins_load_ac;
 static Autocomplete plugins_unload_ac;
+static Autocomplete plugins_enable_ac;
+static Autocomplete plugins_disable_ac;
 static Autocomplete filepath_ac;
 static Autocomplete blocked_ac;
 static Autocomplete tray_ac;
@@ -719,6 +721,8 @@ cmd_ac_init(void)
     theme_load_ac = NULL;
     plugins_load_ac = NULL;
     plugins_unload_ac = NULL;
+    plugins_enable_ac = NULL;
+    plugins_disable_ac = NULL;
 
     autocomplete_add(who_roster_ac, "chat");
     autocomplete_add(who_roster_ac, "online");
@@ -1022,6 +1026,8 @@ cmd_ac_init(void)
     autocomplete_add(plugins_ac, "uninstall");
     autocomplete_add(plugins_ac, "load");
     autocomplete_add(plugins_ac, "unload");
+    autocomplete_add(plugins_ac, "enable");
+    autocomplete_add(plugins_ac, "disable");
 
     autocomplete_add(blocked_ac, "add");
     autocomplete_add(blocked_ac, "remove");
@@ -1520,6 +1526,8 @@ cmd_ac_reset(ProfWin* window)
     g_clear_pointer(&theme_load_ac, autocomplete_free);
     g_clear_pointer(&plugins_load_ac, autocomplete_free);
     g_clear_pointer(&plugins_unload_ac, autocomplete_free);
+    g_clear_pointer(&plugins_enable_ac, autocomplete_free);
+    g_clear_pointer(&plugins_disable_ac, autocomplete_free);
 
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
@@ -1554,6 +1562,8 @@ cmd_ac_uninit(void)
     g_clear_pointer(&theme_load_ac, autocomplete_free);
     g_clear_pointer(&plugins_load_ac, autocomplete_free);
     g_clear_pointer(&plugins_unload_ac, autocomplete_free);
+    g_clear_pointer(&plugins_enable_ac, autocomplete_free);
+    g_clear_pointer(&plugins_disable_ac, autocomplete_free);
     g_clear_pointer(&last_filepath_input, g_free);
     g_clear_pointer(&ac_funcs, g_hash_table_destroy);
 }
@@ -2622,6 +2632,41 @@ _plugins_autocomplete(ProfWin* window, const gchar* const input, gboolean previo
             g_list_free(plugins);
         }
         result = autocomplete_param_with_ac(input, "/plugins unload", plugins_unload_ac, TRUE, previous);
+        if (result) {
+            return result;
+        }
+    }
+
+    if (strncmp(input, "/plugins enable ", 16) == 0) {
+        if (plugins_enable_ac == NULL) {
+            plugins_enable_ac = autocomplete_new();
+            GSList* plugins = plugins_installed_list();
+            GSList* curr = plugins;
+            while (curr) {
+                if (!prefs_plugin_is_enabled(curr->data)) {
+                    autocomplete_add(plugins_enable_ac, curr->data);
+                }
+                curr = g_slist_next(curr);
+            }
+            g_slist_free_full(plugins, g_free);
+        }
+        result = autocomplete_param_with_ac(input, "/plugins enable", plugins_enable_ac, TRUE, previous);
+        if (result) {
+            return result;
+        }
+    }
+
+    if (strncmp(input, "/plugins disable ", 17) == 0) {
+        if (plugins_disable_ac == NULL) {
+            plugins_disable_ac = autocomplete_new();
+            auto_gcharv gchar** enabled = prefs_get_plugins();
+            if (enabled) {
+                for (guint i = 0; i < g_strv_length(enabled); i++) {
+                    autocomplete_add(plugins_disable_ac, enabled[i]);
+                }
+            }
+        }
+        result = autocomplete_param_with_ac(input, "/plugins disable", plugins_disable_ac, TRUE, previous);
         if (result) {
             return result;
         }

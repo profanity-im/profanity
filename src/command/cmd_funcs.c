@@ -7180,6 +7180,71 @@ cmd_plugins_unload(ProfWin* window, const gchar* const command, gchar** args)
 }
 
 gboolean
+cmd_plugins_enable(ProfWin* window, const gchar* const command, gchar** args)
+{
+    if (args[1] == NULL) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    const gchar* name = args[1];
+    auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
+    auto_gchar gchar* full_path = g_build_filename(plugins_dir, name, NULL);
+    if (!g_file_test(full_path, G_FILE_TEST_IS_REGULAR)) {
+        cons_show("Plugin not found: %s", name);
+        return TRUE;
+    }
+
+    prefs_add_plugin(name);
+
+    if (!plugins_is_loaded(name)) {
+        GString* error_message = g_string_new(NULL);
+        if (plugins_load(name, error_message)) {
+            cons_show("Plugin enabled and loaded: %s", name);
+        } else {
+            cons_show("Plugin %s failed to load: %s", name, error_message->str);
+        }
+        g_string_free(error_message, TRUE);
+    } else {
+        cons_show("Plugin enabled: %s", name);
+    }
+
+    return TRUE;
+}
+
+gboolean
+cmd_plugins_disable(ProfWin* window, const gchar* const command, gchar** args)
+{
+    if (args[1] == NULL) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    const gchar* name = args[1];
+    if (!prefs_plugin_is_enabled(name) && !plugins_is_loaded(name)) {
+        auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
+        auto_gchar gchar* full_path = g_build_filename(plugins_dir, name, NULL);
+        if (!g_file_test(full_path, G_FILE_TEST_IS_REGULAR)) {
+            cons_show("Plugin not found: %s", name);
+            return TRUE;
+        }
+        cons_show("Plugin is not enabled: %s", name);
+        return TRUE;
+    }
+
+    prefs_remove_plugin(name);
+
+    if (plugins_is_loaded(name)) {
+        plugins_unload(name);
+        cons_show("Plugin disabled and unloaded: %s", name);
+    } else {
+        cons_show("Plugin disabled: %s", name);
+    }
+
+    return TRUE;
+}
+
+gboolean
 cmd_plugins(ProfWin* window, const gchar* const command, gchar** args)
 {
     GList* plugins = plugins_loaded_list();
@@ -7190,24 +7255,32 @@ cmd_plugins(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    if (unloaded_plugins) {
-        GSList* curr = unloaded_plugins;
-        cons_show("The following plugins already installed and can be loaded:");
-        while (curr) {
-            cons_show("  %s", curr->data);
-            curr = g_slist_next(curr);
-        }
-        g_slist_free_full(unloaded_plugins, g_free);
-    }
-
     if (plugins) {
         GList* curr = plugins;
         cons_show("Loaded plugins:");
         while (curr) {
-            cons_show("  %s", curr->data);
+            if (prefs_plugin_is_enabled(curr->data)) {
+                cons_show("  %s (enabled)", curr->data);
+            } else {
+                cons_show("  %s (session only)", curr->data);
+            }
             curr = g_list_next(curr);
         }
         g_list_free(plugins);
+    }
+
+    if (unloaded_plugins) {
+        GSList* curr = unloaded_plugins;
+        cons_show("Unloaded plugins:");
+        while (curr) {
+            if (prefs_plugin_is_enabled(curr->data)) {
+                cons_show("  %s (enabled)", curr->data);
+            } else {
+                cons_show("  %s (disabled)", curr->data);
+            }
+            curr = g_slist_next(curr);
+        }
+        g_slist_free_full(unloaded_plugins, g_free);
     }
 
     return TRUE;

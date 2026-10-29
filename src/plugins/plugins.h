@@ -83,8 +83,10 @@ typedef struct prof_plugin_t
 
 const char* plugins_get_lua_version(void);
 void plugins_init(void);
+GSList* plugins_installed_list(void);
 GSList* plugins_unloaded_list(void);
 GList* plugins_loaded_list(void);
+gboolean plugins_is_loaded(const char* const name);
 char* plugins_autocomplete(const char* const input, gboolean previous);
 void plugins_reset_autocomplete(void);
 
