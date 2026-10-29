@@ -536,7 +536,7 @@ plugins_install(const char* const plugin_name, const char* const filename, GStri
     g_object_unref(source);
     g_object_unref(destination);
 
-    return plugins_load(plugin_name, error_message);
+    return TRUE;
 }
 
 gboolean

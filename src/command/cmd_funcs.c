@@ -7068,7 +7068,7 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
         auto_gchar gchar* plugin_name = g_path_get_basename(path);
         gboolean result = plugins_install(plugin_name, path, error_message);
         if (result) {
-            cons_show("Plugin installed and loaded: %s", plugin_name);
+            cons_show("Plugin installed: %s", plugin_name);
         } else {
             cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
         }
@@ -7080,7 +7080,7 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
             if (result->installed) {
                 GSList* curr = result->installed;
                 cons_show("");
-                cons_show("Installed and loaded plugins (%u):", g_slist_length(curr));
+                cons_show("Installed plugins (%u):", g_slist_length(curr));
                 while (curr) {
                     cons_show("  %s", curr->data);
                     curr = g_slist_next(curr);

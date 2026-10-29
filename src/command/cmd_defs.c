@@ -2129,7 +2129,7 @@ static const struct cmd_t command_defs[] = {
       CMD_DESC(
               "Manage plugins. Passing no arguments lists installed plugins.")
       CMD_ARGS(
-              { "install [<path or URL>]", "Install a plugin, or all plugins found in a directory (recursive), or download and install plugin (plugin name is based on basename). And loads it/them." },
+              { "install [<path or URL>]", "Install a plugin, or all plugins found in a directory (recursive), or download and install plugin (plugin name is based on basename)." },
               { "uninstall [<plugin>]", "Uninstall a plugin." },
               { "load [<plugin>]", "Load a plugin that already exists in the plugin directory, passing no argument loads all found plugins. It will be loaded upon next start too unless unloaded." },
               { "unload [<plugin>]", "Unload a loaded plugin, passing no argument will unload all plugins." })
