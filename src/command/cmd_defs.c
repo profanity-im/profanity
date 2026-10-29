@@ -2124,29 +2124,33 @@ static const struct cmd_t command_defs[] = {
       CMD_MAINFUNC(cmd_plugins)
       CMD_SYN(
               "/plugins",
-              "/plugins install [<path or URL>]",
-              "/plugins uninstall [<plugin>]",
+              "/plugins install <path|URL>",
               "/plugins load [<plugin>]",
               "/plugins unload [<plugin>]",
               "/plugins enable <plugin>",
-              "/plugins disable <plugin>")
+              "/plugins disable <plugin>",
+              "/plugins uninstall <plugin>")
       CMD_DESC(
-              "Manage plugins. Passing no arguments lists installed plugins.")
+              "Manage plugins. Plugins are searched for in global and user XDG directories.\n "
+              "Use 'load' and 'unload' to run plugins for the current session only. "
+              "Use 'enable' and 'disable' to configure plugins to auto-load on startup. "
+              "Running '/plugins' without arguments displays active and available plugins.")
       CMD_ARGS(
-              { "install [<path or URL>]", "Install a plugin, or all plugins found in a directory (recursive), or download and install plugin (plugin name is based on basename)." },
-              { "uninstall [<plugin>]", "Uninstall a plugin." },
-              { "load [<plugin>]", "Load a plugin that already exists in the plugin directory for the current session, passing no argument loads all found plugins." },
-              { "unload [<plugin>]", "Unload a loaded plugin from the current session, passing no argument will unload all plugins." },
-              { "enable <plugin>", "Enable a plugin to auto-load on start and load it immediately." },
-              { "disable <plugin>", "Disable a plugin from auto-loading on start and unload it." })
+              { "install <path|URL>", "Copy a local .lua file or directory, or download from URL into the user plugins directory." },
+              { "load [<plugin>]", "Load a plugin into the current session only. Passing no argument loads all available plugins." },
+              { "unload [<plugin>]", "Unload a plugin from the current session. Passing no argument unloads all loaded plugins." },
+              { "enable <plugin>", "Enable a plugin to autoload on start and load it into the active session." },
+              { "disable <plugin>", "Disable a plugin from autoloading on start and unload it." },
+              { "uninstall <plugin>", "Unload, disable, and remove a plugin from the user plugins directory." })
       CMD_EXAMPLES(
-              "/plugins install /home/steveharris/Downloads/metal.lua",
-              "/plugins install https://raw.githubusercontent.com/profanity-im/profanity-plugins/master/stable/sounds.lua",
-              "/plugins uninstall browser.lua",
-              "/plugins load browser.lua",
-              "/plugins unload say.lua",
-              "/plugins enable browser.lua",
-              "/plugins disable say.lua")
+              "/plugins",
+              "/plugins install https://profanity-im.github.io/example.lua",
+              "/plugins install /home/user/example.lua",
+              "/plugins load example.lua",
+              "/plugins unload example.lua",
+              "/plugins enable sounds.lua",
+              "/plugins disable sounds.lua",
+              "/plugins uninstall sounds.lua")
     },
 
     { CMD_PREAMBLE("/prefs",
