@@ -227,6 +227,7 @@ static Autocomplete plugins_load_ac;
 static Autocomplete plugins_unload_ac;
 static Autocomplete plugins_enable_ac;
 static Autocomplete plugins_disable_ac;
+static Autocomplete plugins_uninstall_ac;
 static Autocomplete filepath_ac;
 static Autocomplete blocked_ac;
 static Autocomplete tray_ac;
@@ -723,6 +724,7 @@ cmd_ac_init(void)
     plugins_unload_ac = NULL;
     plugins_enable_ac = NULL;
     plugins_disable_ac = NULL;
+    plugins_uninstall_ac = NULL;
 
     autocomplete_add(who_roster_ac, "chat");
     autocomplete_add(who_roster_ac, "online");
@@ -1528,6 +1530,7 @@ cmd_ac_reset(ProfWin* window)
     g_clear_pointer(&plugins_unload_ac, autocomplete_free);
     g_clear_pointer(&plugins_enable_ac, autocomplete_free);
     g_clear_pointer(&plugins_disable_ac, autocomplete_free);
+    g_clear_pointer(&plugins_uninstall_ac, autocomplete_free);
 
     if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
@@ -1564,6 +1567,7 @@ cmd_ac_uninit(void)
     g_clear_pointer(&plugins_unload_ac, autocomplete_free);
     g_clear_pointer(&plugins_enable_ac, autocomplete_free);
     g_clear_pointer(&plugins_disable_ac, autocomplete_free);
+    g_clear_pointer(&plugins_uninstall_ac, autocomplete_free);
     g_clear_pointer(&last_filepath_input, g_free);
     g_clear_pointer(&ac_funcs, g_hash_table_destroy);
 }
@@ -2601,6 +2605,23 @@ _plugins_autocomplete(ProfWin* window, const gchar* const input, gboolean previo
 
     if (strncmp(input, "/plugins install ", 17) == 0) {
         return cmd_ac_complete_filepath(input, "/plugins install", previous);
+    }
+
+    if (strncmp(input, "/plugins uninstall ", 19) == 0) {
+        if (plugins_uninstall_ac == NULL) {
+            plugins_uninstall_ac = autocomplete_new();
+            GSList* plugins = plugins_installed_list();
+            GSList* curr = plugins;
+            while (curr) {
+                autocomplete_add(plugins_uninstall_ac, curr->data);
+                curr = g_slist_next(curr);
+            }
+            g_slist_free_full(plugins, g_free);
+        }
+        result = autocomplete_param_with_ac(input, "/plugins uninstall", plugins_uninstall_ac, TRUE, previous);
+        if (result) {
+            return result;
+        }
     }
 
     if (strncmp(input, "/plugins load ", 14) == 0) {
