@@ -2,18 +2,21 @@
  * plugins.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
- * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2026 Michael Vetter <jubalh@iodoru.org>
  *
  * SPDX-License-Identifier: GPL-3.0-or-later WITH OpenSSL-exception
  */
 
+#include "config.h"
+
+#ifdef HAVE_PLUGINS
+
 #include <string.h>
 #include <stdlib.h>
 #include <gio/gio.h>
+#include <glib.h>
 
 #include "log.h"
-#include "config.h"
-#include "common.h"
 #include "config/files.h"
 #include "config/preferences.h"
 #include "event/client_events.h"
@@ -27,72 +30,426 @@
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
 
-#ifdef HAVE_PYTHON
-#include "plugins/python_plugins.h"
-#include "plugins/python_api.h"
-#endif
+static GHashTable* plugins = NULL;
+static GList* plugins_ordered = NULL;
 
-#ifdef HAVE_C
-#include "plugins/c_plugins.h"
-#include "plugins/c_api.h"
-#endif
+static gint
+_plugin_compare(gconstpointer a, gconstpointer b)
+{
+    const ProfPlugin* p1 = a;
+    const ProfPlugin* p2 = b;
+    if (p1->priority != p2->priority) {
+        return p1->priority - p2->priority;
+    }
+    return g_strcmp0(p1->name, p2->name);
+}
 
-static GHashTable* plugins;
+const char*
+plugins_get_lua_version(void)
+{
+#ifdef HAVE_PLUGINS
+#ifdef LUA_RELEASE
+    return LUA_RELEASE;
+#else
+    return "5.4";
+#endif
+#else
+    return "none";
+#endif
+}
+
+#ifdef HAVE_PLUGINS
+static void
+_lua_call_void_0arg(ProfPlugin* plugin, const char* hook)
+{
+    lua_State* L = plugin->L;
+    lua_getglobal(L, hook);
+    if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
+        lua_pop(L, 1);
+    }
+}
+
+static void
+_lua_call_void_1str(ProfPlugin* plugin, const char* hook, const char* s1)
+{
+    lua_State* L = plugin->L;
+    lua_getglobal(L, hook);
+    lua_pushstring(L, s1 ? s1 : "");
+    if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
+        lua_pop(L, 1);
+    }
+}
+
+static void
+_lua_call_void_2str(ProfPlugin* plugin, const char* hook, const char* s1, const char* s2)
+{
+    lua_State* L = plugin->L;
+    lua_getglobal(L, hook);
+    lua_pushstring(L, s1 ? s1 : "");
+    lua_pushstring(L, s2 ? s2 : "");
+    if (lua_pcall(L, 2, 0, 0) != LUA_OK) {
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
+        lua_pop(L, 1);
+    }
+}
+
+static void
+_lua_call_void_3str(ProfPlugin* plugin, const char* hook, const char* s1, const char* s2, const char* s3)
+{
+    lua_State* L = plugin->L;
+    lua_getglobal(L, hook);
+    lua_pushstring(L, s1 ? s1 : "");
+    if (s2) {
+        lua_pushstring(L, s2);
+    } else {
+        lua_pushnil(L);
+    }
+    lua_pushstring(L, s3 ? s3 : "");
+    if (lua_pcall(L, 3, 0, 0) != LUA_OK) {
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
+        lua_pop(L, 1);
+    }
+}
+
+static void
+_lua_call_void_4str(ProfPlugin* plugin, const char* hook, const char* s1, const char* s2, const char* s3, const char* s4)
+{
+    lua_State* L = plugin->L;
+    lua_getglobal(L, hook);
+    lua_pushstring(L, s1 ? s1 : "");
+    if (s2) {
+        lua_pushstring(L, s2);
+    } else {
+        lua_pushnil(L);
+    }
+    lua_pushstring(L, s3 ? s3 : "");
+    if (s4) {
+        lua_pushstring(L, s4);
+    } else {
+        lua_pushnil(L);
+    }
+    if (lua_pcall(L, 4, 0, 0) != LUA_OK) {
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
+        lua_pop(L, 1);
+    }
+}
+
+static void
+_lua_call_void_presence(ProfPlugin* plugin, const char* barejid, const char* resource,
+                        const char* presence, const char* status, int priority)
+{
+    lua_State* L = plugin->L;
+    lua_getglobal(L, "prof_on_contact_presence");
+    lua_pushstring(L, barejid ? barejid : "");
+    if (resource) {
+        lua_pushstring(L, resource);
+    } else {
+        lua_pushnil(L);
+    }
+    if (presence) {
+        lua_pushstring(L, presence);
+    } else {
+        lua_pushnil(L);
+    }
+    if (status) {
+        lua_pushstring(L, status);
+    } else {
+        lua_pushnil(L);
+    }
+    lua_pushinteger(L, priority);
+    if (lua_pcall(L, 5, 0, 0) != LUA_OK) {
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in prof_on_contact_presence: %s", plugin->name, err);
+        cons_show("Plugin %s error in prof_on_contact_presence: %s", plugin->name, err);
+        lua_pop(L, 1);
+    }
+}
+
+static char*
+_lua_call_filter_2str(ProfPlugin* plugin, const char* hook, const char* s1, const char* s2)
+{
+    lua_State* L = plugin->L;
+    lua_getglobal(L, hook);
+    lua_pushstring(L, s1 ? s1 : "");
+    lua_pushstring(L, s2 ? s2 : "");
+    if (lua_pcall(L, 2, 1, 0) != LUA_OK) {
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
+        lua_pop(L, 1);
+        return NULL;
+    }
+    char* result = NULL;
+    if (lua_isstring(L, -1)) {
+        result = g_strdup(lua_tostring(L, -1));
+    }
+    lua_pop(L, 1);
+    return result;
+}
+
+static char*
+_lua_call_filter_3str(ProfPlugin* plugin, const char* hook, const char* s1, const char* s2, const char* s3)
+{
+    lua_State* L = plugin->L;
+    lua_getglobal(L, hook);
+    lua_pushstring(L, s1 ? s1 : "");
+    if (s2) {
+        lua_pushstring(L, s2);
+    } else {
+        lua_pushnil(L);
+    }
+    lua_pushstring(L, s3 ? s3 : "");
+    if (lua_pcall(L, 3, 1, 0) != LUA_OK) {
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
+        lua_pop(L, 1);
+        return NULL;
+    }
+    char* result = NULL;
+    if (lua_isstring(L, -1)) {
+        result = g_strdup(lua_tostring(L, -1));
+    }
+    lua_pop(L, 1);
+    return result;
+}
+
+static gboolean
+_lua_call_bool_1str(ProfPlugin* plugin, const char* hook, const char* s1)
+{
+    lua_State* L = plugin->L;
+    lua_getglobal(L, hook);
+    lua_pushstring(L, s1 ? s1 : "");
+    if (lua_pcall(L, 1, 1, 0) != LUA_OK) {
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in %s: %s", plugin->name, hook, err);
+        cons_show("Plugin %s error in %s: %s", plugin->name, hook, err);
+        lua_pop(L, 1);
+        return TRUE;
+    }
+    gboolean result = TRUE;
+    if (lua_isboolean(L, -1)) {
+        result = lua_toboolean(L, -1);
+    }
+    lua_pop(L, 1);
+    return result;
+}
+
+static void
+_plugin_destroy(ProfPlugin* plugin)
+{
+    if (!plugin) {
+        return;
+    }
+    if (plugin->L) {
+        lua_close(plugin->L);
+        plugin->L = NULL;
+    }
+    g_free(plugin->name);
+    g_free(plugin);
+}
+
+gchar*
+plugins_find_plugin_path(const char* const filename)
+{
+    if (!filename) {
+        return NULL;
+    }
+
+    auto_gchar gchar* local_dir = files_get_data_path(DIR_PLUGINS);
+    gchar* local_path = g_build_filename(local_dir, filename, NULL);
+    if (g_file_test(local_path, G_FILE_TEST_IS_REGULAR)) {
+        return local_path;
+    }
+    g_free(local_path);
+
+    const gchar* const* system_dirs = g_get_system_data_dirs();
+    if (system_dirs) {
+        for (int i = 0; system_dirs[i]; i++) {
+            auto_gchar gchar* sys_dir = g_build_filename(system_dirs[i], "profanity", DIR_PLUGINS, NULL);
+            gchar* sys_path = g_build_filename(sys_dir, filename, NULL);
+            if (g_file_test(sys_path, G_FILE_TEST_IS_REGULAR)) {
+                return sys_path;
+            }
+            g_free(sys_path);
+        }
+    }
+
+    return NULL;
+}
+
+static ProfPlugin*
+_lua_plugin_create(const char* const filename)
+{
+    auto_gchar gchar* full_path = plugins_find_plugin_path(filename);
+    if (!full_path || !g_file_test(full_path, G_FILE_TEST_IS_REGULAR)) {
+        log_error("Plugin file not found: %s", filename);
+        return NULL;
+    }
+
+    lua_State* L = luaL_newstate();
+    if (!L) {
+        log_error("Failed to allocate Lua state for plugin %s", filename);
+        return NULL;
+    }
+    luaL_openlibs(L);
+    api_init_lua(filename, L);
+
+    lua_getglobal(L, "package");
+    if (lua_istable(L, -1)) {
+        auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
+        GString* new_path = g_string_new(NULL);
+        GString* new_cpath = g_string_new(NULL);
+
+        lua_getfield(L, -1, "path");
+        const char* current_path = lua_tostring(L, -1);
+        g_string_append_printf(new_path, "%s;%s/?.lua;%s/?/init.lua", current_path, plugins_dir, plugins_dir);
+        lua_pop(L, 1);
+
+        lua_getfield(L, -1, "cpath");
+        const char* current_cpath = lua_tostring(L, -1);
+        g_string_append_printf(new_cpath, "%s;%s/?.so", current_cpath, plugins_dir);
+        lua_pop(L, 1);
+
+        const gchar* const* system_dirs = g_get_system_data_dirs();
+        if (system_dirs) {
+            for (int i = 0; system_dirs[i]; i++) {
+                auto_gchar gchar* sys_dir = g_build_filename(system_dirs[i], "profanity", DIR_PLUGINS, NULL);
+                g_string_append_printf(new_path, ";%s/?.lua;%s/?/init.lua", sys_dir, sys_dir);
+                g_string_append_printf(new_cpath, ";%s/?.so", sys_dir);
+            }
+        }
+
+        lua_pushstring(L, new_path->str);
+        lua_setfield(L, -2, "path");
+
+        lua_pushstring(L, new_cpath->str);
+        lua_setfield(L, -2, "cpath");
+
+        g_string_free(new_path, TRUE);
+        g_string_free(new_cpath, TRUE);
+    }
+    lua_pop(L, 1);
+
+    if (luaL_dofile(L, full_path) != LUA_OK) {
+        const char* err = lua_tostring(L, -1);
+        log_error("Error loading Lua plugin %s: %s", filename, err ? err : "unknown error");
+        cons_show("Error loading Lua plugin %s: %s", filename, err ? err : "unknown error");
+        lua_close(L);
+        return NULL;
+    }
+
+    ProfPlugin* plugin = g_new0(ProfPlugin, 1);
+    plugin->name = g_strdup(filename);
+    plugin->L = L;
+    plugin->hook_mask = 0;
+
+    static const char* const hooks[] = {
+        "prof_init", "prof_on_start", "prof_on_shutdown", "prof_on_unload", "prof_on_connect", "prof_on_disconnect",
+        "prof_pre_chat_message_display", "prof_post_chat_message_display", "prof_pre_chat_message_send", "prof_post_chat_message_send",
+        "prof_pre_room_message_display", "prof_post_room_message_display", "prof_pre_room_message_send", "prof_post_room_message_send",
+        "prof_on_room_history_message",
+        "prof_pre_priv_message_display", "prof_post_priv_message_display", "prof_pre_priv_message_send", "prof_post_priv_message_send",
+        "prof_on_message_stanza_send", "prof_on_message_stanza_receive",
+        "prof_on_presence_stanza_send", "prof_on_presence_stanza_receive",
+        "prof_on_iq_stanza_send", "prof_on_iq_stanza_receive",
+        "prof_on_contact_offline", "prof_on_contact_presence",
+        "prof_on_chat_win_focus", "prof_on_room_win_focus",
+        "prof_on_room_occupant_join", "prof_on_room_occupant_leave",
+        "prof_on_chat_state", "prof_on_message_correction", "prof_on_win_open", "prof_on_win_close"
+    };
+
+    G_STATIC_ASSERT(G_N_ELEMENTS(hooks) <= 64);
+    for (size_t i = 0; i < G_N_ELEMENTS(hooks); i++) {
+        lua_getglobal(L, hooks[i]);
+        if (lua_isfunction(L, -1)) {
+            plugin->hook_mask |= (1ULL << i);
+        }
+        lua_pop(L, 1);
+    }
+
+    lua_getglobal(L, "prof_priority");
+    if (lua_isnumber(L, -1)) {
+        plugin->priority = lua_tointeger(L, -1);
+    } else {
+        plugin->priority = PROF_PLUGIN_PRIORITY_NORMAL;
+    }
+    lua_pop(L, 1);
+
+    return plugin;
+}
+
+static void
+_plugin_call_init(ProfPlugin* plugin, const char* version, const char* status,
+                  const char* account_name, const char* fulljid)
+{
+    lua_State* L = plugin->L;
+    lua_getglobal(L, "prof_init");
+    if (!lua_isfunction(L, -1)) {
+        lua_pop(L, 1);
+        return;
+    }
+    lua_pushstring(L, version ? version : "");
+    lua_pushstring(L, status ? status : "");
+    lua_pushstring(L, account_name ? account_name : "");
+    lua_pushstring(L, fulljid ? fulljid : "");
+    if (lua_pcall(L, 4, 0, 0) != LUA_OK) {
+        const char* err = lua_tostring(L, -1);
+        log_error("Plugin %s error in prof_init: %s", plugin->name, err);
+        cons_show("Plugin %s error in prof_init: %s", plugin->name, err);
+        lua_pop(L, 1);
+    }
+}
+#endif
 
 static void
 _plugins_shutdown(void)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList *curr = values, *next;
+    GList* curr = plugins_ordered;
 
     while (curr) {
-        next = g_list_next(curr);
-#ifdef HAVE_PYTHON
-        if (curr && ((ProfPlugin*)curr->data)->lang == LANG_PYTHON) {
-            python_plugin_destroy(curr->data);
-            curr = NULL;
+        ProfPlugin* plugin = curr->data;
+#ifdef HAVE_PLUGINS
+        if (plugin->L) {
+            if (plugin->hook_mask & HOOK_ON_SHUTDOWN)
+                _lua_call_void_0arg(plugin, "prof_on_shutdown");
         }
+        _plugin_destroy(plugin);
 #endif
-#ifdef HAVE_C
-        if (curr && ((ProfPlugin*)curr->data)->lang == LANG_C) {
-            c_plugin_destroy(curr->data);
-            curr = NULL;
-        }
-#endif
-        curr = next;
+        curr = g_list_next(curr);
     }
-    g_list_free(values);
-#ifdef HAVE_PYTHON
-    python_shutdown();
-#endif
-#ifdef HAVE_C
-    c_shutdown();
-#endif
 
     plugin_settings_close();
     plugin_themes_close();
     autocompleters_destroy();
+
     callbacks_close();
     disco_close();
     g_clear_pointer(&plugins, g_hash_table_destroy);
+    g_clear_pointer(&plugins_ordered, g_list_free);
 }
 
 void
 plugins_init(void)
 {
-    prof_add_shutdown_routine(_plugins_shutdown);
     plugins = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+
     callbacks_init();
     autocompleters_init();
     plugin_themes_init();
     plugin_settings_init();
-
-#ifdef HAVE_PYTHON
-    python_env_init();
-#endif
-#ifdef HAVE_C
-    c_env_init();
-#endif
 
     // load plugins
     auto_gcharv gchar** plugins_pref = prefs_get_plugins();
@@ -102,20 +459,12 @@ plugins_init(void)
     for (guint i = 0; i < g_strv_length(plugins_pref); i++) {
         gboolean loaded = FALSE;
         gchar* filename = plugins_pref[i];
-#ifdef HAVE_PYTHON
-        if (g_str_has_suffix(filename, ".py")) {
-            ProfPlugin* plugin = python_plugin_create(filename);
+#ifdef HAVE_PLUGINS
+        if (g_str_has_suffix(filename, ".lua")) {
+            ProfPlugin* plugin = _lua_plugin_create(filename);
             if (plugin) {
                 g_hash_table_insert(plugins, g_strdup(filename), plugin);
-                loaded = TRUE;
-            }
-        }
-#endif
-#ifdef HAVE_C
-        if (g_str_has_suffix(filename, ".so")) {
-            ProfPlugin* plugin = c_plugin_create(filename);
-            if (plugin) {
-                g_hash_table_insert(plugins, g_strdup(filename), plugin);
+                plugins_ordered = g_list_insert_sorted(plugins_ordered, plugin, _plugin_compare);
                 loaded = TRUE;
             }
         }
@@ -128,14 +477,16 @@ plugins_init(void)
     }
 
     // initialise plugins
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
+        if (plugin->hook_mask & HOOK_INIT) {
+            _plugin_call_init(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
+        }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 void
@@ -150,14 +501,15 @@ plugins_free_install_result(PluginsInstallResult* result)
 }
 
 static void
-_plugins_install_dir_recursive(const gchar* const path, PluginsInstallResult* result)
+_plugins_install_dir_recursive(const char* const path, PluginsInstallResult* result)
 {
-    g_autoptr(GDir) directory = g_dir_open(path, 0, NULL);
+    GDir* directory = g_dir_open(path, 0, NULL);
     if (!directory) {
+        log_error("Could not open directory %s", path);
         return;
     }
 
-    g_auto(GPathBuf) pbuf = G_PATH_BUF_INIT;
+    GPathBuf pbuf;
     g_path_buf_init_from_path(&pbuf, path);
 
     const gchar* entry = g_dir_read_name(directory);
@@ -167,7 +519,7 @@ _plugins_install_dir_recursive(const gchar* const path, PluginsInstallResult* re
         if (g_file_test(full, G_FILE_TEST_IS_DIR)) {
             _plugins_install_dir_recursive(full, result);
         } else if (g_file_test(full, G_FILE_TEST_IS_REGULAR)) {
-            if (g_str_has_suffix(entry, ".py") || g_str_has_suffix(entry, ".so")) {
+            if (g_str_has_suffix(entry, ".lua")) {
                 GString* error_message = g_string_new(NULL);
                 if (plugins_install(entry, full, error_message)) {
                     result->installed = g_slist_append(result->installed, g_strdup(full));
@@ -180,6 +532,7 @@ _plugins_install_dir_recursive(const gchar* const path, PluginsInstallResult* re
         g_path_buf_pop(&pbuf);
         entry = g_dir_read_name(directory);
     }
+    g_dir_close(directory);
 }
 
 PluginsInstallResult*
@@ -198,55 +551,38 @@ gboolean
 plugins_uninstall(const char* const plugin_name)
 {
     plugins_unload(plugin_name);
+    prefs_remove_plugin(plugin_name);
     auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
-    GString* target_path = g_string_new(plugins_dir);
-    g_string_append(target_path, "/");
-    g_string_append(target_path, plugin_name);
-    GFile* file = g_file_new_for_path(target_path->str);
+    auto_gchar gchar* full_path = g_build_filename(plugins_dir, plugin_name, NULL);
+    GFile* file = g_file_new_for_path(full_path);
     gboolean result = g_file_delete(file, NULL, NULL);
     g_object_unref(file);
-    g_string_free(target_path, TRUE);
+
     return result;
 }
 
 gboolean
 plugins_install(const char* const plugin_name, const char* const filename, GString* error_message)
 {
+    GFile* source = g_file_new_for_path(filename);
     auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
-    auto_gchar gchar* target_path = g_build_filename(plugins_dir, plugin_name, NULL);
+    auto_gchar gchar* full_path = g_build_filename(plugins_dir, plugin_name, NULL);
+    GFile* destination = g_file_new_for_path(full_path);
 
-    if (g_file_test(target_path, G_FILE_TEST_EXISTS)) {
-        log_info("Failed to install plugin: %s, file exists", plugin_name);
-        g_string_assign(error_message, "File exists");
+    GError* err = NULL;
+    gboolean res = g_file_copy(source, destination, G_FILE_COPY_OVERWRITE, NULL, NULL, NULL, &err);
+    if (!res) {
+        log_error("Could not install plugin %s: %s", filename, err->message);
+        g_string_assign(error_message, err->message);
+        g_error_free(err);
+        g_object_unref(source);
+        g_object_unref(destination);
         return FALSE;
     }
+    g_object_unref(source);
+    g_object_unref(destination);
 
-    gboolean result = copy_file(filename, target_path, FALSE);
-
-    if (result) {
-        result = plugins_load(plugin_name, error_message);
-    }
-    return result;
-}
-
-GSList*
-plugins_load_all(void)
-{
-    GSList* plugins = plugins_unloaded_list();
-    GSList* loaded = NULL;
-    GSList* curr = plugins;
-    GString* error_message = NULL;
-    while (curr) {
-        error_message = g_string_new(NULL);
-        if (plugins_load(curr->data, error_message)) {
-            loaded = g_slist_append(loaded, g_strdup(curr->data));
-        }
-        curr = g_slist_next(curr);
-        g_string_free(error_message, TRUE);
-    }
-    g_slist_free_full(plugins, g_free);
-
-    return loaded;
+    return TRUE;
 }
 
 gboolean
@@ -258,35 +594,57 @@ plugins_load(const char* const name, GString* error_message)
         return FALSE;
     }
 
-    if (g_str_has_suffix(name, ".py")) {
-#ifdef HAVE_PYTHON
-        plugin = python_plugin_create(name);
-#else
-        g_string_assign(error_message, "Python plugins support is disabled.");
-#endif
-    }
-
-    if (g_str_has_suffix(name, ".so")) {
-#ifdef HAVE_C
-        plugin = c_plugin_create(name);
-#else
-        g_string_assign(error_message, "C plugins support is disabled.");
-#endif
-    }
-    if (plugin) {
-        g_hash_table_insert(plugins, g_strdup(name), plugin);
-        if (connection_get_status() == JABBER_CONNECTED) {
-            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, session_get_account_name(), connection_get_fulljid());
-        } else {
-            plugin->init_func(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
+#ifdef HAVE_PLUGINS
+    if (g_str_has_suffix(name, ".lua")) {
+        plugin = _lua_plugin_create(name);
+        if (!plugin) {
+            g_string_assign(error_message, "Failed to load Lua plugin, check error log.");
         }
+    } else {
+        g_string_assign(error_message, "Plugin must have .lua extension.");
+    }
+#else
+    g_string_assign(error_message, "Lua plugin support is disabled.");
+#endif
+
+    if (plugin) {
+
+        g_hash_table_insert(plugins, g_strdup(name), plugin);
+        plugins_ordered = g_list_insert_sorted(plugins_ordered, plugin, _plugin_compare);
+#ifdef HAVE_PLUGINS
+        if (plugin->hook_mask & HOOK_INIT) {
+            if (connection_get_status() == JABBER_CONNECTED) {
+                _plugin_call_init(plugin, PACKAGE_VERSION, PACKAGE_STATUS, session_get_account_name(), connection_get_fulljid());
+            } else {
+                _plugin_call_init(plugin, PACKAGE_VERSION, PACKAGE_STATUS, NULL, NULL);
+            }
+        }
+#endif
         log_info("Loaded plugin: %s", name);
-        prefs_add_plugin(name);
         return TRUE;
     } else {
         log_info("Failed to load plugin: %s", name);
         return FALSE;
     }
+}
+
+GSList*
+plugins_load_all(void)
+{
+    GSList* result = NULL;
+    GSList* unloaded = plugins_unloaded_list();
+    GSList* curr = unloaded;
+    while (curr) {
+        GString* error_message = g_string_new(NULL);
+        if (plugins_load(curr->data, error_message)) {
+            result = g_slist_append(result, g_strdup(curr->data));
+        }
+        g_string_free(error_message, TRUE);
+        curr = g_slist_next(curr);
+    }
+    g_slist_free_full(unloaded, g_free);
+
+    return result;
 }
 
 gboolean
@@ -320,22 +678,21 @@ plugins_unload(const char* const name)
 {
     ProfPlugin* plugin = g_hash_table_lookup(plugins, name);
     if (plugin) {
-        plugin->on_unload_func(plugin);
-#ifdef HAVE_PYTHON
-        if (plugin->lang == LANG_PYTHON) {
-            python_plugin_destroy(plugin);
+#ifdef HAVE_PLUGINS
+        if (plugin->L) {
+            if (plugin->hook_mask & HOOK_ON_UNLOAD)
+                _lua_call_void_0arg(plugin, "prof_on_unload");
         }
 #endif
-#ifdef HAVE_C
-        if (plugin->lang == LANG_C) {
-            c_plugin_destroy(plugin);
-        }
-#endif
-        prefs_remove_plugin(name);
+        callbacks_remove(name);
+
+        plugins_ordered = g_list_remove(plugins_ordered, plugin);
         g_hash_table_remove(plugins, name);
+#ifdef HAVE_PLUGINS
+        _plugin_destroy(plugin);
+#endif
 
         caps_reset_ver();
-        // resend presence to update server's disco info data for this client
         if (connection_get_status() == JABBER_CONNECTED) {
             resource_presence_t last_presence = accounts_get_last_presence(session_get_account_name());
             cl_ev_presence_send(last_presence, 0);
@@ -345,69 +702,79 @@ plugins_unload(const char* const name)
     return FALSE;
 }
 
-void
-plugins_reload_all(void)
-{
-    GList* plugin_names = g_hash_table_get_keys(plugins);
-    GList* plugin_names_dup = NULL;
-    GList* curr = plugin_names;
-    while (curr) {
-        plugin_names_dup = g_list_append(plugin_names_dup, g_strdup(curr->data));
-        curr = g_list_next(curr);
-    }
-    g_list_free(plugin_names);
-
-    GString* error_message = NULL;
-    curr = plugin_names_dup;
-    while (curr) {
-        error_message = g_string_new(NULL);
-        plugins_reload(curr->data, error_message);
-        g_string_free(error_message, TRUE);
-        curr = g_list_next(curr);
-    }
-
-    g_list_free_full(plugin_names_dup, g_free);
-}
-
-gboolean
-plugins_reload(const char* const name, GString* error_message)
-{
-    gboolean res = plugins_unload(name);
-    if (res) {
-        res = plugins_load(name, error_message);
-    } else {
-        log_info("Failed to reload plugin: %s, not loaded", name);
-        g_string_assign(error_message, "cannot unload");
-    }
-
-    return res;
-}
-
 static void
 _plugins_unloaded_list_dir(const gchar* const dir, GSList** result)
 {
     GDir* plugins_dir = g_dir_open(dir, 0, NULL);
-    if (plugins_dir == NULL) {
+    if (!plugins_dir) {
         return;
     }
 
     const gchar* plugin = g_dir_read_name(plugins_dir);
     while (plugin) {
         ProfPlugin* found = g_hash_table_lookup(plugins, plugin);
-        if ((g_str_has_suffix(plugin, ".so") || g_str_has_suffix(plugin, ".py")) && !found) {
-            *result = g_slist_append(*result, g_strdup(plugin));
+        if (g_str_has_suffix(plugin, ".lua") && !found) {
+            if (!g_slist_find_custom(*result, plugin, (GCompareFunc)g_strcmp0)) {
+                *result = g_slist_append(*result, g_strdup(plugin));
+            }
         }
         plugin = g_dir_read_name(plugins_dir);
     }
     g_dir_close(plugins_dir);
 }
 
+static void
+_plugins_installed_list_dir(const gchar* const dir, GSList** result)
+{
+    GDir* plugins_dir = g_dir_open(dir, 0, NULL);
+    if (!plugins_dir) {
+        return;
+    }
+
+    const gchar* filename = g_dir_read_name(plugins_dir);
+    while (filename) {
+        if (g_str_has_suffix(filename, ".lua")) {
+            if (!g_slist_find_custom(*result, filename, (GCompareFunc)g_strcmp0)) {
+                *result = g_slist_append(*result, g_strdup(filename));
+            }
+        }
+        filename = g_dir_read_name(plugins_dir);
+    }
+    g_dir_close(plugins_dir);
+}
+
+GSList*
+plugins_installed_list(void)
+{
+    GSList* result = NULL;
+    auto_gchar gchar* local_dir = files_get_data_path(DIR_PLUGINS);
+    _plugins_installed_list_dir(local_dir, &result);
+
+    const gchar* const* system_dirs = g_get_system_data_dirs();
+    if (system_dirs) {
+        for (int i = 0; system_dirs[i]; i++) {
+            auto_gchar gchar* sys_dir = g_build_filename(system_dirs[i], "profanity", DIR_PLUGINS, NULL);
+            _plugins_installed_list_dir(sys_dir, &result);
+        }
+    }
+
+    return result;
+}
+
 GSList*
 plugins_unloaded_list(void)
 {
     GSList* result = NULL;
-    auto_gchar gchar* plugins_dir = files_get_data_path(DIR_PLUGINS);
-    _plugins_unloaded_list_dir(plugins_dir, &result);
+    auto_gchar gchar* local_dir = files_get_data_path(DIR_PLUGINS);
+    _plugins_unloaded_list_dir(local_dir, &result);
+
+    const gchar* const* system_dirs = g_get_system_data_dirs();
+    if (system_dirs) {
+        for (int i = 0; system_dirs[i]; i++) {
+            auto_gchar gchar* sys_dir = g_build_filename(system_dirs[i], "profanity", DIR_PLUGINS, NULL);
+            _plugins_unloaded_list_dir(sys_dir, &result);
+        }
+    }
 
     return result;
 }
@@ -416,6 +783,16 @@ GList*
 plugins_loaded_list(void)
 {
     return g_hash_table_get_keys(plugins);
+}
+
+gboolean
+plugins_is_loaded(const char* const name)
+{
+    if (!name || !plugins) {
+        return FALSE;
+    }
+
+    return g_hash_table_contains(plugins, name);
 }
 
 char*
@@ -435,7 +812,19 @@ plugins_win_process_line(char* win, const char* const line)
 {
     PluginWindowCallback* window = callbacks_get_window_handler(win);
     if (window) {
-        window->callback_exec(window, win, line);
+#ifdef HAVE_PLUGINS
+        if (window->L && window->lua_ref > 0) {
+            lua_rawgeti(window->L, LUA_REGISTRYINDEX, window->lua_ref);
+            lua_pushstring(window->L, win ? win : "");
+            lua_pushstring(window->L, line ? line : "");
+            if (lua_pcall(window->L, 2, 0, 0) != LUA_OK) {
+                const char* err = lua_tostring(window->L, -1);
+                log_error("Lua error in window %s callback: %s", win, err);
+                cons_show("Lua error in window %s callback: %s", win, err);
+                lua_pop(window->L, 1);
+            }
+        }
+#endif
     }
 }
 
@@ -445,521 +834,581 @@ plugins_close_win(const char* const plugin_name, const char* const tag)
     callbacks_remove_win(plugin_name, tag);
 }
 
-static void
-_plugins_on_shutdown(void)
-{
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
-    while (curr) {
-        ProfPlugin* plugin = curr->data;
-        plugin->on_shutdown_func(plugin);
-        curr = g_list_next(curr);
-    }
-    g_list_free(values);
-}
-
 void
 plugins_on_start(void)
 {
-    prof_add_shutdown_routine(_plugins_on_shutdown);
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->on_start_func(plugin);
+        if (plugin->hook_mask & HOOK_ON_START)
+            _lua_call_void_0arg(plugin, "prof_on_start");
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
+}
+
+void
+plugins_on_shutdown(void)
+{
+    _plugins_shutdown();
+}
+
+void
+plugins_close(void)
+{
+    _plugins_shutdown();
 }
 
 void
 plugins_on_connect(const char* const account_name, const char* const fulljid)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->on_connect_func(plugin, account_name, fulljid);
+        if (plugin->hook_mask & HOOK_ON_CONNECT)
+            _lua_call_void_2str(plugin, "prof_on_connect", account_name, fulljid);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 void
 plugins_on_disconnect(const char* const account_name, const char* const fulljid)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->on_disconnect_func(plugin, account_name, fulljid);
+        if (plugin->hook_mask & HOOK_ON_DISCONNECT)
+            _lua_call_void_2str(plugin, "prof_on_disconnect", account_name, fulljid);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 char*
 plugins_pre_chat_message_display(const char* const barejid, const char* const resource, const char* message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    if (!values) {
-        return NULL;
-    }
-
-    gchar* new_message = NULL;
-    gchar* curr_message = g_strdup(message);
-
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    char* result = NULL;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        new_message = plugin->pre_chat_message_display(plugin, barejid, resource, curr_message);
-        if (new_message) {
-            g_free(curr_message);
-            curr_message = new_message;
+
+        if (plugin->hook_mask & HOOK_PRE_CHAT_MESSAGE_DISPLAY) {
+            char* new_msg = _lua_call_filter_3str(plugin, "prof_pre_chat_message_display", barejid, resource, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
+            }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-
-    return curr_message;
+    return result;
+#else
+    return NULL;
+#endif
 }
 
 void
 plugins_post_chat_message_display(const char* const barejid, const char* const resource, const char* message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->post_chat_message_display(plugin, barejid, resource, message);
+        if (plugin->hook_mask & HOOK_POST_CHAT_MESSAGE_DISPLAY)
+            _lua_call_void_3str(plugin, "prof_post_chat_message_display", barejid, resource, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 char*
 plugins_pre_chat_message_send(const char* const barejid, const char* message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    if (!values) {
-        return NULL;
-    }
-
-    gchar* new_message = NULL;
-    gchar* curr_message = g_strdup(message);
-
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    char* result = NULL;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        if (plugin->contains_hook(plugin, "prof_pre_chat_message_send")) {
-            new_message = plugin->pre_chat_message_send(plugin, barejid, curr_message);
-            g_free(curr_message);
-            if (new_message) {
-                curr_message = new_message;
-            } else {
-                g_list_free(values);
 
-                return NULL;
+        if (plugin->hook_mask & HOOK_PRE_CHAT_MESSAGE_SEND) {
+            char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_chat_message_send", barejid, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
             }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-
-    return curr_message;
+    return result;
+#else
+    return NULL;
+#endif
 }
 
 void
 plugins_post_chat_message_send(const char* const barejid, const char* message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->post_chat_message_send(plugin, barejid, message);
+        if (plugin->hook_mask & HOOK_POST_CHAT_MESSAGE_SEND)
+            _lua_call_void_2str(plugin, "prof_post_chat_message_send", barejid, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 char*
 plugins_pre_room_message_display(const char* const barejid, const char* const nick, const char* message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    if (!values) {
-        return NULL;
-    }
-
-    gchar* new_message = NULL;
-    gchar* curr_message = g_strdup(message);
-
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    char* result = NULL;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        new_message = plugin->pre_room_message_display(plugin, barejid, nick, curr_message);
-        if (new_message) {
-            g_free(curr_message);
-            curr_message = new_message;
+
+        if (plugin->hook_mask & HOOK_PRE_ROOM_MESSAGE_DISPLAY) {
+            char* new_msg = _lua_call_filter_3str(plugin, "prof_pre_room_message_display", barejid, nick, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
+            }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-
-    return curr_message;
+    return result;
+#else
+    return NULL;
+#endif
 }
 
 void
 plugins_post_room_message_display(const char* const barejid, const char* const nick, const char* message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->post_room_message_display(plugin, barejid, nick, message);
+        if (plugin->hook_mask & HOOK_POST_ROOM_MESSAGE_DISPLAY)
+            _lua_call_void_3str(plugin, "prof_post_room_message_display", barejid, nick, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 char*
 plugins_pre_room_message_send(const char* const barejid, const char* message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    if (!values) {
-        return NULL;
-    }
-
-    gchar* new_message = NULL;
-    gchar* curr_message = g_strdup(message);
-
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    char* result = NULL;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        if (plugin->contains_hook(plugin, "prof_pre_room_message_send")) {
-            new_message = plugin->pre_room_message_send(plugin, barejid, curr_message);
-            g_free(curr_message);
-            if (new_message) {
-                curr_message = new_message;
-            } else {
-                g_list_free(values);
 
-                return NULL;
+        if (plugin->hook_mask & HOOK_PRE_ROOM_MESSAGE_SEND) {
+            char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_room_message_send", barejid, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
             }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-
-    return curr_message;
+    return result;
+#else
+    return NULL;
+#endif
 }
 
 void
 plugins_post_room_message_send(const char* const barejid, const char* message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->post_room_message_send(plugin, barejid, message);
+        if (plugin->hook_mask & HOOK_POST_ROOM_MESSAGE_SEND)
+            _lua_call_void_2str(plugin, "prof_post_room_message_send", barejid, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 void
 plugins_on_room_history_message(const char* const barejid, const char* const nick, const char* const message,
                                 GDateTime* timestamp)
 {
-    auto_gchar gchar* timestamp_str = prof_date_time_format_iso8601(timestamp);
-
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    auto_gchar gchar* time_str = NULL;
+    if (timestamp) {
+        time_str = g_date_time_format_iso8601(timestamp);
+    }
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->on_room_history_message(plugin, barejid, nick, message, timestamp_str);
+        if (plugin->hook_mask & HOOK_ON_ROOM_HISTORY_MESSAGE)
+            _lua_call_void_4str(plugin, "prof_on_room_history_message", barejid, nick, message, time_str);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 char*
 plugins_pre_priv_message_display(const char* const fulljid, const char* message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    if (!values) {
-        return NULL;
-    }
-
-    auto_jid Jid* jidp = jid_create(fulljid);
-    gchar* new_message = NULL;
-    gchar* curr_message = g_strdup(message);
-
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    char* result = NULL;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        new_message = plugin->pre_priv_message_display(plugin, jidp->barejid, jidp->resourcepart, curr_message);
-        if (new_message) {
-            g_free(curr_message);
-            curr_message = new_message;
+
+        if (plugin->hook_mask & HOOK_PRE_PRIV_MESSAGE_DISPLAY) {
+            char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_priv_message_display", fulljid, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
+            }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-    return curr_message;
+    return result;
+#else
+    return NULL;
+#endif
 }
 
 void
 plugins_post_priv_message_display(const char* const fulljid, const char* message)
 {
-    auto_jid Jid* jidp = jid_create(fulljid);
-
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->post_priv_message_display(plugin, jidp->barejid, jidp->resourcepart, message);
+        if (plugin->hook_mask & HOOK_POST_PRIV_MESSAGE_DISPLAY)
+            _lua_call_void_2str(plugin, "prof_post_priv_message_display", fulljid, message);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 char*
 plugins_pre_priv_message_send(const char* const fulljid, const char* const message)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    if (!values) {
-        return NULL;
-    }
-
-    auto_jid Jid* jidp = jid_create(fulljid);
-    gchar* new_message = NULL;
-    gchar* curr_message = g_strdup(message);
-
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    char* result = NULL;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        if (plugin->contains_hook(plugin, "prof_pre_priv_message_send")) {
-            new_message = plugin->pre_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, curr_message);
-            g_free(curr_message);
-            if (new_message) {
-                curr_message = new_message;
-            } else {
-                g_list_free(values);
 
-                return NULL;
+        if (plugin->hook_mask & HOOK_PRE_PRIV_MESSAGE_SEND) {
+            char* new_msg = _lua_call_filter_2str(plugin, "prof_pre_priv_message_send", fulljid, result ? result : message);
+            if (new_msg) {
+                g_free(result);
+                result = new_msg;
             }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-
-    return curr_message;
+    return result;
+#else
+    return NULL;
+#endif
 }
 
 void
 plugins_post_priv_message_send(const char* const fulljid, const char* const message)
 {
-    auto_jid Jid* jidp = jid_create(fulljid);
-
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->post_priv_message_send(plugin, jidp->barejid, jidp->resourcepart, message);
+        if (plugin->hook_mask & HOOK_POST_PRIV_MESSAGE_SEND)
+            _lua_call_void_2str(plugin, "prof_post_priv_message_send", fulljid, message);
         curr = g_list_next(curr);
     }
-
-    g_list_free(values);
+#endif
 }
 
 char*
 plugins_on_message_stanza_send(const char* const text)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    if (!values) {
-        return NULL;
-    }
-
-    gchar* new_stanza = NULL;
-    gchar* curr_stanza = g_strdup(text);
-
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    char* result = NULL;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        new_stanza = plugin->on_message_stanza_send(plugin, curr_stanza);
-        if (new_stanza) {
-            g_free(curr_stanza);
-            curr_stanza = new_stanza;
+
+        if (plugin->hook_mask & HOOK_ON_MESSAGE_STANZA_SEND) {
+            char* new_stanza = _lua_call_filter_2str(plugin, "prof_on_message_stanza_send", result ? result : text, "");
+            if (new_stanza) {
+                g_free(result);
+                result = new_stanza;
+            }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-
-    return curr_stanza;
+    return result;
+#else
+    return NULL;
+#endif
 }
 
 gboolean
 plugins_on_message_stanza_receive(const char* const text)
 {
-    gboolean cont = TRUE;
-
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    gboolean result = TRUE;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        gboolean res = plugin->on_message_stanza_receive(plugin, text);
-        if (res == FALSE) {
-            cont = FALSE;
+        if (plugin->hook_mask & HOOK_ON_MESSAGE_STANZA_RECEIVE) {
+            if (!_lua_call_bool_1str(plugin, "prof_on_message_stanza_receive", text)) {
+                result = FALSE;
+            }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-
-    return cont;
+    return result;
+#else
+    return TRUE;
+#endif
 }
 
 char*
 plugins_on_presence_stanza_send(const char* const text)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    if (!values) {
-        return NULL;
-    }
-
-    gchar* new_stanza = NULL;
-    gchar* curr_stanza = g_strdup(text);
-
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    char* result = NULL;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        new_stanza = plugin->on_presence_stanza_send(plugin, curr_stanza);
-        if (new_stanza) {
-            g_free(curr_stanza);
-            curr_stanza = new_stanza;
+
+        if (plugin->hook_mask & HOOK_ON_PRESENCE_STANZA_SEND) {
+            char* new_stanza = _lua_call_filter_2str(plugin, "prof_on_presence_stanza_send", result ? result : text, "");
+            if (new_stanza) {
+                g_free(result);
+                result = new_stanza;
+            }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-
-    return curr_stanza;
+    return result;
+#else
+    return NULL;
+#endif
 }
 
 gboolean
 plugins_on_presence_stanza_receive(const char* const text)
 {
-    gboolean cont = TRUE;
-
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    gboolean result = TRUE;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        gboolean res = plugin->on_presence_stanza_receive(plugin, text);
-        if (res == FALSE) {
-            cont = FALSE;
+        if (plugin->hook_mask & HOOK_ON_PRESENCE_STANZA_RECEIVE) {
+            if (!_lua_call_bool_1str(plugin, "prof_on_presence_stanza_receive", text)) {
+                result = FALSE;
+            }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-
-    return cont;
+    return result;
+#else
+    return TRUE;
+#endif
 }
 
 char*
 plugins_on_iq_stanza_send(const char* const text)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    if (!values) {
-        return NULL;
-    }
-
-    char* new_stanza = NULL;
-    char* curr_stanza = g_strdup(text);
-
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    char* result = NULL;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        new_stanza = plugin->on_iq_stanza_send(plugin, curr_stanza);
-        if (new_stanza) {
-            g_free(curr_stanza);
-            curr_stanza = new_stanza;
+
+        if (plugin->hook_mask & HOOK_ON_IQ_STANZA_SEND) {
+            char* new_stanza = _lua_call_filter_2str(plugin, "prof_on_iq_stanza_send", result ? result : text, "");
+            if (new_stanza) {
+                g_free(result);
+                result = new_stanza;
+            }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-
-    return curr_stanza;
+    return result;
+#else
+    return NULL;
+#endif
 }
 
 gboolean
 plugins_on_iq_stanza_receive(const char* const text)
 {
-    gboolean cont = TRUE;
-
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    gboolean result = TRUE;
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        gboolean res = plugin->on_iq_stanza_receive(plugin, text);
-        if (res == FALSE) {
-            cont = FALSE;
+        if (plugin->hook_mask & HOOK_ON_IQ_STANZA_RECEIVE) {
+            if (!_lua_call_bool_1str(plugin, "prof_on_iq_stanza_receive", text)) {
+                result = FALSE;
+            }
         }
         curr = g_list_next(curr);
     }
-    g_list_free(values);
-
-    return cont;
+    return result;
+#else
+    return TRUE;
+#endif
 }
 
 void
 plugins_on_contact_offline(const char* const barejid, const char* const resource, const char* const status)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->on_contact_offline(plugin, barejid, resource, status);
+        if (plugin->hook_mask & HOOK_ON_CONTACT_OFFLINE)
+            _lua_call_void_3str(plugin, "prof_on_contact_offline", barejid, resource, status);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 void
-plugins_on_contact_presence(const char* const barejid, const char* const resource, const char* const presence, const char* const status, const int priority)
+plugins_on_contact_presence(const char* const barejid, const char* const resource, const char* const presence,
+                            const char* const status, const int priority)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->on_contact_presence(plugin, barejid, resource, presence, status, priority);
+        if (plugin->hook_mask & HOOK_ON_CONTACT_PRESENCE)
+            _lua_call_void_presence(plugin, barejid, resource, presence, status, priority);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 void
 plugins_on_chat_win_focus(const char* const barejid)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->on_chat_win_focus(plugin, barejid);
+        if (plugin->hook_mask & HOOK_ON_CHAT_WIN_FOCUS)
+            _lua_call_void_1str(plugin, "prof_on_chat_win_focus", barejid);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
 }
 
 void
 plugins_on_room_win_focus(const char* const barejid)
 {
-    GList* values = g_hash_table_get_values(plugins);
-    GList* curr = values;
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
     while (curr) {
         ProfPlugin* plugin = curr->data;
-        plugin->on_room_win_focus(plugin, barejid);
+        if (plugin->hook_mask & HOOK_ON_ROOM_WIN_FOCUS)
+            _lua_call_void_1str(plugin, "prof_on_room_win_focus", barejid);
         curr = g_list_next(curr);
     }
-    g_list_free(values);
+#endif
+}
+
+void
+plugins_on_room_occupant_join(const char* const roomjid, const char* const nick)
+{
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
+    while (curr) {
+        ProfPlugin* plugin = curr->data;
+        if (plugin->hook_mask & HOOK_ON_ROOM_OCCUPANT_JOIN)
+            _lua_call_void_2str(plugin, "prof_on_room_occupant_join", roomjid, nick);
+        curr = g_list_next(curr);
+    }
+#endif
+}
+
+void
+plugins_on_room_occupant_leave(const char* const roomjid, const char* const nick, const char* const reason)
+{
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
+    while (curr) {
+        ProfPlugin* plugin = curr->data;
+        if (plugin->hook_mask & HOOK_ON_ROOM_OCCUPANT_LEAVE)
+            _lua_call_void_3str(plugin, "prof_on_room_occupant_leave", roomjid, nick, reason);
+        curr = g_list_next(curr);
+    }
+#endif
+}
+
+void
+plugins_on_chat_state(const char* const barejid, const char* const state)
+{
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
+    while (curr) {
+        ProfPlugin* plugin = curr->data;
+        if (plugin->hook_mask & HOOK_ON_CHAT_STATE)
+            _lua_call_void_2str(plugin, "prof_on_chat_state", barejid, state);
+        curr = g_list_next(curr);
+    }
+#endif
+}
+
+void
+plugins_on_message_correction(const char* const barejid, const char* const id, const char* const new_message)
+{
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
+    while (curr) {
+        ProfPlugin* plugin = curr->data;
+        if (plugin->hook_mask & HOOK_ON_MESSAGE_CORRECTION)
+            _lua_call_void_3str(plugin, "prof_on_message_correction", barejid, id, new_message);
+        curr = g_list_next(curr);
+    }
+#endif
+}
+
+void
+plugins_on_win_open(const char* const title, const char* const type)
+{
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
+    while (curr) {
+        ProfPlugin* plugin = curr->data;
+        if (plugin->hook_mask & HOOK_ON_WIN_OPEN)
+            _lua_call_void_2str(plugin, "prof_on_win_open", title, type);
+        curr = g_list_next(curr);
+    }
+#endif
+}
+
+void
+plugins_on_win_close(const char* const title, const char* const type)
+{
+#ifdef HAVE_PLUGINS
+    GList* curr = plugins_ordered;
+    while (curr) {
+        ProfPlugin* plugin = curr->data;
+        if (plugin->hook_mask & HOOK_ON_WIN_CLOSE)
+            _lua_call_void_2str(plugin, "prof_on_win_close", title, type);
+        curr = g_list_next(curr);
+    }
+#endif
 }
 
 GList*
@@ -967,3 +1416,341 @@ plugins_get_disco_features(void)
 {
     return disco_get_features();
 }
+
+#else // !HAVE_PLUGINS
+
+#include <glib.h>
+#include "plugins/plugins.h"
+
+const char*
+plugins_get_lua_version(void)
+{
+    return "none";
+}
+
+void
+plugins_init(void)
+{
+}
+
+gchar*
+plugins_find_plugin_path(const char* const filename)
+{
+    return NULL;
+}
+
+GSList*
+plugins_installed_list(void)
+{
+    return NULL;
+}
+
+GSList*
+plugins_unloaded_list(void)
+{
+    return NULL;
+}
+
+GList*
+plugins_loaded_list(void)
+{
+    return NULL;
+}
+
+gboolean
+plugins_is_loaded(const char* const name)
+{
+    return FALSE;
+}
+
+char*
+plugins_autocomplete(const char* const input, gboolean previous)
+{
+    return NULL;
+}
+
+void
+plugins_reset_autocomplete(void)
+{
+}
+
+void
+plugins_free_install_result(PluginsInstallResult* result)
+{
+    if (result) {
+        g_free(result);
+    }
+}
+
+gboolean
+plugins_install(const char* const plugin_name, const char* const filename, GString* error_message)
+{
+    if (error_message) {
+        g_string_assign(error_message, "Plugin support is disabled.");
+    }
+    return FALSE;
+}
+
+PluginsInstallResult*
+plugins_install_all(const char* const path)
+{
+    return NULL;
+}
+
+gboolean
+plugins_uninstall(const char* const plugin_name)
+{
+    return FALSE;
+}
+
+gboolean
+plugins_load(const char* const name, GString* error_message)
+{
+    if (error_message) {
+        g_string_assign(error_message, "Plugin support is disabled.");
+    }
+    return FALSE;
+}
+
+GSList*
+plugins_load_all(void)
+{
+    return NULL;
+}
+
+gboolean
+plugins_unload(const char* const name)
+{
+    return FALSE;
+}
+
+gboolean
+plugins_unload_all(void)
+{
+    return TRUE;
+}
+
+void
+plugins_on_start(void)
+{
+}
+
+void
+plugins_on_shutdown(void)
+{
+}
+
+void
+plugins_close(void)
+{
+}
+
+void
+plugins_on_connect(const char* const account_name, const char* const fulljid)
+{
+}
+
+void
+plugins_on_disconnect(const char* const account_name, const char* const fulljid)
+{
+}
+
+char*
+plugins_pre_chat_message_display(const char* const barejid, const char* const resource, const char* message)
+{
+    return NULL;
+}
+
+void
+plugins_post_chat_message_display(const char* const barejid, const char* const resource, const char* message)
+{
+}
+
+char*
+plugins_pre_chat_message_send(const char* const barejid, const char* message)
+{
+    return NULL;
+}
+
+void
+plugins_post_chat_message_send(const char* const barejid, const char* message)
+{
+}
+
+char*
+plugins_pre_room_message_display(const char* const barejid, const char* const nick, const char* message)
+{
+    return NULL;
+}
+
+void
+plugins_post_room_message_display(const char* const barejid, const char* const nick, const char* message)
+{
+}
+
+char*
+plugins_pre_room_message_send(const char* const barejid, const char* message)
+{
+    return NULL;
+}
+
+void
+plugins_post_room_message_send(const char* const barejid, const char* message)
+{
+}
+
+void
+plugins_on_room_history_message(const char* const barejid, const char* const nick, const char* const message,
+                                GDateTime* timestamp)
+{
+}
+
+char*
+plugins_pre_priv_message_display(const char* const fulljid, const char* message)
+{
+    return NULL;
+}
+
+void
+plugins_post_priv_message_display(const char* const fulljid, const char* message)
+{
+}
+
+char*
+plugins_pre_priv_message_send(const char* const fulljid, const char* const message)
+{
+    return NULL;
+}
+
+void
+plugins_post_priv_message_send(const char* const fulljid, const char* const message)
+{
+}
+
+void
+plugins_win_process_line(char* win, const char* const line)
+{
+}
+
+void
+plugins_close_win(const char* const plugin_name, const char* const tag)
+{
+}
+
+char*
+plugins_on_message_stanza_send(const char* const text)
+{
+    return NULL;
+}
+
+gboolean
+plugins_on_message_stanza_receive(const char* const text)
+{
+    return TRUE;
+}
+
+char*
+plugins_on_presence_stanza_send(const char* const text)
+{
+    return NULL;
+}
+
+gboolean
+plugins_on_presence_stanza_receive(const char* const text)
+{
+    return TRUE;
+}
+
+char*
+plugins_on_iq_stanza_send(const char* const text)
+{
+    return NULL;
+}
+
+gboolean
+plugins_on_iq_stanza_receive(const char* const text)
+{
+    return TRUE;
+}
+
+void
+plugins_on_contact_offline(const char* const barejid, const char* const resource, const char* const status)
+{
+}
+
+void
+plugins_on_contact_presence(const char* const barejid, const char* const resource, const char* const presence,
+                            const char* const status, const int priority)
+{
+}
+
+void
+plugins_on_chat_win_focus(const char* const barejid)
+{
+}
+
+void
+plugins_on_room_win_focus(const char* const barejid)
+{
+}
+
+void
+plugins_on_room_occupant_join(const char* const roomjid, const char* const nick)
+{
+}
+
+void
+plugins_on_room_occupant_leave(const char* const roomjid, const char* const nick, const char* const reason)
+{
+}
+
+void
+plugins_on_chat_state(const char* const barejid, const char* const state)
+{
+}
+
+void
+plugins_on_message_correction(const char* const barejid, const char* const id, const char* const new_message)
+{
+}
+
+void
+plugins_on_win_open(const char* const title, const char* const type)
+{
+}
+
+void
+plugins_on_win_close(const char* const title, const char* const type)
+{
+}
+
+gboolean
+plugins_run_command(const char* const cmd)
+{
+    return FALSE;
+}
+
+void
+plugins_run_timed(void)
+{
+}
+
+GList*
+plugins_get_command_names(void)
+{
+    return NULL;
+}
+
+CommandHelp*
+plugins_get_help(const char* const cmd)
+{
+    return NULL;
+}
+
+GList*
+plugins_get_disco_features(void)
+{
+    return NULL;
+}
+
+#endif

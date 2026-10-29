@@ -5,16 +5,16 @@ option('notifications',
   description: 'Enable desktop notifications'
 )
 
-option('python-plugins',
+option('plugins',
   type: 'feature',
-  value: 'disabled',
-  description: 'Enable Python plugins'
+  value: 'auto',
+  description: 'Enable Lua plugin support'
 )
 
-option('c-plugins',
-  type: 'feature',
-  value: 'disabled',
-  description: 'Enable C plugins'
+option('lua-version',
+  type: 'string',
+  value: '',
+  description: 'Specify exact Lua pkg-config package (e.g. lua5.4, lua-5.4, lua, luajit). If empty, auto-detect.'
 )
 
 option('otr',
@@ -67,12 +67,6 @@ option('spellcheck',
 )
 
 # Other:
-option('python_framework',
-  type: 'string',
-  value: '',
-  description: 'Set base directory for Python Framework (macOS only)'
-)
-
 option('tests',
   type: 'boolean',
   value: false,

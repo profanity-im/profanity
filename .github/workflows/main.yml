@@ -72,7 +72,7 @@ jobs:
             meson \
             ninja \
             pkgconf \
-            python@3.14 \
+            lua \
             qrencode \
             readline \
             sqlite \

@@ -3,11 +3,18 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2026 Michael Vetter <jubalh@iodoru.org>
  *
  * SPDX-License-Identifier: GPL-3.0-or-later WITH OpenSSL-exception
  */
 
 #include "config.h"
+
+#ifdef HAVE_PLUGINS
+
+#include "log.h"
+#include <lua.h>
+#include <lauxlib.h>
 
 #include <string.h>
 #include <stdlib.h>
@@ -22,15 +29,18 @@
 #include "ui/window_list.h"
 
 static GHashTable* p_commands = NULL;
+static GHashTable* p_plugin_commands = NULL;
 static GHashTable* p_timed_functions = NULL;
 static GHashTable* p_window_callbacks = NULL;
 
 static void
 _free_window_callback(PluginWindowCallback* window_callback)
 {
-    if (window_callback->callback_destroy) {
-        window_callback->callback_destroy(window_callback->callback);
+#ifdef HAVE_PLUGINS
+    if (window_callback->L && window_callback->lua_ref > 0) {
+        luaL_unref(window_callback->L, LUA_REGISTRYINDEX, window_callback->lua_ref);
     }
+#endif
     g_free(window_callback);
 }
 
@@ -43,6 +53,10 @@ _free_window_callbacks(GHashTable* window_callbacks)
 static void
 _free_command_help(CommandHelp* help)
 {
+    if (!help) {
+        return;
+    }
+
     int i = 0;
     while (help->tags[i] != NULL) {
         g_free(help->tags[i++]);
@@ -73,34 +87,34 @@ _free_command_help(CommandHelp* help)
 static void
 _free_command(PluginCommand* command)
 {
-    if (command->callback_destroy) {
-        command->callback_destroy(command->callback);
+    if (!command) {
+        return;
     }
+#ifdef HAVE_PLUGINS
+    if (command->L && command->lua_ref > 0) {
+        luaL_unref(command->L, LUA_REGISTRYINDEX, command->lua_ref);
+    }
+#endif
     g_free(command->command_name);
-
-    if (command->help)
-        _free_command_help(command->help);
-
+    _free_command_help(command->help);
     g_free(command);
 }
 
 static void
-_free_command_hash(GHashTable* command_hash)
+_free_command_names_list(GList* command_names)
 {
-    g_hash_table_destroy(command_hash);
+    g_list_free_full(command_names, g_free);
 }
 
 static void
 _free_timed_function(PluginTimedFunction* timed_function)
 {
-    if (!timed_function)
-        return;
-    if (timed_function->callback_destroy) {
-        timed_function->callback_destroy(timed_function->callback);
+#ifdef HAVE_PLUGINS
+    if (timed_function->L && timed_function->lua_ref > 0) {
+        luaL_unref(timed_function->L, LUA_REGISTRYINDEX, timed_function->lua_ref);
     }
-
+#endif
     g_timer_destroy(timed_function->timer);
-
     g_free(timed_function);
 }
 
@@ -113,7 +127,8 @@ _free_timed_function_list(GList* timed_functions)
 void
 callbacks_init(void)
 {
-    p_commands = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_command_hash);
+    p_commands = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_command);
+    p_plugin_commands = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_command_names_list);
     p_timed_functions = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_timed_function_list);
     p_window_callbacks = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_window_callbacks);
 }
@@ -121,20 +136,19 @@ callbacks_init(void)
 void
 callbacks_remove(const char* const plugin_name)
 {
-    GHashTable* command_hash = g_hash_table_lookup(p_commands, plugin_name);
-    if (command_hash) {
-        GList* commands = g_hash_table_get_keys(command_hash);
+    GList* commands = g_hash_table_lookup(p_plugin_commands, plugin_name);
+    if (commands) {
         GList* curr = commands;
         while (curr) {
             char* command = curr->data;
             cmd_ac_remove(command);
             cmd_ac_remove_help(&command[1]);
+            g_hash_table_remove(p_commands, command);
             curr = g_list_next(curr);
         }
-        g_list_free(commands);
     }
 
-    g_hash_table_remove(p_commands, plugin_name);
+    g_hash_table_remove(p_plugin_commands, plugin_name);
     g_hash_table_remove(p_timed_functions, plugin_name);
 
     GHashTable* tag_to_win_cb_hash = g_hash_table_lookup(p_window_callbacks, plugin_name);
@@ -157,19 +171,26 @@ callbacks_close(void)
     g_clear_pointer(&p_window_callbacks, g_hash_table_destroy);
     g_clear_pointer(&p_timed_functions, g_hash_table_destroy);
     g_clear_pointer(&p_commands, g_hash_table_destroy);
+    g_clear_pointer(&p_plugin_commands, g_hash_table_destroy);
 }
 
 void
 callbacks_add_command(const char* const plugin_name, PluginCommand* command)
 {
-    GHashTable* command_hash = g_hash_table_lookup(p_commands, plugin_name);
-    if (command_hash) {
-        g_hash_table_insert(command_hash, g_strdup(command->command_name), command);
-    } else {
-        command_hash = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)_free_command);
-        g_hash_table_insert(command_hash, g_strdup(command->command_name), command);
-        g_hash_table_insert(p_commands, g_strdup(plugin_name), command_hash);
+    if (g_hash_table_contains(p_commands, command->command_name)) {
+        g_hash_table_remove(p_commands, command->command_name);
     }
+    g_hash_table_insert(p_commands, g_strdup(command->command_name), command);
+
+    GList* cmd_list = g_hash_table_lookup(p_plugin_commands, plugin_name);
+    if (cmd_list) {
+        // we assign this so we dont get: -Werror=unused-result
+        cmd_list = g_list_append(cmd_list, g_strdup(command->command_name));
+    } else {
+        cmd_list = g_list_append(NULL, g_strdup(command->command_name));
+        g_hash_table_insert(p_plugin_commands, g_strdup(plugin_name), cmd_list);
+    }
+
     cmd_ac_add(command->command_name);
     cmd_ac_add_help(&command->command_name[1]);
 }
@@ -250,51 +271,58 @@ callbacks_get_window_handler(const char* tag)
 gboolean
 plugins_run_command(const char* const input)
 {
-    auto_gcharv gchar** split = g_strsplit(input, " ", -1);
-
-    GList* command_hashes = g_hash_table_get_values(p_commands);
-    GList* curr_hash = command_hashes;
-    while (curr_hash) {
-        GHashTable* command_hash = curr_hash->data;
-
-        PluginCommand* command = g_hash_table_lookup(command_hash, split[0]);
-        if (command) {
-            gboolean result;
-            auto_gcharv gchar** args = parse_args_with_freetext(input, command->min_args, command->max_args, &result);
-            if (result == FALSE) {
-                ui_invalid_command_usage(command->command_name, NULL);
-            } else {
-                command->callback_exec(command, args);
-            }
-            g_list_free(command_hashes);
-            return TRUE;
-        }
-
-        curr_hash = g_list_next(curr_hash);
+    if (!p_commands) {
+        return FALSE;
     }
 
-    g_list_free(command_hashes);
+    auto_gcharv gchar** split = g_strsplit(input, " ", -1);
+    if (!split || !split[0]) {
+        return FALSE;
+    }
+
+    PluginCommand* command = g_hash_table_lookup(p_commands, split[0]);
+    if (command) {
+        gboolean result;
+        auto_gcharv gchar** args = parse_args_with_freetext(input, command->min_args, command->max_args, &result);
+        if (result == FALSE) {
+            ui_invalid_command_usage(command->command_name, NULL);
+        } else {
+#ifdef HAVE_PLUGINS
+            if (command->L && command->lua_ref > 0) {
+                lua_rawgeti(command->L, LUA_REGISTRYINDEX, command->lua_ref);
+                int num_args = 0;
+                if (args) {
+                    for (int i = 0; args[i]; i++) {
+                        lua_pushstring(command->L, args[i]);
+                        num_args++;
+                    }
+                }
+                if (lua_pcall(command->L, num_args, 0, 0) != LUA_OK) {
+                    const char* err = lua_tostring(command->L, -1);
+                    log_error("Lua error in command /%s: %s", command->command_name, err);
+                    cons_show("Plugin error in command /%s: %s", command->command_name, err);
+                    lua_pop(command->L, 1);
+                }
+            }
+#endif
+        }
+        return TRUE;
+    }
+
     return FALSE;
 }
 
 CommandHelp*
 plugins_get_help(const char* const cmd)
 {
-    GList* command_hashes = g_hash_table_get_values(p_commands);
-    GList* curr_hash = command_hashes;
-    while (curr_hash) {
-        GHashTable* command_hash = curr_hash->data;
-
-        PluginCommand* command = g_hash_table_lookup(command_hash, cmd);
-        if (command) {
-            g_list_free(command_hashes);
-            return command->help;
-        }
-
-        curr_hash = g_list_next(curr_hash);
+    if (!p_commands || !cmd) {
+        return NULL;
     }
 
-    g_list_free(command_hashes);
+    PluginCommand* command = g_hash_table_lookup(p_commands, cmd);
+    if (command) {
+        return command->help;
+    }
 
     return NULL;
 }
@@ -314,7 +342,17 @@ plugins_run_timed(void)
             gdouble elapsed = g_timer_elapsed(timed_function->timer, NULL);
 
             if (timed_function->interval_seconds > 0 && elapsed >= timed_function->interval_seconds) {
-                timed_function->callback_exec(timed_function);
+#ifdef HAVE_PLUGINS
+                if (timed_function->L && timed_function->lua_ref > 0) {
+                    lua_rawgeti(timed_function->L, LUA_REGISTRYINDEX, timed_function->lua_ref);
+                    if (lua_pcall(timed_function->L, 0, 0, 0) != LUA_OK) {
+                        const char* err = lua_tostring(timed_function->L, -1);
+                        log_error("Lua error in timed callback: %s", err);
+                        cons_show("Plugin error in timed callback: %s", err);
+                        lua_pop(timed_function->L, 1);
+                    }
+                }
+#endif
                 g_timer_start(timed_function->timer);
             }
 
@@ -329,24 +367,11 @@ plugins_run_timed(void)
 GList*
 plugins_get_command_names(void)
 {
-    GList* result = NULL;
-
-    GList* command_hashes = g_hash_table_get_values(p_commands);
-    GList* curr_hash = command_hashes;
-    while (curr_hash) {
-        GHashTable* command_hash = curr_hash->data;
-        GList* commands = g_hash_table_get_keys(command_hash);
-        GList* curr = commands;
-        while (curr) {
-            char* command = curr->data;
-            result = g_list_append(result, command);
-            curr = g_list_next(curr);
-        }
-        g_list_free(commands);
-        curr_hash = g_list_next(curr_hash);
+    if (!p_commands) {
+        return NULL;
     }
 
-    g_list_free(command_hashes);
-
-    return result;
+    return g_hash_table_get_keys(p_commands);
 }
+
+#endif

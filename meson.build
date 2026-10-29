@@ -169,8 +169,7 @@ if not readline_dep.found()
 endif
 
 # Optional dependencies
-python_dep = disabler()
-dl_dep = disabler()
+lua_dep = disabler()
 gpgme_dep = disabler()
 libotr_dep = disabler()
 gdk_pixbuf_dep = disabler()
@@ -184,8 +183,7 @@ stabber_dep = cc.find_library('stabber', required: false)
 util_dep = cc.find_library('util', required: false)
 
 # Build flags
-build_python_api = false
-build_c_api = false
+build_plugins = false
 build_pgp = false
 build_otr = false
 build_omemo = false
@@ -212,31 +210,29 @@ if get_option('tray').enabled()
   build_tray = true
 endif
 
-# Python plugins
-if get_option('python-plugins').enabled()
-  python_dep = dependency('python3-embed', required: false)
-  if not python_dep.found()
-    python_dep = dependency('python-embed', required: true)
-  else
-    conf_data.set('PY_IS_PYTHON3', 1)
-  endif
-  
-  build_python_api = true
-  conf_data.set('HAVE_PYTHON', 1)
-endif
+# Plugins (Lua)
+lua_opt = get_option('plugins')
+lua_ver = get_option('lua-version')
 
-# C plugins
-if get_option('c-plugins').enabled()
-  if platform == 'cygwin'
-    error('C plugins are not supported on Cygwin')
+if not lua_opt.disabled()
+  if lua_ver != ''
+    lua_dep = dependency(lua_ver, required: lua_opt.enabled())
+  else
+    foreach name : ['lua5.4', 'lua-5.4', 'lua54', 'lua', 'lua5.3', 'lua-5.3', 'lua53', 'luajit']
+      lua_dep = dependency(name, required: false)
+      if lua_dep.found()
+        break
+      endif
+    endforeach
+    if not lua_dep.found() and lua_opt.enabled()
+      error('Lua dependency not found, but -Dplugins=enabled was specified')
+    endif
   endif
-  
-  if platform not in ['openbsd', 'freebsd', 'netbsd']
-    dl_dep = cc.find_library('dl', required: true)
+
+  if lua_dep.found()
+    build_plugins = true
+    conf_data.set('HAVE_PLUGINS', 1)
   endif
-  
-  build_c_api = true
-  conf_data.set('HAVE_C', 1)
 endif
 
 # PGP support
@@ -293,13 +289,9 @@ if themes_path == ''
 endif
 
 icons_path = get_option('datadir') / meson.project_name() / 'icons'
-global_python_plugins_path = get_option('datadir') / meson.project_name() / 'plugins'
-global_c_plugins_path = get_option('libdir') / meson.project_name() / 'plugins'
 
 conf_data.set_quoted('THEMES_PATH', get_option('prefix') / themes_path)
 conf_data.set_quoted('ICONS_PATH', get_option('prefix') / icons_path)
-conf_data.set_quoted('GLOBAL_PYTHON_PLUGINS_PATH', get_option('prefix') / global_python_plugins_path)
-conf_data.set_quoted('GLOBAL_C_PLUGINS_PATH', get_option('prefix') / global_c_plugins_path)
 
 # Check for required functions
 foreach func : ['atexit', 'memset', 'strdup', 'strstr']
@@ -328,12 +320,8 @@ profanity_deps = [
 ]
 
 # Add optional dependencies only if found
-if python_dep.found()
-  profanity_deps += python_dep
-endif
-
-if dl_dep.found()
-  profanity_deps += dl_dep
+if lua_dep.found()
+  profanity_deps += lua_dep
 endif
 
 if gpgme_dep.found()
@@ -439,34 +427,25 @@ core_sources = files(
   'src/config/color.c',
   'src/config/cafile.c',
   'src/plugins/plugins.c',
-  'src/plugins/api.c',
-  'src/plugins/callbacks.c',
-  'src/plugins/autocompleters.c',
-  'src/plugins/themes.c',
-  'src/plugins/settings.c',
-  'src/plugins/disco.c',
 )
 
 # Build the final source list
 profanity_sources = core_sources
 
 # Add conditional sources
+if build_plugins
+  profanity_sources += files(
+    'src/plugins/api.c',
+    'src/plugins/callbacks.c',
+    'src/plugins/autocompleters.c',
+    'src/plugins/themes.c',
+    'src/plugins/settings.c',
+    'src/plugins/disco.c',
+  )
+endif
+
 if build_tray
   profanity_sources += files('src/ui/tray.c')
-endif
-
-if build_python_api
-  profanity_sources += files(
-    'src/plugins/python_plugins.c',
-    'src/plugins/python_api.c',
-  )
-endif
-
-if build_c_api
-  profanity_sources += files(
-    'src/plugins/c_plugins.c',
-    'src/plugins/c_api.c',
-  )
 endif
 
 if build_pgp
@@ -522,24 +501,10 @@ profanity_exe = executable(
   include_directories: inc,
   install: true,
   export_dynamic: true,
-)
-
-# Build libprofanity shared library for C plugins
-if build_c_api
-  libprofanity = shared_library(
-    'profanity',
-    'src/plugins/profapi.c',
-    dependencies: profanity_deps,
-    include_directories: inc,
-    install: true,
-    version: '0.0.0',
   )
-  
-  install_headers('src/plugins/profapi.h')
-endif
 
-# Install themes if enabled
-if get_option('install_themes')
+  # Install themes if enabled
+  if get_option('install_themes')
   install_subdir('themes',
     install_dir: get_option('datadir') / meson.project_name(),
     strip_directory: false,
@@ -612,12 +577,6 @@ if get_option('tests')
       'src/config/color.c',
       'src/config/conflists.c',
       'src/plugins/plugins.c',
-      'src/plugins/api.c',
-      'src/plugins/callbacks.c',
-      'src/plugins/autocompleters.c',
-      'src/plugins/themes.c',
-      'src/plugins/settings.c',
-      'src/plugins/disco.c',
       'src/ui/window_list.c',
       'src/event/common.c',
       'src/event/server_events.c',
@@ -667,25 +626,22 @@ if get_option('tests')
       'tests/unittests/command/test_cmd_ac.c',
       'tests/unittests/command/test_cmd_disconnect.c',
       'tests/unittests/command/test_cmd_mucping.c',
-      'tests/unittests/plugins/test_callbacks.c',
-      'tests/unittests/plugins/test_plugins_disco.c',
       'tests/unittests/unittests.c',
-    )
-    
-    if build_python_api
+      )
+
+    if build_plugins
       unittest_sources += files(
-        'src/plugins/python_plugins.c',
-        'src/plugins/python_api.c',
+        'src/plugins/api.c',
+        'src/plugins/callbacks.c',
+        'src/plugins/autocompleters.c',
+        'src/plugins/themes.c',
+        'src/plugins/settings.c',
+        'src/plugins/disco.c',
+        'tests/unittests/plugins/test_callbacks.c',
+        'tests/unittests/plugins/test_plugins_disco.c',
       )
     endif
-    
-    if build_c_api
-      unittest_sources += files(
-        'src/plugins/c_plugins.c',
-        'src/plugins/c_api.c',
-      )
-    endif
-    
+
     if build_pgp
       unittest_sources += files(
         'tests/unittests/pgp/stub_gpg.c',
@@ -732,6 +688,10 @@ if get_option('tests')
         'tests/functionaltests/functionaltests.c',
       )
 
+      if build_plugins
+        functionaltest_sources += files('tests/functionaltests/test_plugins.c')
+      endif
+
       functionaltests = executable(
         'functionaltests',
         functionaltest_sources,
@@ -760,14 +720,11 @@ summary({
   'Install themes': get_option('install_themes'),
   'Themes path': themes_path,
   'Icons path': icons_path,
-  'Global Python plugins path': global_python_plugins_path,
-  'Global C plugins path': global_c_plugins_path,
 }, section: 'Directories')
 
 summary({
   'Notifications': build_notifications,
-  'Python plugins': build_python_api,
-  'C plugins': build_c_api,
+  'Plugins (Lua)': build_plugins ? 'Enabled (' + lua_dep.name() + ' ' + lua_dep.version() + ')' : 'Disabled',
   'OTR': build_otr,
   'PGP': build_pgp,
   'OMEMO': build_omemo,

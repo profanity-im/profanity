@@ -91,10 +91,6 @@
 #include "ui/tray.h"
 #endif
 
-#ifdef HAVE_PYTHON
-#include "plugins/python_plugins.h"
-#endif
-
 static void _update_presence(const resource_presence_t presence,
                              const char* const show, gchar** args);
 static gboolean _cmd_set_boolean_preference(gchar* arg, const char* const display,
@@ -7026,7 +7022,7 @@ cmd_receipts(ProfWin* window, const gchar* const command, gchar** args)
 static gboolean
 _is_correct_plugin_extension(gchar* plugin)
 {
-    return g_str_has_suffix(plugin, ".py") || g_str_has_suffix(plugin, ".so");
+    return g_str_has_suffix(plugin, ".lua");
 }
 
 static gboolean
@@ -7048,25 +7044,14 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
     auto_gchar gchar* scheme = g_uri_parse_scheme(args[1]);
     if (_http_based_uri_scheme(scheme)) {
         if (!_is_correct_plugin_extension(args[1])) {
-            cons_show("Please, use url ending with correct file name. Plugins must have one of the following extensions: \".py\" or \".so\".");
+            cons_show("Please, use url ending with correct file name. Plugins must have the \".lua\" extension.");
             return TRUE;
         }
         _download_install_plugin(window, args[1], NULL);
         return TRUE;
     }
 
-    if (strchr(args[1], '/')) {
-        path = get_expanded_path(args[1]);
-    } else {
-        if (g_str_has_suffix(args[1], ".py")) {
-            path = g_build_filename(GLOBAL_PYTHON_PLUGINS_PATH, args[1], NULL);
-        } else if (g_str_has_suffix(args[1], ".so")) {
-            path = g_build_filename(GLOBAL_C_PLUGINS_PATH, args[1], NULL);
-        } else {
-            cons_show("Plugins must have one of the following extensions: \".py\" or \".so\".");
-            return TRUE;
-        }
-    }
+    path = get_expanded_path(args[1]);
 
     if (access(path, R_OK) != 0) {
         cons_show("Cannot access: %s", path);
@@ -7075,7 +7060,7 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
 
     if (g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
         if (!_is_correct_plugin_extension(args[1])) {
-            cons_show("Plugins must have one of the following extensions: \".py\" or \".so\".");
+            cons_show("Plugins must have the \".lua\" extension.");
             return TRUE;
         }
 
@@ -7083,7 +7068,7 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
         auto_gchar gchar* plugin_name = g_path_get_basename(path);
         gboolean result = plugins_install(plugin_name, path, error_message);
         if (result) {
-            cons_show("Plugin installed and loaded: %s", plugin_name);
+            cons_show("Plugin installed: %s", plugin_name);
         } else {
             cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
         }
@@ -7095,7 +7080,7 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
             if (result->installed) {
                 GSList* curr = result->installed;
                 cons_show("");
-                cons_show("Installed and loaded plugins (%u):", g_slist_length(curr));
+                cons_show("Installed plugins (%u):", g_slist_length(curr));
                 while (curr) {
                     cons_show("  %s", curr->data);
                     curr = g_slist_next(curr);
@@ -7123,65 +7108,6 @@ cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args)
 }
 
 gboolean
-cmd_plugins_update(ProfWin* window, const gchar* const command, gchar** args)
-{
-    if (args[1] == NULL) {
-        cons_bad_cmd_usage(command);
-        return TRUE;
-    }
-
-    auto_gchar gchar* scheme = g_uri_parse_scheme(args[1]);
-    if (_http_based_uri_scheme(scheme)) {
-        auto_gchar gchar* plugin_name = basename_from_url(args[1]);
-        if (!_is_correct_plugin_extension(plugin_name)) {
-            cons_show("Please, use url ending with correct file name. Plugins must have one of the following extensions: \".py\" or \".so\".");
-            return TRUE;
-        }
-
-        if (!plugins_uninstall(plugin_name)) {
-            cons_show("Failed to uninstall plugin: %s.", plugin_name);
-            return TRUE;
-        }
-
-        _download_install_plugin(window, args[1], NULL);
-        return TRUE;
-    }
-
-    auto_gchar gchar* path = get_expanded_path(args[1]);
-
-    if (access(path, R_OK) != 0) {
-        cons_show("File not found: %s", path);
-        return TRUE;
-    }
-
-    if (!g_file_test(path, G_FILE_TEST_IS_REGULAR)) {
-        cons_show("Argument must be a file.");
-        return TRUE;
-    }
-
-    if (!g_str_has_suffix(path, ".py") && !g_str_has_suffix(path, ".so")) {
-        cons_show("Plugins must have one of the following extensions: '.py' or '.so'");
-        return TRUE;
-    }
-
-    auto_gchar gchar* plugin_name = g_path_get_basename(path);
-    if (!plugins_uninstall(plugin_name)) {
-        cons_show("Failed to uninstall plugin: %s.", plugin_name);
-        return TRUE;
-    }
-
-    GString* error_message = g_string_new(NULL);
-    if (plugins_install(plugin_name, path, error_message)) {
-        cons_show("Plugin installed: %s", plugin_name);
-    } else {
-        cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
-    }
-
-    g_string_free(error_message, TRUE);
-    return TRUE;
-}
-
-gboolean
 cmd_plugins_uninstall(ProfWin* window, const gchar* const command, gchar** args)
 {
     if (args[1] == NULL) {
@@ -7189,11 +7115,22 @@ cmd_plugins_uninstall(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    gboolean res = plugins_uninstall(args[1]);
+    const gchar* name = args[1];
+    auto_gchar gchar* local_dir = files_get_data_path(DIR_PLUGINS);
+    auto_gchar gchar* local_path = g_build_filename(local_dir, name, NULL);
+    if (!g_file_test(local_path, G_FILE_TEST_IS_REGULAR)) {
+        auto_gchar gchar* sys_path = plugins_find_plugin_path(name);
+        if (sys_path) {
+            cons_show("Cannot uninstall system plugin: %s", name);
+            return TRUE;
+        }
+    }
+
+    gboolean res = plugins_uninstall(name);
     if (res) {
-        cons_show("Uninstalled plugin: %s", args[1]);
+        cons_show("Uninstalled plugin: %s", name);
     } else {
-        cons_show("Failed to uninstall plugin: %s", args[1]);
+        cons_show("Failed to uninstall plugin: %s", name);
     }
 
     return TRUE;
@@ -7254,76 +7191,71 @@ cmd_plugins_unload(ProfWin* window, const gchar* const command, gchar** args)
 }
 
 gboolean
-cmd_plugins_reload(ProfWin* window, const gchar* const command, gchar** args)
+cmd_plugins_enable(ProfWin* window, const gchar* const command, gchar** args)
 {
     if (args[1] == NULL) {
-        plugins_reload_all();
-        cons_show("Reloaded all plugins");
+        cons_bad_cmd_usage(command);
         return TRUE;
     }
 
-    GString* error_message = g_string_new(NULL);
-    gboolean res = plugins_reload(args[1], error_message);
-    if (res) {
-        cons_show("Reloaded plugin: %s", args[1]);
-    } else {
-        cons_show("Failed to reload plugin: %s, %s.", args[1], error_message->str);
+    const gchar* name = args[1];
+    auto_gchar gchar* full_path = plugins_find_plugin_path(name);
+    if (!full_path) {
+        cons_show("Plugin not found: %s", name);
+        return TRUE;
     }
-    g_string_free(error_message, TRUE);
+
+    prefs_add_plugin(name);
+
+    if (!plugins_is_loaded(name)) {
+        GString* error_message = g_string_new(NULL);
+        if (plugins_load(name, error_message)) {
+            cons_show("Plugin enabled and loaded: %s", name);
+        } else {
+            cons_show("Plugin enabled for startup: %s (failed to load: %s)", name, error_message->str);
+        }
+        g_string_free(error_message, TRUE);
+    } else {
+        cons_show("Plugin enabled (will auto-load on start): %s", name);
+    }
 
     return TRUE;
 }
 
 gboolean
-cmd_plugins_python_version(ProfWin* window, const gchar* const command, gchar** args)
+cmd_plugins_disable(ProfWin* window, const gchar* const command, gchar** args)
 {
-#ifdef HAVE_PYTHON
-    const char* version = python_get_version_string();
-    cons_show("Python version:");
-    cons_show("%s", version);
-#else
-    cons_show("This build does not support python plugins.");
-#endif
+    if (args[1] == NULL) {
+        cons_bad_cmd_usage(command);
+        return TRUE;
+    }
+
+    const gchar* name = args[1];
+    if (!prefs_plugin_is_enabled(name) && !plugins_is_loaded(name)) {
+        auto_gchar gchar* full_path = plugins_find_plugin_path(name);
+        if (!full_path) {
+            cons_show("Plugin not found: %s", name);
+            return TRUE;
+        }
+        cons_show("Plugin is not enabled: %s", name);
+        return TRUE;
+    }
+
+    prefs_remove_plugin(name);
+
+    if (plugins_is_loaded(name)) {
+        plugins_unload(name);
+        cons_show("Plugin disabled and unloaded: %s", name);
+    } else {
+        cons_show("Plugin disabled: %s", name);
+    }
+
     return TRUE;
 }
 
 gboolean
 cmd_plugins(ProfWin* window, const gchar* const command, gchar** args)
 {
-    GDir* global_pyp_dir = NULL;
-    GDir* global_cp_dir = NULL;
-
-    if (access(GLOBAL_PYTHON_PLUGINS_PATH, R_OK) == 0) {
-        global_pyp_dir = g_dir_open(GLOBAL_PYTHON_PLUGINS_PATH, 0, NULL);
-        if (global_pyp_dir == NULL) {
-            log_warning("Error when trying to open global plugins path: %s", GLOBAL_PYTHON_PLUGINS_PATH);
-            return TRUE;
-        }
-    }
-    if (access(GLOBAL_C_PLUGINS_PATH, R_OK) == 0) {
-        global_cp_dir = g_dir_open(GLOBAL_C_PLUGINS_PATH, 0, NULL);
-        if (global_cp_dir == NULL) {
-            log_warning("Error when trying to open global plugins path: %s", GLOBAL_C_PLUGINS_PATH);
-            return TRUE;
-        }
-    }
-    if (global_pyp_dir) {
-        const gchar* filename;
-        cons_show("The following Python plugins are available globally and can be installed:");
-        while ((filename = g_dir_read_name(global_pyp_dir))) {
-            if (g_str_has_suffix(filename, ".py"))
-                cons_show("  %s", filename);
-        }
-    }
-    if (global_cp_dir) {
-        const gchar* filename;
-        cons_show("The following C plugins are available globally and can be installed:");
-        while ((filename = g_dir_read_name(global_cp_dir))) {
-            if (g_str_has_suffix(filename, ".so"))
-                cons_show("  %s", filename);
-        }
-    }
-
     GList* plugins = plugins_loaded_list();
     GSList* unloaded_plugins = plugins_unloaded_list();
 
@@ -7332,24 +7264,32 @@ cmd_plugins(ProfWin* window, const gchar* const command, gchar** args)
         return TRUE;
     }
 
-    if (unloaded_plugins) {
-        GSList* curr = unloaded_plugins;
-        cons_show("The following plugins already installed and can be loaded:");
-        while (curr) {
-            cons_show("  %s", curr->data);
-            curr = g_slist_next(curr);
-        }
-        g_slist_free_full(unloaded_plugins, g_free);
-    }
-
     if (plugins) {
         GList* curr = plugins;
         cons_show("Loaded plugins:");
         while (curr) {
-            cons_show("  %s", curr->data);
+            if (prefs_plugin_is_enabled(curr->data)) {
+                cons_show("  %s (enabled)", curr->data);
+            } else {
+                cons_show("  %s (session only)", curr->data);
+            }
             curr = g_list_next(curr);
         }
         g_list_free(plugins);
+    }
+
+    if (unloaded_plugins) {
+        GSList* curr = unloaded_plugins;
+        cons_show("Unloaded plugins:");
+        while (curr) {
+            if (prefs_plugin_is_enabled(curr->data)) {
+                cons_show("  %s (enabled)", curr->data);
+            } else {
+                cons_show("  %s (disabled)", curr->data);
+            }
+            curr = g_slist_next(curr);
+        }
+        g_slist_free_full(unloaded_plugins, g_free);
     }
 
     return TRUE;

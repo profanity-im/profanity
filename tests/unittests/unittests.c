@@ -44,8 +44,10 @@
 #include "command/test_cmd_roster.h"
 #include "command/test_cmd_disconnect.h"
 #include "xmpp/test_form.h"
+#ifdef HAVE_PLUGINS
 #include "plugins/test_callbacks.h"
 #include "plugins/test_plugins_disco.h"
+#endif
 
 #define muc_unit_test(f) cmocka_unit_test_setup_teardown(f, muc_before_test, muc_after_test)
 
@@ -695,12 +697,18 @@ main(int argc, char* argv[])
         cmocka_unit_test(str_clean_directional_chars__tests),
         cmocka_unit_test(str_clean_terminal_control_chars__tests),
 
+#ifdef HAVE_PLUGINS
         cmocka_unit_test_setup_teardown(plugins_get_command_names__returns__no_commands,
                                         load_preferences,
                                         close_preferences),
         cmocka_unit_test_setup_teardown(plugins_get_command_names__returns__commands_when_added,
                                         load_preferences,
                                         close_preferences),
+        cmocka_unit_test_setup_teardown(plugins_commands__lookup_and_removal,
+                                        load_preferences,
+                                        close_preferences),
+        cmocka_unit_test(plugins_get_lua_version__returns_version_string),
+        cmocka_unit_test(plugins_find_plugin_path__tests),
 
         cmocka_unit_test(disco_get_features__returns__empty_list_when_none),
         cmocka_unit_test(disco_add_feature__updates__added_feature),
@@ -709,6 +717,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(disco_add_feature__updates__not_duplicate_feature),
         cmocka_unit_test(disco_remove_features__updates__removes_plugin_features),
         cmocka_unit_test(disco_remove_features__updates__not_remove_when_more_than_one_reference),
+#endif
 
         cmocka_unit_test(dbus_is_available__returns_boolean),
         cmocka_unit_test(dbus_get_session_bus__idempotent),

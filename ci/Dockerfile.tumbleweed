@@ -23,8 +23,7 @@ RUN zypper --non-interactive in --no-recommends \
   libuuid-devel \
   make \
   ncurses-devel \
-  python310 \
-  python310-devel \
+  lua54-devel \
   readline-devel \
   sqlite3-devel \
   valgrind \

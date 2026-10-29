@@ -47,7 +47,7 @@ plugin_download_install(void* userdata)
         auto_gchar gchar* plugin_name = basename_from_url(https_url);
         gboolean result = plugins_install(plugin_name, path, error_message);
         if (result) {
-            cons_show("Plugin installed and loaded: %s", plugin_name);
+            cons_show("Plugin installed: %s", plugin_name);
         } else {
             cons_show("Failed to install plugin: %s. %s", plugin_name, error_message->str);
         }

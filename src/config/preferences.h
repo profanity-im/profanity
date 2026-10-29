@@ -232,6 +232,7 @@ void prefs_set_autoxa_time(gint value);
 gchar** prefs_get_plugins(void);
 void prefs_add_plugin(const gchar* const name);
 void prefs_remove_plugin(const gchar* const name);
+gboolean prefs_plugin_is_enabled(const gchar* const name);
 
 const gchar* prefs_get_otr_char(void);
 gboolean prefs_set_otr_char(gchar* ch);

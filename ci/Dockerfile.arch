@@ -23,7 +23,7 @@ RUN pacman -Syu --noconfirm && pacman -S --needed --noconfirm \
   make \
   openssl \
   pkg-config \
-  python \
+  lua \
   wget \
   sqlite \
   valgrind \

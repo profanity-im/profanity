@@ -36,6 +36,7 @@
 #include "ui/ui.h"
 #include "ui/window.h"
 #include "ui/screen.h"
+#include "plugins/plugins.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
 
@@ -1517,6 +1518,8 @@ _win_correct(ProfWin* window, const gchar* const message, const gchar* const id,
         g_free(entry->message);
     }
     entry->message = g_strdup(message);
+
+    plugins_on_message_correction(from_jid, replace_id, message);
 
     // LMC requires original message ID, hence ID remains the same
 

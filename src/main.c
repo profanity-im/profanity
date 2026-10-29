@@ -21,8 +21,8 @@
 #include "pgp/gpg.h"
 #endif
 
-#ifdef HAVE_PYTHON
-#include "plugins/python_plugins.h"
+#ifdef HAVE_PLUGINS
+#include "plugins/plugins.h"
 #endif
 
 #include "profanity.h"
@@ -120,17 +120,10 @@ main(int argc, char** argv)
         g_print("OMEMO support: Disabled\n");
 #endif
 
-#ifdef HAVE_C
-        g_print("C plugins: Enabled\n");
+#ifdef HAVE_PLUGINS
+        g_print("Plugins: Enabled (%s)\n", plugins_get_lua_version());
 #else
-        g_print("C plugins: Disabled\n");
-#endif
-
-#ifdef HAVE_PYTHON
-        auto_gchar gchar* python_version = python_get_version_number();
-        g_print("Python plugins: Enabled (%s)\n", python_version);
-#else
-        g_print("Python plugins: Disabled\n");
+        g_print("Plugins: Disabled\n");
 #endif
 
 #ifdef HAVE_TRAY

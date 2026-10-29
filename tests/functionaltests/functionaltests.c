@@ -28,6 +28,9 @@
 #include "test_muc.h"
 #include "test_disconnect.h"
 #include "test_i18n.h"
+#ifdef HAVE_PLUGINS
+#include "test_plugins.h"
+#endif
 
 #define PROF_FUNC_TEST(test) cmocka_unit_test_setup_teardown(test, init_prof_test, close_prof_test)
 
@@ -122,6 +125,21 @@ main(int argc, char* argv[])
         PROF_FUNC_TEST(i18n_win_nickname),
         PROF_FUNC_TEST(i18n_autocomplete_tab_utf8),
         PROF_FUNC_TEST(i18n_autocomplete_tab_latin),
+
+#ifdef HAVE_PLUGINS
+        PROF_FUNC_TEST(plugins_load_and_run_command),
+        PROF_FUNC_TEST(plugins_priority_ordering),
+        PROF_FUNC_TEST(plugins_priority_alphabetical_tie_break),
+        PROF_FUNC_TEST(plugins_message_filter_chain),
+        PROF_FUNC_TEST(plugins_stanza_interception_and_drop),
+        PROF_FUNC_TEST(plugins_disco_add_feature_advertised),
+        PROF_FUNC_TEST(plugins_window_lifecycle_and_input),
+        PROF_FUNC_TEST(plugins_settings_persistence),
+        PROF_FUNC_TEST(plugins_autocompletion),
+        PROF_FUNC_TEST(plugins_periodic_timer),
+        PROF_FUNC_TEST(plugins_error_handling_crash_immunity),
+        PROF_FUNC_TEST(plugins_startup_autoloading),
+#endif
     };
 
     return cmocka_run_group_tests(all_tests, NULL, NULL);

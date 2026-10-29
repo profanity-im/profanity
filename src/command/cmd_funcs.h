@@ -143,12 +143,11 @@ gboolean cmd_change_password(ProfWin* window, const gchar* const command, gchar*
 
 gboolean cmd_plugins(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_plugins_install(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_plugins_update(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_plugins_uninstall(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_plugins_load(ProfWin* window, const gchar* const command, gchar** args);
 gboolean cmd_plugins_unload(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_plugins_reload(ProfWin* window, const gchar* const command, gchar** args);
-gboolean cmd_plugins_python_version(ProfWin* window, const gchar* const command, gchar** args);
+gboolean cmd_plugins_enable(ProfWin* window, const gchar* const command, gchar** args);
+gboolean cmd_plugins_disable(ProfWin* window, const gchar* const command, gchar** args);
 
 gboolean cmd_blocked(ProfWin* window, const gchar* const command, gchar** args);
 

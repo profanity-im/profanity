@@ -3,11 +3,14 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2026 Michael Vetter <jubalh@iodoru.org>
  *
  * SPDX-License-Identifier: GPL-3.0-or-later WITH OpenSSL-exception
  */
 
 #include "config.h"
+
+#ifdef HAVE_PLUGINS
 
 #include <string.h>
 #include <stdlib.h>
@@ -118,3 +121,5 @@ disco_close(void)
     g_clear_pointer(&features, g_hash_table_destroy);
     g_clear_pointer(&plugin_to_features, g_hash_table_destroy);
 }
+
+#endif
