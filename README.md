@@ -64,3 +64,6 @@ Mailing List: https://lists.posteo.de/listinfo/profanity
 
 ### Chatroom
 MUC: profanity@rooms.dismail.de
+
+### Plugins
+Community maintained Lua plugins: https://github.com/profanity-im/community-plugins
