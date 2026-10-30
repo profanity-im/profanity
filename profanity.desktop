@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Profanity
+GenericName=XMPP Client
+Comment=Console-based XMPP client
+Exec=profanity
+Icon=profanity
+Terminal=true
+Categories=Network;InstantMessaging;Chat;ConsoleOnly;
+Keywords=chat;im;messaging;xmpp;jabber;console;

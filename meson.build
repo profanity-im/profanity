@@ -522,6 +522,13 @@ install_data(
   install_dir: get_option('datadir') / 'icons' / 'hicolor' / 'scalable' / 'apps',
 )
 
+if get_option('install_desktop')
+  install_data(
+    'profanity.desktop',
+    install_dir: get_option('datadir') / 'applications',
+  )
+endif
+
 # Install man pages
 man_pages = run_command('find', 'docs', '-name', 'profanity*.1', '-type', 'f',
                         check: true).stdout().strip().split('\n')
@@ -718,6 +725,7 @@ summary({
   'Platform': platform,
   'Package status': get_option('buildtype'),
   'Install themes': get_option('install_themes'),
+  'Install desktop file': get_option('install_desktop'),
   'Themes path': themes_path,
   'Icons path': icons_path,
 }, section: 'Directories')

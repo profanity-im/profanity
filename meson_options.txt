@@ -85,6 +85,12 @@ option('themes_path',
   description: 'Custom path for themes installation (empty for default)'
 )
 
+option('install_desktop',
+  type: 'boolean',
+  value: false,
+  description: 'Install desktop file'
+)
+
 option('docdir',
   type: 'string',
   value: '',
