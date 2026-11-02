@@ -105,6 +105,7 @@ static void _ping_get_handler(xmpp_stanza_t* const stanza);
 static int _version_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _disco_info_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* const userdata);
+static int _disco_items_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* const userdata);
 static int _http_upload_response_id_handler(xmpp_stanza_t* const stanza, void* const upload_ctx);
 static int _last_activity_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _room_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
@@ -517,7 +518,7 @@ iq_disco_info_request_onconnect(const char* jid)
     auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, id, jid, NULL);
 
-    iq_id_handler_add(id, _disco_info_response_id_handler_onconnect, NULL, NULL);
+    iq_id_handler_add(id, _disco_info_response_id_handler_onconnect, (ProfIqFreeCallback)g_free, g_strdup(jid));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -644,7 +645,11 @@ void
 iq_disco_items_request_onconnect(const char* jid)
 {
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    xmpp_stanza_t* iq = stanza_create_disco_items_iq(ctx, "discoitemsreq_onconnect", jid, NULL);
+    auto_gchar gchar* id = connection_create_stanza_id();
+    xmpp_stanza_t* iq = stanza_create_disco_items_iq(ctx, id, jid, NULL);
+
+    iq_id_handler_add(id, _disco_items_response_id_handler_onconnect, NULL, NULL);
+
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -2499,6 +2504,10 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* con
     const char* from = xmpp_stanza_get_from(stanza);
     const char* type = xmpp_stanza_get_type(stanza);
 
+    if (!from) {
+        from = userdata;
+    }
+
     if (from) {
         log_debug("Received disco#info response from: %s", from);
     } else {
@@ -2617,7 +2626,7 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
     const char* from = xmpp_stanza_get_from(stanza);
     GSList* items = NULL;
 
-    if ((g_strcmp0(id, "discoitemsreq") != 0) && (g_strcmp0(id, "discoitemsreq_onconnect") != 0)) {
+    if (g_strcmp0(id, "discoitemsreq") != 0) {
         return;
     }
 
@@ -2655,13 +2664,57 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
         child = xmpp_stanza_get_next(child);
     }
 
-    if (g_strcmp0(id, "discoitemsreq") == 0) {
-        cons_show_disco_items(items, from);
-    } else if (g_strcmp0(id, "discoitemsreq_onconnect") == 0) {
-        connection_set_disco_items(items);
+    cons_show_disco_items(items, from);
+    g_slist_free_full(items, (GDestroyNotify)_item_destroy);
+}
+
+static int
+_disco_items_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    log_debug("Received disco#items response on connect");
+    const char* type = xmpp_stanza_get_type(stanza);
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        log_error("Failed to query disco#items on connect");
+        return 0;
     }
 
+    xmpp_stanza_t* query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if (query == NULL) {
+        return 0;
+    }
+
+    xmpp_stanza_t* child = xmpp_stanza_get_children(query);
+    if (child == NULL) {
+        return 0;
+    }
+
+    GSList* items = NULL;
+    while (child) {
+        const char* stanza_name = xmpp_stanza_get_name(child);
+        if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
+            const char* item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+            if (item_jid) {
+                DiscoItem* item = g_new0(struct disco_item_t, 1);
+                if (item) {
+                    item->jid = g_strdup(item_jid);
+                    const char* item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+                    if (item_name) {
+                        item->name = g_strdup(item_name);
+                    } else {
+                        item->name = NULL;
+                    }
+                    items = g_slist_append(items, item);
+                }
+            }
+        }
+
+        child = xmpp_stanza_get_next(child);
+    }
+
+    connection_set_disco_items(items);
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);
+
+    return 0;
 }
 
 void
