@@ -149,7 +149,7 @@ static GTimer* autoping_time = NULL;
 static GHashTable* id_handlers;
 static GHashTable* rooms_cache = NULL;
 static GSList* late_delivery_windows = NULL;
-static gboolean received_disco_items = FALSE;
+static gboolean feature_retrieval_completed = FALSE;
 
 static int
 _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
@@ -252,7 +252,7 @@ iq_handlers_init(void)
     if (prefs_get_muc_ping_interval() != 0) {
         xmpp_timed_handler_add(conn, _muc_self_ping_timer_check, 10000, ctx);
     }
-    received_disco_items = FALSE;
+    feature_retrieval_completed = FALSE;
 
     iq_handlers_clear();
 
@@ -326,6 +326,7 @@ iq_handlers_remove_win(ProfWin* window)
 void
 iq_handlers_clear(void)
 {
+    feature_retrieval_completed = FALSE;
     iq_rooms_cache_clear();
     if (id_handlers) {
         g_hash_table_destroy(id_handlers);
@@ -2720,7 +2721,7 @@ _disco_items_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* co
 void
 iq_feature_retrieval_complete_handler(void)
 {
-    received_disco_items = TRUE;
+    feature_retrieval_completed = TRUE;
 
     while (late_delivery_windows) {
         LateDeliveryUserdata* del_data = late_delivery_windows->data;
@@ -3072,8 +3073,8 @@ iq_mam_request(ProfWin* win, GDateTime* enddate)
         message_free(last_msg);
     }
 
-    // Save request for later if disco items haven't been received yet
-    if (!received_disco_items) {
+    // Save request for later if features haven't been received yet
+    if (!feature_retrieval_completed) {
         LateDeliveryUserdata* cur_del_data = g_new0(LateDeliveryUserdata, 1);
         cur_del_data->win = (ProfChatWin*)win;
         cur_del_data->enddate = enddate;
