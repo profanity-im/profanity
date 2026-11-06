@@ -2813,13 +2813,17 @@ static const gchar* mam_timestamp_format_string = "%FT%T.%f%:z";
 void
 iq_mam_request_older(ProfWin* win)
 {
+    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
+
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
-        cons_show_error("Server doesn't support MAM (%s).", XMPP_FEATURE_MAM2);
+        if (win->type == WIN_MUC) {
+            cons_show_error("MUC %s does not support MAM.", target_jid);
+        } else {
+            cons_show_error("Cannot fetch history for %s: Server does not support MAM.", target_jid);
+        }
         return;
     }
-
-    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
 
     ProfMessage* first_msg;
     if (win->type == WIN_MUC) {
@@ -2979,9 +2983,15 @@ iq_mam_verify_request(ProfWin* win, const char* const startdate, const char* con
 void
 _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate, const char* const lastid)
 {
+    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
+
     if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
         log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
-        cons_show_error("Server doesn't support MAM (%s).", XMPP_FEATURE_MAM2);
+        if (win->type == WIN_MUC) {
+            cons_show_error("MUC %s does not support MAM.", target_jid);
+        } else {
+            cons_show_error("Cannot fetch history for %s: Server does not support MAM.", target_jid);
+        }
         win_remove_loading_history(win);
         if (startdate)
             g_date_time_unref(startdate);
@@ -2989,8 +2999,6 @@ _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate, const ch
             g_date_time_unref(enddate);
         return;
     }
-
-    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
 
     char* firstid = NULL;
     char* startdate_str = NULL;
