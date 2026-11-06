@@ -3084,9 +3084,14 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
     const char* type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, "error") == 0) {
         auto_char char* error_message = stanza_get_error_message(stanza);
-        cons_show_error("Server error: %s", error_message);
-        log_debug("MAM Error: %s", error_message);
         MamRsmUserdata* data = (MamRsmUserdata*)userdata;
+        if (data && data->barejid) {
+            cons_show_error("MAM error retrieving history for %s: %s", data->barejid, error_message);
+            log_debug("MAM error retrieving history for %s: %s", data->barejid, error_message);
+        } else {
+            cons_show_error("MAM error retrieving history: %s", error_message);
+            log_debug("MAM Error: %s", error_message);
+        }
         if (data && data->win && wins_get_num((ProfWin*)data->win) != -1) {
             win_remove_loading_history((ProfWin*)data->win);
         }
