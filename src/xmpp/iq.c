@@ -2629,9 +2629,6 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
     }
 
     xmpp_stanza_t* child = xmpp_stanza_get_children(query);
-    if (child == NULL) {
-        return;
-    }
 
     while (child) {
         const char* stanza_name = xmpp_stanza_get_name(child);

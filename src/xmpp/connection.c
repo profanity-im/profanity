@@ -700,6 +700,10 @@ connection_set_disco_items(GSList* items)
 
         curr = g_slist_next(curr);
     }
+
+    if (g_hash_table_size(conn.requested_features) == 0) {
+        sv_ev_connection_features_received();
+    }
 }
 
 jabber_conn_status_t
