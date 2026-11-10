@@ -1379,7 +1379,6 @@ _vcard_refresh_result(xmpp_stanza_t* const stanza, void* userdata)
         return 1;
     }
 
-    cons_show("vCard refreshed");
     vcard_user->modified = FALSE;
     return 1;
 }
