@@ -1730,8 +1730,6 @@ omemo_automatic_start(const gchar* const recipient)
     case PROF_OMEMOPOLICY_AUTOMATIC:
         if (g_list_find_custom(account->omemo_enabled, recipient, (GCompareFunc)g_strcmp0)) {
             result = TRUE;
-        } else if (g_list_find_custom(account->omemo_disabled, recipient, (GCompareFunc)g_strcmp0)) {
-            result = FALSE;
         } else {
             result = FALSE;
         }

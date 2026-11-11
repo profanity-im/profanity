@@ -18,5 +18,5 @@ void omemo_bundle_publish(gboolean first);
 void omemo_bundle_request(const gchar* const jid, uint32_t device_id, ProfIqCallback func, ProfIqFreeCallback free_func, void* userdata);
 int omemo_start_device_session_handle_bundle(xmpp_stanza_t* const stanza, void* const userdata);
 
-gchar* omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_error_t* error) __attribute__((nonnull(2, 3)));
+gchar* omemo_receive_message(xmpp_stanza_t* const stanza, gboolean* trusted, omemo_error_t* error);
 const gchar* omemo_error_to_string(omemo_error_t error);
