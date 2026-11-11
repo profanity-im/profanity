@@ -107,3 +107,47 @@ muc_roster_add__adds_occupant_to_room_roster(void** state)
     assert_true(added);
     assert_true(muc_roster_contains_nick(room, "alice"));
 }
+
+void
+muc_supports_mam__is__false_when_not_joined(void** state)
+{
+    gboolean supported = muc_supports_mam("unjoined@server.org");
+    assert_false(supported);
+}
+
+void
+muc_supports_mam__is__true_when_feature_advertised(void** state)
+{
+    const gchar* room = "room@server.org";
+    const gchar* nick = "bob";
+    muc_join(room, nick, NULL, FALSE);
+
+    GSList* features = NULL;
+    features = g_slist_append(features, "http://jabber.org/protocol/muc");
+    features = g_slist_append(features, "urn:xmpp:mam:2");
+
+    muc_set_features(room, features);
+
+    gboolean supported = muc_supports_mam(room);
+    assert_true(supported);
+
+    g_slist_free(features);
+}
+
+void
+muc_supports_mam__is__false_when_feature_not_advertised(void** state)
+{
+    const gchar* room = "room@server.org";
+    const gchar* nick = "bob";
+    muc_join(room, nick, NULL, FALSE);
+
+    GSList* features = NULL;
+    features = g_slist_append(features, "http://jabber.org/protocol/muc");
+
+    muc_set_features(room, features);
+
+    gboolean supported = muc_supports_mam(room);
+    assert_false(supported);
+
+    g_slist_free(features);
+}

@@ -2811,18 +2811,30 @@ _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
 static const gchar* mam_timestamp_format_string = "%FT%T.%f%:z";
 
+static gboolean
+_win_supports_mam(ProfWin* win, const gchar* const target_jid)
+{
+    if (win->type == WIN_MUC) {
+        return muc_supports_mam(target_jid);
+    }
+
+    return connection_supports(XMPP_FEATURE_MAM2);
+}
+
 void
 iq_mam_request_older(ProfWin* win)
 {
     const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
 
-    if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
-        log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
+    if (!_win_supports_mam(win, target_jid)) {
         if (win->type == WIN_MUC) {
+            log_warning("MUC %s doesn't advertise %s feature.", target_jid, XMPP_FEATURE_MAM2);
             cons_show_error("MUC %s does not support MAM.", target_jid);
         } else {
+            log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
             cons_show_error("Cannot fetch history for %s: Server does not support MAM.", target_jid);
         }
+        win_remove_loading_history(win);
         return;
     }
 
@@ -2986,11 +2998,12 @@ _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate, const ch
 {
     const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
 
-    if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
-        log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
+    if (!_win_supports_mam(win, target_jid)) {
         if (win->type == WIN_MUC) {
+            log_warning("MUC %s doesn't advertise %s feature.", target_jid, XMPP_FEATURE_MAM2);
             cons_show_error("MUC %s does not support MAM.", target_jid);
         } else {
+            log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
             cons_show_error("Cannot fetch history for %s: Server does not support MAM.", target_jid);
         }
         win_remove_loading_history(win);

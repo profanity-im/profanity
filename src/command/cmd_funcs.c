@@ -6925,9 +6925,17 @@ cmd_history(ProfWin* window, const gchar* const command, gchar** args)
                 cons_show("Message Archive Management (MAM) is currently disabled.");
                 return TRUE;
             }
-            if (!connection_supports(XMPP_FEATURE_MAM2)) {
-                cons_show("Your server does not support Message Archive Management (MAM2).");
-                return TRUE;
+            if (window->type == WIN_MUC) {
+                const gchar* roomjid = ((ProfMucWin*)window)->roomjid;
+                if (!muc_supports_mam(roomjid)) {
+                    cons_show("MUC %s does not support Message Archive Management (MAM2).", roomjid);
+                    return TRUE;
+                }
+            } else {
+                if (!connection_supports(XMPP_FEATURE_MAM2)) {
+                    cons_show("Your server does not support Message Archive Management (MAM2).");
+                    return TRUE;
+                }
             }
 
             unsigned int buf_size = buffer_size(window->layout->buffer);
