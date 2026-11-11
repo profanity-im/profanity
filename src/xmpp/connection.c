@@ -45,7 +45,9 @@ typedef struct prof_conn_t
     Jid* jid;
     GHashTable* available_resources;
     GHashTable* features_by_jid;
-    GHashTable* requested_features;
+    GHashTable* account_features_requested;
+    GHashTable* components_requested;
+    gboolean discovering_components;
 } ProfConnection;
 
 typedef struct
@@ -113,7 +115,9 @@ connection_init(void)
     conn.jid = NULL;
     conn.features_by_jid = NULL;
     conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)resource_destroy);
-    conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    conn.account_features_requested = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    conn.components_requested = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    conn.discovering_components = FALSE;
 
     conn.xmpp_ctx = xmpp_ctx_new(&prof_mem, &prof_log);
     auto_gchar gchar* v = prefs_get_string(PREF_STROPHE_VERBOSITY);
@@ -141,7 +145,8 @@ void
 connection_shutdown(void)
 {
     connection_clear_data();
-    g_clear_pointer(&conn.requested_features, g_hash_table_destroy);
+    g_clear_pointer(&conn.components_requested, g_hash_table_destroy);
+    g_clear_pointer(&conn.account_features_requested, g_hash_table_destroy);
     g_clear_pointer(&conn.available_resources, g_hash_table_destroy);
     if (conn.sm_state) {
         xmpp_free_sm_state(conn.sm_state);
@@ -166,8 +171,11 @@ _conn_apply_settings(const gchar* const jid, const gchar* const passwd, const gc
     if (conn.available_resources == NULL) {
         conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)resource_destroy);
     }
-    if (conn.requested_features == NULL) {
-        conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    if (conn.account_features_requested == NULL) {
+        conn.account_features_requested = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+    }
+    if (conn.components_requested == NULL) {
+        conn.components_requested = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     }
 
     auto_jid Jid* jidp = jid_create(jid);
@@ -578,9 +586,15 @@ connection_clear_data(void)
         g_hash_table_remove_all(conn.available_resources);
     }
 
-    if (conn.requested_features) {
-        g_hash_table_remove_all(conn.requested_features);
+    if (conn.account_features_requested) {
+        g_hash_table_remove_all(conn.account_features_requested);
     }
+
+    if (conn.components_requested) {
+        g_hash_table_remove_all(conn.components_requested);
+    }
+
+    conn.discovering_components = FALSE;
 }
 
 TLSCertificate*
@@ -669,14 +683,20 @@ connection_jid_for_feature(const char* const feature)
 void
 connection_request_features(void)
 {
-    /* We don't record it as a requested feature to avoid triggering th
-     * sv_ev_connection_features_received too soon */
+    if (conn.account_features_requested && conn.domain) {
+        g_hash_table_insert(conn.account_features_requested, g_strdup(conn.domain), NULL);
+    }
     iq_disco_info_request_onconnect(conn.domain);
 
     const char* barejid = connection_get_barejid();
     if (conn.features_by_jid && barejid && !g_hash_table_contains(conn.features_by_jid, barejid)) {
         g_hash_table_insert(conn.features_by_jid, g_strdup(barejid),
                             g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL));
+    }
+    if (conn.account_features_requested && barejid && g_strcmp0(conn.domain, barejid) != 0) {
+        g_hash_table_insert(conn.account_features_requested, g_strdup(barejid), NULL);
+    }
+    if (barejid && g_strcmp0(conn.domain, barejid) != 0) {
         iq_disco_info_request_onconnect(barejid);
     }
 }
@@ -684,21 +704,29 @@ connection_request_features(void)
 void
 connection_set_disco_items(GSList* items)
 {
-    if (conn.requested_features == NULL) {
+    if (items == NULL) {
+        conn.discovering_components = FALSE;
         return;
     }
+
     GSList* curr = items;
     while (curr) {
         DiscoItem* item = curr->data;
-        g_hash_table_insert(conn.requested_features, g_strdup(item->jid), NULL);
-        if (conn.features_by_jid) {
+        if (conn.features_by_jid && !g_hash_table_contains(conn.features_by_jid, item->jid)) {
             g_hash_table_insert(conn.features_by_jid, g_strdup(item->jid),
                                 g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL));
+        }
+        if (conn.components_requested && !g_hash_table_contains(conn.components_requested, item->jid)) {
+            g_hash_table_insert(conn.components_requested, g_strdup(item->jid), NULL);
         }
 
         iq_disco_info_request_onconnect(item->jid);
 
         curr = g_slist_next(curr);
+    }
+
+    if (conn.components_requested && g_hash_table_size(conn.components_requested) == 0) {
+        conn.discovering_components = FALSE;
     }
 }
 
@@ -779,12 +807,29 @@ void
 connection_features_received(const gchar* const jid)
 {
     log_info("[CONNECTION] connection_features_received %s", jid);
-    if (conn.requested_features == NULL) {
-        return;
+    if (conn.account_features_requested) {
+        if (g_hash_table_remove(conn.account_features_requested, jid) && g_hash_table_size(conn.account_features_requested) == 0) {
+            sv_ev_connection_features_received();
+        }
     }
-    if (g_hash_table_remove(conn.requested_features, jid) && g_hash_table_size(conn.requested_features) == 0) {
-        sv_ev_connection_features_received();
+    if (conn.components_requested) {
+        g_hash_table_remove(conn.components_requested, jid);
+        if (g_hash_table_size(conn.components_requested) == 0) {
+            conn.discovering_components = FALSE;
+        }
     }
+}
+
+gboolean
+connection_is_discovering_components(void)
+{
+    return conn.discovering_components;
+}
+
+void
+connection_start_component_discovery(void)
+{
+    conn.discovering_components = TRUE;
 }
 
 GHashTable*
@@ -997,8 +1042,11 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         if (conn.available_resources == NULL) {
             conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)resource_destroy);
         }
-        if (conn.requested_features == NULL) {
-            conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+        if (conn.account_features_requested == NULL) {
+            conn.account_features_requested = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+        }
+        if (conn.components_requested == NULL) {
+            conn.components_requested = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
         }
 
         session_login_success(connection_is_secured());
@@ -1029,8 +1077,11 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
         if (conn.available_resources == NULL) {
             conn.available_resources = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)resource_destroy);
         }
-        if (conn.requested_features == NULL) {
-            conn.requested_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+        if (conn.account_features_requested == NULL) {
+            conn.account_features_requested = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
+        }
+        if (conn.components_requested == NULL) {
+            conn.components_requested = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
         }
 
         xmpp_conn_open_stream_default(xmpp_conn);

@@ -105,6 +105,7 @@ static void _ping_get_handler(xmpp_stanza_t* const stanza);
 static int _version_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _disco_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _disco_info_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* const userdata);
+static int _disco_items_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* const userdata);
 static int _http_upload_response_id_handler(xmpp_stanza_t* const stanza, void* const upload_ctx);
 static int _last_activity_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
 static int _room_info_response_id_handler(xmpp_stanza_t* const stanza, void* const userdata);
@@ -148,7 +149,7 @@ static GTimer* autoping_time = NULL;
 static GHashTable* id_handlers;
 static GHashTable* rooms_cache = NULL;
 static GSList* late_delivery_windows = NULL;
-static gboolean received_disco_items = FALSE;
+static gboolean feature_retrieval_completed = FALSE;
 
 static int
 _iq_handler(xmpp_conn_t* const conn, xmpp_stanza_t* const stanza, void* const userdata)
@@ -251,7 +252,7 @@ iq_handlers_init(void)
     if (prefs_get_muc_ping_interval() != 0) {
         xmpp_timed_handler_add(conn, _muc_self_ping_timer_check, 10000, ctx);
     }
-    received_disco_items = FALSE;
+    feature_retrieval_completed = FALSE;
 
     iq_handlers_clear();
 
@@ -325,6 +326,7 @@ iq_handlers_remove_win(ProfWin* window)
 void
 iq_handlers_clear(void)
 {
+    feature_retrieval_completed = FALSE;
     iq_rooms_cache_clear();
     if (id_handlers) {
         g_hash_table_destroy(id_handlers);
@@ -482,7 +484,11 @@ iq_http_upload_request(HTTPUpload* upload)
 {
     const char* jid = connection_jid_for_feature(STANZA_NS_HTTP_UPLOAD);
     if (jid == NULL) {
-        cons_show_error("XEP-0363 HTTP File Upload is not supported by the server");
+        if (connection_is_discovering_components()) {
+            cons_show_error("Server component discovery is in progress. Retry in a moment.");
+        } else {
+            cons_show_error("XEP-0363 HTTP File Upload is not supported by the server");
+        }
         return;
     }
 
@@ -517,7 +523,7 @@ iq_disco_info_request_onconnect(const char* jid)
     auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_disco_info_iq(ctx, id, jid, NULL);
 
-    iq_id_handler_add(id, _disco_info_response_id_handler_onconnect, NULL, NULL);
+    iq_id_handler_add(id, _disco_info_response_id_handler_onconnect, (ProfIqFreeCallback)g_free, g_strdup(jid));
 
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
@@ -643,8 +649,13 @@ iq_disco_items_request(const char* jid)
 void
 iq_disco_items_request_onconnect(const char* jid)
 {
+    connection_start_component_discovery();
     xmpp_ctx_t* const ctx = connection_get_ctx();
-    xmpp_stanza_t* iq = stanza_create_disco_items_iq(ctx, "discoitemsreq_onconnect", jid, NULL);
+    auto_gchar gchar* id = connection_create_stanza_id();
+    xmpp_stanza_t* iq = stanza_create_disco_items_iq(ctx, id, jid, NULL);
+
+    iq_id_handler_add(id, _disco_items_response_id_handler_onconnect, NULL, NULL);
+
     iq_send_stanza(iq);
     xmpp_stanza_release(iq);
 }
@@ -2499,6 +2510,10 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* con
     const char* from = xmpp_stanza_get_from(stanza);
     const char* type = xmpp_stanza_get_type(stanza);
 
+    if (!from) {
+        from = userdata;
+    }
+
     if (from) {
         log_debug("Received disco#info response from: %s", from);
     } else {
@@ -2523,7 +2538,8 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* con
         GHashTable* features = connection_get_features(from);
         if (features == NULL) {
             log_error("No matching disco item found for %s", from);
-            return 1;
+            connection_features_received(from);
+            return 0;
         }
 
         xmpp_stanza_t* child = xmpp_stanza_get_children(query);
@@ -2617,7 +2633,7 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
     const char* from = xmpp_stanza_get_from(stanza);
     GSList* items = NULL;
 
-    if ((g_strcmp0(id, "discoitemsreq") != 0) && (g_strcmp0(id, "discoitemsreq_onconnect") != 0)) {
+    if (g_strcmp0(id, "discoitemsreq") != 0) {
         return;
     }
 
@@ -2655,19 +2671,66 @@ _disco_items_result_handler(xmpp_stanza_t* const stanza)
         child = xmpp_stanza_get_next(child);
     }
 
-    if (g_strcmp0(id, "discoitemsreq") == 0) {
-        cons_show_disco_items(items, from);
-    } else if (g_strcmp0(id, "discoitemsreq_onconnect") == 0) {
-        connection_set_disco_items(items);
+    cons_show_disco_items(items, from);
+    g_slist_free_full(items, (GDestroyNotify)_item_destroy);
+}
+
+static int
+_disco_items_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* const userdata)
+{
+    log_debug("Received disco#items response on connect");
+    const char* type = xmpp_stanza_get_type(stanza);
+    if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
+        log_error("Failed to query disco#items on connect");
+        connection_set_disco_items(NULL);
+        return 0;
     }
 
+    xmpp_stanza_t* query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
+    if (query == NULL) {
+        connection_set_disco_items(NULL);
+        return 0;
+    }
+
+    xmpp_stanza_t* child = xmpp_stanza_get_children(query);
+    if (child == NULL) {
+        connection_set_disco_items(NULL);
+        return 0;
+    }
+
+    GSList* items = NULL;
+    while (child) {
+        const char* stanza_name = xmpp_stanza_get_name(child);
+        if (stanza_name && (g_strcmp0(stanza_name, STANZA_NAME_ITEM) == 0)) {
+            const char* item_jid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
+            if (item_jid) {
+                DiscoItem* item = g_new0(struct disco_item_t, 1);
+                if (item) {
+                    item->jid = g_strdup(item_jid);
+                    const char* item_name = xmpp_stanza_get_attribute(child, STANZA_ATTR_NAME);
+                    if (item_name) {
+                        item->name = g_strdup(item_name);
+                    } else {
+                        item->name = NULL;
+                    }
+                    items = g_slist_append(items, item);
+                }
+            }
+        }
+
+        child = xmpp_stanza_get_next(child);
+    }
+
+    connection_set_disco_items(items);
     g_slist_free_full(items, (GDestroyNotify)_item_destroy);
+
+    return 0;
 }
 
 void
 iq_feature_retrieval_complete_handler(void)
 {
-    received_disco_items = TRUE;
+    feature_retrieval_completed = TRUE;
 
     while (late_delivery_windows) {
         LateDeliveryUserdata* del_data = late_delivery_windows->data;
@@ -2757,16 +2820,32 @@ _mam_buffer_commit_handler(xmpp_stanza_t* const stanza, void* const userdata)
 
 static const gchar* mam_timestamp_format_string = "%FT%T.%f%:z";
 
+static gboolean
+_win_supports_mam(ProfWin* win, const gchar* const target_jid)
+{
+    if (win->type == WIN_MUC) {
+        return muc_supports_mam(target_jid);
+    }
+
+    return connection_supports(XMPP_FEATURE_MAM2);
+}
+
 void
 iq_mam_request_older(ProfWin* win)
 {
-    if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
-        log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
-        cons_show_error("Server doesn't support MAM (%s).", XMPP_FEATURE_MAM2);
+    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
+
+    if (!_win_supports_mam(win, target_jid)) {
+        if (win->type == WIN_MUC) {
+            log_warning("MUC %s doesn't advertise %s feature.", target_jid, XMPP_FEATURE_MAM2);
+            cons_show_error("MUC %s does not support MAM.", target_jid);
+        } else {
+            log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
+            cons_show_error("Cannot fetch history for %s: Server does not support MAM.", target_jid);
+        }
+        win_remove_loading_history(win);
         return;
     }
-
-    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
 
     ProfMessage* first_msg;
     if (win->type == WIN_MUC) {
@@ -2848,7 +2927,11 @@ _mam_verify_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
     const char* type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, "error") == 0) {
         auto_char char* error_message = stanza_get_error_message(stanza);
-        cons_show_error("MAM verification failed: %s", error_message);
+        if (data && data->barejid) {
+            cons_show_error("MAM verification failed for %s: %s", data->barejid, error_message);
+        } else {
+            cons_show_error("MAM verification failed: %s", error_message);
+        }
         return 0;
     }
 
@@ -2922,9 +3005,16 @@ iq_mam_verify_request(ProfWin* win, const char* const startdate, const char* con
 void
 _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate, const char* const lastid)
 {
-    if (connection_supports(XMPP_FEATURE_MAM2) == FALSE) {
-        log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
-        cons_show_error("Server doesn't support MAM (%s).", XMPP_FEATURE_MAM2);
+    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
+
+    if (!_win_supports_mam(win, target_jid)) {
+        if (win->type == WIN_MUC) {
+            log_warning("MUC %s doesn't advertise %s feature.", target_jid, XMPP_FEATURE_MAM2);
+            cons_show_error("MUC %s does not support MAM.", target_jid);
+        } else {
+            log_warning("Server doesn't advertise %s feature.", XMPP_FEATURE_MAM2);
+            cons_show_error("Cannot fetch history for %s: Server does not support MAM.", target_jid);
+        }
         win_remove_loading_history(win);
         if (startdate)
             g_date_time_unref(startdate);
@@ -2932,8 +3022,6 @@ _iq_mam_request(ProfWin* win, GDateTime* startdate, GDateTime* enddate, const ch
             g_date_time_unref(enddate);
         return;
     }
-
-    const char* target_jid = (win->type == WIN_MUC) ? ((ProfMucWin*)win)->roomjid : ((ProfChatWin*)win)->barejid;
 
     char* firstid = NULL;
     char* startdate_str = NULL;
@@ -3007,8 +3095,8 @@ iq_mam_request(ProfWin* win, GDateTime* enddate)
         message_free(last_msg);
     }
 
-    // Save request for later if disco items haven't been received yet
-    if (!received_disco_items) {
+    // Save request for later if features haven't been received yet
+    if (!feature_retrieval_completed) {
         LateDeliveryUserdata* cur_del_data = g_new0(LateDeliveryUserdata, 1);
         cur_del_data->win = (ProfChatWin*)win;
         cur_del_data->enddate = enddate;
@@ -3031,9 +3119,14 @@ _mam_rsm_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
     const char* type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, "error") == 0) {
         auto_char char* error_message = stanza_get_error_message(stanza);
-        cons_show_error("Server error: %s", error_message);
-        log_debug("MAM Error: %s", error_message);
         MamRsmUserdata* data = (MamRsmUserdata*)userdata;
+        if (data && data->barejid) {
+            cons_show_error("MAM error retrieving history for %s: %s", data->barejid, error_message);
+            log_debug("MAM error retrieving history for %s: %s", data->barejid, error_message);
+        } else {
+            cons_show_error("MAM error retrieving history: %s", error_message);
+            log_debug("MAM Error: %s", error_message);
+        }
         if (data && data->win && wins_get_num((ProfWin*)data->win) != -1) {
             win_remove_loading_history((ProfWin*)data->win);
         }

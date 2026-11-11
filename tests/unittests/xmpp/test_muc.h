@@ -12,5 +12,8 @@ void muc_active__is__false_when_not_joined(void** state);
 void muc_active__is__true_when_joined(void** state);
 void muc_roster_add__returns_false_when_room_or_nick_null(void** state);
 void muc_roster_add__adds_occupant_to_room_roster(void** state);
+void muc_supports_mam__is__false_when_not_joined(void** state);
+void muc_supports_mam__is__true_when_feature_advertised(void** state);
+void muc_supports_mam__is__false_when_feature_not_advertised(void** state);
 
 #endif
