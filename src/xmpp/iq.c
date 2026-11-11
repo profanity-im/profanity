@@ -2533,7 +2533,8 @@ _disco_info_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* con
         GHashTable* features = connection_get_features(from);
         if (features == NULL) {
             log_error("No matching disco item found for %s", from);
-            return 1;
+            connection_features_received(from);
+            return 0;
         }
 
         xmpp_stanza_t* child = xmpp_stanza_get_children(query);
