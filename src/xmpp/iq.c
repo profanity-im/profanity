@@ -484,7 +484,11 @@ iq_http_upload_request(HTTPUpload* upload)
 {
     const char* jid = connection_jid_for_feature(STANZA_NS_HTTP_UPLOAD);
     if (jid == NULL) {
-        cons_show_error("XEP-0363 HTTP File Upload is not supported by the server");
+        if (connection_is_discovering_components()) {
+            cons_show_error("Server component discovery is in progress. Retry in a moment.");
+        } else {
+            cons_show_error("XEP-0363 HTTP File Upload is not supported by the server");
+        }
         return;
     }
 
@@ -645,6 +649,7 @@ iq_disco_items_request(const char* jid)
 void
 iq_disco_items_request_onconnect(const char* jid)
 {
+    connection_start_component_discovery();
     xmpp_ctx_t* const ctx = connection_get_ctx();
     auto_gchar gchar* id = connection_create_stanza_id();
     xmpp_stanza_t* iq = stanza_create_disco_items_iq(ctx, id, jid, NULL);
@@ -2677,16 +2682,19 @@ _disco_items_response_id_handler_onconnect(xmpp_stanza_t* const stanza, void* co
     const char* type = xmpp_stanza_get_type(stanza);
     if (g_strcmp0(type, STANZA_TYPE_ERROR) == 0) {
         log_error("Failed to query disco#items on connect");
+        connection_set_disco_items(NULL);
         return 0;
     }
 
     xmpp_stanza_t* query = xmpp_stanza_get_child_by_name(stanza, STANZA_NAME_QUERY);
     if (query == NULL) {
+        connection_set_disco_items(NULL);
         return 0;
     }
 
     xmpp_stanza_t* child = xmpp_stanza_get_children(query);
     if (child == NULL) {
+        connection_set_disco_items(NULL);
         return 0;
     }
 

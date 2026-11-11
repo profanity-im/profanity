@@ -42,4 +42,7 @@ void connection_remove_available_resource(const gchar* const resource);
 
 gchar* connection_create_stanza_id(void);
 
+gboolean connection_is_discovering_components(void);
+void connection_start_component_discovery(void);
+
 #endif

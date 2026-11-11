@@ -3550,6 +3550,8 @@ cmd_join(ProfWin* window, const gchar* const command, gchar** args)
 
             presence_join_room(room_str, account->muc_nick, NULL);
             muc_join(room_str, account->muc_nick, NULL, FALSE);
+        } else if (connection_is_discovering_components()) {
+            cons_show("MUC service discovery is in progress. Retry in a moment.");
         } else {
             cons_show("Account MUC service property not found.");
         }
@@ -3591,6 +3593,9 @@ cmd_join(ProfWin* window, const gchar* const command, gchar** args)
         room = g_strdup_printf("%s@%s", room_jid, account->muc_service);
 
         // no account preference
+    } else if (connection_is_discovering_components()) {
+        cons_show("MUC service discovery is in progress. Retry in a moment.");
+        return TRUE;
     } else {
         cons_show("Account MUC service property not found.");
         return TRUE;
@@ -4600,7 +4605,11 @@ cmd_rooms(ProfWin* window, const gchar* const command, gchar** args)
             service = g_strdup(account->muc_service);
             account_free(account);
         } else {
-            cons_show("Account MUC service property not found.");
+            if (connection_is_discovering_components()) {
+                cons_show("MUC service discovery is in progress. Retry in a moment.");
+            } else {
+                cons_show("Account MUC service property not found.");
+            }
             account_free(account);
             return TRUE;
         }

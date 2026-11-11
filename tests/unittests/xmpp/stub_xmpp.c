@@ -9,6 +9,7 @@
 #include "prof_cmocka.h"
 
 #include "xmpp/xmpp.h"
+#include "xmpp/connection.h"
 
 // connection functions
 void
@@ -102,6 +103,17 @@ gboolean
 connection_is_secured(void)
 {
     return 1;
+}
+
+gboolean
+connection_is_discovering_components(void)
+{
+    return FALSE;
+}
+
+void
+connection_start_component_discovery(void)
+{
 }
 
 TLSCertificate*
