@@ -61,7 +61,6 @@ privwin_incoming_msg(ProfPrivateWin* privatewin, ProfMessage* message)
         }
     }
 
-    wins_add_urls_ac(window, message, FALSE);
     wins_add_quotes_ac(window, message->plain, TRUE);
 
     if (prefs_get_boolean(PREF_BEEP)) {

@@ -1553,6 +1553,8 @@ cmd_ac_reset(ProfWin* window)
     win_reset_search_attempts();
     win_close_reset_search_attempts();
     plugins_reset_autocomplete();
+
+    wins_reset_url_ac();
 }
 
 void
@@ -4037,7 +4039,7 @@ _url_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
         return result;
     }
 
-    if (window->type == WIN_CHAT || window->type == WIN_MUC || window->type == WIN_PRIVATE) {
+    if (window && window->layout && window->layout->buffer) {
         result = autocomplete_param_with_func(input, "/url open", wins_get_url, previous, window);
         if (result) {
             return result;

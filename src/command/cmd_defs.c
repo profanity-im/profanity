@@ -2521,7 +2521,8 @@ static const struct cmd_t command_defs[] = {
               { "save", cmd_url_save })
       CMD_TAGS(
               CMD_TAG_CHAT,
-              CMD_TAG_GROUPCHAT)
+              CMD_TAG_GROUPCHAT,
+              CMD_TAG_UI)
       CMD_SYN(
               "/url open <url>",
               "/url save <url> [<path>]")

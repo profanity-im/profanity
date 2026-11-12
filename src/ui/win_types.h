@@ -131,7 +131,6 @@ typedef struct prof_win_t
     win_type_t type;
     win_scroll_state_t scroll_state;
     ProfLayout* layout;
-    Autocomplete urls_ac;
     Autocomplete quotes_ac;
     GHashTable* warned_jids;
 } ProfWin;

@@ -44,6 +44,7 @@
 #include "command/test_cmd_roster.h"
 #include "command/test_cmd_disconnect.h"
 #include "xmpp/test_form.h"
+#include "ui/test_window_list.h"
 #ifdef HAVE_PLUGINS
 #include "plugins/test_callbacks.h"
 #include "plugins/test_plugins_disco.h"
@@ -724,6 +725,13 @@ main(int argc, char* argv[])
 
         cmocka_unit_test(dbus_is_available__returns_boolean),
         cmocka_unit_test(dbus_get_session_bus__idempotent),
+
+        cmocka_unit_test(wins_get_url__returns__null_when_buffer_empty),
+        cmocka_unit_test(wins_get_url__returns__urls_from_newest_to_oldest),
+        cmocka_unit_test(wins_get_url__returns__deduplicated_urls_favoring_newest),
+        cmocka_unit_test(wins_get_url__returns__match_by_prefix),
+        cmocka_unit_test(wins_get_url__returns__urls_in_console_window),
+        cmocka_unit_test(wins_reset_url_ac__updates__clears_cached_urls),
     };
     return cmocka_run_group_tests(all_tests, NULL, NULL);
 }

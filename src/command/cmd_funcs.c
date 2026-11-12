@@ -9563,8 +9563,8 @@ _url_external_method(const char* cmd_template, const char* url, gchar* filename)
 gboolean
 cmd_url_open(ProfWin* window, const gchar* const command, gchar** args)
 {
-    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
-        cons_show_error("url open not supported in this window");
+    if (!window || !window->layout || !window->layout->buffer) {
+        cons_show_error("`/url open` is not supported in this window.");
         return TRUE;
     }
 
@@ -9575,7 +9575,7 @@ cmd_url_open(ProfWin* window, const gchar* const command, gchar** args)
     }
 
     // reset autocompletion to start from latest url and not where we left of
-    autocomplete_reset(window->urls_ac);
+    wins_reset_url_ac();
 
     auto_gchar gchar* scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
@@ -9606,7 +9606,7 @@ cmd_url_open(ProfWin* window, const gchar* const command, gchar** args)
 gboolean
 cmd_url_save(ProfWin* window, const gchar* const command, gchar** args)
 {
-    if (window->type != WIN_CHAT && window->type != WIN_MUC && window->type != WIN_PRIVATE) {
+    if (!window || !window->layout || !window->layout->buffer) {
         cons_show_error("`/url save` is not supported in this window.");
         return TRUE;
     }
@@ -9620,7 +9620,7 @@ cmd_url_save(ProfWin* window, const gchar* const command, gchar** args)
     gchar* path = args[2]; // might be NULL, intentionally skip NULL check
 
     // reset autocompletion to start from latest url and not where we left of
-    autocomplete_reset(window->urls_ac);
+    wins_reset_url_ac();
 
     auto_gchar gchar* scheme = g_uri_parse_scheme(url);
     if (scheme == NULL) {
