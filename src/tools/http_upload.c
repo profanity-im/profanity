@@ -312,21 +312,18 @@ http_file_put(void* userdata)
                 case WIN_CHAT:
                 {
                     ProfChatWin* chatwin = (ProfChatWin*)(upload->window);
-                    assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
                     cl_ev_send_msg(chatwin, url, url);
                     break;
                 }
                 case WIN_PRIVATE:
                 {
                     ProfPrivateWin* privatewin = (ProfPrivateWin*)(upload->window);
-                    assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
                     cl_ev_send_priv_msg(privatewin, url, url);
                     break;
                 }
                 case WIN_MUC:
                 {
                     ProfMucWin* mucwin = (ProfMucWin*)(upload->window);
-                    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                     cl_ev_send_muc_msg(mucwin, url, url);
                     break;
                 }

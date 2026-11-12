@@ -28,15 +28,6 @@
 #include "xmpp/chat_state.h"
 #include "xmpp/vcard.h"
 
-#define LAYOUT_SPLIT_MEMCHECK   12345671
-#define PROFCHATWIN_MEMCHECK    22374522
-#define PROFMUCWIN_MEMCHECK     52345276
-#define PROFPRIVATEWIN_MEMCHECK 77437483
-#define PROFCONFWIN_MEMCHECK    64334685
-#define PROFXMLWIN_MEMCHECK     87333463
-#define PROFPLUGINWIN_MEMCHECK  43434777
-#define PROFVCARDWIN_MEMCHECK   68947523
-
 typedef enum {
     FIELD_HIDDEN,
     FIELD_TEXT_SINGLE,
@@ -106,7 +97,6 @@ typedef struct prof_layout_split_t
     ProfLayout base;
     WINDOW* subwin;
     int sub_y_pos;
-    unsigned long memcheck;
 } ProfLayoutSplit;
 
 typedef enum {
@@ -155,7 +145,6 @@ typedef struct prof_chat_win_t
     gboolean is_ox; // XEP-0373: OpenPGP for XMPP
     gchar* resource_override;
     gboolean history_shown;
-    unsigned long memcheck;
     gchar* enctext;
     gchar* incoming_char;
     gchar* outgoing_char;
@@ -177,7 +166,6 @@ typedef struct prof_muc_win_t
     gboolean showoffline;
     gboolean is_omemo;
     gboolean omemo_trusted;
-    unsigned long memcheck;
     gchar* enctext;
     gchar* message_char;
     GDateTime* last_msg_timestamp;
@@ -195,7 +183,6 @@ struct prof_conf_win_t
     ProfWin window;
     gchar* roomjid;
     DataForm* form;
-    unsigned long memcheck;
     ProfConfWinCallback submit;
     ProfConfWinCallback cancel;
     const void* userdata;
@@ -206,7 +193,6 @@ typedef struct prof_private_win_t
     ProfWin window;
     gchar* fulljid;
     int unread;
-    unsigned long memcheck;
     gboolean occupant_offline;
     gboolean room_left;
 } ProfPrivateWin;
@@ -214,7 +200,6 @@ typedef struct prof_private_win_t
 typedef struct prof_xml_win_t
 {
     ProfWin window;
-    unsigned long memcheck;
 } ProfXMLWin;
 
 typedef struct prof_plugin_win_t
@@ -222,14 +207,12 @@ typedef struct prof_plugin_win_t
     ProfWin window;
     gchar* tag;
     gchar* plugin_name;
-    unsigned long memcheck;
 } ProfPluginWin;
 
 typedef struct prof_vcard_win_t
 {
     ProfWin window;
     vCard* vcard;
-    unsigned long memcheck;
 } ProfVcardWin;
 
 #endif

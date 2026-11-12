@@ -304,7 +304,6 @@ cmd_otr_theirfp__shows__message_when_non_otr_chat_window(void** state)
     window.quotes_ac = NULL;
     ProfChatWin chatwin;
     chatwin.window = window;
-    chatwin.memcheck = PROFCHATWIN_MEMCHECK;
     chatwin.pgp_send = FALSE;
     chatwin.is_otr = FALSE;
 
@@ -334,7 +333,6 @@ cmd_otr_theirfp__shows__fingerprint(void** state)
     ProfChatWin chatwin;
     chatwin.window = window;
     chatwin.barejid = recipient;
-    chatwin.memcheck = PROFCHATWIN_MEMCHECK;
     chatwin.pgp_send = FALSE;
     chatwin.is_otr = TRUE;
 
@@ -401,7 +399,6 @@ cmd_otr_start__shows__message_when_already_started(void** state)
     ProfChatWin chatwin;
     chatwin.window = window;
     chatwin.barejid = recipient;
-    chatwin.memcheck = PROFCHATWIN_MEMCHECK;
     chatwin.pgp_send = FALSE;
     chatwin.is_otr = TRUE;
 
@@ -427,7 +424,6 @@ cmd_otr_start__shows__message_when_no_key(void** state)
     ProfChatWin chatwin;
     chatwin.window = window;
     chatwin.barejid = recipient;
-    chatwin.memcheck = PROFCHATWIN_MEMCHECK;
     chatwin.pgp_send = FALSE;
     chatwin.is_otr = FALSE;
 
@@ -451,7 +447,6 @@ cmd_otr_start__tests__sends_otr_query_message_to_current_recipeint(void** state)
     ProfChatWin chatwin;
     chatwin.window = window;
     chatwin.barejid = recipient;
-    chatwin.memcheck = PROFCHATWIN_MEMCHECK;
     chatwin.pgp_send = FALSE;
     chatwin.is_otr = FALSE;
 
