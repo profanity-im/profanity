@@ -196,7 +196,6 @@ cmd_bookmark__tests__uses_roomjid_in_room(void** state)
     gchar* args[] = { NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
-    muc_win.memcheck = PROFMUCWIN_MEMCHECK;
     muc_win.roomjid = "room@conf.server";
 
     will_return(connection_get_status, JABBER_CONNECTED);
@@ -219,7 +218,6 @@ cmd_bookmark_add__tests__uses_roomjid_in_room(void** state)
     gchar* args[] = { "add", NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
-    muc_win.memcheck = PROFMUCWIN_MEMCHECK;
     muc_win.roomjid = "room@conf.server";
 
     will_return(connection_get_status, JABBER_CONNECTED);
@@ -243,7 +241,6 @@ cmd_bookmark_add__tests__uses_supplied_jid_in_room(void** state)
     gchar* args[] = { "add", jid, NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
-    muc_win.memcheck = PROFMUCWIN_MEMCHECK;
     muc_win.roomjid = "room2@conf.server";
 
     will_return(connection_get_status, JABBER_CONNECTED);
@@ -372,7 +369,6 @@ cmd_bookmark_remove__tests__uses_roomjid_in_room(void** state)
     gchar* args[] = { "remove", NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
-    muc_win.memcheck = PROFMUCWIN_MEMCHECK;
     muc_win.roomjid = "room@conf.server";
 
     will_return(connection_get_status, JABBER_CONNECTED);
@@ -393,7 +389,6 @@ cmd_bookmark_remove__tests__uses_supplied_jid_in_room(void** state)
     gchar* args[] = { "remove", jid, NULL };
     ProfMucWin muc_win;
     muc_win.window.type = WIN_MUC;
-    muc_win.memcheck = PROFMUCWIN_MEMCHECK;
     muc_win.roomjid = "room2@conf.server";
 
     will_return(connection_get_status, JABBER_CONNECTED);

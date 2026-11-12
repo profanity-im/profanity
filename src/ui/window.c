@@ -126,7 +126,6 @@ _win_create_split_layout(void)
     scrollok(layout->base.win, TRUE);
     layout->subwin = NULL;
     layout->sub_y_pos = 0;
-    layout->memcheck = LAYOUT_SPLIT_MEMCHECK;
 
     return &layout->base;
 }
@@ -170,7 +169,6 @@ win_create_chat(const gchar* const barejid)
     new_win->last_message = NULL;
     new_win->last_msg_id = NULL;
     new_win->has_attention = FALSE;
-    new_win->memcheck = PROFCHATWIN_MEMCHECK;
 
     return &new_win->window;
 }
@@ -198,7 +196,6 @@ win_create_muc(const gchar* const roomjid)
         layout->subwin = NULL;
     }
     layout->sub_y_pos = 0;
-    layout->memcheck = LAYOUT_SPLIT_MEMCHECK;
     layout->base.buffer = buffer_create();
     layout->base.y_pos = 0;
     layout->base.paged = 0;
@@ -230,8 +227,6 @@ win_create_muc(const gchar* const roomjid)
     new_win->last_msg_id = NULL;
     new_win->has_attention = FALSE;
 
-    new_win->memcheck = PROFMUCWIN_MEMCHECK;
-
     return &new_win->window;
 }
 
@@ -248,8 +243,6 @@ win_create_config(const gchar* const roomjid, DataForm* form, ProfConfWinCallbac
     new_win->cancel = cancel;
     new_win->userdata = userdata;
 
-    new_win->memcheck = PROFCONFWIN_MEMCHECK;
-
     return &new_win->window;
 }
 
@@ -265,8 +258,6 @@ win_create_private(const gchar* const fulljid)
     new_win->occupant_offline = FALSE;
     new_win->room_left = FALSE;
 
-    new_win->memcheck = PROFPRIVATEWIN_MEMCHECK;
-
     return &new_win->window;
 }
 
@@ -277,8 +268,6 @@ win_create_xmlconsole(void)
     new_win->window.type = WIN_XML;
     new_win->window.scroll_state = WIN_SCROLL_INNER;
     new_win->window.layout = _win_create_simple_layout();
-
-    new_win->memcheck = PROFXMLWIN_MEMCHECK;
 
     return &new_win->window;
 }
@@ -294,8 +283,6 @@ win_create_plugin(const gchar* const plugin_name, const gchar* const tag)
     new_win->tag = g_strdup(tag);
     new_win->plugin_name = g_strdup(plugin_name);
 
-    new_win->memcheck = PROFPLUGINWIN_MEMCHECK;
-
     return &new_win->window;
 }
 
@@ -308,7 +295,6 @@ win_create_vcard(vCard* vcard)
     new_win->window.layout = _win_create_simple_layout();
 
     new_win->vcard = vcard;
-    new_win->memcheck = PROFVCARDWIN_MEMCHECK;
 
     return &new_win->window;
 }
@@ -334,7 +320,6 @@ win_title_append(ProfWin* window, GString* target)
     case WIN_CHAT:
     {
         const ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         PContact contact = NULL;
         if (roster_exists()) {
             contact = roster_get_contact(chatwin->barejid);
@@ -357,14 +342,12 @@ win_title_append(ProfWin* window, GString* target)
     case WIN_MUC:
     {
         const ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         mucwin_title_append(mucwin->roomjid, PREF_TITLEBAR_MUC_TITLE, target);
         return;
     }
     case WIN_CONFIG:
     {
         const ProfConfWin* confwin = (ProfConfWin*)window;
-        assert(confwin->memcheck == PROFCONFWIN_MEMCHECK);
         mucwin_title_append(confwin->roomjid, PREF_TITLEBAR_MUC_TITLE, target);
         if (confwin->form->modified) {
             g_string_append(target, " config *");
@@ -376,7 +359,6 @@ win_title_append(ProfWin* window, GString* target)
     case WIN_PRIVATE:
     {
         const ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
-        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
         const gchar* slash = strchr(privatewin->fulljid, '/');
         if (slash) {
             auto_gchar gchar* bare = g_strndup(privatewin->fulljid, slash - privatewin->fulljid);
@@ -395,14 +377,12 @@ win_title_append(ProfWin* window, GString* target)
     case WIN_PLUGIN:
     {
         ProfPluginWin* pluginwin = (ProfPluginWin*)window;
-        assert(pluginwin->memcheck == PROFPLUGINWIN_MEMCHECK);
         g_string_append(target, pluginwin->tag);
         return;
     }
     case WIN_VCARD:
     {
         ProfVcardWin* vcardwin = (ProfVcardWin*)window;
-        assert(vcardwin->memcheck == PROFVCARDWIN_MEMCHECK);
 
         g_string_append(target, "vCard ");
         g_string_append(target, connection_get_barejid());
@@ -480,14 +460,12 @@ win_get_last_sent_message(ProfWin* window)
     case WIN_CHAT:
     {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         last_message = chatwin->last_message;
         break;
     }
     case WIN_MUC:
     {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         last_message = mucwin->last_message;
         break;
     }
@@ -907,7 +885,6 @@ win_resize(ProfWin* window)
                 rosterwin_roster();
             } else if (window->type == WIN_MUC) {
                 ProfMucWin* mucwin = (ProfMucWin*)window;
-                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 occupantswin_occupants(mucwin->roomjid);
             }
         } else {
@@ -2247,7 +2224,6 @@ win_notify_remind(ProfWin* window)
     case WIN_CHAT:
     {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
 
         if (prefs_get_boolean(PREF_NOTIFY_CHAT) && chatwin->unread > 0) {
             return TRUE;
@@ -2258,14 +2234,12 @@ win_notify_remind(ProfWin* window)
     case WIN_MUC:
     {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
         return prefs_do_room_notify_mention(mucwin->roomjid, mucwin->unread, mucwin->unread_mentions, mucwin->unread_triggers);
     }
     case WIN_PRIVATE:
     {
         ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
-        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
 
         if (prefs_get_boolean(PREF_NOTIFY_CHAT) && privatewin->unread > 0) {
             return TRUE;
@@ -2283,15 +2257,12 @@ win_unread(ProfWin* window)
 {
     if (window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         return chatwin->unread;
     } else if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return mucwin->unread;
     } else if (window->type == WIN_PRIVATE) {
         ProfPrivateWin* privatewin = (ProfPrivateWin*)window;
-        assert(privatewin->memcheck == PROFPRIVATEWIN_MEMCHECK);
         return privatewin->unread;
     } else {
         return 0;
@@ -2303,11 +2274,9 @@ win_has_attention(ProfWin* window)
 {
     if (window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         return chatwin->has_attention;
     } else if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         return mucwin->has_attention;
     }
     return FALSE;
@@ -2318,12 +2287,10 @@ win_toggle_attention(ProfWin* window)
 {
     if (window->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)window;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         chatwin->has_attention = !chatwin->has_attention;
         return chatwin->has_attention;
     } else if (window->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)window;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         mucwin->has_attention = !mucwin->has_attention;
         return mucwin->has_attention;
     }

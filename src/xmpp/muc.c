@@ -762,7 +762,6 @@ muc_autocomplete(ProfWin* window, const gchar* const input, gboolean previous)
     }
 
     ProfMucWin* mucwin = (ProfMucWin*)window;
-    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
     ChatRoom* chat_room = g_hash_table_lookup(rooms, mucwin->roomjid);
     if (chat_room == NULL || chat_room->nick_ac == NULL) {
         return NULL;

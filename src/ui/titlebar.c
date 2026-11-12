@@ -200,7 +200,6 @@ _title_bar_draw(void)
 
     if (current && current->type == WIN_CHAT) {
         ProfChatWin* chatwin = (ProfChatWin*)current;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         _show_contact_presence(chatwin, pos, maxrightpos);
         _show_privacy(chatwin);
         _show_attention(current, chatwin->has_attention);
@@ -211,7 +210,6 @@ _title_bar_draw(void)
         }
     } else if (current && current->type == WIN_MUC) {
         ProfMucWin* mucwin = (ProfMucWin*)current;
-        assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
         _show_muc_privacy(mucwin);
         _show_attention(current, mucwin->has_attention);
         _show_scrolled(current);

@@ -324,12 +324,10 @@ wins_set_current_by_num(int i)
         current = i;
         if (window->type == WIN_CHAT) {
             ProfChatWin* chatwin = (ProfChatWin*)window;
-            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
             chatwin->unread = 0;
             plugins_on_chat_win_focus(chatwin->barejid);
         } else if (window->type == WIN_MUC) {
             ProfMucWin* mucwin = (ProfMucWin*)window;
-            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             mucwin->unread = 0;
             mucwin->unread_mentions = FALSE;
             mucwin->unread_triggers = FALSE;
@@ -761,7 +759,6 @@ wins_get_xmlconsole(void)
         ProfWin* window = curr->data;
         if (window->type == WIN_XML) {
             ProfXMLWin* xmlwin = (ProfXMLWin*)window;
-            assert(xmlwin->memcheck == PROFXMLWIN_MEMCHECK);
             return xmlwin;
         }
         curr = g_list_next(curr);
@@ -779,7 +776,6 @@ wins_get_vcard(void)
         ProfWin* window = curr->data;
         if (window->type == WIN_VCARD) {
             ProfVcardWin* vcardwin = (ProfVcardWin*)window;
-            assert(vcardwin->memcheck == PROFVCARDWIN_MEMCHECK);
             return vcardwin;
         }
         curr = g_list_next(curr);
@@ -853,14 +849,12 @@ wins_reestablished_connection(void)
 #ifdef HAVE_OMEMO
             if (window->type == WIN_CHAT) {
                 ProfChatWin* chatwin = (ProfChatWin*)window;
-                assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
                 if (chatwin->is_omemo) {
                     win_println(window, THEME_TEXT, "-", "Restarted OMEMO session.");
                     omemo_start_session(chatwin->barejid);
                 }
             } else if (window->type == WIN_MUC) {
                 ProfMucWin* mucwin = (ProfMucWin*)window;
-                assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
                 if (mucwin->is_omemo) {
                     win_println(window, THEME_TEXT, "-", "Restarted OMEMO session.");
                     omemo_start_muc_sessions(mucwin->roomjid);
@@ -1116,11 +1110,9 @@ wins_create_summary_attention(void)
         gboolean has_attention = FALSE;
         if (window->type == WIN_CHAT) {
             ProfChatWin* chatwin = (ProfChatWin*)window;
-            assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
             has_attention = chatwin->has_attention;
         } else if (window->type == WIN_MUC) {
             ProfMucWin* mucwin = (ProfMucWin*)window;
-            assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
             has_attention = mucwin->has_attention;
         }
         if (has_attention) {

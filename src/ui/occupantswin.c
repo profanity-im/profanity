@@ -96,8 +96,10 @@ occupantswin_occupants(const char* const roomjid)
     if (mucwin) {
         GList* occupants = muc_roster(roomjid);
         if (occupants) {
+            if (mucwin->window.layout->type != LAYOUT_SPLIT) {
+                return;
+            }
             ProfLayoutSplit* layout = (ProfLayoutSplit*)mucwin->window.layout;
-            assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
 
             werase(layout->subwin);
 

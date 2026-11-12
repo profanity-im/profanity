@@ -157,7 +157,6 @@ chat_state_activity(void)
 
     if ((status == JABBER_CONNECTED) && (current->type == WIN_CHAT)) {
         ProfChatWin* chatwin = (ProfChatWin*)current;
-        assert(chatwin->memcheck == PROFCHATWIN_MEMCHECK);
         chat_state_handle_typing(chatwin->barejid, chatwin->state);
     }
 }
