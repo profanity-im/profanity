@@ -69,8 +69,10 @@ rosterwin_roster(void)
         return;
     }
 
+    if (console->layout->type != LAYOUT_SPLIT) {
+        return;
+    }
     ProfLayoutSplit* layout = (ProfLayoutSplit*)console->layout;
-    assert(layout->memcheck == LAYOUT_SPLIT_MEMCHECK);
 
     if (layout->subwin == NULL) {
         return;
