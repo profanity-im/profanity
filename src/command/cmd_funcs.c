@@ -95,7 +95,7 @@ static void _update_presence(const resource_presence_t presence,
                              const char* const show, gchar** args);
 static gboolean _cmd_set_boolean_preference(gchar* arg, const char* const display,
                                             preference_t pref);
-static void _who_room(ProfWin* window, const gchar* const command, gchar** args);
+static void _who_room(ProfMucWin* mucwin, const gchar* const command, gchar** args);
 static void _who_roster(ProfWin* window, const gchar* const command, gchar** args);
 static gboolean _cmd_execute(ProfWin* window, const gchar* const command, const char* const inp);
 static gboolean _cmd_execute_default(ProfWin* window, const char* inp);
@@ -1732,7 +1732,7 @@ cmd_theme(ProfWin* window, const gchar* const command, gchar** args)
 }
 
 static void
-_who_room(ProfWin* window, const gchar* const command, gchar** args)
+_who_room(ProfMucWin* mucwin, const gchar* const command, gchar** args)
 {
     if ((g_strv_length(args) == 2) && args[1]) {
         cons_show("Argument group is not applicable to chat rooms.");
@@ -1744,9 +1744,6 @@ _who_room(ProfWin* window, const gchar* const command, gchar** args)
         cons_bad_cmd_usage(command);
         return;
     }
-
-    ProfMucWin* mucwin = (ProfMucWin*)window;
-    assert(mucwin->memcheck == PROFMUCWIN_MEMCHECK);
 
     // presence filter
     if (string_matches_one_of(NULL, args[0], TRUE, "online", "available", "unavailable", "away", "chat", "xa", "dnd", "any", NULL)) {
@@ -2054,7 +2051,7 @@ cmd_who(ProfWin* window, const gchar* const command, gchar** args)
     if (conn_status != JABBER_CONNECTED) {
         cons_show("You are not currently connected.");
     } else if (window->type == WIN_MUC) {
-        _who_room(window, command, args);
+        _who_room((ProfMucWin*)window, command, args);
     } else {
         _who_roster(window, command, args);
     }
