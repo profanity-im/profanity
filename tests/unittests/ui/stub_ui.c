@@ -1457,14 +1457,28 @@ ui_flash(void)
 {
 }
 
+static GList* mock_buffer_entries = NULL;
+
+void
+stub_ui_set_mock_buffer_entries(GList* entries)
+{
+    mock_buffer_entries = entries;
+}
+
 unsigned int
 buffer_size(ProfBuff buffer)
 {
+    if (mock_buffer_entries) {
+        return g_list_length(mock_buffer_entries);
+    }
     return 0;
 }
 
 ProfBuffEntry*
 buffer_get_entry(ProfBuff buffer, unsigned int index)
 {
+    if (mock_buffer_entries) {
+        return g_list_nth_data(mock_buffer_entries, index);
+    }
     return NULL;
 }

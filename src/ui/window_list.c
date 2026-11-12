@@ -21,6 +21,7 @@
 #include "config/theme.h"
 #include "plugins/plugins.h"
 #include "ui/ui.h"
+#include "ui/buffer.h"
 #include "ui/window_list.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
@@ -35,6 +36,8 @@ static GList *keys, *values;
 static int current;
 static Autocomplete wins_ac;
 static Autocomplete wins_close_ac;
+static Autocomplete urls_ac = NULL;
+static GRegex* url_regex = NULL;
 
 static int _wins_cmp_num(gconstpointer a, gconstpointer b);
 static int _wins_get_next_available_num(GList* used);
@@ -77,6 +80,8 @@ wins_init(void)
     wins_close_ac = autocomplete_new();
     autocomplete_add(wins_close_ac, "all");
     autocomplete_add(wins_close_ac, "read");
+
+    urls_ac = autocomplete_new();
 }
 
 ProfWin*
@@ -509,7 +514,6 @@ wins_close_by_num(int i)
                         }
                     }
                 }
-                autocomplete_free(window->urls_ac);
                 autocomplete_free(window->quotes_ac);
                 break;
             }
@@ -523,7 +527,6 @@ wins_close_by_num(int i)
                 if (mucwin->last_msg_timestamp) {
                     g_date_time_unref(mucwin->last_msg_timestamp);
                 }
-                autocomplete_free(window->urls_ac);
                 autocomplete_free(window->quotes_ac);
                 break;
             }
@@ -533,7 +536,6 @@ wins_close_by_num(int i)
                 plugins_on_win_close(privwin->fulljid, "private");
                 autocomplete_remove(wins_ac, privwin->fulljid);
                 autocomplete_remove(wins_close_ac, privwin->fulljid);
-                autocomplete_free(window->urls_ac);
                 autocomplete_free(window->quotes_ac);
                 break;
             }
@@ -616,7 +618,6 @@ wins_new_chat(const gchar* const barejid)
             autocomplete_add(wins_close_ac, nick);
         }
     }
-    newwin->urls_ac = autocomplete_new();
     newwin->quotes_ac = autocomplete_new();
 
     plugins_on_win_open(barejid, "chat");
@@ -631,7 +632,6 @@ wins_new_muc(const gchar* const roomjid)
     _wins_htable_insert(windows, GINT_TO_POINTER(result), newwin);
     autocomplete_add(wins_ac, roomjid);
     autocomplete_add(wins_close_ac, roomjid);
-    newwin->urls_ac = autocomplete_new();
     newwin->quotes_ac = autocomplete_new();
 
     plugins_on_win_open(roomjid, "muc");
@@ -657,7 +657,6 @@ wins_new_private(const gchar* const fulljid)
     _wins_htable_insert(windows, GINT_TO_POINTER(result), newwin);
     autocomplete_add(wins_ac, fulljid);
     autocomplete_add(wins_close_ac, fulljid);
-    newwin->urls_ac = autocomplete_new();
     newwin->quotes_ac = autocomplete_new();
 
     plugins_on_win_open(fulljid, "private");
@@ -1171,6 +1170,8 @@ wins_destroy(void)
     g_clear_pointer(&windows, g_hash_table_destroy);
     g_clear_pointer(&wins_ac, autocomplete_free);
     g_clear_pointer(&wins_close_ac, autocomplete_free);
+    g_clear_pointer(&urls_ac, autocomplete_free);
+    g_clear_pointer(&url_regex, g_regex_unref);
 }
 
 ProfWin*
@@ -1239,34 +1240,6 @@ wins_get_next_attention(void)
 }
 
 void
-wins_add_urls_ac(const ProfWin* const win, const ProfMessage* const message, const gboolean flip)
-{
-    GRegex* regex;
-    GMatchInfo* match_info;
-
-    // https://stackoverflow.com/questions/43588699/regex-for-matching-any-url-character
-    regex = g_regex_new("(https?|aesgcm)://[\\w\\-.~:/?#\\[\\]@!$&'()*+,;=%]+", 0, 0, NULL);
-    g_regex_match(regex, message->plain, 0, &match_info);
-
-    while (g_match_info_matches(match_info)) {
-        auto_gchar gchar* word = g_match_info_fetch(match_info, 0);
-
-        if (flip) {
-            autocomplete_add_unsorted(win->urls_ac, word, FALSE);
-        } else {
-            autocomplete_add_unsorted(win->urls_ac, word, TRUE);
-        }
-        // for people who run profanity a long time, we don't want to waste a lot of memory
-        autocomplete_remove_older_than_max_reverse(win->urls_ac, 20);
-
-        g_match_info_next(match_info, NULL);
-    }
-
-    g_match_info_free(match_info);
-    g_regex_unref(regex);
-}
-
-void
 wins_add_quotes_ac(const ProfWin* const win, const gchar* const message, const gboolean flip)
 {
     if (flip) {
@@ -1279,10 +1252,54 @@ wins_add_quotes_ac(const ProfWin* const win, const gchar* const message, const g
     autocomplete_remove_older_than_max_reverse(win->quotes_ac, 20);
 }
 
+void
+wins_reset_url_ac(void)
+{
+    if (urls_ac) {
+        autocomplete_clear(urls_ac);
+    }
+}
+
 char*
 wins_get_url(const gchar* const search_str, gboolean previous, void* context)
 {
     ProfWin* win = (ProfWin*)context;
 
-    return autocomplete_complete(win->urls_ac, search_str, FALSE, previous);
+    if (!win || !win->layout || !win->layout->buffer) {
+        return NULL;
+    }
+
+    if (!urls_ac) {
+        urls_ac = autocomplete_new();
+    }
+
+    if (autocomplete_length(urls_ac) == 0) {
+        if (url_regex == NULL) {
+            url_regex = g_regex_new("(https?|aesgcm)://[\\w\\-.~:/?#\\[\\]@!$&'()*+,;=%]+", G_REGEX_OPTIMIZE, 0, NULL);
+        }
+
+        unsigned int len = buffer_size(win->layout->buffer);
+        for (unsigned int i = len; i > 0; i--) {
+            ProfBuffEntry* entry = buffer_get_entry(win->layout->buffer, i - 1);
+            if (entry && entry->message) {
+                GMatchInfo* match_info = NULL;
+                g_regex_match(url_regex, entry->message, 0, &match_info);
+
+                GList* msg_urls = NULL;
+                while (g_match_info_matches(match_info)) {
+                    gchar* word = g_match_info_fetch(match_info, 0);
+                    msg_urls = g_list_prepend(msg_urls, word);
+                    g_match_info_next(match_info, NULL);
+                }
+                g_match_info_free(match_info);
+
+                for (GList* u = msg_urls; u != NULL; u = g_list_next(u)) {
+                    autocomplete_add_unsorted(urls_ac, (gchar*)u->data, FALSE);
+                }
+                g_list_free_full(msg_urls, g_free);
+            }
+        }
+    }
+
+    return autocomplete_complete(urls_ac, search_str, FALSE, previous);
 }

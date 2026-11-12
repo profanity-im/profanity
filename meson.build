@@ -633,6 +633,7 @@ if get_option('tests')
       'tests/unittests/command/test_cmd_ac.c',
       'tests/unittests/command/test_cmd_disconnect.c',
       'tests/unittests/command/test_cmd_mucping.c',
+      'tests/unittests/ui/test_window_list.c',
       'tests/unittests/unittests.c',
       )
 

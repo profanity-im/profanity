@@ -1612,7 +1612,6 @@ win_print_history(ProfWin* window, const ProfMessage* const message)
     auto_gchar gchar* display_name = get_display_name(message, &flags);
     const gchar* ch = get_show_char(message->enc);
 
-    wins_add_urls_ac(window, message, FALSE);
     wins_add_quotes_ac(window, message->plain, FALSE);
     int y_start_pos = getcury(window->layout->win);
     _win_print_internal(window, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
@@ -1633,7 +1632,6 @@ win_print_old_history(ProfWin* window, const ProfMessage* const message)
     const gchar* ch = get_show_char(message->enc);
 
     int y_start_pos = getcury(window->layout->win);
-    wins_add_urls_ac(window, message, TRUE);
     wins_add_quotes_ac(window, message->plain, TRUE);
     _win_print_internal(window, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->plain, NULL);
     buffer_prepend(window->layout->buffer, ch, 0, message->timestamp, flags, THEME_TEXT_HISTORY, display_name, message->from_jid->barejid, message->plain, NULL, message->id, y_start_pos, getcury(window->layout->win));
