@@ -2793,8 +2793,13 @@ cmd_roster(ProfWin* window, const gchar* const command, gchar** args)
         } else if (!jid_is_valid_user_jid(jid)) {
             cons_show_error("Not a valid JID: %s", jid);
         } else {
+            auto_jid Jid* jidp = jid_create(jid);
+            if (!jidp) {
+                cons_show_error("Not a valid JID: %s", jid);
+                return TRUE;
+            }
             gchar* name = args[2];
-            roster_send_add_new(jid, name);
+            roster_send_add_new(jidp->barejid, name);
         }
         return TRUE;
 

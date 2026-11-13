@@ -665,6 +665,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(cmd_roster__shows__roster_when_no_args),
         cmocka_unit_test(cmd_roster__shows__message_when_add_no_jid),
         cmocka_unit_test(cmd_roster__tests__add_sends_roster_add_request),
+        cmocka_unit_test(cmd_roster__tests__add_trims_resource_from_jid),
         cmocka_unit_test(cmd_roster__shows__message_when_remove_no_jid),
         cmocka_unit_test(cmd_roster__tests__remove_sends_roster_remove_request),
         cmocka_unit_test(cmd_roster__tests__remove_nickname_sends_roster_remove_request),
