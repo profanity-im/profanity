@@ -3567,9 +3567,9 @@ cmd_join(ProfWin* window, const gchar* const command, gchar** args)
     char* passwd = NULL;
     ProfAccount* account = accounts_get_account(session_get_account_name());
 
-    // full room jid supplied (room@server)
+    // full room jid supplied (room@server or room@server/nick)
     if (room_arg->localpart) {
-        room = g_strdup(room_jid);
+        room = g_strdup(room_arg->barejid);
 
         // server not supplied (room), use account preference
     } else if (account->muc_service) {
@@ -3602,7 +3602,11 @@ cmd_join(ProfWin* window, const gchar* const command, gchar** args)
 
     // In the case that a nick wasn't provided by the optional args...
     if (!nick) {
-        nick = account->muc_nick;
+        if (room_arg->resourcepart) {
+            nick = room_arg->resourcepart;
+        } else {
+            nick = account->muc_nick;
+        }
     }
 
     if (!passwd) {

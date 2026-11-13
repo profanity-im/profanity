@@ -655,6 +655,8 @@ main(int argc, char* argv[])
         muc_unit_test(cmd_join__tests__xmpp_uri_join),
         muc_unit_test(cmd_join__tests__xmpp_uri_join_with_password),
         cmocka_unit_test(cmd_join__tests__xmpp_uri_invalid_query_type),
+        muc_unit_test(cmd_join__tests__uses_resource_as_nick_when_supplied_in_jid),
+        muc_unit_test(cmd_join__tests__prefers_explicit_nick_over_resource_in_jid),
 
         cmocka_unit_test(cmd_roster__shows__message_when_disconnecting),
         cmocka_unit_test(cmd_roster__shows__message_when_connecting),

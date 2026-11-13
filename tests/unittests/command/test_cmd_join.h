@@ -13,5 +13,7 @@ void cmd_join__tests__uses_password_when_supplied(void** state);
 void cmd_join__tests__xmpp_uri_join(void** state);
 void cmd_join__tests__xmpp_uri_join_with_password(void** state);
 void cmd_join__tests__xmpp_uri_invalid_query_type(void** state);
+void cmd_join__tests__uses_resource_as_nick_when_supplied_in_jid(void** state);
+void cmd_join__tests__prefers_explicit_nick_over_resource_in_jid(void** state);
 
 #endif
