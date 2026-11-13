@@ -3531,6 +3531,13 @@ cmd_join(ProfWin* window, const gchar* const command, gchar** args)
             auto_gchar gchar* room_str = g_strdup_printf("private-chat-%s@%s", uuid, account->muc_service);
             connection_free_uuid(uuid);
 
+            if (!jid_is_valid_user_jid(room_str) || g_utf8_strchr(room_str, -1, '/') != NULL) {
+                cons_show_error("Specified room has incorrect format.");
+                cons_show("");
+                account_free(account);
+                return TRUE;
+            }
+
             presence_join_room(room_str, account->muc_nick, NULL);
             muc_join(room_str, account->muc_nick, NULL, FALSE);
         } else if (connection_is_discovering_components()) {
@@ -3578,9 +3585,18 @@ cmd_join(ProfWin* window, const gchar* const command, gchar** args)
         // no account preference
     } else if (connection_is_discovering_components()) {
         cons_show("MUC service discovery is in progress. Retry in a moment.");
+        account_free(account);
         return TRUE;
     } else {
         cons_show("Account MUC service property not found.");
+        account_free(account);
+        return TRUE;
+    }
+
+    if (!jid_is_valid_user_jid(room) || g_utf8_strchr(room, -1, '/') != NULL) {
+        cons_show_error("Specified room has incorrect format.");
+        cons_show("");
+        account_free(account);
         return TRUE;
     }
 

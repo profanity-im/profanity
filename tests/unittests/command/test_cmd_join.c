@@ -60,6 +60,29 @@ cmd_join__shows__error_message_when_invalid_room_jid(void** state)
 }
 
 void
+cmd_join__shows__error_message_when_account_mucservice_invalid(void** state)
+{
+    gchar* account_name = g_strdup("an_account");
+    char* room = "room";
+    gchar* account_service = g_strdup("invalid@@server.org");
+    gchar* args[] = { room, NULL };
+    ProfAccount* account = account_new(account_name, g_strdup("user@server.org"), NULL, NULL,
+                                       TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, account_service, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, account_name);
+
+    expect_string(accounts_get_account, name, account_name);
+    will_return(accounts_get_account, account);
+
+    expect_cons_show_error("Specified room has incorrect format.");
+    expect_cons_show("");
+
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
+    assert_true(result);
+}
+
+void
 cmd_join__tests__uses_account_mucservice_when_no_service_specified(void** state)
 {
     gchar* account_name = g_strdup("an_account");

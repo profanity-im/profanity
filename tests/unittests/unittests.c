@@ -648,6 +648,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(cmd_join__shows__message_when_connecting),
         cmocka_unit_test(cmd_join__shows__message_when_disconnected),
         cmocka_unit_test(cmd_join__shows__error_message_when_invalid_room_jid),
+        muc_unit_test(cmd_join__shows__error_message_when_account_mucservice_invalid),
         muc_unit_test(cmd_join__tests__uses_account_mucservice_when_no_service_specified),
         muc_unit_test(cmd_join__tests__uses_supplied_nick),
         muc_unit_test(cmd_join__tests__uses_account_nick_when_not_supplied),
