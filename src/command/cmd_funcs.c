@@ -2793,8 +2793,13 @@ cmd_roster(ProfWin* window, const gchar* const command, gchar** args)
         } else if (!jid_is_valid_user_jid(jid)) {
             cons_show_error("Not a valid JID: %s", jid);
         } else {
+            auto_jid Jid* jidp = jid_create(jid);
+            if (!jidp) {
+                cons_show_error("Not a valid JID: %s", jid);
+                return TRUE;
+            }
             gchar* name = args[2];
-            roster_send_add_new(jid, name);
+            roster_send_add_new(jidp->barejid, name);
         }
         return TRUE;
 
@@ -3531,6 +3536,13 @@ cmd_join(ProfWin* window, const gchar* const command, gchar** args)
             auto_gchar gchar* room_str = g_strdup_printf("private-chat-%s@%s", uuid, account->muc_service);
             connection_free_uuid(uuid);
 
+            if (!jid_is_valid_user_jid(room_str) || g_utf8_strchr(room_str, -1, '/') != NULL) {
+                cons_show_error("Specified room has incorrect format.");
+                cons_show("");
+                account_free(account);
+                return TRUE;
+            }
+
             presence_join_room(room_str, account->muc_nick, NULL);
             muc_join(room_str, account->muc_nick, NULL, FALSE);
         } else if (connection_is_discovering_components()) {
@@ -3567,9 +3579,9 @@ cmd_join(ProfWin* window, const gchar* const command, gchar** args)
     char* passwd = NULL;
     ProfAccount* account = accounts_get_account(session_get_account_name());
 
-    // full room jid supplied (room@server)
+    // full room jid supplied (room@server or room@server/nick)
     if (room_arg->localpart) {
-        room = g_strdup(room_jid);
+        room = g_strdup(room_arg->barejid);
 
         // server not supplied (room), use account preference
     } else if (account->muc_service) {
@@ -3578,9 +3590,18 @@ cmd_join(ProfWin* window, const gchar* const command, gchar** args)
         // no account preference
     } else if (connection_is_discovering_components()) {
         cons_show("MUC service discovery is in progress. Retry in a moment.");
+        account_free(account);
         return TRUE;
     } else {
         cons_show("Account MUC service property not found.");
+        account_free(account);
+        return TRUE;
+    }
+
+    if (!jid_is_valid_user_jid(room) || g_utf8_strchr(room, -1, '/') != NULL) {
+        cons_show_error("Specified room has incorrect format.");
+        cons_show("");
+        account_free(account);
         return TRUE;
     }
 
@@ -3602,7 +3623,11 @@ cmd_join(ProfWin* window, const gchar* const command, gchar** args)
 
     // In the case that a nick wasn't provided by the optional args...
     if (!nick) {
-        nick = account->muc_nick;
+        if (room_arg->resourcepart) {
+            nick = room_arg->resourcepart;
+        } else {
+            nick = account->muc_nick;
+        }
     }
 
     if (!passwd) {

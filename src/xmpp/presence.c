@@ -259,6 +259,10 @@ void
 presence_join_room(const char* const room, const char* const nick, const char* const passwd)
 {
     auto_jid Jid* jid = jid_create_from_bare_and_resource(room, nick);
+    if (!jid || !jid->fulljid) {
+        log_warning("presence: unable to create full JID for room: %s, nick: %s", room ? room : "(null)", nick ? nick : "(null)");
+        return;
+    }
     log_debug("Sending room join presence to: %s", jid->fulljid);
 
     resource_presence_t presence_type = accounts_get_last_presence(session_get_account_name());
@@ -808,6 +812,10 @@ _muc_user_occupant_handler(xmpp_stanza_t* stanza)
 {
     const char* from = xmpp_stanza_get_from(stanza);
     auto_jid Jid* from_jid = jid_create(from);
+    if (!from_jid || !from_jid->fulljid || !from_jid->barejid) {
+        log_warning("Room presence received from invalid JID: %s", from ? from : "(null)");
+        return;
+    }
 
     log_debug("Room presence received from %s", from_jid->fulljid);
 

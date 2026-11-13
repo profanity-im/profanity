@@ -90,7 +90,7 @@ rosterwin_roster(void)
         while (curr) {
             ProfPrivateWin* privwin = curr->data;
             auto_jid Jid* jidp = jid_create(privwin->fulljid);
-            if (!muc_active(jidp->barejid)) {
+            if (jidp && !muc_active(jidp->barejid)) {
                 orphaned_privchats = g_list_append(orphaned_privchats, privwin);
             }
             curr = g_list_next(curr);
@@ -139,7 +139,7 @@ rosterwin_roster(void)
         while (curr) {
             ProfPrivateWin* privwin = curr->data;
             auto_jid Jid* jidp = jid_create(privwin->fulljid);
-            if (!muc_active(jidp->barejid)) {
+            if (jidp && !muc_active(jidp->barejid)) {
                 orphaned_privchats = g_list_append(orphaned_privchats, privwin);
             }
             curr = g_list_next(curr);
@@ -652,6 +652,10 @@ _rosterwin_rooms_by_service(ProfLayoutSplit* layout)
     while (curr) {
         char* roomjid = curr->data;
         auto_jid Jid* jidp = jid_create(roomjid);
+        if (!jidp || !jidp->domainpart) {
+            curr = g_list_next(curr);
+            continue;
+        }
 
         if (!g_list_find_custom(services, jidp->domainpart, (GCompareFunc)g_strcmp0)) {
             services = g_list_insert_sorted(services, g_strdup(jidp->domainpart), (GCompareFunc)g_strcmp0);
@@ -669,6 +673,10 @@ _rosterwin_rooms_by_service(ProfLayoutSplit* layout)
         while (curr) {
             char* roomjid = curr->data;
             auto_jid Jid* jidp = jid_create(roomjid);
+            if (!jidp || !jidp->domainpart) {
+                curr = g_list_next(curr);
+                continue;
+            }
 
             if (g_strcmp0(curr_service->data, jidp->domainpart) == 0) {
                 filtered_rooms = g_list_append(filtered_rooms, g_strdup(jidp->barejid));
@@ -879,7 +887,10 @@ _rosterwin_private_chats(ProfLayoutSplit* layout, GList* orphaned_privchats)
             }
 
             auto_jid Jid* jidp = jid_create(privwin->fulljid);
-            Occupant* occupant = muc_roster_item(jidp->barejid, jidp->resourcepart);
+            Occupant* occupant = NULL;
+            if (jidp) {
+                occupant = muc_roster_item(jidp->barejid, jidp->resourcepart);
+            }
 
             const char* presence = "offline";
             if (occupant) {

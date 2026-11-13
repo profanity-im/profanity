@@ -9,6 +9,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
 #include "command/cmd_funcs.h"
+#include "command/test_cmd_roster.h"
 
 #define CMD_ROSTER "/roster"
 
@@ -86,6 +87,22 @@ cmd_roster__tests__add_sends_roster_add_request(void** state)
     will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_string(roster_send_add_new, barejid, jid);
+    expect_string(roster_send_add_new, name, nick);
+
+    gboolean result = cmd_roster(NULL, CMD_ROSTER, args);
+    assert_true(result);
+}
+
+void
+cmd_roster__tests__add_trims_resource_from_jid(void** state)
+{
+    char* jid = "bob@server.org/mobile";
+    char* nick = "bob";
+    gchar* args[] = { "add", jid, nick, NULL };
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+
+    expect_string(roster_send_add_new, barejid, "bob@server.org");
     expect_string(roster_send_add_new, name, nick);
 
     gboolean result = cmd_roster(NULL, CMD_ROSTER, args);

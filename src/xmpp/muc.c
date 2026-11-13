@@ -16,6 +16,7 @@
 #include <glib.h>
 
 #include "common.h"
+#include "log.h"
 #include "tools/autocomplete.h"
 #include "ui/ui.h"
 #include "ui/window_list.h"
@@ -187,6 +188,11 @@ muc_confserver_clear(void)
 void
 muc_join(const gchar* const room, const gchar* const nick, const gchar* const password, gboolean autojoin)
 {
+    if (room == NULL || !jid_is_valid_user_jid(room) || g_utf8_strchr(room, -1, '/') != NULL) {
+        log_warning("muc: invalid room JID: %s", room ? room : "(null)");
+        return;
+    }
+
     ChatRoom* new_room = g_new0(ChatRoom, 1);
     new_room->room = g_strdup(room);
     new_room->nick = g_strdup(nick);

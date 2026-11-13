@@ -1036,7 +1036,7 @@ sv_ev_muc_self_online(const gchar* const room, const gchar* const nick, gboolean
         }
 
         auto_jid Jid* jidp = jid_create(room);
-        if (jidp->domainpart) {
+        if (jidp && jidp->domainpart) {
             muc_confserver_add(jidp->domainpart);
         }
 

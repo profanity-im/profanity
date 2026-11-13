@@ -28,6 +28,7 @@
 #include "xmpp/session.h"
 #include "xmpp/iq.h"
 #include "xmpp/connection.h"
+#include "xmpp/jid.h"
 #include "xmpp/roster.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/stanza.h"
@@ -183,6 +184,10 @@ roster_set_handler(xmpp_stanza_t* const stanza)
     }
 
     const char* barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+    if (!barejid || !jid_is_valid(barejid) || g_utf8_strchr(barejid, -1, '/') != NULL) {
+        log_warning("Ignoring roster push with invalid JID: %s", barejid ? barejid : "(null)");
+        return;
+    }
     auto_gchar gchar* barejid_lower = g_utf8_strdown(barejid, -1);
     const char* name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
     const char* sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
@@ -243,6 +248,11 @@ roster_result_handler(xmpp_stanza_t* const stanza)
 
     while (item) {
         const char* barejid = xmpp_stanza_get_attribute(item, STANZA_ATTR_JID);
+        if (!barejid || !jid_is_valid(barejid) || g_utf8_strchr(barejid, -1, '/') != NULL) {
+            log_warning("Ignoring roster item with invalid JID: %s", barejid ? barejid : "(null)");
+            item = xmpp_stanza_get_next(item);
+            continue;
+        }
         auto_gchar gchar* barejid_lower = g_utf8_strdown(barejid, -1);
         const char* name = xmpp_stanza_get_attribute(item, STANZA_ATTR_NAME);
         const char* sub = xmpp_stanza_get_attribute(item, STANZA_ATTR_SUBSCRIPTION);
