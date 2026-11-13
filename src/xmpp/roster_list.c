@@ -16,6 +16,7 @@
 #include <assert.h>
 
 #include "config/preferences.h"
+#include "log.h"
 #include "tools/autocomplete.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/resource.h"
@@ -343,6 +344,11 @@ roster_add(const gchar* const barejid, const gchar* const name, GSList* groups, 
            gboolean pending_out)
 {
     assert(roster != NULL);
+
+    if (barejid == NULL || !jid_is_valid(barejid) || g_utf8_strchr(barejid, -1, '/') != NULL) {
+        log_warning("roster: attempt to add invalid JID: %s", barejid ? barejid : "(null)");
+        return FALSE;
+    }
 
     PContact contact = roster_get_contact(barejid);
     if (contact) {

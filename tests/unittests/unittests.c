@@ -268,6 +268,9 @@ main(int argc, char* argv[])
         cmocka_unit_test(roster_get_display_name__returns__nickname_when_exists),
         cmocka_unit_test(roster_get_display_name__returns__barejid_when_nickname_empty),
         cmocka_unit_test(roster_get_display_name__returns__barejid_when_not_exists),
+        cmocka_unit_test(roster_add__returns_false_when_null_jid),
+        cmocka_unit_test(roster_add__returns_false_when_invalid_jid),
+        cmocka_unit_test(roster_add__returns_false_when_full_jid),
 
         cmocka_unit_test_setup_teardown(chat_session_get__returns__null_when_no_session,
                                         init_chat_sessions,
