@@ -524,6 +524,7 @@ omemo_set_device_list(const char* const from, GList* device_list)
     log_debug("[OMEMO] Setting device list for %s", STR_MAYBE_NULL(from));
     auto_jid Jid* jid = jid_create(from ?: connection_get_fulljid());
 
+    OmemoDeviceListHandler handler = g_hash_table_lookup(omemo_ctx.device_list_handler, jid->barejid);
     if (omemo_ctx.notifying) {
         GList* old_list = g_hash_table_lookup(omemo_ctx.device_list, jid->barejid);
         GList* new_iter;
@@ -557,13 +558,24 @@ omemo_set_device_list(const char* const from, GList* device_list)
                         }
                     }
                 }
+
+                if (!handler && (old_list != NULL || equals_our_barejid(jid->barejid))) {
+                    if (dev_id != omemo_ctx.device_id) {
+                        auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
+                        if (g_strcmp0(trust_mode, "blind") == 0) {
+                            if (!_omemo_has_session(jid->barejid, dev_id)) {
+                                log_debug("[OMEMO] Requesting bundle for new PEP device %u of %s (blind trust)", dev_id, jid->barejid);
+                                omemo_bundle_request(jid->barejid, dev_id, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(jid->barejid));
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
     g_hash_table_insert(omemo_ctx.device_list, g_strdup(jid->barejid), device_list);
 
-    OmemoDeviceListHandler handler = g_hash_table_lookup(omemo_ctx.device_list_handler, jid->barejid);
     if (handler) {
         gboolean keep = handler(jid->barejid, device_list);
         if (!keep) {
