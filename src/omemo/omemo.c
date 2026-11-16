@@ -44,7 +44,6 @@
 #include "xmpp/connection.h"
 #include "xmpp/muc.h"
 #include "xmpp/omemo.h"
-#include "xmpp/roster_list.h"
 #include "xmpp/xmpp.h"
 
 #define AESGCM_URL_NONCE_LEN (2 * OMEMO_AESGCM_NONCE_LENGTH)
@@ -366,17 +365,6 @@ omemo_start_sessions(void)
     // available sender devices must be acquired
     log_debug("[OMEMO] Acquiring sender devices list");
     _acquire_sender_devices_list();
-
-    GSList* contacts = roster_get_contacts(ROSTER_ORD_NAME);
-    if (contacts) {
-        GSList* curr;
-        for (curr = contacts; curr != NULL; curr = g_slist_next(curr)) {
-            PContact contact = curr->data;
-            const char* jid = p_contact_barejid(contact);
-            omemo_start_session(jid);
-        }
-        g_slist_free(contacts);
-    }
 }
 
 static gboolean
