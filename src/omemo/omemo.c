@@ -388,7 +388,7 @@ omemo_start_session(const gchar* const barejid)
             log_debug("[OMEMO] missing device list for %s", barejid);
             // Own devices are handled by _handle_own_device_list
             // We won't add _handle_device_list_start_session for ourself
-            if (equals_our_barejid(barejid)) {
+            if (!equals_our_barejid(barejid)) {
                 g_hash_table_insert(omemo_ctx.device_list_handler, g_strdup(barejid), _handle_device_list_start_session);
             }
             omemo_devicelist_request(barejid);
@@ -673,7 +673,8 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     if ((g_strcmp0(trust_mode, "blind") == 0) && !trusted) {
         auto_gchar gchar* fp = _omemo_fingerprint(identity_key, TRUE);
         cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
-        omemo_trust(jid, fp);
+        _omemo_trust(jid, device_id, fp);
+        wins_omemo_trust_changed(jid);
         trusted = TRUE;
     }
 
@@ -1484,8 +1485,6 @@ _omemo_trust(const char* const jid, uint32_t device_id, const char* const finger
     save_identity(&address, signal_buffer_data(buffer), signal_buffer_len(buffer), &omemo_ctx.identity_key_store);
     g_free(fingerprint_raw);
     signal_buffer_free(buffer);
-
-    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(jid));
 }
 
 void
@@ -1519,6 +1518,7 @@ omemo_trust(const gchar* const jid, const gchar* const fingerprint_formatted)
     }
 
     _omemo_trust(jid, device_id, fingerprint_formatted);
+    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(jid));
 
     wins_omemo_trust_changed(jid);
 }
@@ -1644,8 +1644,10 @@ _handle_own_device_list(const char* const jid, GList* device_list)
 static gboolean
 _handle_device_list_start_session(const char* const jid, GList* device_list)
 {
-    log_debug("[OMEMO] Start session for %s - device_list", jid);
-    omemo_start_session(jid);
+    if (device_list) {
+        log_debug("[OMEMO] Start session for %s - device_list", jid);
+        omemo_start_session(jid);
+    }
 
     return FALSE;
 }
