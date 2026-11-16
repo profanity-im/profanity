@@ -932,7 +932,10 @@ muc_members_add(const gchar* const room, const gchar* const jid)
 #ifdef HAVE_OMEMO
             if (chat_room->anonymity_type == MUC_ANONYMITY_TYPE_NONANONYMOUS) {
                 if (!equals_our_barejid(jid)) {
-                    omemo_start_session(jid);
+                    ProfMucWin* mucwin = wins_get_muc(room);
+                    if (mucwin && mucwin->is_omemo) {
+                        omemo_start_session(jid);
+                    }
                 }
             }
 #endif
