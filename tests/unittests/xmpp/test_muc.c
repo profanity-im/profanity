@@ -2,6 +2,7 @@
 #include <stdlib.h>
 
 #include "xmpp/muc.h"
+#include "xmpp/test_muc.h"
 
 void prof_shutdown(void);
 
@@ -84,6 +85,49 @@ muc_active__is__true_when_joined(void** state)
     gboolean room_is_active = muc_active(room);
 
     assert_true(room_is_active);
+}
+
+void
+muc_join__rejects_invalid_room_jid(void** state)
+{
+    const gchar* room = "room@@server.org";
+    const gchar* nick = "bob";
+    muc_join(room, nick, NULL, FALSE);
+
+    assert_false(muc_active(room));
+    GList* rooms = muc_rooms();
+    assert_null(rooms);
+}
+
+void
+muc_join__rejects_null_room(void** state)
+{
+    muc_join(NULL, "bob", NULL, FALSE);
+
+    GList* rooms = muc_rooms();
+    assert_null(rooms);
+}
+
+void
+muc_join__rejects_room_without_service(void** state)
+{
+    const gchar* room = "room";
+    muc_join(room, "bob", NULL, FALSE);
+
+    assert_false(muc_active(room));
+    GList* rooms = muc_rooms();
+    assert_null(rooms);
+}
+
+void
+muc_join__rejects_full_jid(void** state)
+{
+    const gchar* room = "room@server.org/bob";
+    muc_join(room, "bob", NULL, FALSE);
+
+    assert_false(muc_active(room));
+    GList* rooms = muc_rooms();
+    assert_null(rooms);
 }
 
 void

@@ -75,10 +75,12 @@ bookmark_request(void)
 gboolean
 bookmark_add(const char* jid, const char* nick, const char* password, const char* autojoin_str, const char* name)
 {
-    assert(jid != NULL);
+    if (jid == NULL || !jid_is_valid_user_jid(jid) || g_utf8_strchr(jid, -1, '/') != NULL) {
+        return FALSE;
+    }
 
     auto_jid Jid* jidp = jid_create(jid);
-    if (jidp->domainpart) {
+    if (jidp && jidp->domainpart) {
         muc_confserver_add(jidp->domainpart);
     }
 
@@ -260,7 +262,8 @@ _bookmark_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
             continue;
         }
         const char* barejid = xmpp_stanza_get_attribute(child, STANZA_ATTR_JID);
-        if (!barejid) {
+        if (!barejid || !jid_is_valid_user_jid(barejid) || g_utf8_strchr(barejid, -1, '/') != NULL) {
+            log_warning("Ignoring bookmark with invalid room JID: %s", barejid ? barejid : "(null)");
             child = xmpp_stanza_get_next(child);
             continue;
         }
@@ -314,7 +317,7 @@ _bookmark_result_id_handler(xmpp_stanza_t* const stanza, void* const userdata)
         }
 
         auto_jid Jid* jidp = jid_create(barejid);
-        if (jidp->domainpart) {
+        if (jidp && jidp->domainpart) {
             muc_confserver_add(jidp->domainpart);
         }
 
@@ -366,7 +369,7 @@ _send_bookmarks(void)
         } else {
             // use localpart of JID by if no name is specified
             auto_jid Jid* jidp = jid_create(bookmark->barejid);
-            if (jidp->localpart) {
+            if (jidp && jidp->localpart) {
                 xmpp_stanza_set_attribute(conference, STANZA_ATTR_NAME, jidp->localpart);
             }
         }

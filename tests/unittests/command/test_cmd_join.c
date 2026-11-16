@@ -11,6 +11,7 @@
 #include "config/accounts.h"
 
 #include "command/cmd_funcs.h"
+#include "command/test_cmd_join.h"
 #include "xmpp/muc.h"
 
 #define CMD_JOIN "/join"
@@ -50,6 +51,29 @@ cmd_join__shows__error_message_when_invalid_room_jid(void** state)
     gchar* args[] = { "//@@/", NULL };
 
     will_return(connection_get_status, JABBER_CONNECTED);
+
+    expect_cons_show_error("Specified room has incorrect format.");
+    expect_cons_show("");
+
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
+    assert_true(result);
+}
+
+void
+cmd_join__shows__error_message_when_account_mucservice_invalid(void** state)
+{
+    gchar* account_name = g_strdup("an_account");
+    char* room = "room";
+    gchar* account_service = g_strdup("invalid@@server.org");
+    gchar* args[] = { room, NULL };
+    ProfAccount* account = account_new(account_name, g_strdup("user@server.org"), NULL, NULL,
+                                       TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, account_service, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, account_name);
+
+    expect_string(accounts_get_account, name, account_name);
+    will_return(accounts_get_account, account);
 
     expect_cons_show_error("Specified room has incorrect format.");
     expect_cons_show("");
@@ -219,6 +243,58 @@ cmd_join__tests__xmpp_uri_invalid_query_type(void** state)
     will_return(connection_get_status, JABBER_CONNECTED);
 
     expect_cons_show_error("Unsupported or invalid XMPP URI query type. Only 'join' is supported.");
+
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
+    assert_true(result);
+}
+
+void
+cmd_join__tests__uses_resource_as_nick_when_supplied_in_jid(void** state)
+{
+    gchar* account_name = g_strdup("an_account");
+    char* room_with_nick = "room@conf.server.org/customnick";
+    char* expected_room = "room@conf.server.org";
+    char* expected_nick = "customnick";
+    gchar* account_nick = g_strdup("default_nick");
+    gchar* args[] = { room_with_nick, NULL };
+    ProfAccount* account = account_new(account_name, g_strdup("user@server.org"), NULL, NULL,
+                                       TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, NULL, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, account_name);
+
+    expect_string(accounts_get_account, name, account_name);
+    will_return(accounts_get_account, account);
+
+    expect_string(presence_join_room, room, expected_room);
+    expect_string(presence_join_room, nick, expected_nick);
+    expect_value(presence_join_room, passwd, NULL);
+
+    gboolean result = cmd_join(NULL, CMD_JOIN, args);
+    assert_true(result);
+}
+
+void
+cmd_join__tests__prefers_explicit_nick_over_resource_in_jid(void** state)
+{
+    gchar* account_name = g_strdup("an_account");
+    char* room_with_nick = "room@conf.server.org/customnick";
+    char* expected_room = "room@conf.server.org";
+    char* explicit_nick = "explicit_nick";
+    gchar* account_nick = g_strdup("default_nick");
+    gchar* args[] = { room_with_nick, "nick", explicit_nick, NULL };
+    ProfAccount* account = account_new(account_name, g_strdup("user@server.org"), NULL, NULL,
+                                       TRUE, NULL, 0, g_strdup("laptop"), NULL, NULL, 0, 0, 0, 0, 0, NULL, account_nick, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0);
+
+    will_return(connection_get_status, JABBER_CONNECTED);
+    will_return(session_get_account_name, account_name);
+
+    expect_string(accounts_get_account, name, account_name);
+    will_return(accounts_get_account, account);
+
+    expect_string(presence_join_room, room, expected_room);
+    expect_string(presence_join_room, nick, explicit_nick);
+    expect_value(presence_join_room, passwd, NULL);
 
     gboolean result = cmd_join(NULL, CMD_JOIN, args);
     assert_true(result);

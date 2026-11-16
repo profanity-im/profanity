@@ -5,6 +5,7 @@
 
 #include "xmpp/contact.h"
 #include "xmpp/roster_list.h"
+#include "xmpp/test_roster_list.h"
 
 void
 roster_get_contacts__returns__empty_list_when_none_added(void** state)
@@ -737,6 +738,39 @@ roster_get_display_name__returns__barejid_when_not_exists(void** state)
     roster_create();
 
     assert_string_equal("person@server.org", roster_get_display_name("person@server.org"));
+
+    roster_destroy();
+}
+
+void
+roster_add__returns_false_when_null_jid(void** state)
+{
+    roster_create();
+
+    gboolean result = roster_add(NULL, NULL, NULL, NULL, FALSE);
+    assert_false(result);
+
+    roster_destroy();
+}
+
+void
+roster_add__returns_false_when_invalid_jid(void** state)
+{
+    roster_create();
+
+    gboolean result = roster_add("bad@@jid", NULL, NULL, NULL, FALSE);
+    assert_false(result);
+
+    roster_destroy();
+}
+
+void
+roster_add__returns_false_when_full_jid(void** state)
+{
+    roster_create();
+
+    gboolean result = roster_add("user@domain.org/resource", NULL, NULL, NULL, FALSE);
+    assert_false(result);
 
     roster_destroy();
 }

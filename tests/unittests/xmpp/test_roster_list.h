@@ -37,5 +37,8 @@ void roster_remove__updates__remaining_in_group(void** state);
 void roster_get_display_name__returns__nickname_when_exists(void** state);
 void roster_get_display_name__returns__barejid_when_nickname_empty(void** state);
 void roster_get_display_name__returns__barejid_when_not_exists(void** state);
+void roster_add__returns_false_when_null_jid(void** state);
+void roster_add__returns_false_when_invalid_jid(void** state);
+void roster_add__returns_false_when_full_jid(void** state);
 
 #endif

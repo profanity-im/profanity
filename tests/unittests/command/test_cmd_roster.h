@@ -7,6 +7,7 @@ void cmd_roster__shows__message_when_disconnected(void** state);
 void cmd_roster__shows__roster_when_no_args(void** state);
 void cmd_roster__shows__message_when_add_no_jid(void** state);
 void cmd_roster__tests__add_sends_roster_add_request(void** state);
+void cmd_roster__tests__add_trims_resource_from_jid(void** state);
 void cmd_roster__shows__message_when_remove_no_jid(void** state);
 void cmd_roster__tests__remove_sends_roster_remove_request(void** state);
 void cmd_roster__tests__remove_nickname_sends_roster_remove_request(void** state);
