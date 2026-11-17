@@ -73,6 +73,9 @@ disco_add_feature(const char* plugin_name, char* feature)
 void
 disco_remove_features(const char* plugin_name)
 {
+    if (!plugin_name) {
+        return;
+    }
     if (!features) {
         return;
     }
@@ -103,6 +106,8 @@ disco_remove_features(const char* plugin_name)
         curr = g_list_next(curr);
     }
     g_list_free(plugin_feature_list);
+
+    g_hash_table_remove(plugin_to_features, plugin_name);
 }
 
 GList*

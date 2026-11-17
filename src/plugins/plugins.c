@@ -687,6 +687,7 @@ plugins_unload(const char* const name)
 #endif
         callbacks_remove(name);
         autocompleters_remove_plugin(name);
+        disco_remove_features(name);
 
         plugins_ordered = g_list_remove(plugins_ordered, plugin);
         g_hash_table_remove(plugins, name);
