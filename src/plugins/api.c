@@ -824,7 +824,7 @@ _lua_prof_settings_get(lua_State* L)
         char* val = plugin_settings_string_get(group, key, def);
         if (val) {
             lua_pushstring(L, val);
-            free(val);
+            g_free(val);
         } else {
             lua_pushnil(L);
         }

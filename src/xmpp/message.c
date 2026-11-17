@@ -1688,7 +1688,7 @@ _send_message_stanza(xmpp_stanza_t* const stanza)
     xmpp_stanza_to_text(stanza, &text, &text_size);
 
     xmpp_conn_t* conn = connection_get_conn();
-    auto_char char* plugin_text = plugins_on_message_stanza_send(text);
+    auto_gchar gchar* plugin_text = plugins_on_message_stanza_send(text);
     if (plugin_text) {
         xmpp_send_raw_string(conn, "%s", plugin_text);
     } else {

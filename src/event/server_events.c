@@ -341,7 +341,7 @@ sv_ev_room_message(ProfMessage* message)
     }
 
     char* old_plain = message->plain;
-    auto_char char* plugin_msg = plugins_pre_room_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
+    auto_gchar gchar* plugin_msg = plugins_pre_room_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
     if (plugin_msg)
         message->plain = plugin_msg;
 
@@ -435,7 +435,7 @@ _sv_ev_private_message(ProfMessage* message)
     _clean_incoming_message(message);
 
     char* old_plain = message->plain;
-    auto_char char* plugin_msg = plugins_pre_priv_message_display(message->from_jid->fulljid, message->plain);
+    auto_gchar gchar* plugin_msg = plugins_pre_priv_message_display(message->from_jid->fulljid, message->plain);
     if (plugin_msg)
         message->plain = plugin_msg;
 
