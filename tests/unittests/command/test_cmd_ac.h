@@ -5,5 +5,6 @@ void cmd_ac_complete_filepath__segfaults_when_empty(void** state);
 void cmd_ac_complete_filepath__finds_files_in_current_dir(void** state);
 void cmd_ac_complete_filepath__finds_files_with_dot_slash(void** state);
 void cmd_ac_complete_filepath__cycles_through_files(void** state);
+void cmd_ac_complete__returns_null_for_parameterless_command(void** state);
 
 #endif

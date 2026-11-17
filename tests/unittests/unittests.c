@@ -102,6 +102,7 @@ main(int argc, char* argv[])
         cmocka_unit_test_setup_teardown(cmd_ac_complete_filepath__finds_files_in_current_dir, load_preferences, close_preferences),
         cmocka_unit_test_setup_teardown(cmd_ac_complete_filepath__finds_files_with_dot_slash, load_preferences, close_preferences),
         cmocka_unit_test_setup_teardown(cmd_ac_complete_filepath__cycles_through_files, load_preferences, close_preferences),
+        cmocka_unit_test_setup_teardown(cmd_ac_complete__returns_null_for_parameterless_command, load_preferences, close_preferences),
         cmocka_unit_test(strtoi_range__returns__true_for_valid_input),
         cmocka_unit_test(strtoi_range__returns__false_for_out_of_range),
         cmocka_unit_test(strtoi_range__returns__false_for_invalid_input),
