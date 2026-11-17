@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include "prof_cmocka.h"
 #include "command/cmd_ac.h"
+#include "command/test_cmd_ac.h"
+#include "xmpp/xmpp.h"
 
 static void
 _create_test_file(const char* path)
@@ -91,4 +93,20 @@ cmd_ac_complete_filepath__cycles_through_files(void** state)
     remove("test_dir/file1.txt");
     remove("test_dir/file2.txt");
     rmdir("test_dir");
+}
+
+void
+cmd_ac_complete__returns_null_for_parameterless_command(void** state)
+{
+    ProfWin window;
+    window.type = WIN_CONSOLE;
+
+    gchar* res1 = cmd_ac_complete(&window, "/correct-e", FALSE);
+    assert_non_null(res1);
+    assert_string_equal(res1, "/correct-editor");
+    g_free(res1);
+
+    will_return(connection_get_status, JABBER_DISCONNECTED);
+    gchar* res2 = cmd_ac_complete(&window, "/correct-editor ", FALSE);
+    assert_null(res2);
 }
