@@ -137,7 +137,8 @@ _lua_prof_send_line(lua_State* L)
         ProfMucWin* mucwin = (ProfMucWin*)current;
         cl_ev_send_muc_msg(mucwin, line, NULL);
     } else {
-        cmd_process_input(current, (char*)line);
+        auto_gchar gchar* line_copy = g_strdup(line);
+        cmd_process_input(current, line_copy);
     }
     return 0;
 }
