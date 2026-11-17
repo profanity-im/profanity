@@ -532,6 +532,7 @@ _plugins_install_dir_recursive(const char* const path, PluginsInstallResult* res
         g_path_buf_pop(&pbuf);
         entry = g_dir_read_name(directory);
     }
+    g_path_buf_clear(&pbuf);
     g_dir_close(directory);
 }
 
