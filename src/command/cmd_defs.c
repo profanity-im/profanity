@@ -2287,7 +2287,7 @@ static const struct cmd_t command_defs[] = {
             { "char <char>",             "Set the character to be displayed next to OMEMO encrypted messages." },
             { "trustmode manual",        "Set the global OMEMO trust mode to manual, OMEMO keys has to be trusted manually." },
             { "trustmode firstusage",    "Set the global OMEMO trust mode to ToFu, first OMEMO keys trusted automatically." },
-            { "trustmode blind",         "Set the global OMEMO trust mode to blind, ALL OMEMO keys trusted automatically." },
+            { "trustmode blind",         "Set global trust mode to blind trust before verification (BTBV). Keys are trusted automatically until at least one key for a contact is manually trusted, after which new devices for that contact require manual confirmation." },
             { "policy manual",           "Set the global OMEMO policy to manual, OMEMO sessions must be started manually." },
             { "policy automatic",        "Set the global OMEMO policy to opportunistic, an OMEMO session will be attempted upon starting a conversation." },
             { "policy always",           "Set the global OMEMO policy to always, an error will be displayed if an OMEMO session cannot be initiated upon starting a conversation." },

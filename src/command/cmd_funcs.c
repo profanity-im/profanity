@@ -8768,7 +8768,7 @@ cmd_omemo_trust_mode(ProfWin* window, const gchar* const command, gchar** args)
         cons_show("The first seen OMEMO fingerprints will be trusted automatically - new keys must be trusted manually");
     } else if (g_strcmp0(args[1], "blind") == 0) {
         cons_show("Current trust mode is %s - setting to %s", trust_mode, args[1]);
-        cons_show("ALL OMEMO fingerprints will be trusted automatically");
+        cons_show("OMEMO keys are trusted automatically. Once at least one key for a contact is trusted manually, new devices for that contact require manual confirmation (BTBV).");
     } else {
         cons_bad_cmd_usage(command);
         return TRUE;
@@ -8932,6 +8932,12 @@ cmd_omemo_fingerprint(ProfWin* window, const gchar* const command, gchar** args)
     }
 
     g_list_free(fingerprints);
+
+    if (!equals_our_barejid(jid->barejid)) {
+        gboolean contact_verified = omemo_is_contact_verified(jid->barejid);
+        win_println(window, THEME_DEFAULT, "-", "Contact verification: %s",
+                    contact_verified ? "verified (new devices require manual confirmation)" : "unverified (blind trust active)");
+    }
 
     win_println(window, THEME_DEFAULT, "-", "You can trust it with '/omemo trust [<contact>] <fingerprint>'");
     win_println(window, THEME_DEFAULT, "-", "You can untrust it with '/omemo untrust [<contact>] <fingerprint>'");

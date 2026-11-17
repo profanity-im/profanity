@@ -571,6 +571,9 @@ policy=automatic
 
 # Security device/key verification trust policy.
 # Possible values: manual, firstusage, blind (Default: manual)
+# manual: all keys must be trusted manually.
+# firstusage: TOFU, initial keys trusted automatically, subsequent keys manually.
+# blind: Blind Trust Before Verification (XEP-0454), keys trusted automatically until manually verified with /omemo trust.
 trustmode=manual
 
 

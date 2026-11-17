@@ -60,6 +60,7 @@ void omemo_untrust(const gchar* const jid, const gchar* const fingerprint);
 GList* omemo_known_device_identities(const gchar* const jid);
 gboolean omemo_is_trusted_identity(const gchar* const jid, const gchar* const fingerprint);
 gboolean omemo_is_jid_trusted(const gchar* const jid);
+gboolean omemo_is_contact_verified(const gchar* const barejid);
 GList* omemo_get_jid_untrusted_fingerprints(const gchar* const jid);
 gboolean omemo_is_device_active(const gchar* const jid, const gchar* const fingerprint);
 gchar* omemo_fingerprint_autocomplete(const gchar* const search_str, gboolean previous, void* context);

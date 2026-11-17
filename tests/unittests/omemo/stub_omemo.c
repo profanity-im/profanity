@@ -1,6 +1,7 @@
 #include <glib.h>
 
 #include "config/account.h"
+#include "omemo/omemo.h"
 #include "ui/ui.h"
 
 void
@@ -46,6 +47,12 @@ gboolean
 omemo_is_jid_trusted(const gchar* const jid)
 {
     return TRUE;
+}
+
+gboolean
+omemo_is_contact_verified(const gchar* const barejid)
+{
+    return FALSE;
 }
 
 GList*

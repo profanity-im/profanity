@@ -44,11 +44,12 @@
 #include "xmpp/connection.h"
 #include "xmpp/muc.h"
 #include "xmpp/omemo.h"
-#include "xmpp/roster_list.h"
 #include "xmpp/xmpp.h"
 
 #define AESGCM_URL_NONCE_LEN (2 * OMEMO_AESGCM_NONCE_LENGTH)
 #define AESGCM_URL_KEY_LEN   (2 * OMEMO_AESGCM_KEY_LENGTH)
+
+#define OMEMO_TRUST_GROUP_VERIFIED "verified_contacts"
 
 static void _generate_pre_keys(int count);
 static void _generate_signed_pre_key(void);
@@ -65,6 +66,9 @@ static char* _omemo_fingerprint(ec_public_key* identity, gboolean formatted);
 static unsigned char* _omemo_fingerprint_decode(const char* const fingerprint, size_t* len);
 static char* _omemo_unformat_fingerprint(const char* const fingerprint_formatted);
 static void _omemo_trust(const char* const jid, uint32_t device_id, const char* const fingerprint);
+static gboolean _omemo_has_session(const char* const jid, uint32_t device_id);
+static gboolean _omemo_is_contact_verified(const char* const barejid);
+static void _omemo_set_contact_verified(const char* const barejid, gboolean verified);
 static void _cache_device_identity(const char* const jid, uint32_t device_id, ec_public_key* identity);
 static void _acquire_sender_devices_list(void);
 
@@ -365,17 +369,22 @@ omemo_start_sessions(void)
     // available sender devices must be acquired
     log_debug("[OMEMO] Acquiring sender devices list");
     _acquire_sender_devices_list();
+}
 
-    GSList* contacts = roster_get_contacts(ROSTER_ORD_NAME);
-    if (contacts) {
-        GSList* curr;
-        for (curr = contacts; curr != NULL; curr = g_slist_next(curr)) {
-            PContact contact = curr->data;
-            const char* jid = p_contact_barejid(contact);
-            omemo_start_session(jid);
-        }
-        g_slist_free(contacts);
+static gboolean
+_omemo_has_session(const char* const jid, uint32_t device_id)
+{
+    if (!jid || !omemo_ctx.session_store) {
+        return FALSE;
     }
+
+    signal_protocol_address address = {
+        .name = jid,
+        .name_len = strlen(jid),
+        .device_id = device_id,
+    };
+
+    return contains_session(&address, omemo_ctx.session_store) != 0;
 }
 
 void
@@ -397,7 +406,17 @@ omemo_start_session(const gchar* const barejid)
 
         GList* device_id;
         for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
-            omemo_bundle_request(barejid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(barejid));
+            uint32_t dev_id = GPOINTER_TO_INT(device_id->data);
+            if (dev_id == omemo_ctx.device_id && equals_our_barejid(barejid)) {
+                continue;
+            }
+
+            if (_omemo_has_session(barejid, dev_id)) {
+                log_debug("[OMEMO] Session already exists for %s device %u, skipping bundle request", barejid, dev_id);
+                continue;
+            }
+
+            omemo_bundle_request(barejid, dev_id, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(barejid));
         }
     }
 }
@@ -509,6 +528,7 @@ omemo_set_device_list(const char* const from, GList* device_list)
     log_debug("[OMEMO] Setting device list for %s", STR_MAYBE_NULL(from));
     auto_jid Jid* jid = jid_create(from ?: connection_get_fulljid());
 
+    OmemoDeviceListHandler handler = g_hash_table_lookup(omemo_ctx.device_list_handler, jid->barejid);
     if (omemo_ctx.notifying) {
         GList* old_list = g_hash_table_lookup(omemo_ctx.device_list, jid->barejid);
         GList* new_iter;
@@ -542,13 +562,28 @@ omemo_set_device_list(const char* const from, GList* device_list)
                         }
                     }
                 }
+
+                if (!handler && (old_list != NULL || equals_our_barejid(jid->barejid))) {
+                    if (dev_id != omemo_ctx.device_id) {
+                        auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
+                        if (g_strcmp0(trust_mode, "blind") == 0) {
+                            if (!_omemo_has_session(jid->barejid, dev_id)) {
+                                if (!_omemo_is_contact_verified(jid->barejid)) {
+                                    log_debug("[OMEMO] Requesting bundle for new PEP device %u of %s (blind trust)", dev_id, jid->barejid);
+                                    omemo_bundle_request(jid->barejid, dev_id, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(jid->barejid));
+                                } else {
+                                    log_debug("[OMEMO] New PEP device %u for verified contact %s requires manual verification", dev_id, jid->barejid);
+                                }
+                            }
+                        }
+                    }
+                }
             }
         }
     }
 
     g_hash_table_insert(omemo_ctx.device_list, g_strdup(jid->barejid), device_list);
 
-    OmemoDeviceListHandler handler = g_hash_table_lookup(omemo_ctx.device_list_handler, jid->barejid);
     if (handler) {
         gboolean keep = handler(jid->barejid, device_list);
         if (!keep) {
@@ -672,10 +707,15 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
     auto_gchar gchar* trust_mode = prefs_get_string(PREF_OMEMO_TRUST_MODE);
     if ((g_strcmp0(trust_mode, "blind") == 0) && !trusted) {
         auto_gchar gchar* fp = _omemo_fingerprint(identity_key, TRUE);
-        cons_show("Blind trust for %s device %d (%s)", jid, device_id, fp);
-        _omemo_trust(jid, device_id, fp);
-        wins_omemo_trust_changed(jid);
-        trusted = TRUE;
+        if (!_omemo_is_contact_verified(jid)) {
+            log_debug("[OMEMO] Blind trust for %s device %u (%s)", jid, device_id, fp);
+            _omemo_trust(jid, device_id, fp);
+            wins_omemo_trust_changed(jid);
+            trusted = TRUE;
+        } else {
+            cons_show("New device %u found for verified contact %s. Manual trust required (/omemo trust %s %s).",
+                      device_id, jid, jid, fp);
+        }
     }
 
     if (!trusted) {
@@ -683,7 +723,7 @@ omemo_start_device_session(const char* const jid, uint32_t device_id,
         goto out;
     }
 
-    if (!contains_session(&jid_address, omemo_ctx.session_store)) {
+    if (!_omemo_has_session(jid, device_id)) {
         log_debug("[OMEMO] There is no Session for %s ( %d) ,? building session.", jid_address.name, jid_address.device_id);
         int res;
 
@@ -1112,9 +1152,11 @@ omemo_on_message_recv(const char* const from_jid, uint32_t sid,
         omemo_bundle_publish(TRUE);
 
         if (res == 0) {
-            /* Start a new session */
-            log_debug("[OMEMO][RECV] Res is 0 => omemo_bundle_request");
-            omemo_bundle_request(sender->barejid, sid, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(sender->barejid));
+            /* Start a new session if one does not already exist */
+            if (!_omemo_has_session(sender->barejid, sid)) {
+                log_debug("[OMEMO][RECV] Res is 0 and no session => omemo_bundle_request");
+                omemo_bundle_request(sender->barejid, sid, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(sender->barejid));
+            }
         }
     } else {
         log_debug("[OMEMO][RECV] decrypting message with existing session");
@@ -1264,6 +1306,38 @@ omemo_is_trusted_identity(const gchar* const jid, const gchar* const fingerprint
     signal_buffer_free(buffer);
 
     return trusted;
+}
+
+static gboolean
+_omemo_is_contact_verified(const char* const barejid)
+{
+    if (!barejid || !omemo_ctx.trust.keyfile) {
+        return FALSE;
+    }
+
+    return g_key_file_get_boolean(omemo_ctx.trust.keyfile, OMEMO_TRUST_GROUP_VERIFIED, barejid, NULL);
+}
+
+static void
+_omemo_set_contact_verified(const char* const barejid, gboolean verified)
+{
+    if (!barejid || !omemo_ctx.trust.keyfile) {
+        return;
+    }
+
+    if (verified) {
+        g_key_file_set_boolean(omemo_ctx.trust.keyfile, OMEMO_TRUST_GROUP_VERIFIED, barejid, TRUE);
+    } else {
+        g_key_file_remove_key(omemo_ctx.trust.keyfile, OMEMO_TRUST_GROUP_VERIFIED, barejid, NULL);
+    }
+
+    omemo_trust_keyfile_save();
+}
+
+gboolean
+omemo_is_contact_verified(const gchar* const barejid)
+{
+    return _omemo_is_contact_verified(barejid);
 }
 
 gboolean
@@ -1518,7 +1592,10 @@ omemo_trust(const gchar* const jid, const gchar* const fingerprint_formatted)
     }
 
     _omemo_trust(jid, device_id, fingerprint_formatted);
-    omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(jid));
+    _omemo_set_contact_verified(jid, TRUE);
+    if (!_omemo_has_session(jid, device_id)) {
+        omemo_bundle_request(jid, device_id, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(jid));
+    }
 
     wins_omemo_trust_changed(jid);
 }
@@ -1584,6 +1661,11 @@ omemo_untrust(const gchar* const jid, const gchar* const fingerprint_formatted)
     g_key_file_remove_key(omemo_ctx.trust.keyfile, jid, device_id_str, NULL);
     omemo_trust_keyfile_save();
 
+    GHashTable* trusted_left = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid);
+    if (!trusted_left || g_hash_table_size(trusted_left) == 0) {
+        _omemo_set_contact_verified(jid, FALSE);
+    }
+
     wins_omemo_trust_changed(jid);
 }
 
@@ -1635,7 +1717,17 @@ _handle_own_device_list(const char* const jid, GList* device_list)
     log_debug("[OMEMO] Request OMEMO Bundles for our devices");
     GList* device_id;
     for (device_id = device_list; device_id != NULL; device_id = device_id->next) {
-        omemo_bundle_request(jid, GPOINTER_TO_INT(device_id->data), omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(jid));
+        uint32_t dev_id = GPOINTER_TO_INT(device_id->data);
+        if (dev_id == omemo_ctx.device_id) {
+            continue;
+        }
+
+        if (_omemo_has_session(jid, dev_id)) {
+            log_debug("[OMEMO] Session already exists for our device %u, skipping bundle request", dev_id);
+            continue;
+        }
+
+        omemo_bundle_request(jid, dev_id, omemo_start_device_session_handle_bundle, (ProfIqFreeCallback)g_free, g_strdup(jid));
     }
 
     return TRUE;
@@ -1857,6 +1949,10 @@ _load_trust(void)
     }
 
     for (int i = 0; groups[i] != NULL; i++) {
+        if (g_strcmp0(groups[i], OMEMO_TRUST_GROUP_VERIFIED) == 0) {
+            continue;
+        }
+
         GHashTable* trusted;
 
         trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, groups[i]);
