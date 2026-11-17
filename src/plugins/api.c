@@ -251,7 +251,6 @@ _lua_prof_get_barejid_from_roster(lua_State* L)
     char* barejid = roster_barejid_from_name(name);
     if (barejid) {
         lua_pushstring(L, barejid);
-        free(barejid);
     } else {
         lua_pushnil(L);
     }
