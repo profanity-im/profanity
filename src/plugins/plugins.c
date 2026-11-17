@@ -347,6 +347,9 @@ _lua_plugin_create(const char* const filename)
         const char* err = lua_tostring(L, -1);
         log_error("Error loading Lua plugin %s: %s", filename, err ? err : "unknown error");
         cons_show("Error loading Lua plugin %s: %s", filename, err ? err : "unknown error");
+        callbacks_remove(filename);
+        autocompleters_remove_plugin(filename);
+        disco_remove_features(filename);
         lua_close(L);
         return NULL;
     }
