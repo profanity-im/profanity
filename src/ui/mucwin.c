@@ -1000,7 +1000,7 @@ mucwin_db_history(ProfMucWin* mucwin, const char* start_time, const char* end_ti
     while (curr) {
         ProfMessage* msg = curr->data;
         char* old_plain = msg->plain;
-        auto_char char* plugin_msg = plugins_pre_room_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
+        auto_gchar gchar* plugin_msg = plugins_pre_room_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
         if (plugin_msg)
             msg->plain = plugin_msg;
         if (flip) {

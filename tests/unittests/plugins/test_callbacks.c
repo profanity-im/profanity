@@ -4,6 +4,7 @@
 #include <glib.h>
 
 #include "plugins/callbacks.h"
+#include "plugins/autocompleters.h"
 #include "plugins/plugins.h"
 #include "test_callbacks.h"
 
@@ -89,6 +90,48 @@ plugins_commands__lookup_and_removal(void** state)
     g_list_free(remaining);
 
     callbacks_close();
+}
+
+void
+plugins_autocompleters__removal(void** state)
+{
+    autocompleters_init();
+
+    char* items1[] = { "apple", "apricot", NULL };
+    autocompleters_add("plugin1", "/fruit", items1);
+
+    char* items2[] = { "banana", "blueberry", NULL };
+    autocompleters_add("plugin2", "/berry", items2);
+
+    autocompleters_filepath_add("plugin1", "/sendfile1");
+    autocompleters_filepath_add("plugin2", "/sendfile2");
+
+    char* res1 = autocompleters_complete("/fruit ap", FALSE);
+    assert_non_null(res1);
+    assert_string_equal(res1, "/fruit apple");
+    g_free(res1);
+
+    char* res2 = autocompleters_complete("/berry ban", FALSE);
+    assert_non_null(res2);
+    assert_string_equal(res2, "/berry banana");
+    g_free(res2);
+
+    autocompleters_remove_plugin("plugin1");
+
+    char* res_removed = autocompleters_complete("/fruit ap", FALSE);
+    assert_null(res_removed);
+
+    char* res_retained = autocompleters_complete("/berry ban", FALSE);
+    assert_non_null(res_retained);
+    assert_string_equal(res_retained, "/berry banana");
+    g_free(res_retained);
+
+    autocompleters_remove_plugin("plugin2");
+
+    char* res_none = autocompleters_complete("/berry ban", FALSE);
+    assert_null(res_none);
+
+    autocompleters_destroy();
 }
 
 void

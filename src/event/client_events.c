@@ -120,7 +120,7 @@ cl_ev_send_msg_correct(ProfChatWin* chatwin, const gchar* const msg, const gchar
         }
     }
 
-    auto_char char* plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
+    auto_gchar gchar* plugin_msg = plugins_pre_chat_message_send(chatwin->barejid, msg);
     auto_gchar gchar* sanitized_msg = str_xml_sanitize(plugin_msg ?: msg);
     const char* message = sanitized_msg;
 
@@ -183,7 +183,7 @@ cl_ev_send_msg(ProfChatWin* chatwin, const gchar* const msg, const gchar* const 
 void
 cl_ev_send_muc_msg_corrected(ProfMucWin* mucwin, const gchar* const msg, const gchar* const oob_url, gboolean correct_last_msg)
 {
-    auto_char char* plugin_msg = plugins_pre_room_message_send(mucwin->roomjid, msg);
+    auto_gchar gchar* plugin_msg = plugins_pre_room_message_send(mucwin->roomjid, msg);
     auto_gchar gchar* sanitized_msg = str_xml_sanitize(plugin_msg ?: msg);
     const char* message = sanitized_msg;
 
@@ -225,7 +225,7 @@ cl_ev_send_priv_msg(ProfPrivateWin* privwin, const gchar* const msg, const gchar
     } else if (privwin->room_left) {
         privwin_message_left_room(privwin);
     } else {
-        auto_char char* plugin_msg = plugins_pre_priv_message_send(privwin->fulljid, msg);
+        auto_gchar gchar* plugin_msg = plugins_pre_priv_message_send(privwin->fulljid, msg);
         auto_gchar gchar* sanitized_msg = str_xml_sanitize(plugin_msg ?: msg);
         const char* message = sanitized_msg;
         auto_jid Jid* jidp = jid_create(privwin->fulljid);

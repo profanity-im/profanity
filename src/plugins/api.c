@@ -137,7 +137,8 @@ _lua_prof_send_line(lua_State* L)
         ProfMucWin* mucwin = (ProfMucWin*)current;
         cl_ev_send_muc_msg(mucwin, line, NULL);
     } else {
-        cmd_process_input(current, (char*)line);
+        auto_gchar gchar* line_copy = g_strdup(line);
+        cmd_process_input(current, line_copy);
     }
     return 0;
 }
@@ -251,7 +252,6 @@ _lua_prof_get_barejid_from_roster(lua_State* L)
     char* barejid = roster_barejid_from_name(name);
     if (barejid) {
         lua_pushstring(L, barejid);
-        free(barejid);
     } else {
         lua_pushnil(L);
     }
@@ -825,7 +825,7 @@ _lua_prof_settings_get(lua_State* L)
         char* val = plugin_settings_string_get(group, key, def);
         if (val) {
             lua_pushstring(L, val);
-            free(val);
+            g_free(val);
         } else {
             lua_pushnil(L);
         }
@@ -982,7 +982,13 @@ _lua_prof_completer_add(lua_State* L)
     char** items = g_new0(char*, len + 1);
     for (int i = 1; i <= len; i++) {
         lua_rawgeti(L, 2, i);
-        items[i - 1] = g_strdup(luaL_checkstring(L, -1));
+        const char* str = lua_tostring(L, -1);
+        if (!str) {
+            lua_pop(L, 1);
+            g_strfreev(items);
+            return luaL_error(L, "prof.completer.add: table element %d is not a string", i);
+        }
+        items[i - 1] = g_strdup(str);
         lua_pop(L, 1);
     }
 
@@ -1002,7 +1008,13 @@ _lua_prof_completer_remove(lua_State* L)
     char** items = g_new0(char*, len + 1);
     for (int i = 1; i <= len; i++) {
         lua_rawgeti(L, 2, i);
-        items[i - 1] = g_strdup(luaL_checkstring(L, -1));
+        const char* str = lua_tostring(L, -1);
+        if (!str) {
+            lua_pop(L, 1);
+            g_strfreev(items);
+            return luaL_error(L, "prof.completer.remove: table element %d is not a string", i);
+        }
+        items[i - 1] = g_strdup(str);
         lua_pop(L, 1);
     }
 

@@ -347,6 +347,9 @@ _lua_plugin_create(const char* const filename)
         const char* err = lua_tostring(L, -1);
         log_error("Error loading Lua plugin %s: %s", filename, err ? err : "unknown error");
         cons_show("Error loading Lua plugin %s: %s", filename, err ? err : "unknown error");
+        callbacks_remove(filename);
+        autocompleters_remove_plugin(filename);
+        disco_remove_features(filename);
         lua_close(L);
         return NULL;
     }
@@ -419,24 +422,32 @@ _plugins_shutdown(void)
 {
     GList* curr = plugins_ordered;
 
+#ifdef HAVE_PLUGINS
     while (curr) {
         ProfPlugin* plugin = curr->data;
-#ifdef HAVE_PLUGINS
         if (plugin->L) {
             if (plugin->hook_mask & HOOK_ON_SHUTDOWN)
                 _lua_call_void_0arg(plugin, "prof_on_shutdown");
         }
+        curr = g_list_next(curr);
+    }
+#endif
+
+    callbacks_close();
+    autocompleters_destroy();
+    disco_close();
+    plugin_settings_close();
+    plugin_themes_close();
+
+    curr = plugins_ordered;
+    while (curr) {
+        ProfPlugin* plugin = curr->data;
+#ifdef HAVE_PLUGINS
         _plugin_destroy(plugin);
 #endif
         curr = g_list_next(curr);
     }
 
-    plugin_settings_close();
-    plugin_themes_close();
-    autocompleters_destroy();
-
-    callbacks_close();
-    disco_close();
     g_clear_pointer(&plugins, g_hash_table_destroy);
     g_clear_pointer(&plugins_ordered, g_list_free);
 }
@@ -532,6 +543,7 @@ _plugins_install_dir_recursive(const char* const path, PluginsInstallResult* res
         g_path_buf_pop(&pbuf);
         entry = g_dir_read_name(directory);
     }
+    g_path_buf_clear(&pbuf);
     g_dir_close(directory);
 }
 
@@ -685,6 +697,8 @@ plugins_unload(const char* const name)
         }
 #endif
         callbacks_remove(name);
+        autocompleters_remove_plugin(name);
+        disco_remove_features(name);
 
         plugins_ordered = g_list_remove(plugins_ordered, plugin);
         g_hash_table_remove(plugins, name);

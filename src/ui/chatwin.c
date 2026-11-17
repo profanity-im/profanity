@@ -288,7 +288,7 @@ chatwin_incoming_msg(ProfChatWin* chatwin, ProfMessage* message, gboolean win_cr
     }
 
     char* old_plain = message->plain;
-    auto_char char* new_plain = plugins_pre_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
+    auto_gchar gchar* new_plain = plugins_pre_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
     if (new_plain)
         message->plain = new_plain;
 
@@ -394,7 +394,7 @@ chatwin_outgoing_msg(ProfChatWin* chatwin, const char* const message, const char
     const gchar* enc_char = get_enc_char(enc_mode, chatwin->outgoing_char);
 
     const Jid* myjid = connection_get_jid();
-    auto_char char* plugin_message = plugins_pre_chat_message_display(myjid->barejid, myjid->resourcepart, message);
+    auto_gchar gchar* plugin_message = plugins_pre_chat_message_display(myjid->barejid, myjid->resourcepart, message);
     const char* display_message = plugin_message ?: message;
 
     if (request_receipt && id) {
@@ -423,7 +423,7 @@ chatwin_outgoing_carbon(ProfChatWin* chatwin, ProfMessage* message)
     ProfWin* window = (ProfWin*)chatwin;
 
     char* old_plain = message->plain;
-    auto_char char* plugin_msg = plugins_pre_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
+    auto_gchar gchar* plugin_msg = plugins_pre_chat_message_display(message->from_jid->barejid, message->from_jid->resourcepart, message->plain);
     if (plugin_msg)
         message->plain = plugin_msg;
 
@@ -533,7 +533,7 @@ _chatwin_history(ProfChatWin* chatwin, const char* const contact_barejid)
         while (curr) {
             ProfMessage* msg = curr->data;
             char* old_plain = msg->plain;
-            auto_char char* plugin_msg = plugins_pre_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
+            auto_gchar gchar* plugin_msg = plugins_pre_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
             if (plugin_msg)
                 msg->plain = plugin_msg;
             win_print_history((ProfWin*)chatwin, msg);
@@ -565,7 +565,7 @@ chatwin_db_history(ProfChatWin* chatwin, const char* start_time, const char* end
     while (curr) {
         ProfMessage* msg = curr->data;
         char* old_plain = msg->plain;
-        auto_char char* plugin_msg = plugins_pre_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
+        auto_gchar gchar* plugin_msg = plugins_pre_chat_message_display(msg->from_jid->barejid, msg->from_jid->resourcepart, msg->plain);
         if (plugin_msg)
             msg->plain = plugin_msg;
         if (flip) {
