@@ -419,24 +419,32 @@ _plugins_shutdown(void)
 {
     GList* curr = plugins_ordered;
 
+#ifdef HAVE_PLUGINS
     while (curr) {
         ProfPlugin* plugin = curr->data;
-#ifdef HAVE_PLUGINS
         if (plugin->L) {
             if (plugin->hook_mask & HOOK_ON_SHUTDOWN)
                 _lua_call_void_0arg(plugin, "prof_on_shutdown");
         }
+        curr = g_list_next(curr);
+    }
+#endif
+
+    callbacks_close();
+    autocompleters_destroy();
+    disco_close();
+    plugin_settings_close();
+    plugin_themes_close();
+
+    curr = plugins_ordered;
+    while (curr) {
+        ProfPlugin* plugin = curr->data;
+#ifdef HAVE_PLUGINS
         _plugin_destroy(plugin);
 #endif
         curr = g_list_next(curr);
     }
 
-    plugin_settings_close();
-    plugin_themes_close();
-    autocompleters_destroy();
-
-    callbacks_close();
-    disco_close();
     g_clear_pointer(&plugins, g_hash_table_destroy);
     g_clear_pointer(&plugins_ordered, g_list_free);
 }
