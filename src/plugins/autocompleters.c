@@ -185,6 +185,17 @@ autocompleters_reset(void)
 }
 
 void
+autocompleters_remove_plugin(const char* const plugin_name)
+{
+    if (plugin_to_acs && plugin_name) {
+        g_hash_table_remove(plugin_to_acs, plugin_name);
+    }
+    if (plugin_to_filepath_acs && plugin_name) {
+        g_hash_table_remove(plugin_to_filepath_acs, plugin_name);
+    }
+}
+
+void
 autocompleters_destroy(void)
 {
     g_hash_table_destroy(plugin_to_acs);

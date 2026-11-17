@@ -722,6 +722,7 @@ main(int argc, char* argv[])
         cmocka_unit_test_setup_teardown(plugins_commands__lookup_and_removal,
                                         load_preferences,
                                         close_preferences),
+        cmocka_unit_test(plugins_autocompleters__removal),
         cmocka_unit_test(plugins_get_lua_version__returns_version_string),
         cmocka_unit_test(plugins_find_plugin_path__tests),
 
