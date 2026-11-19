@@ -1,0 +1,79 @@
+.TH man 1 "2026-11-19" "0.20.0" "Profanity XMPP client"
+
+.SH NAME
+/vcard
+
+.SH DESCRIPTION
+View or edit your vCard profile (XEP-0054). If no arguments are given, your vCard is displayed. 
+
+.SH SYNOPSIS
+/vcard
+
+.LP
+/vcard get [<nick|contact>]
+
+.LP
+/vcard edit
+
+.LP
+/vcard photo open <nick|contact> [<index>]
+
+.LP
+/vcard photo save <nick|contact> [output <filepath>] [index <index>]
+
+.LP
+/vcard photo open-self [<index>]
+
+.LP
+/vcard photo save-self [output <filepath>] [index <index>]
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBget [<nick|contact>]\fR
+.RS 4
+View your vCard, or a contact's vCard if provided.
+.RE
+.PP
+\fBedit\fR
+.RS 4
+Edit your vCard profile in an interactive form window.
+.RE
+.PP
+\fBphoto open <nick|contact> [<index>]\fR
+.RS 4
+Download a user's photo from their vCard to a file, and open it.
+.RE
+.PP
+\fBphoto save <nick|contact>\fR
+.RS 4
+Download a user's photo from their vCard to a file.
+.RE
+.PP
+\fBphoto open-self [<index>]\fR
+.RS 4
+Download a photo from your vCard to a file, and open it.
+.RE
+.PP
+\fBphoto save-self\fR
+.RS 4
+Download a photo from your vCard to a file.
+.RE
+
+.SH EXAMPLES
+/vcard
+
+.LP
+/vcard get
+
+.LP
+/vcard get friend@server.org
+
+.LP
+/vcard edit
+
+.LP
+/vcard photo open friend@server.org
+
+.LP

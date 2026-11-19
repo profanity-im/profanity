@@ -1,0 +1,68 @@
+.TH man 1 "2026-11-19" "0.20.0" "Profanity XMPP client"
+
+.SH NAME
+/avatar
+
+.SH DESCRIPTION
+Manage your avatar and contact avatars (XEP-0084). You can publish your own avatar with set or remove it using unset. Contact avatars can be displayed in desktop notifications when available on disk. Contact avatars are not downloaded automatically by default. Use get to fetch a contact's avatar on demand, or enable auto to download and sync avatars automatically.
+
+.SH SYNOPSIS
+/avatar set <path>
+
+.LP
+/avatar unset
+
+.LP
+/avatar get <barejid>
+
+.LP
+/avatar open <barejid>
+
+.LP
+/avatar auto on|off
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBset <path>\fR
+.RS 4
+Set your avatar to the image file at <path>.
+.RE
+.PP
+\fBunset\fR
+.RS 4
+Remove your published avatar so others no longer see an avatar for you.
+.RE
+.PP
+\fBget <barejid>\fR
+.RS 4
+Download the contact's avatar. barejid is the JID to download from.
+.RE
+.PP
+\fBopen <barejid>\fR
+.RS 4
+Download avatar and open it in your configured image viewer. See /executable.
+.RE
+.PP
+\fBauto on|off\fR
+.RS 4
+Automatically download and sync contact avatars in the background.
+.RE
+
+.SH EXAMPLES
+/avatar set ~/images/avatar.png
+
+.LP
+/avatar unset
+
+.LP
+/avatar get thor@valhalla.edda
+
+.LP
+/avatar open freyja@vanaheimr.edda
+
+.LP
+/avatar auto on
+
+.LP

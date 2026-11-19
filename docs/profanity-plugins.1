@@ -1,0 +1,89 @@
+.TH man 1 "2026-11-19" "0.20.0" "Profanity XMPP client"
+
+.SH NAME
+/plugins
+
+.SH DESCRIPTION
+Manage plugins. Plugins are searched for in global and user XDG directories.
+ Use 'load' and 'unload' to run plugins for the current session only. Use 'enable' and 'disable' to configure plugins to auto-load on startup. Running '/plugins' without arguments displays active and available plugins.
+
+.SH SYNOPSIS
+/plugins
+
+.LP
+/plugins install <path|URL>
+
+.LP
+/plugins load [<plugin>]
+
+.LP
+/plugins unload [<plugin>]
+
+.LP
+/plugins enable <plugin>
+
+.LP
+/plugins disable <plugin>
+
+.LP
+/plugins uninstall <plugin>
+
+.LP
+
+.SH ARGUMENTS
+.PP
+\fBinstall <path|URL>\fR
+.RS 4
+Copy a local .lua file or directory, or download from URL into the user plugins directory.
+.RE
+.PP
+\fBload [<plugin>]\fR
+.RS 4
+Load a plugin into the current session only. Passing no argument loads all available plugins.
+.RE
+.PP
+\fBunload [<plugin>]\fR
+.RS 4
+Unload a plugin from the current session. Passing no argument unloads all loaded plugins.
+.RE
+.PP
+\fBenable <plugin>\fR
+.RS 4
+Enable a plugin to autoload on start and load it into the active session.
+.RE
+.PP
+\fBdisable <plugin>\fR
+.RS 4
+Disable a plugin from autoloading on start and unload it.
+.RE
+.PP
+\fBuninstall <plugin>\fR
+.RS 4
+Unload, disable, and remove a plugin from the user plugins directory.
+.RE
+
+.SH EXAMPLES
+/plugins
+
+.LP
+/plugins install https://profanity-im.github.io/example.lua
+
+.LP
+/plugins install /home/user/example.lua
+
+.LP
+/plugins load example.lua
+
+.LP
+/plugins unload example.lua
+
+.LP
+/plugins enable sounds.lua
+
+.LP
+/plugins disable sounds.lua
+
+.LP
+/plugins uninstall sounds.lua
+
+.LP
