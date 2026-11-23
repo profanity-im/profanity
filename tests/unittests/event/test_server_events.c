@@ -4,6 +4,7 @@
 #include <glib.h>
 
 #include "event/server_events.h"
+#include "event/test_server_events.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/roster_list.h"
 #include "xmpp/chat_session.h"
@@ -115,4 +116,117 @@ sv_ev_lost_connection__updates__clears_chat_sessions(void** state)
     ChatSession* session2 = chat_session_get("steve@server.org");
     assert_null(session1);
     assert_null(session2);
+}
+
+void
+sv_ev_lost_connection_conflict__updates__clears_chat_sessions(void** state)
+{
+    roster_create();
+    roster_process_pending_presence();
+    chat_sessions_init();
+    chat_session_recipient_active("bob@server.org", "laptop", FALSE);
+    chat_session_recipient_active("steve@server.org", "mobile", FALSE);
+    expect_cons_show_error("Resource conflict for 'profanity'.");
+
+    sv_ev_lost_connection_conflict("profanity", NULL);
+
+    ChatSession* session1 = chat_session_get("bob@server.org");
+    ChatSession* session2 = chat_session_get("steve@server.org");
+    assert_null(session1);
+    assert_null(session2);
+}
+
+void
+sv_ev_lost_connection_conflict__shows__error_message_with_text(void** state)
+{
+    roster_create();
+    roster_process_pending_presence();
+    chat_sessions_init();
+    expect_cons_show_error("Resource conflict for 'laptop': Replaced by new connection.");
+
+    sv_ev_lost_connection_conflict("laptop", "Replaced by new connection");
+}
+
+void
+sv_ev_lost_connection_conflict__shows__error_message_without_resource_with_text(void** state)
+{
+    roster_create();
+    roster_process_pending_presence();
+    chat_sessions_init();
+    expect_cons_show_error("Resource conflict: Replaced by new connection.");
+
+    sv_ev_lost_connection_conflict(NULL, "Replaced by new connection");
+}
+
+void
+sv_ev_lost_connection_conflict__shows__error_message_without_resource_without_text(void** state)
+{
+    roster_create();
+    roster_process_pending_presence();
+    chat_sessions_init();
+    expect_cons_show_error("Resource conflict.");
+
+    sv_ev_lost_connection_conflict(NULL, NULL);
+}
+
+void
+sv_ev_lost_connection_conflict__shows__error_message_with_empty_text(void** state)
+{
+    roster_create();
+    roster_process_pending_presence();
+    chat_sessions_init();
+    expect_cons_show_error("Resource conflict for 'laptop'.");
+
+    sv_ev_lost_connection_conflict("laptop", "");
+}
+
+void
+sv_ev_lost_connection_conflict__shows__error_message_with_trailing_period(void** state)
+{
+    roster_create();
+    roster_process_pending_presence();
+    chat_sessions_init();
+    expect_cons_show_error("Resource conflict for 'laptop': Replaced by new connection.");
+
+    sv_ev_lost_connection_conflict("laptop", "Replaced by new connection.");
+}
+
+void
+sv_ev_failed_login_conflict__shows__error_message_with_text(void** state)
+{
+    expect_cons_show_error("Resource conflict for 'laptop': Replaced by new connection.");
+
+    sv_ev_failed_login_conflict("laptop", "Replaced by new connection");
+}
+
+void
+sv_ev_failed_login_conflict__shows__error_message_without_text(void** state)
+{
+    expect_cons_show_error("Resource conflict for 'laptop'.");
+
+    sv_ev_failed_login_conflict("laptop", NULL);
+}
+
+void
+sv_ev_failed_login_conflict__shows__error_message_without_resource_with_text(void** state)
+{
+    expect_cons_show_error("Resource conflict: Replaced by new connection.");
+
+    sv_ev_failed_login_conflict(NULL, "Replaced by new connection");
+}
+
+void
+sv_ev_failed_login_conflict__shows__error_message_without_resource_without_text(void** state)
+{
+    expect_cons_show_error("Resource conflict.");
+
+    sv_ev_failed_login_conflict(NULL, NULL);
+}
+
+void
+sv_ev_failed_login_conflict__shows__error_message_with_trailing_period(void** state)
+{
+    expect_cons_show_error("Resource conflict for 'laptop': Replaced by new connection.");
+
+    sv_ev_failed_login_conflict("laptop", "Replaced by new connection.");
 }

@@ -1112,7 +1112,7 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
                 }
             }
             if (conn.conn_status == JABBER_CONNECTED)
-                session_lost_connection();
+                session_lost_connection(stream_error);
 
             // login attempt failed
         } else {
@@ -1125,7 +1125,7 @@ _connection_handler(xmpp_conn_t* const xmpp_conn, const xmpp_conn_event_t status
                 return;
             }
             log_debug("Connection handler: Login failed");
-            session_login_failed();
+            session_login_failed(stream_error);
         }
 
         // close stream response from server after disconnect is handled

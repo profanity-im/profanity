@@ -6,5 +6,16 @@ void sv_ev_contact_online__shows__presence_in_console_when_set_all(void** state)
 void sv_ev_contact_online__shows__dnd_presence_in_console_when_set_all(void** state);
 void sv_ev_contact_offline__updates__removes_chat_session(void** state);
 void sv_ev_lost_connection__updates__clears_chat_sessions(void** state);
+void sv_ev_lost_connection_conflict__updates__clears_chat_sessions(void** state);
+void sv_ev_lost_connection_conflict__shows__error_message_with_text(void** state);
+void sv_ev_lost_connection_conflict__shows__error_message_without_resource_with_text(void** state);
+void sv_ev_lost_connection_conflict__shows__error_message_without_resource_without_text(void** state);
+void sv_ev_lost_connection_conflict__shows__error_message_with_empty_text(void** state);
+void sv_ev_lost_connection_conflict__shows__error_message_with_trailing_period(void** state);
+void sv_ev_failed_login_conflict__shows__error_message_with_text(void** state);
+void sv_ev_failed_login_conflict__shows__error_message_without_text(void** state);
+void sv_ev_failed_login_conflict__shows__error_message_without_resource_with_text(void** state);
+void sv_ev_failed_login_conflict__shows__error_message_without_resource_without_text(void** state);
+void sv_ev_failed_login_conflict__shows__error_message_with_trailing_period(void** state);
 
 #endif

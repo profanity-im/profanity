@@ -15,7 +15,9 @@
 
 void sv_ev_login_account_success(const gchar* const account_name, gboolean secured);
 void sv_ev_lost_connection(void);
+void sv_ev_lost_connection_conflict(const gchar* const resource, const gchar* const text);
 void sv_ev_failed_login(void);
+void sv_ev_failed_login_conflict(const gchar* const resource, const gchar* const text);
 void sv_ev_room_invite(jabber_invite_t invite_type,
                        const gchar* const invitor, const gchar* const room,
                        const gchar* const reason, const gchar* const password);
