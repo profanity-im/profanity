@@ -665,7 +665,11 @@ if get_option('tests')
     endif
     
     if build_omemo
-      unittest_sources += files('tests/unittests/omemo/stub_omemo.c')
+      unittest_sources += files(
+        'src/omemo/omemo_db.c',
+        'tests/unittests/omemo/stub_omemo.c',
+        'tests/unittests/omemo/test_omemo_db.c',
+      )
     endif
     
     unittests = executable(

@@ -35,6 +35,9 @@
 #include "tools/test_dbus.h"
 #include "xmpp/test_roster_list.h"
 #include "xmpp/test_capabilities.h"
+#ifdef HAVE_OMEMO
+#include "omemo/test_omemo_db.h"
+#endif
 #include "config/test_preferences.h"
 #include "event/test_server_events.h"
 #include "command/test_cmd_alias.h"
@@ -277,6 +280,16 @@ main(int argc, char* argv[])
         cmocka_unit_test(caps_test__add_and_lookup_by_ver),
         cmocka_unit_test(caps_test__jid_has_feature),
         cmocka_unit_test(caps_test__legacy_migration),
+
+#ifdef HAVE_OMEMO
+        cmocka_unit_test(omemo_db_test__identity),
+        cmocka_unit_test(omemo_db_test__pre_keys),
+        cmocka_unit_test(omemo_db_test__signed_pre_keys),
+        cmocka_unit_test(omemo_db_test__sessions),
+        cmocka_unit_test(omemo_db_test__trust_and_verified),
+        cmocka_unit_test(omemo_db_test__devices),
+        cmocka_unit_test(omemo_db_test__legacy_migration),
+#endif
 
         cmocka_unit_test_setup_teardown(chat_session_get__returns__null_when_no_session,
                                         init_chat_sessions,
