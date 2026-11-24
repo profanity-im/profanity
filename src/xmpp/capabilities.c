@@ -309,7 +309,8 @@ _caps_by_ver(const gchar* const ver)
 
     EntityCapabilities* result = caps_db_get(ver);
     if (result && ver_to_caps) {
-        g_hash_table_insert(ver_to_caps, g_strdup(ver), _caps_copy(result));
+        g_hash_table_insert(ver_to_caps, g_strdup(ver), result);
+        return _caps_copy(result);
     }
 
     return result;
