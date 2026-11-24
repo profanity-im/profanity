@@ -75,6 +75,41 @@ static GHashTable* last_moods = NULL;
 static void _session_free_internals(void);
 static void _session_free_saved_details(void);
 
+static gchar*
+_session_get_resource(void)
+{
+    const Jid* jid = connection_get_jid();
+    if (jid && jid->resourcepart) {
+        return g_strdup(jid->resourcepart);
+    }
+
+    if (saved_account.name) {
+        ProfAccount* account = accounts_get_account(saved_account.name);
+        if (account) {
+            gchar* res = g_strdup(account->resource);
+            if (!res && account->jid) {
+                auto_jid Jid* parsed = jid_create(account->jid);
+                if (parsed && parsed->resourcepart) {
+                    res = g_strdup(parsed->resourcepart);
+                }
+            }
+            account_free(account);
+            if (res) {
+                return res;
+            }
+        }
+    }
+
+    if (saved_details.jid) {
+        auto_jid Jid* parsed = jid_create(saved_details.jid);
+        if (parsed && parsed->resourcepart) {
+            return g_strdup(parsed->resourcepart);
+        }
+    }
+
+    return NULL;
+}
+
 static void
 _session_shutdown(void)
 {
@@ -200,7 +235,7 @@ session_connect_with_details(const gchar* const jid, const gchar* const passwd, 
 void
 session_autoping_fail(void)
 {
-    session_lost_connection();
+    session_lost_connection(NULL);
 }
 
 void
@@ -383,16 +418,28 @@ session_login_success(gboolean secured)
 }
 
 void
-session_login_failed(void)
+session_login_failed(const xmpp_stream_error_t* const stream_error)
 {
-    if (reconnect_timer == NULL) {
-        log_debug("Connection handler: No reconnect timer");
-        sv_ev_failed_login();
+    gboolean is_conflict = (stream_error != NULL && stream_error->type == XMPP_SE_CONFLICT);
+
+    if (is_conflict) {
+        if (reconnect_timer) {
+            g_timer_destroy(reconnect_timer);
+            reconnect_timer = NULL;
+        }
+        auto_gchar gchar* resource = _session_get_resource();
+        sv_ev_failed_login_conflict(resource, stream_error->text);
         _session_free_internals();
     } else {
-        log_debug("Connection handler: Restarting reconnect timer");
-        if (prefs_get_reconnect() != 0) {
-            g_timer_start(reconnect_timer);
+        if (reconnect_timer == NULL) {
+            log_debug("Connection handler: No reconnect timer");
+            sv_ev_failed_login();
+            _session_free_internals();
+        } else {
+            log_debug("Connection handler: Restarting reconnect timer");
+            if (prefs_get_reconnect() != 0) {
+                g_timer_start(reconnect_timer);
+            }
         }
     }
 
@@ -402,15 +449,27 @@ session_login_failed(void)
 }
 
 void
-session_lost_connection(void)
+session_lost_connection(const xmpp_stream_error_t* const stream_error)
 {
-    /* this callback also clears all cached data */
-    sv_ev_lost_connection();
-    if (prefs_get_reconnect() != 0) {
-        assert(reconnect_timer == NULL);
-        reconnect_timer = g_timer_new();
-    } else {
+    gboolean is_conflict = (stream_error != NULL && stream_error->type == XMPP_SE_CONFLICT);
+
+    if (is_conflict) {
+        if (reconnect_timer) {
+            g_timer_destroy(reconnect_timer);
+            reconnect_timer = NULL;
+        }
+        auto_gchar gchar* resource = _session_get_resource();
+        sv_ev_lost_connection_conflict(resource, stream_error->text);
         _session_free_internals();
+    } else {
+        /* this callback also clears all cached data */
+        sv_ev_lost_connection();
+        if (prefs_get_reconnect() != 0) {
+            assert(reconnect_timer == NULL);
+            reconnect_timer = g_timer_new();
+        } else {
+            _session_free_internals();
+        }
     }
 }
 

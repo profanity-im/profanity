@@ -11,12 +11,13 @@
 #define XMPP_SESSION_H
 
 #include <glib.h>
+#include <strophe.h>
 
 #include "common.h"
 
 void session_login_success(gboolean secured);
-void session_login_failed(void);
-void session_lost_connection(void);
+void session_login_failed(const xmpp_stream_error_t* const stream_error);
+void session_lost_connection(const xmpp_stream_error_t* const stream_error);
 void session_autoping_fail(void);
 
 void session_init_activity(void);

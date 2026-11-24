@@ -186,11 +186,9 @@ sv_ev_connection_features_received(void)
     }
 }
 
-void
-sv_ev_lost_connection(void)
+static void
+_lost_connection_cleanup(void)
 {
-    cons_show_error("Lost connection.");
-
 #ifdef HAVE_LIBOTR
     GSList* recipients = wins_get_chat_recipients();
     GSList* curr = recipients;
@@ -212,10 +210,60 @@ sv_ev_lost_connection(void)
 }
 
 void
+sv_ev_lost_connection(void)
+{
+    cons_show_error("Lost connection.");
+    _lost_connection_cleanup();
+}
+
+static void
+_show_conflict_error(const gchar* const resource, const gchar* const text)
+{
+    gboolean has_text = (text != NULL && text[0] != '\0');
+    gboolean has_resource = (resource != NULL && resource[0] != '\0');
+
+    if (has_text && has_resource) {
+        if (g_str_has_suffix(text, ".")) {
+            cons_show_error("Resource conflict for '%s': %s", resource, text);
+        } else {
+            cons_show_error("Resource conflict for '%s': %s.", resource, text);
+        }
+        log_warning("Resource conflict for '%s': %s", resource, text);
+    } else if (has_resource) {
+        cons_show_error("Resource conflict for '%s'.", resource);
+        log_warning("Resource conflict for '%s'", resource);
+    } else if (has_text) {
+        if (g_str_has_suffix(text, ".")) {
+            cons_show_error("Resource conflict: %s", text);
+        } else {
+            cons_show_error("Resource conflict: %s.", text);
+        }
+        log_warning("Resource conflict: %s", text);
+    } else {
+        cons_show_error("Resource conflict.");
+        log_warning("Resource conflict");
+    }
+}
+
+void
+sv_ev_lost_connection_conflict(const gchar* const resource, const gchar* const text)
+{
+    _show_conflict_error(resource, text);
+    _lost_connection_cleanup();
+}
+
+void
 sv_ev_failed_login(void)
 {
     cons_show_error("Login failed.");
     log_info("Login failed");
+    tlscerts_clear_current();
+}
+
+void
+sv_ev_failed_login_conflict(const gchar* const resource, const gchar* const text)
+{
+    _show_conflict_error(resource, text);
     tlscerts_clear_current();
 }
 
