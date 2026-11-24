@@ -141,7 +141,8 @@ files_file_in_account_data_path(const gchar* const specific_dir, const gchar* co
         g_path_buf_push(&pbuf, account_dir);
     }
 
-    if (!create_dir(g_path_buf_to_path(&pbuf))) {
+    auto_gchar gchar* dir_path = g_path_buf_to_path(&pbuf);
+    if (!create_dir(dir_path)) {
         return NULL;
     }
 
