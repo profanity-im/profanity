@@ -53,9 +53,6 @@
 static void _generate_pre_keys(int count);
 static void _generate_signed_pre_key(void);
 static gboolean _load_identity(void);
-static void _load_trust(void);
-static void _load_sessions(void);
-static void _load_known_devices(void);
 static void _lock(void* user_data);
 static void _unlock(void* user_data);
 static void _omemo_log(int level, const char* message, size_t len, void* user_data);
@@ -133,9 +130,9 @@ omemo_init(void)
 static gboolean
 _omemo_finalize_identity_load(void)
 {
-    _load_trust();
-    _load_sessions();
-    _load_known_devices();
+    omemo_db_load_all_trust(omemo_ctx.identity_key_store.trusted);
+    omemo_db_load_all_sessions(omemo_ctx.session_store);
+    omemo_db_load_all_known_devices(omemo_ctx.known_devices, omemo_static_data.fingerprint_ac);
 
     omemo_devicelist_subscribe();
 
@@ -1815,24 +1812,6 @@ _load_identity(void)
     omemo_start_sessions();
 
     return TRUE;
-}
-
-static void
-_load_trust(void)
-{
-    omemo_db_load_all_trust(omemo_ctx.identity_key_store.trusted);
-}
-
-static void
-_load_sessions(void)
-{
-    omemo_db_load_all_sessions(omemo_ctx.session_store);
-}
-
-static void
-_load_known_devices(void)
-{
-    omemo_db_load_all_known_devices(omemo_ctx.known_devices, omemo_static_data.fingerprint_ac);
 }
 
 static void
