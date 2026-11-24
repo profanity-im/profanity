@@ -656,16 +656,20 @@ omemo_db_delete_session(const char* name, uint32_t device_id)
     return prof_db_step_done(omemo_db, stmt_delete_session);
 }
 
-gboolean
+gint
 omemo_db_delete_all_sessions(const char* name)
 {
     if (!omemo_db || !stmt_delete_all_sessions || !name) {
-        return FALSE;
+        return -1;
     }
 
     sqlite3_bind_text(stmt_delete_all_sessions, 1, name, -1, SQLITE_STATIC);
 
-    return prof_db_step_done(omemo_db, stmt_delete_all_sessions);
+    if (!prof_db_step_done(omemo_db, stmt_delete_all_sessions)) {
+        return -1;
+    }
+
+    return (gint)sqlite3_changes(omemo_db);
 }
 
 void

@@ -41,7 +41,7 @@ gint omemo_db_load_all_signed_pre_keys(GHashTable* signed_pre_key_store, uint32_
 
 gboolean omemo_db_save_session(const char* name, uint32_t device_id, const uint8_t* record, size_t record_len);
 gboolean omemo_db_delete_session(const char* name, uint32_t device_id);
-gboolean omemo_db_delete_all_sessions(const char* name);
+gint omemo_db_delete_all_sessions(const char* name);
 void omemo_db_load_all_sessions(GHashTable* session_store);
 
 gboolean omemo_db_save_trust(const char* name, uint32_t device_id, const uint8_t* key, size_t key_len);

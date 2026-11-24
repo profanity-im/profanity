@@ -174,15 +174,18 @@ delete_all_sessions(const char* name, size_t name_len, void* user_data)
     GHashTable* device_store = NULL;
 
     device_store = g_hash_table_lookup(session_store, name);
-    if (!device_store) {
-        return SG_SUCCESS;
+    int mem_count = 0;
+    if (device_store) {
+        mem_count = (int)g_hash_table_size(device_store);
+        g_hash_table_remove(session_store, name);
     }
 
-    g_hash_table_remove(session_store, name);
+    gint db_count = omemo_db_delete_all_sessions(name);
+    if (db_count < 0) {
+        return SG_ERR_UNKNOWN;
+    }
 
-    omemo_db_delete_all_sessions(name);
-
-    return SG_SUCCESS;
+    return (db_count > mem_count) ? (int)db_count : mem_count;
 }
 
 int

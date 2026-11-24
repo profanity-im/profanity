@@ -245,7 +245,8 @@ omemo_db_test__sessions(void** state)
     assert_non_null(g_hash_table_lookup(alice_devs, GINT_TO_POINTER(200)));
     g_hash_table_destroy(session_store);
 
-    assert_true(omemo_db_delete_all_sessions("alice@example.org"));
+    assert_int_equal(omemo_db_delete_all_sessions("alice@example.org"), 1);
+    assert_int_equal(omemo_db_delete_all_sessions("alice@example.org"), 0);
 
     session_store = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)g_hash_table_destroy);
     omemo_db_load_all_sessions(session_store);
