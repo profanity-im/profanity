@@ -1,5 +1,5 @@
 /*
- * database.h
+ * chatlog_db.h
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2020 - 2026 Michael Vetter <jubalh@iodoru.org>
@@ -7,8 +7,8 @@
  * SPDX-License-Identifier: GPL-3.0-or-later WITH OpenSSL-exception
  */
 
-#ifndef DATABASE_H
-#define DATABASE_H
+#ifndef DATABASE_CHATLOG_DB_H
+#define DATABASE_CHATLOG_DB_H
 
 #include <glib.h>
 #include "config/account.h"
@@ -31,4 +31,4 @@ gboolean log_database_update_archive_id(const prof_msg_type_t type, const gchar*
 char* log_database_get_decrypted_message(const prof_msg_type_t type, const char* const from_jid, const char* const to_jid, const gchar* const stanza_id, const gchar* const archive_id);
 void log_database_close(void);
 
-#endif // DATABASE_H
+#endif // DATABASE_CHATLOG_DB_H

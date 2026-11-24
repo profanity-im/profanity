@@ -16,7 +16,7 @@
 #include "xmpp/muc.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/vcard_funcs.h"
-#include "database.h"
+#include "database/chatlog_db.h"
 #include "tools/bookmark_ignore.h"
 #include "event/server_events.h"
 #include "event/common.h"

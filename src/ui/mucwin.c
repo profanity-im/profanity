@@ -11,7 +11,7 @@
 #include "config.h"
 
 #include "ui.h"
-#include "database.h"
+#include "database/chatlog_db.h"
 
 #include <string.h>
 #include <assert.h>

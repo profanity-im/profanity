@@ -1,5 +1,5 @@
 /*
- * database.c
+ * chatlog_db.c
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2020 - 2026 Michael Vetter <jubalh@iodoru.org>
@@ -21,7 +21,8 @@
 #include "log.h"
 #include "common.h"
 #include "config/files.h"
-#include "database.h"
+#include "database/db.h"
+#include "database/chatlog_db.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "xmpp/xmpp.h"
@@ -66,25 +67,14 @@ _get_db_filename(ProfAccount* account)
 gboolean
 log_database_init(ProfAccount* account)
 {
-    int ret = sqlite3_initialize();
-    if (ret != SQLITE_OK) {
-        log_error("Error initializing SQLite database: %d", ret);
-        return FALSE;
-    }
-
     auto_gchar gchar* filename = _get_db_filename(account);
     if (!filename) {
         return FALSE;
     }
 
-    ret = sqlite3_open(filename, &g_chatlog_database);
-    if (ret != SQLITE_OK) {
-        const char* err_msg = sqlite3_errmsg(g_chatlog_database);
-        log_error("Error opening SQLite database: %s", err_msg);
+    if (!prof_db_open(filename, &g_chatlog_database)) {
         return FALSE;
     }
-
-    sqlite3_exec(g_chatlog_database, "PRAGMA journal_mode=WAL;", NULL, NULL, NULL);
 
     char* err_msg;
 
@@ -207,10 +197,7 @@ out:
 void
 log_database_close(void)
 {
-    if (g_chatlog_database) {
-        sqlite3_close(g_chatlog_database);
-        g_chatlog_database = NULL;
-    }
+    prof_db_close(&g_chatlog_database);
 }
 
 gboolean

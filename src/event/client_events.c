@@ -15,7 +15,7 @@
 
 #include "log.h"
 #include "chatlog.h"
-#include "database.h"
+#include "database/chatlog_db.h"
 #include "config/preferences.h"
 #include "event/common.h"
 #include "event/client_events.h"

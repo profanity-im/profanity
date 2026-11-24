@@ -363,7 +363,7 @@ core_sources = files(
   'src/chatlog.c',
   'src/database/db.c',
   'src/database/caps_db.c',
-  'src/database.c',
+  'src/database/chatlog_db.c',
   'src/profanity.c',
   'src/xmpp/chat_session.c',
   'src/xmpp/muc.c',

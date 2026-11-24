@@ -18,7 +18,7 @@
 #include "profanity.h"
 #include "log.h"
 #include "chatlog.h"
-#include "database.h"
+#include "database/chatlog_db.h"
 #include "config/preferences.h"
 #include "config/tlscerts.h"
 #include "config/account.h"

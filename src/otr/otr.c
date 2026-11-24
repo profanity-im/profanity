@@ -17,7 +17,7 @@
 
 #include "log.h"
 #include "chatlog.h"
-#include "database.h"
+#include "database/chatlog_db.h"
 #include "config/preferences.h"
 #include "config/files.h"
 #include "otr/otr.h"
