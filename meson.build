@@ -467,6 +467,7 @@ if build_omemo
     'src/omemo/omemo.c',
     'src/omemo/crypto.c',
     'src/omemo/store.c',
+    'src/omemo/omemo_db.c',
     'src/xmpp/omemo.c',
     'src/tools/aesgcm_download.c',
   )

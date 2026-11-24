@@ -3,6 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2019 Paul Fariello <paul@fariello.eu>
+ * Copyright (C) 2026 Michael Vetter <jubalh@iodoru.org>
  *
  * SPDX-License-Identifier: GPL-3.0-or-later WITH OpenSSL-exception
  */
@@ -17,6 +18,7 @@
 
 #include "log.h"
 #include "omemo/omemo.h"
+#include "omemo/omemo_db.h"
 #include "omemo/store.h"
 
 GHashTable*
@@ -122,11 +124,7 @@ store_session(const signal_protocol_address* address,
     signal_buffer* buffer = signal_buffer_create(record, record_len);
     g_hash_table_insert(device_store, GINT_TO_POINTER(address->device_id), buffer);
 
-    auto_gchar gchar* record_b64 = g_base64_encode(record, record_len);
-    auto_gchar gchar* device_id = g_strdup_printf("%d", address->device_id);
-    g_key_file_set_string(omemo_sessions_keyfile(), address->name, device_id, record_b64);
-
-    omemo_sessions_keyfile_save();
+    omemo_db_save_session(address->name, address->device_id, record, record_len);
 
     return SG_SUCCESS;
 }
@@ -164,9 +162,7 @@ delete_session(const signal_protocol_address* address, void* user_data)
 
     g_hash_table_remove(device_store, GINT_TO_POINTER(address->device_id));
 
-    auto_gchar gchar* device_id_str = g_strdup_printf("%d", address->device_id);
-    g_key_file_remove_key(omemo_sessions_keyfile(), address->name, device_id_str, NULL);
-    omemo_sessions_keyfile_save();
+    omemo_db_delete_session(address->name, address->device_id);
 
     return SG_SUCCESS;
 }
@@ -179,13 +175,14 @@ delete_all_sessions(const char* name, size_t name_len, void* user_data)
 
     device_store = g_hash_table_lookup(session_store, name);
     if (!device_store) {
-        log_debug("[OMEMO][STORE] No device => no delete");
         return SG_SUCCESS;
     }
 
-    guint len = g_hash_table_size(device_store);
-    g_hash_table_remove_all(device_store);
-    return len;
+    g_hash_table_remove(session_store, name);
+
+    omemo_db_delete_all_sessions(name);
+
+    return SG_SUCCESS;
 }
 
 int
@@ -195,7 +192,7 @@ load_pre_key(signal_buffer** record, uint32_t pre_key_id, void* user_data)
     GHashTable* pre_key_store = (GHashTable*)user_data;
 
     original = g_hash_table_lookup(pre_key_store, GINT_TO_POINTER(pre_key_id));
-    if (original == NULL) {
+    if (!original) {
         log_error("[OMEMO][STORE] SG_ERR_INVALID_KEY_ID");
         return SG_ERR_INVALID_KEY_ID;
     }
@@ -213,12 +210,7 @@ store_pre_key(uint32_t pre_key_id, uint8_t* record, size_t record_len,
     signal_buffer* buffer = signal_buffer_create(record, record_len);
     g_hash_table_insert(pre_key_store, GINT_TO_POINTER(pre_key_id), buffer);
 
-    /* Long term storage */
-    auto_gchar gchar* pre_key_id_str = g_strdup_printf("%d", pre_key_id);
-    auto_gchar gchar* record_b64 = g_base64_encode(record, record_len);
-    g_key_file_set_string(omemo_identity_keyfile(), OMEMO_STORE_GROUP_PREKEYS, pre_key_id_str, record_b64);
-
-    omemo_identity_keyfile_save();
+    omemo_db_save_pre_key(pre_key_id, record, record_len);
 
     return SG_SUCCESS;
 }
@@ -238,11 +230,7 @@ remove_pre_key(uint32_t pre_key_id, void* user_data)
 
     int ret = g_hash_table_remove(pre_key_store, GINT_TO_POINTER(pre_key_id));
 
-    /* Long term storage */
-    auto_gchar gchar* pre_key_id_str = g_strdup_printf("%d", pre_key_id);
-    g_key_file_remove_key(omemo_identity_keyfile(), OMEMO_STORE_GROUP_PREKEYS, pre_key_id_str, NULL);
-
-    omemo_identity_keyfile_save();
+    omemo_db_remove_pre_key(pre_key_id);
 
     if (ret > 0) {
         return SG_SUCCESS;
@@ -278,12 +266,7 @@ store_signed_pre_key(uint32_t signed_pre_key_id, uint8_t* record,
     signal_buffer* buffer = signal_buffer_create(record, record_len);
     g_hash_table_insert(signed_pre_key_store, GINT_TO_POINTER(signed_pre_key_id), buffer);
 
-    /* Long term storage */
-    auto_gchar gchar* signed_pre_key_id_str = g_strdup_printf("%d", signed_pre_key_id);
-    auto_gchar gchar* record_b64 = g_base64_encode(record, record_len);
-    g_key_file_set_string(omemo_identity_keyfile(), OMEMO_STORE_GROUP_SIGNED_PREKEYS, signed_pre_key_id_str, record_b64);
-
-    omemo_identity_keyfile_save();
+    omemo_db_save_signed_pre_key(signed_pre_key_id, record, record_len);
 
     return SG_SUCCESS;
 }
@@ -303,11 +286,7 @@ remove_signed_pre_key(uint32_t signed_pre_key_id, void* user_data)
 
     int ret = g_hash_table_remove(signed_pre_key_store, GINT_TO_POINTER(signed_pre_key_id));
 
-    /* Long term storage */
-    auto_gchar gchar* signed_pre_key_id_str = g_strdup_printf("%d", signed_pre_key_id);
-    g_key_file_remove_key(omemo_identity_keyfile(), OMEMO_STORE_GROUP_PREKEYS, signed_pre_key_id_str, NULL);
-
-    omemo_identity_keyfile_save();
+    omemo_db_remove_signed_pre_key(signed_pre_key_id);
 
     return ret;
 }
@@ -362,12 +341,7 @@ save_identity(const signal_protocol_address* address, uint8_t* key_data,
     }
     g_hash_table_insert(trusted, GINT_TO_POINTER(address->device_id), buffer);
 
-    /* Long term storage */
-    auto_gchar gchar* key_b64 = g_base64_encode(key_data, key_len);
-    auto_gchar gchar* device_id = g_strdup_printf("%d", address->device_id);
-    g_key_file_set_string(omemo_trust_keyfile(), address->name, device_id, key_b64);
-
-    omemo_trust_keyfile_save();
+    omemo_db_save_trust(address->name, address->device_id, key_data, key_len);
 
     return SG_SUCCESS;
 }
