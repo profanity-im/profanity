@@ -11,11 +11,13 @@
 #include <glib/gstdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sqlite3.h>
 
 #include "common.h"
 #include "helpers.h"
 #include "config/account.h"
 #include "config/files.h"
+#include "database/db.h"
 #include "omemo/omemo.h"
 #include "omemo/store.h"
 #include "omemo/omemo_db.h"
@@ -102,6 +104,19 @@ omemo_db_test__identity(void** state)
 
     g_free(loaded_pub);
     g_free(loaded_priv);
+
+    // Overwrite identity row with empty BLOB to test corruption handling
+    sqlite3* raw_db = NULL;
+    auto_gchar gchar* db_path = files_file_in_account_data_path(DIR_DATABASE, test_account.jid, "omemo.db");
+    assert_true(prof_db_open(db_path, &raw_db));
+    assert_true(prof_db_exec(raw_db, "UPDATE omemo_identity SET public_key = X'' WHERE device_id = 42;"));
+    prof_db_close(&raw_db);
+
+    omemo_db_close();
+    assert_true(omemo_db_init(&test_account));
+    loaded_pub = NULL;
+    loaded_priv = NULL;
+    assert_false(omemo_db_load_identity(&dev_id, &reg_id, &loaded_pub, &loaded_pub_len, &loaded_priv, &loaded_priv_len));
 
     omemo_db_close();
     _clean_omemo_files();

@@ -482,6 +482,21 @@ omemo_db_load_identity(uint32_t* device_id, uint32_t* registration_id,
     int rc = sqlite3_step(stmt_load_identity);
 
     if (rc == SQLITE_ROW) {
+        const void* pub_blob = sqlite3_column_blob(stmt_load_identity, 2);
+        int pub_bytes = sqlite3_column_bytes(stmt_load_identity, 2);
+        const void* priv_blob = sqlite3_column_blob(stmt_load_identity, 3);
+        int priv_bytes = sqlite3_column_bytes(stmt_load_identity, 3);
+
+        if (pub_key && (!pub_blob || pub_bytes <= 0)) {
+            sqlite3_reset(stmt_load_identity);
+            return FALSE;
+        }
+
+        if (priv_key && (!priv_blob || priv_bytes <= 0)) {
+            sqlite3_reset(stmt_load_identity);
+            return FALSE;
+        }
+
         if (device_id) {
             *device_id = (uint32_t)sqlite3_column_int64(stmt_load_identity, 0);
         }
@@ -489,16 +504,12 @@ omemo_db_load_identity(uint32_t* device_id, uint32_t* registration_id,
             *registration_id = (uint32_t)sqlite3_column_int64(stmt_load_identity, 1);
         }
 
-        const void* pub_blob = sqlite3_column_blob(stmt_load_identity, 2);
-        int pub_bytes = sqlite3_column_bytes(stmt_load_identity, 2);
-        if (pub_key && pub_key_len && pub_blob && pub_bytes > 0) {
+        if (pub_key && pub_key_len) {
             *pub_key = g_memdup2(pub_blob, pub_bytes);
             *pub_key_len = (size_t)pub_bytes;
         }
 
-        const void* priv_blob = sqlite3_column_blob(stmt_load_identity, 3);
-        int priv_bytes = sqlite3_column_bytes(stmt_load_identity, 3);
-        if (priv_key && priv_key_len && priv_blob && priv_bytes > 0) {
+        if (priv_key && priv_key_len) {
             *priv_key = g_memdup2(priv_blob, priv_bytes);
             *priv_key_len = (size_t)priv_bytes;
         }
