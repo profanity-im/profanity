@@ -38,6 +38,7 @@
 #ifdef HAVE_OMEMO
 #include "omemo/test_omemo_db.h"
 #endif
+#include "database/test_db.h"
 #include "config/test_preferences.h"
 #include "event/test_server_events.h"
 #include "command/test_cmd_alias.h"
@@ -290,6 +291,10 @@ main(int argc, char* argv[])
         cmocka_unit_test(omemo_db_test__devices),
         cmocka_unit_test(omemo_db_test__legacy_migration),
 #endif
+
+        cmocka_unit_test(test_db__open_and_close),
+        cmocka_unit_test(test_db__exec_and_prepare),
+        cmocka_unit_test(test_db__transactions),
 
         cmocka_unit_test_setup_teardown(chat_session_get__returns__null_when_no_session,
                                         init_chat_sessions,
