@@ -151,7 +151,7 @@ caps_test__legacy_migration(void** state)
 
     // Expect the notification displayed in console when migration completes
     auto_gchar gchar* expected_output = g_strdup_printf(
-        "Capabilities cache migrated to SQLite database. Legacy file renamed to %s; you may delete it if you wish.",
+        "Capabilities cache migrated to SQLite database. Legacy file renamed to %s.",
         migrated_path);
     expect_string(cons_show, output, expected_output);
 
