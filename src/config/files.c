@@ -32,7 +32,7 @@ files_create_directories(void)
         }
     }
 
-    const gchar* const data_dirs[] = { DIR_CHATLOGS, DIR_LOGS, DIR_PLUGINS, NULL };
+    const gchar* const data_dirs[] = { DIR_CHATLOGS, DIR_LOGS, DIR_PLUGINS, DIR_DATABASE, NULL };
     for (int i = 0; data_dirs[i]; i++) {
         auto_gchar gchar* dir = files_get_data_path(data_dirs[i]);
         if (!create_dir(dir)) {
