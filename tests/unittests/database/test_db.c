@@ -7,6 +7,7 @@
  */
 
 #include "prof_cmocka.h"
+#include <sys/stat.h>
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <stdlib.h>
@@ -50,6 +51,11 @@ test_db__open_and_close(void** state)
     sqlite3* db = NULL;
     assert_true(prof_db_open(db_file, &db));
     assert_non_null(db);
+
+    // Verify file permissions are 0600 (S_IRUSR | S_IWUSR)
+    GStatBuf st;
+    assert_int_equal(g_stat(db_file, &st), 0);
+    assert_int_equal(st.st_mode & 0777, S_IRUSR | S_IWUSR);
 
     // Verify WAL mode was enabled
     sqlite3_stmt* stmt = NULL;

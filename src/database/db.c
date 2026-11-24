@@ -9,9 +9,12 @@
 
 #include "config.h"
 
+#include <sys/stat.h>
 #include <sqlite3.h>
 #include <glib.h>
+#include <glib/gstdio.h>
 
+#include "common.h"
 #include "log.h"
 #include "database/db.h"
 
@@ -38,6 +41,19 @@ prof_db_open(const gchar* path, sqlite3** db)
             *db = NULL;
         }
         return FALSE;
+    }
+
+    // Restrict database file permissions to owner read/write (0600)
+    g_chmod(path, S_IRUSR | S_IWUSR);
+
+    auto_gchar gchar* wal_path = g_strdup_printf("%s-wal", path);
+    if (g_file_test(wal_path, G_FILE_TEST_EXISTS)) {
+        g_chmod(wal_path, S_IRUSR | S_IWUSR);
+    }
+
+    auto_gchar gchar* shm_path = g_strdup_printf("%s-shm", path);
+    if (g_file_test(shm_path, G_FILE_TEST_EXISTS)) {
+        g_chmod(shm_path, S_IRUSR | S_IWUSR);
     }
 
     sqlite3_busy_timeout(*db, PROF_DB_BUSY_TIMEOUT_MS);
