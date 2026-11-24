@@ -207,7 +207,6 @@ log_database_close(void)
 {
     if (g_chatlog_database) {
         sqlite3_close(g_chatlog_database);
-        sqlite3_shutdown();
         g_chatlog_database = NULL;
     }
 }
