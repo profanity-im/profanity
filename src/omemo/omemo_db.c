@@ -30,6 +30,7 @@ static sqlite3* omemo_db = NULL;
 
 static sqlite3_stmt* stmt_save_identity;
 static sqlite3_stmt* stmt_load_identity;
+static sqlite3_stmt* stmt_has_identity;
 
 static sqlite3_stmt* stmt_save_pre_key;
 static sqlite3_stmt* stmt_remove_pre_key;
@@ -105,6 +106,7 @@ _prepare_all_stmts(void)
 
     ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_identity (device_id, registration_id, public_key, private_key) VALUES (?, ?, ?, ?);", &stmt_save_identity);
     ok &= prof_db_prepare(omemo_db, "SELECT device_id, registration_id, public_key, private_key FROM omemo_identity LIMIT 1;", &stmt_load_identity);
+    ok &= prof_db_prepare(omemo_db, "SELECT 1 FROM omemo_identity LIMIT 1;", &stmt_has_identity);
 
     ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_pre_keys (pre_key_id, record) VALUES (?, ?);", &stmt_save_pre_key);
     ok &= prof_db_prepare(omemo_db, "DELETE FROM omemo_pre_keys WHERE pre_key_id = ?;", &stmt_remove_pre_key);
@@ -172,6 +174,7 @@ omemo_db_close(void)
 {
     prof_db_finalize(&stmt_save_identity);
     prof_db_finalize(&stmt_load_identity);
+    prof_db_finalize(&stmt_has_identity);
 
     prof_db_finalize(&stmt_save_pre_key);
     prof_db_finalize(&stmt_remove_pre_key);
@@ -440,12 +443,12 @@ omemo_db_migrate_legacy_files(const ProfAccount* account)
 gboolean
 omemo_db_has_identity(void)
 {
-    if (!omemo_db || !stmt_load_identity) {
+    if (!omemo_db || !stmt_has_identity) {
         return FALSE;
     }
 
-    int rc = sqlite3_step(stmt_load_identity);
-    sqlite3_reset(stmt_load_identity);
+    int rc = sqlite3_step(stmt_has_identity);
+    sqlite3_reset(stmt_has_identity);
 
     return (rc == SQLITE_ROW);
 }
