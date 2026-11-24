@@ -21,6 +21,7 @@
 #include "log.h"
 #include "ui/ui.h"
 #include "config/files.h"
+#include "database/db.h"
 #include "omemo/omemo.h"
 #include "omemo/store.h"
 #include "omemo/omemo_db.h"
@@ -52,16 +53,6 @@ static sqlite3_stmt* stmt_remove_verified;
 
 static sqlite3_stmt* stmt_save_device;
 static sqlite3_stmt* stmt_load_all_devices;
-
-static gboolean
-_prepare_stmt(sqlite3_stmt** stmt, const char* sql)
-{
-    if (sqlite3_prepare_v2(omemo_db, sql, -1, stmt, NULL) != SQLITE_OK) {
-        log_error("[OMEMO][DB] Error preparing statement: %s (%s)", sqlite3_errmsg(omemo_db), sql);
-        return FALSE;
-    }
-    return TRUE;
-}
 
 static gboolean
 _init_tables(void)
@@ -104,14 +95,7 @@ _init_tables(void)
                          "CREATE TABLE IF NOT EXISTS DbVersion ("
                          "version INTEGER PRIMARY KEY);";
 
-    char* err_msg = NULL;
-    if (sqlite3_exec(omemo_db, schema, NULL, NULL, &err_msg) != SQLITE_OK) {
-        log_error("[OMEMO][DB] Error creating schema: %s", err_msg);
-        sqlite3_free(err_msg);
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_exec(omemo_db, schema);
 }
 
 static gboolean
@@ -119,42 +103,33 @@ _prepare_all_stmts(void)
 {
     gboolean ok = TRUE;
 
-    ok &= _prepare_stmt(&stmt_save_identity, "INSERT OR REPLACE INTO omemo_identity (device_id, registration_id, public_key, private_key) VALUES (?, ?, ?, ?);");
-    ok &= _prepare_stmt(&stmt_load_identity, "SELECT device_id, registration_id, public_key, private_key FROM omemo_identity LIMIT 1;");
+    ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_identity (device_id, registration_id, public_key, private_key) VALUES (?, ?, ?, ?);", &stmt_save_identity);
+    ok &= prof_db_prepare(omemo_db, "SELECT device_id, registration_id, public_key, private_key FROM omemo_identity LIMIT 1;", &stmt_load_identity);
 
-    ok &= _prepare_stmt(&stmt_save_pre_key, "INSERT OR REPLACE INTO omemo_pre_keys (pre_key_id, record) VALUES (?, ?);");
-    ok &= _prepare_stmt(&stmt_remove_pre_key, "DELETE FROM omemo_pre_keys WHERE pre_key_id = ?;");
-    ok &= _prepare_stmt(&stmt_load_all_pre_keys, "SELECT pre_key_id, record FROM omemo_pre_keys;");
+    ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_pre_keys (pre_key_id, record) VALUES (?, ?);", &stmt_save_pre_key);
+    ok &= prof_db_prepare(omemo_db, "DELETE FROM omemo_pre_keys WHERE pre_key_id = ?;", &stmt_remove_pre_key);
+    ok &= prof_db_prepare(omemo_db, "SELECT pre_key_id, record FROM omemo_pre_keys;", &stmt_load_all_pre_keys);
 
-    ok &= _prepare_stmt(&stmt_save_signed_pre_key, "INSERT OR REPLACE INTO omemo_signed_pre_keys (signed_pre_key_id, record) VALUES (?, ?);");
-    ok &= _prepare_stmt(&stmt_remove_signed_pre_key, "DELETE FROM omemo_signed_pre_keys WHERE signed_pre_key_id = ?;");
-    ok &= _prepare_stmt(&stmt_load_all_signed_pre_keys, "SELECT signed_pre_key_id, record FROM omemo_signed_pre_keys;");
+    ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_signed_pre_keys (signed_pre_key_id, record) VALUES (?, ?);", &stmt_save_signed_pre_key);
+    ok &= prof_db_prepare(omemo_db, "DELETE FROM omemo_signed_pre_keys WHERE signed_pre_key_id = ?;", &stmt_remove_signed_pre_key);
+    ok &= prof_db_prepare(omemo_db, "SELECT signed_pre_key_id, record FROM omemo_signed_pre_keys;", &stmt_load_all_signed_pre_keys);
 
-    ok &= _prepare_stmt(&stmt_save_session, "INSERT OR REPLACE INTO omemo_sessions (barejid, device_id, record) VALUES (?, ?, ?);");
-    ok &= _prepare_stmt(&stmt_delete_session, "DELETE FROM omemo_sessions WHERE barejid = ? AND device_id = ?;");
-    ok &= _prepare_stmt(&stmt_delete_all_sessions, "DELETE FROM omemo_sessions WHERE barejid = ?;");
-    ok &= _prepare_stmt(&stmt_load_all_sessions, "SELECT barejid, device_id, record FROM omemo_sessions;");
+    ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_sessions (barejid, device_id, record) VALUES (?, ?, ?);", &stmt_save_session);
+    ok &= prof_db_prepare(omemo_db, "DELETE FROM omemo_sessions WHERE barejid = ? AND device_id = ?;", &stmt_delete_session);
+    ok &= prof_db_prepare(omemo_db, "DELETE FROM omemo_sessions WHERE barejid = ?;", &stmt_delete_all_sessions);
+    ok &= prof_db_prepare(omemo_db, "SELECT barejid, device_id, record FROM omemo_sessions;", &stmt_load_all_sessions);
 
-    ok &= _prepare_stmt(&stmt_save_trust, "INSERT OR REPLACE INTO omemo_trust (barejid, device_id, identity_key) VALUES (?, ?, ?);");
-    ok &= _prepare_stmt(&stmt_remove_trust, "DELETE FROM omemo_trust WHERE barejid = ? AND device_id = ?;");
-    ok &= _prepare_stmt(&stmt_load_all_trust, "SELECT barejid, device_id, identity_key FROM omemo_trust;");
-    ok &= _prepare_stmt(&stmt_is_verified, "SELECT 1 FROM omemo_verified WHERE barejid = ? LIMIT 1;");
-    ok &= _prepare_stmt(&stmt_set_verified, "INSERT OR REPLACE INTO omemo_verified (barejid) VALUES (?);");
-    ok &= _prepare_stmt(&stmt_remove_verified, "DELETE FROM omemo_verified WHERE barejid = ?;");
+    ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_trust (barejid, device_id, identity_key) VALUES (?, ?, ?);", &stmt_save_trust);
+    ok &= prof_db_prepare(omemo_db, "DELETE FROM omemo_trust WHERE barejid = ? AND device_id = ?;", &stmt_remove_trust);
+    ok &= prof_db_prepare(omemo_db, "SELECT barejid, device_id, identity_key FROM omemo_trust;", &stmt_load_all_trust);
+    ok &= prof_db_prepare(omemo_db, "SELECT 1 FROM omemo_verified WHERE barejid = ? LIMIT 1;", &stmt_is_verified);
+    ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_verified (barejid) VALUES (?);", &stmt_set_verified);
+    ok &= prof_db_prepare(omemo_db, "DELETE FROM omemo_verified WHERE barejid = ?;", &stmt_remove_verified);
 
-    ok &= _prepare_stmt(&stmt_save_device, "INSERT OR REPLACE INTO omemo_known_devices (barejid, device_id, fingerprint) VALUES (?, ?, ?);");
-    ok &= _prepare_stmt(&stmt_load_all_devices, "SELECT barejid, device_id, fingerprint FROM omemo_known_devices;");
+    ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_known_devices (barejid, device_id, fingerprint) VALUES (?, ?, ?);", &stmt_save_device);
+    ok &= prof_db_prepare(omemo_db, "SELECT barejid, device_id, fingerprint FROM omemo_known_devices;", &stmt_load_all_devices);
 
     return ok;
-}
-
-static void
-_finalize_stmt(sqlite3_stmt** stmt)
-{
-    if (stmt && *stmt) {
-        sqlite3_finalize(*stmt);
-        *stmt = NULL;
-    }
 }
 
 gboolean
@@ -169,25 +144,15 @@ omemo_db_init(const ProfAccount* account)
         return FALSE;
     }
 
-    int ret = sqlite3_initialize();
-    if (ret != SQLITE_OK) {
-        log_error("[OMEMO][DB] Error initializing SQLite library: %d", ret);
-        return FALSE;
-    }
-
     auto_gchar gchar* db_path = files_file_in_account_data_path(DIR_DATABASE, account->jid, "omemo.db");
     if (!db_path) {
         log_error("[OMEMO][DB] Failed to get database path for account %s", account->jid);
         return FALSE;
     }
 
-    ret = sqlite3_open(db_path, &omemo_db);
-    if (ret != SQLITE_OK) {
-        log_error("[OMEMO][DB] Error opening omemo database %s: %s", db_path, sqlite3_errmsg(omemo_db));
+    if (!prof_db_open(db_path, &omemo_db)) {
         return FALSE;
     }
-
-    sqlite3_exec(omemo_db, "PRAGMA journal_mode=WAL;", NULL, NULL, NULL);
 
     if (!_init_tables()) {
         omemo_db_close();
@@ -205,36 +170,33 @@ omemo_db_init(const ProfAccount* account)
 void
 omemo_db_close(void)
 {
-    _finalize_stmt(&stmt_save_identity);
-    _finalize_stmt(&stmt_load_identity);
+    prof_db_finalize(&stmt_save_identity);
+    prof_db_finalize(&stmt_load_identity);
 
-    _finalize_stmt(&stmt_save_pre_key);
-    _finalize_stmt(&stmt_remove_pre_key);
-    _finalize_stmt(&stmt_load_all_pre_keys);
+    prof_db_finalize(&stmt_save_pre_key);
+    prof_db_finalize(&stmt_remove_pre_key);
+    prof_db_finalize(&stmt_load_all_pre_keys);
 
-    _finalize_stmt(&stmt_save_signed_pre_key);
-    _finalize_stmt(&stmt_remove_signed_pre_key);
-    _finalize_stmt(&stmt_load_all_signed_pre_keys);
+    prof_db_finalize(&stmt_save_signed_pre_key);
+    prof_db_finalize(&stmt_remove_signed_pre_key);
+    prof_db_finalize(&stmt_load_all_signed_pre_keys);
 
-    _finalize_stmt(&stmt_save_session);
-    _finalize_stmt(&stmt_delete_session);
-    _finalize_stmt(&stmt_delete_all_sessions);
-    _finalize_stmt(&stmt_load_all_sessions);
+    prof_db_finalize(&stmt_save_session);
+    prof_db_finalize(&stmt_delete_session);
+    prof_db_finalize(&stmt_delete_all_sessions);
+    prof_db_finalize(&stmt_load_all_sessions);
 
-    _finalize_stmt(&stmt_save_trust);
-    _finalize_stmt(&stmt_remove_trust);
-    _finalize_stmt(&stmt_load_all_trust);
-    _finalize_stmt(&stmt_is_verified);
-    _finalize_stmt(&stmt_set_verified);
-    _finalize_stmt(&stmt_remove_verified);
+    prof_db_finalize(&stmt_save_trust);
+    prof_db_finalize(&stmt_remove_trust);
+    prof_db_finalize(&stmt_load_all_trust);
+    prof_db_finalize(&stmt_is_verified);
+    prof_db_finalize(&stmt_set_verified);
+    prof_db_finalize(&stmt_remove_verified);
 
-    _finalize_stmt(&stmt_save_device);
-    _finalize_stmt(&stmt_load_all_devices);
+    prof_db_finalize(&stmt_save_device);
+    prof_db_finalize(&stmt_load_all_devices);
 
-    if (omemo_db) {
-        sqlite3_close(omemo_db);
-        omemo_db = NULL;
-    }
+    prof_db_close(&omemo_db);
 }
 
 void
@@ -261,10 +223,8 @@ omemo_db_migrate_legacy_files(const ProfAccount* account)
 
     log_info("[OMEMO] Migrating legacy OMEMO files for account %s to omemo.db...", account->jid);
 
-    char* err_msg = NULL;
-    if (sqlite3_exec(omemo_db, "BEGIN TRANSACTION;", NULL, NULL, &err_msg) != SQLITE_OK) {
-        log_error("[OMEMO] Failed to begin transaction for OMEMO migration: %s", err_msg);
-        sqlite3_free(err_msg);
+    if (!prof_db_begin(omemo_db)) {
+        log_error("[OMEMO] Failed to begin transaction for OMEMO migration");
         free_keyfile(&kf_identity);
         return;
     }
@@ -452,7 +412,7 @@ omemo_db_migrate_legacy_files(const ProfAccount* account)
     }
 
     if (success) {
-        if (sqlite3_exec(omemo_db, "COMMIT;", NULL, NULL, &err_msg) == SQLITE_OK) {
+        if (prof_db_commit(omemo_db)) {
             const char* const files_to_rename[] = {
                 "identity.txt", "sessions.txt", "trust.txt", "known_devices.txt", NULL
             };
@@ -468,12 +428,11 @@ omemo_db_migrate_legacy_files(const ProfAccount* account)
             log_info("[OMEMO] Successfully migrated OMEMO data to SQLite database (omemo.db)");
             cons_show("OMEMO storage migrated to SQLite database (omemo.db). Legacy files renamed to *.migrated.");
         } else {
-            log_error("[OMEMO] Failed to commit transaction for OMEMO migration: %s", err_msg);
-            sqlite3_free(err_msg);
-            sqlite3_exec(omemo_db, "ROLLBACK;", NULL, NULL, NULL);
+            log_error("[OMEMO] Failed to commit transaction for OMEMO migration");
+            prof_db_rollback(omemo_db);
         }
     } else {
-        sqlite3_exec(omemo_db, "ROLLBACK;", NULL, NULL, NULL);
+        prof_db_rollback(omemo_db);
         log_error("[OMEMO] Migration of OMEMO data failed; transaction rolled back, legacy files untouched.");
     }
 }
@@ -485,7 +444,6 @@ omemo_db_has_identity(void)
         return FALSE;
     }
 
-    sqlite3_reset(stmt_load_identity);
     int rc = sqlite3_step(stmt_load_identity);
     sqlite3_reset(stmt_load_identity);
 
@@ -501,24 +459,12 @@ omemo_db_save_identity(uint32_t device_id, uint32_t registration_id,
         return FALSE;
     }
 
-    sqlite3_reset(stmt_save_identity);
-    sqlite3_clear_bindings(stmt_save_identity);
-
     sqlite3_bind_int64(stmt_save_identity, 1, (sqlite3_int64)device_id);
     sqlite3_bind_int64(stmt_save_identity, 2, (sqlite3_int64)registration_id);
     sqlite3_bind_blob(stmt_save_identity, 3, pub_key, (int)pub_key_len, SQLITE_STATIC);
     sqlite3_bind_blob(stmt_save_identity, 4, priv_key, (int)priv_key_len, SQLITE_STATIC);
 
-    int rc = sqlite3_step(stmt_save_identity);
-    sqlite3_reset(stmt_save_identity);
-    sqlite3_clear_bindings(stmt_save_identity);
-
-    if (rc != SQLITE_DONE) {
-        log_error("[OMEMO][DB] Error saving identity: %s", sqlite3_errmsg(omemo_db));
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_step_done(omemo_db, stmt_save_identity);
 }
 
 gboolean
@@ -530,7 +476,6 @@ omemo_db_load_identity(uint32_t* device_id, uint32_t* registration_id,
         return FALSE;
     }
 
-    sqlite3_reset(stmt_load_identity);
     int rc = sqlite3_step(stmt_load_identity);
 
     if (rc == SQLITE_ROW) {
@@ -570,22 +515,10 @@ omemo_db_save_pre_key(uint32_t pre_key_id, const uint8_t* record, size_t record_
         return FALSE;
     }
 
-    sqlite3_reset(stmt_save_pre_key);
-    sqlite3_clear_bindings(stmt_save_pre_key);
-
     sqlite3_bind_int64(stmt_save_pre_key, 1, (sqlite3_int64)pre_key_id);
     sqlite3_bind_blob(stmt_save_pre_key, 2, record, (int)record_len, SQLITE_STATIC);
 
-    int rc = sqlite3_step(stmt_save_pre_key);
-    sqlite3_reset(stmt_save_pre_key);
-    sqlite3_clear_bindings(stmt_save_pre_key);
-
-    if (rc != SQLITE_DONE) {
-        log_error("[OMEMO][DB] Error saving pre_key %u: %s", pre_key_id, sqlite3_errmsg(omemo_db));
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_step_done(omemo_db, stmt_save_pre_key);
 }
 
 gboolean
@@ -595,20 +528,9 @@ omemo_db_remove_pre_key(uint32_t pre_key_id)
         return FALSE;
     }
 
-    sqlite3_reset(stmt_remove_pre_key);
-    sqlite3_clear_bindings(stmt_remove_pre_key);
     sqlite3_bind_int64(stmt_remove_pre_key, 1, (sqlite3_int64)pre_key_id);
 
-    int rc = sqlite3_step(stmt_remove_pre_key);
-    sqlite3_reset(stmt_remove_pre_key);
-    sqlite3_clear_bindings(stmt_remove_pre_key);
-
-    if (rc != SQLITE_DONE) {
-        log_error("[OMEMO][DB] Error removing pre_key %u: %s", pre_key_id, sqlite3_errmsg(omemo_db));
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_step_done(omemo_db, stmt_remove_pre_key);
 }
 
 gint
@@ -617,8 +539,6 @@ omemo_db_load_all_pre_keys(GHashTable* pre_key_store, uint32_t* max_pre_key_id)
     if (!omemo_db || !stmt_load_all_pre_keys || !pre_key_store) {
         return 0;
     }
-
-    sqlite3_reset(stmt_load_all_pre_keys);
 
     gint count = 0;
     uint32_t max_id = 0;
@@ -654,22 +574,10 @@ omemo_db_save_signed_pre_key(uint32_t signed_pre_key_id, const uint8_t* record, 
         return FALSE;
     }
 
-    sqlite3_reset(stmt_save_signed_pre_key);
-    sqlite3_clear_bindings(stmt_save_signed_pre_key);
-
     sqlite3_bind_int64(stmt_save_signed_pre_key, 1, (sqlite3_int64)signed_pre_key_id);
     sqlite3_bind_blob(stmt_save_signed_pre_key, 2, record, (int)record_len, SQLITE_STATIC);
 
-    int rc = sqlite3_step(stmt_save_signed_pre_key);
-    sqlite3_reset(stmt_save_signed_pre_key);
-    sqlite3_clear_bindings(stmt_save_signed_pre_key);
-
-    if (rc != SQLITE_DONE) {
-        log_error("[OMEMO][DB] Error saving signed_pre_key %u: %s", signed_pre_key_id, sqlite3_errmsg(omemo_db));
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_step_done(omemo_db, stmt_save_signed_pre_key);
 }
 
 gboolean
@@ -679,20 +587,9 @@ omemo_db_remove_signed_pre_key(uint32_t signed_pre_key_id)
         return FALSE;
     }
 
-    sqlite3_reset(stmt_remove_signed_pre_key);
-    sqlite3_clear_bindings(stmt_remove_signed_pre_key);
     sqlite3_bind_int64(stmt_remove_signed_pre_key, 1, (sqlite3_int64)signed_pre_key_id);
 
-    int rc = sqlite3_step(stmt_remove_signed_pre_key);
-    sqlite3_reset(stmt_remove_signed_pre_key);
-    sqlite3_clear_bindings(stmt_remove_signed_pre_key);
-
-    if (rc != SQLITE_DONE) {
-        log_error("[OMEMO][DB] Error removing signed_pre_key %u: %s", signed_pre_key_id, sqlite3_errmsg(omemo_db));
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_step_done(omemo_db, stmt_remove_signed_pre_key);
 }
 
 gint
@@ -701,8 +598,6 @@ omemo_db_load_all_signed_pre_keys(GHashTable* signed_pre_key_store, uint32_t* si
     if (!omemo_db || !stmt_load_all_signed_pre_keys || !signed_pre_key_store) {
         return 0;
     }
-
-    sqlite3_reset(stmt_load_all_signed_pre_keys);
 
     gint count = 0;
     uint32_t max_id = 0;
@@ -738,23 +633,11 @@ omemo_db_save_session(const char* name, uint32_t device_id, const uint8_t* recor
         return FALSE;
     }
 
-    sqlite3_reset(stmt_save_session);
-    sqlite3_clear_bindings(stmt_save_session);
-
     sqlite3_bind_text(stmt_save_session, 1, name, -1, SQLITE_STATIC);
     sqlite3_bind_int64(stmt_save_session, 2, (sqlite3_int64)device_id);
     sqlite3_bind_blob(stmt_save_session, 3, record, (int)record_len, SQLITE_STATIC);
 
-    int rc = sqlite3_step(stmt_save_session);
-    sqlite3_reset(stmt_save_session);
-    sqlite3_clear_bindings(stmt_save_session);
-
-    if (rc != SQLITE_DONE) {
-        log_error("[OMEMO][DB] Error saving session for %s (%u): %s", name, device_id, sqlite3_errmsg(omemo_db));
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_step_done(omemo_db, stmt_save_session);
 }
 
 gboolean
@@ -764,22 +647,10 @@ omemo_db_delete_session(const char* name, uint32_t device_id)
         return FALSE;
     }
 
-    sqlite3_reset(stmt_delete_session);
-    sqlite3_clear_bindings(stmt_delete_session);
-
     sqlite3_bind_text(stmt_delete_session, 1, name, -1, SQLITE_STATIC);
     sqlite3_bind_int64(stmt_delete_session, 2, (sqlite3_int64)device_id);
 
-    int rc = sqlite3_step(stmt_delete_session);
-    sqlite3_reset(stmt_delete_session);
-    sqlite3_clear_bindings(stmt_delete_session);
-
-    if (rc != SQLITE_DONE) {
-        log_error("[OMEMO][DB] Error deleting session for %s (%u): %s", name, device_id, sqlite3_errmsg(omemo_db));
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_step_done(omemo_db, stmt_delete_session);
 }
 
 gboolean
@@ -789,21 +660,9 @@ omemo_db_delete_all_sessions(const char* name)
         return FALSE;
     }
 
-    sqlite3_reset(stmt_delete_all_sessions);
-    sqlite3_clear_bindings(stmt_delete_all_sessions);
-
     sqlite3_bind_text(stmt_delete_all_sessions, 1, name, -1, SQLITE_STATIC);
 
-    int rc = sqlite3_step(stmt_delete_all_sessions);
-    sqlite3_reset(stmt_delete_all_sessions);
-    sqlite3_clear_bindings(stmt_delete_all_sessions);
-
-    if (rc != SQLITE_DONE) {
-        log_error("[OMEMO][DB] Error deleting all sessions for %s: %s", name, sqlite3_errmsg(omemo_db));
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_step_done(omemo_db, stmt_delete_all_sessions);
 }
 
 void
@@ -812,8 +671,6 @@ omemo_db_load_all_sessions(GHashTable* session_store)
     if (!omemo_db || !stmt_load_all_sessions || !session_store) {
         return;
     }
-
-    sqlite3_reset(stmt_load_all_sessions);
 
     while (sqlite3_step(stmt_load_all_sessions) == SQLITE_ROW) {
         const char* name = (const char*)sqlite3_column_text(stmt_load_all_sessions, 0);
@@ -842,23 +699,11 @@ omemo_db_save_trust(const char* name, uint32_t device_id, const uint8_t* key, si
         return FALSE;
     }
 
-    sqlite3_reset(stmt_save_trust);
-    sqlite3_clear_bindings(stmt_save_trust);
-
     sqlite3_bind_text(stmt_save_trust, 1, name, -1, SQLITE_STATIC);
     sqlite3_bind_int64(stmt_save_trust, 2, (sqlite3_int64)device_id);
     sqlite3_bind_blob(stmt_save_trust, 3, key, (int)key_len, SQLITE_STATIC);
 
-    int rc = sqlite3_step(stmt_save_trust);
-    sqlite3_reset(stmt_save_trust);
-    sqlite3_clear_bindings(stmt_save_trust);
-
-    if (rc != SQLITE_DONE) {
-        log_error("[OMEMO][DB] Error saving trust for %s (%u): %s", name, device_id, sqlite3_errmsg(omemo_db));
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_step_done(omemo_db, stmt_save_trust);
 }
 
 gboolean
@@ -868,22 +713,10 @@ omemo_db_remove_trust(const char* name, uint32_t device_id)
         return FALSE;
     }
 
-    sqlite3_reset(stmt_remove_trust);
-    sqlite3_clear_bindings(stmt_remove_trust);
-
     sqlite3_bind_text(stmt_remove_trust, 1, name, -1, SQLITE_STATIC);
     sqlite3_bind_int64(stmt_remove_trust, 2, (sqlite3_int64)device_id);
 
-    int rc = sqlite3_step(stmt_remove_trust);
-    sqlite3_reset(stmt_remove_trust);
-    sqlite3_clear_bindings(stmt_remove_trust);
-
-    if (rc != SQLITE_DONE) {
-        log_error("[OMEMO][DB] Error removing trust for %s (%u): %s", name, device_id, sqlite3_errmsg(omemo_db));
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_step_done(omemo_db, stmt_remove_trust);
 }
 
 void
@@ -892,8 +725,6 @@ omemo_db_load_all_trust(GHashTable* trusted_table)
     if (!omemo_db || !stmt_load_all_trust || !trusted_table) {
         return;
     }
-
-    sqlite3_reset(stmt_load_all_trust);
 
     while (sqlite3_step(stmt_load_all_trust) == SQLITE_ROW) {
         const char* name = (const char*)sqlite3_column_text(stmt_load_all_trust, 0);
@@ -922,9 +753,6 @@ omemo_db_is_contact_verified(const char* barejid)
         return FALSE;
     }
 
-    sqlite3_reset(stmt_is_verified);
-    sqlite3_clear_bindings(stmt_is_verified);
-
     sqlite3_bind_text(stmt_is_verified, 1, barejid, -1, SQLITE_STATIC);
 
     int rc = sqlite3_step(stmt_is_verified);
@@ -945,22 +773,14 @@ omemo_db_set_contact_verified(const char* barejid, gboolean verified)
         if (!stmt_set_verified) {
             return;
         }
-        sqlite3_reset(stmt_set_verified);
-        sqlite3_clear_bindings(stmt_set_verified);
         sqlite3_bind_text(stmt_set_verified, 1, barejid, -1, SQLITE_STATIC);
-        sqlite3_step(stmt_set_verified);
-        sqlite3_reset(stmt_set_verified);
-        sqlite3_clear_bindings(stmt_set_verified);
+        prof_db_step_done(omemo_db, stmt_set_verified);
     } else {
         if (!stmt_remove_verified) {
             return;
         }
-        sqlite3_reset(stmt_remove_verified);
-        sqlite3_clear_bindings(stmt_remove_verified);
         sqlite3_bind_text(stmt_remove_verified, 1, barejid, -1, SQLITE_STATIC);
-        sqlite3_step(stmt_remove_verified);
-        sqlite3_reset(stmt_remove_verified);
-        sqlite3_clear_bindings(stmt_remove_verified);
+        prof_db_step_done(omemo_db, stmt_remove_verified);
     }
 }
 
@@ -971,23 +791,11 @@ omemo_db_save_device(const char* name, uint32_t device_id, const char* fingerpri
         return FALSE;
     }
 
-    sqlite3_reset(stmt_save_device);
-    sqlite3_clear_bindings(stmt_save_device);
-
     sqlite3_bind_text(stmt_save_device, 1, name, -1, SQLITE_STATIC);
     sqlite3_bind_int64(stmt_save_device, 2, (sqlite3_int64)device_id);
     sqlite3_bind_text(stmt_save_device, 3, fingerprint, -1, SQLITE_STATIC);
 
-    int rc = sqlite3_step(stmt_save_device);
-    sqlite3_reset(stmt_save_device);
-    sqlite3_clear_bindings(stmt_save_device);
-
-    if (rc != SQLITE_DONE) {
-        log_error("[OMEMO][DB] Error saving device %s (%u): %s", name, device_id, sqlite3_errmsg(omemo_db));
-        return FALSE;
-    }
-
-    return TRUE;
+    return prof_db_step_done(omemo_db, stmt_save_device);
 }
 
 void
@@ -996,8 +804,6 @@ omemo_db_load_all_known_devices(GHashTable* known_devices, GHashTable* fingerpri
     if (!omemo_db || !stmt_load_all_devices || !known_devices) {
         return;
     }
-
-    sqlite3_reset(stmt_load_all_devices);
 
     while (sqlite3_step(stmt_load_all_devices) == SQLITE_ROW) {
         const char* name = (const char*)sqlite3_column_text(stmt_load_all_devices, 0);
