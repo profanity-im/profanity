@@ -84,6 +84,8 @@ log_database_init(ProfAccount* account)
         return FALSE;
     }
 
+    sqlite3_exec(g_chatlog_database, "PRAGMA journal_mode=WAL;", NULL, NULL, NULL);
+
     char* err_msg;
 
     int db_version = _get_db_version();
