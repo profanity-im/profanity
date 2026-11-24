@@ -59,6 +59,12 @@ test_db__open_and_close(void** state)
     assert_string_equal(journal_mode, "wal");
     sqlite3_finalize(stmt);
 
+    // Verify busy timeout was set to 5000ms
+    assert_int_equal(sqlite3_prepare_v2(db, "PRAGMA busy_timeout;", -1, &stmt, NULL), SQLITE_OK);
+    assert_int_equal(sqlite3_step(stmt), SQLITE_ROW);
+    assert_int_equal(sqlite3_column_int(stmt, 0), 5000);
+    sqlite3_finalize(stmt);
+
     prof_db_close(&db);
     assert_null(db);
 

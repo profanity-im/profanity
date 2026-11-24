@@ -15,6 +15,8 @@
 #include "log.h"
 #include "database/db.h"
 
+#define PROF_DB_BUSY_TIMEOUT_MS 5000
+
 gboolean
 prof_db_open(const gchar* path, sqlite3** db)
 {
@@ -38,6 +40,7 @@ prof_db_open(const gchar* path, sqlite3** db)
         return FALSE;
     }
 
+    sqlite3_busy_timeout(*db, PROF_DB_BUSY_TIMEOUT_MS);
     sqlite3_exec(*db, "PRAGMA journal_mode=WAL;", NULL, NULL, NULL);
     sqlite3_exec(*db, "PRAGMA foreign_keys=ON;", NULL, NULL, NULL);
 
