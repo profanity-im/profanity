@@ -89,7 +89,9 @@ caps_init(void)
 
     my_sha1 = NULL;
 
-    caps_db_init();
+    if (!caps_db_init()) {
+        log_warning("Failed to initialize SQLite capabilities cache backend; operating with in-memory cache only.");
+    }
 }
 
 void
