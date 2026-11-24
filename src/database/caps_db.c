@@ -62,12 +62,15 @@ _caps_migrate_legacy_keyfile(void)
 
     prof_keyfile_t legacy_kf;
     if (!load_data_keyfile(&legacy_kf, FILE_CAPSCACHE)) {
+        free_keyfile(&legacy_kf);
+        g_unlink(legacy_path);
         return;
     }
 
     GKeyFile* kf = legacy_kf.keyfile;
     if (!kf) {
         free_keyfile(&legacy_kf);
+        g_unlink(legacy_path);
         return;
     }
 
@@ -75,6 +78,7 @@ _caps_migrate_legacy_keyfile(void)
     auto_gcharv gchar** groups = g_key_file_get_groups(kf, &num_groups);
     if (!groups || num_groups == 0) {
         free_keyfile(&legacy_kf);
+        g_unlink(legacy_path);
         return;
     }
 

@@ -189,3 +189,26 @@ caps_test__legacy_migration(void** state)
     close_preferences(state);
     g_rmdir("./tests/files");
 }
+
+void
+caps_test__empty_legacy_file(void** state)
+{
+    load_preferences(state);
+    create_data_dir(state);
+    _clean_caps_files();
+
+    auto_gchar gchar* legacy_path = files_get_data_path(FILE_CAPSCACHE);
+    assert_true(g_file_set_contents(legacy_path, "", 0, NULL));
+    assert_true(g_file_test(legacy_path, G_FILE_TEST_IS_REGULAR));
+
+    caps_init();
+
+    // Empty legacy file must have been removed
+    assert_false(g_file_test(legacy_path, G_FILE_TEST_EXISTS));
+
+    prof_shutdown();
+    _clean_caps_files();
+    remove_data_dir(state);
+    close_preferences(state);
+    g_rmdir("./tests/files");
+}

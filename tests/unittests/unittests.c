@@ -281,6 +281,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(caps_test__add_and_lookup_by_ver),
         cmocka_unit_test(caps_test__jid_has_feature),
         cmocka_unit_test(caps_test__legacy_migration),
+        cmocka_unit_test(caps_test__empty_legacy_file),
 
 #ifdef HAVE_OMEMO
         cmocka_unit_test(omemo_db_test__identity),
