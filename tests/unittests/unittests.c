@@ -34,6 +34,7 @@
 #include "tools/test_parser.h"
 #include "tools/test_dbus.h"
 #include "xmpp/test_roster_list.h"
+#include "xmpp/test_capabilities.h"
 #include "config/test_preferences.h"
 #include "event/test_server_events.h"
 #include "command/test_cmd_alias.h"
@@ -272,6 +273,10 @@ main(int argc, char* argv[])
         cmocka_unit_test(roster_add__returns_false_when_null_jid),
         cmocka_unit_test(roster_add__returns_false_when_invalid_jid),
         cmocka_unit_test(roster_add__returns_false_when_full_jid),
+
+        cmocka_unit_test(caps_test__add_and_lookup_by_ver),
+        cmocka_unit_test(caps_test__jid_has_feature),
+        cmocka_unit_test(caps_test__legacy_migration),
 
         cmocka_unit_test_setup_teardown(chat_session_get__returns__null_when_no_session,
                                         init_chat_sessions,

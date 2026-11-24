@@ -483,36 +483,16 @@ publish_user_mood(const char* const mood, const char* const text)
 }
 
 // caps functions
-void
-caps_add_feature(char* feature)
-{
-}
-
-void
-caps_remove_feature(char* feature)
-{
-}
-
-EntityCapabilities*
-caps_lookup(const char* const jid)
+xmpp_stanza_t*
+stanza_create_caps_query_element(xmpp_ctx_t* const ctx)
 {
     return NULL;
 }
 
-void
-caps_destroy(EntityCapabilities* caps)
+char*
+stanza_create_caps_sha1_from_query(xmpp_stanza_t* query)
 {
-}
-
-void
-caps_reset_ver(void)
-{
-}
-
-gboolean
-caps_jid_has_feature(const char* const jid, const char* const feature)
-{
-    return FALSE;
+    return NULL;
 }
 
 gboolean
