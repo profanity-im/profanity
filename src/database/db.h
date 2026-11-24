@@ -32,4 +32,8 @@ gboolean prof_db_begin(sqlite3* db);
 gboolean prof_db_commit(sqlite3* db);
 gboolean prof_db_rollback(sqlite3* db);
 
+/* Schema Versioning */
+gint prof_db_get_version(sqlite3* db);
+gboolean prof_db_set_version(sqlite3* db, gint version);
+
 #endif

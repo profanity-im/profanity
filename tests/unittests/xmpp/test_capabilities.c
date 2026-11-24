@@ -10,10 +10,12 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <stdlib.h>
+#include <sqlite3.h>
 
 #include "common.h"
 #include "helpers.h"
 #include "config/files.h"
+#include "database/db.h"
 #include "xmpp/xmpp.h"
 #include "xmpp/capabilities.h"
 #include "xmpp/test_capabilities.h"
@@ -81,6 +83,13 @@ caps_test__add_and_lookup_by_ver(void** state)
 
     caps_destroy(caps);
     caps_destroy(looked_up);
+
+    // Verify DbVersion was initialized to 1
+    auto_gchar gchar* caps_db_file = files_get_data_path(DIR_DATABASE "/capscache.db");
+    sqlite3* caps_db_handle = NULL;
+    assert_true(prof_db_open(caps_db_file, &caps_db_handle));
+    assert_int_equal(prof_db_get_version(caps_db_handle), 1);
+    prof_db_close(&caps_db_handle);
 
     prof_shutdown();
     _clean_caps_files();

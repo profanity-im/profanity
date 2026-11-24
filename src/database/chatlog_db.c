@@ -35,12 +35,11 @@ static char* _get_db_filename(ProfAccount* account);
 static prof_msg_type_t _get_message_type_type(const char* const type);
 static const char* _get_message_type_str(prof_msg_type_t type);
 static prof_enc_t _get_message_enc_type(const char* const encstr);
-static int _get_db_version(void);
 static gboolean _migrate_to_v2(void);
 static gboolean _migrate_to_v3(void);
 static gboolean _check_available_space_for_db_migration(char* path_to_db);
 
-static const int latest_version = 3;
+#define CHATLOG_DB_VERSION 3
 
 static gchar*
 _db_strdup(const gchar* str)
@@ -76,89 +75,54 @@ log_database_init(ProfAccount* account)
         return FALSE;
     }
 
-    char* err_msg;
-
-    int db_version = _get_db_version();
-    if (db_version == latest_version) {
+    int db_version = prof_db_get_version(g_chatlog_database);
+    if (db_version == CHATLOG_DB_VERSION) {
         return TRUE;
     }
 
-    // ChatLogs Table
-    // Contains all chat messages
-    //
-    // id is primary key
-    // from_jid is the sender's jid
-    // to_jid is the receiver's jid
-    // from_resource is the sender's resource
-    // to_resource is the receiver's resource
-    // message is the message's text
-    // timestamp is the timestamp like "2020/03/24 11:12:14"
-    // type is there to distinguish: message (chat), MUC message (muc), muc pm (mucpm)
-    // stanza_id is the ID in <message>
-    // archive_id is the stanza-id from from XEP-0359: Unique and Stable Stanza IDs used for XEP-0313: Message Archive Management
-    // encryption is to distinguish: none, omemo, otr, pgp
-    // marked_read is 0/1 whether a message has been marked as read via XEP-0333: Chat Markers
-    // replace_id is the ID from XEP-0308: Last Message Correction
-    // replaces_db_id is ID (primary key) of the original message that LMC message corrects/replaces
-    // replaced_by_db_id is ID (primary key) of the last correcting (LMC) message for the original message
-    char* query = "CREATE TABLE IF NOT EXISTS `ChatLogs` ("
-                  "`id` INTEGER PRIMARY KEY AUTOINCREMENT, "
-                  "`from_jid` TEXT NOT NULL, "
-                  "`to_jid` TEXT NOT NULL, "
-                  "`from_resource` TEXT, "
-                  "`to_resource` TEXT, "
-                  "`message` TEXT, "
-                  "`timestamp` TEXT, "
-                  "`type` TEXT, "
-                  "`stanza_id` TEXT, "
-                  "`archive_id` TEXT UNIQUE, "
-                  "`encryption` TEXT, "
-                  "`marked_read` INTEGER, "
-                  "`replace_id` TEXT, "
-                  "`replaces_db_id` INTEGER, "
-                  "`replaced_by_db_id` INTEGER)";
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
-        goto out;
-    }
+    const char* const init_statements[] = {
+        "CREATE TABLE IF NOT EXISTS `ChatLogs` ("
+        "`id` INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "`from_jid` TEXT NOT NULL, "
+        "`to_jid` TEXT NOT NULL, "
+        "`from_resource` TEXT, "
+        "`to_resource` TEXT, "
+        "`message` TEXT, "
+        "`timestamp` TEXT, "
+        "`type` TEXT, "
+        "`stanza_id` TEXT, "
+        "`archive_id` TEXT UNIQUE, "
+        "`encryption` TEXT, "
+        "`marked_read` INTEGER, "
+        "`replace_id` TEXT, "
+        "`replaces_db_id` INTEGER, "
+        "`replaced_by_db_id` INTEGER);",
 
-    query = "CREATE TRIGGER IF NOT EXISTS update_corrected_message "
-            "AFTER INSERT ON ChatLogs "
-            "FOR EACH ROW "
-            "WHEN NEW.replaces_db_id IS NOT NULL "
-            "BEGIN "
-            "UPDATE ChatLogs "
-            "SET replaced_by_db_id = NEW.id "
-            "WHERE id = NEW.replaces_db_id; "
-            "END;";
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
-        log_error("Unable to add `update_corrected_message` trigger.");
-        goto out;
-    }
+        "CREATE TRIGGER IF NOT EXISTS update_corrected_message "
+        "AFTER INSERT ON ChatLogs "
+        "FOR EACH ROW "
+        "WHEN NEW.replaces_db_id IS NOT NULL "
+        "BEGIN "
+        "UPDATE ChatLogs "
+        "SET replaced_by_db_id = NEW.id "
+        "WHERE id = NEW.replaces_db_id; "
+        "END;",
 
-    query = "CREATE INDEX IF NOT EXISTS ChatLogs_timestamp_IDX ON `ChatLogs` (`timestamp`)";
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
-        log_error("Unable to create index for timestamp.");
-        goto out;
-    }
-    query = "CREATE INDEX IF NOT EXISTS ChatLogs_to_from_jid_IDX ON `ChatLogs` (`to_jid`, `from_jid`)";
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
-        log_error("Unable to create index for to_jid.");
-        goto out;
-    }
+        "CREATE INDEX IF NOT EXISTS ChatLogs_timestamp_IDX ON `ChatLogs` (`timestamp`);",
+        "CREATE INDEX IF NOT EXISTS ChatLogs_to_from_jid_IDX ON `ChatLogs` (`to_jid`, `from_jid`);",
+    };
 
-    query = "CREATE TABLE IF NOT EXISTS `DbVersion` (`dv_id` INTEGER PRIMARY KEY, `version` INTEGER UNIQUE)";
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
-        goto out;
+    for (gsize i = 0; i < G_N_ELEMENTS(init_statements); i++) {
+        if (!prof_db_exec(g_chatlog_database, init_statements[i])) {
+            goto out;
+        }
     }
 
     if (db_version == -1) {
-        query = sqlite3_mprintf("INSERT INTO `DbVersion` (`version`) VALUES (%d) ON CONFLICT(`version`) DO NOTHING", latest_version);
-        if (SQLITE_OK != sqlite3_exec(g_chatlog_database, query, NULL, 0, &err_msg)) {
-            sqlite3_free(query);
+        if (!prof_db_set_version(g_chatlog_database, CHATLOG_DB_VERSION)) {
             goto out;
         }
-        sqlite3_free(query);
-        db_version = _get_db_version();
+        db_version = CHATLOG_DB_VERSION;
     }
 
     // Unlikely event, but we don't want to migrate if we are just unable to determine the DB version
@@ -167,7 +131,7 @@ log_database_init(ProfAccount* account)
         goto out;
     }
 
-    if (db_version < latest_version) {
+    if (db_version < CHATLOG_DB_VERSION) {
         cons_show("Migrating database schema. This operation may take a while...");
         if (db_version < 2 && (!_check_available_space_for_db_migration(filename) || !_migrate_to_v2())) {
             cons_show_error("Database Initialization Error: Unable to migrate database to version 2. Please, check error logs for details.");
@@ -184,12 +148,6 @@ log_database_init(ProfAccount* account)
     return TRUE;
 
 out:
-    if (err_msg) {
-        log_error("SQLite error in log_database_init(): %s", err_msg);
-        sqlite3_free(err_msg);
-    } else {
-        log_error("Unknown SQLite error in log_database_init().");
-    }
     log_database_close();
     return FALSE;
 }
@@ -656,22 +614,6 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     return is_new;
 }
 
-static int
-_get_db_version(void)
-{
-    int current_version = -1;
-    const char* query = "SELECT `version` FROM `DbVersion` LIMIT 1";
-    sqlite3_stmt* statement;
-
-    if (sqlite3_prepare_v2(g_chatlog_database, query, -1, &statement, NULL) == SQLITE_OK) {
-        if (sqlite3_step(statement) == SQLITE_ROW) {
-            current_version = sqlite3_column_int(statement, 0);
-        }
-        sqlite3_finalize(statement);
-    }
-    return current_version;
-}
-
 /**
  * Migration to version 2 introduces new columns. Returns TRUE on success.
  *
@@ -682,11 +624,12 @@ _get_db_version(void)
 static gboolean
 _migrate_to_v2(void)
 {
-    char* err_msg = NULL;
+    if (!prof_db_begin(g_chatlog_database)) {
+        log_error("[DB Migration] Failed to begin transaction for v2 migration");
+        return FALSE;
+    }
 
-    // from_resource, to_resource, message, timestamp, stanza_id, archive_id, replace_id, type, encryption
-    const char* sql_statements[] = {
-        "BEGIN TRANSACTION",
+    const char* const sql_statements[] = {
         "ALTER TABLE `ChatLogs` ADD COLUMN `replaces_db_id` INTEGER;",
         "ALTER TABLE `ChatLogs` ADD COLUMN `replaced_by_db_id` INTEGER;",
         "UPDATE `ChatLogs` AS A "
@@ -711,34 +654,27 @@ _migrate_to_v2(void)
         "replace_id = COALESCE(NULLIF(replace_id, ''), NULL), "
         "type = COALESCE(NULLIF(type, ''), NULL), "
         "encryption = COALESCE(NULLIF(encryption, ''), NULL);",
-        "DELETE FROM `DbVersion`;",
-        "INSERT INTO `DbVersion` (`version`) VALUES (2);",
-        "END TRANSACTION"
     };
 
-    int statements_count = sizeof(sql_statements) / sizeof(sql_statements[0]);
-
-    for (int i = 0; i < statements_count; i++) {
-        if (SQLITE_OK != sqlite3_exec(g_chatlog_database, sql_statements[i], NULL, 0, &err_msg)) {
-            log_error("SQLite error in _migrate_to_v2() on statement %d: %s", i, err_msg);
-            if (err_msg) {
-                sqlite3_free(err_msg);
-                err_msg = NULL;
-            }
+    for (gsize i = 0; i < G_N_ELEMENTS(sql_statements); i++) {
+        if (!prof_db_exec(g_chatlog_database, sql_statements[i])) {
+            log_error("SQLite error in _migrate_to_v2() on statement %" G_GSIZE_FORMAT, i);
             goto cleanup;
         }
+    }
+
+    if (!prof_db_set_version(g_chatlog_database, 2)) {
+        goto cleanup;
+    }
+
+    if (!prof_db_commit(g_chatlog_database)) {
+        goto cleanup;
     }
 
     return TRUE;
 
 cleanup:
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, "ROLLBACK;", NULL, 0, &err_msg)) {
-        log_error("[DB Migration] Unable to ROLLBACK: %s", err_msg);
-        if (err_msg) {
-            sqlite3_free(err_msg);
-        }
-    }
-
+    prof_db_rollback(g_chatlog_database);
     return FALSE;
 }
 
@@ -764,10 +700,12 @@ _check_available_space_for_db_migration(char* path_to_db)
 static gboolean
 _migrate_to_v3(void)
 {
-    char* err_msg = NULL;
+    if (!prof_db_begin(g_chatlog_database)) {
+        log_error("[DB Migration] Failed to begin transaction for v3 migration");
+        return FALSE;
+    }
 
-    const char* sql_statements[] = {
-        "BEGIN TRANSACTION",
+    const char* const sql_statements[] = {
         "CREATE TABLE `ChatLogs_v3_migration` ("
         "`id` INTEGER PRIMARY KEY AUTOINCREMENT, "
         "`from_jid` TEXT NOT NULL, "
@@ -805,35 +743,27 @@ _migrate_to_v3(void)
         "SET replaced_by_db_id = NEW.id "
         "WHERE id = NEW.replaces_db_id; "
         "END;",
-
-        "DELETE FROM `DbVersion`;",
-        "INSERT INTO `DbVersion` (`version`) VALUES (3);",
-        "END TRANSACTION"
     };
 
-    int statements_count = sizeof(sql_statements) / sizeof(sql_statements[0]);
-
-    for (int i = 0; i < statements_count; i++) {
-        if (SQLITE_OK != sqlite3_exec(g_chatlog_database, sql_statements[i], NULL, 0, &err_msg)) {
-            log_error("SQLite error in _migrate_to_v3() on statement %d: %s", i, err_msg);
-            if (err_msg) {
-                sqlite3_free(err_msg);
-                err_msg = NULL;
-            }
+    for (gsize i = 0; i < G_N_ELEMENTS(sql_statements); i++) {
+        if (!prof_db_exec(g_chatlog_database, sql_statements[i])) {
+            log_error("SQLite error in _migrate_to_v3() on statement %" G_GSIZE_FORMAT, i);
             goto cleanup;
         }
+    }
+
+    if (!prof_db_set_version(g_chatlog_database, 3)) {
+        goto cleanup;
+    }
+
+    if (!prof_db_commit(g_chatlog_database)) {
+        goto cleanup;
     }
 
     return TRUE;
 
 cleanup:
-    if (SQLITE_OK != sqlite3_exec(g_chatlog_database, "ROLLBACK;", NULL, 0, &err_msg)) {
-        log_error("DB Migration] Unable to ROLLBACK: %s", err_msg);
-        if (err_msg) {
-            sqlite3_free(err_msg);
-        }
-    }
-
+    prof_db_rollback(g_chatlog_database);
     return FALSE;
 }
 

@@ -139,3 +139,51 @@ prof_db_rollback(sqlite3* db)
 {
     return prof_db_exec(db, "ROLLBACK;");
 }
+
+gint
+prof_db_get_version(sqlite3* db)
+{
+    if (!db) {
+        return -1;
+    }
+
+    sqlite3_stmt* stmt = NULL;
+    if (!prof_db_prepare(db, "SELECT version FROM DbVersion LIMIT 1;", &stmt)) {
+        return -1;
+    }
+
+    gint version = -1;
+    if (sqlite3_step(stmt) == SQLITE_ROW) {
+        version = (gint)sqlite3_column_int(stmt, 0);
+    }
+    prof_db_finalize(&stmt);
+
+    return version;
+}
+
+gboolean
+prof_db_set_version(sqlite3* db, gint version)
+{
+    if (!db || version < 0) {
+        return FALSE;
+    }
+
+    if (!prof_db_exec(db, "CREATE TABLE IF NOT EXISTS DbVersion (version INTEGER PRIMARY KEY);")) {
+        return FALSE;
+    }
+
+    if (!prof_db_exec(db, "DELETE FROM DbVersion;")) {
+        return FALSE;
+    }
+
+    sqlite3_stmt* stmt = NULL;
+    if (!prof_db_prepare(db, "INSERT INTO DbVersion (version) VALUES (?);", &stmt)) {
+        return FALSE;
+    }
+
+    sqlite3_bind_int(stmt, 1, version);
+    gboolean ok = prof_db_step_done(db, stmt);
+    prof_db_finalize(&stmt);
+
+    return ok;
+}

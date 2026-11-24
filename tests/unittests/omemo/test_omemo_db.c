@@ -87,6 +87,13 @@ omemo_db_test__identity(void** state)
     assert_true(omemo_db_save_identity(42, 12345, pub_key, sizeof(pub_key), priv_key, sizeof(priv_key)));
     assert_true(omemo_db_has_identity());
 
+    // Verify DbVersion was initialized to 1
+    sqlite3* ver_db = NULL;
+    auto_gchar gchar* db_ver_path = files_file_in_account_data_path(DIR_DATABASE, test_account.jid, "omemo.db");
+    assert_true(prof_db_open(db_ver_path, &ver_db));
+    assert_int_equal(prof_db_get_version(ver_db), 1);
+    prof_db_close(&ver_db);
+
     uint32_t dev_id = 0;
     uint32_t reg_id = 0;
     uint8_t* loaded_pub = NULL;

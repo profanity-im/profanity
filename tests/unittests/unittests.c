@@ -296,6 +296,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(test_db__open_and_close),
         cmocka_unit_test(test_db__exec_and_prepare),
         cmocka_unit_test(test_db__transactions),
+        cmocka_unit_test(test_db__version),
 
         cmocka_unit_test_setup_teardown(chat_session_get__returns__null_when_no_session,
                                         init_chat_sessions,

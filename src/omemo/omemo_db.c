@@ -26,6 +26,8 @@
 #include "omemo/store.h"
 #include "omemo/omemo_db.h"
 
+#define OMEMO_DB_VERSION 1
+
 static sqlite3* omemo_db = NULL;
 
 static sqlite3_stmt* stmt_save_identity;
@@ -96,7 +98,21 @@ _init_tables(void)
                          "CREATE TABLE IF NOT EXISTS DbVersion ("
                          "version INTEGER PRIMARY KEY);";
 
-    return prof_db_exec(omemo_db, schema);
+    if (!prof_db_exec(omemo_db, schema)) {
+        return FALSE;
+    }
+
+    gint version = prof_db_get_version(omemo_db);
+    if (version == -1) {
+        if (!prof_db_set_version(omemo_db, OMEMO_DB_VERSION)) {
+            return FALSE;
+        }
+    } else if (version > OMEMO_DB_VERSION) {
+        log_error("[OMEMO][DB] Database version %d is newer than supported version %d", version, OMEMO_DB_VERSION);
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 static gboolean

@@ -23,6 +23,8 @@
 #include "log.h"
 #include "ui/ui.h"
 
+#define CAPS_DB_VERSION 1
+
 static sqlite3* caps_db;
 static sqlite3_stmt* stmt_contains;
 static sqlite3_stmt* stmt_get;
@@ -221,6 +223,24 @@ caps_db_init(void)
 
     const char* create_index_sql = "CREATE INDEX IF NOT EXISTS idx_caps_cache_last_seen ON caps_cache(last_seen);";
     if (!prof_db_exec(caps_db, create_index_sql)) {
+        caps_db_close();
+        return FALSE;
+    }
+
+    const char* create_version_sql = "CREATE TABLE IF NOT EXISTS DbVersion (version INTEGER PRIMARY KEY);";
+    if (!prof_db_exec(caps_db, create_version_sql)) {
+        caps_db_close();
+        return FALSE;
+    }
+
+    gint version = prof_db_get_version(caps_db);
+    if (version == -1) {
+        if (!prof_db_set_version(caps_db, CAPS_DB_VERSION)) {
+            caps_db_close();
+            return FALSE;
+        }
+    } else if (version > CAPS_DB_VERSION) {
+        log_error("Capabilities cache database version %d is newer than supported version %d", version, CAPS_DB_VERSION);
         caps_db_close();
         return FALSE;
     }

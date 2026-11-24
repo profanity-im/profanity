@@ -12,5 +12,6 @@
 void test_db__open_and_close(void** state);
 void test_db__exec_and_prepare(void** state);
 void test_db__transactions(void** state);
+void test_db__version(void** state);
 
 #endif

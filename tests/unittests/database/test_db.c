@@ -161,3 +161,35 @@ test_db__transactions(void** state)
     remove_data_dir(state);
     g_rmdir("./tests/files");
 }
+
+void
+test_db__version(void** state)
+{
+    create_data_dir(state);
+    _clean_test_db();
+
+    auto_gchar gchar* db_dir = files_get_data_path(DIR_DATABASE);
+    create_dir(db_dir);
+
+    auto_gchar gchar* db_file = files_get_data_path(DIR_DATABASE "/test_common.db");
+
+    sqlite3* db = NULL;
+    assert_true(prof_db_open(db_file, &db));
+
+    // Initially, no DbVersion table exists
+    assert_int_equal(prof_db_get_version(db), -1);
+
+    // Set version to 1
+    assert_true(prof_db_set_version(db, 1));
+    assert_int_equal(prof_db_get_version(db), 1);
+
+    // Update version to 2
+    assert_true(prof_db_set_version(db, 2));
+    assert_int_equal(prof_db_get_version(db), 2);
+
+    prof_db_close(&db);
+
+    _clean_test_db();
+    remove_data_dir(state);
+    g_rmdir("./tests/files");
+}
