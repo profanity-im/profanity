@@ -185,11 +185,10 @@ caps_create(const gchar* const category, const gchar* const type, const gchar* c
     }
 
     result->features = NULL;
-    GSList* curr = features;
-    while (curr) {
-        result->features = g_slist_append(result->features, g_strdup(curr->data));
-        curr = g_slist_next(curr);
+    for (GSList* curr = features; curr != NULL; curr = g_slist_next(curr)) {
+        result->features = g_slist_prepend(result->features, g_strdup(curr->data));
     }
+    result->features = g_slist_reverse(result->features);
 
     return result;
 }

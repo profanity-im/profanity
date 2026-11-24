@@ -336,9 +336,10 @@ caps_db_get(const gchar* const ver)
             auto_gcharv gchar** feats = g_strsplit(features_raw, "\n", -1);
             for (gsize i = 0; feats[i] != NULL; i++) {
                 if (*feats[i]) {
-                    features = g_slist_append(features, feats[i]);
+                    features = g_slist_prepend(features, feats[i]);
                 }
             }
+            features = g_slist_reverse(features);
             result = caps_create(category, type, name, software, software_version, os, os_version, features);
             g_slist_free(features);
         } else {
