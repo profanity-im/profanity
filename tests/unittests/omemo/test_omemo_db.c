@@ -110,6 +110,7 @@ omemo_db_test__identity(void** state)
     assert_memory_equal(loaded_priv, priv_key, sizeof(priv_key));
 
     g_free(loaded_pub);
+    prof_wipe_memory(loaded_priv, loaded_priv_len);
     g_free(loaded_priv);
 
     // Overwrite identity row with empty BLOB to test corruption handling

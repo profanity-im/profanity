@@ -760,6 +760,8 @@ main(int argc, char* argv[])
         cmocka_unit_test(str_xml_sanitize__strips_illegal_characters),
         cmocka_unit_test(str_clean_directional_chars__tests),
         cmocka_unit_test(str_clean_terminal_control_chars__tests),
+        cmocka_unit_test(prof_wipe_memory__tests),
+        cmocka_unit_test(prof_wipe_string__tests),
 
 #ifdef HAVE_PLUGINS
         cmocka_unit_test_setup_teardown(plugins_get_command_names__returns__no_commands,

@@ -1769,6 +1769,7 @@ _load_identity(void)
     ratchet_identity_key_pair_create(&omemo_ctx.identity_key_pair, public_key, private_key);
 
     g_free(pub_raw);
+    prof_wipe_memory(priv_raw, priv_len);
     g_free(priv_raw);
 
     /* Pre keys */

@@ -287,6 +287,12 @@ omemo_db_migrate_legacy_files(const ProfAccount* account)
         if (!omemo_db_save_identity(device_id, reg_id, pub_raw, pub_len, priv_raw, priv_len)) {
             success = FALSE;
         }
+        if (priv_raw) {
+            prof_wipe_memory(priv_raw, priv_len);
+        }
+        if (priv_b64) {
+            prof_wipe_string(priv_b64);
+        }
     } else {
         success = FALSE;
     }

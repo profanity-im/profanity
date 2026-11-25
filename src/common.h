@@ -122,6 +122,7 @@ free_keyfile(prof_keyfile_t* keyfile);
 #define READ_BUF_SIZE 4088
 
 void prof_wipe_string(gchar* str);
+void prof_wipe_memory(void* mem, size_t len);
 
 typedef enum {
     CONTACT_OFFLINE,

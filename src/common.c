@@ -905,3 +905,14 @@ prof_wipe_string(gchar* str)
         }
     }
 }
+
+void
+prof_wipe_memory(void* mem, size_t len)
+{
+    if (mem && len > 0) {
+        volatile unsigned char* p = (volatile unsigned char*)mem;
+        while (len--) {
+            *p++ = 0;
+        }
+    }
+}
