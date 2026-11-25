@@ -37,7 +37,7 @@ _clean_omemo_files(void)
     auto_gchar gchar* db_file = files_file_in_account_data_path(DIR_DATABASE, test_account.jid, "omemo.db");
     auto_gchar gchar* db_wal = files_file_in_account_data_path(DIR_DATABASE, test_account.jid, "omemo.db-wal");
     auto_gchar gchar* db_shm = files_file_in_account_data_path(DIR_DATABASE, test_account.jid, "omemo.db-shm");
-    auto_gchar gchar* db_dir = files_get_account_data_path(DIR_DATABASE, test_account.jid);
+    auto_gchar gchar* db_dir = files_file_in_account_data_path(DIR_DATABASE, test_account.jid, NULL);
     auto_gchar gchar* db_root = files_get_data_path(DIR_DATABASE);
 
     auto_gchar gchar* omemo_dir = files_file_in_account_data_path(DIR_OMEMO, test_account.jid, NULL);

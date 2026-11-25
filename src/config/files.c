@@ -121,15 +121,6 @@ files_get_download_path(const gchar* const jid)
 }
 
 gchar*
-files_get_account_data_path(const gchar* const specific_dir, const gchar* const jid)
-{
-    auto_gchar gchar* data_dir = files_get_data_path(specific_dir);
-    auto_gchar gchar* account_dir = files_sanitize_jid(jid);
-
-    return g_build_filename(data_dir, account_dir, NULL);
-}
-
-gchar*
 files_file_in_account_data_path(const gchar* const specific_dir, const gchar* const jid, const gchar* const file_name)
 {
     g_auto(GPathBuf) pbuf = G_PATH_BUF_INIT;
