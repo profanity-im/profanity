@@ -37,7 +37,7 @@ prof_db_open(const gchar* path, sqlite3** db)
     if (ret != SQLITE_OK) {
         log_error("Error opening database %s: %s", path, sqlite3_errmsg(*db));
         if (*db) {
-            sqlite3_close(*db);
+            sqlite3_close_v2(*db);
             *db = NULL;
         }
         return FALSE;
@@ -70,7 +70,7 @@ prof_db_close(sqlite3** db)
         return;
     }
 
-    sqlite3_close(*db);
+    sqlite3_close_v2(*db);
     *db = NULL;
 }
 

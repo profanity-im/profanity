@@ -74,6 +74,14 @@ test_db__open_and_close(void** state)
     prof_db_close(&db);
     assert_null(db);
 
+    // Verify prof_db_close safely handles connections with unfinalized statements via sqlite3_close_v2
+    assert_true(prof_db_open(db_file, &db));
+    sqlite3_stmt* dangling_stmt = NULL;
+    assert_int_equal(sqlite3_prepare_v2(db, "SELECT 1;", -1, &dangling_stmt, NULL), SQLITE_OK);
+    prof_db_close(&db);
+    assert_null(db);
+    assert_int_equal(sqlite3_finalize(dangling_stmt), SQLITE_OK);
+
     // Verify opening invalid path fails cleanly and leaves db NULL
     sqlite3* fail_db = NULL;
     assert_false(prof_db_open("/nonexistent_directory_for_prof_db_test/fail.db", &fail_db));
