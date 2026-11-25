@@ -164,7 +164,8 @@ prof_db_get_version(sqlite3* db)
     }
 
     sqlite3_stmt* stmt = NULL;
-    if (!prof_db_prepare(db, "SELECT version FROM DbVersion LIMIT 1;", &stmt)) {
+    int rc = sqlite3_prepare_v2(db, "SELECT version FROM DbVersion LIMIT 1;", -1, &stmt, NULL);
+    if (rc != SQLITE_OK) {
         return -1;
     }
 
