@@ -1532,7 +1532,7 @@ omemo_untrust(const gchar* const jid, const gchar* const fingerprint_formatted)
         /* Skip DJB_TYPE byte */
         original++;
         if ((signal_buffer_len(buffer) - 1) == len && memcmp(original, identity, len) == 0) {
-            g_hash_table_remove(trusted, key);
+            g_hash_table_iter_remove(&iter);
         }
     }
     g_free(identity);
