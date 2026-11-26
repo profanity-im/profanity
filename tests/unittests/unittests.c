@@ -34,6 +34,11 @@
 #include "tools/test_parser.h"
 #include "tools/test_dbus.h"
 #include "xmpp/test_roster_list.h"
+#include "xmpp/test_capabilities.h"
+#ifdef HAVE_OMEMO
+#include "omemo/test_omemo_db.h"
+#endif
+#include "database/test_db.h"
 #include "config/test_preferences.h"
 #include "event/test_server_events.h"
 #include "command/test_cmd_alias.h"
@@ -272,6 +277,27 @@ main(int argc, char* argv[])
         cmocka_unit_test(roster_add__returns_false_when_null_jid),
         cmocka_unit_test(roster_add__returns_false_when_invalid_jid),
         cmocka_unit_test(roster_add__returns_false_when_full_jid),
+
+        cmocka_unit_test(caps_test__add_and_lookup_by_ver),
+        cmocka_unit_test(caps_test__jid_has_feature),
+        cmocka_unit_test(caps_test__legacy_migration),
+        cmocka_unit_test(caps_test__empty_legacy_file),
+
+#ifdef HAVE_OMEMO
+        cmocka_unit_test(omemo_db_test__identity),
+        cmocka_unit_test(omemo_db_test__pre_keys),
+        cmocka_unit_test(omemo_db_test__signed_pre_keys),
+        cmocka_unit_test(omemo_db_test__sessions),
+        cmocka_unit_test(omemo_db_test__trust_and_verified),
+        cmocka_unit_test(omemo_db_test__devices),
+        cmocka_unit_test(omemo_db_test__legacy_migration),
+        cmocka_unit_test(omemo_db_test__account_switch),
+#endif
+
+        cmocka_unit_test(test_db__open_and_close),
+        cmocka_unit_test(test_db__exec_and_prepare),
+        cmocka_unit_test(test_db__transactions),
+        cmocka_unit_test(test_db__version),
 
         cmocka_unit_test_setup_teardown(chat_session_get__returns__null_when_no_session,
                                         init_chat_sessions,
@@ -735,6 +761,8 @@ main(int argc, char* argv[])
         cmocka_unit_test(str_xml_sanitize__strips_illegal_characters),
         cmocka_unit_test(str_clean_directional_chars__tests),
         cmocka_unit_test(str_clean_terminal_control_chars__tests),
+        cmocka_unit_test(prof_wipe_memory__tests),
+        cmocka_unit_test(prof_wipe_string__tests),
 
 #ifdef HAVE_PLUGINS
         cmocka_unit_test_setup_teardown(plugins_get_command_names__returns__no_commands,

@@ -37,7 +37,7 @@
 #include "xmpp/roster_list.h"
 #include "xmpp/roster.h"
 #include "xmpp/muc.h"
-#include "src/database.h"
+#include "database/chatlog_db.h"
 #include "ui/window.h"
 
 #ifdef HAVE_OMEMO

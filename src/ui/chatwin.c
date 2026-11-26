@@ -19,7 +19,7 @@
 #include "window_list.h"
 #include "xmpp/roster_list.h"
 #include "log.h"
-#include "database.h"
+#include "database/chatlog_db.h"
 #include "config/preferences.h"
 #include "ui/ui.h"
 #include "ui/window.h"

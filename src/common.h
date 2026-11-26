@@ -122,6 +122,7 @@ free_keyfile(prof_keyfile_t* keyfile);
 #define READ_BUF_SIZE 4088
 
 void prof_wipe_string(gchar* str);
+void prof_wipe_memory(void* mem, size_t len);
 
 typedef enum {
     CONTACT_OFFLINE,
@@ -143,7 +144,6 @@ typedef enum {
 gboolean string_to_verbosity(const gchar* cmd, int* verbosity, gchar** err_msg);
 
 gboolean create_dir(const gchar* name);
-gboolean copy_file(const gchar* const src, const gchar* const target, const gboolean overwrite_existing);
 gboolean strtoi_range(const gchar* str, int* saveptr, int min, int max, gchar** err_msg);
 int utf8_display_len(const gchar* const str);
 gchar* str_xml_sanitize(const gchar* const str);

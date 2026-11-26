@@ -9,6 +9,7 @@
 #include "xmpp/resource.h"
 #include "common.h"
 #include "prof_cmocka.h"
+#include "test_common.h"
 #include <stdlib.h>
 #include "tests/unittests/ui/stub_ui.h" // Include for mocking cons_show
 
@@ -1286,4 +1287,29 @@ str_clean_terminal_control_chars__tests(void** state)
     char buf9[] = "üñîçøðé 🚀 مرحبا שלום";
     str_clean_terminal_control_chars(buf9);
     assert_string_equal("üñîçøðé 🚀 مرحبا שלום", buf9);
+}
+
+void
+prof_wipe_memory__tests(void** state)
+{
+    unsigned char buf[] = { 0x01, 0x00, 0x03, 0x04, 0x00, 0x06 };
+    prof_wipe_memory(buf, sizeof(buf));
+    for (size_t i = 0; i < sizeof(buf); i++) {
+        assert_int_equal(buf[i], 0);
+    }
+
+    prof_wipe_memory(NULL, 10);
+    prof_wipe_memory(buf, 0);
+}
+
+void
+prof_wipe_string__tests(void** state)
+{
+    char str[] = "sensitive_password_123";
+    prof_wipe_string(str);
+    for (size_t i = 0; i < sizeof(str); i++) {
+        assert_int_equal(str[i], 0);
+    }
+
+    prof_wipe_string(NULL);
 }

@@ -3,6 +3,7 @@
  * vim: expandtab:ts=4:sts=4:sw=4
  *
  * Copyright (C) 2012 - 2019 James Booth <boothj5@gmail.com>
+ * Copyright (C) 2026 Michael Vetter <jubalh@iodoru.org>
  *
  * SPDX-License-Identifier: GPL-3.0-or-later WITH OpenSSL-exception
  */
@@ -13,45 +14,42 @@
 #include <string.h>
 
 #include <glib.h>
-#include <glib/gstdio.h>
-
 #include <strophe.h>
 
 #include "common.h"
-#include "log.h"
-#include "event/client_events.h"
-#include "plugins/plugins.h"
-#include "config/files.h"
 #include "config/preferences.h"
-#include "xmpp/xmpp.h"
-#include "xmpp/stanza.h"
-#include "xmpp/form.h"
+#include "database/caps_db.h"
+#include "event/client_events.h"
+#include "log.h"
+#include "plugins/plugins.h"
+#include "ui/ui.h"
 #include "xmpp/capabilities.h"
-
-static gchar* cache_loc;
-static prof_keyfile_t caps_prof_keyfile;
-static GKeyFile* cache;
+#include "xmpp/form.h"
+#include "xmpp/stanza.h"
+#include "xmpp/xmpp.h"
 
 static GHashTable* jid_to_ver;
 static GHashTable* jid_to_caps;
+static GHashTable* ver_to_caps;
 
 static GHashTable* prof_features;
 static gchar* my_sha1;
 
-static void _save_cache(void);
 static EntityCapabilities* _caps_by_ver(const gchar* const ver);
 static EntityCapabilities* _caps_by_jid(const gchar* const jid);
 static EntityCapabilities* _caps_copy(EntityCapabilities* caps);
+static void _disco_identity_destroy(DiscoIdentity* disco_identity);
+static void _software_version_destroy(SoftwareVersion* software_version);
 
 static void
 _caps_close(void)
 {
     caps_reset_ver();
-    free_keyfile(&caps_prof_keyfile);
-    cache = NULL;
+    caps_db_close();
+
     g_clear_pointer(&jid_to_ver, g_hash_table_destroy);
     g_clear_pointer(&jid_to_caps, g_hash_table_destroy);
-    g_clear_pointer(&cache_loc, g_free);
+    g_clear_pointer(&ver_to_caps, g_hash_table_destroy);
     g_clear_pointer(&prof_features, g_hash_table_destroy);
 }
 
@@ -62,11 +60,9 @@ caps_init(void)
 
     prof_add_shutdown_routine(_caps_close);
 
-    load_data_keyfile(&caps_prof_keyfile, FILE_CAPSCACHE);
-    cache = caps_prof_keyfile.keyfile;
-
     jid_to_ver = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, g_free);
     jid_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)caps_destroy);
+    ver_to_caps = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, (GDestroyNotify)caps_destroy);
 
     prof_features = g_hash_table_new_full(g_str_hash, g_str_equal, g_free, NULL);
     g_hash_table_add(prof_features, g_strdup(STANZA_NS_CAPS));
@@ -92,6 +88,10 @@ caps_init(void)
     }
 
     my_sha1 = NULL;
+
+    if (!caps_db_init()) {
+        log_warning("Failed to initialize SQLite capabilities cache backend; operating with in-memory cache only.");
+    }
 }
 
 void
@@ -185,11 +185,10 @@ caps_create(const gchar* const category, const gchar* const type, const gchar* c
     }
 
     result->features = NULL;
-    GSList* curr = features;
-    while (curr) {
-        result->features = g_slist_append(result->features, g_strdup(curr->data));
-        curr = g_slist_next(curr);
+    for (GSList* curr = features; curr != NULL; curr = g_slist_next(curr)) {
+        result->features = g_slist_prepend(result->features, g_strdup(curr->data));
     }
+    result->features = g_slist_reverse(result->features);
 
     return result;
 }
@@ -201,53 +200,15 @@ caps_add_by_ver(const gchar* const ver, EntityCapabilities* caps)
         return;
     }
 
-    gboolean cached = g_key_file_has_group(cache, ver);
-    if (cached) {
+    if (caps_cache_contains(ver)) {
         return;
     }
 
-    if (caps->identity) {
-        DiscoIdentity* identity = caps->identity;
-        if (identity->name) {
-            g_key_file_set_string(cache, ver, "name", identity->name);
-        }
-        if (identity->category) {
-            g_key_file_set_string(cache, ver, "category", identity->category);
-        }
-        if (identity->type) {
-            g_key_file_set_string(cache, ver, "type", identity->type);
-        }
+    if (ver_to_caps) {
+        g_hash_table_insert(ver_to_caps, g_strdup(ver), _caps_copy(caps));
     }
 
-    if (caps->software_version) {
-        SoftwareVersion* software_version = caps->software_version;
-        if (software_version->software) {
-            g_key_file_set_string(cache, ver, "software", software_version->software);
-        }
-        if (software_version->software_version) {
-            g_key_file_set_string(cache, ver, "software_version", software_version->software_version);
-        }
-        if (software_version->os) {
-            g_key_file_set_string(cache, ver, "os", software_version->os);
-        }
-        if (software_version->os_version) {
-            g_key_file_set_string(cache, ver, "os_version", software_version->os_version);
-        }
-    }
-
-    if (caps->features) {
-        GSList* curr_feature = caps->features;
-        int num = g_slist_length(caps->features);
-        const gchar* features_list[num];
-        int curr = 0;
-        while (curr_feature) {
-            features_list[curr++] = curr_feature->data;
-            curr_feature = g_slist_next(curr_feature);
-        }
-        g_key_file_set_string_list(cache, ver, "features", features_list, num);
-    }
-
-    _save_cache();
+    caps_db_put(ver, caps);
 }
 
 void
@@ -265,7 +226,15 @@ caps_map_jid_to_ver(const gchar* const jid, const gchar* const ver)
 gboolean
 caps_cache_contains(const gchar* const ver)
 {
-    return (g_key_file_has_group(cache, ver));
+    if (ver == NULL) {
+        return FALSE;
+    }
+
+    if (ver_to_caps && g_hash_table_contains(ver_to_caps, ver)) {
+        return TRUE;
+    }
+
+    return caps_db_contains(ver);
 }
 
 EntityCapabilities*
@@ -328,34 +297,22 @@ caps_reset_ver(void)
 static EntityCapabilities*
 _caps_by_ver(const gchar* const ver)
 {
-    if (!g_key_file_has_group(cache, ver)) {
+    if (ver == NULL) {
         return NULL;
     }
 
-    auto_gchar gchar* category = g_key_file_get_string(cache, ver, "category", NULL);
-    auto_gchar gchar* type = g_key_file_get_string(cache, ver, "type", NULL);
-    auto_gchar gchar* name = g_key_file_get_string(cache, ver, "name", NULL);
-
-    auto_gchar gchar* software = g_key_file_get_string(cache, ver, "software", NULL);
-    auto_gchar gchar* software_version = g_key_file_get_string(cache, ver, "software_version", NULL);
-    auto_gchar gchar* os = g_key_file_get_string(cache, ver, "os", NULL);
-    auto_gchar gchar* os_version = g_key_file_get_string(cache, ver, "os_version", NULL);
-
-    gsize features_len = 0;
-    auto_gcharv gchar** features_list = g_key_file_get_string_list(cache, ver, "features", &features_len, NULL);
-    GSList* features = NULL;
-    if (features_list && features_len > 0) {
-        for (gsize i = 0; i < features_len; i++) {
-            features = g_slist_append(features, features_list[i]);
+    if (ver_to_caps) {
+        EntityCapabilities* in_mem = g_hash_table_lookup(ver_to_caps, ver);
+        if (in_mem) {
+            return _caps_copy(in_mem);
         }
     }
 
-    EntityCapabilities* result = caps_create(
-        category, type, name,
-        software, software_version, os, os_version,
-        features);
-
-    g_slist_free(features);
+    EntityCapabilities* result = caps_db_get(ver);
+    if (result && ver_to_caps) {
+        g_hash_table_insert(ver_to_caps, g_strdup(ver), result);
+        return _caps_copy(result);
+    }
 
     return result;
 }
@@ -373,7 +330,7 @@ _caps_copy(EntityCapabilities* caps)
         return NULL;
     }
 
-    const gchar* const categoty = caps->identity ? caps->identity->category : NULL;
+    const gchar* const category = caps->identity ? caps->identity->category : NULL;
     const gchar* const type = caps->identity ? caps->identity->type : NULL;
     const gchar* const name = caps->identity ? caps->identity->name : NULL;
 
@@ -382,7 +339,7 @@ _caps_copy(EntityCapabilities* caps)
     const gchar* const os = caps->software_version ? caps->software_version->os : NULL;
     const gchar* const os_version = caps->software_version ? caps->software_version->os_version : NULL;
 
-    return caps_create(categoty, type, name, software, software_version, os, os_version, caps->features);
+    return caps_create(category, type, name, software, software_version, os, os_version, caps->features);
 }
 
 static void
@@ -419,10 +376,4 @@ caps_destroy(EntityCapabilities* caps)
         }
         g_free(caps);
     }
-}
-
-static void
-_save_cache(void)
-{
-    save_keyfile(&caps_prof_keyfile);
 }

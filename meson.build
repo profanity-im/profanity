@@ -361,7 +361,9 @@ core_sources = files(
   'src/log.c',
   'src/common.c',
   'src/chatlog.c',
-  'src/database.c',
+  'src/database/db.c',
+  'src/database/caps_db.c',
+  'src/database/chatlog_db.c',
   'src/profanity.c',
   'src/xmpp/chat_session.c',
   'src/xmpp/muc.c',
@@ -467,6 +469,7 @@ if build_omemo
     'src/omemo/omemo.c',
     'src/omemo/crypto.c',
     'src/omemo/store.c',
+    'src/omemo/omemo_db.c',
     'src/xmpp/omemo.c',
     'src/tools/aesgcm_download.c',
   )
@@ -567,6 +570,7 @@ if get_option('tests')
       'src/xmpp/resource.c',
       'src/xmpp/chat_state.c',
       'src/xmpp/roster_list.c',
+      'src/xmpp/capabilities.c',
       'src/xmpp/form.c',
       'src/command/cmd_defs.c',
       'src/command/cmd_funcs.c',
@@ -576,6 +580,8 @@ if get_option('tests')
       'src/tools/editor.c',
       'src/tools/spellcheck.c',
       'src/tools/bookmark_ignore.c',
+      'src/database/db.c',
+      'src/database/caps_db.c',
       'src/config/account.c',
       'src/config/files.c',
       'src/config/tlscerts.c',
@@ -614,6 +620,8 @@ if get_option('tests')
       'tests/unittests/tools/test_parser.c',
       'tests/unittests/tools/test_dbus.c',
       'tests/unittests/xmpp/test_roster_list.c',
+      'tests/unittests/xmpp/test_capabilities.c',
+      'tests/unittests/database/test_db.c',
       'tests/unittests/xmpp/test_chat_session.c',
       'tests/unittests/xmpp/test_contact.c',
       'tests/unittests/config/test_preferences.c',
@@ -662,7 +670,11 @@ if get_option('tests')
     endif
     
     if build_omemo
-      unittest_sources += files('tests/unittests/omemo/stub_omemo.c')
+      unittest_sources += files(
+        'src/omemo/omemo_db.c',
+        'tests/unittests/omemo/stub_omemo.c',
+        'tests/unittests/omemo/test_omemo_db.c',
+      )
     endif
     
     unittests = executable(

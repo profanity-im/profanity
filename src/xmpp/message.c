@@ -35,7 +35,7 @@
 #include "xmpp/xmpp.h"
 #include "xmpp/form.h"
 #include "xmpp/iq.h"
-#include "database.h"
+#include "database/chatlog_db.h"
 
 #ifdef HAVE_OMEMO
 #include "xmpp/omemo.h"

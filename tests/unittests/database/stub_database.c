@@ -9,7 +9,7 @@
 #include <glib.h>
 #include "prof_cmocka.h"
 
-#include "database.h"
+#include "database/chatlog_db.h"
 
 gboolean
 log_database_init(ProfAccount* account)

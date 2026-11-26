@@ -32,7 +32,7 @@ files_create_directories(void)
         }
     }
 
-    const gchar* const data_dirs[] = { DIR_CHATLOGS, DIR_LOGS, DIR_PLUGINS, NULL };
+    const gchar* const data_dirs[] = { DIR_CHATLOGS, DIR_LOGS, DIR_PLUGINS, DIR_DATABASE, NULL };
     for (int i = 0; data_dirs[i]; i++) {
         auto_gchar gchar* dir = files_get_data_path(data_dirs[i]);
         if (!create_dir(dir)) {
@@ -121,15 +121,6 @@ files_get_download_path(const gchar* const jid)
 }
 
 gchar*
-files_get_account_data_path(const gchar* const specific_dir, const gchar* const jid)
-{
-    auto_gchar gchar* data_dir = files_get_data_path(specific_dir);
-    auto_gchar gchar* account_dir = files_sanitize_jid(jid);
-
-    return g_build_filename(data_dir, account_dir, NULL);
-}
-
-gchar*
 files_file_in_account_data_path(const gchar* const specific_dir, const gchar* const jid, const gchar* const file_name)
 {
     g_auto(GPathBuf) pbuf = G_PATH_BUF_INIT;
@@ -141,7 +132,8 @@ files_file_in_account_data_path(const gchar* const specific_dir, const gchar* co
         g_path_buf_push(&pbuf, account_dir);
     }
 
-    if (!create_dir(g_path_buf_to_path(&pbuf))) {
+    auto_gchar gchar* dir_path = g_path_buf_to_path(&pbuf);
+    if (!create_dir(dir_path)) {
         return NULL;
     }
 

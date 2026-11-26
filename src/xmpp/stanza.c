@@ -28,7 +28,7 @@
 #include "xmpp/connection.h"
 #include "xmpp/form.h"
 #include "xmpp/muc.h"
-#include "database.h"
+#include "database/chatlog_db.h"
 
 static void _stanza_add_unique_id(xmpp_stanza_t* stanza);
 static gchar* _stanza_create_sha1_hash(const gchar* const str);

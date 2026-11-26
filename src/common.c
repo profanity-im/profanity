@@ -243,18 +243,6 @@ create_dir(const gchar* name)
 }
 
 gboolean
-copy_file(const gchar* const sourcepath, const gchar* const targetpath, const gboolean overwrite_existing)
-{
-    GFile* source = g_file_new_for_path(sourcepath);
-    GFile* dest = g_file_new_for_path(targetpath);
-    GFileCopyFlags flags = overwrite_existing ? G_FILE_COPY_OVERWRITE : G_FILE_COPY_NONE;
-    gboolean success = g_file_copy(source, dest, flags, NULL, NULL, NULL, NULL);
-    g_object_unref(source);
-    g_object_unref(dest);
-    return success;
-}
-
-gboolean
 strtoi_range(const gchar* str, int* saveptr, int min, int max, gchar** err_msg)
 {
     if (str == NULL) {
@@ -901,6 +889,17 @@ prof_wipe_string(gchar* str)
     if (str) {
         volatile gchar* p = (volatile gchar*)str;
         while (*p) {
+            *p++ = 0;
+        }
+    }
+}
+
+void
+prof_wipe_memory(void* mem, size_t len)
+{
+    if (mem && len > 0) {
+        volatile unsigned char* p = (volatile unsigned char*)mem;
+        while (len--) {
             *p++ = 0;
         }
     }
