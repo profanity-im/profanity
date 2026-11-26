@@ -291,6 +291,7 @@ main(int argc, char* argv[])
         cmocka_unit_test(omemo_db_test__trust_and_verified),
         cmocka_unit_test(omemo_db_test__devices),
         cmocka_unit_test(omemo_db_test__legacy_migration),
+        cmocka_unit_test(omemo_db_test__account_switch),
 #endif
 
         cmocka_unit_test(test_db__open_and_close),

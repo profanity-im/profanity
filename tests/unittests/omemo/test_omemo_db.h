@@ -16,5 +16,6 @@ void omemo_db_test__sessions(void** state);
 void omemo_db_test__trust_and_verified(void** state);
 void omemo_db_test__devices(void** state);
 void omemo_db_test__legacy_migration(void** state);
+void omemo_db_test__account_switch(void** state);
 
 #endif

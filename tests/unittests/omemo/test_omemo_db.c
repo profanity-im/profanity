@@ -479,3 +479,91 @@ omemo_db_test__legacy_migration(void** state)
     remove_data_dir(state);
     g_rmdir("./tests/files");
 }
+
+void
+omemo_db_test__account_switch(void** state)
+{
+    create_data_dir(state);
+    _clean_omemo_files();
+
+    ProfAccount account_alice = {
+        .name = "alice",
+        .jid = "alice@example.org"
+    };
+    ProfAccount account_bob = {
+        .name = "bob",
+        .jid = "bob@example.org"
+    };
+
+    // Clean any residual files for alice and bob
+    auto_gchar gchar* alice_dir = files_file_in_account_data_path(DIR_DATABASE, account_alice.jid, NULL);
+    auto_gchar gchar* alice_db = files_file_in_account_data_path(DIR_DATABASE, account_alice.jid, "omemo.db");
+    auto_gchar gchar* alice_wal = files_file_in_account_data_path(DIR_DATABASE, account_alice.jid, "omemo.db-wal");
+    auto_gchar gchar* alice_shm = files_file_in_account_data_path(DIR_DATABASE, account_alice.jid, "omemo.db-shm");
+    g_unlink(alice_db);
+    g_unlink(alice_wal);
+    g_unlink(alice_shm);
+    if (alice_dir) {
+        g_rmdir(alice_dir);
+    }
+
+    auto_gchar gchar* bob_dir = files_file_in_account_data_path(DIR_DATABASE, account_bob.jid, NULL);
+    auto_gchar gchar* bob_db = files_file_in_account_data_path(DIR_DATABASE, account_bob.jid, "omemo.db");
+    auto_gchar gchar* bob_wal = files_file_in_account_data_path(DIR_DATABASE, account_bob.jid, "omemo.db-wal");
+    auto_gchar gchar* bob_shm = files_file_in_account_data_path(DIR_DATABASE, account_bob.jid, "omemo.db-shm");
+    g_unlink(bob_db);
+    g_unlink(bob_wal);
+    g_unlink(bob_shm);
+    if (bob_dir) {
+        g_rmdir(bob_dir);
+    }
+
+    // 1. Initialize for Alice and save identity
+    assert_true(omemo_db_init(&account_alice));
+    assert_false(omemo_db_has_identity());
+
+    const uint8_t pub_alice[] = { 0x01, 0x02, 0x03 };
+    const uint8_t priv_alice[] = { 0x11, 0x12, 0x13 };
+    assert_true(omemo_db_save_identity(111, 1001, pub_alice, sizeof(pub_alice), priv_alice, sizeof(priv_alice)));
+    assert_true(omemo_db_has_identity());
+
+    // 2. Switch to Bob WITHOUT closing Alice's database first (tests re-entrancy)
+    assert_true(omemo_db_init(&account_bob));
+    assert_false(omemo_db_has_identity()); // Bob's DB must be empty, not showing Alice's identity
+
+    const uint8_t pub_bob[] = { 0x04, 0x05, 0x06 };
+    const uint8_t priv_bob[] = { 0x14, 0x15, 0x16 };
+    assert_true(omemo_db_save_identity(222, 2002, pub_bob, sizeof(pub_bob), priv_bob, sizeof(priv_bob)));
+
+    uint32_t dev_id = 0, reg_id = 0;
+    assert_true(omemo_db_load_identity(&dev_id, &reg_id, NULL, NULL, NULL, NULL));
+    assert_int_equal(dev_id, 222);
+    assert_int_equal(reg_id, 2002);
+
+    // 3. Switch back to Alice without explicit close
+    assert_true(omemo_db_init(&account_alice));
+    assert_true(omemo_db_has_identity());
+    assert_true(omemo_db_load_identity(&dev_id, &reg_id, NULL, NULL, NULL, NULL));
+    assert_int_equal(dev_id, 111);
+    assert_int_equal(reg_id, 1001);
+
+    // Cleanup
+    omemo_db_close();
+
+    g_unlink(alice_db);
+    g_unlink(alice_wal);
+    g_unlink(alice_shm);
+    if (alice_dir) {
+        g_rmdir(alice_dir);
+    }
+
+    g_unlink(bob_db);
+    g_unlink(bob_wal);
+    g_unlink(bob_shm);
+    if (bob_dir) {
+        g_rmdir(bob_dir);
+    }
+
+    remove_data_dir(state);
+    g_rmdir("./tests/files");
+}

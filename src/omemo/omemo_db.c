@@ -155,7 +155,7 @@ gboolean
 omemo_db_init(const ProfAccount* account)
 {
     if (omemo_db) {
-        return TRUE;
+        omemo_db_close();
     }
 
     if (!account || !account->jid) {
