@@ -1511,31 +1511,9 @@ omemo_trust(const gchar* const jid, const gchar* const fingerprint_formatted)
 void
 omemo_untrust(const gchar* const jid, const gchar* const fingerprint_formatted)
 {
-    size_t len;
-    unsigned char* identity = _omemo_fingerprint_decode(fingerprint_formatted, &len);
-    if (!identity)
-        return;
-
-    GHashTableIter iter;
-    gpointer key, value;
-
-    GHashTable* trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid);
-    if (!trusted) {
-        g_free(identity);
+    if (!jid || !fingerprint_formatted) {
         return;
     }
-
-    g_hash_table_iter_init(&iter, trusted);
-    while (g_hash_table_iter_next(&iter, &key, &value)) {
-        signal_buffer* buffer = value;
-        unsigned char* original = signal_buffer_data(buffer);
-        /* Skip DJB_TYPE byte */
-        original++;
-        if ((signal_buffer_len(buffer) - 1) == len && memcmp(original, identity, len) == 0) {
-            g_hash_table_iter_remove(&iter);
-        }
-    }
-    g_free(identity);
 
     auto_gchar gchar* fingerprint = _omemo_unformat_fingerprint(fingerprint_formatted);
     if (!fingerprint) {
@@ -1551,11 +1529,18 @@ omemo_untrust(const gchar* const jid, const gchar* const fingerprint_formatted)
         return;
     }
 
-    uint32_t device_id = GPOINTER_TO_INT(g_hash_table_lookup(known_identities, fingerprint));
+    uint32_t device_id = GPOINTER_TO_UINT(g_hash_table_lookup(known_identities, fingerprint));
     if (!device_id) {
         log_error("[OMEMO] cannot find device id while untrusting a fingerprint");
         return;
     }
+
+    /* Remove from in-memory trusted store */
+    GHashTable* trusted = g_hash_table_lookup(omemo_ctx.identity_key_store.trusted, jid);
+    if (trusted) {
+        g_hash_table_remove(trusted, GINT_TO_POINTER(device_id));
+    }
+
     signal_protocol_address address = {
         .name = jid,
         .name_len = strlen(jid),
