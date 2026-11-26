@@ -225,9 +225,7 @@ _db_get_limits_info(prof_msg_type_t type, const char* const jid, gboolean is_las
         return NULL;
     }
 
-    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        log_error("Unknown SQLite error in _db_get_limits_info().");
+    if (!prof_db_prepare(g_chatlog_database, query, &stmt)) {
         return NULL;
     }
 
@@ -243,7 +241,7 @@ _db_get_limits_info(prof_msg_type_t type, const char* const jid, gboolean is_las
         message_free(msg);
         msg = NULL;
     }
-    sqlite3_finalize(stmt);
+    prof_db_finalize(&stmt);
 
     return msg;
 }
@@ -326,14 +324,12 @@ log_database_get_previous_chat(const gchar* const contact_barejid, const gchar* 
         return NULL;
     }
 
-    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        log_error("SQLite error in log_database_get_previous_chat(): %s", sqlite3_errmsg(g_chatlog_database));
+    if (!prof_db_prepare(g_chatlog_database, query, &stmt)) {
         return NULL;
     }
 
     GSList* history = _db_parse_history_messages(stmt);
-    sqlite3_finalize(stmt);
+    prof_db_finalize(&stmt);
 
     return history;
 }
@@ -371,14 +367,12 @@ log_database_get_previous_muc(const gchar* const room_jid, const gchar* const st
         return NULL;
     }
 
-    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        log_error("SQLite error in log_database_get_previous_muc(): %s", sqlite3_errmsg(g_chatlog_database));
+    if (!prof_db_prepare(g_chatlog_database, query, &stmt)) {
         return NULL;
     }
 
     GSList* history = _db_parse_history_messages(stmt);
-    sqlite3_finalize(stmt);
+    prof_db_finalize(&stmt);
 
     return history;
 }
@@ -388,13 +382,12 @@ _db_get_int_result(const char* query)
 {
     sqlite3_stmt* stmt = NULL;
     int count = 0;
-    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
-    if (rc == SQLITE_OK) {
+    if (prof_db_prepare(g_chatlog_database, query, &stmt)) {
         if (sqlite3_step(stmt) == SQLITE_ROW) {
             count = sqlite3_column_int(stmt, 0);
         }
+        prof_db_finalize(&stmt);
     }
-    sqlite3_finalize(stmt);
     return count;
 }
 
@@ -535,8 +528,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
 
         sqlite3_stmt* lmc_stmt = NULL;
 
-        if (SQLITE_OK != sqlite3_prepare_v2(g_chatlog_database, replace_check_query, -1, &lmc_stmt, NULL)) {
-            log_error("SQLite error in _add_to_db() on selecting original message: %s", sqlite3_errmsg(g_chatlog_database));
+        if (!prof_db_prepare(g_chatlog_database, replace_check_query, &lmc_stmt)) {
             return FALSE;
         }
 
@@ -551,13 +543,13 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
             if (g_strcmp0(from_jid_orig, from_jid->barejid) != 0) {
                 log_error("Mismatch in sender JIDs when trying to do LMC. Corrected message sender: %s. Original message sender: %s. Replace-ID: %s. Message: %s", from_jid->barejid, from_jid_orig, message->replace_id, message->plain);
                 cons_show_error("%s sent a message correction with mismatched sender. See log for details.", from_jid->barejid);
-                sqlite3_finalize(lmc_stmt);
+                prof_db_finalize(&lmc_stmt);
                 return FALSE;
             }
         } else {
             log_warning("Got LMC message that does not have original message counterpart in the database from %s", message->from_jid->fulljid);
         }
-        sqlite3_finalize(lmc_stmt);
+        prof_db_finalize(&lmc_stmt);
     }
 
     // stanza-id (XEP-0359) doesn't have to be present in the message.
@@ -592,14 +584,12 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
     log_debug("Writing to DB. Query: %s", query);
 
     sqlite3_stmt* stmt = NULL;
-    int rc = sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL);
-    if (rc != SQLITE_OK) {
-        log_error("SQLite error in _add_to_db() (prepare): %s", sqlite3_errmsg(g_chatlog_database));
+    if (!prof_db_prepare(g_chatlog_database, query, &stmt)) {
         return FALSE;
     }
 
     gboolean is_new = TRUE;
-    rc = sqlite3_step(stmt);
+    int rc = sqlite3_step(stmt);
     if (rc == SQLITE_ROW) {
         log_debug("Successfully inserted message into database.");
     } else if (rc == SQLITE_DONE) {
@@ -610,7 +600,7 @@ _add_to_db(ProfMessage* message, char* type, const Jid* const from_jid, const Ji
         is_new = FALSE;
     }
 
-    sqlite3_finalize(stmt);
+    prof_db_finalize(&stmt);
     return is_new;
 }
 
@@ -794,11 +784,11 @@ log_database_update_archive_id(const prof_msg_type_t type, const gchar* const ro
         archive_id, stanza_id, our_barejid, room_or_contact_jid, type_str);
 
     if (query) {
-        if (SQLITE_OK == sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL)) {
-            if (sqlite3_step(stmt) == SQLITE_DONE) {
+        if (prof_db_prepare(g_chatlog_database, query, &stmt)) {
+            if (prof_db_step_done(g_chatlog_database, stmt)) {
                 success = (sqlite3_changes(g_chatlog_database) > 0);
             }
-            sqlite3_finalize(stmt);
+            prof_db_finalize(&stmt);
         }
     }
 
@@ -840,14 +830,14 @@ log_database_get_decrypted_message(const prof_msg_type_t type, const gchar* cons
     }
 
     if (query) {
-        if (SQLITE_OK == sqlite3_prepare_v2(g_chatlog_database, query, -1, &stmt, NULL)) {
+        if (prof_db_prepare(g_chatlog_database, query, &stmt)) {
             if (sqlite3_step(stmt) == SQLITE_ROW) {
                 const char* text = (const char*)sqlite3_column_text(stmt, 0);
                 if (text) {
                     decrypted_text = g_strdup(text);
                 }
             }
-            sqlite3_finalize(stmt);
+            prof_db_finalize(&stmt);
         }
     }
 
