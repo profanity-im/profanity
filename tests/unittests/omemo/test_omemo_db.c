@@ -87,6 +87,22 @@ omemo_db_test__identity(void** state)
     assert_true(omemo_db_save_identity(42, 12345, pub_key, sizeof(pub_key), priv_key, sizeof(priv_key)));
     assert_true(omemo_db_has_identity());
 
+    // Verify saving a new identity overwrites the old one
+    const uint8_t pub_key2[] = { 0x99, 0x88, 0x77 };
+    const uint8_t priv_key2[] = { 0x11, 0x22, 0x33, 0x44 };
+    assert_true(omemo_db_save_identity(99, 54321, pub_key2, sizeof(pub_key2), priv_key2, sizeof(priv_key2)));
+
+    // Check that there is only 1 row in the table
+    sqlite3* count_db = NULL;
+    auto_gchar gchar* count_db_path = files_file_in_account_data_path(DIR_DATABASE, test_account.jid, "omemo.db");
+    assert_true(prof_db_open(count_db_path, &count_db));
+    sqlite3_stmt* stmt = NULL;
+    assert_int_equal(sqlite3_prepare_v2(count_db, "SELECT COUNT(*) FROM omemo_identity;", -1, &stmt, NULL), SQLITE_OK);
+    assert_int_equal(sqlite3_step(stmt), SQLITE_ROW);
+    assert_int_equal(sqlite3_column_int(stmt, 0), 1);
+    sqlite3_finalize(stmt);
+    prof_db_close(&count_db);
+
     // Verify DbVersion was initialized to 1
     sqlite3* ver_db = NULL;
     auto_gchar gchar* db_ver_path = files_file_in_account_data_path(DIR_DATABASE, test_account.jid, "omemo.db");
@@ -102,12 +118,12 @@ omemo_db_test__identity(void** state)
     size_t loaded_priv_len = 0;
 
     assert_true(omemo_db_load_identity(&dev_id, &reg_id, &loaded_pub, &loaded_pub_len, &loaded_priv, &loaded_priv_len));
-    assert_int_equal(dev_id, 42);
-    assert_int_equal(reg_id, 12345);
-    assert_int_equal(loaded_pub_len, sizeof(pub_key));
-    assert_memory_equal(loaded_pub, pub_key, sizeof(pub_key));
-    assert_int_equal(loaded_priv_len, sizeof(priv_key));
-    assert_memory_equal(loaded_priv, priv_key, sizeof(priv_key));
+    assert_int_equal(dev_id, 99);
+    assert_int_equal(reg_id, 54321);
+    assert_int_equal(loaded_pub_len, sizeof(pub_key2));
+    assert_memory_equal(loaded_pub, pub_key2, sizeof(pub_key2));
+    assert_int_equal(loaded_priv_len, sizeof(priv_key2));
+    assert_memory_equal(loaded_priv, priv_key2, sizeof(priv_key2));
 
     g_free(loaded_pub);
     prof_wipe_memory(loaded_priv, loaded_priv_len);
@@ -117,7 +133,7 @@ omemo_db_test__identity(void** state)
     sqlite3* raw_db = NULL;
     auto_gchar gchar* db_path = files_file_in_account_data_path(DIR_DATABASE, test_account.jid, "omemo.db");
     assert_true(prof_db_open(db_path, &raw_db));
-    assert_true(prof_db_exec(raw_db, "UPDATE omemo_identity SET public_key = X'' WHERE device_id = 42;"));
+    assert_true(prof_db_exec(raw_db, "UPDATE omemo_identity SET public_key = X'' WHERE device_id = 99;"));
     prof_db_close(&raw_db);
 
     omemo_db_close();

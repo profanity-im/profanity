@@ -61,7 +61,8 @@ static gboolean
 _init_tables(void)
 {
     const char* schema = "CREATE TABLE IF NOT EXISTS omemo_identity ("
-                         "device_id INTEGER PRIMARY KEY, "
+                         "id INTEGER PRIMARY KEY CHECK (id = 1), "
+                         "device_id INTEGER NOT NULL, "
                          "registration_id INTEGER NOT NULL, "
                          "public_key BLOB NOT NULL, "
                          "private_key BLOB NOT NULL);"
@@ -120,9 +121,9 @@ _prepare_all_stmts(void)
 {
     gboolean ok = TRUE;
 
-    ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_identity (device_id, registration_id, public_key, private_key) VALUES (?, ?, ?, ?);", &stmt_save_identity);
+    ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_identity (id, device_id, registration_id, public_key, private_key) VALUES (1, ?, ?, ?, ?);", &stmt_save_identity);
     ok &= prof_db_prepare(omemo_db, "SELECT device_id, registration_id, public_key, private_key FROM omemo_identity LIMIT 1;", &stmt_load_identity);
-    ok &= prof_db_prepare(omemo_db, "SELECT 1 FROM omemo_identity LIMIT 1;", &stmt_has_identity);
+    ok &= prof_db_prepare(omemo_db, "SELECT 1 FROM omemo_identity WHERE length(public_key) > 0 AND length(private_key) > 0 LIMIT 1;", &stmt_has_identity);
 
     ok &= prof_db_prepare(omemo_db, "INSERT OR REPLACE INTO omemo_pre_keys (pre_key_id, record) VALUES (?, ?);", &stmt_save_pre_key);
     ok &= prof_db_prepare(omemo_db, "DELETE FROM omemo_pre_keys WHERE pre_key_id = ?;", &stmt_remove_pre_key);
